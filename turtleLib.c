@@ -1,6 +1,5 @@
 #include "include/turtleTools.h"
 #include "include/osTools.h"
-#include "include/slider.h"
 #include <time.h>
 
 void parseRibbonOutput() {
@@ -95,9 +94,6 @@ int main(int argc, char *argv[]) {
     clock_t start, end;
 
     turtleBgColor(30, 30, 30);
-    slider_t slider1;
-    double slider1Output;
-    sliderInit(&slider1, (unitype *) &slider1Output, 'd', "slider1", "horizontal", 0, 0, 10, 100, 0.0, 100.0);
 
     while (turtle.close == 0) { // main loop
         start = clock();
@@ -105,8 +101,6 @@ int main(int argc, char *argv[]) {
         turtleClear();
         ribbonUpdate();
         parseRibbonOutput();
-        sliderControl(&slider1);
-        sliderRender(&slider1);
         turtleUpdate(); // update the screen
         end = clock();
         while ((double) (end - start) / CLOCKS_PER_SEC < (1.0 / tps)) {
