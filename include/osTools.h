@@ -35,6 +35,8 @@ idea: try glfwGetClipboardString and glfwSetClipboardString
 #ifndef OSTOOLS
 #define OSTOOLS
 
+GLFWwindow *osToolsWindow;
+
 #ifdef OS_WINDOWS
 #include <windows.h>
 #include <shobjidl.h>
@@ -54,7 +56,8 @@ typedef struct {
 win32FileDialogObject osFileDialog;
 win32ClipboardObject osClipboard;
 
-int32_t osToolsInit(char argv0[]) {
+int32_t osToolsInit(char argv0[], GLFWwindow *window) {
+    osToolsWindow = window;
     /* get executable filepath */
     GetModuleFileNameA(NULL, osFileDialog.executableFilepath, MAX_PATH);
     if (GetLastError() != ERROR_SUCCESS) {
@@ -331,7 +334,8 @@ typedef struct {
 zenityFileDialogObject osFileDialog;
 xclipClipboardObject osClipboard;
 
-void osToolsInit(char argv0[]) {
+void osToolsInit(char argv0[], GLFWwindow *window) {
+    osToolsWindow = window;
     /* get executable filepath */
     FILE *exStringFile = popen("pwd", "r");
     fscanf(exStringFile, "%s", osFileDialog.executableFilepath);
@@ -353,12 +357,13 @@ void osToolsInit(char argv0[]) {
 
 /* gets the text */
 int32_t osClipboardGetText() {
+    osClipboard.text = strdup(glfwGetClipboardString(osToolsWindow));
     return 0;
 }
 
 /* takes null terminated strings */
 int32_t osClipboardSetText(const char *input) {
-    osClipboard.text = strdup(input);
+    glfwSetClipboardString(osToolsWindow, input);
     return 0;
 }
 

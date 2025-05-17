@@ -70,7 +70,7 @@ int main(int argc, char *argv[]) {
     /* Create a windowed mode window and its OpenGL context */
     const GLFWvidmode *monitorSize = glfwGetVideoMode(glfwGetPrimaryMonitor());
     int windowHeight = monitorSize -> height * 0.85;
-    GLFWwindow* window = glfwCreateWindow(windowHeight * 16 / 9, windowHeight, "turtleLib", NULL, NULL);
+    GLFWwindow *window = glfwCreateWindow(windowHeight * 16 / 9, windowHeight, "turtleLib", NULL, NULL);
     if (!window) {
         glfwTerminate();
         return -1;
@@ -86,7 +86,7 @@ int main(int argc, char *argv[]) {
     ribbonInit(window, "include/ribbonConfig.txt");
     ribbonDarkTheme(); // dark theme preset
     /* initialise osTools */
-    osToolsInit(argv[0]); // must include argv[0] to get executableFilepath
+    osToolsInit(argv[0], window); // must include argv[0] to get executableFilepath, must include GLFW window
     osFileDialogAddExtension("txt"); // add txt to extension restrictions
 
     uint32_t tps = 120; // ticks per second (locked to fps in this case)
