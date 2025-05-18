@@ -6,6 +6,8 @@ The combination of functions that the turtle libraries provide make it ideal for
 
 ![EMPV](EMPV.png)
 
+![logicgates](logicgates.png)
+
 ## Turtle
 
 turtle allows you to use openGL to draw on an application window like a canvas. Using `turtleGoto()`, `turtlePenDown()`, and `turtlePenUp()`, objects can be drawn on the screen. Turtle can also directly "blit" shapes to the screen using `turtleCircle()` and `turtleQuad()`. Turtle also includes functionality to detect keyboard and mouse clicks, using the `turtleKeyPressed()` and `turtleMouseDown()` functions.
