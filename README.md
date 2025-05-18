@@ -4,9 +4,9 @@ The turtle libraries are a set of openGL libraries written in C that add functio
 
 The combination of functions that the turtle libraries provide make it ideal for lightweight GUI applications such as [EMPV](https://github.com/Severson-Group/EMPV) or [logicgates](https://github.com/Known4225/Logic-Gates-OpenGL).
 
-![EMPV](/images/EMPV.png)
+![EMPV](images/EMPV.png)
 
-![logicgates](/images/logicgates.png)
+![logicgates](images/logicgates.png)
 
 ## Turtle
 
