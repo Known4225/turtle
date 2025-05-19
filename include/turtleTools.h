@@ -72,6 +72,15 @@ void turtleToolsLightTheme() { // light theme preset (default)
     tt_themeColors[21] = 0.0;   // text color
     tt_themeColors[22] = 0.0;
     tt_themeColors[23] = 0.0;
+    tt_themeColors[24] = 255.0; // background color
+    tt_themeColors[25] = 255.0;
+    tt_themeColors[26] = 255.0;
+    tt_themeColors[27] = 195.0; // window color
+    tt_themeColors[28] = 195.0;
+    tt_themeColors[29] = 195.0;
+    tt_themeColors[30] = 0.0;   // text color
+    tt_themeColors[31] = 0.0;
+    tt_themeColors[32] = 0.0;
 }
 
 void turtleToolsDarkTheme() { // dark theme preset
@@ -100,6 +109,15 @@ void turtleToolsDarkTheme() { // dark theme preset
     tt_themeColors[21] = 160.0; // text color
     tt_themeColors[22] = 160.0;
     tt_themeColors[23] = 160.0;
+    tt_themeColors[24] = 60.0;  // background color
+    tt_themeColors[25] = 60.0;
+    tt_themeColors[26] = 60.0;
+    tt_themeColors[27] = 10.0;  // window color
+    tt_themeColors[28] = 10.0;
+    tt_themeColors[29] = 10.0;
+    tt_themeColors[30] = 200.0; // text color
+    tt_themeColors[31] = 200.0;
+    tt_themeColors[32] = 200.0;
 }
 
 /* ribbon */

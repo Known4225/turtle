@@ -53,9 +53,11 @@ void parseRibbonOutput() {
             if (ribbonRender.output[2] == 1) { // Change theme
                 printf("Change theme\n");
                 if (tt_theme == TT_THEME_DARK) {
-                    turtleToolsDarkTheme();
-                } else {
+                    turtleBgColor(255, 255, 255);
                     turtleToolsLightTheme();
+                } else {
+                    turtleBgColor(30, 30, 30);
+                    turtleToolsDarkTheme();
                 }
             } 
             if (ribbonRender.output[2] == 2) { // GLFW
