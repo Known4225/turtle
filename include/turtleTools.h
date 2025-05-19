@@ -33,17 +33,17 @@ tt_enabled_t tt_enabled; // all start at 0 (global variable)
 
 /* default colours (light theme) */
 double tt_themeColors[96] = {
-    200.0, 200.0, 200.0, // top bar color
-    140.0, 140.0, 140.0, // dropdown color
-    100.0, 100.0, 100.0, // select color
-    0.0, 0.0, 0.0,       // text color
-    200.0, 200.0, 200.0, // popup color
-    140.0, 140.0, 140.0, // boxes color
-    100.0, 100.0, 100.0, // boxes highlight color
-    0.0, 0.0, 0.0,       // text color
-    255.0, 255.0, 255.0, // background color
-    195.0, 195.0, 195.0, // window color
-    0.0, 0.0, 0.0,       // text color
+    200.0, 200.0, 200.0, // top bar color (0)
+    140.0, 140.0, 140.0, // dropdown color (3)
+    100.0, 100.0, 100.0, // select color (6)
+    0.0, 0.0, 0.0,       // text color (9)
+    200.0, 200.0, 200.0, // popup color (12)
+    140.0, 140.0, 140.0, // boxes color (15)
+    100.0, 100.0, 100.0, // boxes highlight color (18)
+    0.0, 0.0, 0.0,       // text color (21)
+    255.0, 255.0, 255.0, // background color (24)
+    195.0, 195.0, 195.0, // window color (27)
+    0.0, 0.0, 0.0,       // text color (30)
 };
 
 void turtleToolsLightTheme() { // light theme preset (default)
@@ -78,9 +78,9 @@ void turtleToolsLightTheme() { // light theme preset (default)
     tt_themeColors[27] = 195.0; // window color
     tt_themeColors[28] = 195.0;
     tt_themeColors[29] = 195.0;
-    tt_themeColors[30] = 0.0;   // text color
-    tt_themeColors[31] = 0.0;
-    tt_themeColors[32] = 0.0;
+    tt_themeColors[30] = 200.0; // text color
+    tt_themeColors[31] = 200.0;
+    tt_themeColors[32] = 200.0;
 }
 
 void turtleToolsDarkTheme() { // dark theme preset
