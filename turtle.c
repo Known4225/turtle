@@ -60,6 +60,19 @@ void parseRibbonOutput() {
     }
 }
 
+void parsePopupOutput(GLFWwindow *window) {
+    if (popup.output[0] == 1) {
+        popup.output[0] = 0; // untoggle
+        if (popup.output[1] == 0) { // cancel
+            turtle.close = 0;
+            glfwSetWindowShouldClose(window, 0);
+        }
+        if (popup.output[1] == 1) { // close
+            turtle.shouldClose = 1;
+        }
+    }
+}
+
 int main(int argc, char *argv[]) {
     /* Initialize glfw */
     if (!glfwInit()) {
@@ -70,7 +83,7 @@ int main(int argc, char *argv[]) {
     /* Create a windowed mode window and its OpenGL context */
     const GLFWvidmode *monitorSize = glfwGetVideoMode(glfwGetPrimaryMonitor());
     int windowHeight = monitorSize -> height * 0.85;
-    GLFWwindow *window = glfwCreateWindow(windowHeight * 16 / 9, windowHeight, "turtleLib", NULL, NULL);
+    GLFWwindow *window = glfwCreateWindow(windowHeight * 16 / 9, windowHeight, "turtle", NULL, NULL);
     if (!window) {
         glfwTerminate();
         return -1;
@@ -85,6 +98,12 @@ int main(int argc, char *argv[]) {
     /* initialise turtleTools ribbon */
     ribbonInit(window, "include/ribbonConfig.txt");
     ribbonDarkTheme(); // dark theme preset
+    /* initialise popup */
+    char constructedPath[4097 + 32];
+    strcpy(constructedPath, osFileDialog.executableFilepath);
+    strcat(constructedPath, "include/popupConfig.txt");
+    popupInit(constructedPath, -60, -20, 60, 20);
+    popupDarkTheme(); // dark theme preset
     /* initialise osTools */
     osToolsInit(argv[0], window); // must include argv[0] to get executableFilepath, must include GLFW window
     osFileDialogAddExtension("txt"); // add txt to extension restrictions
@@ -95,12 +114,14 @@ int main(int argc, char *argv[]) {
 
     turtleBgColor(30, 30, 30);
 
-    while (turtle.close == 0) { // main loop
+    while (turtle.shouldClose == 0) {
         start = clock();
         turtleGetMouseCoords();
         turtleClear();
         ribbonUpdate();
         parseRibbonOutput();
+        popupUpdate();
+        parsePopupOutput(window);
         turtleUpdate(); // update the screen
         end = clock();
         while ((double) (end - start) / CLOCKS_PER_SEC < (1.0 / tps)) {

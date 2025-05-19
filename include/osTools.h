@@ -218,7 +218,7 @@ int32_t osFileDialogPrompt(char openOrSave, char *filename) { // 0 - open, 1 - s
             Info: each COMDLG creates one more entry to the dropdown to the right of the text box in the file dialog window
             You can only see files that are specified in the types on the current COMDLG_FILTERSPEC selected in the dropdown
             Thats why I shove all the types into one COMDLG_FILTERSPEC, because I want the user to be able to see all compatible files at once
-             */
+            */
             if (osFileDialog.numExtensions > 0) {
                 COMDLG_FILTERSPEC *fileExtensions = malloc(sizeof(COMDLG_FILTERSPEC)); // just one filter
                 WCHAR *buildFilter = malloc(10 * osFileDialog.numExtensions * sizeof(WCHAR));
