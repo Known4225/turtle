@@ -27,6 +27,7 @@ void turtleTexture(int textureCode, double x1, double y1, double x2, double y2, 
 typedef struct {
     GLFWwindow* window; // the window
     list_t *keyPressed; // global keyPressed and mousePressed list
+    int8_t mousePressed[4]; // cached mouse variables
     int32_t screenbounds[2]; // list of screen bounds (pixels)
     int32_t lastscreenbounds[2]; // list of screen bounds last frame
     int32_t initscreenbounds[2]; // screenbounds at initialisation
@@ -85,12 +86,15 @@ void mouseSense(GLFWwindow* window, int32_t button, int32_t action, int32_t mods
         switch(button) {
             case GLFW_MOUSE_BUTTON_LEFT:
             list_append(turtle.keyPressed, (unitype) "m1", 's');
+            turtle.mousePressed[0] = 1;
             break;
             case GLFW_MOUSE_BUTTON_RIGHT:
             list_append(turtle.keyPressed, (unitype) "m2", 's');
+            turtle.mousePressed[1] = 1;
             break;
             case GLFW_MOUSE_BUTTON_MIDDLE:
             list_append(turtle.keyPressed, (unitype) "m3", 's');
+            turtle.mousePressed[2] = 1;
             break;
             default:
             break;
@@ -100,12 +104,15 @@ void mouseSense(GLFWwindow* window, int32_t button, int32_t action, int32_t mods
         switch(button) {
             case GLFW_MOUSE_BUTTON_LEFT:
             list_remove(turtle.keyPressed, (unitype) "m1", 's');
+            turtle.mousePressed[0] = 0;
             break;
             case GLFW_MOUSE_BUTTON_RIGHT:
             list_remove(turtle.keyPressed, (unitype) "m2", 's');
+            turtle.mousePressed[1] = 0;
             break;
             case GLFW_MOUSE_BUTTON_MIDDLE:
             list_remove(turtle.keyPressed, (unitype) "m3", 's');
+            turtle.mousePressed[2] = 0;
             break;
             default:
             break;
@@ -132,17 +139,17 @@ char turtleKeyPressed(int key) {
 
 /* top level boolean output call to check if the left click button is currently being held down */
 char turtleMouseDown() {
-    return list_count(turtle.keyPressed, (unitype) "m1", 's');
+    return turtle.mousePressed[0];
 }
 
 /* top level boolean output call to check if the right click button is currently being held down */
 char turtleMouseRight() {
-    return list_count(turtle.keyPressed, (unitype) "m2", 's');
+    return turtle.mousePressed[1];
 }
 
 /* top level boolean output call to check if the middle mouse button is currently being held down */
 char turtleMouseMiddle() {
-    return list_count(turtle.keyPressed, (unitype) "m3", 's');
+    return turtle.mousePressed[2];
 }
 
 /* alternate duplicate of top level boolean output call to check if the middle mouse button is currently being held down */

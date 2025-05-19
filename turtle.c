@@ -97,13 +97,12 @@ int main(int argc, char *argv[]) {
     turtleTextInit(window, "include/fontBez.tgl");
     /* initialise turtleTools ribbon */
     ribbonInit(window, "include/ribbonConfig.txt");
-    ribbonDarkTheme(); // dark theme preset
+    turtleToolsDarkTheme(); // dark theme preset
     /* initialise popup */
     char constructedPath[4097 + 32];
     strcpy(constructedPath, osFileDialog.executableFilepath);
     strcat(constructedPath, "include/popupConfig.txt");
     popupInit(constructedPath, -60, -20, 60, 20);
-    popupDarkTheme(); // dark theme preset
     /* initialise osTools */
     osToolsInit(argv[0], window); // must include argv[0] to get executableFilepath, must include GLFW window
     osFileDialogAddExtension("txt"); // add txt to extension restrictions
@@ -113,14 +112,24 @@ int main(int argc, char *argv[]) {
     clock_t start, end;
 
     turtleBgColor(30, 30, 30);
+    int buttonVar, switchVar, dropdownVar;
+    double dialVar;
+    list_t *dropdownOptions = list_init();
+    list_append(dropdownOptions, (unitype) "drop1", 's');
+    list_append(dropdownOptions, (unitype) "drop2", 's');
+    list_append(dropdownOptions, (unitype) "drop3", 's');
+    list_append(dropdownOptions, (unitype) "drop4", 's');
+    buttonInit("button", &buttonVar, -100, 100, 10, BUTTON_SHAPE_RECTANGLE);
+    switchInit("switch", &switchVar, 100, 100, 10);
+    dialInit("dial", &dialVar, DIAL_EXP, -100, -100, 10, 0, 1000, 1);
+    dropdownInit("dropdown", dropdownOptions, &dropdownVar, 100, -100, 10);
 
     while (turtle.shouldClose == 0) {
         start = clock();
         turtleGetMouseCoords();
         turtleClear();
-        ribbonUpdate();
+        turtleToolsUpdate();
         parseRibbonOutput();
-        popupUpdate();
         parsePopupOutput(window);
         turtleUpdate(); // update the screen
         end = clock();
