@@ -7,7 +7,7 @@ keyboard and mouse presses
 */
 
 #ifndef TURTLESET
-#define TURTLESET 1 // include guard
+#define TURTLESET // include guard
 #include <math.h>
 #ifndef M_PI
     #define M_PI 3.14159265358979323846
