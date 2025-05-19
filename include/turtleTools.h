@@ -13,6 +13,13 @@ text box (under development)
 #define TURTLETOOLS
 #include "turtleText.h"
 
+typedef enum {
+    TT_THEME_LIGHT = 0,
+    TT_THEME_DARK = 1,
+} tt_theme_t;
+
+tt_theme_t tt_theme;
+
 typedef struct {
     int8_t ribbonEnabled;
     int8_t popupEnabled;
@@ -25,7 +32,7 @@ typedef struct {
 tt_enabled_t tt_enabled; // all start at 0 (global variable)
 
 /* default colours (light theme) */
-double tt_themeColors[24] = {
+double tt_themeColors[96] = {
     200.0, 200.0, 200.0, // top bar color
     140.0, 140.0, 140.0, // dropdown color
     100.0, 100.0, 100.0, // select color
@@ -34,7 +41,66 @@ double tt_themeColors[24] = {
     140.0, 140.0, 140.0, // boxes color
     100.0, 100.0, 100.0, // boxes highlight color
     0.0, 0.0, 0.0,       // text color
+    255.0, 255.0, 255.0, // background color
+    195.0, 195.0, 195.0, // window color
+    0.0, 0.0, 0.0,       // text color
 };
+
+void turtleToolsLightTheme() { // light theme preset (default)
+    tt_theme = TT_THEME_LIGHT;
+    tt_themeColors[0] =  200.0; // top bar color
+    tt_themeColors[1] =  200.0;
+    tt_themeColors[2] =  200.0;
+    tt_themeColors[3] =  140.0; // dropdown color
+    tt_themeColors[4] =  140.0;
+    tt_themeColors[5] =  140.0;
+    tt_themeColors[6] =  100.0; // select color
+    tt_themeColors[7] =  100.0;
+    tt_themeColors[8] =  100.0;
+    tt_themeColors[9] =  0.0;   // text color
+    tt_themeColors[10] = 0.0;
+    tt_themeColors[11] = 0.0;
+    tt_themeColors[12] = 200.0; // popup color, 
+    tt_themeColors[13] = 200.0;
+    tt_themeColors[14] = 200.0;
+    tt_themeColors[15] = 140.0; // boxes color,
+    tt_themeColors[16] = 140.0;
+    tt_themeColors[17] = 140.0;
+    tt_themeColors[18] = 100.0; // boxes highlight color
+    tt_themeColors[19] = 100.0;
+    tt_themeColors[20] = 100.0;
+    tt_themeColors[21] = 0.0;   // text color
+    tt_themeColors[22] = 0.0;
+    tt_themeColors[23] = 0.0;
+}
+
+void turtleToolsDarkTheme() { // dark theme preset
+    tt_theme = TT_THEME_DARK;
+    tt_themeColors[0] =  70.0;  // top bar color
+    tt_themeColors[1] =  70.0;
+    tt_themeColors[2] =  70.0;
+    tt_themeColors[3] =  80.0;  // dropdown color
+    tt_themeColors[4] =  80.0;
+    tt_themeColors[5] =  80.0;
+    tt_themeColors[6] =  70.0;  // select color
+    tt_themeColors[7] =  70.0;
+    tt_themeColors[8] =  70.0;
+    tt_themeColors[9] =  160.0; // text color
+    tt_themeColors[10] = 160.0;
+    tt_themeColors[11] = 160.0;
+    tt_themeColors[12] = 10.0;  // popup color, 
+    tt_themeColors[13] = 10.0;
+    tt_themeColors[14] = 10.0;
+    tt_themeColors[15] = 40.0;  // boxes color,
+    tt_themeColors[16] = 40.0;
+    tt_themeColors[17] = 40.0;
+    tt_themeColors[18] = 60.0;  // boxes highlight color
+    tt_themeColors[19] = 60.0;
+    tt_themeColors[20] = 60.0;
+    tt_themeColors[21] = 160.0; // text color
+    tt_themeColors[22] = 160.0;
+    tt_themeColors[23] = 160.0;
+}
 
 /* ribbon */
 
@@ -123,60 +189,6 @@ int ribbonInit(GLFWwindow* window, const char *filename) { // read from config f
         list_append(ribbonRender.lengths, (unitype) max, 'd');
     }
     return 0;
-}
-
-void turtleToolsLightTheme() { // light theme preset (default)
-    tt_themeColors[0] =  200.0; // top bar color
-    tt_themeColors[1] =  200.0;
-    tt_themeColors[2] =  200.0;
-    tt_themeColors[3] =  140.0; // dropdown color
-    tt_themeColors[4] =  140.0;
-    tt_themeColors[5] =  140.0;
-    tt_themeColors[6] =  100.0; // select color
-    tt_themeColors[7] =  100.0;
-    tt_themeColors[8] =  100.0;
-    tt_themeColors[9] =  0.0;   // text color
-    tt_themeColors[10] = 0.0;
-    tt_themeColors[11] = 0.0;
-    tt_themeColors[12] = 200.0; // popup color, 
-    tt_themeColors[13] = 200.0;
-    tt_themeColors[14] = 200.0;
-    tt_themeColors[15] = 140.0; // boxes color,
-    tt_themeColors[16] = 140.0;
-    tt_themeColors[17] = 140.0;
-    tt_themeColors[18] = 100.0; // boxes highlight color
-    tt_themeColors[19] = 100.0;
-    tt_themeColors[20] = 100.0;
-    tt_themeColors[21] = 0.0;   // text color
-    tt_themeColors[22] = 0.0;
-    tt_themeColors[23] = 0.0;
-}
-
-void turtleToolsDarkTheme() { // dark theme preset
-    tt_themeColors[0] =  70.0;  // top bar color
-    tt_themeColors[1] =  70.0;
-    tt_themeColors[2] =  70.0;
-    tt_themeColors[3] =  80.0;  // dropdown color
-    tt_themeColors[4] =  80.0;
-    tt_themeColors[5] =  80.0;
-    tt_themeColors[6] =  70.0;  // select color
-    tt_themeColors[7] =  70.0;
-    tt_themeColors[8] =  70.0;
-    tt_themeColors[9] =  160.0; // text color
-    tt_themeColors[10] = 160.0;
-    tt_themeColors[11] = 160.0;
-    tt_themeColors[12] = 10.0;  // popup color, 
-    tt_themeColors[13] = 10.0;
-    tt_themeColors[14] = 10.0;
-    tt_themeColors[15] = 40.0;  // boxes color,
-    tt_themeColors[16] = 40.0;
-    tt_themeColors[17] = 40.0;
-    tt_themeColors[18] = 60.0;  // boxes highlight color
-    tt_themeColors[19] = 60.0;
-    tt_themeColors[20] = 60.0;
-    tt_themeColors[21] = 160.0; // text color
-    tt_themeColors[22] = 160.0;
-    tt_themeColors[23] = 160.0;
 }
 
 void ribbonUpdate() {
@@ -375,9 +387,10 @@ void popupFree() {
 typedef struct {
     double dialAnchorX;
     double dialAnchorY;
-} dial_anchor_t;
+    int32_t dropdownLogicIndex;
+} tt_globals_t;
 
-dial_anchor_t tt_dialAnchor;
+tt_globals_t tt_globals;
 
 typedef struct {
     list_t *buttons;
@@ -413,8 +426,8 @@ typedef enum {
 /* dial */
 typedef struct {
     char label[24];
-    dial_type_t type;
     int status[2];
+    dial_type_t type;
     double size;
     double position[2]; // X, Y
     double range[2];
@@ -432,12 +445,19 @@ typedef struct {
     int *variable; // 1 if switch is flipped, 0 otherwise
 } switch_t;
 
+typedef enum {
+    DROPDOWN_ALIGN_LEFT = 0,
+    DROPDOWN_ALIGN_CENTER = 1,
+    DROPDOWN_ALIGN_RIGHT = 2,
+} dropdown_align_t;
+
 /* dropdown */
 typedef struct {
     list_t *options;
     char label[24];
     int index;
     int status;
+    dropdown_align_t align;
     double size;
     double position[2]; // X, Y
     double maxXfactor;
@@ -521,8 +541,9 @@ void dropdownCalculateMax(dropdown_t *dropdown) {
     }
 }
 
-dropdown_t *dropdownInit(char *label, list_t *options, int *variable, double xOffset, double yOffset, double size) {
+dropdown_t *dropdownInit(char *label, list_t *options, int *variable, double xOffset, double yOffset, double size, dropdown_align_t align) {
     if (tt_enabled.dropdownEnabled == 0) {
+        tt_globals.dropdownLogicIndex = -1;
         tt_enabled.dropdownEnabled = 1;
         tt_elements.dropdowns = list_init();
     }
@@ -535,6 +556,7 @@ dropdown_t *dropdownInit(char *label, list_t *options, int *variable, double xOf
     dropdownp -> options = options;
     dropdownp -> index = *variable;
     dropdownp -> status = 0;
+    dropdownp -> align = align;
     dropdownp -> position[0] = xOffset;
     dropdownp -> position[1] = yOffset;
     dropdownp -> size = size;
@@ -590,7 +612,7 @@ void switchUpdate() {
         turtleGoto(switchX + switchp -> size * 0.8, switchY);
         turtlePenUp();
         turtlePenSize(switchp -> size);
-        turtlePenColor(tt_themeColors[9], tt_themeColors[10], tt_themeColors[11]);
+        turtlePenColor(tt_themeColors[6], tt_themeColors[7], tt_themeColors[8]);
         if (*(switchp -> variable)) {
             turtleGoto(switchX + switchp -> size * 0.8, switchY);
         } else {
@@ -645,10 +667,10 @@ void dialUpdate() {
         turtlePenDown();
         turtlePenUp();
         turtlePenSize(dialp -> size * 2 * 0.8);
-        turtlePenColor(tt_themeColors[3], tt_themeColors[4], tt_themeColors[5]);
+        turtlePenColor(tt_themeColors[27], tt_themeColors[28], tt_themeColors[29]);
         turtlePenDown();
         turtlePenUp();
-        turtlePenColor(tt_themeColors[9], tt_themeColors[10], tt_themeColors[11]);
+        turtlePenColor(tt_themeColors[30], tt_themeColors[31], tt_themeColors[32]);
         turtlePenSize(1);
         turtlePenDown();
         double dialAngle;
@@ -663,8 +685,8 @@ void dialUpdate() {
         turtlePenUp();
         if (turtleMouseDown()) {
             if (dialp -> status[0] < 0) {
-                tt_dialAnchor.dialAnchorX = dialX;
-                tt_dialAnchor.dialAnchorY = dialY;
+                tt_globals.dialAnchorX = dialX;
+                tt_globals.dialAnchorY = dialY;
                 dialp -> status[0] *= -1;
                 dialp -> status[1] = turtle.mouseX - dialX;
             }
@@ -681,14 +703,14 @@ void dialUpdate() {
             }
         }
         if (dialp -> status[0] > 0) {
-            dialAngle = angleBetween(tt_dialAnchor.dialAnchorX, tt_dialAnchor.dialAnchorY, turtle.mouseX, turtle.mouseY);
-            if (turtle.mouseY < tt_dialAnchor.dialAnchorY) {
+            dialAngle = angleBetween(tt_globals.dialAnchorX, tt_globals.dialAnchorY, turtle.mouseX, turtle.mouseY);
+            if (turtle.mouseY < tt_globals.dialAnchorY) {
                 dialp -> status[1] = turtle.mouseX - dialX;
             }
-            if ((dialAngle < 0.000000001 || dialAngle > 180) && turtle.mouseY > tt_dialAnchor.dialAnchorY && dialp -> status[1] >= 0) {
+            if ((dialAngle < 0.000000001 || dialAngle > 180) && turtle.mouseY > tt_globals.dialAnchorY && dialp -> status[1] >= 0) {
                 dialAngle = 0.000000001;
             }
-            if ((dialAngle > 359.99999999 || dialAngle < 180) && turtle.mouseY > tt_dialAnchor.dialAnchorY && dialp -> status[1] < 0) {
+            if ((dialAngle > 359.99999999 || dialAngle < 180) && turtle.mouseY > tt_globals.dialAnchorY && dialp -> status[1] < 0) {
                 dialAngle = 359.99999999;
             }
             if (dialp -> type == DIAL_LOG) {
@@ -718,8 +740,7 @@ void dropdownUpdate() {
         }
         double xfactor = turtleTextGetUnicodeLength(dropdown -> options -> data[dropdown -> index].s, dropdown -> size - 1);
         double itemHeight = (dropdown -> size * 1.5);
-        // logicIndex = self.windows[window].dropdownLogicIndex;
-        logicIndex = 0;
+        logicIndex = tt_globals.dropdownLogicIndex;
         if (dropdown -> status == -1) {
             turtleRectangle(dropdownX - dropdown -> size - xfactor, dropdownY - dropdown -> size * 0.7, dropdownX + dropdown -> size + 10, dropdownY + dropdown -> size * 0.7, tt_themeColors[12], tt_themeColors[13], tt_themeColors[14], 0);
         } else if (dropdown -> status >= 1) {
@@ -776,7 +797,7 @@ void dropdownUpdate() {
                     dropdown -> status = 0;
                 }
             }
-            turtlePenColor(tt_themeColors[9], tt_themeColors[10], tt_themeColors[11]);
+            turtlePenColor(tt_themeColors[30], tt_themeColors[31], tt_themeColors[32]);
             int renderIndex = 1;
             for (int i = 0; i < dropdown -> options -> length; i++) {
                 if (i != dropdown -> index) {
@@ -788,7 +809,8 @@ void dropdownUpdate() {
         if (dropdown -> status >= 1) {
             logicIndex = i;
         }
-        turtlePenColor(tt_themeColors[9], tt_themeColors[10], tt_themeColors[11]);
+        tt_globals.dropdownLogicIndex = logicIndex;
+        turtlePenColor(tt_themeColors[30], tt_themeColors[31], tt_themeColors[32]);
         turtleTextWriteUnicode(dropdown -> options -> data[dropdown -> index].s, dropdownX, dropdownY, dropdown -> size - 1, 100);
         if (dropdown -> status >= 1) {
             turtleTriangle(dropdownX + 11, dropdownY + 4, dropdownX + 11, dropdownY - 4, dropdownX + 5, dropdownY, tt_themeColors[9], tt_themeColors[10], tt_themeColors[11], 0);
@@ -814,9 +836,9 @@ void turtleToolsUpdate() {
     if (tt_enabled.dialEnabled) {
         dialUpdate();
     }
-    // if (tt_enabled.dropdownEnabled) {
-    //     dropdownUpdate();
-    // }
+    if (tt_enabled.dropdownEnabled) {
+        dropdownUpdate();
+    }
 }
 
 #endif
