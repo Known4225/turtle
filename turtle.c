@@ -117,7 +117,7 @@ int main(int argc, char *argv[]) {
 
     turtleBgColor(30, 30, 30);
     int32_t buttonVar, switchVar = 0, dropdownVar = 0;
-    double dialVar;
+    double dialVar = 0.0, sliderVar = 0.0;
     list_t *dropdownOptions = list_init();
     list_append(dropdownOptions, (unitype) "a", 's');
     list_append(dropdownOptions, (unitype) "long item", 's');
@@ -126,10 +126,17 @@ int main(int argc, char *argv[]) {
     list_append(dropdownOptions, (unitype) "c", 's');
     list_append(dropdownOptions, (unitype) "d", 's');
     list_append(dropdownOptions, (unitype) "e", 's');
-    buttonInit("button", &buttonVar, 0, 20, 10, TT_BUTTON_SHAPE_RECTANGLE);
-    switchInit("switch", &switchVar, 0, -20, 10);
-    dialInit("dial", &dialVar, TT_DIAL_EXP, 0, -60, 10, 0, 1000, 1);
-    dropdownInit("dropdown", dropdownOptions, &dropdownVar, 0, 48, 10, TT_DROPDOWN_ALIGN_CENTER);
+    buttonInit("button", &buttonVar, TT_BUTTON_SHAPE_RECTANGLE, 150, 20, 10);
+    switchInit("switch", &switchVar, 150, -20, 10);
+    dialInit("dial", &dialVar, TT_DIAL_EXP, -150, 20, 10, 0, 1000, 1);
+    dialInit("dial", &dialVar, TT_DIAL_LINEAR, -150, -20, 10, 0, 1000, 1);
+    sliderInit("slider", &sliderVar, TT_SLIDER_HORIZONTAL, TT_SLIDER_ALIGN_LEFT, -100, 35, 10, 50, 0, 255, 1);
+    sliderInit("slider", &sliderVar, TT_SLIDER_HORIZONTAL, TT_SLIDER_ALIGN_CENTER, 0, 35, 10, 50, 0, 255, 1);
+    sliderInit("slider", &sliderVar, TT_SLIDER_HORIZONTAL, TT_SLIDER_ALIGN_RIGHT, 100, 35, 10, 50, 0, 255, 1);
+    sliderInit("slider", &sliderVar, TT_SLIDER_VERTICAL, TT_SLIDER_ALIGN_LEFT, -100, -35, 10, 50, 0, 255, 1);
+    sliderInit("slider", &sliderVar, TT_SLIDER_VERTICAL, TT_SLIDER_ALIGN_CENTER, 0, -35, 10, 50, 0, 255, 1);
+    sliderInit("slider", &sliderVar, TT_SLIDER_VERTICAL, TT_SLIDER_ALIGN_RIGHT, 100, -35, 10, 50, 0, 255, 1);
+    dropdownInit("dropdown", dropdownOptions, &dropdownVar, TT_DROPDOWN_ALIGN_CENTER, 0, 70, 10);
 
     while (turtle.shouldClose == 0) {
         start = clock();
