@@ -101,15 +101,12 @@ int main(int argc, char *argv[]) {
     /* initialize turtle */
     turtleInit(window, -320, -180, 320, 180);
     /* initialise turtleText */
-    turtleTextInit(window, "include/fontBez.tgl");
+    turtleTextInit("include/fontBez.tgl");
     /* initialise turtleTools ribbon */
-    ribbonInit(window, "include/ribbonConfig.txt");
     turtleToolsDarkTheme(); // dark theme preset
-    /* initialise popup */
-    char constructedPath[4097 + 32];
-    strcpy(constructedPath, osFileDialog.executableFilepath);
-    strcat(constructedPath, "include/popupConfig.txt");
-    popupInit(constructedPath, -60, -20, 60, 20);
+    ribbonInit("include/ribbonConfig.txt");
+    /* initialise turtleTools popup */
+    popupInit("include/popupConfig.txt", -60, -20, 60, 20);
     /* initialise osTools */
     osToolsInit(argv[0], window); // must include argv[0] to get executableFilepath, must include GLFW window
     osFileDialogAddExtension("txt"); // add txt to extension restrictions

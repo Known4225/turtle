@@ -398,7 +398,7 @@ int32_t osFileDialogPrompt(char openOrSave, char *prename) { // 0 - open, 1 - sa
     if (osFileDialog.numExtensions > 0) {
         char buildFilter[7 * osFileDialog.numExtensions + 1]; // last space is replaced with ' and followed by \0
         int32_t j = 0;
-        for (uint32_t i = 0; i < osFileDialog.numExtensions; i++) {
+        for (int32_t i = 0; i < osFileDialog.numExtensions; i++) {
             buildFilter[j] = '*';
             buildFilter[j + 1] = '.';
             j += 2;

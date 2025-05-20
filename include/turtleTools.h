@@ -154,7 +154,7 @@ typedef struct {
 tt_ribbon_t ribbonRender;
 
 /* initialise ribbon */
-int32_t ribbonInit(GLFWwindow* window, const char *filename) {
+int32_t ribbonInit(const char *filename) {
     tt_enabled.ribbonEnabled = 1;
     ribbonRender.marginSize = 10; // number of pixels between different items in the ribbon (not affected by ribbonSize)
     ribbonRender.mainselect[0] = -1;

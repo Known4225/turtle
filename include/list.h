@@ -331,8 +331,8 @@ int32_t list_index(list_t *list, unitype item, char type) {
 }
 
 /* counts how many instances of an item is found in the list */
-int32_t list_count(list_t *list, unitype item, char type) {
-    int32_t count = 0;
+uint32_t list_count(list_t *list, unitype item, char type) {
+    uint32_t count = 0;
     for (uint32_t i = 0; i < list -> length; i++) {
         count += unitype_check_equal(list -> data[i], item, list -> type[i], type);
     }

@@ -8,7 +8,7 @@ texture support
 */
 
 #ifndef TURTLESET
-#define TURTLESET 1 // include guard
+#define TURTLESET // include guard
 #include <math.h>
 #ifndef M_PI
     #define M_PI 3.14159265358979323846
@@ -87,7 +87,7 @@ const char *turtleFragmentShaderSource =
     "}\0";
 
 // run this to set the bounds of the window in coordinates
-void turtleSetWorldCoordinates(int minX, int minY, int maxX, int maxY) {
+void turtleSetWorldCoordinates(int32_t minX, int32_t minY, int32_t maxX, int32_t maxY) {
     glfwGetWindowSize(turtle.window, &turtle.screenbounds[0], &turtle.screenbounds[1]);
     turtle.initscreenbounds[0] = turtle.screenbounds[0];
     turtle.initscreenbounds[1] = turtle.screenbounds[1];
@@ -97,7 +97,7 @@ void turtleSetWorldCoordinates(int minX, int minY, int maxX, int maxY) {
     turtle.bounds[3] = maxY;
 }
 // detect key presses
-void keySense(GLFWwindow *window, int key, int scancode, int action, int mods) {
+void keySense(GLFWwindow *window, int32_t key, int32_t scancode, int32_t action, int32_t mods) {
     if (action == GLFW_PRESS) {
         list_append(turtle.keyPressed, (unitype) key, 'i');
     }
@@ -106,7 +106,7 @@ void keySense(GLFWwindow *window, int key, int scancode, int action, int mods) {
     }
 }
 // detect mouse clicks
-void mouseSense(GLFWwindow* window, int button, int action, int mods) {
+void mouseSense(GLFWwindow* window, int32_t button, int32_t action, int32_t mods) {
     if (action == GLFW_PRESS) {
         switch(button) {
             case GLFW_MOUSE_BUTTON_LEFT:
@@ -185,7 +185,7 @@ void turtleInit(GLFWwindow* window, int32_t minX, int32_t minY, int32_t maxX, in
     glGenVertexArrays(1, &VAO);
     glBindVertexArray(VAO);
 
-    unsigned int VBO;
+    uint32_t VBO;
     glGenBuffers(1, &VBO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
@@ -316,7 +316,7 @@ void turtlePenDown() {
     if (turtle.pen == 0) {
         turtle.pen = 1;
         char changed = 0;
-        int len = turtle.penPos -> length;
+        uint32_t len = turtle.penPos -> length;
         if (len > 0) {
             unitype *ren = turtle.penPos -> data;
             if (ren[len - 9].d != turtle.x) {changed = 1;}
@@ -397,7 +397,7 @@ void turtleGoto(double x, double y) {
         turtle.y = y;
         if (turtle.pen == 1) {
             char changed = 0;
-            int len = turtle.penPos -> length;
+            uint32_t len = turtle.penPos -> length;
             if (len > 0) {
                 unitype *ren = turtle.penPos -> data;
                 if (ren[len - 9].d != turtle.x) {changed = 1;}
@@ -442,14 +442,14 @@ void addVertex(double x, double y, double r, double g, double b, double a, doubl
 
 /* draws a circle at the specified x and y (coordinates) */
 void turtleCircleRender(double x, double y, double rad, double r, double g, double b, double a, double xfact, double yfact, double prez) {
-    int p = (int) prez;
+    int32_t p = (int32_t) prez;
     if (p > 0) {
         // p--;
         float originX = x * xfact;
         float originY = (y + rad) * yfact;
         addVertex(originX, originY, r, g, b, a, 0, 0, 0);
         addVertex((x + rad * sin(2 * 1 * M_PI / prez)) * xfact, (y + rad * cos(2 * 1 * M_PI / prez)) * yfact, r, g, b, a, 0, 0, 0);
-        int i = 0;
+        int32_t i = 0;
         for (; i < p; i++) {
             addVertex((x + rad * sin(2 * i * M_PI / prez)) * xfact, (y + rad * cos(2 * i * M_PI / prez)) * yfact, r, g, b, a, 0, 0, 0);
             addVertex(originX, originY, r, g, b, a, 0, 0, 0);
@@ -479,14 +479,36 @@ void turtleTriangleRender(double x1, double y1, double x2, double y2, double x3,
 }
 
 /* adds a (blit) triangle to the pipeline (for better speed) */
-void turtleTriangle(double x1, double y1, double x2, double y2, double x3, double y3, double r, double g, double b, double a) {
+void turtleTriangle(double x1, double y1, double x2, double y2, double x3, double y3) {
+    list_append(turtle.penPos, (unitype) x1, 'd');
+    list_append(turtle.penPos, (unitype) y1, 'd');
+    list_append(turtle.penPos, (unitype) x2, 'd');
+    list_append(turtle.penPos, (unitype) turtle.penr, 'd');
+    list_append(turtle.penPos, (unitype) turtle.peng, 'd');
+    list_append(turtle.penPos, (unitype) turtle.penb, 'd');
+    list_append(turtle.penPos, (unitype) turtle.pena, 'd');
+    list_append(turtle.penPos, (unitype) 66, 'h'); // blit triangle signifier
+    list_append(turtle.penPos, (unitype) y2, 'd'); // some unconventional formatting but it works
+
+    list_append(turtle.penPos, (unitype) x3, 'd');
+    list_append(turtle.penPos, (unitype) y3, 'd');
+    list_append(turtle.penPos, (unitype) 0, 'd'); // zero'd out (wasted space)
+    list_append(turtle.penPos, (unitype) turtle.penr, 'd'); // duplicate colour data (wasted space)
+    list_append(turtle.penPos, (unitype) turtle.peng, 'd');
+    list_append(turtle.penPos, (unitype) turtle.penb, 'd');
+    list_append(turtle.penPos, (unitype) turtle.pena, 'd');
+    list_append(turtle.penPos, (unitype) 66, 'h'); // blit triangle signifier
+    list_append(turtle.penPos, (unitype) 0, 'd'); // zero'd out (wasted space)
+}
+
+void turtleTriangleColor(double x1, double y1, double x2, double y2, double x3, double y3, double r, double g, double b, double a) {
     list_append(turtle.penPos, (unitype) x1, 'd');
     list_append(turtle.penPos, (unitype) y1, 'd');
     list_append(turtle.penPos, (unitype) x2, 'd');
     list_append(turtle.penPos, (unitype) (r / 255), 'd');
     list_append(turtle.penPos, (unitype) (g / 255), 'd');
     list_append(turtle.penPos, (unitype) (b / 255), 'd');
-    list_append(turtle.penPos, (unitype) (1.0 - (a / 255)), 'd');
+    list_append(turtle.penPos, (unitype) (a / 255), 'd');
     list_append(turtle.penPos, (unitype) 66, 'h'); // blit triangle signifier
     list_append(turtle.penPos, (unitype) y2, 'd'); // some unconventional formatting but it works
 
@@ -512,14 +534,36 @@ void turtleQuadRender(double x1, double y1, double x2, double y2, double x3, dou
 }
 
 /* adds a (blit) quad to the pipeline (for better speed) */
-void turtleQuad(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, double r, double g, double b, double a) {
+void turtleQuad(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4) {
+    list_append(turtle.penPos, (unitype) x1, 'd');
+    list_append(turtle.penPos, (unitype) y1, 'd');
+    list_append(turtle.penPos, (unitype) x2, 'd');
+    list_append(turtle.penPos, (unitype) turtle.penr, 'd');
+    list_append(turtle.penPos, (unitype) turtle.peng, 'd');
+    list_append(turtle.penPos, (unitype) turtle.penb, 'd');
+    list_append(turtle.penPos, (unitype) turtle.pena, 'd');
+    list_append(turtle.penPos, (unitype) 67, 'h'); // blit quad signifier
+    list_append(turtle.penPos, (unitype) y2, 'd'); // some unconventional formatting but it works
+
+    list_append(turtle.penPos, (unitype) x3, 'd');
+    list_append(turtle.penPos, (unitype) y3, 'd');
+    list_append(turtle.penPos, (unitype) x4, 'd');
+    list_append(turtle.penPos, (unitype) turtle.penr, 'd'); // duplicate colour data (wasted space)
+    list_append(turtle.penPos, (unitype) turtle.peng, 'd');
+    list_append(turtle.penPos, (unitype) turtle.penb, 'd');
+    list_append(turtle.penPos, (unitype) turtle.pena, 'd');
+    list_append(turtle.penPos, (unitype) 67, 'h'); // blit quad signifier
+    list_append(turtle.penPos, (unitype) y4, 'd');
+}
+
+void turtleQuadColor(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, double r, double g, double b, double a) {
     list_append(turtle.penPos, (unitype) x1, 'd');
     list_append(turtle.penPos, (unitype) y1, 'd');
     list_append(turtle.penPos, (unitype) x2, 'd');
     list_append(turtle.penPos, (unitype) (r / 255), 'd');
     list_append(turtle.penPos, (unitype) (g / 255), 'd');
     list_append(turtle.penPos, (unitype) (b / 255), 'd');
-    list_append(turtle.penPos, (unitype) (1.0 - (a / 255)), 'd');
+    list_append(turtle.penPos, (unitype) (a / 255), 'd');
     list_append(turtle.penPos, (unitype) 67, 'h'); // blit quad signifier
     list_append(turtle.penPos, (unitype) y2, 'd'); // some unconventional formatting but it works
 
@@ -535,14 +579,36 @@ void turtleQuad(double x1, double y1, double x2, double y2, double x3, double y3
 }
 
 /* adds a (blit) rectangle to the pipeline (uses quad interface) */
-void turtleRentangle(double x1, double y1, double x2, double y2, double r, double g, double b, double a) {
+void turtleRectangle(double x1, double y1, double x2, double y2) {
+    list_append(turtle.penPos, (unitype) x1, 'd');
+    list_append(turtle.penPos, (unitype) y1, 'd');
+    list_append(turtle.penPos, (unitype) x2, 'd');
+    list_append(turtle.penPos, (unitype) turtle.penr, 'd');
+    list_append(turtle.penPos, (unitype) turtle.peng, 'd');
+    list_append(turtle.penPos, (unitype) turtle.penb, 'd');
+    list_append(turtle.penPos, (unitype) turtle.pena, 'd');
+    list_append(turtle.penPos, (unitype) 67, 'h'); // blit quad signifier
+    list_append(turtle.penPos, (unitype) y1, 'd'); // some unconventional formatting but it works
+
+    list_append(turtle.penPos, (unitype) x2, 'd');
+    list_append(turtle.penPos, (unitype) y2, 'd');
+    list_append(turtle.penPos, (unitype) x1, 'd');
+    list_append(turtle.penPos, (unitype) turtle.penr, 'd'); // duplicate colour data (wasted space)
+    list_append(turtle.penPos, (unitype) turtle.peng, 'd');
+    list_append(turtle.penPos, (unitype) turtle.penb, 'd');
+    list_append(turtle.penPos, (unitype) turtle.pena, 'd');
+    list_append(turtle.penPos, (unitype) 67, 'h'); // blit quad signifier
+    list_append(turtle.penPos, (unitype) y2, 'd');
+}
+
+void turtleRectangleColor(double x1, double y1, double x2, double y2, double r, double g, double b, double a) {
     list_append(turtle.penPos, (unitype) x1, 'd');
     list_append(turtle.penPos, (unitype) y1, 'd');
     list_append(turtle.penPos, (unitype) x2, 'd');
     list_append(turtle.penPos, (unitype) (r / 255), 'd');
     list_append(turtle.penPos, (unitype) (g / 255), 'd');
     list_append(turtle.penPos, (unitype) (b / 255), 'd');
-    list_append(turtle.penPos, (unitype) (1.0 - (a / 255)), 'd');
+    list_append(turtle.penPos, (unitype) (a / 255), 'd');
     list_append(turtle.penPos, (unitype) 67, 'h'); // blit quad signifier
     list_append(turtle.penPos, (unitype) y1, 'd'); // some unconventional formatting but it works
 
@@ -557,7 +623,7 @@ void turtleRentangle(double x1, double y1, double x2, double y2, double r, doubl
     list_append(turtle.penPos, (unitype) y2, 'd');
 }
 
-void turtleTextureRender(int textureCode, double x1, double y1, double x2, double y2, double r, double g, double b, double rot, double xfact, double yfact) {
+void turtleTextureRender(int32_t textureCode, double x1, double y1, double x2, double y2, double r, double g, double b, double rot, double xfact, double yfact) {
     /* do the rotation math here - rotate on center */
     double avgX = (x1 + x2) / 2;
     double avgY = (y1 + y2) / 2;
@@ -584,7 +650,7 @@ void turtleTextureRender(int textureCode, double x1, double y1, double x2, doubl
 }
 
 // adds a (blit) rectangular texture
-void turtleTexture(int textureCode, double x1, double y1, double x2, double y2, double rot, double r, double g, double b) {
+void turtleTexture(int32_t textureCode, double x1, double y1, double x2, double y2, double rot, double r, double g, double b) {
     list_append(turtle.penPos, (unitype) x1, 'd');
     list_append(turtle.penPos, (unitype) y1, 'd');
     list_append(turtle.penPos, (unitype) x2, 'd');
@@ -601,12 +667,12 @@ void turtleUpdate() {
     // used to have a feature that only redrew the screen if there have been any changes from last frame, but it has been removed.
     // opted to redraw every frame and not list_copy, an alternative is hashing the penPos list. An interesting idea for sure... for another time
     char changed = 0;
-    int len = turtle.penPos -> length;
+    uint32_t len = turtle.penPos -> length;
     unitype *ren = turtle.penPos -> data;
     char *renType = turtle.penPos -> type;
     unsigned long long oldHash = turtle.penHash;
     turtle.penHash = 0; // I don't use this but it's an idea: https://stackoverflow.com/questions/57455444/very-low-collision-non-cryptographic-hashing-function
-    for (int i = 0; i < len; i++) {
+    for (uint32_t i = 0; i < len; i++) {
         turtle.penHash += (unsigned long long) turtle.penPos -> data[i].p; // simple addition hash. I know not technically safe since i cast all sizes to 8 byte, but it should still work
     }
     // printf("%lld %lld\n", oldHash, turtle.penHash);
@@ -623,7 +689,7 @@ void turtleUpdate() {
         double lastSize = -1;
         double lastPrez = -1;
         double precomputedLog = 5;
-        for (int i = 0; i < len; i += 9) {
+        for (int32_t i = 0; i < (int32_t) len; i += 9) {
             if (renType[i] == 'd') {
                 switch (ren[i + 7].h) {
                     case 0:
@@ -649,12 +715,12 @@ void turtleUpdate() {
                     }
                     break;
                 }
-                if (i + 9 < len && renType[i + 9] == 'd' && ren[i + 7].h < 64 && (ren[i + 7].h == 4 || ren[i + 7].h == 5 || (fabs(ren[i].d - ren[i + 9].d) > ren[i + 2].d / 2 || fabs(ren[i + 1].d - ren[i + 10].d) > ren[i + 2].d / 2))) { // tests for next point continuity and also ensures that the next point is at sufficiently different coordinates
+                if (i + 9 < (int32_t) len && renType[i + 9] == 'd' && ren[i + 7].h < 64 && (ren[i + 7].h == 4 || ren[i + 7].h == 5 || (fabs(ren[i].d - ren[i + 9].d) > ren[i + 2].d / 2 || fabs(ren[i + 1].d - ren[i + 10].d) > ren[i + 2].d / 2))) { // tests for next point continuity and also ensures that the next point is at sufficiently different coordinates
                     double dir = atan((ren[i + 9].d - ren[i].d) / (ren[i + 1].d - ren[i + 10].d));
                     double sinn = sin(dir + M_PI / 2);
                     double coss = cos(dir + M_PI / 2);
                     turtleQuadRender(ren[i].d + ren[i + 2].d * sinn, ren[i + 1].d - ren[i + 2].d * coss, ren[i + 9].d + ren[i + 2].d * sinn, ren[i + 10].d - ren[i + 2].d * coss, ren[i + 9].d - ren[i + 2].d * sinn, ren[i + 10].d + ren[i + 2].d * coss, ren[i].d - ren[i + 2].d * sinn, ren[i + 1].d + ren[i + 2].d * coss, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xfact, yfact);
-                    if ((ren[i + 7].h == 4 || ren[i + 7].h == 5) && i + 18 < len && renType[i + 18] == 'd') {
+                    if ((ren[i + 7].h == 4 || ren[i + 7].h == 5) && i + 18 < (int32_t) len && renType[i + 18] == 'd') {
                         double dir2 = atan((ren[i + 18].d - ren[i + 9].d) / (ren[i + 10].d - ren[i + 19].d));
                         double sinn2 = sin(dir2 + M_PI / 2);
                         double coss2 = cos(dir2 + M_PI / 2);

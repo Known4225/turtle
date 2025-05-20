@@ -2,7 +2,7 @@
 
 #ifndef TURTLETEXT
 #define TURTLETEXT
-#include "turtle.h"
+#include "turtleTextures.h"
 
 /* turtleText variables */
 typedef struct {
@@ -16,7 +16,7 @@ typedef struct {
 turtleText turtleTextRender;
 
 /* initialise values, must supply a font file (tgl) */
-int32_t turtleTextInit(GLFWwindow* window, const char *filename) {
+int32_t turtleTextInit(const char *filename) {
     turtlePenColor(0, 0, 0);
     turtleTextRender.bezierPrez = 10;
 
@@ -35,7 +35,7 @@ int32_t turtleTextInit(GLFWwindow* window, const char *filename) {
     int32_t oldptr;
     int32_t strptr;
 
-    int8_t line[2048]; // maximum line length
+    char line[2048]; // maximum line length
     line[2047] = 0; // canary value
     turtleTextRender.charCount = 0;
     while (fgets(line, 2048, tgl) != NULL) { // fgets to prevent overflows
@@ -60,15 +60,15 @@ int32_t turtleTextInit(GLFWwindow* window, const char *filename) {
                 if (strlen((char *) parsedInt) > 4) {
                     printf("Error: character at line %d too long for uint32_t\n", supportedCharReferenceInit -> length + 1);
                 }
-                for (int i = strlen((char *) parsedInt); i > 0; i--) {
-                    int abri = (strlen((char *) parsedInt) - i);
+                for (int32_t i = strlen((char *) parsedInt); i > 0; i--) {
+                    int32_t abri = (strlen((char *) parsedInt) - i);
                     fontPar += (uint32_t) parsedInt[abri] << ((i - 1) * 8);
                 }
                 if (fontPar == 0) { // exception for the comma character
                     fontPar = 44;
                 }
-                list_append(supportedCharReferenceInit, (unitype) (int) fontPar, 'i'); // adds as an int but will typecast back to unsigned later, this might not work correctly but it also doesn't really matter
-                list_append(fontPointerInit, (unitype) (int) (fontDataInit -> length), 'i');
+                list_append(supportedCharReferenceInit, (unitype) fontPar, 'i'); // adds as an int but will typecast back to unsigned later, this might not work correctly but it also doesn't really matter
+                list_append(fontPointerInit, (unitype) fontDataInit -> length, 'i');
                 firstIndex = fontDataInit -> length;
                 list_append(fontDataInit, (unitype) 1, 'i');
             } else {
@@ -76,7 +76,7 @@ int32_t turtleTextInit(GLFWwindow* window, const char *filename) {
                 if (strcmp((char *) parsedInt, "b") == 0) {
                     list_append(fontDataInit, (unitype) 140894115, 'i'); // all b's get converted to the integer 140894115 (chosen semi-randomly)
                 } else {
-                    list_append(fontDataInit, (unitype) (int) (fontPar), 'i'); // fontPar will double count when it encounters a b (idk why) so if there's a b we ignore the second fontPar (which is a duplicate of the previous one)
+                    list_append(fontDataInit, (unitype) fontPar, 'i'); // fontPar will double count when it encounters a b (idk why) so if there's a b we ignore the second fontPar (which is a duplicate of the previous one)
                 }
                 loops += 1;
             }
@@ -86,8 +86,8 @@ int32_t turtleTextInit(GLFWwindow* window, const char *filename) {
         }
         fontDataInit -> data[firstIndex] = (unitype) loops;
         firstIndex += 1; // using firstIndex as iteration variable
-        int len1 = fontDataInit -> data[firstIndex].i;
-        int maximums[4] = {-2147483648, -2147483648, 2147483647, 2147483647}; // for describing bounding box of a character
+        int32_t len1 = fontDataInit -> data[firstIndex].i;
+        int32_t maximums[4] = {-2147483648, -2147483648, 2147483647, 2147483647}; // for describing bounding box of a character
         
         /* good programmng alert */
         #define CHECKS_EMB(ind) \
@@ -103,10 +103,10 @@ int32_t turtleTextInit(GLFWwindow* window, const char *filename) {
             if (fontDataInit -> data[ind + 1].i < maximums[3]) {\
                 maximums[3] = fontDataInit -> data[ind + 1].i;\
             }
-        for (int i = 0; i < len1; i++) {
+        for (int32_t i = 0; i < len1; i++) {
             firstIndex += 1;
-            int len2 = fontDataInit -> data[firstIndex].i;
-            for (int j = 0; j < len2; j++) {
+            int32_t len2 = fontDataInit -> data[firstIndex].i;
+            for (int32_t j = 0; j < len2; j++) {
                 firstIndex += 1;
                 if (fontDataInit -> data[firstIndex].i == 140894115) {
                     firstIndex += 1;
@@ -183,12 +183,12 @@ int32_t turtleTextInit(GLFWwindow* window, const char *filename) {
 /* render functions */
 
 /* renders a quadratic bezier curve on the screen */
-void renderBezier(double x1, double y1, double x2, double y2, double x3, double y3, int prez) {
+void renderBezier(double x1, double y1, double x2, double y2, double x3, double y3, int32_t prez) {
     turtleGoto(x1, y1);
     turtlePenDown();
     double iter1 = 1;
     double iter2 = 0;
-    for (int i = 0; i < prez; i++) {
+    for (int32_t i = 0; i < prez; i++) {
         iter1 -= (double) 1 / prez;
         iter2 += (double) 1 / prez;
         double t1 = iter1 * iter1;
@@ -203,12 +203,12 @@ void renderBezier(double x1, double y1, double x2, double y2, double x3, double 
 void renderChar(int32_t index, double x, double y, double size) {
     index += 1;
     int32_t len1 = turtleTextRender.fontData[index];
-    for (uint32_t i = 0; i < len1; i++) {
+    for (int32_t i = 0; i < len1; i++) {
         index += 1;
         if (turtle.pen == 1)
             turtlePenUp();
         int32_t len2 = turtleTextRender.fontData[index];
-        for (uint32_t j = 0; j < len2; j++) {
+        for (int32_t j = 0; j < len2; j++) {
             index += 1;
             if (turtleTextRender.fontData[index] == 140894115) { // 140894115 is the b value (reserved)
                 index += 4;
@@ -226,16 +226,15 @@ void renderChar(int32_t index, double x, double y, double size) {
         }
     }
     turtlePenUp();
-    // no variables in turtleTextRender are changed
 }
 
 /* gets the length of a string in pixels on the screen */
-double turtleTextGetLength(const uint32_t *text, int textLength, double size) {
+double turtleTextGetLength(const uint32_t *text, int32_t textLength, double size) {
     size /= 175;
     double xTrack = 0;
-    for (uint32_t i = 0; i < textLength; i++) {
+    for (int32_t i = 0; i < textLength; i++) {
         int32_t currentDataAddress = 0;
-        for (uint32_t j = 0; j < turtleTextRender.charCount; j++) { // change to hashmap later
+        for (int32_t j = 0; j < turtleTextRender.charCount; j++) { // change to hashmap later
             if (turtleTextRender.supportedCharReference[j] == text[i]) {
                 currentDataAddress = j;
                 break;
@@ -249,7 +248,7 @@ double turtleTextGetLength(const uint32_t *text, int textLength, double size) {
 
 /* gets the length of a string in pixels on the screen */
 double turtleTextGetStringLength(const char *str, double size) {
-    int32_t len = strlen(str);
+    uint32_t len = strlen(str);
     uint32_t converted[len];
     for (uint32_t i = 0; i < len; i++) {
         converted[i] = (uint32_t) str[i];
@@ -279,7 +278,7 @@ double turtleTextGetUnicodeLength(const unsigned char *str, double size) {
             byteLength = 1;
         } else { // case: multi-byte character
             uint32_t convert = 0;
-            for (uint32_t k = 0; k < byteLength; k++) {
+            for (int32_t k = 0; k < byteLength; k++) {
                 convert = convert << 8;
                 convert += (uint32_t) str[i + k];
             }
@@ -292,10 +291,10 @@ double turtleTextGetUnicodeLength(const unsigned char *str, double size) {
 }
 
 /* writes to the screen */
-void turtleTextWrite(const uint32_t *text, int textLength, double x, double y, double size, double align) {
+void turtleTextWrite(const uint32_t *text, int32_t textLength, double x, double y, double size, double align) {
     char saveShape = turtle.penshape;
     double saveSize = turtle.pensize;
-    turtleTextRender.bezierPrez = (int) ceil(sqrt(size * 1)); // change the 1 for higher or lower bezier precision
+    turtleTextRender.bezierPrez = (int32_t) ceil(sqrt(size * 1)); // change the 1 for higher or lower bezier precision
     double xTrack = x;
     size /= 175;
     y -= size * 70;
@@ -305,9 +304,9 @@ void turtleTextWrite(const uint32_t *text, int textLength, double x, double y, d
     turtlePenShape("text"); // dedicated setting that blends circle and connected
     list_t *xvals = list_init();
     list_t *dataIndStored = list_init();
-    for (int i = 0; i < textLength; i++) {
+    for (int32_t i = 0; i < textLength; i++) {
         int32_t currentDataAddress = 0;
-        for (uint32_t j = 0; j < turtleTextRender.charCount; j++) { // change to hashmap later
+        for (int32_t j = 0; j < turtleTextRender.charCount; j++) { // change to hashmap later
             if (turtleTextRender.supportedCharReference[j] == text[i]) {
                 currentDataAddress = j;
                 break;
@@ -318,7 +317,7 @@ void turtleTextWrite(const uint32_t *text, int textLength, double x, double y, d
         xTrack += (turtleTextRender.fontData[turtleTextRender.fontPointer[currentDataAddress + 1] - 4] + 40) * size;
     }
     xTrack -= 40 * size;
-    for (uint32_t i = 0; i < textLength; i++) {
+    for (int32_t i = 0; i < textLength; i++) {
         renderChar((double) turtleTextRender.fontPointer[dataIndStored -> data[i].i], xvals -> data[i].d - ((xTrack - x) * (align / 100)), y, size);
     }
     list_free(dataIndStored);
@@ -332,7 +331,7 @@ void turtleTextWrite(const uint32_t *text, int textLength, double x, double y, d
 void turtleTextWriteString(const char *str, double x, double y, double size, double align) {
     int32_t len = strlen(str);
     uint32_t converted[len];
-    for (uint32_t i = 0; i < len; i++) {
+    for (int32_t i = 0; i < len; i++) {
         converted[i] = (uint32_t) str[i];
     }
     turtleTextWrite(converted, len, x, y, size, align);
@@ -348,7 +347,7 @@ void turtleTextWriteUnicode(const unsigned char *str, double x, double y, double
     while (i < len) {
         byteLength = 0;
         for (uint8_t j = 0; j < 8; j++) {
-            unsigned char mask = 128 >> j;
+            uint8_t mask = 128 >> j;
             if (str[i] & mask) {
                 byteLength += 1;
             } else {
@@ -360,7 +359,7 @@ void turtleTextWriteUnicode(const unsigned char *str, double x, double y, double
             byteLength = 1;
         } else { // case: multi-byte character
             uint32_t convert = 0;
-            for (uint32_t k = 0; k < byteLength; k++) {
+            for (int32_t k = 0; k < byteLength; k++) {
                 convert = convert << 8;
                 convert += (uint32_t) str[i + k];
             }
