@@ -5,7 +5,7 @@ dropdown
 button
 dial
 switch
-slider
+slider (under development)
 text box (under development)
 */
 
