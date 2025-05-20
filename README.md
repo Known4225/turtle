@@ -24,6 +24,8 @@ turtleText extends the functionality of turtle to allow text to be drawn to the 
 
 turtleTools contains many different UI elements including dropdowns, dials, sliders, switches, and buttons.
 
+![turtleTools](images/turtleTools.png)
+
 ## osTools
 
 osTools contains file dialog, clipboard, and other operating system integration tools.
