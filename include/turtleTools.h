@@ -802,15 +802,15 @@ void dropdownUpdate() {
                 dropdownAlignFactor = 100;
                 turtleTextWriteUnicode(dropdown -> label, dropdownX - 2, dropdownY + 15, dropdown -> size - 1, dropdownAlignFactor);
             } else {
-                dropdownXFactor[0] = dropdownX - xfactor / 2 - 5;
-                dropdownXFactor[1] = dropdownX + xfactor / 2 + 5;
-                dropdownMaxXFactor[0] = dropdownX - dropdown -> maxXfactor / 2 - 5;
-                dropdownMaxXFactor[1] = dropdownX + dropdown -> maxXfactor / 2;
+                dropdownXFactor[0] = dropdownX - xfactor / 2 - 10;
+                dropdownXFactor[1] = dropdownX + xfactor / 2;
+                dropdownMaxXFactor[0] = dropdownX - dropdown -> maxXfactor / 2 - 10;
+                dropdownMaxXFactor[1] = dropdownX + dropdown -> maxXfactor / 2 - 5;
                 if (dropdownXFactor[1] > dropdownMaxXFactor[1]) {
                     dropdownMaxXFactor[1] = dropdownXFactor[1] + 10;
                 }
                 dropdownAlignFactor = 50;
-                turtleTextWriteUnicode(dropdown -> label, dropdownX + 5, dropdownY + 15, dropdown -> size - 1, dropdownAlignFactor);
+                turtleTextWriteUnicode(dropdown -> label, dropdownX, dropdownY + 15, dropdown -> size - 1, dropdownAlignFactor);
             }
         }
         logicIndex = tt_globals.dropdownLogicIndex;
@@ -911,9 +911,6 @@ void dropdownUpdate() {
 }
 
 void turtleToolsUpdate() {
-    if (tt_enabled.ribbonEnabled) {
-        ribbonUpdate();
-    }
     if (tt_enabled.popupEnabled) {
         popupUpdate();
     }
@@ -928,6 +925,12 @@ void turtleToolsUpdate() {
     }
     if (tt_enabled.dropdownEnabled) {
         dropdownUpdate();
+    }
+    if (tt_enabled.ribbonEnabled) {
+        ribbonUpdate();
+    }
+    if (tt_enabled.popupEnabled) {
+        popupUpdate();
     }
 }
 

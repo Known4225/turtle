@@ -126,10 +126,10 @@ int main(int argc, char *argv[]) {
     list_append(dropdownOptions, (unitype) "long item", 's');
     list_append(dropdownOptions, (unitype) "very long item name", 's');
     list_append(dropdownOptions, (unitype) "b", 's');
-    buttonInit("button", &buttonVar, -100, 100, 8, BUTTON_SHAPE_RECTANGLE);
-    switchInit("switch", &switchVar, 100, 100, 8);
-    dialInit("dial", &dialVar, DIAL_EXP, -100, -100, 8, 0, 1000, 1);
-    dropdownInit("dropdown", dropdownOptions, &dropdownVar, 100, -100, 8, TT_DROPDOWN_ALIGN_RIGHT);
+    buttonInit("button", &buttonVar, 0, 30, 8, BUTTON_SHAPE_RECTANGLE);
+    switchInit("switch", &switchVar, 0, 0, 8);
+    dialInit("dial", &dialVar, DIAL_EXP, 0, -30, 8, 0, 1000, 1);
+    dropdownInit("dropdown", dropdownOptions, &dropdownVar, 0, 48, 8, TT_DROPDOWN_ALIGN_CENTER);
 
     while (turtle.shouldClose == 0) {
         start = clock();
