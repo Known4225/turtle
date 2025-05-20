@@ -126,9 +126,9 @@ int main(int argc, char *argv[]) {
     list_append(dropdownOptions, (unitype) "c", 's');
     list_append(dropdownOptions, (unitype) "d", 's');
     list_append(dropdownOptions, (unitype) "e", 's');
-    buttonInit("button", &buttonVar, 0, 20, 10, BUTTON_SHAPE_RECTANGLE);
+    buttonInit("button", &buttonVar, 0, 20, 10, TT_BUTTON_SHAPE_RECTANGLE);
     switchInit("switch", &switchVar, 0, -20, 10);
-    dialInit("dial", &dialVar, DIAL_EXP, 0, -60, 10, 0, 1000, 1);
+    dialInit("dial", &dialVar, TT_DIAL_EXP, 0, -60, 10, 0, 1000, 1);
     dropdownInit("dropdown", dropdownOptions, &dropdownVar, 0, 48, 10, TT_DROPDOWN_ALIGN_CENTER);
 
     while (turtle.shouldClose == 0) {

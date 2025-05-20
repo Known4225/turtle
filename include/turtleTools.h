@@ -5,7 +5,7 @@ dropdown
 button
 dial
 switch
-slider (under development)
+slider
 text box (under development)
 */
 
@@ -441,15 +441,16 @@ typedef struct {
     list_t *buttons;
     list_t *switches;
     list_t *dials;
+    list_t *sliders;
     list_t *dropdowns;
 } tt_elements_t;
 
 tt_elements_t tt_elements;
 
 typedef enum {
-    BUTTON_SHAPE_RECTANGLE = 0,
-    BUTTON_SHAPE_ROUNDED_RECTANGLE = 1,
-    BUTTON_SHAPE_CIRCLE = 2,
+    TT_BUTTON_SHAPE_RECTANGLE = 0,
+    TT_BUTTON_SHAPE_ROUNDED_RECTANGLE = 1,
+    TT_BUTTON_SHAPE_CIRCLE = 2,
 } tt_button_shape_t;
 
 /* button */
@@ -462,10 +463,19 @@ typedef struct {
     int32_t *variable; // 1 if button is being pressed, 0 otherwise
 } tt_button_t;
 
+/* switch */
+typedef struct {
+    char label[24];
+    int32_t status;
+    double size;
+    double position[2]; // X, Y
+    int32_t *variable; // 1 if switch is flipped, 0 otherwise
+} tt_switch_t;
+
 typedef enum {
-    DIAL_LINEAR = 0,
-    DIAL_LOG = 1,
-    DIAL_EXP = 2,
+    TT_DIAL_LINEAR = 0,
+    TT_DIAL_LOG = 1,
+    TT_DIAL_EXP = 2,
 } tt_dial_type_t;
 
 /* dial */
@@ -481,14 +491,23 @@ typedef struct {
     double *variable; // value of dial
 } tt_dial_t;
 
+typedef enum {
+    TT_SLIDER_HORIZONTAL = 0,
+    TT_SLIDER_VERTICAL = 1,
+} tt_slider_type_t;
+
 /* switch */
 typedef struct {
-    char label[24];
-    int32_t status;
+    char label;
+    int32_t status[2];
+    tt_slider_type_t type;
     double size;
     double position[2]; // X, Y
-    int32_t *variable; // 1 if switch is flipped, 0 otherwise
-} tt_switch_t;
+    double range[2];
+    double renderNumberFactor; // multiply rendered variable by this amount
+    double defaultValue;
+    double *variable; // value of slider
+} tt_slider_t;
 
 typedef enum {
     TT_DROPDOWN_ALIGN_LEFT = 0,
@@ -728,11 +747,11 @@ void dialUpdate() {
         turtlePenSize(1);
         turtlePenDown();
         double dialAngle;
-        if (dialp -> type == DIAL_LOG) {
+        if (dialp -> type == TT_DIAL_LOG) {
             dialAngle = pow(360, (*(dialp -> variable) - dialp -> range[0]) / (dialp -> range[1] - dialp -> range[0]));
-        } else if (dialp -> type == DIAL_LINEAR) {
+        } else if (dialp -> type == TT_DIAL_LINEAR) {
             dialAngle = (*(dialp -> variable) - dialp -> range[0]) / (dialp -> range[1] - dialp -> range[0]) * 360;
-        } else if (dialp -> type == DIAL_EXP) {
+        } else if (dialp -> type == TT_DIAL_EXP) {
             dialAngle = 360 * (log(((*(dialp -> variable) - dialp -> range[0]) / (dialp -> range[1] - dialp -> range[0])) * 360 + 1) / log(361));
         }
         turtleGoto(dialX + sin(dialAngle / 57.2958) * dialp -> size, dialY + cos(dialAngle / 57.2958) * dialp -> size);
@@ -767,11 +786,11 @@ void dialUpdate() {
             if ((dialAngle > 359.99999999 || dialAngle < 180) && turtle.mouseY > tt_globals.dialAnchorY && dialp -> status[1] < 0) {
                 dialAngle = 359.99999999;
             }
-            if (dialp -> type == DIAL_LOG) {
+            if (dialp -> type == TT_DIAL_LOG) {
                 *(dialp -> variable) = round(dialp -> range[0] + (dialp -> range[1] - dialp -> range[0]) * (log(dialAngle) / log(360)));
-            } else if (dialp -> type == DIAL_LINEAR) {
+            } else if (dialp -> type == TT_DIAL_LINEAR) {
                 *(dialp -> variable) = round(dialp -> range[0] + ((dialp -> range[1] - dialp -> range[0]) * dialAngle / 360));
-            } else if (dialp -> type == DIAL_EXP) {
+            } else if (dialp -> type == TT_DIAL_EXP) {
                 *(dialp -> variable) = round(dialp -> range[0] + (dialp -> range[1] - dialp -> range[0]) * ((pow(361, dialAngle / 360) - 1) / 360));
             }
         }
@@ -814,7 +833,7 @@ void dropdownUpdate() {
                 dropdownMaxXFactor[1] = dropdownX;
                 dropdownAlignFactor = 100;
                 turtleTextWriteUnicode((unsigned char *) dropdown -> label, dropdownX - 2, dropdownY + 1.6 * dropdown -> size, dropdown -> size - 1, dropdownAlignFactor);
-            } else {
+            } else if (dropdown -> align == TT_DROPDOWN_ALIGN_CENTER) {
                 dropdownXFactor[0] = dropdownX - xfactor / 2 - 10;
                 dropdownXFactor[1] = dropdownX + xfactor / 2;
                 dropdownMaxXFactor[0] = dropdownX - dropdown -> maxXfactor / 2 - 10;
@@ -895,7 +914,7 @@ void dropdownUpdate() {
                         turtleTextWriteUnicode((unsigned char *) dropdown -> options -> data[i].s, dropdownMaxXFactor[0] + 2, dropdownY - renderIndex * itemHeight, dropdown -> size - 1, dropdownAlignFactor);
                     } else if (dropdown -> align == TT_DROPDOWN_ALIGN_RIGHT) {
                         turtleTextWriteUnicode((unsigned char *) dropdown -> options -> data[i].s, dropdownMaxXFactor[1] - 16, dropdownY - renderIndex * itemHeight, dropdown -> size - 1, dropdownAlignFactor);
-                    } else {
+                    } else if (dropdown -> align == TT_DROPDOWN_ALIGN_CENTER) {
                         turtleTextWriteUnicode((unsigned char *) dropdown -> options -> data[i].s, (dropdownMaxXFactor[0] + dropdownMaxXFactor[1]) / 2, dropdownY - renderIndex * itemHeight, dropdown -> size - 1, dropdownAlignFactor);
                     }
                     renderIndex++;
@@ -911,7 +930,7 @@ void dropdownUpdate() {
             turtleTextWriteUnicode((unsigned char *) dropdown -> options -> data[dropdown -> index].s, dropdownXFactor[0] + 2, dropdownY, dropdown -> size - 1, dropdownAlignFactor);
         } else if (dropdown -> align == TT_DROPDOWN_ALIGN_RIGHT) {
             turtleTextWriteUnicode((unsigned char *) dropdown -> options -> data[dropdown -> index].s, dropdownXFactor[1] - 6, dropdownY, dropdown -> size - 1, dropdownAlignFactor);
-        } else {
+        } else if (dropdown -> align == TT_DROPDOWN_ALIGN_CENTER) {
             turtleTextWriteUnicode((unsigned char *) dropdown -> options -> data[dropdown -> index].s, (dropdownXFactor[0] + dropdownXFactor[1]) / 2, dropdownY, dropdown -> size - 1, dropdownAlignFactor);
         }
         tt_setColor(TT_COLOR_DROPDOWN_TRIANGLE);

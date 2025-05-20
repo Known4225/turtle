@@ -7,7 +7,7 @@ lib:
 	gcc -c include/osTools.h -DOS_LINUX -O3 -o osTools.o
 	ar rcs turtle.dll turtleTools.o osTools.o
 win:
-	gcc turtle.c -L./Windows -lglfw3 -lopengl32 -lgdi32 -lglad -lole32 -luuid -lwsock32 -lWs2_32 -lturtle -DOS_WINDOWS -DDEBUGGING_FLAG -Wall -o turtle.exe
+	gcc turtle.c -L./Windows -lglfw3 -lopengl32 -lgdi32 -lglad -lole32 -luuid -lwsock32 -lWs2_32 -DOS_WINDOWS -DDEBUGGING_FLAG -Wall -o turtle.exe
 winrel:
 	gcc turtle.c -L./Windows -lglfw3 -lopengl32 -lgdi32 -lglad -lole32 -luuid -lwsock32 -lWs2_32 -DOS_WINDOWS -O3 -o turtle.exe
 winlib:
