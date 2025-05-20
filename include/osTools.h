@@ -45,7 +45,7 @@ typedef struct {
     char executableFilepath[MAX_PATH + 1]; // filepath of executable
     char selectedFilename[MAX_PATH + 1]; // output filename - maximum filepath is 260 characters (?)
     char openOrSave; // 0 - open, 1 - save
-    int numExtensions; // number of extensions
+    int32_t numExtensions; // number of extensions
     char **extensions; // array of allowed extensions (7 characters long max (cuz *.json;))
 } win32FileDialogObject; // almost as bad of naming as the windows API
 
@@ -64,7 +64,7 @@ int32_t osToolsInit(char argv0[], GLFWwindow *window) {
         strcpy(osFileDialog.executableFilepath, "null");
         printf("error: could not retrieve executable filepath\n");
     }
-    int index = strlen(osFileDialog.executableFilepath) - 1;
+    int32_t index = strlen(osFileDialog.executableFilepath) - 1;
     while (index > -1 && osFileDialog.executableFilepath[index] != '\\' && osFileDialog.executableFilepath[index] != '/') {
         index--;
     }
@@ -204,7 +204,7 @@ int32_t osFileDialogPrompt(char openOrSave, char *filename) { // 0 - open, 1 - s
 
             /* configure autofill filename */
             if (openOrSave == 1 && strcmp(filename, "null") != 0) {
-                int i = 0;
+                int32_t i = 0;
                 unsigned short prename[MAX_PATH + 1];
                 while (filename[i] != '\0' && i < MAX_PATH + 1) {
                     prename[i] = filename[i]; // convert from char to WCHAR
@@ -222,12 +222,12 @@ int32_t osFileDialogPrompt(char openOrSave, char *filename) { // 0 - open, 1 - s
             if (osFileDialog.numExtensions > 0) {
                 COMDLG_FILTERSPEC *fileExtensions = malloc(sizeof(COMDLG_FILTERSPEC)); // just one filter
                 WCHAR *buildFilter = malloc(10 * osFileDialog.numExtensions * sizeof(WCHAR));
-                int j = 0;
-                for (int i = 0; i < osFileDialog.numExtensions; i++) {
+                int32_t j = 0;
+                for (int32_t i = 0; i < osFileDialog.numExtensions; i++) {
                     buildFilter[j] = (unsigned short) '*';
                     buildFilter[j + 1] = (unsigned short) '.';
                     j += 2;
-                    for (int k = 0; k < strlen(osFileDialog.extensions[i]) && k < 8; k++) {
+                    for (uint32_t k = 0; k < strlen(osFileDialog.extensions[i]) && k < 8; k++) {
                         buildFilter[j] = osFileDialog.extensions[i][k];
                         j += 1;
                     }
@@ -257,7 +257,7 @@ int32_t osFileDialogPrompt(char openOrSave, char *filename) { // 0 - open, 1 - s
             if (SUCCEEDED(hr)){
                 hr = psiResult -> lpVtbl -> GetDisplayName(psiResult, SIGDN_FILESYSPATH, &pszFilePath); // extracts path name
                 if (SUCCEEDED(hr)) {
-                    int i = 0;
+                    int32_t i = 0;
                     while (pszFilePath[i] != '\0' && i < MAX_PATH + 1) {
                         osFileDialog.selectedFilename[i] = pszFilePath[i]; // convert from WCHAR to char
                         i++;
@@ -323,7 +323,7 @@ typedef struct {
     char executableFilepath[4097]; // filepath of executable
     char selectedFilename[4097]; // output filename - maximum filepath is 4096 characters (?)
     char openOrSave; // 0 - open, 1 - save
-    int numExtensions; // number of extensions
+    int32_t numExtensions; // number of extensions
     char **extensions; // array of allowed extensions (7 characters long max (cuz *.json ))
 } zenityFileDialogObject;
 
@@ -426,7 +426,7 @@ int32_t osFileDialogPrompt(char openOrSave, char *prename) { // 0 - open, 1 - sa
         strcpy(osFileDialog.selectedFilename, "null");
         return -1;
     }
-    for (int i = 0; i < 4096; i++) {
+    for (uint32_t i = 0; i < 4096; i++) {
         if (osFileDialog.selectedFilename[i] == '\n') {
             osFileDialog.selectedFilename[i] = '\0'; // replace all newlines with null characters
         }

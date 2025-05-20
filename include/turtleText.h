@@ -258,7 +258,7 @@ double turtleTextGetStringLength(const char *str, double size) {
 }
 
 /* gets the length of a u-string in pixels on the screen */
-double turtleTextGetUnicodeLength(const char *str, double size) {
+double turtleTextGetUnicodeLength(const unsigned char *str, double size) {
     int32_t len = strlen((char *) str);
     uint32_t converted[len]; // max number of characters in a utf-8 string of length len
     int32_t byteLength;

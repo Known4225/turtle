@@ -89,7 +89,7 @@ int main(int argc, char *argv[]) {
 
     /* Create a windowed mode window and its OpenGL context */
     const GLFWvidmode *monitorSize = glfwGetVideoMode(glfwGetPrimaryMonitor());
-    int windowHeight = monitorSize -> height * 0.85;
+    int32_t windowHeight = monitorSize -> height * 0.85;
     GLFWwindow *window = glfwCreateWindow(windowHeight * 16 / 9, windowHeight, "turtle", NULL, NULL);
     if (!window) {
         glfwTerminate();
@@ -119,7 +119,7 @@ int main(int argc, char *argv[]) {
     clock_t start, end;
 
     turtleBgColor(30, 30, 30);
-    int buttonVar, switchVar = 0, dropdownVar = 0;
+    int32_t buttonVar, switchVar = 0, dropdownVar = 0;
     double dialVar;
     list_t *dropdownOptions = list_init();
     list_append(dropdownOptions, (unitype) "a", 's');

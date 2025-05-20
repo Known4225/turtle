@@ -94,7 +94,7 @@ list_t *list_init() {
 }
 
 /* accesses an item of the list as a void pointer */
-void *list_item(list_t *list, int index) {
+void *list_item(list_t *list, uint32_t index) {
     void *ret;
     switch (list -> type[index]) {
         case 'i':
@@ -214,7 +214,7 @@ unitype list_delete(list_t *list, int32_t index) {
     if (list -> type[index] == 's' || list -> type[index] == 'p') {
         free(list -> data[index].p);
     }
-    for (int32_t i = index; i < list -> length - 1 ; i++) {
+    for (uint32_t i = index; i < list -> length - 1 ; i++) {
         list -> data[i] = list -> data[i + 1];
         list -> type[i] = list -> type[i + 1];
     }
@@ -230,14 +230,14 @@ unitype list_delete(list_t *list, int32_t index) {
 }
 
 /* deletes many items from the list spanning from [indexMin] to [indexMax - 1] */
-void list_delete_range(list_t* list, int32_t indexMin, int32_t indexMax) {
+void list_delete_range(list_t* list, uint32_t indexMin, uint32_t indexMax) {
     if (indexMin > indexMax) {
-        int32_t swap = indexMin;
+        uint32_t swap = indexMin;
         indexMin = indexMax;
         indexMax = swap;
     }
     char zerod = 0; // edge case: "should've used list_clear"
-    int32_t difference = (indexMax - indexMin);
+    uint32_t difference = (indexMax - indexMin);
     list -> realLength = list -> length - difference;
     if (list -> realLength <= 1) {
         zerod = 1;
@@ -246,11 +246,11 @@ void list_delete_range(list_t* list, int32_t indexMin, int32_t indexMax) {
     
     char *newType = malloc(list -> realLength * sizeof(char)); // no need to calloc we're gonna fill it all up anyway
     unitype *newData = malloc(list -> realLength * sizeof(unitype));
-    for (int32_t i = 0; i < indexMin; i++) {
+    for (uint32_t i = 0; i < indexMin; i++) {
         newType[i] = list -> type[i];
         newData[i] = list -> data[i];
     }
-    for (int32_t i = indexMax; i < list -> length; i++) {
+    for (uint32_t i = indexMax; i < list -> length; i++) {
         newType[i - difference] = list -> type[i];
         newData[i - difference] = list -> data[i];
     }
@@ -340,10 +340,10 @@ int32_t list_count(list_t *list, unitype item, char type) {
 }
 
 /* sort list */
-int32_t list_sort(list_t *list) {
+void list_sort(list_t *list) {
     /* create min heap */
     int32_t temp;
-    for (int32_t i = 2; i < list -> length + 1; i++) {
+    for (uint32_t i = 2; i < list -> length + 1; i++) {
         int32_t j = i;
         while (j > 1 && list -> data[j / 2 - 1].i > list -> data[j - 1].i) {
             temp = list -> data[j / 2 - 1].i;
@@ -376,8 +376,8 @@ int32_t list_sort(list_t *list) {
 
 /* deletes the first instance of the item from the list, returns the index the item was at, returns -1 and doesn't modify the list if not found (python but without ValueError) */
 int32_t list_remove(list_t *list, unitype item, char type) {
-    int32_t trig = 0;
-    for (int32_t i = 0; i < list -> length; i++) {
+    uint32_t trig = 0;
+    for (uint32_t i = 0; i < list -> length; i++) {
         trig += unitype_check_equal(list -> data[i], item, list -> type[i], type);
         if (trig == 1) {
             list_delete(list, i);
@@ -415,7 +415,7 @@ void unitype_print(unitype item, char type) {
             list_print_emb(item.r);
         break;
         case 'l':
-            printf("%lu", item.l);
+            printf("%llu", item.l);
         break;
         case 'h':
             printf("%hi", item.h);
@@ -437,7 +437,7 @@ void list_copy(list_t *src, list_t *dest) {
     uint32_t len = src -> length;
     dest -> length = len;
     dest -> realLength = src -> realLength;
-    for (int32_t i = 0; i < len; i++) {
+    for (uint32_t i = 0; i < len; i++) {
         dest -> type[i] = src -> type[i];
         if (src -> type[i] == 'r') {
             dest -> data[i] = (unitype) (void *) list_init();

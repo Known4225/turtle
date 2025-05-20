@@ -154,7 +154,7 @@ typedef struct {
 tt_ribbon_t ribbonRender;
 
 /* initialise ribbon */
-int ribbonInit(GLFWwindow* window, const char *filename) {
+int32_t ribbonInit(GLFWwindow* window, const char *filename) {
     tt_enabled.ribbonEnabled = 1;
     ribbonRender.marginSize = 10; // number of pixels between different items in the ribbon (not affected by ribbonSize)
     ribbonRender.mainselect[0] = -1;
@@ -241,7 +241,7 @@ void ribbonUpdate() {
     ribbonRender.subselect[0] = -1;
     for (uint32_t i = 0; i < ribbonRender.options -> length; i++) {
         double prevCutoff = cutoff;
-        if (i == ribbonRender.mainselect[2]) {
+        if (i == (uint32_t) ribbonRender.mainselect[2]) {
             double xLeft = prevCutoff - ribbonRender.marginSize / 2.0;
             double xRight = prevCutoff + ribbonRender.lengths -> data[i * 2 + 1].d + ribbonRender.marginSize / 2.0;
             double yDown = ribbonRender.bounds[3] - 10 - 15 * (ribbonRender.options -> data[i].r -> length - 1) - ribbonRender.marginSize / 2.0;
@@ -254,7 +254,7 @@ void ribbonUpdate() {
                     ribbonRender.subselect[0] = j;
                 }
                 tt_setColor(TT_COLOR_TEXT_ALTERNATE);
-                turtleTextWriteString(ribbonRender.options -> data[i].r -> data[j].s, prevCutoff, 174.5 - j * 15, 7 * ribbonRender.ribbonSize, 0);
+                turtleTextWriteUnicode((unsigned char *) ribbonRender.options -> data[i].r -> data[j].s, prevCutoff, 174.5 - j * 15, 7 * ribbonRender.ribbonSize, 0);
             }
         }
         cutoff += ribbonRender.lengths -> data[i * 2].d + ribbonRender.marginSize;
@@ -264,7 +264,7 @@ void ribbonUpdate() {
             ribbonRender.mainselect[0] = i;
         }
         tt_setColor(TT_COLOR_TEXT_ALTERNATE);
-        turtleTextWriteString(ribbonRender.options -> data[i].r -> data[0].s, prevCutoff, 174.5, 7 * ribbonRender.ribbonSize, 0);
+        turtleTextWriteUnicode((unsigned char *) ribbonRender.options -> data[i].r -> data[0].s, prevCutoff, 174.5, 7 * ribbonRender.ribbonSize, 0);
     }
     if (turtleMouseDown()) { // this is hideous
         if (ribbonRender.mouseDown == 0) {
@@ -331,7 +331,7 @@ typedef struct {
 tt_popup_t popup;
 
 /* initialise popup */
-int popupInit(const char *filename, double minX, double minY, double maxX, double maxY) {
+int32_t popupInit(const char *filename, double minX, double minY, double maxX, double maxY) {
     tt_enabled.popupEnabled = 1;
     popup.minX = minX;
     popup.minY = minY;
@@ -373,7 +373,7 @@ void popupUpdate() {
         double textX = popup.minX + (popup.maxX - popup.minX) / 2;
         double textY = popup.maxY - textSize * 2;
         tt_setColor(TT_COLOR_TEXT);
-        turtleTextWriteString(popup.message, textX, textY, textSize, 50);
+        turtleTextWriteUnicode((unsigned char *) popup.message, textX, textY, textSize, 50);
         textY -= textSize * 4;
         double fullLength = 0;
         for (uint32_t i = 0; i < popup.options -> length; i++) {
@@ -402,7 +402,7 @@ void popupUpdate() {
                 } else {
                     if (popup.mouseDown == 1) {
                         popup.mouseDown = 0;
-                        if (popup.output[1] == i) {
+                        if (popup.output[1] == (int32_t) i) {
                             popup.output[0] = 1;
                         }
                     }
@@ -412,7 +412,7 @@ void popupUpdate() {
                 turtleQuad(textX - textSize, textY - textSize, textX + textSize + strLen, textY - textSize, textX + textSize + strLen, textY + textSize, textX - textSize, textY + textSize);
             }
             tt_setColor(TT_COLOR_TEXT);
-            turtleTextWriteString(popup.options -> data[i].s, textX, textY, textSize, 0);
+            turtleTextWriteUnicode((unsigned char *) popup.options -> data[i].s, textX, textY, textSize, 0);
             textX += strLen + padThai;
         }
         if (!turtleMouseDown() && popup.mouseDown == 1 && flagged == 1) {
@@ -455,11 +455,11 @@ typedef enum {
 /* button */
 typedef struct {
     char label[24];
-    int status;
+    int32_t status;
     tt_button_shape_t shape;
     double size;
     double position[2]; // X, Y
-    int *variable; // 1 if button is being pressed, 0 otherwise
+    int32_t *variable; // 1 if button is being pressed, 0 otherwise
 } tt_button_t;
 
 typedef enum {
@@ -500,7 +500,7 @@ typedef enum {
 typedef struct {
     list_t *options;
     char label[24];
-    int32_t index;
+    uint32_t index;
     int32_t status;
     tt_dropdown_align_t align;
     double size;
@@ -510,7 +510,7 @@ typedef struct {
 } tt_dropdown_t;
 
 /* initialise UI elements */
-tt_button_t *buttonInit(char *label, int *variable, double xOffset, double yOffset, double size, tt_button_shape_t shape) {
+tt_button_t *buttonInit(char *label, int32_t *variable, double xOffset, double yOffset, double size, tt_button_shape_t shape) {
     if (tt_enabled.buttonEnabled == 0) {
         tt_enabled.buttonEnabled = 1;
         tt_elements.buttons = list_init();
@@ -531,7 +531,7 @@ tt_button_t *buttonInit(char *label, int *variable, double xOffset, double yOffs
     return buttonp;
 }
 
-tt_switch_t *switchInit(char *label, int *variable, double xOffset, double yOffset, double size) {
+tt_switch_t *switchInit(char *label, int32_t *variable, double xOffset, double yOffset, double size) {
     if (tt_enabled.switchEnabled == 0) {
         tt_enabled.switchEnabled = 1;
         tt_elements.switches = list_init();
@@ -578,7 +578,7 @@ tt_dial_t *dialInit(char *label, double *variable, tt_dial_type_t type, double x
 
 void dropdownCalculateMax(tt_dropdown_t *dropdown) {
     dropdown -> maxXfactor = 0;
-    for (int i = 0; i < dropdown -> options -> length; i++) {
+    for (uint32_t i = 0; i < dropdown -> options -> length; i++) {
         double stringLength = turtleTextGetStringLength(dropdown -> options -> data[i].s, dropdown -> size - 1);
         if (stringLength > dropdown -> maxXfactor) {
             dropdown -> maxXfactor = stringLength;
@@ -586,7 +586,7 @@ void dropdownCalculateMax(tt_dropdown_t *dropdown) {
     }
 }
 
-tt_dropdown_t *dropdownInit(char *label, list_t *options, int *variable, double xOffset, double yOffset, double size, tt_dropdown_align_t align) {
+tt_dropdown_t *dropdownInit(char *label, list_t *options, int32_t *variable, double xOffset, double yOffset, double size, tt_dropdown_align_t align) {
     if (tt_enabled.dropdownEnabled == 0) {
         tt_globals.dropdownLogicIndex = -1;
         tt_enabled.dropdownEnabled = 1;
@@ -612,11 +612,11 @@ tt_dropdown_t *dropdownInit(char *label, list_t *options, int *variable, double 
 }
 
 void buttonUpdate() {
-    for (int i = 0; i < tt_elements.buttons -> length; i++) {
+    for (uint32_t i = 0; i < tt_elements.buttons -> length; i++) {
         tt_button_t *buttonp = (tt_button_t *) (tt_elements.buttons -> data[i].p);
         double buttonX = buttonp -> position[0];
         double buttonY = buttonp -> position[1];
-        double buttonWidth = turtleTextGetUnicodeLength(buttonp -> label, buttonp -> size) * 1.1;
+        double buttonWidth = turtleTextGetUnicodeLength((unsigned char *) buttonp -> label, buttonp -> size) * 1.1;
         double buttonHeight = buttonp -> size * 1.75;
         if (buttonp -> status == 0) {
             tt_setColor(TT_COLOR_BUTTON);
@@ -625,7 +625,7 @@ void buttonUpdate() {
         }
         turtleRectangle(buttonX - buttonWidth / 2, buttonY - buttonHeight / 2, buttonX + buttonWidth / 2, buttonY + buttonHeight / 2);
         tt_setColor(TT_COLOR_TEXT);
-        turtleTextWriteUnicode(buttonp -> label, buttonX, buttonY, buttonp -> size - 1, 50);
+        turtleTextWriteUnicode((unsigned char *) buttonp -> label, buttonX, buttonY, buttonp -> size - 1, 50);
         if (turtleMouseDown()) {
             if (buttonp -> status < 0) {
                 buttonp -> status *= -1;
@@ -646,12 +646,12 @@ void buttonUpdate() {
 }
 
 void switchUpdate() {
-    for (int i = 0; i < tt_elements.switches -> length; i++) {
+    for (uint32_t i = 0; i < tt_elements.switches -> length; i++) {
         tt_switch_t *switchp = (tt_switch_t *) (tt_elements.switches -> data[i].p);
         double switchX = switchp -> position[0];
         double switchY = switchp -> position[1];
         tt_setColor(TT_COLOR_TEXT);
-        turtleTextWriteUnicode(switchp -> label, switchX, switchY + 1.6 * switchp -> size, switchp -> size - 1, 50);
+        turtleTextWriteUnicode((unsigned char *) switchp -> label, switchX, switchY + 1.6 * switchp -> size, switchp -> size - 1, 50);
         if (*(switchp -> variable)) {
             tt_setColor(TT_COLOR_SWITCH_ON);
         } else {
@@ -709,10 +709,10 @@ double angleBetween(double x1, double y1, double x2, double y2) {
 }
 
 void dialUpdate() {
-    for (int i = 0; i < tt_elements.dials -> length; i++) {
+    for (uint32_t i = 0; i < tt_elements.dials -> length; i++) {
         tt_dial_t *dialp = (tt_dial_t *) (tt_elements.dials -> data[i].p);
         tt_setColor(TT_COLOR_TEXT);
-        turtleTextWriteUnicode(dialp -> label, dialp -> position[0], dialp -> position[1] + 1.9 * dialp -> size, dialp -> size - 1, 50);
+        turtleTextWriteUnicode((unsigned char *) dialp -> label, dialp -> position[0], dialp -> position[1] + 1.9 * dialp -> size, dialp -> size - 1, 50);
         turtlePenSize(dialp -> size * 2);
         double dialX = dialp -> position[0];
         double dialY = dialp -> position[1];
@@ -784,13 +784,13 @@ void dialUpdate() {
 }
 
 void dropdownUpdate() {
-    int logicIndex = -1;
-    for (int i = 0; i < tt_elements.dropdowns -> length; i++) {
+    int32_t logicIndex = -1;
+    for (uint32_t i = 0; i < tt_elements.dropdowns -> length; i++) {
         tt_dropdown_t *dropdown = (tt_dropdown_t *) (tt_elements.dropdowns -> data[i].p);
         /* render dropdown default position */
         double dropdownX = dropdown -> position[0];
         double dropdownY = dropdown -> position[1];
-        double xfactor = turtleTextGetUnicodeLength(dropdown -> options -> data[dropdown -> index].s, dropdown -> size - 1);
+        double xfactor = turtleTextGetUnicodeLength((unsigned char *) dropdown -> options -> data[dropdown -> index].s, dropdown -> size - 1);
         double itemHeight = (dropdown -> size * 1.5);
         double dropdownXFactor[2];
         double dropdownMaxXFactor[2];
@@ -806,14 +806,14 @@ void dropdownUpdate() {
                     dropdownMaxXFactor[1] = dropdownXFactor[1] + 10;
                 }
                 dropdownAlignFactor = 0;
-                turtleTextWriteUnicode(dropdown -> label, dropdownX + 2, dropdownY + 1.6 * dropdown -> size, dropdown -> size - 1, dropdownAlignFactor);
+                turtleTextWriteUnicode((unsigned char *) dropdown -> label, dropdownX + 2, dropdownY + 1.6 * dropdown -> size, dropdown -> size - 1, dropdownAlignFactor);
             } else if (dropdown -> align == TT_DROPDOWN_ALIGN_RIGHT) {
                 dropdownXFactor[0] = dropdownX - xfactor - 20;
                 dropdownXFactor[1] = dropdownX - 10;
                 dropdownMaxXFactor[0] = dropdownX - dropdown -> maxXfactor - 20;
                 dropdownMaxXFactor[1] = dropdownX;
                 dropdownAlignFactor = 100;
-                turtleTextWriteUnicode(dropdown -> label, dropdownX - 2, dropdownY + 1.6 * dropdown -> size, dropdown -> size - 1, dropdownAlignFactor);
+                turtleTextWriteUnicode((unsigned char *) dropdown -> label, dropdownX - 2, dropdownY + 1.6 * dropdown -> size, dropdown -> size - 1, dropdownAlignFactor);
             } else {
                 dropdownXFactor[0] = dropdownX - xfactor / 2 - 10;
                 dropdownXFactor[1] = dropdownX + xfactor / 2;
@@ -823,7 +823,7 @@ void dropdownUpdate() {
                     dropdownMaxXFactor[1] = dropdownXFactor[1] + 10;
                 }
                 dropdownAlignFactor = 50;
-                turtleTextWriteUnicode(dropdown -> label, dropdownX, dropdownY + 1.6 * dropdown -> size, dropdown -> size - 1, dropdownAlignFactor);
+                turtleTextWriteUnicode((unsigned char *) dropdown -> label, dropdownX, dropdownY + 1.6 * dropdown -> size, dropdown -> size - 1, dropdownAlignFactor);
             }
         }
         logicIndex = tt_globals.dropdownLogicIndex;
@@ -849,7 +849,7 @@ void dropdownUpdate() {
             }
         }
         if (dropdown -> status == -1) {
-            if (i > logicIndex && turtleMouseDown()) {
+            if ((int32_t) i > logicIndex && turtleMouseDown()) {
                 dropdown -> status = 1;
             }
         }
@@ -868,7 +868,7 @@ void dropdownUpdate() {
 
         if (dropdown -> status == 2 || dropdown -> status == 1) {
             if (turtle.mouseX > dropdownMaxXFactor[0] && turtle.mouseX < dropdownMaxXFactor[1] && turtle.mouseY > dropdownY - dropdown -> size * 0.7 - (dropdown -> options -> length - 1) * itemHeight && turtle.mouseY < dropdownY + dropdown -> size * 0.7) {
-                int selected = round((dropdownY - turtle.mouseY) / itemHeight);
+                uint32_t selected = round((dropdownY - turtle.mouseY) / itemHeight);
                 tt_setColor(TT_COLOR_DROPDOWN_HOVER);
                 turtleRectangle(dropdownMaxXFactor[0], dropdownY - dropdown -> size * 0.7 - selected * itemHeight, dropdownMaxXFactor[1], dropdownY + dropdown -> size * 0.7 - selected * itemHeight);
                 if (turtleMouseDown() && dropdown -> status == 2) {
@@ -888,15 +888,15 @@ void dropdownUpdate() {
                 }
             }
             tt_setColor(TT_COLOR_TEXT);
-            int renderIndex = 1;
-            for (int i = 0; i < dropdown -> options -> length; i++) {
+            int32_t renderIndex = 1;
+            for (uint32_t i = 0; i < dropdown -> options -> length; i++) {
                 if (i != dropdown -> index) {
                     if (dropdown -> align == TT_DROPDOWN_ALIGN_LEFT) {
-                        turtleTextWriteUnicode(dropdown -> options -> data[i].s, dropdownMaxXFactor[0] + 2, dropdownY - renderIndex * itemHeight, dropdown -> size - 1, dropdownAlignFactor);
+                        turtleTextWriteUnicode((unsigned char *) dropdown -> options -> data[i].s, dropdownMaxXFactor[0] + 2, dropdownY - renderIndex * itemHeight, dropdown -> size - 1, dropdownAlignFactor);
                     } else if (dropdown -> align == TT_DROPDOWN_ALIGN_RIGHT) {
-                        turtleTextWriteUnicode(dropdown -> options -> data[i].s, dropdownMaxXFactor[1] - 16, dropdownY - renderIndex * itemHeight, dropdown -> size - 1, dropdownAlignFactor);
+                        turtleTextWriteUnicode((unsigned char *) dropdown -> options -> data[i].s, dropdownMaxXFactor[1] - 16, dropdownY - renderIndex * itemHeight, dropdown -> size - 1, dropdownAlignFactor);
                     } else {
-                        turtleTextWriteUnicode(dropdown -> options -> data[i].s, (dropdownMaxXFactor[0] + dropdownMaxXFactor[1]) / 2, dropdownY - renderIndex * itemHeight, dropdown -> size - 1, dropdownAlignFactor);
+                        turtleTextWriteUnicode((unsigned char *) dropdown -> options -> data[i].s, (dropdownMaxXFactor[0] + dropdownMaxXFactor[1]) / 2, dropdownY - renderIndex * itemHeight, dropdown -> size - 1, dropdownAlignFactor);
                     }
                     renderIndex++;
                 }
@@ -908,11 +908,11 @@ void dropdownUpdate() {
         tt_globals.dropdownLogicIndex = logicIndex;
         tt_setColor(TT_COLOR_TEXT);
         if (dropdown -> align == TT_DROPDOWN_ALIGN_LEFT) {
-            turtleTextWriteUnicode(dropdown -> options -> data[dropdown -> index].s, dropdownXFactor[0] + 2, dropdownY, dropdown -> size - 1, dropdownAlignFactor);
+            turtleTextWriteUnicode((unsigned char *) dropdown -> options -> data[dropdown -> index].s, dropdownXFactor[0] + 2, dropdownY, dropdown -> size - 1, dropdownAlignFactor);
         } else if (dropdown -> align == TT_DROPDOWN_ALIGN_RIGHT) {
-            turtleTextWriteUnicode(dropdown -> options -> data[dropdown -> index].s, dropdownXFactor[1] - 6, dropdownY, dropdown -> size - 1, dropdownAlignFactor);
+            turtleTextWriteUnicode((unsigned char *) dropdown -> options -> data[dropdown -> index].s, dropdownXFactor[1] - 6, dropdownY, dropdown -> size - 1, dropdownAlignFactor);
         } else {
-            turtleTextWriteUnicode(dropdown -> options -> data[dropdown -> index].s, (dropdownXFactor[0] + dropdownXFactor[1]) / 2, dropdownY, dropdown -> size - 1, dropdownAlignFactor);
+            turtleTextWriteUnicode((unsigned char *) dropdown -> options -> data[dropdown -> index].s, (dropdownXFactor[0] + dropdownXFactor[1]) / 2, dropdownY, dropdown -> size - 1, dropdownAlignFactor);
         }
         tt_setColor(TT_COLOR_DROPDOWN_TRIANGLE);
         if (dropdown -> status >= 1) {
