@@ -129,7 +129,7 @@ int main(int argc, char *argv[]) {
     buttonInit("button", &buttonVar, -100, 100, 8, BUTTON_SHAPE_RECTANGLE);
     switchInit("switch", &switchVar, 100, 100, 8);
     dialInit("dial", &dialVar, DIAL_EXP, -100, -100, 8, 0, 1000, 1);
-    dropdownInit("dropdown", dropdownOptions, &dropdownVar, 100, -100, 8, TT_DROPDOWN_ALIGN_LEFT);
+    dropdownInit("dropdown", dropdownOptions, &dropdownVar, 100, -100, 8, TT_DROPDOWN_ALIGN_RIGHT);
 
     while (turtle.shouldClose == 0) {
         start = clock();

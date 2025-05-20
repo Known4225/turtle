@@ -793,21 +793,24 @@ void dropdownUpdate() {
                     dropdownMaxXFactor[1] = dropdownXFactor[1] + 10;
                 }
                 dropdownAlignFactor = 0;
-                turtleTextWriteUnicode(dropdown -> label, dropdownXFactor[0] + 2, dropdownY + 15, dropdown -> size - 1, dropdownAlignFactor);
+                turtleTextWriteUnicode(dropdown -> label, dropdownX + 2, dropdownY + 15, dropdown -> size - 1, dropdownAlignFactor);
             } else if (dropdown -> align == TT_DROPDOWN_ALIGN_RIGHT) {
-                dropdownXFactor[0] = dropdownX - xfactor;
-                dropdownXFactor[1] = dropdownX;
-                dropdownMaxXFactor[0] = dropdownX - dropdown -> maxXfactor;
+                dropdownXFactor[0] = dropdownX - xfactor - 20;
+                dropdownXFactor[1] = dropdownX - 10;
+                dropdownMaxXFactor[0] = dropdownX - dropdown -> maxXfactor - 20;
                 dropdownMaxXFactor[1] = dropdownX;
                 dropdownAlignFactor = 100;
-                turtleTextWriteUnicode(dropdown -> label, dropdownX - 5, dropdownY + 15, dropdown -> size - 1, dropdownAlignFactor);
+                turtleTextWriteUnicode(dropdown -> label, dropdownX - 2, dropdownY + 15, dropdown -> size - 1, dropdownAlignFactor);
             } else {
-                dropdownXFactor[0] = dropdownX - dropdown -> size - xfactor / 2;
-                dropdownXFactor[1] = dropdownX + dropdown -> size + xfactor / 2;
-                dropdownMaxXFactor[0] = dropdownX + dropdown -> size + dropdown -> maxXfactor / 2;
-                dropdownMaxXFactor[1] = dropdownX - dropdown -> size - dropdown -> maxXfactor / 2;
+                dropdownXFactor[0] = dropdownX - xfactor / 2 - 5;
+                dropdownXFactor[1] = dropdownX + xfactor / 2 + 5;
+                dropdownMaxXFactor[0] = dropdownX - dropdown -> maxXfactor / 2 - 5;
+                dropdownMaxXFactor[1] = dropdownX + dropdown -> maxXfactor / 2;
+                if (dropdownXFactor[1] > dropdownMaxXFactor[1]) {
+                    dropdownMaxXFactor[1] = dropdownXFactor[1] + 10;
+                }
                 dropdownAlignFactor = 50;
-                turtleTextWriteUnicode(dropdown -> label, dropdownX - 5, dropdownY + 15, dropdown -> size - 1, dropdownAlignFactor);
+                turtleTextWriteUnicode(dropdown -> label, dropdownX + 5, dropdownY + 15, dropdown -> size - 1, dropdownAlignFactor);
             }
         }
         logicIndex = tt_globals.dropdownLogicIndex;
@@ -875,7 +878,13 @@ void dropdownUpdate() {
             int renderIndex = 1;
             for (int i = 0; i < dropdown -> options -> length; i++) {
                 if (i != dropdown -> index) {
-                    turtleTextWriteUnicode(dropdown -> options -> data[i].s, dropdownMaxXFactor[0] + 2, dropdownY - renderIndex * itemHeight, dropdown -> size - 1, dropdownAlignFactor);
+                    if (dropdown -> align == TT_DROPDOWN_ALIGN_LEFT) {
+                        turtleTextWriteUnicode(dropdown -> options -> data[i].s, dropdownMaxXFactor[0] + 2, dropdownY - renderIndex * itemHeight, dropdown -> size - 1, dropdownAlignFactor);
+                    } else if (dropdown -> align == TT_DROPDOWN_ALIGN_RIGHT) {
+                        turtleTextWriteUnicode(dropdown -> options -> data[i].s, dropdownMaxXFactor[1] - 16, dropdownY - renderIndex * itemHeight, dropdown -> size - 1, dropdownAlignFactor);
+                    } else {
+                        turtleTextWriteUnicode(dropdown -> options -> data[i].s, (dropdownMaxXFactor[0] + dropdownMaxXFactor[1]) / 2, dropdownY - renderIndex * itemHeight, dropdown -> size - 1, dropdownAlignFactor);
+                    }
                     renderIndex++;
                 }
             }
@@ -885,7 +894,13 @@ void dropdownUpdate() {
         }
         tt_globals.dropdownLogicIndex = logicIndex;
         tt_setColor(TT_COLOR_TEXT);
-        turtleTextWriteUnicode(dropdown -> options -> data[dropdown -> index].s, dropdownXFactor[0] + 2, dropdownY, dropdown -> size - 1, dropdownAlignFactor);
+        if (dropdown -> align == TT_DROPDOWN_ALIGN_LEFT) {
+            turtleTextWriteUnicode(dropdown -> options -> data[dropdown -> index].s, dropdownXFactor[0] + 2, dropdownY, dropdown -> size - 1, dropdownAlignFactor);
+        } else if (dropdown -> align == TT_DROPDOWN_ALIGN_RIGHT) {
+            turtleTextWriteUnicode(dropdown -> options -> data[dropdown -> index].s, dropdownXFactor[1] - 6, dropdownY, dropdown -> size - 1, dropdownAlignFactor);
+        } else {
+            turtleTextWriteUnicode(dropdown -> options -> data[dropdown -> index].s, (dropdownXFactor[0] + dropdownXFactor[1]) / 2, dropdownY, dropdown -> size - 1, dropdownAlignFactor);
+        }
         tt_setColor(TT_COLOR_DROPDOWN_TRIANGLE);
         if (dropdown -> status >= 1) {
             turtleTriangle(dropdownXFactor[1] + 4, dropdownY + 4, dropdownXFactor[1] + 4, dropdownY - 4, dropdownXFactor[1] - 2, dropdownY);
