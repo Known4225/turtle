@@ -50,10 +50,10 @@ typedef struct {
     char shouldClose; // controls whether the window terminates on turtle.close
     double circleprez; // how precise circles are (specifically, the number of sides of a circle with diameter e)
     double pensize; // turtle pen size
-    double penr;
-    double peng;
-    double penb;
-    double pena;
+    double penr; // pen red (0 to 1)
+    double peng; // pen green (0 to 1)
+    double penb; // pen blue (0 to 1)
+    double pena; // pen alpha (0 to 1)
     double currentColor[4]; // for reducing API color calls
 } turtleglob; // all globals are conSTRUCTed here
 
@@ -426,7 +426,29 @@ void turtleTriangleRender(double x1, double y1, double x2, double y2, double x3,
 }
 
 /* adds a (blit) triangle to the pipeline (for better speed) */
-void turtleTriangle(double x1, double y1, double x2, double y2, double x3, double y3, double r, double g, double b, double a) {
+void turtleTriangle(double x1, double y1, double x2, double y2, double x3, double y3) {
+    list_append(turtle.penPos, (unitype) x1, 'd');
+    list_append(turtle.penPos, (unitype) y1, 'd');
+    list_append(turtle.penPos, (unitype) x2, 'd');
+    list_append(turtle.penPos, (unitype) turtle.penr, 'd');
+    list_append(turtle.penPos, (unitype) turtle.peng, 'd');
+    list_append(turtle.penPos, (unitype) turtle.penb, 'd');
+    list_append(turtle.penPos, (unitype) turtle.pena, 'd');
+    list_append(turtle.penPos, (unitype) 66, 'h'); // blit triangle signifier
+    list_append(turtle.penPos, (unitype) y2, 'd'); // some unconventional formatting but it works
+
+    list_append(turtle.penPos, (unitype) x3, 'd');
+    list_append(turtle.penPos, (unitype) y3, 'd');
+    list_append(turtle.penPos, (unitype) 0, 'd'); // zero'd out (wasted space)
+    list_append(turtle.penPos, (unitype) turtle.penr, 'd'); // duplicate colour data (wasted space)
+    list_append(turtle.penPos, (unitype) turtle.peng, 'd');
+    list_append(turtle.penPos, (unitype) turtle.penb, 'd');
+    list_append(turtle.penPos, (unitype) turtle.pena, 'd');
+    list_append(turtle.penPos, (unitype) 66, 'h'); // blit triangle signifier
+    list_append(turtle.penPos, (unitype) 0, 'd'); // zero'd out (wasted space)
+}
+
+void turtleTriangleColor(double x1, double y1, double x2, double y2, double x3, double y3, double r, double g, double b, double a) {
     list_append(turtle.penPos, (unitype) x1, 'd');
     list_append(turtle.penPos, (unitype) y1, 'd');
     list_append(turtle.penPos, (unitype) x2, 'd');
@@ -471,7 +493,29 @@ void turtleQuadRender(double x1, double y1, double x2, double y2, double x3, dou
 }
 
 /* adds a (blit) quad to the pipeline (for better speed) */
-void turtleQuad(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, double r, double g, double b, double a) {
+void turtleQuad(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4) {
+    list_append(turtle.penPos, (unitype) x1, 'd');
+    list_append(turtle.penPos, (unitype) y1, 'd');
+    list_append(turtle.penPos, (unitype) x2, 'd');
+    list_append(turtle.penPos, (unitype) turtle.penr, 'd');
+    list_append(turtle.penPos, (unitype) turtle.peng, 'd');
+    list_append(turtle.penPos, (unitype) turtle.penb, 'd');
+    list_append(turtle.penPos, (unitype) turtle.pena, 'd');
+    list_append(turtle.penPos, (unitype) 67, 'h'); // blit quad signifier
+    list_append(turtle.penPos, (unitype) y2, 'd'); // some unconventional formatting but it works
+
+    list_append(turtle.penPos, (unitype) x3, 'd');
+    list_append(turtle.penPos, (unitype) y3, 'd');
+    list_append(turtle.penPos, (unitype) x4, 'd');
+    list_append(turtle.penPos, (unitype) turtle.penr, 'd'); // duplicate colour data (wasted space)
+    list_append(turtle.penPos, (unitype) turtle.peng, 'd');
+    list_append(turtle.penPos, (unitype) turtle.penb, 'd');
+    list_append(turtle.penPos, (unitype) turtle.pena, 'd');
+    list_append(turtle.penPos, (unitype) 67, 'h'); // blit quad signifier
+    list_append(turtle.penPos, (unitype) y4, 'd');
+}
+
+void turtleQuadColor(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, double r, double g, double b, double a) {
     list_append(turtle.penPos, (unitype) x1, 'd');
     list_append(turtle.penPos, (unitype) y1, 'd');
     list_append(turtle.penPos, (unitype) x2, 'd');
@@ -494,7 +538,29 @@ void turtleQuad(double x1, double y1, double x2, double y2, double x3, double y3
 }
 
 /* adds a (blit) rectangle to the pipeline (uses quad interface) */
-void turtleRectangle(double x1, double y1, double x2, double y2, double r, double g, double b, double a) {
+void turtleRectangle(double x1, double y1, double x2, double y2) {
+    list_append(turtle.penPos, (unitype) x1, 'd');
+    list_append(turtle.penPos, (unitype) y1, 'd');
+    list_append(turtle.penPos, (unitype) x2, 'd');
+    list_append(turtle.penPos, (unitype) turtle.penr, 'd');
+    list_append(turtle.penPos, (unitype) turtle.peng, 'd');
+    list_append(turtle.penPos, (unitype) turtle.penb, 'd');
+    list_append(turtle.penPos, (unitype) turtle.pena, 'd');
+    list_append(turtle.penPos, (unitype) 67, 'h'); // blit quad signifier
+    list_append(turtle.penPos, (unitype) y1, 'd'); // some unconventional formatting but it works
+
+    list_append(turtle.penPos, (unitype) x2, 'd');
+    list_append(turtle.penPos, (unitype) y2, 'd');
+    list_append(turtle.penPos, (unitype) x1, 'd');
+    list_append(turtle.penPos, (unitype) turtle.penr, 'd'); // duplicate colour data (wasted space)
+    list_append(turtle.penPos, (unitype) turtle.peng, 'd');
+    list_append(turtle.penPos, (unitype) turtle.penb, 'd');
+    list_append(turtle.penPos, (unitype) turtle.pena, 'd');
+    list_append(turtle.penPos, (unitype) 67, 'h'); // blit quad signifier
+    list_append(turtle.penPos, (unitype) y2, 'd');
+}
+
+void turtleRectangleColor(double x1, double y1, double x2, double y2, double r, double g, double b, double a) {
     list_append(turtle.penPos, (unitype) x1, 'd');
     list_append(turtle.penPos, (unitype) y1, 'd');
     list_append(turtle.penPos, (unitype) x2, 'd');
@@ -529,7 +595,6 @@ void turtleUpdate() {
     for (uint32_t i = 0; i < len; i++) {
         turtle.penHash += (uint64_t) turtle.penPos -> data[i].p; // simple addition hash. I know not technically safe since i cast all sizes to 8 byte, but it should still work
     }
-    // printf("%lld %lld\n", oldHash, turtle.penHash);
     if (len != turtle.lastLength || oldHash != turtle.penHash) {
         changed = 1;
         turtle.lastLength = len;

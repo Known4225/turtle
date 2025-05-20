@@ -16,9 +16,9 @@ text box (under development)
 typedef enum {
     TT_THEME_LIGHT = 0,
     TT_THEME_DARK = 1,
-} tt_theme_t;
+} tt_theme_name_t;
 
-tt_theme_t tt_theme;
+tt_theme_name_t tt_theme;
 
 typedef struct {
     int8_t ribbonEnabled;
@@ -32,92 +32,100 @@ typedef struct {
 tt_enabled_t tt_enabled; // all start at 0 (global variable)
 
 /* default colours (light theme) */
-double tt_themeColors[96] = {
-    200.0, 200.0, 200.0, // top bar color (0)
-    140.0, 140.0, 140.0, // dropdown color (3)
-    100.0, 100.0, 100.0, // select color (6)
-    0.0, 0.0, 0.0,       // text color (9)
-    200.0, 200.0, 200.0, // popup color (12)
-    140.0, 140.0, 140.0, // boxes color (15)
-    100.0, 100.0, 100.0, // boxes highlight color (18)
-    0.0, 0.0, 0.0,       // text color (21)
-    255.0, 255.0, 255.0, // background color (24)
-    195.0, 195.0, 195.0, // window color (27)
-    0.0, 0.0, 0.0,       // text color (30)
+double tt_themeColors[] = {
+    0.0, 0.0, 0.0,       // text color (0)
+    0.0, 0.0, 0.0,       // text color alternate (3)
+    200.0, 200.0, 200.0, // ribbon top bar color (6)
+    140.0, 140.0, 140.0, // ribbon dropdown color (9)
+    100.0, 100.0, 100.0, // ribbon select color (12)
+    200.0, 200.0, 200.0, // popup box color (15)
+    140.0, 140.0, 140.0, // popup boxes color (18)
+    100.0, 100.0, 100.0, // popup boxes select color (21)
+    255.0, 255.0, 255.0, // button color (24)
+    195.0, 195.0, 195.0, // button select color (27)
+    0.0, 0.0, 0.0,       // switch color (30)
+    230.0, 230.0, 230.0, // switch circle color (33)
+    160.0, 160.0, 160.0, // dial color (36)
+    30.0, 30.0, 30.0,    // dial inner circle color (39)
+    160.0, 160.0, 160.0, // dropdown color (42)
+    160.0, 160.0, 160.0, // dropdown select color (45)
+    160.0, 160.0, 160.0, // dropdown hover color (48)
+    160.0, 160.0, 160.0, // dropdown triangle color (51)
 };
+
+typedef enum {
+    TT_COLOR_TEXT = 0,
+    TT_COLOR_TEXT_ALTERNATE = 3,
+    TT_COLOR_RIBBON_TOP = 6,
+    TT_COLOR_RIBBON_DROPDOWN = 9,
+    TT_COLOR_RIBBON_SELECT = 12,
+    TT_COLOR_POPUP_BOX = 15,
+    TT_COLOR_POPUP_BUTTON = 18,
+    TT_COLOR_POPUP_BUTTON_SELECT = 21,
+    TT_COLOR_BUTTON = 24,
+    TT_COLOR_BUTTON_SELECT = 27,
+    TT_COLOR_SWITCH = 30,
+    TT_COLOR_SWITCH_CIRCLE = 33,
+    TT_COLOR_DIAL = 36,
+    TT_COLOR_DIAL_INNER = 39,
+    TT_COLOR_DROPDOWN = 42,
+    TT_COLOR_DROPDOWN_SELECT = 45,
+    TT_COLOR_DROPDOWN_HOVER = 48,
+    TT_COLOR_DROPDOWN_TRIANGLE = 51,
+} tt_theme_internal_t;
+
+void tt_setColor(int32_t index) {
+    turtlePenColor(tt_themeColors[index], tt_themeColors[index + 1], tt_themeColors[index + 2]);
+}
 
 void turtleToolsLightTheme() { // light theme preset (default)
     tt_theme = TT_THEME_LIGHT;
-    tt_themeColors[0] =  200.0; // top bar color
-    tt_themeColors[1] =  200.0;
-    tt_themeColors[2] =  200.0;
-    tt_themeColors[3] =  140.0; // dropdown color
-    tt_themeColors[4] =  140.0;
-    tt_themeColors[5] =  140.0;
-    tt_themeColors[6] =  100.0; // select color
-    tt_themeColors[7] =  100.0;
-    tt_themeColors[8] =  100.0;
-    tt_themeColors[9] =  0.0;   // text color
-    tt_themeColors[10] = 0.0;
-    tt_themeColors[11] = 0.0;
-    tt_themeColors[12] = 200.0; // popup color, 
-    tt_themeColors[13] = 200.0;
-    tt_themeColors[14] = 200.0;
-    tt_themeColors[15] = 140.0; // boxes color,
-    tt_themeColors[16] = 140.0;
-    tt_themeColors[17] = 140.0;
-    tt_themeColors[18] = 100.0; // boxes highlight color
-    tt_themeColors[19] = 100.0;
-    tt_themeColors[20] = 100.0;
-    tt_themeColors[21] = 0.0;   // text color
-    tt_themeColors[22] = 0.0;
-    tt_themeColors[23] = 0.0;
-    tt_themeColors[24] = 255.0; // background color
-    tt_themeColors[25] = 255.0;
-    tt_themeColors[26] = 255.0;
-    tt_themeColors[27] = 195.0; // window color
-    tt_themeColors[28] = 195.0;
-    tt_themeColors[29] = 195.0;
-    tt_themeColors[30] = 200.0; // text color
-    tt_themeColors[31] = 200.0;
-    tt_themeColors[32] = 200.0;
+    double tt_themeCopy[] = {
+        0.0, 0.0, 0.0,       // text color (0)
+        0.0, 0.0, 0.0,       // text color alternate (3)
+        200.0, 200.0, 200.0, // ribbon top bar color (6)
+        140.0, 140.0, 140.0, // ribbon dropdown color (9)
+        100.0, 100.0, 100.0, // ribbon select color (12)
+        200.0, 200.0, 200.0, // popup box color (15)
+        140.0, 140.0, 140.0, // popup boxes color (18)
+        100.0, 100.0, 100.0, // popup boxes select color (21)
+        200.0, 200.0, 200.0, // button color (24)
+        160.0, 160.0, 160.0, // button select color (27)
+        120.0, 120.0, 120.0, // switch color (30)
+        230.0, 230.0, 230.0, // switch circle color (33)
+        0.0, 0.0, 0.0,       // dial color (36)
+        255.0, 255.0, 255.0, // dial inner circle color (39)
+        160.0, 160.0, 160.0, // dropdown color (42)
+        120.0, 120.0, 120.0, // dropdown select color (45)
+        120.0, 120.0, 120.0, // dropdown hover color (48)
+        100.0, 100.0, 100.0, // dropdown triangle color (51)
+    };
+    memcpy(tt_themeColors, tt_themeCopy, sizeof(tt_themeCopy));
 }
 
 void turtleToolsDarkTheme() { // dark theme preset
     tt_theme = TT_THEME_DARK;
-    tt_themeColors[0] =  70.0;  // top bar color
-    tt_themeColors[1] =  70.0;
-    tt_themeColors[2] =  70.0;
-    tt_themeColors[3] =  80.0;  // dropdown color
-    tt_themeColors[4] =  80.0;
-    tt_themeColors[5] =  80.0;
-    tt_themeColors[6] =  70.0;  // select color
-    tt_themeColors[7] =  70.0;
-    tt_themeColors[8] =  70.0;
-    tt_themeColors[9] =  160.0; // text color
-    tt_themeColors[10] = 160.0;
-    tt_themeColors[11] = 160.0;
-    tt_themeColors[12] = 10.0;  // popup color, 
-    tt_themeColors[13] = 10.0;
-    tt_themeColors[14] = 10.0;
-    tt_themeColors[15] = 40.0;  // boxes color,
-    tt_themeColors[16] = 40.0;
-    tt_themeColors[17] = 40.0;
-    tt_themeColors[18] = 60.0;  // boxes highlight color
-    tt_themeColors[19] = 60.0;
-    tt_themeColors[20] = 60.0;
-    tt_themeColors[21] = 160.0; // text color
-    tt_themeColors[22] = 160.0;
-    tt_themeColors[23] = 160.0;
-    tt_themeColors[24] = 60.0;  // background color
-    tt_themeColors[25] = 60.0;
-    tt_themeColors[26] = 60.0;
-    tt_themeColors[27] = 10.0;  // window color
-    tt_themeColors[28] = 10.0;
-    tt_themeColors[29] = 10.0;
-    tt_themeColors[30] = 200.0; // text color
-    tt_themeColors[31] = 200.0;
-    tt_themeColors[32] = 200.0;
+    double tt_themeCopy[] = {
+        200.0, 200.0, 200.0, // text color (0)
+        160.0, 160.0, 160.0, // text color alternate (3)
+        70.0, 70.0, 70.0,    // ribbon top bar color (6)
+        80.0, 80.0, 80.0,    // ribbon dropdown color (9)
+        70.0, 70.0, 70.0,    // ribbon select color (12)
+        10.0, 10.0, 10.0,    // popup box color (15)
+        40.0, 40.0, 40.0,    // popup boxes color (18)
+        60.0, 60.0, 60.0,    // popup boxes select color (21)
+        80.0, 80.0, 80.0,    // button color (24)
+        100.0, 100.0, 100.0, // button select color (27)
+        10.0, 10.0, 10.0,    // switch color (30)
+        200.0, 200.0, 200.0, // switch circle color (33)
+        200.0, 200.0, 200.0, // dial color (36)
+        30.0, 30.0, 30.0,    // dial inner circle color (39)
+        60.0, 60.0, 60.0,    // dropdown color (42)
+        80.0, 80.0, 80.0,    // dropdown select color (45)
+        80.0, 80.0, 80.0,    // dropdown hover color (48)
+        160.0, 160.0, 160.0, // dropdown triangle color (51)
+    };
+    memcpy(tt_themeColors, tt_themeCopy, sizeof(tt_themeCopy));
 }
 
 /* ribbon */
@@ -137,7 +145,8 @@ typedef struct {
 
 tt_ribbon_t ribbonRender;
 
-int ribbonInit(GLFWwindow* window, const char *filename) { // read from config file
+/* initialise ribbon */
+int ribbonInit(GLFWwindow* window, const char *filename) {
     tt_enabled.ribbonEnabled = 1;
     ribbonRender.marginSize = 10; // number of pixels between different items in the ribbon (not affected by ribbonSize)
     ribbonRender.mainselect[0] = -1;
@@ -209,14 +218,16 @@ int ribbonInit(GLFWwindow* window, const char *filename) { // read from config f
     return 0;
 }
 
+/* render ribbon */
 void ribbonUpdate() {
     char shapeSave = turtle.penshape;
     double sizeSave = turtle.pensize;
     turtlePenSize(20);
     turtlePenShape("square");
     turtleGetMouseCoords(); // get the mouse coordinates (turtle.mouseX, turtle.mouseY)
-    turtleQuad(ribbonRender.bounds[0], ribbonRender.bounds[3] - 10, ribbonRender.bounds[2], ribbonRender.bounds[3] - 10, ribbonRender.bounds[2], ribbonRender.bounds[3], ribbonRender.bounds[0], ribbonRender.bounds[3], tt_themeColors[0], tt_themeColors[1], tt_themeColors[2], 50.0); // render ribbon
-    turtlePenColor(tt_themeColors[9], tt_themeColors[10], tt_themeColors[11]); // text colour
+    tt_setColor(TT_COLOR_RIBBON_TOP);
+    turtleQuad(ribbonRender.bounds[0], ribbonRender.bounds[3] - 10, ribbonRender.bounds[2], ribbonRender.bounds[3] - 10, ribbonRender.bounds[2], ribbonRender.bounds[3], ribbonRender.bounds[0], ribbonRender.bounds[3]); // render ribbon
+    tt_setColor(TT_COLOR_TEXT_ALTERNATE);
     double cutoff = ribbonRender.bounds[0] + ribbonRender.marginSize;
     ribbonRender.mainselect[0] = -1;
     ribbonRender.subselect[0] = -1;
@@ -226,20 +237,25 @@ void ribbonUpdate() {
             double xLeft = prevCutoff - ribbonRender.marginSize / 2.0;
             double xRight = prevCutoff + ribbonRender.lengths -> data[i * 2 + 1].d + ribbonRender.marginSize / 2.0;
             double yDown = ribbonRender.bounds[3] - 10 - 15 * (ribbonRender.options -> data[i].r -> length - 1) - ribbonRender.marginSize / 2.0;
-            turtleQuad(xLeft, ribbonRender.bounds[3] - 10, xRight, ribbonRender.bounds[3] - 10, xRight, yDown, xLeft, yDown, tt_themeColors[3], tt_themeColors[4], tt_themeColors[5], 0.0); // ribbon highlight
+            tt_setColor(TT_COLOR_RIBBON_DROPDOWN);
+            turtleQuad(xLeft, ribbonRender.bounds[3] - 10, xRight, ribbonRender.bounds[3] - 10, xRight, yDown, xLeft, yDown); // ribbon highlight
             for (uint32_t j = 1; j < ribbonRender.options -> data[i].r -> length; j++) {
                 if (turtle.mouseY > ribbonRender.bounds[3] - 10 - 15 * j - ribbonRender.marginSize / 4.0 && turtle.mouseY < ribbonRender.bounds[3] - 10 && turtle.mouseX > xLeft && turtle.mouseX < xRight && ribbonRender.subselect[0] == -1) {
-                    turtleQuad(xLeft, ribbonRender.bounds[3] - 10 - 15 * (j - 1) - ribbonRender.marginSize / 4.0, xRight, ribbonRender.bounds[3] - 10 - 15 * (j - 1) - ribbonRender.marginSize / 4.0, xRight, ribbonRender.bounds[3] - 10 - 15 * j - ribbonRender.marginSize / 3.0, xLeft, ribbonRender.bounds[3] - 10 - 15 * j - ribbonRender.marginSize / 3.0, tt_themeColors[6], tt_themeColors[7], tt_themeColors[8], 0.0); // dropdown highlight
+                    tt_setColor(TT_COLOR_RIBBON_SELECT);
+                    turtleQuad(xLeft, ribbonRender.bounds[3] - 10 - 15 * (j - 1) - ribbonRender.marginSize / 4.0, xRight, ribbonRender.bounds[3] - 10 - 15 * (j - 1) - ribbonRender.marginSize / 4.0, xRight, ribbonRender.bounds[3] - 10 - 15 * j - ribbonRender.marginSize / 3.0, xLeft, ribbonRender.bounds[3] - 10 - 15 * j - ribbonRender.marginSize / 3.0); // dropdown highlight
                     ribbonRender.subselect[0] = j;
                 }
+                tt_setColor(TT_COLOR_TEXT_ALTERNATE);
                 turtleTextWriteString(ribbonRender.options -> data[i].r -> data[j].s, prevCutoff, 174.5 - j * 15, 7 * ribbonRender.ribbonSize, 0);
             }
         }
         cutoff += ribbonRender.lengths -> data[i * 2].d + ribbonRender.marginSize;
         if (turtle.mouseY > ribbonRender.bounds[3] - 10 && turtle.mouseY < ribbonRender.bounds[3] && turtle.mouseX > ribbonRender.bounds[0] + ribbonRender.marginSize / 2.0 && turtle.mouseX < cutoff - ribbonRender.marginSize / 2.0 && ribbonRender.mainselect[0] == -1) { // -217, -195, -164
-            turtleQuad(prevCutoff - ribbonRender.marginSize / 2.0, 179, cutoff - ribbonRender.marginSize / 2.0, 179, cutoff - ribbonRender.marginSize / 2.0, 171, prevCutoff - ribbonRender.marginSize / 2.0, 171, tt_themeColors[3], tt_themeColors[4], tt_themeColors[5], 0.0); // render dropdown
+            tt_setColor(TT_COLOR_DROPDOWN);
+            turtleQuad(prevCutoff - ribbonRender.marginSize / 2.0, 179, cutoff - ribbonRender.marginSize / 2.0, 179, cutoff - ribbonRender.marginSize / 2.0, 171, prevCutoff - ribbonRender.marginSize / 2.0, 171); // render dropdown
             ribbonRender.mainselect[0] = i;
         }
+        tt_setColor(TT_COLOR_TEXT_ALTERNATE);
         turtleTextWriteString(ribbonRender.options -> data[i].r -> data[0].s, prevCutoff, 174.5, 7 * ribbonRender.ribbonSize, 0);
     }
     if (turtleMouseDown()) { // this is hideous
@@ -306,6 +322,7 @@ typedef struct {
 
 tt_popup_t popup;
 
+/* initialise popup */
 int popupInit(const char *filename, double minX, double minY, double maxX, double maxY) {
     tt_enabled.popupEnabled = 1;
     popup.minX = minX;
@@ -339,14 +356,15 @@ int popupInit(const char *filename, double minX, double minY, double maxX, doubl
     return 0;
 }
 
+/* render popup */
 void popupUpdate() {
     if (turtle.close == 1) {
-        turtleQuad(popup.minX, popup.minY, popup.minX, popup.maxY, 
-        popup.maxX, popup.maxY, popup.maxX, popup.minY, tt_themeColors[12], tt_themeColors[13], tt_themeColors[14], 0);
+        tt_setColor(TT_COLOR_POPUP_BOX);
+        turtleQuad(popup.minX, popup.minY, popup.minX, popup.maxY, popup.maxX, popup.maxY, popup.maxX, popup.minY);
         double textSize = 5;
         double textX = popup.minX + (popup.maxX - popup.minX) / 2;
         double textY = popup.maxY - textSize * 2;
-        turtlePenColor(tt_themeColors[21], tt_themeColors[22], tt_themeColors[23]);
+        tt_setColor(TT_COLOR_TEXT);
         turtleTextWriteString(popup.message, textX, textY, textSize, 50);
         textY -= textSize * 4;
         double fullLength = 0;
@@ -364,8 +382,8 @@ void popupUpdate() {
             double strLen = turtleTextGetStringLength(popup.options -> data[i].s, textSize);
             if (turtle.mouseX > textX - textSize && turtle.mouseX < textX + strLen + textSize &&
             turtle.mouseY > textY - textSize && turtle.mouseY < textY + textSize) {
-                turtleQuad(textX - textSize, textY - textSize, textX + textSize + strLen, textY - textSize, 
-                textX + textSize + strLen, textY + textSize, textX - textSize, textY + textSize, tt_themeColors[18], tt_themeColors[19], tt_themeColors[20], 0);
+                tt_setColor(TT_COLOR_POPUP_BUTTON_SELECT);
+                turtleQuad(textX - textSize, textY - textSize, textX + textSize + strLen, textY - textSize, textX + textSize + strLen, textY + textSize, textX - textSize, textY + textSize);
                 if (turtleMouseDown()) {
                     if (popup.mouseDown == 0) {
                         popup.mouseDown = 1;
@@ -382,9 +400,10 @@ void popupUpdate() {
                     }
                 }
             } else {
-                turtleQuad(textX - textSize, textY - textSize, textX + textSize + strLen, textY - textSize, 
-                textX + textSize + strLen, textY + textSize, textX - textSize, textY + textSize, tt_themeColors[15], tt_themeColors[16], tt_themeColors[17], 0);
+                tt_setColor(TT_COLOR_POPUP_BUTTON);
+                turtleQuad(textX - textSize, textY - textSize, textX + textSize + strLen, textY - textSize, textX + textSize + strLen, textY + textSize, textX - textSize, textY + textSize);
             }
+            tt_setColor(TT_COLOR_TEXT);
             turtleTextWriteString(popup.options -> data[i].s, textX, textY, textSize, 0);
             textX += strLen + padThai;
         }
@@ -423,72 +442,72 @@ typedef enum {
     BUTTON_SHAPE_RECTANGLE = 0,
     BUTTON_SHAPE_ROUNDED_RECTANGLE = 1,
     BUTTON_SHAPE_CIRCLE = 2,
-} button_shape_t;
+} tt_button_shape_t;
 
 /* button */
 typedef struct {
     char label[24];
     int status;
-    button_shape_t shape;
+    tt_button_shape_t shape;
     double size;
     double position[2]; // X, Y
     int *variable; // 1 if button is being pressed, 0 otherwise
-} button_t;
+} tt_button_t;
 
 typedef enum {
     DIAL_LINEAR = 0,
     DIAL_LOG = 1,
     DIAL_EXP = 2,
-} dial_type_t;
+} tt_dial_type_t;
 
 /* dial */
 typedef struct {
     char label[24];
-    int status[2];
-    dial_type_t type;
+    int32_t status[2];
+    tt_dial_type_t type;
     double size;
     double position[2]; // X, Y
     double range[2];
     double renderNumberFactor; // multiply rendered variable by this amount
     double defaultValue;
     double *variable; // value of dial
-} dial_t;
+} tt_dial_t;
 
 /* switch */
 typedef struct {
     char label[24];
-    int status;
+    int32_t status;
     double size;
     double position[2]; // X, Y
-    int *variable; // 1 if switch is flipped, 0 otherwise
-} switch_t;
+    int32_t *variable; // 1 if switch is flipped, 0 otherwise
+} tt_switch_t;
 
 typedef enum {
-    DROPDOWN_ALIGN_LEFT = 0,
-    DROPDOWN_ALIGN_CENTER = 1,
-    DROPDOWN_ALIGN_RIGHT = 2,
-} dropdown_align_t;
+    TT_DROPDOWN_ALIGN_LEFT = 0,
+    TT_DROPDOWN_ALIGN_CENTER = 1,
+    TT_DROPDOWN_ALIGN_RIGHT = 2,
+} tt_dropdown_align_t;
 
 /* dropdown */
 typedef struct {
     list_t *options;
     char label[24];
-    int index;
-    int status;
-    dropdown_align_t align;
+    int32_t index;
+    int32_t status;
+    tt_dropdown_align_t align;
     double size;
     double position[2]; // X, Y
     double maxXfactor;
-    int *variable; // index of dropdown selected
-} dropdown_t;
+    int32_t *variable; // index of dropdown selected
+} tt_dropdown_t;
 
 /* initialise UI elements */
-button_t *buttonInit(char *label, int *variable, double xOffset, double yOffset, double size, button_shape_t shape) {
+tt_button_t *buttonInit(char *label, int *variable, double xOffset, double yOffset, double size, tt_button_shape_t shape) {
     if (tt_enabled.buttonEnabled == 0) {
         tt_enabled.buttonEnabled = 1;
         tt_elements.buttons = list_init();
     }
-    button_t *buttonp = malloc(sizeof(button_t));
+    tt_button_t *buttonp = malloc(sizeof(tt_button_t));
     if (label == NULL) {
         memcpy(buttonp -> label, "", strlen("") + 1);
     } else {
@@ -504,12 +523,12 @@ button_t *buttonInit(char *label, int *variable, double xOffset, double yOffset,
     return buttonp;
 }
 
-switch_t *switchInit(char *label, int *variable, double xOffset, double yOffset, double size) {
+tt_switch_t *switchInit(char *label, int *variable, double xOffset, double yOffset, double size) {
     if (tt_enabled.switchEnabled == 0) {
         tt_enabled.switchEnabled = 1;
         tt_elements.switches = list_init();
     }
-    switch_t *switchp = malloc(sizeof(switch_t));
+    tt_switch_t *switchp = malloc(sizeof(tt_switch_t));
     if (label == NULL) {
         memcpy(switchp -> label, "", strlen("") + 1);
     } else {
@@ -524,12 +543,12 @@ switch_t *switchInit(char *label, int *variable, double xOffset, double yOffset,
     return switchp;
 }
 
-dial_t *dialInit(char *label, double *variable, dial_type_t type, double xOffset, double yOffset, double size, double bottom, double top, double renderNumberFactor) {
+tt_dial_t *dialInit(char *label, double *variable, tt_dial_type_t type, double xOffset, double yOffset, double size, double bottom, double top, double renderNumberFactor) {
     if (tt_enabled.dialEnabled == 0) {
         tt_enabled.dialEnabled = 1;
         tt_elements.dials = list_init();
     }
-    dial_t *dialp = malloc(sizeof(dial_t));
+    tt_dial_t *dialp = malloc(sizeof(tt_dial_t));
     if (label == NULL) {
         memcpy(dialp -> label, "", strlen("") + 1);
     } else {
@@ -549,7 +568,7 @@ dial_t *dialInit(char *label, double *variable, dial_type_t type, double xOffset
     return dialp;
 }
 
-void dropdownCalculateMax(dropdown_t *dropdown) {
+void dropdownCalculateMax(tt_dropdown_t *dropdown) {
     dropdown -> maxXfactor = 0;
     for (int i = 0; i < dropdown -> options -> length; i++) {
         double stringLength = turtleTextGetStringLength(dropdown -> options -> data[i].s, dropdown -> size - 1);
@@ -559,13 +578,13 @@ void dropdownCalculateMax(dropdown_t *dropdown) {
     }
 }
 
-dropdown_t *dropdownInit(char *label, list_t *options, int *variable, double xOffset, double yOffset, double size, dropdown_align_t align) {
+tt_dropdown_t *dropdownInit(char *label, list_t *options, int *variable, double xOffset, double yOffset, double size, tt_dropdown_align_t align) {
     if (tt_enabled.dropdownEnabled == 0) {
         tt_globals.dropdownLogicIndex = -1;
         tt_enabled.dropdownEnabled = 1;
         tt_elements.dropdowns = list_init();
     }
-    dropdown_t *dropdownp = malloc(sizeof(dropdown_t));
+    tt_dropdown_t *dropdownp = malloc(sizeof(tt_dropdown_t));
     if (label == NULL) {
         memcpy(dropdownp -> label, "", strlen("") + 1);
     } else {
@@ -586,17 +605,18 @@ dropdown_t *dropdownInit(char *label, list_t *options, int *variable, double xOf
 
 void buttonUpdate() {
     for (int i = 0; i < tt_elements.buttons -> length; i++) {
-        button_t *button = (button_t *) (tt_elements.buttons -> data[i].p);
+        tt_button_t *button = (tt_button_t *) (tt_elements.buttons -> data[i].p);
         double buttonX = button -> position[0];
         double buttonY = button -> position[1];
         double buttonWidth = turtleTextGetUnicodeLength(button -> label, button -> size);
         double buttonHeight = 14;
         if (button -> status == 0) {
-            turtleRectangle(buttonX - buttonWidth / 2, buttonY - buttonHeight / 2, buttonX + buttonWidth / 2, buttonY + buttonHeight / 2, tt_themeColors[0], tt_themeColors[1], tt_themeColors[2], 0);
+            tt_setColor(TT_COLOR_BUTTON);
         } else {
-            turtleRectangle(buttonX - buttonWidth / 2, buttonY - buttonHeight / 2, buttonX + buttonWidth / 2, buttonY + buttonHeight / 2, tt_themeColors[3], tt_themeColors[4], tt_themeColors[5], 0);
+            tt_setColor(TT_COLOR_BUTTON_SELECT);
         }
-        turtlePenColor(tt_themeColors[9], tt_themeColors[10], tt_themeColors[11]);
+        turtleRectangle(buttonX - buttonWidth / 2, buttonY - buttonHeight / 2, buttonX + buttonWidth / 2, buttonY + buttonHeight / 2);
+        tt_setColor(TT_COLOR_TEXT);
         turtleTextWriteUnicode(button -> label, buttonX, buttonY, button -> size - 1, 50);
         if (turtleMouseDown()) {
             if (button -> status < 0) {
@@ -619,18 +639,19 @@ void buttonUpdate() {
 
 void switchUpdate() {
     for (int i = 0; i < tt_elements.switches -> length; i++) {
-        switch_t *switchp = (switch_t *) (tt_elements.switches -> data[i].p);
+        tt_switch_t *switchp = (tt_switch_t *) (tt_elements.switches -> data[i].p);
         double switchX = switchp -> position[0];
         double switchY = switchp -> position[1];
+        tt_setColor(TT_COLOR_TEXT);
         turtleTextWriteUnicode(switchp -> label, switchX, switchY + 15, switchp -> size - 1, 50);
-        turtlePenColor(tt_themeColors[12], tt_themeColors[13], tt_themeColors[14]);
+        tt_setColor(TT_COLOR_SWITCH);
         turtlePenSize(switchp -> size * 1.2);
         turtleGoto(switchX - switchp -> size * 0.8, switchY);
         turtlePenDown();
         turtleGoto(switchX + switchp -> size * 0.8, switchY);
         turtlePenUp();
         turtlePenSize(switchp -> size);
-        turtlePenColor(tt_themeColors[6], tt_themeColors[7], tt_themeColors[8]);
+        tt_setColor(TT_COLOR_SWITCH_CIRCLE);
         if (*(switchp -> variable)) {
             turtleGoto(switchX + switchp -> size * 0.8, switchY);
         } else {
@@ -676,19 +697,21 @@ double angleBetween(double x1, double y1, double x2, double y2) {
 
 void dialUpdate() {
     for (int i = 0; i < tt_elements.dials -> length; i++) {
-        dial_t *dialp = (dial_t *) (tt_elements.dials -> data[i].p);
+        tt_dial_t *dialp = (tt_dial_t *) (tt_elements.dials -> data[i].p);
+        tt_setColor(TT_COLOR_TEXT);
         turtleTextWriteUnicode(dialp -> label, dialp -> position[0], dialp -> position[1] + 15, dialp -> size - 1, 50);
         turtlePenSize(dialp -> size * 2);
         double dialX = dialp -> position[0];
         double dialY = dialp -> position[1];
         turtleGoto(dialX, dialY);
+        tt_setColor(TT_COLOR_DIAL);
         turtlePenDown();
         turtlePenUp();
         turtlePenSize(dialp -> size * 2 * 0.8);
-        turtlePenColor(tt_themeColors[27], tt_themeColors[28], tt_themeColors[29]);
+        tt_setColor(TT_COLOR_DIAL_INNER);
         turtlePenDown();
         turtlePenUp();
-        turtlePenColor(tt_themeColors[30], tt_themeColors[31], tt_themeColors[32]);
+        tt_setColor(TT_COLOR_DIAL);
         turtlePenSize(1);
         turtlePenDown();
         double dialAngle;
@@ -742,6 +765,7 @@ void dialUpdate() {
         char bubble[24];
         double rounded = round(*(dialp -> variable) * dialp -> renderNumberFactor);
         sprintf(bubble, "%.0lf", rounded);
+        tt_setColor(TT_COLOR_TEXT);
         turtleTextWriteString(bubble, dialX + dialp -> size + 3, dialY, 4, 0);
     }
 }
@@ -749,24 +773,55 @@ void dialUpdate() {
 void dropdownUpdate() {
     int logicIndex = -1;
     for (int i = 0; i < tt_elements.dropdowns -> length; i++) {
-        dropdown_t *dropdown = (dropdown_t *) (tt_elements.dropdowns -> data[i].p);
+        tt_dropdown_t *dropdown = (tt_dropdown_t *) (tt_elements.dropdowns -> data[i].p);
         /* render dropdown default position */
         double dropdownX = dropdown -> position[0];
         double dropdownY = dropdown -> position[1];
-        if (strlen(dropdown -> label) > 0) {
-            turtleTextWriteUnicode(dropdown -> label, dropdownX - 5, dropdownY + 15, dropdown -> size - 1, 50);
-        }
         double xfactor = turtleTextGetUnicodeLength(dropdown -> options -> data[dropdown -> index].s, dropdown -> size - 1);
         double itemHeight = (dropdown -> size * 1.5);
+        double dropdownXFactor[2];
+        double dropdownMaxXFactor[2];
+        double dropdownAlignFactor;
+        if (strlen(dropdown -> label) > 0) {
+            tt_setColor(TT_COLOR_TEXT);
+            if (dropdown -> align == TT_DROPDOWN_ALIGN_LEFT) {
+                dropdownXFactor[0] = dropdownX;
+                dropdownXFactor[1] = dropdownX + xfactor + 10;
+                dropdownMaxXFactor[0] = dropdownX;
+                dropdownMaxXFactor[1] = dropdownX + dropdown -> maxXfactor + 4;
+                if (dropdownXFactor[1] > dropdownMaxXFactor[1]) {
+                    dropdownMaxXFactor[1] = dropdownXFactor[1] + 10;
+                }
+                dropdownAlignFactor = 0;
+                turtleTextWriteUnicode(dropdown -> label, dropdownXFactor[0] + 2, dropdownY + 15, dropdown -> size - 1, dropdownAlignFactor);
+            } else if (dropdown -> align == TT_DROPDOWN_ALIGN_RIGHT) {
+                dropdownXFactor[0] = dropdownX - xfactor;
+                dropdownXFactor[1] = dropdownX;
+                dropdownMaxXFactor[0] = dropdownX - dropdown -> maxXfactor;
+                dropdownMaxXFactor[1] = dropdownX;
+                dropdownAlignFactor = 100;
+                turtleTextWriteUnicode(dropdown -> label, dropdownX - 5, dropdownY + 15, dropdown -> size - 1, dropdownAlignFactor);
+            } else {
+                dropdownXFactor[0] = dropdownX - dropdown -> size - xfactor / 2;
+                dropdownXFactor[1] = dropdownX + dropdown -> size + xfactor / 2;
+                dropdownMaxXFactor[0] = dropdownX + dropdown -> size + dropdown -> maxXfactor / 2;
+                dropdownMaxXFactor[1] = dropdownX - dropdown -> size - dropdown -> maxXfactor / 2;
+                dropdownAlignFactor = 50;
+                turtleTextWriteUnicode(dropdown -> label, dropdownX - 5, dropdownY + 15, dropdown -> size - 1, dropdownAlignFactor);
+            }
+        }
         logicIndex = tt_globals.dropdownLogicIndex;
         if (dropdown -> status == -1) {
-            turtleRectangle(dropdownX - dropdown -> size - xfactor, dropdownY - dropdown -> size * 0.7, dropdownX + dropdown -> size + 10, dropdownY + dropdown -> size * 0.7, tt_themeColors[12], tt_themeColors[13], tt_themeColors[14], 0);
+            tt_setColor(TT_COLOR_DROPDOWN_SELECT);
+            turtleRectangle(dropdownXFactor[0], dropdownY - dropdown -> size * 0.7, dropdownXFactor[1] + 10, dropdownY + dropdown -> size * 0.7);
         } else if (dropdown -> status >= 1) {
-            turtleRectangle(dropdownX - dropdown -> size - dropdown -> maxXfactor, dropdownY - dropdown -> size * 0.7 - (dropdown -> options -> length - 1) * itemHeight, dropdownX + dropdown -> size + 10, dropdownY + dropdown -> size * 0.7, tt_themeColors[12], tt_themeColors[13], tt_themeColors[14], 0);
+            tt_setColor(TT_COLOR_DROPDOWN);
+            turtleRectangle(dropdownMaxXFactor[0], dropdownY - dropdown -> size * 0.7 - (dropdown -> options -> length - 1) * itemHeight, dropdownMaxXFactor[1], dropdownY + dropdown -> size * 0.7);
         } else {
-            turtleRectangle(dropdownX - dropdown -> size - xfactor, dropdownY - dropdown -> size * 0.7, dropdownX + dropdown -> size + 10, dropdownY + dropdown -> size * 0.7, tt_themeColors[21], tt_themeColors[22], tt_themeColors[23], 0);
+            tt_setColor(TT_COLOR_DROPDOWN);
+            turtleRectangle(dropdownXFactor[0], dropdownY - dropdown -> size * 0.7, dropdownXFactor[1] + 10, dropdownY + dropdown -> size * 0.7);
         }
-        if (turtle.mouseX > dropdownX - dropdown -> size - xfactor && turtle.mouseX < dropdownX + dropdown -> size + 10 && turtle.mouseY > dropdownY - dropdown -> size * 0.7 && turtle.mouseY < dropdownY + dropdown -> size * 0.7) {
+        if (turtle.mouseX > dropdownXFactor[0] && turtle.mouseX < dropdownXFactor[1] + 10 && turtle.mouseY > dropdownY - dropdown -> size * 0.7 && turtle.mouseY < dropdownY + dropdown -> size * 0.7) {
             if (!turtleMouseDown() && dropdown -> status == 0) {
                 dropdown -> status = -1;
                 logicIndex = -1;
@@ -796,9 +851,10 @@ void dropdownUpdate() {
         }
 
         if (dropdown -> status == 2 || dropdown -> status == 1) {
-            if (turtle.mouseX > dropdownX - dropdown -> size - dropdown -> maxXfactor && turtle.mouseX < dropdownX + dropdown -> size + 10 && turtle.mouseY > dropdownY - dropdown -> size * 0.7 - (dropdown -> options -> length - 1) * itemHeight && turtle.mouseY < dropdownY + dropdown -> size * 0.7) {
+            if (turtle.mouseX > dropdownMaxXFactor[0] && turtle.mouseX < dropdownMaxXFactor[1] && turtle.mouseY > dropdownY - dropdown -> size * 0.7 - (dropdown -> options -> length - 1) * itemHeight && turtle.mouseY < dropdownY + dropdown -> size * 0.7) {
                 int selected = round((dropdownY - turtle.mouseY) / itemHeight);
-                turtleRectangle(dropdownX - dropdown -> size - dropdown -> maxXfactor, dropdownY - dropdown -> size * 0.7 - selected * itemHeight, dropdownX + dropdown -> size + 10, dropdownY + dropdown -> size * 0.7 - selected * itemHeight, tt_themeColors[21], tt_themeColors[22], tt_themeColors[23], 0);
+                tt_setColor(TT_COLOR_DROPDOWN_HOVER);
+                turtleRectangle(dropdownMaxXFactor[0], dropdownY - dropdown -> size * 0.7 - selected * itemHeight, dropdownMaxXFactor[1], dropdownY + dropdown -> size * 0.7 - selected * itemHeight);
                 if (turtleMouseDown() && dropdown -> status == 2) {
                     if (selected != 0) {
                         if (dropdown -> index >= selected) {
@@ -815,11 +871,11 @@ void dropdownUpdate() {
                     dropdown -> status = 0;
                 }
             }
-            turtlePenColor(tt_themeColors[30], tt_themeColors[31], tt_themeColors[32]);
+            tt_setColor(TT_COLOR_TEXT);
             int renderIndex = 1;
             for (int i = 0; i < dropdown -> options -> length; i++) {
                 if (i != dropdown -> index) {
-                    turtleTextWriteUnicode(dropdown -> options -> data[i].s, dropdownX, dropdownY - renderIndex * itemHeight, dropdown -> size - 1, 100);
+                    turtleTextWriteUnicode(dropdown -> options -> data[i].s, dropdownMaxXFactor[0] + 2, dropdownY - renderIndex * itemHeight, dropdown -> size - 1, dropdownAlignFactor);
                     renderIndex++;
                 }
             }
@@ -828,12 +884,13 @@ void dropdownUpdate() {
             logicIndex = i;
         }
         tt_globals.dropdownLogicIndex = logicIndex;
-        turtlePenColor(tt_themeColors[30], tt_themeColors[31], tt_themeColors[32]);
-        turtleTextWriteUnicode(dropdown -> options -> data[dropdown -> index].s, dropdownX, dropdownY, dropdown -> size - 1, 100);
+        tt_setColor(TT_COLOR_TEXT);
+        turtleTextWriteUnicode(dropdown -> options -> data[dropdown -> index].s, dropdownXFactor[0] + 2, dropdownY, dropdown -> size - 1, dropdownAlignFactor);
+        tt_setColor(TT_COLOR_DROPDOWN_TRIANGLE);
         if (dropdown -> status >= 1) {
-            turtleTriangle(dropdownX + 11, dropdownY + 4, dropdownX + 11, dropdownY - 4, dropdownX + 5, dropdownY, tt_themeColors[9], tt_themeColors[10], tt_themeColors[11], 0);
+            turtleTriangle(dropdownXFactor[1] + 4, dropdownY + 4, dropdownXFactor[1] + 4, dropdownY - 4, dropdownXFactor[1] - 2, dropdownY);
         } else {
-            turtleTriangle(dropdownX + 13, dropdownY + 3, dropdownX + 5, dropdownY + 3, dropdownX + 9, dropdownY - 3, tt_themeColors[9], tt_themeColors[10], tt_themeColors[11], 0);
+            turtleTriangle(dropdownXFactor[1] + 6, dropdownY + 3, dropdownXFactor[1] - 2, dropdownY + 3, dropdownXFactor[1] + 2, dropdownY - 3);
         }
     }
 }

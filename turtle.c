@@ -122,14 +122,14 @@ int main(int argc, char *argv[]) {
     int buttonVar, switchVar, dropdownVar = 0;
     double dialVar;
     list_t *dropdownOptions = list_init();
-    list_append(dropdownOptions, (unitype) "drop1", 's');
-    list_append(dropdownOptions, (unitype) "drop2", 's');
-    list_append(dropdownOptions, (unitype) "drop3", 's');
-    list_append(dropdownOptions, (unitype) "drop4", 's');
+    list_append(dropdownOptions, (unitype) "a", 's');
+    list_append(dropdownOptions, (unitype) "long item", 's');
+    list_append(dropdownOptions, (unitype) "very long item name", 's');
+    list_append(dropdownOptions, (unitype) "b", 's');
     buttonInit("button", &buttonVar, -100, 100, 8, BUTTON_SHAPE_RECTANGLE);
     switchInit("switch", &switchVar, 100, 100, 8);
     dialInit("dial", &dialVar, DIAL_EXP, -100, -100, 8, 0, 1000, 1);
-    dropdownInit("dropdown", dropdownOptions, &dropdownVar, 100, -100, 8, DROPDOWN_ALIGN_CENTER);
+    dropdownInit("dropdown", dropdownOptions, &dropdownVar, 100, -100, 8, TT_DROPDOWN_ALIGN_LEFT);
 
     while (turtle.shouldClose == 0) {
         start = clock();
@@ -138,6 +138,9 @@ int main(int argc, char *argv[]) {
         turtleToolsUpdate();
         parseRibbonOutput();
         parsePopupOutput(window);
+        char coordsStr[16];
+        sprintf(coordsStr, "%.2lf, %.2lf", turtle.mouseX, turtle.mouseY);
+        turtleTextWriteString(coordsStr, -310, -170, 5, 0);
         turtleUpdate(); // update the screen
         end = clock();
         while ((double) (end - start) / CLOCKS_PER_SEC < (1.0 / tps)) {
