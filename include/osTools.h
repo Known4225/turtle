@@ -35,6 +35,10 @@ idea: try glfwGetClipboardString and glfwSetClipboardString
 #ifndef OSTOOLS
 #define OSTOOLS
 
+#include <stdio.h>
+#include <stdint.h>
+#include "glfw3.h"
+
 GLFWwindow *osToolsWindow;
 
 #ifdef OS_WINDOWS
@@ -293,11 +297,11 @@ void osSetCursor(LPCTSTR cursor) {
 }
 
 void osHideAndLockCursor() {
-    ShowCursor(false);
+    ShowCursor(0);
 }
 
 void osShowCursor() {
-    ShowCursor(true);
+    ShowCursor(1);
 }
 #endif
 #ifdef OS_LINUX
