@@ -126,6 +126,9 @@ int main(int argc, char *argv[]) {
     list_append(dropdownOptions, (unitype) "long item", 's');
     list_append(dropdownOptions, (unitype) "very long item name", 's');
     list_append(dropdownOptions, (unitype) "b", 's');
+    list_append(dropdownOptions, (unitype) "c", 's');
+    list_append(dropdownOptions, (unitype) "d", 's');
+    list_append(dropdownOptions, (unitype) "e", 's');
     buttonInit("button", &buttonVar, 0, 20, 10, BUTTON_SHAPE_RECTANGLE);
     switchInit("switch", &switchVar, 0, -20, 10);
     dialInit("dial", &dialVar, DIAL_EXP, 0, -60, 10, 0, 1000, 1);
