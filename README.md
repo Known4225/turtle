@@ -12,6 +12,10 @@ The combination of functions that the turtle libraries provide make it ideal for
 
 turtle allows you to use openGL to draw on an application window like a canvas. Using `turtleGoto()`, `turtlePenDown()`, and `turtlePenUp()`, objects can be drawn on the screen. Turtle can also directly "blit" shapes to the screen using `turtleCircle()` and `turtleQuad()`. Turtle also includes functionality to detect keyboard and mouse clicks, using the `turtleKeyPressed()` and `turtleMouseDown()` functions.
 
+## TurtleTextures
+
+a version of turtle that allows textures to be loaded and rendered on the screen
+
 ## TurtleText
 
 turtleText extends the functionality of turtle to allow text to be drawn to the screen using the `turtleTextWriteString()` and `turtleTextWriteUnicode()` functions. A custom font file `fontBez.tgl` is included with the project which supports the latin, greek, and cyrillic alphabets as well as a variety of common characters.
