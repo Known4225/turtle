@@ -140,6 +140,7 @@ int main(int argc, char *argv[]) {
         parsePopupOutput(window);
         char coordsStr[16];
         sprintf(coordsStr, "%.2lf, %.2lf", turtle.mouseX, turtle.mouseY);
+        tt_setColor(TT_COLOR_TEXT);
         turtleTextWriteString(coordsStr, -310, -170, 5, 0);
         turtleUpdate(); // update the screen
         end = clock();
