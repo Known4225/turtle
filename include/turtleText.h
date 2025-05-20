@@ -2,7 +2,7 @@
 
 #ifndef TURTLETEXT
 #define TURTLETEXT
-#include "turtleTextures.h"
+#include "turtle.h"
 
 /* turtleText variables */
 typedef struct {
