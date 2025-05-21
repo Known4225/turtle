@@ -213,7 +213,7 @@ int32_t ribbonInit(const char *filename) {
         } else {
             if (j != 0) {
                 list_t *appendList = list_init();
-                list_copy(sublist, appendList);
+                list_copy(appendList, sublist);
                 list_clear(sublist);
                 list_append(ribbonRender.options, (unitype) appendList, 'r');
             }
@@ -223,7 +223,7 @@ int32_t ribbonInit(const char *filename) {
     }
     list_pop(sublist);
     list_t *appendList = list_init();
-    list_copy(sublist, appendList);
+    list_copy(appendList, sublist);
     list_clear(sublist);
     list_append(ribbonRender.options, (unitype) appendList, 'r');
     list_free(sublist);
@@ -385,7 +385,7 @@ int32_t popupInit(const char *filename, double minX, double minY, double maxX, d
 void popupUpdate() {
     if (turtle.close == 1) {
         tt_setColor(TT_COLOR_POPUP_BOX);
-        turtleQuad(popup.minX, popup.minY, popup.minX, popup.maxY, popup.maxX, popup.maxY, popup.maxX, popup.minY);
+        turtleRectangle(popup.minX, popup.minY, popup.maxX, popup.maxY);
         double textSize = 5;
         double textX = popup.minX + (popup.maxX - popup.minX) / 2;
         double textY = popup.maxY - textSize * 2;
@@ -408,7 +408,7 @@ void popupUpdate() {
             if (turtle.mouseX > textX - textSize && turtle.mouseX < textX + strLen + textSize &&
             turtle.mouseY > textY - textSize && turtle.mouseY < textY + textSize) {
                 tt_setColor(TT_COLOR_POPUP_BUTTON_SELECT);
-                turtleQuad(textX - textSize, textY - textSize, textX + textSize + strLen, textY - textSize, textX + textSize + strLen, textY + textSize, textX - textSize, textY + textSize);
+                turtleRectangle(textX - textSize, textY - textSize, textX + textSize + strLen, textY + textSize);
                 if (turtleMouseDown()) {
                     if (popup.mouseDown == 0) {
                         popup.mouseDown = 1;
@@ -426,7 +426,7 @@ void popupUpdate() {
                 }
             } else {
                 tt_setColor(TT_COLOR_POPUP_BUTTON);
-                turtleQuad(textX - textSize, textY - textSize, textX + textSize + strLen, textY - textSize, textX + textSize + strLen, textY + textSize, textX - textSize, textY + textSize);
+                turtleRectangle(textX - textSize, textY - textSize, textX + textSize + strLen, textY + textSize);
             }
             tt_setColor(TT_COLOR_TEXT);
             turtleTextWriteUnicode((unsigned char *) popup.options -> data[i].s, textX, textY, textSize, 0);

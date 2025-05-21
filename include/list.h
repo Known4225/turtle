@@ -47,7 +47,7 @@ find and delete element in the list (must specify type):
 list_remove(list, [element], 'i');
 
 copy one list to another
-list_copy(source, dest);
+list_copy(dest, source);
 
 delete all the elements of a list
 list_clear(list);
@@ -430,7 +430,7 @@ void unitype_print(unitype item, char type) {
 }
 
 /* copies one list to another (duplicates strings or pointers) */
-void list_copy(list_t *src, list_t *dest) {
+void list_copy(list_t *dest, list_t *src) {
     list_free_lite(dest);
     dest -> type = calloc(src -> realLength, sizeof(int32_t));
     dest -> data = calloc(src -> realLength, sizeof(unitype));

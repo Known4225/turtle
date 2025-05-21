@@ -147,7 +147,7 @@ int32_t bufferList_remove(bufferList_t *list, float item) {
 }
 
 /* copies one list to another */
-void bufferList_copy(bufferList_t *src, bufferList_t *dest) {
+void bufferList_copy(bufferList_t *dest, bufferList_t *src) {
     bufferList_free_lite(dest);
     dest -> data = calloc(src -> realLength, sizeof(float));
     uint32_t len = src -> length;
