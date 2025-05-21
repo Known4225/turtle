@@ -447,6 +447,12 @@ void popupFree() {
 /* UI tools */
 
 typedef struct {
+    int32_t colorOverride;
+    double color[24];
+} tt_color_override_t;
+
+
+typedef struct {
     double dialAnchorX;
     double dialAnchorY;
     int32_t dropdownLogicIndex;
@@ -472,6 +478,7 @@ typedef enum {
 
 /* button */
 typedef struct {
+    tt_color_override_t color;
     char label[24];
     int32_t status;
     tt_button_shape_t shape;
@@ -482,6 +489,7 @@ typedef struct {
 
 /* switch */
 typedef struct {
+    tt_color_override_t color;
     char label[24];
     int32_t status;
     double size;
@@ -497,6 +505,7 @@ typedef enum {
 
 /* dial */
 typedef struct {
+    tt_color_override_t color;
     char label[24];
     int32_t status[2];
     tt_dial_type_t type;
@@ -521,6 +530,7 @@ typedef enum {
 
 /* slider */
 typedef struct {
+    tt_color_override_t color;
     char label[24];
     int32_t status;
     tt_slider_type_t type;
@@ -542,8 +552,9 @@ typedef enum {
 
 /* dropdown */
 typedef struct {
-    list_t *options;
+    tt_color_override_t color;
     char label[24];
+    list_t *options;
     uint32_t index;
     int32_t status;
     tt_dropdown_align_t align;
@@ -552,6 +563,12 @@ typedef struct {
     double maxXfactor;
     int32_t *variable; // index of dropdown selected
 } tt_dropdown_t;
+
+/* override colors with color array */
+void tt_colorOverride(void *element, double *colors, uint32_t length) {
+    ((tt_button_t *) element) -> color.colorOverride = 1;
+    memcpy(((tt_button_t *) element) -> color.color, colors, length * sizeof(double));
+}
 
 /* initialise UI elements */
 tt_button_t *buttonInit(char *label, int32_t *variable, tt_button_shape_t shape, double x, double y, double size) {
@@ -565,6 +582,7 @@ tt_button_t *buttonInit(char *label, int32_t *variable, tt_button_shape_t shape,
     } else {
         memcpy(buttonp -> label, label, strlen(label) + 1);
     }
+    buttonp -> color.colorOverride = 0;
     buttonp -> status = 0;
     buttonp -> shape = shape;
     buttonp -> position[0] = x;
@@ -588,6 +606,7 @@ tt_switch_t *switchInit(char *label, int32_t *variable, double x, double y, doub
     } else {
         memcpy(switchp -> label, label, strlen(label) + 1);
     }
+    switchp -> color.colorOverride = 0;
     switchp -> status = 0;
     switchp -> position[0] = x;
     switchp -> position[1] = y;
@@ -609,6 +628,7 @@ tt_dial_t *dialInit(char *label, double *variable, tt_dial_type_t type, double x
     } else {
         memcpy(dialp -> label, label, strlen(label) + 1);
     }
+    dialp -> color.colorOverride = 0;
     dialp -> status[0] = 0;
     dialp -> type = type;
     dialp -> position[0] = x;
@@ -635,6 +655,7 @@ tt_slider_t *sliderInit(char *label, double *variable, tt_slider_type_t type, tt
     } else {
         memcpy(sliderp -> label, label, strlen(label) + 1);
     }
+    sliderp -> color.colorOverride = 0;
     sliderp -> status = 0;
     sliderp -> type = type;
     sliderp -> align = align;
@@ -673,6 +694,7 @@ tt_dropdown_t *dropdownInit(char *label, list_t *options, int32_t *variable, tt_
     } else {
         memcpy(dropdownp -> label, label, strlen(label) + 1);
     }
+    dropdownp -> color.colorOverride = 0;
     dropdownp -> options = options;
     dropdownp -> index = *variable;
     dropdownp -> status = 0;
@@ -922,16 +944,28 @@ void sliderUpdate() {
                 sliderOffsetXFactorSmall = -sliderp -> size * 1;
             }
         }
-        tt_setColor(TT_COLOR_TEXT);
+        if (sliderp -> color.colorOverride) {
+            turtlePenColor(sliderp -> color.color[0], sliderp -> color.color[1], sliderp -> color.color[2]);
+        } else {
+            tt_setColor(TT_COLOR_TEXT);
+        }
         turtleTextWriteUnicode((unsigned char *) sliderp -> label, sliderp -> position[0] + sliderOffsetXFactor, sliderp -> position[1] + sliderOffsetYFactor, sliderp -> size - 1, sliderAlignFactor);
         turtlePenSize(sliderp -> size * 1.2);
         turtleGoto(sliderXLeft, sliderYLeft);
-        tt_setColor(TT_COLOR_SLIDER_BAR);
+        if (sliderp -> color.colorOverride) {
+            turtlePenColor(sliderp -> color.color[3], sliderp -> color.color[4], sliderp -> color.color[5]);
+        } else {
+            tt_setColor(TT_COLOR_SLIDER_BAR);
+        }
         turtlePenDown();
         turtleGoto(sliderXRight, sliderYRight);
         turtlePenUp();
         turtlePenSize(sliderp -> size);
-        tt_setColor(TT_COLOR_SLIDER_CIRCLE);
+        if (sliderp -> color.colorOverride) {
+            turtlePenColor(sliderp -> color.color[6], sliderp -> color.color[7], sliderp -> color.color[8]);
+        } else {
+            tt_setColor(TT_COLOR_SLIDER_CIRCLE);
+        }
         if (sliderp -> type == TT_SLIDER_HORIZONTAL) {
             turtleGoto(sliderXLeft + (sliderXRight - sliderXLeft) * (*(sliderp -> variable) - sliderp -> range[0]) / (sliderp -> range[1] - sliderp -> range[0]), sliderYLeft);
         } else if (sliderp -> type == TT_SLIDER_VERTICAL) {
@@ -971,7 +1005,11 @@ void sliderUpdate() {
             char bubble[24];
             double rounded = round(*(sliderp -> variable) * sliderp -> renderNumberFactor);
             sprintf(bubble, "%.0lf", rounded);
-            tt_setColor(TT_COLOR_TEXT);
+            if (sliderp -> color.colorOverride) {
+                turtlePenColor(sliderp -> color.color[6], sliderp -> color.color[7], sliderp -> color.color[8]);
+            } else {
+                tt_setColor(TT_COLOR_TEXT);
+            }
             turtleTextWriteString(bubble, sliderp -> position[0] + sliderOffsetXFactorSmall, sliderp -> position[1] + sliderOffsetYFactorSmall, 4, sliderAlignFactor);
         }
     }
