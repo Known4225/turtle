@@ -54,8 +54,8 @@ typedef struct {
     char **extensions; // array of allowed extensions (7 characters long max (cuz *.json;))
 } osToolsFileDialogObject;
 
-osToolsClipboardObject osClipboard;
-osToolsFileDialogObject osFileDialog;
+osToolsClipboardObject osToolsClipboard;
+osToolsFileDialogObject osToolsFileDialog;
 
 #ifdef OS_WINDOWS
 #include <windows.h>
@@ -64,21 +64,21 @@ osToolsFileDialogObject osFileDialog;
 int32_t osToolsInit(char argv0[], GLFWwindow *window) {
     osToolsWindow = window;
     /* get executable filepath */
-    GetModuleFileNameA(NULL, osFileDialog.executableFilepath, MAX_PATH);
+    GetModuleFileNameA(NULL, osToolsFileDialog.executableFilepath, MAX_PATH);
     if (GetLastError() != ERROR_SUCCESS) {
-        strcpy(osFileDialog.executableFilepath, "null");
+        strcpy(osToolsFileDialog.executableFilepath, "null");
         printf("error: could not retrieve executable filepath\n");
     }
-    int32_t index = strlen(osFileDialog.executableFilepath) - 1;
-    while (index > -1 && osFileDialog.executableFilepath[index] != '\\' && osFileDialog.executableFilepath[index] != '/') {
+    int32_t index = strlen(osToolsFileDialog.executableFilepath) - 1;
+    while (index > -1 && osToolsFileDialog.executableFilepath[index] != '\\' && osToolsFileDialog.executableFilepath[index] != '/') {
         index--;
     }
-    osFileDialog.executableFilepath[index + 1] = '\0';
+    osToolsFileDialog.executableFilepath[index + 1] = '\0';
     /* initialise file dialog */
-    strcpy(osFileDialog.selectedFilename, "null");
-    osFileDialog.openOrSave = 0; // open by default
-    osFileDialog.numExtensions = 0; // 0 means all extensions
-    osFileDialog.extensions = malloc(1 * sizeof(char *)); // malloc list
+    strcpy(osToolsFileDialog.selectedFilename, "null");
+    osToolsFileDialog.openOrSave = 0; // open by default
+    osToolsFileDialog.numExtensions = 0; // 0 means all extensions
+    osToolsFileDialog.extensions = malloc(1 * sizeof(char *)); // malloc list
 
     /* initialise clipboard */
     if (!OpenClipboard(NULL)) { // initialises win32Clipboard.text as clipboard text data
@@ -92,16 +92,16 @@ int32_t osToolsInit(char argv0[], GLFWwindow *window) {
         if (wstrData != NULL) {
             uint32_t i = 0;
             uint32_t dynMem = 8; // start with 7 characters
-            osClipboard.text = malloc(dynMem);
+            osToolsClipboard.text = malloc(dynMem);
             while (wstrData[i] != '\0' && i < 4294967295) {
-                osClipboard.text[i] = wstrData[i]; // convert from WCHAR to char
+                osToolsClipboard.text[i] = wstrData[i]; // convert from WCHAR to char
                 i++;
                 if (i >= dynMem) { // if i is eight we need to realloc to at least 9
                     dynMem *= 2;
-                    osClipboard.text = realloc(osClipboard.text, dynMem);
+                    osToolsClipboard.text = realloc(osToolsClipboard.text, dynMem);
                 }
             }
-            osClipboard.text[i] = '\0';
+            osToolsClipboard.text[i] = '\0';
             GlobalUnlock(clipboardHandle);
         } else {
             printf("error: could not lock clipboard\n");
@@ -117,8 +117,8 @@ int32_t osToolsInit(char argv0[], GLFWwindow *window) {
     return 0;
 }
 
-int32_t osClipboardGetText() { // gets the text from win32Clipboard
-    free(osClipboard.text);
+int32_t osToolsClipboardGetText() { // gets the text from win32Clipboard
+    free(osToolsClipboard.text);
     if (!OpenClipboard(NULL)) { // https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-openclipboard
         printf("error: could not open clipboard\n");
         return -1;
@@ -130,16 +130,16 @@ int32_t osClipboardGetText() { // gets the text from win32Clipboard
         if (wstrData != NULL) {
             uint32_t i = 0;
             uint32_t dynMem = 8; // start with 7 characters
-            osClipboard.text = malloc(dynMem);
+            osToolsClipboard.text = malloc(dynMem);
             while (wstrData[i] != '\0' && i < 4294967295) {
-                osClipboard.text[i] = wstrData[i]; // convert from WCHAR to char
+                osToolsClipboard.text[i] = wstrData[i]; // convert from WCHAR to char
                 i++;
                 if (i >= dynMem) { // if i is eight we need to realloc to at least 9
                     dynMem *= 2;
-                    osClipboard.text = realloc(osClipboard.text, dynMem);
+                    osToolsClipboard.text = realloc(osToolsClipboard.text, dynMem);
                 }
             }
-            osClipboard.text[i] = '\0';
+            osToolsClipboard.text[i] = '\0';
             GlobalUnlock(clipboardHandle);
         } else {
             printf("error: could not lock clipboard\n");
@@ -155,7 +155,7 @@ int32_t osClipboardGetText() { // gets the text from win32Clipboard
     return 0;
 }
 
-int32_t osClipboardSetText(const char *input) { // takes null terminated strings
+int32_t osToolsClipboardSetText(const char *input) { // takes null terminated strings
     if (!OpenClipboard(NULL)) { // technically (according to windows documentation) I should get the HWND (window handle) for the GLFW window, but that requires using the glfw3native.h header which would require lots of rewrites and endanger cross-platform compatibility
         printf("error: could not open clipboard\n");
         return -1;
@@ -186,18 +186,18 @@ int32_t osClipboardSetText(const char *input) { // takes null terminated strings
     return 0;
 }
 
-void osFileDialogAddExtension(char *extension) {
+void osToolsFileDialogAddExtension(char *extension) {
     if (strlen(extension) <= 4) {
-        osFileDialog.numExtensions += 1;
-        osFileDialog.extensions = realloc(osFileDialog.extensions, osFileDialog.numExtensions * sizeof(char *));
-        osFileDialog.extensions[osFileDialog.numExtensions - 1] = strdup(extension);
+        osToolsFileDialog.numExtensions += 1;
+        osToolsFileDialog.extensions = realloc(osToolsFileDialog.extensions, osToolsFileDialog.numExtensions * sizeof(char *));
+        osToolsFileDialog.extensions[osToolsFileDialog.numExtensions - 1] = strdup(extension);
     } else {
         printf("extension name: %s too long\n", extension);
     }
 }
 
-int32_t osFileDialogPrompt(char openOrSave, char *filename) { // 0 - open, 1 - save, filename refers to autofill filename ("null" or empty string for no autofill)
-    osFileDialog.openOrSave = openOrSave;
+int32_t osToolsFileDialogPrompt(char openOrSave, char *filename) { // 0 - open, 1 - save, filename refers to autofill filename ("null" or empty string for no autofill)
+    osToolsFileDialog.openOrSave = openOrSave;
     HRESULT hr = CoInitializeEx(NULL, 0); // https://learn.microsoft.com/en-us/windows/win32/api/objbase/ne-objbase-coinit
     if (SUCCEEDED(hr)) {
         IFileDialog *fileDialog;
@@ -224,16 +224,16 @@ int32_t osFileDialogPrompt(char openOrSave, char *filename) { // 0 - open, 1 - s
             You can only see files that are specified in the types on the current COMDLG_FILTERSPEC selected in the dropdown
             Thats why I shove all the types into one COMDLG_FILTERSPEC, because I want the user to be able to see all compatible files at once
             */
-            if (osFileDialog.numExtensions > 0) {
+            if (osToolsFileDialog.numExtensions > 0) {
                 COMDLG_FILTERSPEC *fileExtensions = malloc(sizeof(COMDLG_FILTERSPEC)); // just one filter
-                WCHAR *buildFilter = malloc(10 * osFileDialog.numExtensions * sizeof(WCHAR));
+                WCHAR *buildFilter = malloc(10 * osToolsFileDialog.numExtensions * sizeof(WCHAR));
                 int32_t j = 0;
-                for (int32_t i = 0; i < osFileDialog.numExtensions; i++) {
+                for (int32_t i = 0; i < osToolsFileDialog.numExtensions; i++) {
                     buildFilter[j] = (unsigned short) '*';
                     buildFilter[j + 1] = (unsigned short) '.';
                     j += 2;
-                    for (uint32_t k = 0; k < strlen(osFileDialog.extensions[i]) && k < 8; k++) {
-                        buildFilter[j] = osFileDialog.extensions[i][k];
+                    for (uint32_t k = 0; k < strlen(osToolsFileDialog.extensions[i]) && k < 8; k++) {
+                        buildFilter[j] = osToolsFileDialog.extensions[i][k];
                         j += 1;
                     }
                     buildFilter[j] = (unsigned short) ';';
@@ -264,10 +264,10 @@ int32_t osFileDialogPrompt(char openOrSave, char *filename) { // 0 - open, 1 - s
                 if (SUCCEEDED(hr)) {
                     int32_t i = 0;
                     while (pszFilePath[i] != '\0' && i < MAX_PATH + 1) {
-                        osFileDialog.selectedFilename[i] = pszFilePath[i]; // convert from WCHAR to char
+                        osToolsFileDialog.selectedFilename[i] = pszFilePath[i]; // convert from WCHAR to char
                         i++;
                     }
-                    osFileDialog.selectedFilename[i] = '\0';
+                    osToolsFileDialog.selectedFilename[i] = '\0';
                     CoTaskMemFree(pszFilePath);
                     return 0;
                 }
@@ -307,7 +307,7 @@ void osShowCursor() {
 #endif
 #ifdef OS_LINUX
 
-/* This is the zenity version of osFileDialog.h, it's for linux */
+/* This is the zenity version of osToolsFileDialog.h, it's for linux */
 
 /* 
 a note on zenity:
@@ -324,47 +324,47 @@ void osToolsInit(char argv0[], GLFWwindow *window) {
     osToolsWindow = window;
     /* get executable filepath */
     FILE *exStringFile = popen("pwd", "r");
-    fscanf(exStringFile, "%s", osFileDialog.executableFilepath);
-    strcat(osFileDialog.executableFilepath, "/");
-    strcat(osFileDialog.executableFilepath, argv0);
+    fscanf(exStringFile, "%s", osToolsFileDialog.executableFilepath);
+    strcat(osToolsFileDialog.executableFilepath, "/");
+    strcat(osToolsFileDialog.executableFilepath, argv0);
     
-    int32_t index = strlen(osFileDialog.executableFilepath) - 1;
-    while (index > -1 && osFileDialog.executableFilepath[index] != '/') {
+    int32_t index = strlen(osToolsFileDialog.executableFilepath) - 1;
+    while (index > -1 && osToolsFileDialog.executableFilepath[index] != '/') {
         index--;
     }
-    osFileDialog.executableFilepath[index + 1] = '\0';
+    osToolsFileDialog.executableFilepath[index + 1] = '\0';
 
     /* initialise file dialog */
-    strcpy(osFileDialog.selectedFilename, "null");
-    osFileDialog.openOrSave = 0; // open by default
-    osFileDialog.numExtensions = 0; // 0 means all extensions
-    osFileDialog.extensions = malloc(1 * sizeof(char *)); // malloc list
+    strcpy(osToolsFileDialog.selectedFilename, "null");
+    osToolsFileDialog.openOrSave = 0; // open by default
+    osToolsFileDialog.numExtensions = 0; // 0 means all extensions
+    osToolsFileDialog.extensions = malloc(1 * sizeof(char *)); // malloc list
 }
 
 /* gets the text */
-int32_t osClipboardGetText() {
-    osClipboard.text = strdup(glfwGetClipboardString(osToolsWindow));
+int32_t osToolsClipboardGetText() {
+    osToolsClipboard.text = strdup(glfwGetClipboardString(osToolsWindow));
     return 0;
 }
 
 /* takes null terminated strings */
-int32_t osClipboardSetText(const char *input) {
+int32_t osToolsClipboardSetText(const char *input) {
     glfwSetClipboardString(osToolsWindow, input);
     return 0;
 }
 
-void osFileDialogAddExtension(char *extension) {
+void osToolsFileDialogAddExtension(char *extension) {
     if (strlen(extension) <= 4) {
-        osFileDialog.numExtensions += 1;
-        osFileDialog.extensions = realloc(osFileDialog.extensions, osFileDialog.numExtensions * 8);
-        osFileDialog.extensions[osFileDialog.numExtensions - 1] = strdup(extension);
+        osToolsFileDialog.numExtensions += 1;
+        osToolsFileDialog.extensions = realloc(osToolsFileDialog.extensions, osToolsFileDialog.numExtensions * 8);
+        osToolsFileDialog.extensions[osToolsFileDialog.numExtensions - 1] = strdup(extension);
     } else {
         printf("extension name: %s too long\n", extension);
     }
 }
 
-int32_t osFileDialogPrompt(char openOrSave, char *prename) { // 0 - open, 1 - save, prename refers to autofill filename ("null" or empty string for no autofill)
-    char fullCommand[23 + 13 + 256 + 15 + 34 + 7 * osFileDialog.numExtensions + 14 + 1]; // 23 for zenity --file-selection, 13 for --filename=', 256 for prename, 15 for --title='Open', 34 for --file-filter='Specified Types | , 7 for each extension, 14 for title, 1 for \0
+int32_t osToolsFileDialogPrompt(char openOrSave, char *prename) { // 0 - open, 1 - save, prename refers to autofill filename ("null" or empty string for no autofill)
+    char fullCommand[23 + 13 + 256 + 15 + 34 + 7 * osToolsFileDialog.numExtensions + 14 + 1]; // 23 for zenity --file-selection, 13 for --filename=', 256 for prename, 15 for --title='Open', 34 for --file-filter='Specified Types | , 7 for each extension, 14 for title, 1 for \0
     strcpy(fullCommand, "zenity --file-selection");
     /* configure autofill filename */
     if (openOrSave == 1 && strcmp(prename, "null") != 0) {
@@ -381,18 +381,18 @@ int32_t osFileDialogPrompt(char openOrSave, char *prename) { // 0 - open, 1 - sa
     strcat(fullCommand, title);
 
     /* configure extensions */
-    if (osFileDialog.numExtensions > 0) {
-        char buildFilter[7 * osFileDialog.numExtensions + 1]; // last space is replaced with ' and followed by \0
+    if (osToolsFileDialog.numExtensions > 0) {
+        char buildFilter[7 * osToolsFileDialog.numExtensions + 1]; // last space is replaced with ' and followed by \0
         int32_t j = 0;
-        for (int32_t i = 0; i < osFileDialog.numExtensions; i++) {
+        for (int32_t i = 0; i < osToolsFileDialog.numExtensions; i++) {
             buildFilter[j] = '*';
             buildFilter[j + 1] = '.';
             j += 2;
-            for (uint32_t k = 0; k < strlen(osFileDialog.extensions[i]) && k < 8; k++) {
-                buildFilter[j] = osFileDialog.extensions[i][k];
+            for (uint32_t k = 0; k < strlen(osToolsFileDialog.extensions[i]) && k < 8; k++) {
+                buildFilter[j] = osToolsFileDialog.extensions[i][k];
                 j += 1;
             }
-            if (i != osFileDialog.numExtensions - 1) { // dont add space if it's the last element
+            if (i != osToolsFileDialog.numExtensions - 1) { // dont add space if it's the last element
                 buildFilter[j] = ' ';
                 j += 1;
             }
@@ -407,17 +407,17 @@ int32_t osFileDialogPrompt(char openOrSave, char *prename) { // 0 - open, 1 - sa
     /* execute */
     // printf("%s\n", fullCommand);
     FILE* filenameStream = popen(fullCommand, "r");
-    if (fgets(osFileDialog.selectedFilename, 4097, filenameStream) == NULL) { // adds a \n before \0 (?)
+    if (fgets(osToolsFileDialog.selectedFilename, 4097, filenameStream) == NULL) { // adds a \n before \0 (?)
         // printf("Error: fgets\n");
-        strcpy(osFileDialog.selectedFilename, "null");
+        strcpy(osToolsFileDialog.selectedFilename, "null");
         return -1;
     }
     for (uint32_t i = 0; i < 4096; i++) {
-        if (osFileDialog.selectedFilename[i] == '\n') {
-            osFileDialog.selectedFilename[i] = '\0'; // replace all newlines with null characters
+        if (osToolsFileDialog.selectedFilename[i] == '\n') {
+            osToolsFileDialog.selectedFilename[i] = '\0'; // replace all newlines with null characters
         }
     }
-    // printf("Success, filename: %s\n", osFileDialog.filename);
+    // printf("Success, filename: %s\n", osToolsFileDialog.filename);
     pclose(filenameStream);
     return 0;
 }

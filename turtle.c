@@ -10,22 +10,22 @@ void parseRibbonOutput() {
                 printf("New\n");
             }
             if (ribbonRender.output[2] == 2) { // Save
-                if (strcmp(osFileDialog.selectedFilename, "null") == 0) {
-                    if (osFileDialogPrompt(1, "") != -1) {
-                        printf("Saved to: %s\n", osFileDialog.selectedFilename);
+                if (strcmp(osToolsFileDialog.selectedFilename, "null") == 0) {
+                    if (osToolsFileDialogPrompt(1, "") != -1) {
+                        printf("Saved to: %s\n", osToolsFileDialog.selectedFilename);
                     }
                 } else {
-                    printf("Saved to: %s\n", osFileDialog.selectedFilename);
+                    printf("Saved to: %s\n", osToolsFileDialog.selectedFilename);
                 }
             }
             if (ribbonRender.output[2] == 3) { // Save As...
-                if (osFileDialogPrompt(1, "") != -1) {
-                    printf("Saved to: %s\n", osFileDialog.selectedFilename);
+                if (osToolsFileDialogPrompt(1, "") != -1) {
+                    printf("Saved to: %s\n", osToolsFileDialog.selectedFilename);
                 }
             }
             if (ribbonRender.output[2] == 4) { // Open
-                if (osFileDialogPrompt(0, "") != -1) {
-                    printf("Loaded data from: %s\n", osFileDialog.selectedFilename);
+                if (osToolsFileDialogPrompt(0, "") != -1) {
+                    printf("Loaded data from: %s\n", osToolsFileDialog.selectedFilename);
                 }
             }
         }
@@ -37,16 +37,16 @@ void parseRibbonOutput() {
                 printf("Redo\n");
             }
             if (ribbonRender.output[2] == 3) { // Cut
-                osClipboardSetText("test123");
+                osToolsClipboardSetText("test123");
                 printf("Cut \"test123\" to clipboard!\n");
             }
             if (ribbonRender.output[2] == 4) { // Copy
-                osClipboardSetText("test345");
+                osToolsClipboardSetText("test345");
                 printf("Copied \"test345\" to clipboard!\n");
             }
             if (ribbonRender.output[2] == 5) { // Paste
-                osClipboardGetText();
-                printf("Pasted \"%s\" from clipboard!\n", osClipboard.text);
+                osToolsClipboardGetText();
+                printf("Pasted \"%s\" from clipboard!\n", osToolsClipboard.text);
             }
         }
         if (ribbonRender.output[1] == 2) { // View
@@ -109,7 +109,7 @@ int main(int argc, char *argv[]) {
     popupInit("include/popupConfig.txt", -60, -20, 60, 20);
     /* initialise osTools */
     osToolsInit(argv[0], window); // must include argv[0] to get executableFilepath, must include GLFW window
-    osFileDialogAddExtension("txt"); // add txt to extension restrictions
+    osToolsFileDialogAddExtension("txt"); // add txt to extension restrictions
 
     uint32_t tps = 120; // ticks per second (locked to fps in this case)
     uint64_t tick = 0; // count number of ticks since application started
