@@ -37,28 +37,29 @@ idea: try glfwGetClipboardString and glfwSetClipboardString
 
 #include <stdio.h>
 #include <stdint.h>
+#include <string.h>
 #include "glfw3.h"
 
 GLFWwindow *osToolsWindow;
 
-#ifdef OS_WINDOWS
-#include <windows.h>
-#include <shobjidl.h>
+typedef struct {
+    char *text; // clipboard text data (heap allocated)
+} osToolsClipboardObject;
 
 typedef struct {
-    char executableFilepath[MAX_PATH + 1]; // filepath of executable
-    char selectedFilename[MAX_PATH + 1]; // output filename - maximum filepath is 260 characters (?)
+    char executableFilepath[4096 + 1]; // filepath of executable
+    char selectedFilename[4096 + 1]; // output filename - maximum filepath is 260 characters on windows and 4096 on linux
     char openOrSave; // 0 - open, 1 - save
     int32_t numExtensions; // number of extensions
     char **extensions; // array of allowed extensions (7 characters long max (cuz *.json;))
-} win32FileDialogObject; // almost as bad of naming as the windows API
+} osToolsFileDialogObject;
 
-typedef struct {
-    char *text; // clipboard text data (heap allocated)
-} win32ClipboardObject;
+osToolsClipboardObject osClipboard;
+osToolsFileDialogObject osFileDialog;
 
-win32FileDialogObject osFileDialog;
-win32ClipboardObject osClipboard;
+#ifdef OS_WINDOWS
+#include <windows.h>
+#include <shobjidl.h>
 
 int32_t osToolsInit(char argv0[], GLFWwindow *window) {
     osToolsWindow = window;
@@ -318,25 +319,6 @@ additionally, filters can be added with
 FILE* filenameStream = popen("zenity --file-selection --file-filter='Name | *.ext *.ext2 *.ext3'", "r");
 This is similar to COMDLG_FILTERSPEC struct's pszName and pszSpec, so you can add more filter "profiles" by using multiple --file-filter tags in the command
 */
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-typedef struct {
-    char executableFilepath[4097]; // filepath of executable
-    char selectedFilename[4097]; // output filename - maximum filepath is 4096 characters (?)
-    char openOrSave; // 0 - open, 1 - save
-    int32_t numExtensions; // number of extensions
-    char **extensions; // array of allowed extensions (7 characters long max (cuz *.json ))
-} zenityFileDialogObject;
-
-typedef struct {
-    char *text; // clipboard text data (heap allocated)
-} xclipClipboardObject;
-
-zenityFileDialogObject osFileDialog;
-xclipClipboardObject osClipboard;
 
 void osToolsInit(char argv0[], GLFWwindow *window) {
     osToolsWindow = window;
