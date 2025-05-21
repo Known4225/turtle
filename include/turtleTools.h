@@ -819,16 +819,15 @@ void dialUpdate() {
                 dialp -> status[0] *= -1;
                 dialp -> status[1] = turtle.mouseX - dialX;
             }
+        } else if (turtleMouseRight()) {
+            if (dialp -> status[0] < 0) {
+                *(dialp -> variable) = dialp -> defaultValue;
+            }
         } else {
             if (turtle.mouseX > dialX - dialp -> size && turtle.mouseX < dialX + dialp -> size && turtle.mouseY > dialY - dialp -> size && turtle.mouseY < dialY + dialp -> size) {
                 dialp -> status[0] = -1;
             } else {
                 dialp -> status[0] = 0;
-            }
-        }
-        if (turtleMouseRight()) {
-            if (dialp -> status[0] < 0) {
-                *(dialp -> variable) = dialp -> defaultValue;
             }
         }
         if (dialp -> status[0] > 0) {
@@ -944,6 +943,10 @@ void sliderUpdate() {
             if (sliderp -> status < 0) {
                 sliderp -> status *= -1;
             }
+        } else if (turtleMouseRight()) {
+            if (sliderp -> status < 0) {
+                *(sliderp -> variable) = sliderp -> defaultValue;
+            }
         } else {
             if (turtle.mouseX > sliderXLeft - sliderp -> size * 0.6 && turtle.mouseX < sliderXRight + sliderp -> size * 0.6 && turtle.mouseY > sliderYLeft - sliderp -> size * 0.6 && turtle.mouseY < sliderYRight + sliderp -> size * 0.6) {
                 sliderp -> status = -1;
@@ -953,14 +956,14 @@ void sliderUpdate() {
         }
         if (sliderp -> status > 0) {
             if (sliderp -> type == TT_SLIDER_HORIZONTAL) {
-                *(sliderp -> variable) = sliderp -> range[0] + (turtle.mouseX - sliderXLeft) / sliderp -> length * (sliderp -> range[1] - sliderp -> range[0]);
+                *(sliderp -> variable) = round(sliderp -> range[0] + (turtle.mouseX - sliderXLeft) / sliderp -> length * (sliderp -> range[1] - sliderp -> range[0]));
             } else if (sliderp -> type == TT_SLIDER_VERTICAL) {
-                *(sliderp -> variable) = sliderp -> range[0] + (turtle.mouseY - sliderYLeft) / sliderp -> length * (sliderp -> range[1] - sliderp -> range[0]);
+                *(sliderp -> variable) = round(sliderp -> range[0] + (turtle.mouseY - sliderYLeft) / sliderp -> length * (sliderp -> range[1] - sliderp -> range[0]));
             }
-            if (*(sliderp -> variable) > sliderp -> range[1]) {
+            if (*(sliderp -> variable) >= sliderp -> range[1]) {
                 *(sliderp -> variable) = sliderp -> range[1];
             }
-            if (*(sliderp -> variable) < sliderp -> range[0]) {
+            if (*(sliderp -> variable) <= sliderp -> range[0]) {
                 *(sliderp -> variable) = sliderp -> range[0];
             }
         }
