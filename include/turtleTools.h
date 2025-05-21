@@ -519,7 +519,7 @@ typedef enum {
     TT_SLIDER_ALIGN_RIGHT = 2,
 } tt_slider_align_t;
 
-/* switch */
+/* slider */
 typedef struct {
     char label[24];
     int32_t status;
@@ -1136,6 +1136,36 @@ void turtleToolsUpdate() {
     if (tt_enabled.dropdownEnabled) {
         dropdownUpdate();
     }
+    if (tt_enabled.ribbonEnabled) {
+        ribbonUpdate();
+    }
+    if (tt_enabled.popupEnabled) {
+        popupUpdate();
+    }
+}
+
+void turtleToolsUpdateUI() {
+    if (tt_enabled.popupEnabled) {
+        popupUpdate();
+    }
+    if (tt_enabled.buttonEnabled) {
+        buttonUpdate();
+    }
+    if (tt_enabled.switchEnabled) {
+        switchUpdate();
+    }
+    if (tt_enabled.dialEnabled) {
+        dialUpdate();
+    }
+    if (tt_enabled.sliderEnabled) {
+        sliderUpdate();
+    }
+    if (tt_enabled.dropdownEnabled) {
+        dropdownUpdate();
+    }
+}
+
+void turtleToolsUpdateRibbonPopup() {
     if (tt_enabled.ribbonEnabled) {
         ribbonUpdate();
     }
