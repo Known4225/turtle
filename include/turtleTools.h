@@ -13,6 +13,14 @@ text box (under development)
 #define TURTLETOOLS
 #include "turtleText.h"
 
+int randomInt(int lowerBound, int upperBound) { // random integer between lower and upper bound (inclusive)
+    return (rand() % (upperBound - lowerBound + 1) + lowerBound);
+}
+
+double randomDouble(double lowerBound, double upperBound) { // random double between lower and upper bound
+    return (rand() * (upperBound - lowerBound) / RAND_MAX + lowerBound); // probably works idk
+}
+
 typedef enum {
     TT_THEME_LIGHT = 0,
     TT_THEME_DARK = 1,
