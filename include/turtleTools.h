@@ -1064,7 +1064,7 @@ void dropdownUpdate() {
             }
         }
         logicIndex = tt_globals.dropdownLogicIndex;
-        if (dropdownp -> status == -1) {
+        if ((int32_t) i > logicIndex && dropdownp -> status == -1) {
             tt_setColor(TT_COLOR_DROPDOWN_SELECT);
             turtleRectangle(dropdownXFactor[0], dropdownY - dropdownp -> size * 0.7, dropdownXFactor[1] + dropdownp -> size, dropdownY + dropdownp -> size * 0.7);
         } else if (dropdownp -> status >= 1) {
