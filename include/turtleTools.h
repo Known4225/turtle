@@ -276,7 +276,7 @@ void ribbonUpdate() {
         }
         cutoff += ribbonRender.lengths -> data[i * 2].d + ribbonRender.marginSize;
         if (turtle.mouseY > ribbonRender.bounds[3] - 10 && turtle.mouseY < ribbonRender.bounds[3] && turtle.mouseX > ribbonRender.bounds[0] + ribbonRender.marginSize / 2.0 && turtle.mouseX < cutoff - ribbonRender.marginSize / 2.0 && ribbonRender.mainselect[0] == -1) { // -217, -195, -164
-            tt_setColor(TT_COLOR_DROPDOWN);
+            tt_setColor(TT_COLOR_RIBBON_SELECT);
             turtleQuad(prevCutoff - ribbonRender.marginSize / 2.0, 179, cutoff - ribbonRender.marginSize / 2.0, 179, cutoff - ribbonRender.marginSize / 2.0, 171, prevCutoff - ribbonRender.marginSize / 2.0, 171); // render dropdown
             ribbonRender.mainselect[0] = i;
         }
