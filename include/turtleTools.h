@@ -1137,7 +1137,7 @@ void dropdownUpdate() {
                     dropdownp -> status = 0;
                 }
             }
-            tt_setColor(TT_COLOR_TEXT);
+            tt_setColor(TT_COLOR_TEXT_ALTERNATE);
             int32_t renderIndex = 1;
             for (uint32_t i = 0; i < dropdownp -> options -> length; i++) {
                 if (i != dropdownp -> index) {
@@ -1156,7 +1156,7 @@ void dropdownUpdate() {
             logicIndex = i;
         }
         tt_globals.dropdownLogicIndex = logicIndex;
-        tt_setColor(TT_COLOR_TEXT);
+        tt_setColor(TT_COLOR_TEXT_ALTERNATE);
         if (dropdownp -> align == TT_DROPDOWN_ALIGN_LEFT) {
             turtleTextWriteUnicode((unsigned char *) dropdownp -> options -> data[dropdownp -> index].s, dropdownXFactor[0] + dropdownp -> size / 5, dropdownY, dropdownp -> size - 1, dropdownAlignFactor);
         } else if (dropdownp -> align == TT_DROPDOWN_ALIGN_CENTER) {
