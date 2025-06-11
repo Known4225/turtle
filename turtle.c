@@ -101,7 +101,7 @@ int main(int argc, char *argv[]) {
     /* initialize turtle */
     turtleInit(window, -320, -180, 320, 180);
     /* initialise turtleText */
-    turtleTextInit("include/fontBez.tgl");
+    turtleTextInit("include/roberto.tgl");
     /* initialise turtleTools ribbon */
     turtleToolsDarkTheme(); // dark theme preset
     ribbonInit("include/ribbonConfig.txt");

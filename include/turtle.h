@@ -42,10 +42,10 @@ typedef struct {
     list_t *penPos; // a list of where to draw
     uint64_t penHash; // the penPos list is hashed and this hash is used to determine if any changes occured between frames
     uint32_t lastLength; // the penPos list's length is saved and if it is different from last frame we know we have to redraw
-    char pen; // pen status (1 for down, 0 for up)
-    char penshape; // 0 for circle, 1 for square, 2 for triangle
-    char close; // close changes to 1 when the user clicks the x on the window
-    char shouldClose; // controls whether the window terminates on turtle.close
+    uint8_t pen; // pen status (1 for down, 0 for up)
+    uint16_t penshape; // 0 for circle, 1 for square, 2 for triangle
+    uint8_t close; // close changes to 1 when the user clicks the x on the window
+    uint8_t shouldClose; // controls whether the window terminates on turtle.close
     double circleprez; // how precise circles are (specifically, the number of sides of a circle with diameter e)
     double pensize; // turtle pen size
     double penr; // pen red (0 to 1)
