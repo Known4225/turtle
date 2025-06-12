@@ -117,7 +117,7 @@ int main(int argc, char *argv[]) {
 
     turtleBgColor(30, 30, 30);
     int32_t buttonVar, switchVar = 0, dropdownVar = 0;
-    double dialVar = 0.0, sliderVar = 0.0;
+    double dialVar = 0.0, sliderVar = 0.0, scrollbarVar = 0.0;
     list_t *dropdownOptions = list_init();
     list_append(dropdownOptions, (unitype) "a", 's');
     list_append(dropdownOptions, (unitype) "long item", 's');
@@ -136,6 +136,7 @@ int main(int argc, char *argv[]) {
     sliderInit("slider", &sliderVar, TT_SLIDER_VERTICAL, TT_SLIDER_ALIGN_LEFT, -100, -35, 10, 50, 0, 255, 1);
     sliderInit("slider", &sliderVar, TT_SLIDER_VERTICAL, TT_SLIDER_ALIGN_CENTER, 0, -35, 10, 50, 0, 255, 1);
     sliderInit("slider", &sliderVar, TT_SLIDER_VERTICAL, TT_SLIDER_ALIGN_RIGHT, 100, -35, 10, 50, 0, 255, 1);
+    scrollbarInit(&scrollbarVar, TT_SCROLLBAR_VERTICAL, 300, 0, 10, 300, 50);
     dropdownInit("dropdown", dropdownOptions, &dropdownVar, TT_DROPDOWN_ALIGN_CENTER, 0, 70, 10);
 
     while (turtle.shouldClose == 0) {

@@ -35,6 +35,7 @@ typedef struct {
     int8_t switchEnabled;
     int8_t dialEnabled;
     int8_t sliderEnabled;
+    int8_t scrollbarEnabled;
     int8_t dropdownEnabled;
 } tt_enabled_t;
 
@@ -469,6 +470,7 @@ typedef struct {
     list_t *switches;
     list_t *dials;
     list_t *sliders;
+    list_t *scrollbars;
     list_t *dropdowns;
 } tt_elements_t;
 
@@ -547,6 +549,24 @@ typedef struct {
     double defaultValue;
     double *variable; // value of slider
 } tt_slider_t;
+
+typedef enum {
+    TT_SCROLLBAR_HORIZONTAL = 0,
+    TT_SCROLLBAR_VERTICAL = 1,
+} tt_scrollbar_type_t;
+
+/* scrollbar */
+typedef struct {
+    tt_color_override_t color;
+    int32_t status;
+    tt_slider_type_t type;
+    double size;
+    double length;
+    double position[2]; // X, Y
+    double barPercentage; // percentage of scrollbar occupied by bar
+    double barAnchor;
+    double *variable; // value of slider
+} tt_scrollbar_t;
 
 typedef enum {
     TT_DROPDOWN_ALIGN_LEFT = 0,
@@ -686,6 +706,26 @@ void dropdownCalculateMax(tt_dropdown_t *dropdown) {
     }
 }
 
+tt_scrollbar_t *scrollbarInit(double *variable, tt_scrollbar_type_t type, double x, double y, double size, double length, double barPercentage) {
+    if (tt_enabled.scrollbarEnabled == 0) {
+        tt_enabled.scrollbarEnabled = 1;
+        tt_elements.scrollbars = list_init();
+    }
+    tt_scrollbar_t *scrollbarp = malloc(sizeof(tt_scrollbar_t));
+    scrollbarp -> color.colorOverride = 0;
+    scrollbarp -> status = 0;
+    scrollbarp -> type = type;
+    scrollbarp -> position[0] = x;
+    scrollbarp -> position[1] = y;
+    scrollbarp -> size = size;
+    scrollbarp -> length = length;
+    scrollbarp -> barPercentage = barPercentage;
+    scrollbarp -> variable = variable;
+    list_append(tt_elements.scrollbars, (unitype) (void *) scrollbarp, 'p');
+    return scrollbarp;
+}
+
+/* create a dropdown - use a list of strings for options */
 tt_dropdown_t *dropdownInit(char *label, list_t *options, int32_t *variable, tt_dropdown_align_t align, double x, double y, double size) {
     if (tt_enabled.dropdownEnabled == 0) {
         tt_globals.dropdownLogicIndex = -1;
@@ -1019,6 +1059,54 @@ void sliderUpdate() {
     }
 }
 
+void scrollbarUpdate() {
+    for (uint32_t i = 0; i < tt_elements.scrollbars -> length; i++) {
+        tt_scrollbar_t *scrollbarp = (tt_scrollbar_t *) (tt_elements.scrollbars -> data[i].p);
+        double scrollbarTop = scrollbarp -> position[1] + scrollbarp -> length / 2;
+        double scrollbarBottom = scrollbarp -> position[1] - scrollbarp -> length / 2;
+        double dragTop = scrollbarTop - ((*(scrollbarp -> variable)) / 100 * (scrollbarp -> length / scrollbarp -> barPercentage * 100));
+        double dragBottom = scrollbarTop - ((*(scrollbarp -> variable) + scrollbarp -> barPercentage / 2) / 100 * (scrollbarp -> length / scrollbarp -> barPercentage * 100));
+        if (scrollbarp -> type == TT_SLIDER_HORIZONTAL) {
+            turtlePenSize(scrollbarp -> size * 1.2);
+        } else if (scrollbarp -> type == TT_SLIDER_VERTICAL) {
+            turtlePenSize(scrollbarp -> size * 1.2);
+            if (scrollbarp -> color.colorOverride) {
+                turtlePenColor(scrollbarp -> color.color[3], scrollbarp -> color.color[4], scrollbarp -> color.color[5]);
+            } else {
+                tt_setColor(TT_COLOR_SLIDER_BAR);
+            }
+            turtleGoto(scrollbarp -> position[0], scrollbarTop);
+            turtlePenDown();
+            turtleGoto(scrollbarp -> position[0], scrollbarBottom);
+            turtlePenUp();
+            turtlePenSize(scrollbarp -> size * 1);
+            if (scrollbarp -> color.colorOverride) {
+                turtlePenColor(scrollbarp -> color.color[6], scrollbarp -> color.color[7], scrollbarp -> color.color[8]);
+            } else {
+                tt_setColor(TT_COLOR_SLIDER_CIRCLE);
+            }
+            turtleGoto(scrollbarp -> position[0], dragTop);
+            turtlePenDown();
+            turtleGoto(scrollbarp -> position[0], dragBottom);
+            turtlePenUp();
+            if (turtleMouseDown()) {
+                if (scrollbarp -> status < 0) {
+                    scrollbarp -> status *= -1;
+                }
+            } else {
+                if (turtle.mouseX > scrollbarp -> position[0] - scrollbarp -> size * 1.1 && turtle.mouseX < scrollbarp -> position[0] + scrollbarp -> size * 1.1 && turtle.mouseY > scrollbarBottom && turtle.mouseY < scrollbarTop) {
+                    scrollbarp -> status = -1;
+                } else {
+                    scrollbarp -> status = 0;
+                }
+            }
+            if (scrollbarp -> status > 0) {
+                *(scrollbarp -> variable) = turtle.mouseY;
+            }
+        }
+    }
+}
+
 void dropdownUpdate() {
     int32_t logicIndex = -1;
     for (uint32_t i = 0; i < tt_elements.dropdowns -> length; i++) {
@@ -1174,9 +1262,6 @@ void dropdownUpdate() {
 }
 
 void turtleToolsUpdate() {
-    if (tt_enabled.popupEnabled) {
-        popupUpdate();
-    }
     if (tt_enabled.buttonEnabled) {
         buttonUpdate();
     }
@@ -1188,6 +1273,9 @@ void turtleToolsUpdate() {
     }
     if (tt_enabled.sliderEnabled) {
         sliderUpdate();
+    }
+    if (tt_enabled.scrollbarEnabled) {
+        scrollbarUpdate();
     }
     if (tt_enabled.dropdownEnabled) {
         dropdownUpdate();
@@ -1201,9 +1289,6 @@ void turtleToolsUpdate() {
 }
 
 void turtleToolsUpdateUI() {
-    if (tt_enabled.popupEnabled) {
-        popupUpdate();
-    }
     if (tt_enabled.buttonEnabled) {
         buttonUpdate();
     }
@@ -1215,6 +1300,9 @@ void turtleToolsUpdateUI() {
     }
     if (tt_enabled.sliderEnabled) {
         sliderUpdate();
+    }
+    if (tt_enabled.scrollbarEnabled) {
+        scrollbarUpdate();
     }
     if (tt_enabled.dropdownEnabled) {
         dropdownUpdate();
