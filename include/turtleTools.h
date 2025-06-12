@@ -1064,8 +1064,8 @@ void scrollbarUpdate() {
         tt_scrollbar_t *scrollbarp = (tt_scrollbar_t *) (tt_elements.scrollbars -> data[i].p);
         double scrollbarTop = scrollbarp -> position[1] + scrollbarp -> length / 2;
         double scrollbarBottom = scrollbarp -> position[1] - scrollbarp -> length / 2;
-        double dragTop = scrollbarTop - ((*(scrollbarp -> variable)) / 100 * (scrollbarp -> length / scrollbarp -> barPercentage * 100));
-        double dragBottom = scrollbarTop - ((*(scrollbarp -> variable) + scrollbarp -> barPercentage / 2) / 100 * (scrollbarp -> length / scrollbarp -> barPercentage * 100));
+        double dragTop = scrollbarTop - ((*(scrollbarp -> variable)) / 100 * (scrollbarp -> length * scrollbarp -> barPercentage / 100));
+        double dragBottom = scrollbarTop - (*(scrollbarp -> variable) / 100 * (scrollbarp -> length * scrollbarp -> barPercentage / 100) + scrollbarp -> length * scrollbarp -> barPercentage / 100);
         if (scrollbarp -> type == TT_SLIDER_HORIZONTAL) {
             turtlePenSize(scrollbarp -> size * 1.2);
         } else if (scrollbarp -> type == TT_SLIDER_VERTICAL) {
@@ -1091,6 +1091,7 @@ void scrollbarUpdate() {
             turtlePenUp();
             if (turtleMouseDown()) {
                 if (scrollbarp -> status < 0) {
+                    scrollbarp -> barAnchor = 0;
                     scrollbarp -> status *= -1;
                 }
             } else {
@@ -1101,7 +1102,14 @@ void scrollbarUpdate() {
                 }
             }
             if (scrollbarp -> status > 0) {
-                *(scrollbarp -> variable) = turtle.mouseY;
+                *(scrollbarp -> variable) = (scrollbarTop - turtle.mouseY) / scrollbarp -> length * 100;
+                if (*(scrollbarp -> variable) < 0) {
+                    *(scrollbarp -> variable) = 0;
+                }
+                if (*(scrollbarp -> variable) > 100) {
+                    *(scrollbarp -> variable) = 100;
+                }
+                printf("%lf\n", *(scrollbarp -> variable));
             }
         }
     }
