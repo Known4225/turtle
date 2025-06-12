@@ -40,7 +40,10 @@ idea: try glfwGetClipboardString and glfwSetClipboardString
 #include <string.h>
 #include "glfw3.h"
 
-GLFWwindow *osToolsWindow;
+typedef struct {
+    GLFWwindow *osToolsWindow;
+    GLFWcursor *standardCursors[6];
+} osToolsGLFWObject;
 
 typedef struct {
     char *text; // clipboard text data (heap allocated)
@@ -54,15 +57,69 @@ typedef struct {
     char **extensions; // array of allowed extensions (7 characters long max (cuz *.json;))
 } osToolsFileDialogObject;
 
+osToolsGLFWObject osToolsGLFW;
 osToolsClipboardObject osToolsClipboard;
 osToolsFileDialogObject osToolsFileDialog;
+
+/* OS independent functions */
+void osToolsIndependentInit(GLFWwindow *window) {
+    osToolsGLFW.osToolsWindow = window;
+    osToolsGLFW.standardCursors[0] = glfwCreateStandardCursor(GLFW_ARROW_CURSOR);
+    osToolsGLFW.standardCursors[1] = glfwCreateStandardCursor(GLFW_IBEAM_CURSOR);
+    osToolsGLFW.standardCursors[2] = glfwCreateStandardCursor(GLFW_CROSSHAIR_CURSOR);
+    osToolsGLFW.standardCursors[3] = glfwCreateStandardCursor(GLFW_HAND_CURSOR);
+    osToolsGLFW.standardCursors[4] = glfwCreateStandardCursor(GLFW_HRESIZE_CURSOR);
+    osToolsGLFW.standardCursors[5] = glfwCreateStandardCursor(GLFW_VRESIZE_CURSOR);
+}
+
+/*
+GLFW_ARROW_CURSOR
+GLFW_IBEAM_CURSOR
+GLFW_CROSSHAIR_CURSOR
+GLFW_HAND_CURSOR
+GLFW_HRESIZE_CURSOR
+GLFW_VRESIZE_CURSOR
+*/
+void osSetCursor(uint32_t cursor) {
+    switch (cursor) {
+    case GLFW_ARROW_CURSOR:
+        glfwSetCursor(osToolsGLFW.osToolsWindow, osToolsGLFW.standardCursors[0]);
+    break;
+    case GLFW_IBEAM_CURSOR:
+        glfwSetCursor(osToolsGLFW.osToolsWindow, osToolsGLFW.standardCursors[1]);
+    break;
+    case GLFW_CROSSHAIR_CURSOR:
+        glfwSetCursor(osToolsGLFW.osToolsWindow, osToolsGLFW.standardCursors[2]);
+    break;
+    case GLFW_HAND_CURSOR:
+        glfwSetCursor(osToolsGLFW.osToolsWindow, osToolsGLFW.standardCursors[3]);
+    break;
+    case GLFW_HRESIZE_CURSOR:
+        glfwSetCursor(osToolsGLFW.osToolsWindow, osToolsGLFW.standardCursors[4]);
+    break;
+    case GLFW_VRESIZE_CURSOR:
+        glfwSetCursor(osToolsGLFW.osToolsWindow, osToolsGLFW.standardCursors[5]);
+    break;
+    default:
+        glfwSetCursor(osToolsGLFW.osToolsWindow, osToolsGLFW.standardCursors[0]);
+    break;
+    }
+}
+
+void osHideAndLockCursor() {
+    glfwSetInputMode(osToolsGLFW.osToolsWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+}
+
+void osShowCursor() {
+    glfwSetInputMode(osToolsGLFW.osToolsWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+}
 
 #ifdef OS_WINDOWS
 #include <windows.h>
 #include <shobjidl.h>
 
 int32_t osToolsInit(char argv0[], GLFWwindow *window) {
-    osToolsWindow = window;
+    osToolsIndependentInit(window);
     /* get executable filepath */
     GetModuleFileNameA(NULL, osToolsFileDialog.executableFilepath, MAX_PATH);
     if (GetLastError() != ERROR_SUCCESS) {
@@ -292,16 +349,27 @@ int32_t osToolsFileDialogPrompt(char openOrSave, char *filename) { // 0 - open, 
 #define CURSOR_DIAGONALLEFT IDC_SIZENWSE
 #define CURSOR_DIAGONALRIGHT IDC_SIZENESW
 
-void osSetCursor(LPCTSTR cursor) {
+/*
+CURSOR_POINTER IDC_ARROW
+CURSOR_LOADING IDC_WAIT
+CURSOR_HAND IDC_HAND
+CURSOR_MOVING IDC_SIZEALL
+CURSOR_CROSS IDC_CROSS
+CURSOR_UPDOWN IDC_SIZENS
+CURSOR_SIDESIDE IDC_SIZEWE
+CURSOR_DIAGONALLEFT IDC_SIZENWSE
+CURSOR_DIAGONALRIGHT IDC_SIZENESW
+*/
+void osWindowsSetCursor(LPCTSTR cursor) {
     HCURSOR hCursor = LoadCursor(NULL, cursor);
     SetCursor(hCursor);
 }
 
-void osHideAndLockCursor() {
+void osWindowsHideAndLockCursor() {
     ShowCursor(0);
 }
 
-void osShowCursor() {
+void osWindowsShowCursor() {
     ShowCursor(1);
 }
 #endif
@@ -321,7 +389,7 @@ This is similar to COMDLG_FILTERSPEC struct's pszName and pszSpec, so you can ad
 */
 
 void osToolsInit(char argv0[], GLFWwindow *window) {
-    osToolsWindow = window;
+    osToolsIndependentInit(window);
     /* get executable filepath */
     FILE *exStringFile = popen("pwd", "r");
     fscanf(exStringFile, "%s", osToolsFileDialog.executableFilepath);
@@ -343,13 +411,13 @@ void osToolsInit(char argv0[], GLFWwindow *window) {
 
 /* gets the text */
 int32_t osToolsClipboardGetText() {
-    osToolsClipboard.text = strdup(glfwGetClipboardString(osToolsWindow));
+    osToolsClipboard.text = strdup(glfwGetClipboardString(osToolsGLFW.osToolsWindow));
     return 0;
 }
 
 /* takes null terminated strings */
 int32_t osToolsClipboardSetText(const char *input) {
-    glfwSetClipboardString(osToolsWindow, input);
+    glfwSetClipboardString(osToolsGLFW.osToolsWindow, input);
     return 0;
 }
 
