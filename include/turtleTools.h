@@ -65,37 +65,6 @@ typedef struct {
 
 tt_elements_t tt_elements;
 
-/* default colours (light theme) */
-double tt_themeColors[] = {
-    0.0, 0.0, 0.0,       // text color (0)
-    0.0, 0.0, 0.0,       // text color alternate (3)
-    200.0, 200.0, 200.0, // ribbon top bar color (6)
-    140.0, 140.0, 140.0, // ribbon dropdown color (9)
-    160.0, 160.0, 160.0, // ribbon select color (12)
-    100.0, 100.0, 100.0, // ribbon hover color (15)
-    200.0, 200.0, 200.0, // popup box color (18)
-    140.0, 140.0, 140.0, // popup boxes color (21)
-    100.0, 100.0, 100.0, // popup boxes select color (24)
-    200.0, 200.0, 200.0, // button color (27)
-    160.0, 160.0, 160.0, // button select color (30)
-    180.0, 180.0, 180.0, // switch color off (33)
-    230.0, 230.0, 230.0, // switch circle color off (36)
-    30.0, 30.0, 30.0,    // switch color on (39)
-    0.0, 255.0, 255.0,   // switch circle color on (42)
-    0.0, 0.0, 0.0,       // dial color (45)
-    255.0, 255.0, 255.0, // dial inner circle color (48)
-    120.0, 120.0, 120.0, // slider bar color (51)
-    230.0, 230.0, 230.0, // slider circle color (54)
-    140.0, 140.0, 140.0, // scrollbar bar base color (57)
-    180.0, 180.0, 180.0, // scrollbar bar color (60)
-    200.0, 200.0, 200.0, // scrollbar bar hover color (63)
-    220.0, 220.0, 220.0, // scrollbar bar clicked color (66)
-    160.0, 160.0, 160.0, // dropdown color (69)
-    120.0, 120.0, 120.0, // dropdown select color (72)
-    120.0, 120.0, 120.0, // dropdown hover color (75)
-    100.0, 100.0, 100.0, // dropdown triangle color (78)
-};
-
 typedef enum {
     TT_COLOR_TEXT = 0,
     TT_COLOR_TEXT_ALTERNATE = 3,
@@ -126,6 +95,37 @@ typedef enum {
     TT_COLOR_DROPDOWN_TRIANGLE = 78,
 } tt_theme_internal_t;
 
+/* default colours (light theme) */
+double tt_themeColors[] = {
+    0.0, 0.0, 0.0,       // text color (0)
+    0.0, 0.0, 0.0,       // text color alternate (3)
+    200.0, 200.0, 200.0, // ribbon top bar color (6)
+    140.0, 140.0, 140.0, // ribbon dropdown color (9)
+    160.0, 160.0, 160.0, // ribbon select color (12)
+    100.0, 100.0, 100.0, // ribbon hover color (15)
+    200.0, 200.0, 200.0, // popup box color (18)
+    140.0, 140.0, 140.0, // popup boxes color (21)
+    100.0, 100.0, 100.0, // popup boxes select color (24)
+    200.0, 200.0, 200.0, // button color (27)
+    160.0, 160.0, 160.0, // button select color (30)
+    180.0, 180.0, 180.0, // switch color off (33)
+    230.0, 230.0, 230.0, // switch circle color off (36)
+    30.0, 30.0, 30.0,    // switch color on (39)
+    0.0, 255.0, 255.0,   // switch circle color on (42)
+    0.0, 0.0, 0.0,       // dial color (45)
+    255.0, 255.0, 255.0, // dial inner circle color (48)
+    120.0, 120.0, 120.0, // slider bar color (51)
+    230.0, 230.0, 230.0, // slider circle color (54)
+    200.0, 200.0, 200.0, // scrollbar bar base color (57)
+    160.0, 160.0, 160.0, // scrollbar bar color (60)
+    120.0, 120.0, 120.0, // scrollbar bar hover color (63)
+    120.0, 120.0, 120.0, // scrollbar bar clicked color (66)
+    160.0, 160.0, 160.0, // dropdown color (69)
+    120.0, 120.0, 120.0, // dropdown select color (72)
+    120.0, 120.0, 120.0, // dropdown hover color (75)
+    100.0, 100.0, 100.0, // dropdown triangle color (78)
+};
+
 void tt_setColor(int32_t index) {
     turtlePenColor(tt_themeColors[index], tt_themeColors[index + 1], tt_themeColors[index + 2]);
 }
@@ -152,10 +152,10 @@ void turtleToolsLightTheme() { // light theme preset (default)
         255.0, 255.0, 255.0, // dial inner circle color (48)
         120.0, 120.0, 120.0, // slider bar color (51)
         230.0, 230.0, 230.0, // slider circle color (54)
-        140.0, 140.0, 140.0, // scrollbar bar base color (57)
-        180.0, 180.0, 180.0, // scrollbar bar color (60)
-        200.0, 200.0, 200.0, // scrollbar bar hover color (63)
-        220.0, 220.0, 220.0, // scrollbar bar clicked color (66)
+        200.0, 200.0, 200.0, // scrollbar bar base color (57)
+        160.0, 160.0, 160.0, // scrollbar bar color (60)
+        120.0, 120.0, 120.0, // scrollbar bar hover color (63)
+        120.0, 120.0, 120.0, // scrollbar bar clicked color (66)
         160.0, 160.0, 160.0, // dropdown color (69)
         120.0, 120.0, 120.0, // dropdown select color (72)
         120.0, 120.0, 120.0, // dropdown hover color (75)
@@ -509,6 +509,7 @@ typedef struct {
 typedef struct {
     double dialAnchorX;
     double dialAnchorY;
+    double barAnchor;
     int32_t dropdownLogicIndex;
 } tt_globals_t;
 
@@ -610,10 +611,9 @@ typedef struct {
     double size;
     double *variable; // value of slider
     int32_t status;
-    tt_slider_type_t type;
+    tt_scrollbar_type_t type;
     double length;
     double barPercentage; // percentage of scrollbar occupied by bar
-    double barAnchor;
 } tt_scrollbar_t;
 
 typedef enum {
@@ -642,6 +642,25 @@ typedef struct {
 void tt_colorOverride(void *element, double *colors, uint32_t length) {
     ((tt_button_t *) element) -> color.colorOverride = 1;
     memcpy(((tt_button_t *) element) -> color.color, colors, length * sizeof(double));
+}
+
+typedef enum {
+    TT_COLOR_OVERRIDE_SLOT_0 = 0,
+    TT_COLOR_OVERRIDE_SLOT_1 = 3,
+    TT_COLOR_OVERRIDE_SLOT_2 = 6,
+    TT_COLOR_OVERRIDE_SLOT_3 = 9,
+    TT_COLOR_OVERRIDE_SLOT_4 = 12,
+    TT_COLOR_OVERRIDE_SLOT_5 = 15,
+    TT_COLOR_OVERRIDE_SLOT_6 = 18,
+    TT_COLOR_OVERRIDE_SLOT_7 = 21,
+} tt_color_override_internal_t;
+
+void tt_internalColor(void *element, int32_t colorIndex, int32_t overrideIndex) {
+    if (((tt_button_t *) element) -> color.colorOverride) {
+        turtlePenColor(((tt_button_t *) element) -> color.color[overrideIndex], ((tt_button_t *) element) -> color.color[overrideIndex + 1], ((tt_button_t *) element) -> color.color[overrideIndex + 2]);
+    } else {
+        turtlePenColor(tt_themeColors[colorIndex], tt_themeColors[colorIndex + 1], tt_themeColors[colorIndex + 2]);
+    }
 }
 
 /* initialise UI elements */
@@ -849,12 +868,12 @@ void buttonUpdate() {
         double buttonWidth = turtleTextGetUnicodeLength((unsigned char *) buttonp -> label, buttonp -> size) * 1.1;
         double buttonHeight = buttonp -> size * 1.75;
         if (buttonp -> status == 0) {
-            tt_setColor(TT_COLOR_BUTTON);
+            tt_internalColor(buttonp, TT_COLOR_BUTTON, TT_COLOR_OVERRIDE_SLOT_1);
         } else {
-            tt_setColor(TT_COLOR_BUTTON_SELECT);
+            tt_internalColor(buttonp, TT_COLOR_BUTTON_SELECT, TT_COLOR_OVERRIDE_SLOT_2);
         }
         turtleRectangle(buttonX - buttonWidth / 2, buttonY - buttonHeight / 2, buttonX + buttonWidth / 2, buttonY + buttonHeight / 2);
-        tt_setColor(TT_COLOR_TEXT_ALTERNATE);
+        tt_internalColor(buttonp, TT_COLOR_TEXT_ALTERNATE, TT_COLOR_OVERRIDE_SLOT_0);
         turtleTextWriteUnicode((unsigned char *) buttonp -> label, buttonX, buttonY, buttonp -> size - 1, 50);
         if (turtleMouseDown()) {
             if (buttonp -> status < 0) {
@@ -880,12 +899,12 @@ void switchUpdate() {
         tt_switch_t *switchp = (tt_switch_t *) (tt_elements.switches -> data[i].p);
         double switchX = switchp -> x;
         double switchY = switchp -> y;
-        tt_setColor(TT_COLOR_TEXT);
+        tt_internalColor(switchp, TT_COLOR_TEXT, TT_COLOR_OVERRIDE_SLOT_0);
         turtleTextWriteUnicode((unsigned char *) switchp -> label, switchX, switchY + 1.6 * switchp -> size, switchp -> size - 1, 50);
         if (*(switchp -> variable)) {
-            tt_setColor(TT_COLOR_SWITCH_ON);
+            tt_internalColor(switchp, TT_COLOR_SWITCH_ON, TT_COLOR_OVERRIDE_SLOT_1);
         } else {
-            tt_setColor(TT_COLOR_SWITCH_OFF);
+            tt_internalColor(switchp, TT_COLOR_SWITCH_OFF, TT_COLOR_OVERRIDE_SLOT_2);
         }
         turtlePenSize(switchp -> size * 1.2);
         turtleGoto(switchX - switchp -> size * 0.8, switchY);
@@ -894,10 +913,10 @@ void switchUpdate() {
         turtlePenUp();
         turtlePenSize(switchp -> size);
         if (*(switchp -> variable)) {
-            tt_setColor(TT_COLOR_SWITCH_CIRCLE_ON);
+            tt_internalColor(switchp, TT_COLOR_SWITCH_CIRCLE_ON, TT_COLOR_OVERRIDE_SLOT_3);
             turtleGoto(switchX + switchp -> size * 0.8, switchY);
         } else {
-            tt_setColor(TT_COLOR_SWITCH_CIRCLE_OFF);
+            tt_internalColor(switchp, TT_COLOR_SWITCH_CIRCLE_OFF, TT_COLOR_OVERRIDE_SLOT_4);
             turtleGoto(switchX - switchp -> size * 0.8, switchY);
         }
         turtlePenDown();
@@ -941,20 +960,20 @@ double angleBetween(double x1, double y1, double x2, double y2) {
 void dialUpdate() {
     for (uint32_t i = 0; i < tt_elements.dials -> length; i++) {
         tt_dial_t *dialp = (tt_dial_t *) (tt_elements.dials -> data[i].p);
-        tt_setColor(TT_COLOR_TEXT);
+        tt_internalColor(dialp, TT_COLOR_TEXT, TT_COLOR_OVERRIDE_SLOT_0);
         turtleTextWriteUnicode((unsigned char *) dialp -> label, dialp -> x, dialp -> y + 1.9 * dialp -> size, dialp -> size - 1, 50);
         turtlePenSize(dialp -> size * 2);
         double dialX = dialp -> x;
         double dialY = dialp -> y;
         turtleGoto(dialX, dialY);
-        tt_setColor(TT_COLOR_DIAL);
+        tt_internalColor(dialp, TT_COLOR_DIAL, TT_COLOR_OVERRIDE_SLOT_1);
         turtlePenDown();
         turtlePenUp();
         turtlePenSize(dialp -> size * 2 * 0.8);
-        tt_setColor(TT_COLOR_DIAL_INNER);
+        tt_internalColor(dialp, TT_COLOR_DIAL_INNER, TT_COLOR_OVERRIDE_SLOT_2);
         turtlePenDown();
         turtlePenUp();
-        tt_setColor(TT_COLOR_DIAL);
+        tt_internalColor(dialp, TT_COLOR_DIAL, TT_COLOR_OVERRIDE_SLOT_1);
         turtlePenSize(1);
         turtlePenDown();
         double dialAngle;
@@ -1004,11 +1023,9 @@ void dialUpdate() {
                 *(dialp -> variable) = round(dialp -> range[0] + (dialp -> range[1] - dialp -> range[0]) * ((pow(361, dialAngle / 360) - 1) / 360));
             }
         }
-        char bubble[24];
+        tt_internalColor(dialp, TT_COLOR_TEXT, TT_COLOR_OVERRIDE_SLOT_0);
         double rounded = round(*(dialp -> variable) * dialp -> renderNumberFactor);
-        sprintf(bubble, "%.0lf", rounded);
-        tt_setColor(TT_COLOR_TEXT);
-        turtleTextWriteString(bubble, dialX + dialp -> size + 3, dialY, 4, 0);
+        turtleTextWriteStringf(dialX + dialp -> size + 3, dialY, 4, 0, "%.0lf", rounded);
     }
 }
 
@@ -1077,28 +1094,16 @@ void sliderUpdate() {
                 sliderOffsetXFactorSmall = -sliderp -> size * 1;
             }
         }
-        if (sliderp -> color.colorOverride) {
-            turtlePenColor(sliderp -> color.color[0], sliderp -> color.color[1], sliderp -> color.color[2]);
-        } else {
-            tt_setColor(TT_COLOR_TEXT);
-        }
+        tt_internalColor(sliderp, TT_COLOR_TEXT, TT_COLOR_OVERRIDE_SLOT_0);
         turtleTextWriteUnicode((unsigned char *) sliderp -> label, sliderp -> x + sliderOffsetXFactor, sliderp -> y + sliderOffsetYFactor, sliderp -> size - 1, sliderAlignFactor);
         turtlePenSize(sliderp -> size * 1.2);
         turtleGoto(sliderXLeft, sliderYLeft);
-        if (sliderp -> color.colorOverride) {
-            turtlePenColor(sliderp -> color.color[3], sliderp -> color.color[4], sliderp -> color.color[5]);
-        } else {
-            tt_setColor(TT_COLOR_SLIDER_BAR);
-        }
+        tt_internalColor(sliderp, TT_COLOR_SLIDER_BAR, TT_COLOR_OVERRIDE_SLOT_1);
         turtlePenDown();
         turtleGoto(sliderXRight, sliderYRight);
         turtlePenUp();
         turtlePenSize(sliderp -> size);
-        if (sliderp -> color.colorOverride) {
-            turtlePenColor(sliderp -> color.color[6], sliderp -> color.color[7], sliderp -> color.color[8]);
-        } else {
-            tt_setColor(TT_COLOR_SLIDER_CIRCLE);
-        }
+        tt_internalColor(sliderp, TT_COLOR_SLIDER_CIRCLE, TT_COLOR_OVERRIDE_SLOT_2);
         if (sliderp -> type == TT_SLIDER_HORIZONTAL) {
             turtleGoto(sliderXLeft + (sliderXRight - sliderXLeft) * (*(sliderp -> variable) - sliderp -> range[0]) / (sliderp -> range[1] - sliderp -> range[0]), sliderYLeft);
         } else if (sliderp -> type == TT_SLIDER_VERTICAL) {
@@ -1135,15 +1140,9 @@ void sliderUpdate() {
             }
         }
         if (sliderp -> renderNumberFactor != 0) {
-            char bubble[24];
+            tt_internalColor(sliderp, TT_COLOR_TEXT, TT_COLOR_OVERRIDE_SLOT_0);
             double rounded = round(*(sliderp -> variable) * sliderp -> renderNumberFactor);
-            sprintf(bubble, "%.0lf", rounded);
-            if (sliderp -> color.colorOverride) {
-                turtlePenColor(sliderp -> color.color[6], sliderp -> color.color[7], sliderp -> color.color[8]);
-            } else {
-                tt_setColor(TT_COLOR_TEXT);
-            }
-            turtleTextWriteString(bubble, sliderp -> x + sliderOffsetXFactorSmall, sliderp -> y + sliderOffsetYFactorSmall, 4, sliderAlignFactor);
+            turtleTextWriteStringf(sliderp -> x + sliderOffsetXFactorSmall, sliderp -> y + sliderOffsetYFactorSmall, 4, sliderAlignFactor, "%.0lf", rounded);
         }
     }
 }
@@ -1160,38 +1159,22 @@ void scrollbarUpdate() {
         double scrollbarBottom = scrollbarp -> y - scrollbarp -> length / 2;
         double dragTop = scrollbarTop - (*(scrollbarp -> variable)) / 100 * (scrollbarp -> length * (1 - scrollbarp -> barPercentage / 100));
         double dragBottom = dragTop - (scrollbarp -> length * scrollbarp -> barPercentage / 100);
-        if (scrollbarp -> type == TT_SLIDER_HORIZONTAL) {
+        if (scrollbarp -> type == TT_SCROLLBAR_HORIZONTAL) {
+            /* TODO */
+        } else if (scrollbarp -> type == TT_SCROLLBAR_VERTICAL) {
             turtlePenSize(scrollbarp -> size * 1);
-        } else if (scrollbarp -> type == TT_SLIDER_VERTICAL) {
-            turtlePenSize(scrollbarp -> size * 1);
-            if (scrollbarp -> color.colorOverride) {
-                turtlePenColor(scrollbarp -> color.color[3], scrollbarp -> color.color[4], scrollbarp -> color.color[5]);
-            } else {
-                tt_setColor(TT_COLOR_SCROLLBAR_BASE);
-            }
+            tt_internalColor(scrollbarp, TT_COLOR_SCROLLBAR_BASE, TT_COLOR_OVERRIDE_SLOT_1);
             turtleGoto(scrollbarp -> x, scrollbarTop);
             turtlePenDown();
             turtleGoto(scrollbarp -> x, scrollbarBottom);
             turtlePenUp();
             turtlePenSize(scrollbarp -> size * 0.8);
-            if (scrollbarp -> status == -1) {
-                if (scrollbarp -> color.colorOverride) {
-                    turtlePenColor(scrollbarp -> color.color[9], scrollbarp -> color.color[10], scrollbarp -> color.color[11]);
-                } else {
-                    tt_setColor(TT_COLOR_SCROLLBAR_HOVER);
-                }
+            if (scrollbarp -> status == -1 && turtle.mouseY > dragBottom - scrollbarp -> size * 0.4 && turtle.mouseY < dragTop + scrollbarp -> size * 0.4) {
+                tt_internalColor(scrollbarp, TT_COLOR_SCROLLBAR_HOVER, TT_COLOR_OVERRIDE_SLOT_2);
             } else if (scrollbarp -> status == 1) {
-                if (scrollbarp -> color.colorOverride) {
-                    turtlePenColor(scrollbarp -> color.color[12], scrollbarp -> color.color[13], scrollbarp -> color.color[14]);
-                } else {
-                    tt_setColor(TT_COLOR_SCROLLBAR_CLICKED);
-                }
+                tt_internalColor(scrollbarp, TT_COLOR_SCROLLBAR_CLICKED, TT_COLOR_OVERRIDE_SLOT_3);
             } else {
-                if (scrollbarp -> color.colorOverride) {
-                    turtlePenColor(scrollbarp -> color.color[6], scrollbarp -> color.color[7], scrollbarp -> color.color[8]);
-                } else {
-                    tt_setColor(TT_COLOR_SCROLLBAR_BAR);
-                }
+                tt_internalColor(scrollbarp, TT_COLOR_SCROLLBAR_BAR, TT_COLOR_OVERRIDE_SLOT_4);
             }
             turtleGoto(scrollbarp -> x, dragTop);
             turtlePenDown();
@@ -1199,10 +1182,10 @@ void scrollbarUpdate() {
             turtlePenUp();
             if (turtleMouseDown()) {
                 if (scrollbarp -> status < 0) {
-                    if (turtle.mouseY > dragBottom && turtle.mouseY < dragTop) {
-                        scrollbarp -> barAnchor = dragTop - turtle.mouseY;
+                    if (turtle.mouseY > dragBottom - scrollbarp -> size * 0.4 && turtle.mouseY < dragTop + scrollbarp -> size * 0.4) {
+                        tt_globals.barAnchor = dragTop - turtle.mouseY;
                     } else {
-                        scrollbarp -> barAnchor = (scrollbarp -> length * scrollbarp -> barPercentage / 100) / 2;
+                        tt_globals.barAnchor = (scrollbarp -> length * scrollbarp -> barPercentage / 100) / 2;
                     }
                     scrollbarp -> status *= -1;
                 }
@@ -1214,7 +1197,7 @@ void scrollbarUpdate() {
                 }
             }
             if (scrollbarp -> status > 0) {
-                *(scrollbarp -> variable) = (scrollbarTop - turtle.mouseY - scrollbarp -> barAnchor) / (scrollbarp -> length * (1 - scrollbarp -> barPercentage / 100)) * 100;
+                *(scrollbarp -> variable) = (scrollbarTop - turtle.mouseY - tt_globals.barAnchor) / (scrollbarp -> length * (1 - scrollbarp -> barPercentage / 100)) * 100;
                 if (*(scrollbarp -> variable) < 0) {
                     *(scrollbarp -> variable) = 0;
                 }
