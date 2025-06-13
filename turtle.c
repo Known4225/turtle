@@ -53,11 +53,17 @@ void parseRibbonOutput() {
             if (ribbonRender.output[2] == 1) { // Change theme
                 printf("Change theme\n");
                 if (tt_theme == TT_THEME_DARK) {
+                    turtleBgColor(36, 30, 32);
+                    turtleToolsSetTheme(TT_THEME_COLT);
+                } else if (tt_theme == TT_THEME_COLT) {
+                    turtleBgColor(212, 201, 190);
+                    turtleToolsSetTheme(TT_THEME_NAVY);
+                } else if (tt_theme == TT_THEME_NAVY) {
                     turtleBgColor(255, 255, 255);
-                    turtleToolsLightTheme();
-                } else {
+                    turtleToolsSetTheme(TT_THEME_LIGHT);
+                } else if (tt_theme == TT_THEME_LIGHT) {
                     turtleBgColor(30, 30, 30);
-                    turtleToolsDarkTheme();
+                    turtleToolsSetTheme(TT_THEME_DARK);
                 }
             } 
             if (ribbonRender.output[2] == 2) { // GLFW
@@ -90,7 +96,7 @@ int main(int argc, char *argv[]) {
     /* Create a windowed mode window and its OpenGL context */
     const GLFWvidmode *monitorSize = glfwGetVideoMode(glfwGetPrimaryMonitor());
     int32_t windowHeight = monitorSize -> height * 0.85;
-    GLFWwindow *window = glfwCreateWindow(windowHeight * 16 / 9, windowHeight, "turtle", NULL, NULL);
+    GLFWwindow *window = glfwCreateWindow(windowHeight * 16 / 9, windowHeight, "turtle demo", NULL, NULL);
     if (!window) {
         glfwTerminate();
         return -1;
@@ -103,7 +109,7 @@ int main(int argc, char *argv[]) {
     /* initialise turtleText */
     turtleTextInit("include/roberto.tgl");
     /* initialise turtleTools ribbon */
-    turtleToolsDarkTheme(); // dark theme preset
+    turtleToolsSetTheme(TT_THEME_DARK); // dark theme preset
     ribbonInit("include/ribbonConfig.txt");
     /* initialise turtleTools popup */
     popupInit("include/popupConfig.txt", -60, -20, 60, 20);
@@ -117,7 +123,7 @@ int main(int argc, char *argv[]) {
 
     turtleBgColor(30, 30, 30);
     int32_t buttonVar, switchVar = 0, dropdownVar = 0;
-    double dialVar = 0.0, sliderVar = 0.0, scrollbarVar = 0.0;
+    double dialVar = 0.0, sliderVar = 0.0, scrollbarVarX = 0.0, scrollbarVarY = 0.0;
     list_t *dropdownOptions = list_init();
     list_append(dropdownOptions, (unitype) "a", 's');
     list_append(dropdownOptions, (unitype) "long item", 's');
@@ -136,19 +142,35 @@ int main(int argc, char *argv[]) {
     sliderInit("slider", &sliderVar, TT_SLIDER_VERTICAL, TT_SLIDER_ALIGN_LEFT, -100, -35, 10, 50, 0, 255, 1);
     sliderInit("slider", &sliderVar, TT_SLIDER_VERTICAL, TT_SLIDER_ALIGN_CENTER, 0, -35, 10, 50, 0, 255, 1);
     sliderInit("slider", &sliderVar, TT_SLIDER_VERTICAL, TT_SLIDER_ALIGN_RIGHT, 100, -35, 10, 50, 0, 255, 1);
-    scrollbarInit(&scrollbarVar, TT_SCROLLBAR_VERTICAL, 310, 0, 10, 320, 33);
+    scrollbarInit(&scrollbarVarX, TT_SCROLLBAR_HORIZONTAL, 20, -170, 10, 550, 50);
+    scrollbarInit(&scrollbarVarY, TT_SCROLLBAR_VERTICAL, 310, 0, 10, 320, 33);
     dropdownInit("dropdown", dropdownOptions, &dropdownVar, TT_DROPDOWN_ALIGN_CENTER, 0, 70, 10);
 
     double power = 0.0, speed = 0.0, exposure = 0.0, x = 103, y = 95, z = 215;
+    int32_t xEnabled, yEnabled, zEnabled;
+    list_t *sources = list_init();
+    int sourceIndex;
+    list_append(sources, (unitype) "None", 's');
+    list_append(sources, (unitype) "SP932", 's');
+    list_append(sources, (unitype) "SP932U", 's');
+    list_append(sources, (unitype) "SP928", 's');
+    list_append(sources, (unitype) "SP1203", 's');
+    list_append(sources, (unitype) "SP-1550M", 's');
     dialInit("Power", &power, TT_DIAL_LINEAR, -150, -210, 10, 0, 100, 1);
     dialInit("Speed", &speed, TT_DIAL_LINEAR, -100, -210, 10, 0, 1000, 1);
     dialInit("Exposure", &exposure, TT_DIAL_EXP, -50, -210, 10, 0, 1000, 1);
+    dropdownInit("Source", sources, &sourceIndex, TT_DROPDOWN_ALIGN_LEFT, -10, -207, 10);
     tt_slider_t *xSlider = sliderInit("", &x, TT_SLIDER_HORIZONTAL, TT_SLIDER_ALIGN_CENTER, -100, -240, 10, 100, -300, 300, 0);
     tt_slider_t *ySlider = sliderInit("", &y, TT_SLIDER_HORIZONTAL, TT_SLIDER_ALIGN_CENTER, -100, -260, 10, 100, -300, 300, 0);
     tt_slider_t *zSlider = sliderInit("", &z, TT_SLIDER_HORIZONTAL, TT_SLIDER_ALIGN_CENTER, -100, -280, 10, 100, -300, 300, 0);
+    switchInit("", &xEnabled, -10, -240, 10);
+    switchInit("", &yEnabled, -10, -260, 10);
+    switchInit("", &zEnabled, -10, -280, 10);
 
+    list_t *xPositions = list_init();
     list_t *yPositions = list_init();
     for (uint32_t i = 0; i < tt_elements.all -> length; i++) {
+        list_append(xPositions, (unitype) ((tt_button_t *) tt_elements.all -> data[i].p) -> x, 'd');
         list_append(yPositions, (unitype) ((tt_button_t *) tt_elements.all -> data[i].p) -> y, 'd');
     }
 
@@ -169,17 +191,28 @@ int main(int argc, char *argv[]) {
 
         for (uint32_t i = 0; i < tt_elements.all -> length; i++) {
             if (((tt_button_t *) tt_elements.all -> data[i].p) -> element != TT_ELEMENT_SCROLLBAR) {
-                ((tt_button_t *) tt_elements.all -> data[i].p) -> y = yPositions -> data[i].d + scrollbarVar * 3.3;
+                ((tt_button_t *) tt_elements.all -> data[i].p) -> x = xPositions -> data[i].d - scrollbarVarX * 5;
+                ((tt_button_t *) tt_elements.all -> data[i].p) -> y = yPositions -> data[i].d + scrollbarVarY * 3.3;
             }
         }
         scroll = turtleMouseWheel();
         if (scroll != 0) {
-            scrollbarVar -= scroll * scrollFactor;
-            if (scrollbarVar < 0) {
-                scrollbarVar = 0;
-            }
-            if (scrollbarVar > 100) {
-                scrollbarVar = 100;
+            if (turtleKeyPressed(GLFW_KEY_LEFT_SHIFT)) {
+                scrollbarVarX -= scroll * scrollFactor;
+                if (scrollbarVarX < 0) {
+                    scrollbarVarX = 0;
+                }
+                if (scrollbarVarX > 100) {
+                    scrollbarVarX = 100;
+                }
+            } else {
+                scrollbarVarY -= scroll * scrollFactor;
+                if (scrollbarVarY < 0) {
+                    scrollbarVarY = 0;
+                }
+                if (scrollbarVarY > 100) {
+                    scrollbarVarY = 100;
+                }
             }
         }
         turtleToolsUpdate(); // update turtleTools

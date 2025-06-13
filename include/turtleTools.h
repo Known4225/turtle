@@ -25,6 +25,8 @@ double randomDouble(double lowerBound, double upperBound) { // random double bet
 typedef enum {
     TT_THEME_LIGHT = 0,
     TT_THEME_DARK = 1,
+    TT_THEME_COLT = 2,
+    TT_THEME_NAVY = 3,
 } tt_theme_name_t;
 
 tt_theme_name_t tt_theme;
@@ -130,74 +132,136 @@ void tt_setColor(int32_t index) {
     turtlePenColor(tt_themeColors[index], tt_themeColors[index + 1], tt_themeColors[index + 2]);
 }
 
-void turtleToolsLightTheme() { // light theme preset (default)
-    tt_theme = TT_THEME_LIGHT;
-    double tt_themeCopy[] = {
-        0.0, 0.0, 0.0,       // text color (0)
-        0.0, 0.0, 0.0,       // text color alternate (3)
-        200.0, 200.0, 200.0, // ribbon top bar color (6)
-        140.0, 140.0, 140.0, // ribbon dropdown color (9)
-        160.0, 160.0, 160.0, // ribbon select color (12)
-        100.0, 100.0, 100.0, // ribbon hover color (15)
-        200.0, 200.0, 200.0, // popup box color (18)
-        140.0, 140.0, 140.0, // popup boxes color (21)
-        100.0, 100.0, 100.0, // popup boxes select color (24)
-        200.0, 200.0, 200.0, // button color (27)
-        160.0, 160.0, 160.0, // button select color (30)
-        180.0, 180.0, 180.0, // switch color off (33)
-        230.0, 230.0, 230.0, // switch circle color off (36)
-        30.0, 30.0, 30.0,    // switch color on (39)
-        0.0, 255.0, 255.0,   // switch circle color on (42)
-        0.0, 0.0, 0.0,       // dial color (45)
-        255.0, 255.0, 255.0, // dial inner circle color (48)
-        120.0, 120.0, 120.0, // slider bar color (51)
-        230.0, 230.0, 230.0, // slider circle color (54)
-        200.0, 200.0, 200.0, // scrollbar bar base color (57)
-        160.0, 160.0, 160.0, // scrollbar bar color (60)
-        120.0, 120.0, 120.0, // scrollbar bar hover color (63)
-        120.0, 120.0, 120.0, // scrollbar bar clicked color (66)
-        160.0, 160.0, 160.0, // dropdown color (69)
-        120.0, 120.0, 120.0, // dropdown select color (72)
-        120.0, 120.0, 120.0, // dropdown hover color (75)
-        100.0, 100.0, 100.0, // dropdown triangle color (78)
-    };
-    memcpy(tt_themeColors, tt_themeCopy, sizeof(tt_themeCopy));
-}
-
-void turtleToolsDarkTheme() { // dark theme preset
-    tt_theme = TT_THEME_DARK;
-    double tt_themeCopy[] = {
-        200.0, 200.0, 200.0, // text color (0)
-        160.0, 160.0, 160.0, // text color alternate (3)
-        70.0, 70.0, 70.0,    // ribbon top bar color (6)
-        80.0, 80.0, 80.0,    // ribbon dropdown color (9)
-        60.0, 60.0, 60.0,    // ribbon select color (12)
-        70.0, 70.0, 70.0,    // ribbon hover color (15)
-        10.0, 10.0, 10.0,    // popup box color (18)
-        40.0, 40.0, 40.0,    // popup boxes color (21)
-        60.0, 60.0, 60.0,    // popup boxes select color (24)
-        80.0, 80.0, 80.0,    // button color (27)
-        100.0, 100.0, 100.0, // button select color (30)
-        60.0, 60.0, 60.0,    // switch color off (33)
-        80.0, 80.0, 80.0,    // switch circle color off (36)
-        10.0, 10.0, 10.0,    // switch color on (39)
-        50.0, 230.0, 30.0,   // switch circle color on (42)
-        200.0, 200.0, 200.0, // dial color (45)
-        30.0, 30.0, 30.0,    // dial inner circle color (48)
-        10.0, 10.0, 10.0,    // slider bar color (51)
-        230.0, 230.0, 230.0, // slider circle color (54)
-
-        50.0, 50.0, 50.0,    // scrollbar bar base color (57)
-        150.0, 150.0, 150.0, // scrollbar bar color (60)
-        170.0, 170.0, 170.0, // scrollbar bar hover color (63)
-        190.0, 190.0, 190.0, // scrollbar bar clicked color (66)
-
-        60.0, 60.0, 60.0,    // dropdown color (69)
-        80.0, 80.0, 80.0,    // dropdown select color (72)
-        80.0, 80.0, 80.0,    // dropdown hover color (75)
-        160.0, 160.0, 160.0, // dropdown triangle color (78)
-    };
-    memcpy(tt_themeColors, tt_themeCopy, sizeof(tt_themeCopy));
+void turtleToolsSetTheme(tt_theme_name_t theme) {
+    if (theme == TT_THEME_DARK) {
+        tt_theme = theme;
+        double tt_themeCopy[] = {
+            200.0, 200.0, 200.0, // text color (0)
+            160.0, 160.0, 160.0, // text color alternate (3)
+            70.0, 70.0, 70.0,    // ribbon top bar color (6)
+            80.0, 80.0, 80.0,    // ribbon dropdown color (9)
+            60.0, 60.0, 60.0,    // ribbon select color (12)
+            70.0, 70.0, 70.0,    // ribbon hover color (15)
+            10.0, 10.0, 10.0,    // popup box color (18)
+            40.0, 40.0, 40.0,    // popup boxes color (21)
+            60.0, 60.0, 60.0,    // popup boxes select color (24)
+            80.0, 80.0, 80.0,    // button color (27)
+            100.0, 100.0, 100.0, // button select color (30)
+            60.0, 60.0, 60.0,    // switch color off (33)
+            80.0, 80.0, 80.0,    // switch circle color off (36)
+            10.0, 10.0, 10.0,    // switch color on (39)
+            50.0, 230.0, 30.0,   // switch circle color on (42)
+            200.0, 200.0, 200.0, // dial color (45)
+            30.0, 30.0, 30.0,    // dial inner circle color (48)
+            10.0, 10.0, 10.0,    // slider bar color (51)
+            230.0, 230.0, 230.0, // slider circle color (54)
+            50.0, 50.0, 50.0,    // scrollbar bar base color (57)
+            150.0, 150.0, 150.0, // scrollbar bar color (60)
+            170.0, 170.0, 170.0, // scrollbar bar hover color (63)
+            190.0, 190.0, 190.0, // scrollbar bar clicked color (66)
+            60.0, 60.0, 60.0,    // dropdown color (69)
+            80.0, 80.0, 80.0,    // dropdown select color (72)
+            80.0, 80.0, 80.0,    // dropdown hover color (75)
+            160.0, 160.0, 160.0, // dropdown triangle color (78)
+        };
+        memcpy(tt_themeColors, tt_themeCopy, sizeof(tt_themeCopy));
+    } else if (theme == TT_THEME_COLT) {
+        tt_theme = theme;
+        double tt_themeCopy[] = {
+            189.0, 200.0, 203.0, // text color (0)
+            154.0, 160.0, 160.0, // text color alternate (3)
+            84.0, 73.0, 70.0,    // ribbon top bar color (6)
+            93.0, 80.0, 80.0,    // ribbon dropdown color (9)
+            69.0, 55.0, 53.0,    // ribbon select color (12)
+            77.0, 70.0, 70.0,    // ribbon hover color (15)
+            9.0, 10.0, 10.0,     // popup box color (18)
+            52.0, 40.0, 40.0,    // popup boxes color (21)
+            73.0, 60.0, 60.0,    // popup boxes select color (24)
+            89.0, 80.0, 80.0,    // button color (27)
+            111.0, 109.0, 100.0, // button select color (30)
+            68.0, 60.0, 60.0,    // switch color off (33)
+            91.0, 80.0, 80.0,    // switch circle color off (36)
+            69.0, 55.0, 53.0,    // switch color on (39)
+            242.0, 242.0, 230.0, // switch circle color on (42)
+            211.0, 211.0, 200.0, // dial color (45)
+            36.0, 30.0, 32.0,    // dial inner circle color (48)
+            69.0, 55.0, 53.0,    // slider bar color (51)
+            242.0, 242.0, 230.0, // slider circle color (54)
+            241.0, 239.0, 236.0, // scrollbar bar base color (57)
+            69.0, 55.0, 53.0,    // scrollbar bar color (60)
+            84.0, 70.0, 68.0,    // scrollbar bar hover color (63)
+            84.0, 70.0, 68.0,    // scrollbar bar clicked color (66)
+            68.0, 60.0, 60.0,    // dropdown color (69)
+            92.0, 80.0, 80.0,    // dropdown select color (72)
+            93.0, 80.0, 80.0,    // dropdown hover color (75)
+            175.0, 171.0, 160.0, // dropdown triangle color (78)
+        };
+        memcpy(tt_themeColors, tt_themeCopy, sizeof(tt_themeCopy));
+    } else if (theme == TT_THEME_NAVY) {
+        tt_theme = theme;
+        double tt_themeCopy[] = {
+            3.0, 3.0, 3.0,       // text color (0)
+            241.0, 239.0, 236.0, // text color alternate (3)
+            21.2, 115.6, 160.2,  // ribbon top bar color (6)
+            74.0, 108.0, 144.0,  // ribbon dropdown color (9)
+            112.0, 146.0, 182.0, // ribbon select color (12)
+            112.0, 146.0, 182.0, // ribbon hover color (15)
+            18.0, 52.0, 88.0,    // popup box color (18)
+            74.0, 108.0, 144.0,  // popup boxes color (21)
+            126.0, 160.0, 196.0, // popup boxes select color (24)
+            18.0, 52.0, 88.0,    // button color (27)
+            74.0, 108.0, 144.0,  // button select color (30)
+            18.0, 52.0, 88.0,    // switch color off (33)
+            241.0, 239.0, 236.0, // switch circle color off (36)
+            18.0, 52.0, 88.0,    // switch color on (39)
+            241.0, 239.0, 236.0, // switch circle color on (42)
+            3.0, 3.0, 3.0,       // dial color (45)
+            212.0, 201.0, 190.0, // dial inner circle color (48)
+            18.0, 52.0, 88.0,    // slider bar color (51)
+            241.0, 239.0, 236.0, // slider circle color (54)
+            241.0, 239.0, 236.0, // scrollbar bar base color (57)
+            33.6, 161.9, 211.6,  // scrollbar bar color (60)
+            50.0, 178.3, 228.0,  // scrollbar bar hover color (63)
+            50.0, 178.3, 228.0,  // scrollbar bar clicked color (66)
+            18.0, 52.0, 88.0,    // dropdown color (69)
+            74.0, 108.0, 144.0,  // dropdown select color (72)
+            74.0, 108.0, 144.0,  // dropdown hover color (75)
+            241.0, 239.0, 236.0, // dropdown triangle color (78)
+        };
+        memcpy(tt_themeColors, tt_themeCopy, sizeof(tt_themeCopy));
+    } else {
+        tt_theme = TT_THEME_LIGHT;
+        double tt_themeCopy[] = {
+            0.0, 0.0, 0.0,       // text color (0)
+            0.0, 0.0, 0.0,       // text color alternate (3)
+            200.0, 200.0, 200.0, // ribbon top bar color (6)
+            140.0, 140.0, 140.0, // ribbon dropdown color (9)
+            160.0, 160.0, 160.0, // ribbon select color (12)
+            100.0, 100.0, 100.0, // ribbon hover color (15)
+            200.0, 200.0, 200.0, // popup box color (18)
+            140.0, 140.0, 140.0, // popup boxes color (21)
+            100.0, 100.0, 100.0, // popup boxes select color (24)
+            200.0, 200.0, 200.0, // button color (27)
+            160.0, 160.0, 160.0, // button select color (30)
+            180.0, 180.0, 180.0, // switch color off (33)
+            230.0, 230.0, 230.0, // switch circle color off (36)
+            30.0, 30.0, 30.0,    // switch color on (39)
+            0.0, 255.0, 255.0,   // switch circle color on (42)
+            0.0, 0.0, 0.0,       // dial color (45)
+            255.0, 255.0, 255.0, // dial inner circle color (48)
+            120.0, 120.0, 120.0, // slider bar color (51)
+            230.0, 230.0, 230.0, // slider circle color (54)
+            200.0, 200.0, 200.0, // scrollbar bar base color (57)
+            160.0, 160.0, 160.0, // scrollbar bar color (60)
+            120.0, 120.0, 120.0, // scrollbar bar hover color (63)
+            120.0, 120.0, 120.0, // scrollbar bar clicked color (66)
+            160.0, 160.0, 160.0, // dropdown color (69)
+            120.0, 120.0, 120.0, // dropdown select color (72)
+            120.0, 120.0, 120.0, // dropdown hover color (75)
+            100.0, 100.0, 100.0, // dropdown triangle color (78)
+        };
+        memcpy(tt_themeColors, tt_themeCopy, sizeof(tt_themeCopy));
+    }
 }
 
 /* ribbon */
@@ -1155,13 +1219,64 @@ tip: try to match the ratio of visible content to the scrollbar's barPercentage 
 void scrollbarUpdate() {
     for (uint32_t i = 0; i < tt_elements.scrollbars -> length; i++) {
         tt_scrollbar_t *scrollbarp = (tt_scrollbar_t *) (tt_elements.scrollbars -> data[i].p);
-        double scrollbarTop = scrollbarp -> y + scrollbarp -> length / 2;
-        double scrollbarBottom = scrollbarp -> y - scrollbarp -> length / 2;
-        double dragTop = scrollbarTop - (*(scrollbarp -> variable)) / 100 * (scrollbarp -> length * (1 - scrollbarp -> barPercentage / 100));
-        double dragBottom = dragTop - (scrollbarp -> length * scrollbarp -> barPercentage / 100);
         if (scrollbarp -> type == TT_SCROLLBAR_HORIZONTAL) {
-            /* TODO */
+            double scrollbarLeft = scrollbarp -> x - scrollbarp -> length / 2;
+            double scrollbarRight = scrollbarp -> x + scrollbarp -> length / 2;
+            double dragLeft = scrollbarLeft + (*(scrollbarp -> variable)) / 100 * (scrollbarp -> length * (1 - scrollbarp -> barPercentage / 100));
+            double dragRight = dragLeft + (scrollbarp -> length * scrollbarp -> barPercentage / 100);
+            turtlePenSize(scrollbarp -> size * 1);
+            tt_internalColor(scrollbarp, TT_COLOR_SCROLLBAR_BASE, TT_COLOR_OVERRIDE_SLOT_1);
+            turtleGoto(scrollbarLeft, scrollbarp -> y);
+            turtlePenDown();
+            turtleGoto(scrollbarRight, scrollbarp -> y);
+            turtlePenUp();
+            turtlePenSize(scrollbarp -> size * 0.8);
+            if (scrollbarp -> status == -1 && turtle.mouseX > dragLeft - scrollbarp -> size * 0.4 && turtle.mouseX < dragRight + scrollbarp -> size * 0.4) {
+                tt_internalColor(scrollbarp, TT_COLOR_SCROLLBAR_HOVER, TT_COLOR_OVERRIDE_SLOT_2);
+            } else if (scrollbarp -> status > 0) {
+                tt_internalColor(scrollbarp, TT_COLOR_SCROLLBAR_CLICKED, TT_COLOR_OVERRIDE_SLOT_3);
+            } else {
+                tt_internalColor(scrollbarp, TT_COLOR_SCROLLBAR_BAR, TT_COLOR_OVERRIDE_SLOT_4);
+            }
+            turtleGoto(dragLeft, scrollbarp -> y);
+            turtlePenDown();
+            turtleGoto(dragRight, scrollbarp -> y);
+            turtlePenUp();
+            if (scrollbarp -> status == 2) {
+                tt_globals.barAnchor = turtle.mouseX - dragLeft;
+                scrollbarp -> status = 1;
+            }
+            if (turtleMouseDown()) {
+                if (scrollbarp -> status < 0) {
+                    if (turtle.mouseX > dragLeft - scrollbarp -> size * 0.4 && turtle.mouseX < dragRight + scrollbarp -> size * 0.4) {
+                        tt_globals.barAnchor = turtle.mouseX - dragLeft;
+                    } else {
+                        tt_globals.barAnchor = (scrollbarp -> length * scrollbarp -> barPercentage / 100) / 2;
+                        scrollbarp -> status = -2;
+                    }
+                    scrollbarp -> status *= -1;
+                }
+            } else {
+                if (turtle.mouseY > scrollbarp -> y - scrollbarp -> size * 0.5 && turtle.mouseY < scrollbarp -> y + scrollbarp -> size * 0.5 && turtle.mouseX < scrollbarRight && turtle.mouseX > scrollbarLeft) {
+                    scrollbarp -> status = -1;
+                } else {
+                    scrollbarp -> status = 0;
+                }
+            }
+            if (scrollbarp -> status > 0) {
+                *(scrollbarp -> variable) = (turtle.mouseX - scrollbarLeft - tt_globals.barAnchor) / (scrollbarp -> length * (1 - scrollbarp -> barPercentage / 100)) * 100;
+                if (*(scrollbarp -> variable) < 0) {
+                    *(scrollbarp -> variable) = 0;
+                }
+                if (*(scrollbarp -> variable) > 100) {
+                    *(scrollbarp -> variable) = 100;
+                }
+            }
         } else if (scrollbarp -> type == TT_SCROLLBAR_VERTICAL) {
+            double scrollbarTop = scrollbarp -> y + scrollbarp -> length / 2;
+            double scrollbarBottom = scrollbarp -> y - scrollbarp -> length / 2;
+            double dragTop = scrollbarTop - (*(scrollbarp -> variable)) / 100 * (scrollbarp -> length * (1 - scrollbarp -> barPercentage / 100));
+            double dragBottom = dragTop - (scrollbarp -> length * scrollbarp -> barPercentage / 100);
             turtlePenSize(scrollbarp -> size * 1);
             tt_internalColor(scrollbarp, TT_COLOR_SCROLLBAR_BASE, TT_COLOR_OVERRIDE_SLOT_1);
             turtleGoto(scrollbarp -> x, scrollbarTop);
