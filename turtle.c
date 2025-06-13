@@ -136,25 +136,50 @@ int main(int argc, char *argv[]) {
     sliderInit("slider", &sliderVar, TT_SLIDER_VERTICAL, TT_SLIDER_ALIGN_LEFT, -100, -35, 10, 50, 0, 255, 1);
     sliderInit("slider", &sliderVar, TT_SLIDER_VERTICAL, TT_SLIDER_ALIGN_CENTER, 0, -35, 10, 50, 0, 255, 1);
     sliderInit("slider", &sliderVar, TT_SLIDER_VERTICAL, TT_SLIDER_ALIGN_RIGHT, 100, -35, 10, 50, 0, 255, 1);
-    scrollbarInit(&scrollbarVar, TT_SCROLLBAR_VERTICAL, 300, 0, 10, 300, 33);
+    scrollbarInit(&scrollbarVar, TT_SCROLLBAR_VERTICAL, 310, 0, 10, 320, 33);
     dropdownInit("dropdown", dropdownOptions, &dropdownVar, TT_DROPDOWN_ALIGN_CENTER, 0, 70, 10);
+
+    double power = 0.0, speed = 0.0, exposure = 0.0, x = 103, y = 95, z = 215;
+    dialInit("Power", &power, TT_DIAL_LINEAR, -150, -200, 10, 0, 100, 1);
+    dialInit("Speed", &speed, TT_DIAL_LINEAR, -100, -200, 10, 0, 1000, 1);
+    dialInit("Exposure", &exposure, TT_DIAL_EXP, -50, -200, 10, 0, 1000, 1);
+    tt_slider_t *xSlider = sliderInit("", &x, TT_SLIDER_HORIZONTAL, TT_SLIDER_ALIGN_CENTER, -100, -230, 10, 100, -300, 300, 0);
+    tt_slider_t *ySlider = sliderInit("", &y, TT_SLIDER_HORIZONTAL, TT_SLIDER_ALIGN_CENTER, -100, -250, 10, 100, -300, 300, 0);
+    tt_slider_t *zSlider = sliderInit("", &z, TT_SLIDER_HORIZONTAL, TT_SLIDER_ALIGN_CENTER, -100, -270, 10, 100, -300, 300, 0);
 
     list_t *yPositions = list_init();
     for (uint32_t i = 0; i < tt_elements.all -> length; i++) {
         list_append(yPositions, (unitype) ((tt_button_t *) tt_elements.all -> data[i].p) -> y, 'd');
     }
 
+    double scroll = 0.0;
+    double scrollFactor = 20;
     while (turtle.shouldClose == 0) {
         start = clock();
         turtleGetMouseCoords();
         turtleClear();
-        char coordsStr[16];
-        sprintf(coordsStr, "%.2lf, %.2lf", turtle.mouseX, turtle.mouseY);
         tt_setColor(TT_COLOR_TEXT);
-        turtleTextWriteString(coordsStr, -310, -170, 5, 0);
+        turtleTextWriteStringf(-310, -170, 5, 0, "%.2lf, %.2lf", turtle.mouseX, turtle.mouseY);
+        turtleTextWriteString("X", xSlider -> x - xSlider -> length / 2 - xSlider -> size, xSlider -> y, xSlider -> size - 1, 100);
+        turtleTextWriteStringf(ySlider -> x + xSlider -> length / 2 + xSlider -> size, xSlider -> y, 4, 0, "%.01lf", round(x) / 10);
+        turtleTextWriteString("Y", xSlider -> x - ySlider -> length / 2 - xSlider -> size, ySlider -> y, xSlider -> size - 1, 100);
+        turtleTextWriteStringf(ySlider -> x + ySlider -> length / 2 + xSlider -> size, ySlider -> y, 4, 0, "%.01lf", round(y) / 10);
+        turtleTextWriteString("Z", zSlider -> x - zSlider -> length / 2 - xSlider -> size, zSlider -> y, xSlider -> size - 1, 100);
+        turtleTextWriteStringf(zSlider -> x + zSlider -> length / 2 + xSlider -> size, zSlider -> y, 4, 0, "%.01lf", round(z) / 10);
+
         for (uint32_t i = 0; i < tt_elements.all -> length; i++) {
             if (((tt_button_t *) tt_elements.all -> data[i].p) -> element != TT_ELEMENT_SCROLLBAR) {
                 ((tt_button_t *) tt_elements.all -> data[i].p) -> y = yPositions -> data[i].d + scrollbarVar * 3;
+            }
+        }
+        scroll = turtleMouseWheel();
+        if (scroll != 0) {
+            scrollbarVar -= scroll * scrollFactor;
+            if (scrollbarVar < 0) {
+                scrollbarVar = 0;
+            }
+            if (scrollbarVar > 100) {
+                scrollbarVar = 100;
             }
         }
         turtleToolsUpdate(); // update turtleTools

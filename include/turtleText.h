@@ -3,6 +3,7 @@
 #ifndef TURTLETEXT
 #define TURTLETEXT
 #include "turtle.h"
+#include <stdarg.h>
 
 /* turtleText variables */
 typedef struct {
@@ -335,6 +336,16 @@ void turtleTextWriteString(const char *str, double x, double y, double size, dou
         converted[i] = (uint32_t) str[i];
     }
     turtleTextWrite(converted, len, x, y, size, align);
+}
+
+/* formatted string */
+void turtleTextWriteStringf(double x, double y, double size, double align, const char *str, ...) {
+    char buffer[1024];
+	va_list args;
+	va_start(args, str);
+	vsnprintf(buffer, 1024, str, args);
+	turtleTextWriteString(buffer, x, y, size, align);
+	va_end(args);
 }
 
 /* wrapper function for unicode strings (UTF-8, u8"Hello World") */

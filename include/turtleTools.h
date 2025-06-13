@@ -1,11 +1,12 @@
 /* turtleTools library includes:
 ribbon: customisable top bar
-popup: 
-dropdown
+popup
 button
-dial
 switch
+dial
 slider
+scrollbar
+dropdown
 text box (under development)
 */
 
@@ -85,10 +86,14 @@ double tt_themeColors[] = {
     255.0, 255.0, 255.0, // dial inner circle color (48)
     120.0, 120.0, 120.0, // slider bar color (51)
     230.0, 230.0, 230.0, // slider circle color (54)
-    160.0, 160.0, 160.0, // dropdown color (57)
-    120.0, 120.0, 120.0, // dropdown select color (60)
-    120.0, 120.0, 120.0, // dropdown hover color (63)
-    100.0, 100.0, 100.0, // dropdown triangle color (66)
+    140.0, 140.0, 140.0, // scrollbar bar base color (57)
+    180.0, 180.0, 180.0, // scrollbar bar color (60)
+    200.0, 200.0, 200.0, // scrollbar bar hover color (63)
+    220.0, 220.0, 220.0, // scrollbar bar clicked color (66)
+    160.0, 160.0, 160.0, // dropdown color (69)
+    120.0, 120.0, 120.0, // dropdown select color (72)
+    120.0, 120.0, 120.0, // dropdown hover color (75)
+    100.0, 100.0, 100.0, // dropdown triangle color (78)
 };
 
 typedef enum {
@@ -111,10 +116,14 @@ typedef enum {
     TT_COLOR_DIAL_INNER = 48,
     TT_COLOR_SLIDER_BAR = 51,
     TT_COLOR_SLIDER_CIRCLE = 54,
-    TT_COLOR_DROPDOWN = 57,
-    TT_COLOR_DROPDOWN_SELECT = 60,
-    TT_COLOR_DROPDOWN_HOVER = 63,
-    TT_COLOR_DROPDOWN_TRIANGLE = 66,
+    TT_COLOR_SCROLLBAR_BASE = 57,
+    TT_COLOR_SCROLLBAR_BAR = 60,
+    TT_COLOR_SCROLLBAR_HOVER = 63,
+    TT_COLOR_SCROLLBAR_CLICKED = 66,
+    TT_COLOR_DROPDOWN = 69,
+    TT_COLOR_DROPDOWN_SELECT = 72,
+    TT_COLOR_DROPDOWN_HOVER = 75,
+    TT_COLOR_DROPDOWN_TRIANGLE = 78,
 } tt_theme_internal_t;
 
 void tt_setColor(int32_t index) {
@@ -143,10 +152,14 @@ void turtleToolsLightTheme() { // light theme preset (default)
         255.0, 255.0, 255.0, // dial inner circle color (48)
         120.0, 120.0, 120.0, // slider bar color (51)
         230.0, 230.0, 230.0, // slider circle color (54)
-        160.0, 160.0, 160.0, // dropdown color (57)
-        120.0, 120.0, 120.0, // dropdown select color (60)
-        120.0, 120.0, 120.0, // dropdown hover color (63)
-        100.0, 100.0, 100.0, // dropdown triangle color (66)
+        140.0, 140.0, 140.0, // scrollbar bar base color (57)
+        180.0, 180.0, 180.0, // scrollbar bar color (60)
+        200.0, 200.0, 200.0, // scrollbar bar hover color (63)
+        220.0, 220.0, 220.0, // scrollbar bar clicked color (66)
+        160.0, 160.0, 160.0, // dropdown color (69)
+        120.0, 120.0, 120.0, // dropdown select color (72)
+        120.0, 120.0, 120.0, // dropdown hover color (75)
+        100.0, 100.0, 100.0, // dropdown triangle color (78)
     };
     memcpy(tt_themeColors, tt_themeCopy, sizeof(tt_themeCopy));
 }
@@ -173,10 +186,16 @@ void turtleToolsDarkTheme() { // dark theme preset
         30.0, 30.0, 30.0,    // dial inner circle color (48)
         10.0, 10.0, 10.0,    // slider bar color (51)
         230.0, 230.0, 230.0, // slider circle color (54)
-        60.0, 60.0, 60.0,    // dropdown color (57)
-        80.0, 80.0, 80.0,    // dropdown select color (60)
-        80.0, 80.0, 80.0,    // dropdown hover color (63)
-        160.0, 160.0, 160.0, // dropdown triangle color (66)
+
+        50.0, 50.0, 50.0,    // scrollbar bar base color (57)
+        150.0, 150.0, 150.0, // scrollbar bar color (60)
+        170.0, 170.0, 170.0, // scrollbar bar hover color (63)
+        190.0, 190.0, 190.0, // scrollbar bar clicked color (66)
+
+        60.0, 60.0, 60.0,    // dropdown color (69)
+        80.0, 80.0, 80.0,    // dropdown select color (72)
+        80.0, 80.0, 80.0,    // dropdown hover color (75)
+        160.0, 160.0, 160.0, // dropdown triangle color (78)
     };
     memcpy(tt_themeColors, tt_themeCopy, sizeof(tt_themeCopy));
 }
@@ -626,6 +645,8 @@ void tt_colorOverride(void *element, double *colors, uint32_t length) {
 }
 
 /* initialise UI elements */
+
+/* create a button */
 tt_button_t *buttonInit(char *label, int32_t *variable, tt_button_shape_t shape, double x, double y, double size) {
     if (tt_enabled.buttonEnabled == 0) {
         tt_enabled.buttonEnabled = 1;
@@ -751,6 +772,7 @@ tt_slider_t *sliderInit(char *label, double *variable, tt_slider_type_t type, tt
     return sliderp;
 }
 
+/* create a scrollbar */
 tt_scrollbar_t *scrollbarInit(double *variable, tt_scrollbar_type_t type, double x, double y, double size, double length, double barPercentage) {
     if (tt_enabled.scrollbarEnabled == 0) {
         tt_enabled.scrollbarEnabled = 1;
@@ -1145,17 +1167,31 @@ void scrollbarUpdate() {
             if (scrollbarp -> color.colorOverride) {
                 turtlePenColor(scrollbarp -> color.color[3], scrollbarp -> color.color[4], scrollbarp -> color.color[5]);
             } else {
-                tt_setColor(TT_COLOR_SLIDER_BAR);
+                tt_setColor(TT_COLOR_SCROLLBAR_BASE);
             }
             turtleGoto(scrollbarp -> x, scrollbarTop);
             turtlePenDown();
             turtleGoto(scrollbarp -> x, scrollbarBottom);
             turtlePenUp();
             turtlePenSize(scrollbarp -> size * 0.8);
-            if (scrollbarp -> color.colorOverride) {
-                turtlePenColor(scrollbarp -> color.color[6], scrollbarp -> color.color[7], scrollbarp -> color.color[8]);
+            if (scrollbarp -> status == -1) {
+                if (scrollbarp -> color.colorOverride) {
+                    turtlePenColor(scrollbarp -> color.color[9], scrollbarp -> color.color[10], scrollbarp -> color.color[11]);
+                } else {
+                    tt_setColor(TT_COLOR_SCROLLBAR_HOVER);
+                }
+            } else if (scrollbarp -> status == 1) {
+                if (scrollbarp -> color.colorOverride) {
+                    turtlePenColor(scrollbarp -> color.color[12], scrollbarp -> color.color[13], scrollbarp -> color.color[14]);
+                } else {
+                    tt_setColor(TT_COLOR_SCROLLBAR_CLICKED);
+                }
             } else {
-                tt_setColor(TT_COLOR_SLIDER_CIRCLE);
+                if (scrollbarp -> color.colorOverride) {
+                    turtlePenColor(scrollbarp -> color.color[6], scrollbarp -> color.color[7], scrollbarp -> color.color[8]);
+                } else {
+                    tt_setColor(TT_COLOR_SCROLLBAR_BAR);
+                }
             }
             turtleGoto(scrollbarp -> x, dragTop);
             turtlePenDown();
@@ -1163,7 +1199,11 @@ void scrollbarUpdate() {
             turtlePenUp();
             if (turtleMouseDown()) {
                 if (scrollbarp -> status < 0) {
-                    scrollbarp -> barAnchor = (scrollbarp -> length * scrollbarp -> barPercentage / 100) / 2;
+                    if (turtle.mouseY > dragBottom && turtle.mouseY < dragTop) {
+                        scrollbarp -> barAnchor = dragTop - turtle.mouseY;
+                    } else {
+                        scrollbarp -> barAnchor = (scrollbarp -> length * scrollbarp -> barPercentage / 100) / 2;
+                    }
                     scrollbarp -> status *= -1;
                 }
             } else {
