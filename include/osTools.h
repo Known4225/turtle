@@ -46,7 +46,7 @@ typedef struct {
 } osToolsGLFWObject;
 
 typedef struct {
-    char *text; // clipboard text data (heap allocated)
+    const char *text; // clipboard text data (heap allocated)
 } osToolsClipboardObject;
 
 typedef struct {
@@ -138,108 +138,88 @@ int32_t osToolsInit(char argv0[], GLFWwindow *window) {
     osToolsFileDialog.extensions = malloc(1 * sizeof(char *)); // malloc list
 
     /* initialise clipboard */
-    if (!OpenClipboard(NULL)) { // initialises win32Clipboard.text as clipboard text data
-        printf("error: could not open clipboard (windows)\n");
-        return -1;
-    }
-    HANDLE clipboardHandle = GetClipboardData(CF_TEXT);
-    LPTSTR wstrData;
-    if (clipboardHandle != NULL) {
-        wstrData = GlobalLock(clipboardHandle);
-        if (wstrData != NULL) {
-            uint32_t i = 0;
-            uint32_t dynMem = 8; // start with 7 characters
-            osToolsClipboard.text = malloc(dynMem);
-            while (wstrData[i] != '\0' && i < 4294967295) {
-                osToolsClipboard.text[i] = wstrData[i]; // convert from WCHAR to char
-                i++;
-                if (i >= dynMem) { // if i is eight we need to realloc to at least 9
-                    dynMem *= 2;
-                    osToolsClipboard.text = realloc(osToolsClipboard.text, dynMem);
-                }
-            }
-            osToolsClipboard.text[i] = '\0';
-            GlobalUnlock(clipboardHandle);
-        } else {
-            printf("error: could not lock clipboard\n");
-            CloseClipboard();
-            return -1;
-        }
-    } else {
-        printf("error: could not read from clipboard\n");
-        CloseClipboard();
-        return -1;
-    }
-    CloseClipboard();
+    osToolsClipboard.text = glfwGetClipboardString(osToolsGLFW.osToolsWindow);
     return 0;
 }
 
-int32_t osToolsClipboardGetText() { // gets the text from win32Clipboard
-    free(osToolsClipboard.text);
-    if (!OpenClipboard(NULL)) { // https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-openclipboard
-        printf("error: could not open clipboard\n");
-        return -1;
-    }
-    HANDLE clipboardHandle = GetClipboardData(CF_TEXT); // https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getclipboarddata
-    LPTSTR wstrData; // WCHAR string
-    if (clipboardHandle != NULL) {
-        wstrData = GlobalLock(clipboardHandle); // https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-globallock
-        if (wstrData != NULL) {
-            uint32_t i = 0;
-            uint32_t dynMem = 8; // start with 7 characters
-            osToolsClipboard.text = malloc(dynMem);
-            while (wstrData[i] != '\0' && i < 4294967295) {
-                osToolsClipboard.text[i] = wstrData[i]; // convert from WCHAR to char
-                i++;
-                if (i >= dynMem) { // if i is eight we need to realloc to at least 9
-                    dynMem *= 2;
-                    osToolsClipboard.text = realloc(osToolsClipboard.text, dynMem);
-                }
-            }
-            osToolsClipboard.text[i] = '\0';
-            GlobalUnlock(clipboardHandle);
-        } else {
-            printf("error: could not lock clipboard\n");
-            CloseClipboard();
-            return -1;
-        }
-    } else {
-        printf("error: could not read from clipboard\n");
-        CloseClipboard();
-        return -1;
-    }
-    CloseClipboard();
+/* gets the text from win32Clipboard */
+// int32_t osToolsClipboardGetText() { // gets the text from win32Clipboard
+//     free(osToolsClipboard.text);
+//     if (!OpenClipboard(NULL)) { // https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-openclipboard
+//         printf("error: could not open clipboard\n");
+//         return -1;
+//     }
+//     HANDLE clipboardHandle = GetClipboardData(CF_TEXT); // https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getclipboarddata
+//     LPTSTR wstrData; // WCHAR string
+//     if (clipboardHandle != NULL) {
+//         wstrData = GlobalLock(clipboardHandle); // https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-globallock
+//         if (wstrData != NULL) {
+//             uint32_t i = 0;
+//             uint32_t dynMem = 8; // start with 7 characters
+//             osToolsClipboard.text = malloc(dynMem);
+//             while (wstrData[i] != '\0' && i < 4294967295) {
+//                 osToolsClipboard.text[i] = wstrData[i]; // convert from WCHAR to char
+//                 i++;
+//                 if (i >= dynMem) { // if i is eight we need to realloc to at least 9
+//                     dynMem *= 2;
+//                     osToolsClipboard.text = realloc(osToolsClipboard.text, dynMem);
+//                 }
+//             }
+//             osToolsClipboard.text[i] = '\0';
+//             GlobalUnlock(clipboardHandle);
+//         } else {
+//             printf("error: could not lock clipboard\n");
+//             CloseClipboard();
+//             return -1;
+//         }
+//     } else {
+//         printf("error: could not read from clipboard\n");
+//         CloseClipboard();
+//         return -1;
+//     }
+//     CloseClipboard();
+//     return 0;
+// }
+
+int32_t osToolsClipboardGetText() {
+    osToolsClipboard.text = glfwGetClipboardString(osToolsGLFW.osToolsWindow);
     return 0;
 }
 
-int32_t osToolsClipboardSetText(const char *input) { // takes null terminated strings
-    if (!OpenClipboard(NULL)) { // technically (according to windows documentation) I should get the HWND (window handle) for the GLFW window, but that requires using the glfw3native.h header which would require lots of rewrites and endanger cross-platform compatibility
-        printf("error: could not open clipboard\n");
-        return -1;
-    }
-    uint32_t dynMem = strlen(input) + 1; // +1 for the null character
-    /* GlobalAlloc is like malloc but windows */
-    /* "Handles" are like pointers to data but not directly, you have to "GlobalLock" to actually access the data */
-    /* GlobalAlloc allows you to alloc memory at the place that the Handle points to */
-    HANDLE clipboardBufferHandle = GlobalAlloc(GMEM_MOVEABLE, dynMem); // https://learn.microsoft.com/en-us/windows/win32/sysinfo/handles-and-objects
-    LPTSTR clipboardBufferObject = GlobalLock(clipboardBufferHandle); // WCHAR string
-    for (uint32_t i = 0; i < dynMem; i++) {
-        clipboardBufferObject[i] = input[i]; // convert from char to WCHAR
-    }
-    GlobalUnlock(clipboardBufferObject);
-    /* Empty clipboard: Empties the clipboard and frees handles to data in the clipboard. The function then assigns ownership of the clipboard to the window that currently has the clipboard open. 
-    This is a problem because our openClipboard window handle (HWND) is NULL, so the ownership doesn't get transferred, but it still works on my machine */
-    if (!EmptyClipboard()) { // https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-emptyclipboard
-        printf("error: could not empty clipboard\n");
-        CloseClipboard();
-        return -1;
-    }
-    if (SetClipboardData(CF_TEXT, clipboardBufferHandle) == NULL) { // https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-setclipboarddata
-        printf("error: could not set cliboard data\n");
-        CloseClipboard();
-        return -1;
-    }
-    CloseClipboard();
+/* takes null terminated strings */
+// int32_t osToolsClipboardSetText(const char *input) {
+//     if (!OpenClipboard(NULL)) { // technically (according to windows documentation) I should get the HWND (window handle) for the GLFW window, but that requires using the glfw3native.h header which would require lots of rewrites and endanger cross-platform compatibility
+//         printf("error: could not open clipboard\n");
+//         return -1;
+//     }
+//     uint32_t dynMem = strlen(input) + 1; // +1 for the null character
+//     /* GlobalAlloc is like malloc but windows */
+//     /* "Handles" are like pointers to data but not directly, you have to "GlobalLock" to actually access the data */
+//     /* GlobalAlloc allows you to alloc memory at the place that the Handle points to */
+//     HANDLE clipboardBufferHandle = GlobalAlloc(GMEM_MOVEABLE, dynMem); // https://learn.microsoft.com/en-us/windows/win32/sysinfo/handles-and-objects
+//     LPTSTR clipboardBufferObject = GlobalLock(clipboardBufferHandle); // WCHAR string
+//     for (uint32_t i = 0; i < dynMem; i++) {
+//         clipboardBufferObject[i] = input[i]; // convert from char to WCHAR
+//     }
+//     GlobalUnlock(clipboardBufferObject);
+//     /* Empty clipboard: Empties the clipboard and frees handles to data in the clipboard. The function then assigns ownership of the clipboard to the window that currently has the clipboard open. 
+//     This is a problem because our openClipboard window handle (HWND) is NULL, so the ownership doesn't get transferred, but it still works on my machine */
+//     if (!EmptyClipboard()) { // https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-emptyclipboard
+//         printf("error: could not empty clipboard\n");
+//         CloseClipboard();
+//         return -1;
+//     }
+//     if (SetClipboardData(CF_TEXT, clipboardBufferHandle) == NULL) { // https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-setclipboarddata
+//         printf("error: could not set cliboard data\n");
+//         CloseClipboard();
+//         return -1;
+//     }
+//     CloseClipboard();
+//     return 0;
+// }
+
+int32_t osToolsClipboardSetText(const char *input) {
+    glfwSetClipboardString(osToolsGLFW.osToolsWindow, input);
     return 0;
 }
 
