@@ -136,8 +136,13 @@ int main(int argc, char *argv[]) {
     sliderInit("slider", &sliderVar, TT_SLIDER_VERTICAL, TT_SLIDER_ALIGN_LEFT, -100, -35, 10, 50, 0, 255, 1);
     sliderInit("slider", &sliderVar, TT_SLIDER_VERTICAL, TT_SLIDER_ALIGN_CENTER, 0, -35, 10, 50, 0, 255, 1);
     sliderInit("slider", &sliderVar, TT_SLIDER_VERTICAL, TT_SLIDER_ALIGN_RIGHT, 100, -35, 10, 50, 0, 255, 1);
-    scrollbarInit(&scrollbarVar, TT_SCROLLBAR_VERTICAL, 300, 0, 10, 300, 30);
+    scrollbarInit(&scrollbarVar, TT_SCROLLBAR_VERTICAL, 300, 0, 10, 300, 33);
     dropdownInit("dropdown", dropdownOptions, &dropdownVar, TT_DROPDOWN_ALIGN_CENTER, 0, 70, 10);
+
+    list_t *yPositions = list_init();
+    for (uint32_t i = 0; i < tt_elements.all -> length; i++) {
+        list_append(yPositions, (unitype) ((tt_button_t *) tt_elements.all -> data[i].p) -> y, 'd');
+    }
 
     while (turtle.shouldClose == 0) {
         start = clock();
@@ -147,6 +152,11 @@ int main(int argc, char *argv[]) {
         sprintf(coordsStr, "%.2lf, %.2lf", turtle.mouseX, turtle.mouseY);
         tt_setColor(TT_COLOR_TEXT);
         turtleTextWriteString(coordsStr, -310, -170, 5, 0);
+        for (uint32_t i = 0; i < tt_elements.all -> length; i++) {
+            if (((tt_button_t *) tt_elements.all -> data[i].p) -> element != TT_ELEMENT_SCROLLBAR) {
+                ((tt_button_t *) tt_elements.all -> data[i].p) -> y = yPositions -> data[i].d + scrollbarVar * 3;
+            }
+        }
         turtleToolsUpdate(); // update turtleTools
         parseRibbonOutput(); // user defined function to use ribbon
         parsePopupOutput(window); // user defined function to use popup
