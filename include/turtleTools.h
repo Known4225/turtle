@@ -1496,11 +1496,11 @@ void turtleToolsUpdate() {
     if (tt_enabled.sliderEnabled) {
         sliderUpdate();
     }
-    if (tt_enabled.scrollbarEnabled) {
-        scrollbarUpdate();
-    }
     if (tt_enabled.dropdownEnabled) {
         dropdownUpdate();
+    }
+    if (tt_enabled.scrollbarEnabled) {
+        scrollbarUpdate();
     }
     if (tt_enabled.ribbonEnabled) {
         ribbonUpdate();
@@ -1523,11 +1523,11 @@ void turtleToolsUpdateUI() {
     if (tt_enabled.sliderEnabled) {
         sliderUpdate();
     }
-    if (tt_enabled.scrollbarEnabled) {
-        scrollbarUpdate();
-    }
     if (tt_enabled.dropdownEnabled) {
         dropdownUpdate();
+    }
+    if (tt_enabled.scrollbarEnabled) {
+        scrollbarUpdate();
     }
 }
 
