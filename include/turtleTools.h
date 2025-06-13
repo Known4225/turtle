@@ -1171,7 +1171,7 @@ void scrollbarUpdate() {
             turtlePenSize(scrollbarp -> size * 0.8);
             if (scrollbarp -> status == -1 && turtle.mouseY > dragBottom - scrollbarp -> size * 0.4 && turtle.mouseY < dragTop + scrollbarp -> size * 0.4) {
                 tt_internalColor(scrollbarp, TT_COLOR_SCROLLBAR_HOVER, TT_COLOR_OVERRIDE_SLOT_2);
-            } else if (scrollbarp -> status == 1) {
+            } else if (scrollbarp -> status > 0) {
                 tt_internalColor(scrollbarp, TT_COLOR_SCROLLBAR_CLICKED, TT_COLOR_OVERRIDE_SLOT_3);
             } else {
                 tt_internalColor(scrollbarp, TT_COLOR_SCROLLBAR_BAR, TT_COLOR_OVERRIDE_SLOT_4);
@@ -1180,12 +1180,17 @@ void scrollbarUpdate() {
             turtlePenDown();
             turtleGoto(scrollbarp -> x, dragBottom);
             turtlePenUp();
+            if (scrollbarp -> status == 2) {
+                tt_globals.barAnchor = dragTop - turtle.mouseY;
+                scrollbarp -> status = 1;
+            }
             if (turtleMouseDown()) {
                 if (scrollbarp -> status < 0) {
                     if (turtle.mouseY > dragBottom - scrollbarp -> size * 0.4 && turtle.mouseY < dragTop + scrollbarp -> size * 0.4) {
                         tt_globals.barAnchor = dragTop - turtle.mouseY;
                     } else {
                         tt_globals.barAnchor = (scrollbarp -> length * scrollbarp -> barPercentage / 100) / 2;
+                        scrollbarp -> status = -2;
                     }
                     scrollbarp -> status *= -1;
                 }
