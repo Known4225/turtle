@@ -149,7 +149,7 @@ int main(int argc, char *argv[]) {
     double power = 0.0, speed = 0.0, exposure = 0.0, x = 103, y = 95, z = 215;
     int32_t xEnabled, yEnabled, zEnabled;
     list_t *sources = list_init();
-    int sourceIndex;
+    int sourceIndex = 0;
     list_append(sources, (unitype) "None", 's');
     list_append(sources, (unitype) "SP932", 's');
     list_append(sources, (unitype) "SP932U", 's');
