@@ -608,6 +608,7 @@ typedef struct {
     int8_t *variable; // 1 if switch is flipped, 0 otherwise
     char label[24];
     int32_t status;
+    uint8_t enabled; // if 0, switch will not interact with mouse
 } tt_switch_t;
 
 typedef enum {
@@ -755,7 +756,7 @@ tt_button_t *buttonInit(char *label, int8_t *variable, tt_button_shape_t shape, 
     *variable = 0; // button starts unpressed
     buttonp -> variable = variable;
     list_append(tt_elements.buttons, (unitype) (void *) buttonp, 'p');
-    list_append(tt_elements.all, (unitype) (void *) buttonp, 'p');
+    list_append(tt_elements.all, (unitype) (void *) buttonp, 'l');
     return buttonp;
 }
 
@@ -782,15 +783,15 @@ tt_switch_t *switchInit(char *label, int8_t *variable, double x, double y, doubl
     switchp -> y = y;
     switchp -> size = size;
     switchp -> variable = variable;
+    switchp -> enabled = 1;
     list_append(tt_elements.switches, (unitype) (void *) switchp, 'p');
-    list_append(tt_elements.all, (unitype) (void *) switchp, 'p');
+    list_append(tt_elements.all, (unitype) (void *) switchp, 'l');
     return switchp;
 }
 
 void switchDeinit(tt_switch_t *switchp) {
-    list_remove(tt_elements.switches, (unitype) (void *) switchp, 'p');
-    list_remove(tt_elements.all, (unitype) (void *) switchp, 'p');
-    free(switchp);
+    list_remove(tt_elements.all, (unitype) (uint64_t) switchp, 'l');
+    list_remove(tt_elements.switches, (unitype) (uint64_t) switchp, 'l');
 }
 
 /* create a dial - make renderNumberFactor 0 to hide dial number */
@@ -822,7 +823,7 @@ tt_dial_t *dialInit(char *label, double *variable, tt_dial_type_t type, double x
     dialp -> renderNumberFactor = renderNumberFactor;
     dialp -> defaultValue = *variable;
     list_append(tt_elements.dials, (unitype) (void *) dialp, 'p');
-    list_append(tt_elements.all, (unitype) (void *) dialp, 'p');
+    list_append(tt_elements.all, (unitype) (void *) dialp, 'l');
     return dialp;
 }
 
@@ -857,7 +858,7 @@ tt_slider_t *sliderInit(char *label, double *variable, tt_slider_type_t type, tt
     sliderp -> renderNumberFactor = renderNumberFactor;
     sliderp -> defaultValue = *variable;
     list_append(tt_elements.sliders, (unitype) (void *) sliderp, 'p');
-    list_append(tt_elements.all, (unitype) (void *) sliderp, 'p');
+    list_append(tt_elements.all, (unitype) (void *) sliderp, 'l');
     return sliderp;
 }
 
@@ -883,7 +884,7 @@ tt_scrollbar_t *scrollbarInit(double *variable, tt_scrollbar_type_t type, double
     scrollbarp -> barPercentage = barPercentage;
     scrollbarp -> variable = variable;
     list_append(tt_elements.scrollbars, (unitype) (void *) scrollbarp, 'p');
-    list_append(tt_elements.all, (unitype) (void *) scrollbarp, 'p');
+    list_append(tt_elements.all, (unitype) (void *) scrollbarp, 'l');
     return scrollbarp;
 }
 
@@ -926,7 +927,7 @@ tt_dropdown_t *dropdownInit(char *label, list_t *options, int32_t *variable, tt_
     dropdownp -> variable = variable;
     dropdownCalculateMax(dropdownp);
     list_append(tt_elements.dropdowns, (unitype) (void *) dropdownp, 'p');
-    list_append(tt_elements.all, (unitype) (void *) dropdownp, 'p');
+    list_append(tt_elements.all, (unitype) (void *) dropdownp, 'l');
     return dropdownp;
 }
 
@@ -991,24 +992,27 @@ void switchUpdate() {
         }
         turtlePenDown();
         turtlePenUp();
-        if (turtleMouseDown()) {
-            if (switchp -> status < 0) {
-                switchp -> status *= -1;
-            }
-        } else {
-            if (turtle.mouseX > switchX - switchp -> size * 1.35 && turtle.mouseX < switchX + switchp -> size * 1.35 && turtle.mouseY > switchY - switchp -> size * 0.6 && turtle.mouseY < switchY + switchp -> size * 0.6) {
-                switchp -> status = -1;
+        /* mouse */
+        if (switchp -> enabled) {
+            if (turtleMouseDown()) {
+                if (switchp -> status < 0) {
+                    switchp -> status *= -1;
+                }
             } else {
+                if (turtle.mouseX > switchX - switchp -> size * 1.35 && turtle.mouseX < switchX + switchp -> size * 1.35 && turtle.mouseY > switchY - switchp -> size * 0.6 && turtle.mouseY < switchY + switchp -> size * 0.6) {
+                    switchp -> status = -1;
+                } else {
+                    switchp -> status = 0;
+                }
+            }
+            if (switchp -> status > 0) {
+                if (*(switchp -> variable)) {
+                    *(switchp -> variable) = 0;
+                } else {
+                    *(switchp -> variable) = 1;
+                }
                 switchp -> status = 0;
             }
-        }
-        if (switchp -> status > 0) {
-            if (*(switchp -> variable)) {
-                *(switchp -> variable) = 0;
-            } else {
-                *(switchp -> variable) = 1;
-            }
-            switchp -> status = 0;
         }
     }
 }
