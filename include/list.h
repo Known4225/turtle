@@ -1,3 +1,6 @@
+#ifndef UNITYPELISTSET
+#define UNITYPELISTSET // include guard
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -73,7 +76,7 @@ typedef union { // supported types
     list_t* r;
     uint64_t l;
     uint16_t h;
-    bool b;
+    uint8_t b;
 } unitype;
 
 struct list_f {
@@ -394,7 +397,7 @@ void unitype_print(unitype item, char type) {
             printf("%d", item.i);
         break;
         case 'u':
-            printf("%i", item.i);
+            printf("%u", item.u);
         break;
         case 'f':
             printf("%f", item.f);
@@ -526,3 +529,5 @@ void list_free(list_t *list) {
     list_free_lite(list);
     free(list);
 }
+
+#endif

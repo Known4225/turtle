@@ -122,7 +122,8 @@ int main(int argc, char *argv[]) {
     clock_t start, end;
 
     turtleBgColor(30, 30, 30);
-    int32_t buttonVar, switchVar = 0, dropdownVar = 0;
+    int8_t buttonVar, switchVar = 0;
+    int32_t dropdownVar = 0;
     double dialVar = 0.0, sliderVar = 0.0, scrollbarVarX = 0.0, scrollbarVarY = 0.0;
     list_t *dropdownOptions = list_init();
     list_append(dropdownOptions, (unitype) "a", 's');
@@ -147,7 +148,7 @@ int main(int argc, char *argv[]) {
     dropdownInit("dropdown", dropdownOptions, &dropdownVar, TT_DROPDOWN_ALIGN_CENTER, 0, 70, 10);
 
     double power = 0.0, speed = 0.0, exposure = 0.0, x = 103, y = 95, z = 215;
-    int32_t xEnabled, yEnabled, zEnabled;
+    int8_t xEnabled = 0, yEnabled = 1, zEnabled = 0;
     list_t *sources = list_init();
     int sourceIndex = 0;
     list_append(sources, (unitype) "None", 's');

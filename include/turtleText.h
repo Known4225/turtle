@@ -257,6 +257,17 @@ double turtleTextGetStringLength(const char *str, double size) {
     return turtleTextGetLength(converted, len, size);
 }
 
+/* gets the length of a string in pixels on the screen */
+double turtleTextGetStringLengthf(double size, const char *str, ...) {
+    char buffer[1024];
+    va_list args;
+    va_start(args, str);
+    vsnprintf(buffer, 1024, str, args);
+    double out = turtleTextGetStringLength(buffer, size);
+    va_end(args);
+    return out;
+}
+
 /* gets the length of a u-string in pixels on the screen */
 double turtleTextGetUnicodeLength(const unsigned char *str, double size) {
     int32_t len = strlen((char *) str);
@@ -341,11 +352,11 @@ void turtleTextWriteString(const char *str, double x, double y, double size, dou
 /* formatted string */
 void turtleTextWriteStringf(double x, double y, double size, double align, const char *str, ...) {
     char buffer[1024];
-	va_list args;
-	va_start(args, str);
-	vsnprintf(buffer, 1024, str, args);
-	turtleTextWriteString(buffer, x, y, size, align);
-	va_end(args);
+    va_list args;
+    va_start(args, str);
+    vsnprintf(buffer, 1024, str, args);
+    turtleTextWriteString(buffer, x, y, size, align);
+    va_end(args);
 }
 
 /* wrapper function for unicode strings (UTF-8, u8"Hello World") */

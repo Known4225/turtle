@@ -39,6 +39,7 @@ idea: try glfwGetClipboardString and glfwSetClipboardString
 #include <stdint.h>
 #include <string.h>
 #include "glfw3.h"
+#include "list.h"
 
 typedef struct {
     GLFWwindow *osToolsWindow;
@@ -118,6 +119,12 @@ void osShowCursor() {
 #include <windows.h>
 #include <shobjidl.h>
 
+typedef struct {
+    list_t *mappedFiles;
+} osToolsMemmapObject;
+
+osToolsMemmapObject osToolsMemmap;
+
 int32_t osToolsInit(char argv0[], GLFWwindow *window) {
     osToolsIndependentInit(window);
     /* get executable filepath */
@@ -139,6 +146,9 @@ int32_t osToolsInit(char argv0[], GLFWwindow *window) {
 
     /* initialise clipboard */
     osToolsClipboard.text = glfwGetClipboardString(osToolsGLFW.osToolsWindow);
+
+    /* initialise memmap module */
+    osToolsMemmap.mappedFiles = list_init();
     return 0;
 }
 
@@ -352,6 +362,62 @@ void osWindowsHideAndLockCursor() {
 void osWindowsShowCursor() {
     ShowCursor(1);
 }
+
+uint8_t *mapFile(char *filename, uint32_t *sizeOutput) {
+    HANDLE fileHandle = CreateFileA(filename, FILE_GENERIC_READ | FILE_GENERIC_WRITE, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+    if (fileHandle == INVALID_HANDLE_VALUE) {
+        printf("Could not open file %ld\n", GetLastError());
+        return NULL;
+    }
+    if (!GetFileSizeEx(fileHandle, (PLARGE_INTEGER) sizeOutput)) {
+        printf("Failed to get size of file\n");
+        CloseHandle(fileHandle);
+        return NULL;
+    }
+    HANDLE mappingHandle = CreateFileMappingA(fileHandle, NULL, PAGE_READWRITE, 0, 0, NULL);
+    if (mappingHandle == NULL) {
+        printf("Could not memory map file %ld\n", GetLastError());
+        CloseHandle(fileHandle);
+        return NULL;
+    }
+    LPVOID address = MapViewOfFile(mappingHandle, FILE_MAP_ALL_ACCESS, 0, 0, 0);
+    if (address == NULL) {
+        printf("Could not create map view of file %ld\n", GetLastError());
+        CloseHandle(fileHandle);
+        CloseHandle(mappingHandle);
+        return NULL;
+    }
+    list_append(osToolsMemmap.mappedFiles, (unitype) filename, 's'); // filename
+    list_append(osToolsMemmap.mappedFiles, (unitype) fileHandle, 'l'); // file handle (uint64_t so no free on list_delete)
+    list_append(osToolsMemmap.mappedFiles, (unitype) mappingHandle, 'l'); // mapping handle (uint64_t so no free on list_delete)
+    list_append(osToolsMemmap.mappedFiles, (unitype) address, 'l'); // file data (uint64_t so no free on list_delete)
+    return address;
+}
+
+int32_t unmapFile(uint8_t *data) {
+    UnmapViewOfFile(data);
+    int32_t index = -1;
+    for (uint32_t i = 0; i < osToolsMemmap.mappedFiles -> length; i += 4) {
+        if (osToolsMemmap.mappedFiles -> data[i + 3].p == data) {
+            index = i;
+            break;
+        }
+    }
+    if (index >= 0) {
+        // printf("Closing %s\n", osToolsMemmap.mappedFiles -> data[index].s);
+        CloseHandle(osToolsMemmap.mappedFiles -> data[index + 1].p);
+        CloseHandle(osToolsMemmap.mappedFiles -> data[index + 2].p);
+        list_delete(osToolsMemmap.mappedFiles, index);
+        list_delete(osToolsMemmap.mappedFiles, index);
+        list_delete(osToolsMemmap.mappedFiles, index);
+        list_delete(osToolsMemmap.mappedFiles, index);
+        return 0;
+    } else {
+        printf("Could not find %p in memory mapped index\n", data);
+        return 1;
+    }
+}
+
 #endif
 #ifdef OS_LINUX
 

@@ -592,7 +592,7 @@ typedef struct {
     double x;
     double y;
     double size;
-    int32_t *variable; // 1 if button is being pressed, 0 otherwise
+    int8_t *variable; // 1 if button is being pressed, 0 otherwise
     char label[24];
     int32_t status;
     tt_button_shape_t shape;
@@ -605,7 +605,7 @@ typedef struct {
     double x;
     double y;
     double size;
-    int32_t *variable; // 1 if switch is flipped, 0 otherwise
+    int8_t *variable; // 1 if switch is flipped, 0 otherwise
     char label[24];
     int32_t status;
 } tt_switch_t;
@@ -730,7 +730,7 @@ void tt_internalColor(void *element, int32_t colorIndex, int32_t overrideIndex) 
 /* initialise UI elements */
 
 /* create a button */
-tt_button_t *buttonInit(char *label, int32_t *variable, tt_button_shape_t shape, double x, double y, double size) {
+tt_button_t *buttonInit(char *label, int8_t *variable, tt_button_shape_t shape, double x, double y, double size) {
     if (tt_enabled.buttonEnabled == 0) {
         tt_enabled.buttonEnabled = 1;
         tt_elements.buttons = list_init();
@@ -760,7 +760,7 @@ tt_button_t *buttonInit(char *label, int32_t *variable, tt_button_shape_t shape,
 }
 
 /* create a switch */
-tt_switch_t *switchInit(char *label, int32_t *variable, double x, double y, double size) {
+tt_switch_t *switchInit(char *label, int8_t *variable, double x, double y, double size) {
     if (tt_enabled.switchEnabled == 0) {
         tt_enabled.switchEnabled = 1;
         tt_elements.switches = list_init();
@@ -785,6 +785,12 @@ tt_switch_t *switchInit(char *label, int32_t *variable, double x, double y, doub
     list_append(tt_elements.switches, (unitype) (void *) switchp, 'p');
     list_append(tt_elements.all, (unitype) (void *) switchp, 'p');
     return switchp;
+}
+
+void switchDeinit(tt_switch_t *switchp) {
+    list_remove(tt_elements.switches, (unitype) (void *) switchp, 'p');
+    list_remove(tt_elements.all, (unitype) (void *) switchp, 'p');
+    free(switchp);
 }
 
 /* create a dial - make renderNumberFactor 0 to hide dial number */
