@@ -41,6 +41,7 @@ typedef struct {
     int8_t sliderEnabled;
     int8_t scrollbarEnabled;
     int8_t dropdownEnabled;
+    int8_t textboxEnabled;
 } tt_enabled_t;
 
 tt_enabled_t tt_enabled; // all start at 0 (global variable)
@@ -53,7 +54,7 @@ typedef enum {
     TT_ELEMENT_SCROLLBAR = 4,
     TT_ELEMENT_DROPDOWN = 5,
     TT_ELEMENT_TEXTBOX = 6,
-    TT_NUMBER_OF_ELEMENTS = 6,
+    TT_NUMBER_OF_ELEMENTS = 7,
 } tt_element_names_t;
 
 typedef struct {
@@ -64,6 +65,7 @@ typedef struct {
     list_t *sliders;
     list_t *scrollbars;
     list_t *dropdowns;
+    list_t *textboxes;
 } tt_elements_t;
 
 tt_elements_t tt_elements;
@@ -96,6 +98,10 @@ typedef enum {
     TT_COLOR_DROPDOWN_SELECT = 72,
     TT_COLOR_DROPDOWN_HOVER = 75,
     TT_COLOR_DROPDOWN_TRIANGLE = 78,
+    TT_COLOR_TEXTBOX_BOX = 81,
+    TT_COLOR_TEXTBOX_PHANTOM_TEXT = 84,
+    TT_COLOR_TEXTBOX_LINE = 87,
+    TT_COLOR_TEXTBOX_SELECT = 90,
 } tt_theme_internal_t;
 
 /* default colours (light theme) */
@@ -127,6 +133,10 @@ double tt_themeColors[] = {
     120.0, 120.0, 120.0, // dropdown select color (72)
     120.0, 120.0, 120.0, // dropdown hover color (75)
     100.0, 100.0, 100.0, // dropdown triangle color (78)
+    160.0, 160.0, 160.0, // textbox color (81)
+    200.0, 200.0, 200.0, // textbox phantom text color (84)
+    120.0, 120.0, 120.0, // textbox line color (87)
+    11.0, 87.0, 208.0,   // textbox select color (90)
 };
 
 void tt_setColor(int32_t index) {
@@ -164,6 +174,10 @@ void turtleToolsSetTheme(tt_theme_name_t theme) {
             80.0, 80.0, 80.0,    // dropdown select color (72)
             80.0, 80.0, 80.0,    // dropdown hover color (75)
             160.0, 160.0, 160.0, // dropdown triangle color (78)
+            60.0, 60.0, 60.0,    // textbox color (81)
+            80.0, 80.0, 80.0,    // textbox phantom text color (84)
+            160.0, 160.0, 160.0, // textbox line color (87)
+            11.0, 87.0, 208.0,   // textbox select color (90)
         };
         memcpy(tt_themeColors, tt_themeCopy, sizeof(tt_themeCopy));
     } else if (theme == TT_THEME_COLT) {
@@ -196,6 +210,10 @@ void turtleToolsSetTheme(tt_theme_name_t theme) {
             92.0, 80.0, 80.0,    // dropdown select color (72)
             93.0, 80.0, 80.0,    // dropdown hover color (75)
             175.0, 171.0, 160.0, // dropdown triangle color (78)
+            160.0, 160.0, 160.0, // textbox color (81)
+            200.0, 200.0, 200.0, // textbox phantom text color (84)
+            120.0, 120.0, 120.0, // textbox line color (87)
+            11.0, 87.0, 208.0,   // textbox select color (90)
         };
         memcpy(tt_themeColors, tt_themeCopy, sizeof(tt_themeCopy));
     } else if (theme == TT_THEME_NAVY) {
@@ -228,6 +246,10 @@ void turtleToolsSetTheme(tt_theme_name_t theme) {
             74.0, 108.0, 144.0,  // dropdown select color (72)
             74.0, 108.0, 144.0,  // dropdown hover color (75)
             241.0, 239.0, 236.0, // dropdown triangle color (78)
+            160.0, 160.0, 160.0, // textbox color (81)
+            200.0, 200.0, 200.0, // textbox phantom text color (84)
+            120.0, 120.0, 120.0, // textbox line color (87)
+            11.0, 87.0, 208.0,   // textbox select color (90)
         };
         memcpy(tt_themeColors, tt_themeCopy, sizeof(tt_themeCopy));
     } else {
@@ -260,6 +282,10 @@ void turtleToolsSetTheme(tt_theme_name_t theme) {
             120.0, 120.0, 120.0, // dropdown select color (72)
             120.0, 120.0, 120.0, // dropdown hover color (75)
             100.0, 100.0, 100.0, // dropdown triangle color (78)
+            160.0, 160.0, 160.0, // textbox color (81)
+            200.0, 200.0, 200.0, // textbox phantom text color (84)
+            120.0, 120.0, 120.0, // textbox line color (87)
+            11.0, 87.0, 208.0,   // textbox select color (90)
         };
         memcpy(tt_themeColors, tt_themeCopy, sizeof(tt_themeCopy));
     }
@@ -722,6 +748,26 @@ typedef struct {
     double maxXfactor;
 } tt_dropdown_t;
 
+typedef enum {
+    TT_TEXTBOX_ALIGN_LEFT = 0,
+    TT_TEXTBOX_ALIGN_CENTER = 1,
+    TT_TEXTBOX_ALIGN_RIGHT = 2,
+} tt_textbox_align_t;
+
+typedef struct {
+    tt_element_names_t element;
+    tt_element_enabled_t enabled;
+    tt_color_override_t color;
+    double x;
+    double y;
+    double size;
+    char *text;
+    char label[24];
+    int32_t status;
+    tt_textbox_align_t align;
+    double length;
+} tt_textbox_t;
+
 /* override colors with color array */
 void tt_colorOverride(void *element, double *colors, uint32_t length) {
     ((tt_button_t *) element) -> color.colorOverride = 1;
@@ -740,15 +786,15 @@ typedef enum {
 } tt_color_override_internal_t;
 
 int32_t tt_color_override_default[] = {
-    /*  button                   switch                      dial                  slider                   scrollbar                   dropdown  */
-    TT_COLOR_TEXT,          TT_COLOR_TEXT,              TT_COLOR_TEXT,       TT_COLOR_TEXT,          0,                          TT_COLOR_TEXT,
-    TT_COLOR_BUTTON,        TT_COLOR_SWITCH_ON,         TT_COLOR_DIAL,       TT_COLOR_SLIDER_BAR,    TT_COLOR_SCROLLBAR_BASE,    TT_COLOR_TEXT_ALTERNATE,
-    TT_COLOR_BUTTON_SELECT, TT_COLOR_SWITCH_OFF,        TT_COLOR_DIAL_INNER, TT_COLOR_SLIDER_CIRCLE, TT_COLOR_SCROLLBAR_HOVER,   TT_COLOR_DROPDOWN,
-    0,                      TT_COLOR_SWITCH_CIRCLE_ON,  0,                   0,                      TT_COLOR_SCROLLBAR_CLICKED, TT_COLOR_DROPDOWN_SELECT,
-    0,                      TT_COLOR_SWITCH_CIRCLE_OFF, 0,                   0,                      TT_COLOR_SCROLLBAR_BAR,     TT_COLOR_DROPDOWN_HOVER,
-    0,                      0,                          0,                   0,                      0,                          TT_COLOR_DROPDOWN_TRIANGLE,
-    0,                      0,                          0,                   0,                      0,                          0,
-    0,                      0,                          0,                   0,                      0,                          0,
+    /*  button                   switch                      dial                  slider                   scrollbar                   dropdown               textbox  */
+    TT_COLOR_TEXT,          TT_COLOR_TEXT,              TT_COLOR_TEXT,       TT_COLOR_TEXT,          0,                          TT_COLOR_TEXT,              TT_COLOR_TEXT,
+    TT_COLOR_BUTTON,        TT_COLOR_SWITCH_ON,         TT_COLOR_DIAL,       TT_COLOR_SLIDER_BAR,    TT_COLOR_SCROLLBAR_BASE,    TT_COLOR_TEXT_ALTERNATE,    TT_COLOR_TEXT,
+    TT_COLOR_BUTTON_SELECT, TT_COLOR_SWITCH_OFF,        TT_COLOR_DIAL_INNER, TT_COLOR_SLIDER_CIRCLE, TT_COLOR_SCROLLBAR_HOVER,   TT_COLOR_DROPDOWN,          TT_COLOR_TEXT,
+    0,                      TT_COLOR_SWITCH_CIRCLE_ON,  0,                   0,                      TT_COLOR_SCROLLBAR_CLICKED, TT_COLOR_DROPDOWN_SELECT,   TT_COLOR_TEXT,
+    0,                      TT_COLOR_SWITCH_CIRCLE_OFF, 0,                   0,                      TT_COLOR_SCROLLBAR_BAR,     TT_COLOR_DROPDOWN_HOVER,    TT_COLOR_TEXT,
+    0,                      0,                          0,                   0,                      0,                          TT_COLOR_DROPDOWN_TRIANGLE, TT_COLOR_TEXT,
+    0,                      0,                          0,                   0,                      0,                          0,                          TT_COLOR_TEXT,
+    0,                      0,                          0,                   0,                      0,                          0,                          TT_COLOR_TEXT,
 };
 
 void elementResetColor(void *elementp, int32_t elementType) {
@@ -801,6 +847,11 @@ tt_button_t *buttonInit(char *label, int8_t *variable, double x, double y, doubl
     return buttonp;
 }
 
+void buttonFree(tt_button_t *buttonp) {
+    list_remove(tt_elements.all, (unitype) (uint64_t) buttonp, 'l');
+    list_remove(tt_elements.buttons, (unitype) (void *) buttonp, 'p');
+}
+
 /* create a switch */
 tt_switch_t *switchInit(char *label, int8_t *variable, double x, double y, double size) {
     if (tt_enabled.switchEnabled == 0) {
@@ -832,9 +883,9 @@ tt_switch_t *switchInit(char *label, int8_t *variable, double x, double y, doubl
     return switchp;
 }
 
-void switchDeinit(tt_switch_t *switchp) {
+void switchFree(tt_switch_t *switchp) {
     list_remove(tt_elements.all, (unitype) (uint64_t) switchp, 'l');
-    list_remove(tt_elements.switches, (unitype) (uint64_t) switchp, 'l');
+    list_remove(tt_elements.switches, (unitype) (void *) switchp, 'p');
 }
 
 /* create a dial - make renderNumberFactor 0 to hide dial number */
@@ -870,6 +921,11 @@ tt_dial_t *dialInit(char *label, double *variable, tt_dial_type_t type, double x
     list_append(tt_elements.dials, (unitype) (void *) dialp, 'p');
     list_append(tt_elements.all, (unitype) (void *) dialp, 'l');
     return dialp;
+}
+
+void dialFree(tt_dial_t *dialp) {
+    list_remove(tt_elements.all, (unitype) (uint64_t) dialp, 'l');
+    list_remove(tt_elements.dials, (unitype) (void *) dialp, 'p');
 }
 
 /* create a slider - make renderNumberFactor 0 to hide slider number */
@@ -909,6 +965,11 @@ tt_slider_t *sliderInit(char *label, double *variable, tt_slider_type_t type, tt
     return sliderp;
 }
 
+void sliderFree(tt_slider_t *sliderp) {
+    list_remove(tt_elements.all, (unitype) (uint64_t) sliderp, 'l');
+    list_remove(tt_elements.sliders, (unitype) (void *) sliderp, 'p');
+}
+
 /* create a scrollbar */
 tt_scrollbar_t *scrollbarInit(double *variable, tt_scrollbar_type_t type, double x, double y, double size, double length, double barPercentage) {
     if (tt_enabled.scrollbarEnabled == 0) {
@@ -935,6 +996,11 @@ tt_scrollbar_t *scrollbarInit(double *variable, tt_scrollbar_type_t type, double
     list_append(tt_elements.scrollbars, (unitype) (void *) scrollbarp, 'p');
     list_append(tt_elements.all, (unitype) (void *) scrollbarp, 'l');
     return scrollbarp;
+}
+
+void scrollbarFree(tt_scrollbar_t *scrollbarp) {
+    list_remove(tt_elements.all, (unitype) (uint64_t) scrollbarp, 'l');
+    list_remove(tt_elements.scrollbars, (unitype) (void *) scrollbarp, 'p');
 }
 
 void dropdownCalculateMax(tt_dropdown_t *dropdown) {
@@ -980,6 +1046,51 @@ tt_dropdown_t *dropdownInit(char *label, list_t *options, int32_t *variable, tt_
     list_append(tt_elements.dropdowns, (unitype) (void *) dropdownp, 'p');
     list_append(tt_elements.all, (unitype) (void *) dropdownp, 'l');
     return dropdownp;
+}
+
+void dropdownFree(tt_dropdown_t *dropdownp) {
+    list_remove(tt_elements.all, (unitype) (uint64_t) dropdownp, 'l');
+    list_remove(tt_elements.dropdowns, (unitype) (void *) dropdownp, 'p');
+}
+
+void textboxKeyCallback(int32_t key, int32_t scancode, int32_t action);
+
+/* create a textbox */
+tt_textbox_t *textboxInit(char *label, uint32_t maxCharacters, double x, double y, double size, double length) {
+    if (tt_enabled.textboxEnabled == 0) {
+        turtle.keyCallback = textboxKeyCallback;
+        tt_enabled.textboxEnabled = 1;
+        tt_elements.textboxes = list_init();
+    }
+    if (tt_enabled.turtleToolsEnabled == 0) {
+        tt_enabled.turtleToolsEnabled = 1;
+        tt_elements.all = list_init();
+    }
+    tt_textbox_t *textboxp = malloc(sizeof(tt_textbox_t));
+    textboxp -> element = TT_ELEMENT_TEXTBOX;
+    textboxp -> enabled = TT_ELEMENT_ENABLED;
+    if (label == NULL) {
+        memcpy(textboxp -> label, "", strlen("") + 1);
+    } else {
+        memcpy(textboxp -> label, label, strlen(label) + 1);
+    }
+    textboxp -> color.colorOverride = 0;
+    elementResetColor(textboxp, TT_ELEMENT_TEXTBOX);
+    textboxp -> status = 0;
+    textboxp -> align = TT_TEXTBOX_ALIGN_LEFT;
+    textboxp -> x = x;
+    textboxp -> y = y;
+    textboxp -> size = size;
+    textboxp -> length = length;
+    textboxp -> text = calloc(maxCharacters, 1);
+    list_append(tt_elements.textboxes, (unitype) (void *) textboxp, 'p');
+    list_append(tt_elements.all, (unitype) (void *) textboxp, 'l');
+    return textboxp;
+}
+
+void textboxFree(tt_textbox_t *textboxp) {
+    list_remove(tt_elements.all, (unitype) (uint64_t) textboxp, 'l');
+    list_remove(tt_elements.textboxes, (unitype) (void *) textboxp, 'p');
 }
 
 void buttonUpdate() {
@@ -1614,6 +1725,69 @@ void dropdownUpdate() {
     }
 }
 
+void textboxKeyCallback(int32_t key, int32_t scancode, int32_t action) {
+    if (action == GLFW_PRESS) {
+        for (uint32_t i = 0; i < tt_elements.textboxes -> length; i++) {
+            tt_textbox_t *textboxp = (tt_textbox_t *) (tt_elements.textboxes -> data[i].p);
+            if (textboxp -> status > 1) {
+                printf("%d\n", key);
+                strcat(textboxp -> text, (char *) &key);
+                break;
+            }
+        }
+    }
+}
+
+void textboxUpdate() {
+    for (uint32_t i = 0; i < tt_elements.textboxes -> length; i++) {
+        tt_textbox_t *textboxp = (tt_textbox_t *) (tt_elements.textboxes -> data[i].p);
+        if (textboxp -> enabled == TT_ELEMENT_HIDE) {
+            continue;
+        }
+        tt_internalColor(textboxp, TT_COLOR_TEXTBOX_BOX, TT_COLOR_OVERRIDE_SLOT_1);
+        turtleRectangle(textboxp -> x, textboxp -> y - textboxp -> size, textboxp -> x + textboxp -> length, textboxp -> y + textboxp -> size);
+
+        if (textboxp -> status <= 0) {
+            tt_internalColor(textboxp, TT_COLOR_TEXTBOX_PHANTOM_TEXT, TT_COLOR_OVERRIDE_SLOT_2);
+            turtleTextWriteString(textboxp -> label, textboxp -> x + textboxp -> size / 2, textboxp -> y, textboxp -> size - 1, 0);
+        } else if (textboxp -> status > 0) {
+            tt_internalColor(textboxp, TT_COLOR_TEXT_ALTERNATE, TT_COLOR_OVERRIDE_SLOT_0);
+            turtleTextWriteUnicode((unsigned char *) textboxp -> text, textboxp -> x + textboxp -> size / 3, textboxp -> y, textboxp -> size - 1, 0);
+            if (textboxp -> status < 66) {
+                tt_internalColor(textboxp, TT_COLOR_TEXTBOX_LINE, TT_COLOR_OVERRIDE_SLOT_3);
+                turtleRectangle(textboxp -> x + textboxp -> size / 1.8 + turtleTextGetUnicodeLength((unsigned char *) textboxp -> text, textboxp -> size - 1), textboxp -> y - textboxp -> size * 0.8, textboxp -> x + textboxp -> size / 1.8 + turtleTextGetUnicodeLength((unsigned char *) textboxp -> text, textboxp -> size - 1) + 1, textboxp -> y + textboxp -> size * 0.8);
+            }
+            if (textboxp -> status > 1) {
+                textboxp -> status++;
+                if (textboxp -> status > 128) {
+                    textboxp -> status = 2;
+                }
+            }
+        }
+
+        if (textboxp -> enabled == TT_ELEMENT_ENABLED) {
+            if (turtleMouseDown()) {
+                if (textboxp -> status < 0) {
+                    textboxp -> status *= -1;
+                }
+                if (textboxp -> status > 1 && (turtle.mouseX < textboxp -> x || turtle.mouseX > textboxp -> x + textboxp -> length || turtle.mouseY < textboxp -> y - textboxp -> size || turtle.mouseY > textboxp -> y + textboxp -> size)) {
+                    textboxp -> status = 0;
+                }
+            } else {
+                if (textboxp -> status == 1) {
+                    textboxp -> status = 2;
+                } else if (textboxp -> status < 2) {
+                    if (turtle.mouseX > textboxp -> x && turtle.mouseX < textboxp -> x + textboxp -> length && turtle.mouseY > textboxp -> y - textboxp -> size && turtle.mouseY < textboxp -> y + textboxp -> size) {
+                        textboxp -> status = -1;
+                    } else {
+                        textboxp -> status = 0;
+                    }
+                }
+            }
+        }
+    }
+}
+
 void turtleToolsUpdate() {
     char shapeSave = turtle.penshape;
     turtlePenShape("circle");
@@ -1628,6 +1802,9 @@ void turtleToolsUpdate() {
     }
     if (tt_enabled.sliderEnabled) {
         sliderUpdate();
+    }
+    if (tt_enabled.textboxEnabled) {
+        textboxUpdate();
     }
     if (tt_enabled.dropdownEnabled) {
         dropdownUpdate();
@@ -1658,6 +1835,9 @@ void turtleToolsUpdateUI() {
     }
     if (tt_enabled.sliderEnabled) {
         sliderUpdate();
+    }
+    if (tt_enabled.textboxEnabled) {
+        textboxUpdate();
     }
     if (tt_enabled.dropdownEnabled) {
         dropdownUpdate();
