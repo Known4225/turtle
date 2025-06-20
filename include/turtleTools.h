@@ -8,6 +8,9 @@ slider
 scrollbar
 dropdown
 text box (under development)
+
+TODO:
+using the tab key to select different elements? And allowing them to be changed with the keyboard??
 */
 
 #ifndef TURTLETOOLS
@@ -766,6 +769,10 @@ typedef struct {
     int32_t status;
     tt_textbox_align_t align;
     double length;
+    int32_t maxCharacters;
+    int32_t editIndex;
+    int32_t lastKey;
+    int32_t keyTimeout;
 } tt_textbox_t;
 
 /* override colors with color array */
@@ -1053,12 +1060,12 @@ void dropdownFree(tt_dropdown_t *dropdownp) {
     list_remove(tt_elements.dropdowns, (unitype) (void *) dropdownp, 'p');
 }
 
-void textboxKeyCallback(int32_t key, int32_t scancode, int32_t action);
+void textboxUnicodeCallback(uint32_t codepoint);
 
 /* create a textbox */
 tt_textbox_t *textboxInit(char *label, uint32_t maxCharacters, double x, double y, double size, double length) {
     if (tt_enabled.textboxEnabled == 0) {
-        turtle.keyCallback = textboxKeyCallback;
+        turtle.unicodeCallback = textboxUnicodeCallback;
         tt_enabled.textboxEnabled = 1;
         tt_elements.textboxes = list_init();
     }
@@ -1082,7 +1089,11 @@ tt_textbox_t *textboxInit(char *label, uint32_t maxCharacters, double x, double 
     textboxp -> y = y;
     textboxp -> size = size;
     textboxp -> length = length;
-    textboxp -> text = calloc(maxCharacters, 1);
+    textboxp -> text = calloc(maxCharacters + 1, 1);
+    textboxp -> maxCharacters = maxCharacters;
+    textboxp -> editIndex = 0;
+    textboxp -> lastKey = 0;
+    textboxp -> keyTimeout = 0;
     list_append(tt_elements.textboxes, (unitype) (void *) textboxp, 'p');
     list_append(tt_elements.all, (unitype) (void *) textboxp, 'l');
     return textboxp;
@@ -1725,15 +1736,42 @@ void dropdownUpdate() {
     }
 }
 
-void textboxKeyCallback(int32_t key, int32_t scancode, int32_t action) {
-    if (action == GLFW_PRESS) {
-        for (uint32_t i = 0; i < tt_elements.textboxes -> length; i++) {
-            tt_textbox_t *textboxp = (tt_textbox_t *) (tt_elements.textboxes -> data[i].p);
-            if (textboxp -> status > 1) {
-                printf("%d\n", key);
-                strcat(textboxp -> text, (char *) &key);
-                break;
+void textboxAddKey(tt_textbox_t *textboxp, int32_t key) {
+    int32_t len = strlen(textboxp -> text);
+    if (key < 256) {
+        if (len < textboxp -> maxCharacters) {
+            strcat(textboxp -> text, (char *) &key);
+        }
+    } else {
+        /* non-printable keys */
+        if (key == GLFW_KEY_BACKSPACE) {
+            if (len > 0) {
+                textboxp -> text[len - 1] = '\0';
             }
+        } else if (key == GLFW_KEY_ENTER) {
+
+        } else if (key == GLFW_KEY_LEFT) {
+            if (textboxp -> editIndex > 0) {
+                textboxp -> editIndex--;
+            }
+        } else if (key == GLFW_KEY_RIGHT) {
+            if (textboxp -> editIndex < len) {
+                textboxp -> editIndex++;
+            }
+        }
+    }
+}
+
+void textboxUnicodeCallback(uint32_t codepoint) {
+    for (uint32_t i = 0; i < tt_elements.textboxes -> length; i++) {
+        tt_textbox_t *textboxp = (tt_textbox_t *) (tt_elements.textboxes -> data[i].p);
+        if (textboxp -> status > 1) {
+            // printf("%d\n", key);
+            textboxp -> lastKey = codepoint;
+            textboxp -> keyTimeout = 50;
+            printf("%d\n", codepoint);
+            textboxAddKey(textboxp, codepoint);
+            break;
         }
     }
 }
@@ -1748,14 +1786,32 @@ void textboxUpdate() {
         turtleRectangle(textboxp -> x, textboxp -> y - textboxp -> size, textboxp -> x + textboxp -> length, textboxp -> y + textboxp -> size);
 
         if (textboxp -> status <= 0) {
-            tt_internalColor(textboxp, TT_COLOR_TEXTBOX_PHANTOM_TEXT, TT_COLOR_OVERRIDE_SLOT_2);
-            turtleTextWriteString(textboxp -> label, textboxp -> x + textboxp -> size / 2, textboxp -> y, textboxp -> size - 1, 0);
+            if (strlen(textboxp -> text) == 0) {
+                tt_internalColor(textboxp, TT_COLOR_TEXTBOX_PHANTOM_TEXT, TT_COLOR_OVERRIDE_SLOT_2);
+                turtleTextWriteString(textboxp -> label, textboxp -> x + textboxp -> size / 2, textboxp -> y, textboxp -> size - 1, 0);
+            } else {
+                tt_internalColor(textboxp, TT_COLOR_TEXT_ALTERNATE, TT_COLOR_OVERRIDE_SLOT_0);
+                turtleTextWriteUnicode((unsigned char *) textboxp -> text, textboxp -> x + textboxp -> size / 3, textboxp -> y, textboxp -> size - 1, 0);
+            }
         } else if (textboxp -> status > 0) {
             tt_internalColor(textboxp, TT_COLOR_TEXT_ALTERNATE, TT_COLOR_OVERRIDE_SLOT_0);
             turtleTextWriteUnicode((unsigned char *) textboxp -> text, textboxp -> x + textboxp -> size / 3, textboxp -> y, textboxp -> size - 1, 0);
             if (textboxp -> status < 66) {
                 tt_internalColor(textboxp, TT_COLOR_TEXTBOX_LINE, TT_COLOR_OVERRIDE_SLOT_3);
                 turtleRectangle(textboxp -> x + textboxp -> size / 1.8 + turtleTextGetUnicodeLength((unsigned char *) textboxp -> text, textboxp -> size - 1), textboxp -> y - textboxp -> size * 0.8, textboxp -> x + textboxp -> size / 1.8 + turtleTextGetUnicodeLength((unsigned char *) textboxp -> text, textboxp -> size - 1) + 1, textboxp -> y + textboxp -> size * 0.8);
+            }
+            if (textboxp -> keyTimeout > 0) {
+                textboxp -> keyTimeout--;
+            }
+            if (textboxp -> lastKey > 0) {
+                if (turtleKeyPressed(textboxp -> lastKey)) {
+                    if (textboxp -> keyTimeout == 0) {
+                        textboxp -> keyTimeout = 4;
+                        // textboxAddKey(textboxp, textboxp -> lastKey);
+                    }
+                } else {
+                    textboxp -> lastKey = 0;
+                }
             }
             if (textboxp -> status > 1) {
                 textboxp -> status++;

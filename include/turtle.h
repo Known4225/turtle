@@ -26,6 +26,7 @@ typedef struct {
     GLFWwindow* window; // the window
     list_t *keyPressed; // global keyPressed and mousePressed list
     void (*keyCallback)(int32_t key, int32_t scancode, int32_t action);
+    void (*unicodeCallback)(uint32_t codepoint);
     int8_t mousePressed[4]; // cached mouse variables
     int32_t screenbounds[2]; // list of screen bounds (pixels)
     int32_t lastscreenbounds[2]; // list of screen bounds last frame
@@ -67,6 +68,13 @@ void turtleSetWorldCoordinates(int32_t minX, int32_t minY, int32_t maxX, int32_t
     turtle.bounds[1] = minY;
     turtle.bounds[2] = maxX;
     turtle.bounds[3] = maxY;
+}
+
+/* detect */
+void unicodeSense(GLFWwindow *window, uint32_t codepoint) {
+    if (turtle.unicodeCallback != NULL) {
+        turtle.unicodeCallback(codepoint);
+    }
 }
 
 /* detect key presses */
@@ -192,6 +200,8 @@ void turtleInit(GLFWwindow* window, int32_t minX, int32_t minY, int32_t maxX, in
     turtle.currentColor[3] = 1.0;
     turtleSetWorldCoordinates(minX, minY, maxX, maxY);
     turtle.keyCallback = NULL;
+    turtle.unicodeCallback = NULL;
+    glfwSetCharCallback(window, unicodeSense);
     glfwSetKeyCallback(window, keySense); // initiate mouse and keyboard detection
     glfwSetMouseButtonCallback(window, mouseSense);
     glfwSetScrollCallback(window, scrollSense);
