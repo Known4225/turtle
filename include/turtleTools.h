@@ -1914,18 +1914,22 @@ void textboxUpdate() {
                 }
                 turtleTextWriteUnicode((unsigned char *) (textboxp -> text + j), textboxp -> x + textboxp -> length - textboxp -> size / 3, textboxp -> y, textboxp -> size - 1, 100);
                 if (textboxp -> status < 66) {
+                    char tempHold = textboxp -> text[textboxp -> editIndex - 1];
+                    textboxp -> text[textboxp -> editIndex - 1] = '\0';
+                    textLength = turtleTextGetUnicodeLength((unsigned char *) (textboxp -> text + textboxp -> editIndex), textboxp -> size - 1);
+                    textboxp -> text[textboxp -> editIndex - 1] = tempHold;
                     tt_internalColor(textboxp, TT_COLOR_TEXTBOX_LINE, TT_COLOR_OVERRIDE_SLOT_3);
-                    turtleRectangle(textboxp -> x + textboxp -> length - textboxp -> size / 3, textboxp -> y - textboxp -> size * 0.8, textboxp -> x + textboxp -> length - textboxp -> size / 3 + 1, textboxp -> y + textboxp -> size * 0.8);
+                    turtleRectangle(textboxp -> x + textboxp -> length - textboxp -> size / 3 - textLength, textboxp -> y - textboxp -> size * 0.8, textboxp -> x + textboxp -> length - textboxp -> size / 3 - textLength + 1, textboxp -> y + textboxp -> size * 0.8);
                 }
                 tt_internalColor(textboxp, TT_COLOR_TEXTBOX_BOX, TT_COLOR_OVERRIDE_SLOT_1);
                 turtleRectangle(textboxp -> x, textboxp -> y - textboxp -> size, textboxp -> x + textboxp -> size / 3, textboxp -> y + textboxp -> size);
             } else {
                 turtleTextWriteUnicode((unsigned char *) textboxp -> text, textboxp -> x + textboxp -> size / 3, textboxp -> y, textboxp -> size - 1, 0);
-                char tempHold = textboxp -> text[textboxp -> editIndex];
-                textboxp -> text[textboxp -> editIndex] = '\0';
-                textLength = turtleTextGetUnicodeLength((unsigned char *) textboxp -> text, textboxp -> size - 1);
-                textboxp -> text[textboxp -> editIndex] = tempHold;
                 if (textboxp -> status < 66) {
+                    char tempHold = textboxp -> text[textboxp -> editIndex];
+                    textboxp -> text[textboxp -> editIndex] = '\0';
+                    textLength = turtleTextGetUnicodeLength((unsigned char *) textboxp -> text, textboxp -> size - 1);
+                    textboxp -> text[textboxp -> editIndex] = tempHold;
                     tt_internalColor(textboxp, TT_COLOR_TEXTBOX_LINE, TT_COLOR_OVERRIDE_SLOT_3);
                     turtleRectangle(textboxp -> x + textboxp -> size / 3 + textLength, textboxp -> y - textboxp -> size * 0.8, textboxp -> x + textboxp -> size / 3 + textLength + 1, textboxp -> y + textboxp -> size * 0.8);
                 }
