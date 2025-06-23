@@ -231,6 +231,9 @@ void renderChar(int32_t index, double x, double y, double size) {
 
 /* gets the length of a string in pixels on the screen */
 double turtleTextGetLength(const uint32_t *text, int32_t textLength, double size) {
+    if (textLength == 0) {
+        return 0;
+    }
     size /= 175;
     double xTrack = 0;
     for (int32_t i = 0; i < textLength; i++) {
@@ -299,7 +302,7 @@ double turtleTextGetUnicodeLength(const unsigned char *str, double size) {
         i += byteLength;
         next += 1;
     }
-    return turtleTextGetLength(converted, len, size);
+    return turtleTextGetLength(converted, next, size);
 }
 
 /* writes to the screen */

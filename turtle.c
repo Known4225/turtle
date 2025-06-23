@@ -147,7 +147,7 @@ int main(int argc, char *argv[]) {
     scrollbarInit(&scrollbarVarX, TT_SCROLLBAR_HORIZONTAL, 20, -170, 10, 550, 50);
     scrollbarInit(&scrollbarVarY, TT_SCROLLBAR_VERTICAL, 310, 0, 10, 320, 33);
     dropdownInit("dropdown", dropdownOptions, &dropdownVar, TT_DROPDOWN_ALIGN_CENTER, 0, 70, 10);
-    textboxInit("Enter", 12, -50, -110, 10, 100);
+    textboxInit("Enter", 128, -50, -110, 10, 100);
 
     double power = 0.0, speed = 0.0, exposure = 0.0, x = 103, y = 95, z = 215;
     int8_t xEnabled = 0, yEnabled = 1, zEnabled = 0;
