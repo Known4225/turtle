@@ -25,6 +25,22 @@ double randomDouble(double lowerBound, double upperBound) { // random double bet
     return (rand() * (upperBound - lowerBound) / RAND_MAX + lowerBound); // probably works idk
 }
 
+/* insert a string to an index in to string */
+char *strins(char *dest, char *source, int32_t index) {
+    int32_t lenDest = strlen(dest);
+    int32_t lenSource = strlen(source);
+    memmove(dest + index + lenSource, dest + index, lenDest - index);
+    memcpy(dest + index, source, lenSource);
+    return dest;
+}
+
+char *strdel(char *dest, int32_t index, int32_t size) {
+    int32_t len = strlen(dest);
+    memmove(dest + index, dest + index + size, len - index - size);
+    dest[len - size] = '\0';
+    return dest;
+}
+
 typedef enum {
     TT_THEME_LIGHT = 0,
     TT_THEME_DARK = 1,
@@ -1742,24 +1758,29 @@ void textboxAddKey(tt_textbox_t *textboxp, int32_t key) {
     int32_t len = strlen(textboxp -> text);
     /* https://stackoverflow.com/questions/42012563/convert-unicode-code-points-to-utf-8-and-utf-32 */
     uint32_t uKey = key;
-    uint8_t buffer[4] = {0};
+    uint8_t buffer[5] = {0};
+    int32_t size = 1;
     if (uKey <= 0x7F) {
         buffer[0] = uKey;
     } else if (uKey <= 0x7FF) {
         buffer[0] = 0xC0 | (uKey >> 6);            /* 110xxxxx */
         buffer[1] = 0x80 | (uKey & 0x3F);          /* 10xxxxxx */
+        size = 2;
     } else if (uKey <= 0xFFFF) {
         buffer[0] = 0xE0 | (uKey >> 12);           /* 1110xxxx */
         buffer[1] = 0x80 | ((uKey >> 6) & 0x3F);   /* 10xxxxxx */
         buffer[2] = 0x80 | (uKey & 0x3F);          /* 10xxxxxx */
+        size = 3;
     } else if (uKey <= 0x10FFFF) {
         buffer[0] = 0xF0 | (uKey >> 18);           /* 11110xxx */
         buffer[1] = 0x80 | ((uKey >> 12) & 0x3F);  /* 10xxxxxx */
         buffer[2] = 0x80 | ((uKey >> 6) & 0x3F);   /* 10xxxxxx */
         buffer[3] = 0x80 | (uKey & 0x3F);          /* 10xxxxxx */
+        size = 4;
     }
     if (len < textboxp -> maxCharacters) {
-        strcat(textboxp -> text, (char *) buffer);
+        strins(textboxp -> text, (char *) buffer, textboxp -> editIndex);
+        textboxp -> editIndex += size;
     }
 }
 
@@ -1767,7 +1788,6 @@ void textboxUnicodeCallback(uint32_t codepoint) {
     for (uint32_t i = 0; i < tt_elements.textboxes -> length; i++) {
         tt_textbox_t *textboxp = (tt_textbox_t *) (tt_elements.textboxes -> data[i].p);
         if (textboxp -> status > 1) {
-            // printf("%d\n", codepoint);
             textboxAddKey(textboxp, codepoint);
             break;
         }
@@ -1777,32 +1797,61 @@ void textboxUnicodeCallback(uint32_t codepoint) {
 void textboxHandleOtherKey(tt_textbox_t *textboxp, int32_t key) {
     int32_t len = strlen(textboxp -> text);
     if (key == GLFW_KEY_BACKSPACE) {
-        if (len <= 0) {
+        if (textboxp -> editIndex <= 0) {
             return;
         }
-        if (textboxp -> text[len - 1] & 0b10000000) {
-            while ((textboxp -> text[len - 1] & 0b01000000) == 0) {
-                textboxp -> text[len - 1] = '\0';
-                len = strlen(textboxp -> text);
-                if (len <= 0) {
-                    return;
+        int32_t size = 1;
+        if (textboxp -> text[textboxp -> editIndex - 1] & 0b10000000) {
+            while ((textboxp -> text[textboxp -> editIndex - 1] & 0b01000000) == 0) {
+                textboxp -> editIndex--;
+                size++;
+            }
+        }
+        textboxp -> editIndex--;
+        strdel(textboxp -> text, textboxp -> editIndex, size);
+    } else if (key == GLFW_KEY_DELETE) {
+        if (textboxp -> editIndex >= len) {
+            return;
+        }
+        int32_t size = 1;
+        if (textboxp -> text[textboxp -> editIndex] & 0b10000000) {
+            if (textboxp -> text[textboxp -> editIndex] & 0b00100000) {
+                if (textboxp -> text[textboxp -> editIndex] & 0b00010000) {
+                    size++;
                 }
+                size++;
             }
-            if (len <= 0) {
-                return;
-            }
+            size++;
         }
-        textboxp -> text[len - 1] = '\0';
+        strdel(textboxp -> text, textboxp -> editIndex, size);
     } else if (key == GLFW_KEY_ENTER) {
-
+        textboxp -> status = 0;
     } else if (key == GLFW_KEY_LEFT) {
-        if (textboxp -> editIndex > 0) {
-            textboxp -> editIndex--;
+        textboxp -> status = 2;
+        if (textboxp -> editIndex <= 0) {
+            return;
         }
+        if (textboxp -> text[textboxp -> editIndex - 1] & 0b10000000) {
+            while ((textboxp -> text[textboxp -> editIndex - 1] & 0b01000000) == 0) {
+                textboxp -> editIndex--;
+            }
+        }
+        textboxp -> editIndex--;
     } else if (key == GLFW_KEY_RIGHT) {
-        if (textboxp -> editIndex < len) {
+        textboxp -> status = 2;
+        if (textboxp -> editIndex >= len) {
+            return;
+        }
+        if (textboxp -> text[textboxp -> editIndex] & 0b10000000) {
+            if (textboxp -> text[textboxp -> editIndex] & 0b00100000) {
+                if (textboxp -> text[textboxp -> editIndex] & 0b00010000) {
+                    textboxp -> editIndex++;
+                }
+                textboxp -> editIndex++;
+            }
             textboxp -> editIndex++;
         }
+        textboxp -> editIndex++;
     }
 }
 
@@ -1827,6 +1876,7 @@ void textboxUpdate() {
         if (textboxp -> enabled == TT_ELEMENT_HIDE) {
             continue;
         }
+        printf("editIndex: %d\n", textboxp -> editIndex);
         tt_internalColor(textboxp, TT_COLOR_TEXTBOX_BOX, TT_COLOR_OVERRIDE_SLOT_1);
         turtleRectangle(textboxp -> x, textboxp -> y - textboxp -> size, textboxp -> x + textboxp -> length, textboxp -> y + textboxp -> size);
 
@@ -1871,6 +1921,10 @@ void textboxUpdate() {
                 turtleRectangle(textboxp -> x, textboxp -> y - textboxp -> size, textboxp -> x + textboxp -> size / 3, textboxp -> y + textboxp -> size);
             } else {
                 turtleTextWriteUnicode((unsigned char *) textboxp -> text, textboxp -> x + textboxp -> size / 3, textboxp -> y, textboxp -> size - 1, 0);
+                char tempHold = textboxp -> text[textboxp -> editIndex];
+                textboxp -> text[textboxp -> editIndex] = '\0';
+                textLength = turtleTextGetUnicodeLength((unsigned char *) textboxp -> text, textboxp -> size - 1);
+                textboxp -> text[textboxp -> editIndex] = tempHold;
                 if (textboxp -> status < 66) {
                     tt_internalColor(textboxp, TT_COLOR_TEXTBOX_LINE, TT_COLOR_OVERRIDE_SLOT_3);
                     turtleRectangle(textboxp -> x + textboxp -> size / 3 + textLength, textboxp -> y - textboxp -> size * 0.8, textboxp -> x + textboxp -> size / 3 + textLength + 1, textboxp -> y + textboxp -> size * 0.8);
@@ -1900,6 +1954,7 @@ void textboxUpdate() {
         if (textboxp -> enabled == TT_ELEMENT_ENABLED) {
             if (turtleMouseDown()) {
                 if (textboxp -> status < 0) {
+                    textboxp -> editIndex = strlen(textboxp -> text);
                     textboxp -> status *= -1;
                 }
                 if (textboxp -> status > 1 && (turtle.mouseX < textboxp -> x || turtle.mouseX > textboxp -> x + textboxp -> length || turtle.mouseY < textboxp -> y - textboxp -> size || turtle.mouseY > textboxp -> y + textboxp -> size)) {
