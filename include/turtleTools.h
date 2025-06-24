@@ -152,9 +152,9 @@ double tt_themeColors[] = {
     120.0, 120.0, 120.0, // dropdown select color (72)
     120.0, 120.0, 120.0, // dropdown hover color (75)
     100.0, 100.0, 100.0, // dropdown triangle color (78)
-    160.0, 160.0, 160.0, // textbox color (81)
-    200.0, 200.0, 200.0, // textbox phantom text color (84)
-    120.0, 120.0, 120.0, // textbox line color (87)
+    200.0, 200.0, 200.0, // textbox color (81)
+    180.0, 180.0, 180.0, // textbox phantom text color (84)
+    0.0, 0.0, 0.0,       // textbox line color (87)
     11.0, 87.0, 208.0,   // textbox select color (90)
 };
 
@@ -229,9 +229,9 @@ void turtleToolsSetTheme(tt_theme_name_t theme) {
             92.0, 80.0, 80.0,    // dropdown select color (72)
             93.0, 80.0, 80.0,    // dropdown hover color (75)
             175.0, 171.0, 160.0, // dropdown triangle color (78)
-            160.0, 160.0, 160.0, // textbox color (81)
-            200.0, 200.0, 200.0, // textbox phantom text color (84)
-            120.0, 120.0, 120.0, // textbox line color (87)
+            89.0, 80.0, 80.0,    // textbox color (81)
+            143.0, 134.0, 134.0, // textbox phantom text color (84)
+            154.0, 160.0, 160.0, // textbox line color (87)
             11.0, 87.0, 208.0,   // textbox select color (90)
         };
         memcpy(tt_themeColors, tt_themeCopy, sizeof(tt_themeCopy));
@@ -265,9 +265,9 @@ void turtleToolsSetTheme(tt_theme_name_t theme) {
             74.0, 108.0, 144.0,  // dropdown select color (72)
             74.0, 108.0, 144.0,  // dropdown hover color (75)
             241.0, 239.0, 236.0, // dropdown triangle color (78)
-            160.0, 160.0, 160.0, // textbox color (81)
-            200.0, 200.0, 200.0, // textbox phantom text color (84)
-            120.0, 120.0, 120.0, // textbox line color (87)
+            18.0, 52.0, 88.0,    // textbox color (81)
+            112.0, 146.0, 182.0, // textbox phantom text color (84)
+            241.0, 239.0, 236.0, // textbox line color (87)
             11.0, 87.0, 208.0,   // textbox select color (90)
         };
         memcpy(tt_themeColors, tt_themeCopy, sizeof(tt_themeCopy));
@@ -301,9 +301,9 @@ void turtleToolsSetTheme(tt_theme_name_t theme) {
             120.0, 120.0, 120.0, // dropdown select color (72)
             120.0, 120.0, 120.0, // dropdown hover color (75)
             100.0, 100.0, 100.0, // dropdown triangle color (78)
-            160.0, 160.0, 160.0, // textbox color (81)
-            200.0, 200.0, 200.0, // textbox phantom text color (84)
-            120.0, 120.0, 120.0, // textbox line color (87)
+            200.0, 200.0, 200.0, // textbox color (81)
+            180.0, 180.0, 180.0, // textbox phantom text color (84)
+            0.0, 0.0, 0.0,       // textbox line color (87)
             11.0, 87.0, 208.0,   // textbox select color (90)
         };
         memcpy(tt_themeColors, tt_themeCopy, sizeof(tt_themeCopy));
@@ -789,6 +789,8 @@ typedef struct {
     int32_t editIndex;
     int32_t lastKey;
     int32_t keyTimeout;
+    int8_t renderTextAlignment; // 0 for left aligned, 1 for right aligned
+    int32_t renderTextIndex; // starting index of text
 } tt_textbox_t;
 
 /* override colors with color array */
@@ -809,15 +811,15 @@ typedef enum {
 } tt_color_override_internal_t;
 
 int32_t tt_color_override_default[] = {
-    /*  button                   switch                      dial                  slider                   scrollbar                   dropdown               textbox  */
-    TT_COLOR_TEXT,          TT_COLOR_TEXT,              TT_COLOR_TEXT,       TT_COLOR_TEXT,          0,                          TT_COLOR_TEXT,              TT_COLOR_TEXT,
-    TT_COLOR_BUTTON,        TT_COLOR_SWITCH_ON,         TT_COLOR_DIAL,       TT_COLOR_SLIDER_BAR,    TT_COLOR_SCROLLBAR_BASE,    TT_COLOR_TEXT_ALTERNATE,    TT_COLOR_TEXT,
-    TT_COLOR_BUTTON_SELECT, TT_COLOR_SWITCH_OFF,        TT_COLOR_DIAL_INNER, TT_COLOR_SLIDER_CIRCLE, TT_COLOR_SCROLLBAR_HOVER,   TT_COLOR_DROPDOWN,          TT_COLOR_TEXT,
-    0,                      TT_COLOR_SWITCH_CIRCLE_ON,  0,                   0,                      TT_COLOR_SCROLLBAR_CLICKED, TT_COLOR_DROPDOWN_SELECT,   TT_COLOR_TEXT,
-    0,                      TT_COLOR_SWITCH_CIRCLE_OFF, 0,                   0,                      TT_COLOR_SCROLLBAR_BAR,     TT_COLOR_DROPDOWN_HOVER,    TT_COLOR_TEXT,
-    0,                      0,                          0,                   0,                      0,                          TT_COLOR_DROPDOWN_TRIANGLE, TT_COLOR_TEXT,
-    0,                      0,                          0,                   0,                      0,                          0,                          TT_COLOR_TEXT,
-    0,                      0,                          0,                   0,                      0,                          0,                          TT_COLOR_TEXT,
+    /*  button                    switch                      dial                  slider                   scrollbar                   dropdown               textbox  */
+    TT_COLOR_TEXT_ALTERNATE, TT_COLOR_TEXT,              TT_COLOR_TEXT,       TT_COLOR_TEXT,          0,                          TT_COLOR_TEXT,              TT_COLOR_TEXT_ALTERNATE,
+    TT_COLOR_BUTTON,         TT_COLOR_SWITCH_ON,         TT_COLOR_DIAL,       TT_COLOR_SLIDER_BAR,    TT_COLOR_SCROLLBAR_BASE,    TT_COLOR_TEXT_ALTERNATE,    TT_COLOR_TEXTBOX_BOX,
+    TT_COLOR_BUTTON_SELECT,  TT_COLOR_SWITCH_OFF,        TT_COLOR_DIAL_INNER, TT_COLOR_SLIDER_CIRCLE, TT_COLOR_SCROLLBAR_HOVER,   TT_COLOR_DROPDOWN,          TT_COLOR_TEXTBOX_PHANTOM_TEXT,
+    0,                       TT_COLOR_SWITCH_CIRCLE_ON,  0,                   0,                      TT_COLOR_SCROLLBAR_CLICKED, TT_COLOR_DROPDOWN_SELECT,   TT_COLOR_TEXTBOX_LINE,
+    0,                       TT_COLOR_SWITCH_CIRCLE_OFF, 0,                   0,                      TT_COLOR_SCROLLBAR_BAR,     TT_COLOR_DROPDOWN_HOVER,    TT_COLOR_TEXTBOX_SELECT,
+    0,                       0,                          0,                   0,                      0,                          TT_COLOR_DROPDOWN_TRIANGLE, 0,
+    0,                       0,                          0,                   0,                      0,                          0,                          0,
+    0,                       0,                          0,                   0,                      0,                          0,                          0,
 };
 
 void elementResetColor(void *elementp, int32_t elementType) {
@@ -1112,6 +1114,8 @@ tt_textbox_t *textboxInit(char *label, uint32_t maxCharacters, double x, double 
     textboxp -> editIndex = 0;
     textboxp -> lastKey = 0;
     textboxp -> keyTimeout = 0;
+    textboxp -> renderTextAlignment = 0;
+    textboxp -> renderTextIndex = 0;
     list_append(tt_elements.textboxes, (unitype) (void *) textboxp, 'p');
     list_append(tt_elements.all, (unitype) (void *) textboxp, 'l');
     return textboxp;
@@ -1876,7 +1880,7 @@ void textboxUpdate() {
         if (textboxp -> enabled == TT_ELEMENT_HIDE) {
             continue;
         }
-        printf("editIndex: %d\n", textboxp -> editIndex);
+        // printf("editIndex: %d\n", textboxp -> editIndex);
         tt_internalColor(textboxp, TT_COLOR_TEXTBOX_BOX, TT_COLOR_OVERRIDE_SLOT_1);
         turtleRectangle(textboxp -> x, textboxp -> y - textboxp -> size, textboxp -> x + textboxp -> length, textboxp -> y + textboxp -> size);
 
@@ -1889,16 +1893,20 @@ void textboxUpdate() {
                 double textLength = turtleTextGetUnicodeLength((unsigned char *) textboxp -> text, textboxp -> size - 1);
                 if (textLength > textboxp -> length - textboxp -> size / 1.5) {
                     /* text is too big to fit in textbox */
+                    textboxp -> renderTextAlignment = 1;
                     int32_t j = 0;
                     while (textLength > textboxp -> length - textboxp -> size / 3) {
                         j++;
-                        textLength = turtleTextGetUnicodeLength((unsigned char *) (textboxp -> text + j), textboxp -> size - 1);
+                        textLength = turtleTextGetUnicodeLength((unsigned char *) (textboxp -> text + textboxp -> renderTextIndex), textboxp -> size - 1);
                     }
-                    turtleTextWriteUnicode((unsigned char *) (textboxp -> text + j), textboxp -> x + textboxp -> length - textboxp -> size / 3, textboxp -> y, textboxp -> size - 1, 100);
+                    textboxp -> renderTextIndex = j; 
+                    turtleTextWriteUnicode((unsigned char *) (textboxp -> text + j), textboxp -> x + textboxp -> length - textboxp -> size / 3, textboxp -> y, textboxp -> size - 1, textboxp -> renderTextAlignment * 100);
                     tt_internalColor(textboxp, TT_COLOR_TEXTBOX_BOX, TT_COLOR_OVERRIDE_SLOT_1);
                     turtleRectangle(textboxp -> x, textboxp -> y - textboxp -> size, textboxp -> x + textboxp -> size / 3, textboxp -> y + textboxp -> size);
                 } else {
-                    turtleTextWriteUnicode((unsigned char *) textboxp -> text, textboxp -> x + textboxp -> size / 3, textboxp -> y, textboxp -> size - 1, 0);
+                    textboxp -> renderTextAlignment = 0;
+                    textboxp -> renderTextIndex = 0;
+                    turtleTextWriteUnicode((unsigned char *) (textboxp -> text + textboxp -> renderTextIndex), textboxp -> x + textboxp -> size / 3, textboxp -> y, textboxp -> size - 1, textboxp -> renderTextAlignment * 100);
                 }
             }
         } else if (textboxp -> status > 0) {
@@ -1906,13 +1914,15 @@ void textboxUpdate() {
 
             double textLength = turtleTextGetUnicodeLength((unsigned char *) textboxp -> text, textboxp -> size - 1);
             if (textLength > textboxp -> length - textboxp -> size / 1.5) {
+                textboxp -> renderTextAlignment = 1;
                 /* text is too big to fit in textbox */
                 int32_t j = 0;
                 while (textLength > textboxp -> length - textboxp -> size / 3) {
                     j++;
                     textLength = turtleTextGetUnicodeLength((unsigned char *) (textboxp -> text + j), textboxp -> size - 1);
                 }
-                turtleTextWriteUnicode((unsigned char *) (textboxp -> text + j), textboxp -> x + textboxp -> length - textboxp -> size / 3, textboxp -> y, textboxp -> size - 1, 100);
+                textboxp -> renderTextIndex = j; 
+                turtleTextWriteUnicode((unsigned char *) (textboxp -> text + textboxp -> renderTextIndex), textboxp -> x + textboxp -> length - textboxp -> size / 3, textboxp -> y, textboxp -> size - 1, textboxp -> renderTextAlignment * 100);
                 if (textboxp -> status < 66) {
                     char tempHold = textboxp -> text[textboxp -> editIndex - 1];
                     textboxp -> text[textboxp -> editIndex - 1] = '\0';
@@ -1924,7 +1934,9 @@ void textboxUpdate() {
                 tt_internalColor(textboxp, TT_COLOR_TEXTBOX_BOX, TT_COLOR_OVERRIDE_SLOT_1);
                 turtleRectangle(textboxp -> x, textboxp -> y - textboxp -> size, textboxp -> x + textboxp -> size / 3, textboxp -> y + textboxp -> size);
             } else {
-                turtleTextWriteUnicode((unsigned char *) textboxp -> text, textboxp -> x + textboxp -> size / 3, textboxp -> y, textboxp -> size - 1, 0);
+                textboxp -> renderTextAlignment = 0;
+                textboxp -> renderTextIndex = 0;
+                turtleTextWriteUnicode((unsigned char *) (textboxp -> text + textboxp -> renderTextIndex), textboxp -> x + textboxp -> size / 3, textboxp -> y, textboxp -> size - 1, textboxp -> renderTextAlignment * 100);
                 if (textboxp -> status < 66) {
                     char tempHold = textboxp -> text[textboxp -> editIndex];
                     textboxp -> text[textboxp -> editIndex] = '\0';
