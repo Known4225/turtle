@@ -274,7 +274,7 @@ double turtleTextGetStringLengthf(double size, const char *str, ...) {
 /* gets the length of a u-string in pixels on the screen */
 double turtleTextGetUnicodeLength(const unsigned char *str, double size) {
     int32_t len = strlen((char *) str);
-    uint32_t converted[len]; // max number of characters in a utf-8 string of length len
+    uint32_t converted[len];
     int32_t byteLength;
     int32_t i = 0;
     int32_t next = 0;
@@ -365,7 +365,7 @@ void turtleTextWriteStringf(double x, double y, double size, double align, const
 /* wrapper function for unicode strings (UTF-8, u8"Hello World") */
 void turtleTextWriteUnicode(const unsigned char *str, double x, double y, double size, double align) {
     int32_t len = strlen((char *) str);
-    uint32_t converted[len]; // max number of characters in a utf-8 string of length len
+    uint32_t converted[len];
     int32_t byteLength;
     int32_t i = 0;
     int32_t next = 0;
@@ -394,5 +394,37 @@ void turtleTextWriteUnicode(const unsigned char *str, double x, double y, double
         next += 1;
     }
     turtleTextWrite(converted, next, x, y, size, align);
+}
+
+int32_t turtleTextConvertUnicode(const unsigned char *str, uint32_t *converted) {
+    int32_t len = strlen((char *) str);
+    int32_t byteLength;
+    int32_t i = 0;
+    int32_t next = 0;
+    while (i < len) {
+        byteLength = 0;
+        for (uint8_t j = 0; j < 8; j++) {
+            uint8_t mask = 128 >> j;
+            if (str[i] & mask) {
+                byteLength += 1;
+            } else {
+                j = 8; // end loop
+            }
+        }
+        if (byteLength == 0) { // case: ASCII character
+            converted[next] = (uint32_t) str[i];
+            byteLength = 1;
+        } else { // case: multi-byte character
+            uint32_t convert = 0;
+            for (int32_t k = 0; k < byteLength; k++) {
+                convert = convert << 8;
+                convert += (uint32_t) str[i + k];
+            }
+            converted[next] = convert;
+        }
+        i += byteLength;
+        next += 1;
+    }
+    return next;
 }
 #endif

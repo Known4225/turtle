@@ -789,8 +789,10 @@ typedef struct {
     int32_t editIndex;
     int32_t lastKey;
     int32_t keyTimeout;
-    int8_t renderTextAlignment; // 0 for left aligned, 1 for right aligned
-    int32_t renderTextIndex; // starting index of text
+    /* render variables */
+    double renderPixelOffset;
+    int32_t renderStartingIndex;
+    int32_t renderNumCharacters;
 } tt_textbox_t;
 
 /* override colors with color array */
@@ -1114,8 +1116,9 @@ tt_textbox_t *textboxInit(char *label, uint32_t maxCharacters, double x, double 
     textboxp -> editIndex = 0;
     textboxp -> lastKey = 0;
     textboxp -> keyTimeout = 0;
-    textboxp -> renderTextAlignment = 0;
-    textboxp -> renderTextIndex = 0;
+    textboxp -> renderPixelOffset = 0;
+    textboxp -> renderStartingIndex = 0;
+    textboxp -> renderNumCharacters = 0;
     list_append(tt_elements.textboxes, (unitype) (void *) textboxp, 'p');
     list_append(tt_elements.all, (unitype) (void *) textboxp, 'l');
     return textboxp;
@@ -1874,6 +1877,31 @@ void textboxKeyCallback(int32_t key, int32_t scancode, int32_t action) {
     }
 }
 
+int32_t textboxCalculateMaximumCharacters(uint32_t *charlist, int32_t textLength, double size, double lengthPixels, int8_t sweepDirection) {
+    if (sweepDirection == -1) {
+        /* sweep from the back to the front */
+        size /= 175;
+        double xTrack = 0;
+        for (int32_t i = 0; i < textLength; i++) {
+            int32_t currentDataAddress = 0;
+            for (int32_t j = 0; j < turtleTextRender.charCount; j++) {
+                if (turtleTextRender.supportedCharReference[j] == charlist[i]) {
+                    currentDataAddress = j;
+                    break;
+                }
+            }
+            xTrack += (turtleTextRender.fontData[turtleTextRender.fontPointer[currentDataAddress + 1] - 4] + 40) * size;
+            if (xTrack - 40 * size > lengthPixels) {
+                return i;
+            }
+        }
+        return textLength;
+    } else if (sweepDirection == 1) {
+        /* sweep from the front to the back */
+    }
+    return 0;
+}
+
 void textboxUpdate() {
     for (uint32_t i = 0; i < tt_elements.textboxes -> length; i++) {
         tt_textbox_t *textboxp = (tt_textbox_t *) (tt_elements.textboxes -> data[i].p);
@@ -1885,67 +1913,43 @@ void textboxUpdate() {
         turtleRectangle(textboxp -> x, textboxp -> y - textboxp -> size, textboxp -> x + textboxp -> length, textboxp -> y + textboxp -> size);
 
         if (textboxp -> status <= 0) {
+            textboxp -> renderPixelOffset = textboxp -> size / 3;
+            textboxp -> renderStartingIndex = 0;
+            /* textbox idle */
             if (strlen(textboxp -> text) == 0) {
+                /* render label */
+                textboxp -> renderNumCharacters = 0;
                 tt_internalColor(textboxp, TT_COLOR_TEXTBOX_PHANTOM_TEXT, TT_COLOR_OVERRIDE_SLOT_2);
                 turtleTextWriteUnicode((unsigned char *) textboxp -> label, textboxp -> x + textboxp -> size / 2, textboxp -> y, textboxp -> size - 1, 0);
             } else {
-                tt_internalColor(textboxp, TT_COLOR_TEXT_ALTERNATE, TT_COLOR_OVERRIDE_SLOT_0);
-                double textLength = turtleTextGetUnicodeLength((unsigned char *) textboxp -> text, textboxp -> size - 1);
-                if (textLength > textboxp -> length - textboxp -> size / 1.5) {
-                    /* text is too big to fit in textbox */
-                    textboxp -> renderTextAlignment = 1;
-                    int32_t j = 0;
-                    while (textLength > textboxp -> length - textboxp -> size / 3) {
-                        j++;
-                        textLength = turtleTextGetUnicodeLength((unsigned char *) (textboxp -> text + textboxp -> renderTextIndex), textboxp -> size - 1);
-                    }
-                    textboxp -> renderTextIndex = j; 
-                    turtleTextWriteUnicode((unsigned char *) (textboxp -> text + j), textboxp -> x + textboxp -> length - textboxp -> size / 3, textboxp -> y, textboxp -> size - 1, textboxp -> renderTextAlignment * 100);
-                    tt_internalColor(textboxp, TT_COLOR_TEXTBOX_BOX, TT_COLOR_OVERRIDE_SLOT_1);
-                    turtleRectangle(textboxp -> x, textboxp -> y - textboxp -> size, textboxp -> x + textboxp -> size / 3, textboxp -> y + textboxp -> size);
+                /* calculate rendered characters */
+                double totalTextLength = turtleTextGetUnicodeLength((unsigned char *) textboxp -> text, textboxp -> size - 1);
+                if (totalTextLength < textboxp -> length - textboxp -> size / 1.5) {
+                    textboxp -> renderNumCharacters = strlen(textboxp -> text);
                 } else {
-                    textboxp -> renderTextAlignment = 0;
-                    textboxp -> renderTextIndex = 0;
-                    turtleTextWriteUnicode((unsigned char *) (textboxp -> text + textboxp -> renderTextIndex), textboxp -> x + textboxp -> size / 3, textboxp -> y, textboxp -> size - 1, textboxp -> renderTextAlignment * 100);
+                    /* not all characters fit in textbox - retract text length */
+                    uint32_t textConverted[strlen(textboxp -> text) + 1];
+                    uint32_t characterLength = turtleTextConvertUnicode((unsigned char *) textboxp -> text, textConverted);
+                    textboxp -> renderNumCharacters = textboxCalculateMaximumCharacters(textConverted, characterLength, textboxp -> size - 1, textboxp -> length - textboxp -> size / 3, -1);
                 }
             }
         } else if (textboxp -> status > 0) {
-            tt_internalColor(textboxp, TT_COLOR_TEXT_ALTERNATE, TT_COLOR_OVERRIDE_SLOT_0);
-
-            double textLength = turtleTextGetUnicodeLength((unsigned char *) textboxp -> text, textboxp -> size - 1);
-            if (textLength > textboxp -> length - textboxp -> size / 1.5) {
-                textboxp -> renderTextAlignment = 1;
-                /* text is too big to fit in textbox */
-                int32_t j = 0;
-                while (textLength > textboxp -> length - textboxp -> size / 3) {
-                    j++;
-                    textLength = turtleTextGetUnicodeLength((unsigned char *) (textboxp -> text + j), textboxp -> size - 1);
-                }
-                textboxp -> renderTextIndex = j; 
-                turtleTextWriteUnicode((unsigned char *) (textboxp -> text + textboxp -> renderTextIndex), textboxp -> x + textboxp -> length - textboxp -> size / 3, textboxp -> y, textboxp -> size - 1, textboxp -> renderTextAlignment * 100);
-                if (textboxp -> status < 66) {
-                    char tempHold = textboxp -> text[textboxp -> editIndex - 1];
-                    textboxp -> text[textboxp -> editIndex - 1] = '\0';
-                    textLength = turtleTextGetUnicodeLength((unsigned char *) (textboxp -> text + textboxp -> editIndex), textboxp -> size - 1);
-                    textboxp -> text[textboxp -> editIndex - 1] = tempHold;
-                    tt_internalColor(textboxp, TT_COLOR_TEXTBOX_LINE, TT_COLOR_OVERRIDE_SLOT_3);
-                    turtleRectangle(textboxp -> x + textboxp -> length - textboxp -> size / 3 - textLength, textboxp -> y - textboxp -> size * 0.8, textboxp -> x + textboxp -> length - textboxp -> size / 3 - textLength + 1, textboxp -> y + textboxp -> size * 0.8);
-                }
-                tt_internalColor(textboxp, TT_COLOR_TEXTBOX_BOX, TT_COLOR_OVERRIDE_SLOT_1);
-                turtleRectangle(textboxp -> x, textboxp -> y - textboxp -> size, textboxp -> x + textboxp -> size / 3, textboxp -> y + textboxp -> size);
+            /* editing text */
+            textboxp -> renderPixelOffset = textboxp -> size / 3;
+            textboxp -> renderStartingIndex = 0;
+            /* calculate rendered characters */
+            double totalTextLength = turtleTextGetUnicodeLength((unsigned char *) textboxp -> text, textboxp -> size - 1);
+            if (totalTextLength < textboxp -> length - textboxp -> size / 1.5) {
+                textboxp -> renderNumCharacters = strlen(textboxp -> text);
             } else {
-                textboxp -> renderTextAlignment = 0;
-                textboxp -> renderTextIndex = 0;
-                turtleTextWriteUnicode((unsigned char *) (textboxp -> text + textboxp -> renderTextIndex), textboxp -> x + textboxp -> size / 3, textboxp -> y, textboxp -> size - 1, textboxp -> renderTextAlignment * 100);
-                if (textboxp -> status < 66) {
-                    char tempHold = textboxp -> text[textboxp -> editIndex];
-                    textboxp -> text[textboxp -> editIndex] = '\0';
-                    textLength = turtleTextGetUnicodeLength((unsigned char *) textboxp -> text, textboxp -> size - 1);
-                    textboxp -> text[textboxp -> editIndex] = tempHold;
-                    tt_internalColor(textboxp, TT_COLOR_TEXTBOX_LINE, TT_COLOR_OVERRIDE_SLOT_3);
-                    turtleRectangle(textboxp -> x + textboxp -> size / 3 + textLength, textboxp -> y - textboxp -> size * 0.8, textboxp -> x + textboxp -> size / 3 + textLength + 1, textboxp -> y + textboxp -> size * 0.8);
-                }
+                /* not all characters fit in textbox - retract text length */
+                uint32_t textConverted[strlen(textboxp -> text) + 1];
+                uint32_t characterLength = turtleTextConvertUnicode((unsigned char *) textboxp -> text, textConverted);
+                textboxp -> renderNumCharacters = textboxCalculateMaximumCharacters(textConverted, characterLength, textboxp -> size - 1, textboxp -> length - textboxp -> size / 3, -1);
             }
+
+            /* TODO */
+            
             if (textboxp -> keyTimeout > 0) {
                 textboxp -> keyTimeout--;
             }
@@ -1965,6 +1969,25 @@ void textboxUpdate() {
                     textboxp -> status = 2;
                 }
             }
+        }
+
+        /* draw text and occluding boxes */
+        char tempHold;
+        tempHold = textboxp -> text[textboxp -> renderStartingIndex + textboxp -> renderNumCharacters];
+        textboxp -> text[textboxp -> renderStartingIndex + textboxp -> renderNumCharacters] = '\0';
+        tt_internalColor(textboxp, TT_COLOR_TEXT_ALTERNATE, TT_COLOR_OVERRIDE_SLOT_0);
+        turtleTextWriteUnicode((unsigned char *) (textboxp -> text + textboxp -> renderStartingIndex), textboxp -> x + textboxp -> renderPixelOffset, textboxp -> y, textboxp -> size - 1, 0);
+        textboxp -> text[textboxp -> renderStartingIndex + textboxp -> renderNumCharacters] = tempHold;
+        tt_internalColor(textboxp, TT_COLOR_TEXTBOX_BOX, TT_COLOR_OVERRIDE_SLOT_1);
+        turtleRectangle(textboxp -> x, textboxp -> y - textboxp -> size, textboxp -> x + textboxp -> size / 3, textboxp -> y + textboxp -> size);
+        turtleRectangle(textboxp -> x + textboxp -> length, textboxp -> y - textboxp -> size, textboxp -> x + textboxp -> length - textboxp -> size / 3, textboxp -> y + textboxp -> size);
+        if (textboxp -> status > 0 && textboxp -> status < 66) {
+            char tempHold = textboxp -> text[textboxp -> editIndex];
+            textboxp -> text[textboxp -> editIndex] = '\0';
+            double textLength = turtleTextGetUnicodeLength((unsigned char *) textboxp -> text, textboxp -> size - 1);
+            textboxp -> text[textboxp -> editIndex] = tempHold;
+            tt_internalColor(textboxp, TT_COLOR_TEXTBOX_LINE, TT_COLOR_OVERRIDE_SLOT_3);
+            turtleRectangle(textboxp -> x + textboxp -> size / 3 + textLength, textboxp -> y - textboxp -> size * 0.8, textboxp -> x + textboxp -> size / 3 + textLength + 1, textboxp -> y + textboxp -> size * 0.8);
         }
 
         if (textboxp -> enabled == TT_ELEMENT_ENABLED) {
