@@ -70,7 +70,7 @@ void turtleSetWorldCoordinates(int32_t minX, int32_t minY, int32_t maxX, int32_t
     turtle.bounds[3] = maxY;
 }
 
-/* detect */
+/* detect character */
 void unicodeSense(GLFWwindow *window, uint32_t codepoint) {
     if (turtle.unicodeCallback != NULL) {
         turtle.unicodeCallback(codepoint);
@@ -143,27 +143,27 @@ double turtleMouseWheel() {
 }
 
 /* top level boolean output call to check if the key with code [key] is currently being held down. Uses the GLFW_KEY_X macros */
-char turtleKeyPressed(int32_t key) {
+int8_t turtleKeyPressed(int32_t key) {
     return list_count(turtle.keyPressed, (unitype) key, 'c');
 }
 
 /* top level boolean output call to check if the left click button is currently being held down */
-char turtleMouseDown() {
+int8_t turtleMouseDown() {
     return turtle.mousePressed[0];
 }
 
 /* top level boolean output call to check if the right click button is currently being held down */
-char turtleMouseRight() {
+int8_t turtleMouseRight() {
     return turtle.mousePressed[1];
 }
 
 /* top level boolean output call to check if the middle mouse button is currently being held down */
-char turtleMouseMiddle() {
+int8_t turtleMouseMiddle() {
     return turtle.mousePressed[2];
 }
 
 /* alternate duplicate of top level boolean output call to check if the middle mouse button is currently being held down */
-char turtleMouseMid() {
+int8_t turtleMouseMid() {
     return turtle.mousePressed[2];
 }
 
@@ -262,7 +262,7 @@ void turtleClear() {
 void turtlePenDown() {
     if (turtle.pen == 0) {
         turtle.pen = 1;
-        char changed = 0;
+        int8_t changed = 0;
         int32_t len = turtle.penPos -> length;
         if (len > 0) {
             unitype *ren = turtle.penPos -> data;
@@ -343,7 +343,7 @@ void turtleGoto(double x, double y) {
         turtle.x = x;
         turtle.y = y;
         if (turtle.pen == 1) {
-            char changed = 0;
+            int8_t changed = 0;
             int32_t len = turtle.penPos -> length;
             if (len > 0) {
                 unitype *ren = turtle.penPos -> data;
@@ -376,7 +376,7 @@ void turtleGoto(double x, double y) {
 
 /* draws a circle at the specified x and y (coordinates) */
 void turtleCircleRender(double x, double y, double rad, double r, double g, double b, double a, double xfact, double yfact, double prez) {
-    char colorChange = 0;
+    int8_t colorChange = 0;
     if (r != turtle.currentColor[0]) {colorChange = 1;}
     if (g != turtle.currentColor[1]) {colorChange = 1;}
     if (b != turtle.currentColor[2]) {colorChange = 1;}
@@ -397,7 +397,7 @@ void turtleCircleRender(double x, double y, double rad, double r, double g, doub
 
 /* draws a square */
 void turtleSquareRender(double x1, double y1, double x2, double y2, double r, double g, double b, double a, double xfact, double yfact) {
-    char colorChange = 0;
+    int8_t colorChange = 0;
     if (r != turtle.currentColor[0]) {colorChange = 1;}
     if (g != turtle.currentColor[1]) {colorChange = 1;}
     if (b != turtle.currentColor[2]) {colorChange = 1;}
@@ -419,7 +419,7 @@ void turtleSquareRender(double x1, double y1, double x2, double y2, double r, do
 
 /* draws a triangle */
 void turtleTriangleRender(double x1, double y1, double x2, double y2, double x3, double y3, double r, double g, double b, double a, double xfact, double yfact) {
-    char colorChange = 0;
+    int8_t colorChange = 0;
     if (r != turtle.currentColor[0]) {colorChange = 1;}
     if (g != turtle.currentColor[1]) {colorChange = 1;}
     if (b != turtle.currentColor[2]) {colorChange = 1;}
@@ -485,7 +485,7 @@ void turtleTriangleColor(double x1, double y1, double x2, double y2, double x3, 
 
 /* draws a quadrilateral */
 void turtleQuadRender(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, double r, double g, double b, double a, double xfact, double yfact) {
-    char colorChange = 0;
+    int8_t colorChange = 0;
     if (r != turtle.currentColor[0]) {colorChange = 1;}
     if (g != turtle.currentColor[1]) {colorChange = 1;}
     if (b != turtle.currentColor[2]) {colorChange = 1;}
@@ -599,10 +599,10 @@ void turtleRectangleColor(double x1, double y1, double x2, double y2, double r, 
 void turtleUpdate() {
     // used to have a feature that only redrew the screen if there have been any changes from last frame, but it has been removed.
     // opted to redraw every frame and not list_copy, an alternative is hashing the penPos list. An interesting idea for sure... for another time
-    char changed = 0;
+    int8_t changed = 0;
     uint32_t len = turtle.penPos -> length;
     unitype *ren = turtle.penPos -> data;
-    char *renType = turtle.penPos -> type;
+    int8_t *renType = turtle.penPos -> type;
     uint64_t oldHash = turtle.penHash;
     turtle.penHash = 0; // I don't use this but it's an idea: https://stackoverflow.com/questions/57455444/very-low-collision-non-cryptographic-hashing-function
     for (uint32_t i = 0; i < len; i++) {

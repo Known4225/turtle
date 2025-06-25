@@ -11,78 +11,80 @@
 21.04.23:
 unitype list, supports a variety of types
 
-access items of a list:
-list -> data[0]
+example usage:
+list_t *newList = list_init();
+list_append(newList, (unitype) "hello", 's'); // add to list
+list_append(newList, (unitype) "test", LIST_TYPE_STRING); // add to list using enum
+list_print(newList);
+> [hello, test]
+list_insert(newList, (unitype) 128, 'i', 1);
+list_insert(newList, (unitype) 12.0, 'd', 1);
+list_print(newList);
+> [hello, 12.0, 128, test]
+printf("%s\n", newList -> data[3].s);
+> test
+printf("%d\n", newList -> length);
+> 4 
+list_delete(newList, 0);
+list_print(newList);
+> [12.0, 128, test]
+list_clear(newList);
+list_print(newList);
+> []
+list_free(newList);
 
-access length of list:
-list -> length
-
-list functions:
-
-create list:
-list_t list = list_init();
-
-access items of a list (as a void pointer):
-void *item = list_item(list, [index]);
-
-append to list:
-list_append(list, (unitype) [data], 'i');
-
-insert to list
-list_insert(list, [index], (unitype) [data], 'i');
-
-pop from list:
-list_pop(list);
-
-delete index from list:
-list_delete(list, [index]);
-
-delete range of indices from list (deletes from indexMin to indexMax - 1):
-list_delete_range(list, [indexMin], [indexMax]);
-
-find element in the list (must specify type):
-list_find(list, [element], 'i');
-
-count how many elements are in the list (must specify type):
-list_count(list, [elements], 'i');
-
-find and delete element in the list (must specify type):
-list_remove(list, [element], 'i');
-
-copy one list to another
-list_copy(dest, source);
-
-delete all the elements of a list
-list_clear(list);
-
-print the list:
-list_print(list);
-
-free the list (when done using):
-list_free(list);
+Notes:
+Strings added to the list will be "strdup"d - meaning that you can pass in stack allocated buffers and string literals. This does not apply to pointers added to the list which must be heap allocated
+When calling list_clear() or list_free(), the list will free all strings, pointers, and lists within itself. If you don't want this to happen append the item to the list as a uint64
+list_copy will make a copy of all strings, pointers, and lists - it will not use the same pointers (a list can be safely freed after being copied without causing effects to the copied list)
+You must call list_init() when intending to copy a list - all lists must be initialised before any functions can be called on them (if your program is crashing - check to make sure you initialised all your lists)
 */
+
+typedef enum {
+    LIST_TYPE_BOOL = 'b',
+    LIST_TYPE_CHAR = 'c',
+    LIST_TYPE_INT8 = 'e',
+    LIST_TYPE_UINT8 = 'b',
+    LIST_TYPE_INT16 = 'j',
+    LIST_TYPE_UINT16 = 'h',
+    LIST_TYPE_INT32 = 'i',
+    LIST_TYPE_UINT32 = 'u',
+    LIST_TYPE_INT64 = 'm',
+    LIST_TYPE_UINT64 = 'l',
+    LIST_TYPE_FLOAT = 'f',
+    LIST_TYPE_DOUBLE = 'd',
+    LIST_TYPE_STRING = 's',
+    LIST_TYPE_POINTER = 'p',
+    LIST_TYPE_LIST = 'r',
+} list_type_t;
 
 struct list_f; // so basically im a good programmer
 typedef struct list_f list_t;
 
 typedef union { // supported types
+    signed char ch;
+    bool bo;
+    int8_t c;
+    uint8_t b;
+    int16_t h;
+    uint16_t hu;
     int32_t i;
     uint32_t u;
-    float f;
-    double d;
-    char c;
-    char* s;
-    void* p;
-    list_t* r;
+    int64_t li;
     uint64_t l;
-    uint16_t h;
-    uint8_t b;
+    float f;
+    double d; // i will stand by it. d should be double
+    double lf;
+    char *s;
+    void *p;
+    list_t *r;
+    list_t *list;
 } unitype;
 
 struct list_f {
     uint32_t length;
     uint32_t realLength;
-    char *type;
+    int8_t *type;
     unitype *data;
 };
 
@@ -94,50 +96,6 @@ list_t *list_init() {
     list -> type = calloc(1, sizeof(char));
     list -> data = calloc(1, sizeof(unitype));
     return list;
-}
-
-/* accesses an item of the list as a void pointer */
-void *list_item(list_t *list, uint32_t index) {
-    void *ret;
-    switch (list -> type[index]) {
-        case 'i':
-            ret = &list -> data[index].i;
-        break;
-        case 'u':
-            ret = &list -> data[index].u;
-        break;
-        case 'f':
-            ret = &list -> data[index].f;
-        break;
-        case 'd':
-            ret = &list -> data[index].d;
-        break;
-        case 'c':
-            ret = &list -> data[index].c;
-        break;
-        case 's':
-            ret = list -> data[index].s;
-        break;
-        case 'p':
-            ret = &list -> data[index].p;
-        break;
-        case 'r':
-            ret = &list -> data[index].r;
-        break;
-        case 'l':
-            ret = &list -> data[index].l;
-        break;
-        case 'h':
-            ret = &list -> data[index].h;
-        break;
-        case 'b':
-            ret = &list -> data[index].b;
-        break;
-        default:
-            ret = NULL;
-            printf("item - type not recognized\n");
-    }
-    return ret;
 }
 
 void list_free_lite(list_t *);
@@ -233,13 +191,13 @@ unitype list_delete(list_t *list, int32_t index) {
 }
 
 /* deletes many items from the list spanning from [indexMin] to [indexMax - 1] */
-void list_delete_range(list_t* list, uint32_t indexMin, uint32_t indexMax) {
+void list_delete_range(list_t *list, uint32_t indexMin, uint32_t indexMax) {
     if (indexMin > indexMax) {
         uint32_t swap = indexMin;
         indexMin = indexMax;
         indexMax = swap;
     }
-    char zerod = 0; // edge case: "should've used list_clear"
+    int8_t zerod = 0; // edge case: "should've used list_clear"
     uint32_t difference = (indexMax - indexMin);
     list -> realLength = list -> length - difference;
     if (list -> realLength <= 1) {
@@ -247,7 +205,7 @@ void list_delete_range(list_t* list, uint32_t indexMin, uint32_t indexMax) {
         list -> realLength = 1;
     }
     
-    char *newType = malloc(list -> realLength * sizeof(char)); // no need to calloc we're gonna fill it all up anyway
+    int8_t *newType = malloc(list -> realLength * sizeof(int8_t)); // no need to calloc we're gonna fill it all up anyway
     unitype *newData = malloc(list -> realLength * sizeof(unitype));
     for (uint32_t i = 0; i < indexMin; i++) {
         newType[i] = list -> type[i];
@@ -267,49 +225,53 @@ void list_delete_range(list_t* list, uint32_t indexMin, uint32_t indexMax) {
 }
 
 /* checks if two unitype items are equal */
-int32_t unitype_check_equal(unitype item1, unitype item2, char typeItem1, char typeItem2) {
-    if ((typeItem1 == 's' || typeItem2 == 's') && typeItem1 != typeItem2) { // logical xor but idk how to do it
+int32_t unitype_check_equal(unitype item1, unitype item2, int8_t typeItem1, int8_t typeItem2) {
+    if ((typeItem1 == 's' || typeItem2 == 's') && typeItem1 != typeItem2) {
         return 0;
     }
+
     switch (typeItem1) {
-        case 'i':
-            if (item1.i == item2.i) {return 1;}
-        break;
-        case 'u':
-            if (item1.i == item2.i) {return 1;}
-        break;
-        case 'f':
-            if (item1.f == item2.f) {return 1;}
-        break;
-        case 'd':
-            if (item1.d == item2.d) {return 1;}
-        break;
-        case 'c':
+        case LIST_TYPE_CHAR:
             if (item1.c == item2.c) {return 1;}
-        break;
-        case 's':
-            if (strcmp(item1.s, item2.s) == 0) {return 1;}
-        break;
-        case 'p':
-            if (item1.p == item2.p) {return 1;} // questionable
-        break;
-        case 'r':
-            if (item1.r == item2.r) {return 1;} // questionable^2 (doesn't check if lists are equivalent/congruent, just compares memory location)
-        break;
-        case 'l':
-            if (item1.l == item2.l) {return 1;}
-        break;
-        case 'h':
-            if (item1.h == item2.h) {return 1;}
-        break;
-        case 'b':
+            return 0;
+        case LIST_TYPE_INT8:
+        case LIST_TYPE_UINT8: // UINT8 or BOOL
             if (item1.b == item2.b) {return 1;}
-        break;
+            return 0;
+        case LIST_TYPE_INT16:
+        case LIST_TYPE_UINT16:
+            if (item1.hu == item2.hu) {return 1;}
+            return 0;
+        case LIST_TYPE_INT32:
+        case LIST_TYPE_UINT32:
+            if (item1.u == item2.u) {return 1;}
+            return 0;
+        case LIST_TYPE_INT64:
+        case LIST_TYPE_UINT64:
+            if (item1.l == item2.l) {return 1;}
+            return 0;
+        case LIST_TYPE_FLOAT:
+            if (item1.f == item2.f) {return 1;}
+            return 0;
+        case LIST_TYPE_DOUBLE:
+            if (item1.d == item2.d) {return 1;}
+            return 0;
+        case LIST_TYPE_STRING:
+            if (strcmp(item1.s, item2.s) == 0) {return 1;}
+            return 0;
+        case LIST_TYPE_POINTER:
+            if (item1.p == item2.p) {return 1;} // questionable
+            return 0;
+        case LIST_TYPE_LIST:
+            if (item1.r == item2.r) {return 1;} // questionable^2 (doesn't check if lists are equivalent/congruent, just compares memory location)
+            return 0;
+        default:
+            printf("unitype_check_equal - type %d not recognized\n", typeItem1);
+            return 0;
     }
-    return 0;
 }
 
-/* returns the index of the first instance of the item in the list, returns -1 if not found (python) */
+/* returns the index of the first instance of the item in the list, returns -1 if not found */
 int32_t list_find(list_t *list, unitype item, char type) {
     for (uint32_t i = 0; i < list -> length; i++) {
         if (unitype_check_equal(list -> data[i], item, list -> type[i], type)) {
@@ -373,7 +335,7 @@ void list_sort(list_t *list) {
     }
 }
 
-/* deletes the first instance of the item from the list, returns the index the item was at, returns -1 and doesn't modify the list if not found (python but without ValueError) */
+/* deletes the first instance of the item from the list, returns the index the item was at, returns -1 and doesn't modify the list if not found */
 int32_t list_remove(list_t *list, unitype item, char type) {
     for (uint32_t i = 0; i < list -> length; i++) {
         if (unitype_check_equal(list -> data[i], item, list -> type[i], type)) {
@@ -387,41 +349,50 @@ int32_t list_remove(list_t *list, unitype item, char type) {
 /* prints a unitype item */
 void unitype_print(unitype item, char type) {
     switch (type) {
-        case 'i':
-            printf("%d", item.i);
-        break;
-        case 'u':
-            printf("%u", item.u);
-        break;
-        case 'f':
-            printf("%f", item.f);
-        break;
-        case 'd':
-            printf("%lf", item.d);
-        break;
-        case 'c':
+        case LIST_TYPE_CHAR:
             printf("%c", item.c);
         break;
-        case 's':
-            printf("%s", item.s);
+        case LIST_TYPE_INT8:
+            printf("%hhi", item.b);
         break;
-        case 'p':
-            printf("%p", item.p);
+        case LIST_TYPE_UINT8: // UINT8 or BOOL
+            printf("%hhu", item.b);
         break;
-        case 'r':
-            list_print_emb(item.r);
-        break;
-        case 'l':
-            printf("%llu", item.l);
-        break;
-        case 'h':
+        case LIST_TYPE_INT16:
             printf("%hi", item.h);
         break;
-        case 'b':
-            printf("%hi", item.b);
+        case LIST_TYPE_UINT16:
+            printf("%hu", item.hu);
+        break;
+        case LIST_TYPE_INT32:
+            printf("%d", item.i);
+        break;
+        case LIST_TYPE_UINT32:
+            printf("%u", item.u);
+        break;
+        case LIST_TYPE_INT64:
+            printf("%lli", item.li);
+        break;
+        case LIST_TYPE_UINT64:
+            printf("%llu", item.l);
+        break;
+        case LIST_TYPE_FLOAT:
+            printf("%f", item.f);
+        break;
+        case LIST_TYPE_DOUBLE:
+            printf("%lf", item.d);
+        break;
+        case LIST_TYPE_STRING:
+            printf("%s", item.s);
+        break;
+        case LIST_TYPE_POINTER:
+            printf("%p", item.p);
+        break;
+        case LIST_TYPE_LIST:
+            list_print_emb(item.r);
         break;
         default:
-            printf("print - type not recognized\n");
+            printf("unitype_print - type %d not recognized\n", type);
             return;
     }
 }
@@ -453,23 +424,6 @@ void list_copy(list_t *dest, list_t *src) {
     }
 }
 
-/* prints the list (like python would) */
-void list_print(list_t *list) {
-    printf("[");
-    if (list -> length == 0) {
-        printf("]\n");
-        return;
-    }
-    for (uint32_t i = 0; i < list -> length; i++) {
-        unitype_print(list -> data[i], list -> type[i]);
-        if (i == list -> length - 1) {
-            printf("]\n");
-        } else {
-            printf(", ");
-        }
-    }
-}
-
 /* prints the list but without closing \n */
 void list_print_emb(list_t *list) {
     printf("[");
@@ -485,6 +439,12 @@ void list_print_emb(list_t *list) {
             printf(", ");
         }
     }
+}
+
+/* prints the list */
+void list_print(list_t *list) {
+    list_print_emb(list);
+    printf("\n");
 }
 
 /* prints the types of the list */
