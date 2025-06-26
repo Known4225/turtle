@@ -29,7 +29,7 @@ double randomDouble(double lowerBound, double upperBound) { // random double bet
 char *strins(char *dest, char *source, int32_t index) {
     int32_t lenDest = strlen(dest);
     int32_t lenSource = strlen(source);
-    memmove(dest + index + lenSource, dest + index, lenDest - index);
+    memmove(dest + index + lenSource, dest + index, lenDest - index + 1);
     memcpy(dest + index, source, lenSource);
     return dest;
 }
@@ -37,7 +37,9 @@ char *strins(char *dest, char *source, int32_t index) {
 char *strdel(char *dest, int32_t index, int32_t size) {
     int32_t len = strlen(dest);
     memmove(dest + index, dest + index + size, len - index - size);
-    dest[len - size] = '\0';
+    for (uint32_t i = 0; i < size + 1; i++) {
+        dest[len - size + i] = '\0';
+    }
     return dest;
 }
 
@@ -1111,7 +1113,7 @@ tt_textbox_t *textboxInit(char *label, uint32_t maxCharacters, double x, double 
     textboxp -> y = y;
     textboxp -> size = size;
     textboxp -> length = length;
-    textboxp -> text = calloc(maxCharacters + 1, 1);
+    textboxp -> text = calloc(maxCharacters + 5, 1);
     textboxp -> maxCharacters = maxCharacters;
     textboxp -> editIndex = 0;
     textboxp -> lastKey = 0;
@@ -1877,11 +1879,12 @@ void textboxKeyCallback(int32_t key, int32_t scancode, int32_t action) {
     }
 }
 
-int32_t textboxCalculateMaximumCharacters(uint32_t *charlist, int32_t textLength, double size, double lengthPixels, int8_t sweepDirection) {
+int32_t textboxCalculateMaximumCharacters(uint32_t *charlist, int32_t textLength, double size, double lengthPixels, int8_t sweepDirection, double *outputLength) {
     if (sweepDirection == -1) {
         /* sweep from the back to the front */
         size /= 175;
         double xTrack = 0;
+        int32_t byteCount = 0;
         for (int32_t i = 0; i < textLength; i++) {
             int32_t currentDataAddress = 0;
             for (int32_t j = 0; j < turtleTextRender.charCount; j++) {
@@ -1891,13 +1894,54 @@ int32_t textboxCalculateMaximumCharacters(uint32_t *charlist, int32_t textLength
                 }
             }
             xTrack += (turtleTextRender.fontData[turtleTextRender.fontPointer[currentDataAddress + 1] - 4] + 40) * size;
+            byteCount++;
+            if (charlist[i] & 0x0000FF00) {
+                byteCount++;
+                if (charlist[i] & 0x00FF0000) {
+                    byteCount++;
+                    if (charlist[i] & 0xFF000000) {
+                        byteCount++;
+                    }
+                }
+            }
             if (xTrack - 40 * size > lengthPixels) {
-                return i;
+                *outputLength = xTrack - 40 * size;
+                return byteCount;
             }
         }
-        return textLength;
+        *outputLength = xTrack - 40 * size;
+        return byteCount;
     } else if (sweepDirection == 1) {
         /* sweep from the front to the back */
+        size /= 175;
+        double xTrack = 0;
+        int32_t byteCount = 0;
+        for (int32_t i = textLength - 1; i > 0; i--) {
+            int32_t currentDataAddress = 0;
+            for (int32_t j = 0; j < turtleTextRender.charCount; j++) {
+                if (turtleTextRender.supportedCharReference[j] == charlist[i]) {
+                    currentDataAddress = j;
+                    break;
+                }
+            }
+            xTrack += (turtleTextRender.fontData[turtleTextRender.fontPointer[currentDataAddress + 1] - 4] + 40) * size;
+            byteCount--;
+            if (charlist[i] & 0x0000FF00) {
+                byteCount--;
+                if (charlist[i] & 0x00FF0000) {
+                    byteCount--;
+                    if (charlist[i] & 0xFF000000) {
+                        byteCount--;
+                    }
+                }
+            }
+            if (xTrack - 40 * size > lengthPixels) {
+                *outputLength = xTrack - 40 * size;
+                return byteCount;
+            }
+        }
+        *outputLength = xTrack - 40 * size;
+        return byteCount;
     }
     return 0;
 }
@@ -1930,22 +1974,44 @@ void textboxUpdate() {
                     /* not all characters fit in textbox - retract text length */
                     uint32_t textConverted[strlen(textboxp -> text) + 1];
                     uint32_t characterLength = turtleTextConvertUnicode((unsigned char *) textboxp -> text, textConverted);
-                    textboxp -> renderNumCharacters = textboxCalculateMaximumCharacters(textConverted, characterLength, textboxp -> size - 1, textboxp -> length - textboxp -> size / 3, -1);
+                    double dummy;
+                    textboxp -> renderNumCharacters = textboxCalculateMaximumCharacters(textConverted, characterLength, textboxp -> size - 1, textboxp -> length - textboxp -> size * 1.2, -1, &dummy);
                 }
             }
         } else if (textboxp -> status > 0) {
             /* editing text */
-            textboxp -> renderPixelOffset = textboxp -> size / 3;
-            textboxp -> renderStartingIndex = 0;
             /* calculate rendered characters */
+            char tempHold = textboxp -> text[textboxp -> renderStartingIndex + textboxp -> renderNumCharacters];
+            textboxp -> text[textboxp -> renderStartingIndex + textboxp -> renderNumCharacters] = '\0';
+            double currentTextLength = turtleTextGetUnicodeLength((unsigned char *) (textboxp -> text + textboxp -> renderStartingIndex), textboxp -> size - 1);
+            textboxp -> text[textboxp -> renderStartingIndex + textboxp -> renderNumCharacters] = tempHold;
             double totalTextLength = turtleTextGetUnicodeLength((unsigned char *) textboxp -> text, textboxp -> size - 1);
             if (totalTextLength < textboxp -> length - textboxp -> size / 1.5) {
+                textboxp -> renderStartingIndex = 0;
+                textboxp -> renderPixelOffset = textboxp -> size / 3;
                 textboxp -> renderNumCharacters = strlen(textboxp -> text);
             } else {
                 /* not all characters fit in textbox - retract text length */
-                uint32_t textConverted[strlen(textboxp -> text) + 1];
-                uint32_t characterLength = turtleTextConvertUnicode((unsigned char *) textboxp -> text, textConverted);
-                textboxp -> renderNumCharacters = textboxCalculateMaximumCharacters(textConverted, characterLength, textboxp -> size - 1, textboxp -> length - textboxp -> size / 3, -1);
+                // printf("%.2lf %.2lf\n", currentTextLength, textboxp -> length - textboxp -> size / 1.5);
+                // if (currentTextLength < textboxp -> length - textboxp -> size / 1.5) {
+                if (textboxp -> editIndex < textboxp -> renderStartingIndex) {
+                    /* set editIndex at the left side of box */
+                    textboxp -> renderStartingIndex = textboxp -> editIndex;
+                    textboxp -> renderPixelOffset = textboxp -> size / 3;
+                    uint32_t textConverted[strlen(textboxp -> text) + 1];
+                    uint32_t characterLength = turtleTextConvertUnicode((unsigned char *) (textboxp -> text + textboxp -> editIndex), textConverted);
+                    double dummy;
+                    textboxp -> renderNumCharacters = textboxCalculateMaximumCharacters(textConverted, characterLength, textboxp -> size - 1, textboxp -> length - textboxp -> size * 1.2, -1, &dummy);
+                } else if (textboxp -> editIndex > textboxp -> renderStartingIndex + textboxp -> renderNumCharacters) {
+                    /* set editIndex at the right side of box */
+                    uint32_t textConverted[strlen(textboxp -> text) + 1];
+                    uint32_t characterLength = turtleTextConvertUnicode((unsigned char *) textboxp -> text, textConverted);
+                    double textPixelLength;
+                    textboxp -> renderStartingIndex = strlen(textboxp -> text) + textboxCalculateMaximumCharacters(textConverted, characterLength, textboxp -> size - 1, textboxp -> length - textboxp -> size * 1.2, 1, &textPixelLength);
+                    textboxp -> renderNumCharacters = strlen(textboxp -> text) - textboxp -> renderStartingIndex;
+                    textboxp -> renderPixelOffset = textboxp -> length - textboxp -> size / 3 - textPixelLength;
+                }
+                // }
             }
 
             /* TODO */
@@ -1972,6 +2038,7 @@ void textboxUpdate() {
         }
 
         /* draw text and occluding boxes */
+        // printf("%s: %d %d %d\n", textboxp -> text, textboxp -> editIndex, textboxp -> renderStartingIndex, textboxp -> renderNumCharacters);
         char tempHold;
         tempHold = textboxp -> text[textboxp -> renderStartingIndex + textboxp -> renderNumCharacters];
         textboxp -> text[textboxp -> renderStartingIndex + textboxp -> renderNumCharacters] = '\0';
@@ -1984,10 +2051,10 @@ void textboxUpdate() {
         if (textboxp -> status > 0 && textboxp -> status < 66) {
             char tempHold = textboxp -> text[textboxp -> editIndex];
             textboxp -> text[textboxp -> editIndex] = '\0';
-            double textLength = turtleTextGetUnicodeLength((unsigned char *) textboxp -> text, textboxp -> size - 1);
+            double textLength = turtleTextGetUnicodeLength((unsigned char *) (textboxp -> text + textboxp -> renderStartingIndex), textboxp -> size - 1);
             textboxp -> text[textboxp -> editIndex] = tempHold;
             tt_internalColor(textboxp, TT_COLOR_TEXTBOX_LINE, TT_COLOR_OVERRIDE_SLOT_3);
-            turtleRectangle(textboxp -> x + textboxp -> size / 3 + textLength, textboxp -> y - textboxp -> size * 0.8, textboxp -> x + textboxp -> size / 3 + textLength + 1, textboxp -> y + textboxp -> size * 0.8);
+            turtleRectangle(textboxp -> x + textboxp -> renderPixelOffset + textLength, textboxp -> y - textboxp -> size * 0.8, textboxp -> x + textboxp -> renderPixelOffset + textLength + 1, textboxp -> y + textboxp -> size * 0.8);
         }
 
         if (textboxp -> enabled == TT_ELEMENT_ENABLED) {

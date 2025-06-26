@@ -100,7 +100,7 @@ list_t *list_init() {
 
 void list_free_lite(list_t *);
 void list_free(list_t *);
-void list_print_emb(list_t *);
+void list_fprint_emb(FILE *fp, list_t *);
 
 /* append to list, must specify type */
 void list_append(list_t *list, unitype data, char type) {
@@ -347,52 +347,54 @@ int32_t list_remove(list_t *list, unitype item, char type) {
 }
 
 /* prints a unitype item */
-void unitype_print(unitype item, char type) {
+void unitype_fprint(FILE *fp, unitype item, char type) {
     switch (type) {
         case LIST_TYPE_CHAR:
-            printf("%c", item.c);
+            fprintf(fp, "%c", item.c);
         break;
         case LIST_TYPE_INT8:
-            printf("%hhi", item.b);
+            fprintf(fp, "%hhi", item.b);
         break;
         case LIST_TYPE_UINT8: // UINT8 or BOOL
-            printf("%hhu", item.b);
+            fprintf(fp, "%hhu", item.b);
         break;
         case LIST_TYPE_INT16:
-            printf("%hi", item.h);
+            fprintf(fp, "%hi", item.h);
         break;
         case LIST_TYPE_UINT16:
-            printf("%hu", item.hu);
+            fprintf(fp, "%hu", item.hu);
         break;
         case LIST_TYPE_INT32:
-            printf("%d", item.i);
+            fprintf(fp, "%d", item.i);
         break;
         case LIST_TYPE_UINT32:
-            printf("%u", item.u);
+            fprintf(fp, "%u", item.u);
         break;
         case LIST_TYPE_INT64:
-            printf("%lli", item.li);
+            fprintf(fp, "%lli", item.li);
         break;
         case LIST_TYPE_UINT64:
-            printf("%llu", item.l);
+            fprintf(fp, "%llu", item.l);
         break;
         case LIST_TYPE_FLOAT:
-            printf("%f", item.f);
+            fprintf(fp, "%f", item.f);
         break;
         case LIST_TYPE_DOUBLE:
-            printf("%lf", item.d);
+            fprintf(fp, "%lf", item.d);
         break;
         case LIST_TYPE_STRING:
-            printf("%s", item.s);
+            fprintf(fp, "%s", item.s);
         break;
         case LIST_TYPE_POINTER:
-            printf("%p", item.p);
+            fprintf(fp, "%p", item.p);
         break;
         case LIST_TYPE_LIST:
-            list_print_emb(item.r);
+            fputs("[", fp);
+            list_fprint_emb(fp, item.r);
+            fputs("]", fp);
         break;
         default:
-            printf("unitype_print - type %d not recognized\n", type);
+            printf("unitype_fprint - type %d not recognized\n", type);
             return;
     }
 }
@@ -424,26 +426,26 @@ void list_copy(list_t *dest, list_t *src) {
     }
 }
 
-/* prints the list but without closing \n */
-void list_print_emb(list_t *list) {
-    printf("[");
+/* prints the list without brackets */
+void list_fprint_emb(FILE *fp, list_t *list) {
+    fprintf(fp, "[");
     if (list -> length == 0) {
-        printf("]");
+        fprintf(fp, "]");
         return;
     }
     for (uint32_t i = 0; i < list -> length; i++) {
-        unitype_print(list -> data[i], list -> type[i]);
+        unitype_fprint(fp, list -> data[i], list -> type[i]);
         if (i == list -> length - 1) {
-            printf("]");
+            fprintf(fp, "]");
         } else {
-            printf(", ");
+            fprintf(fp, ", ");
         }
     }
 }
 
 /* prints the list */
 void list_print(list_t *list) {
-    list_print_emb(list);
+    list_fprint_emb(stdout, list);
     printf("\n");
 }
 
