@@ -2017,7 +2017,7 @@ void textboxUpdate() {
                     uint32_t characterLength = turtleTextConvertUnicode((unsigned char *) (textboxp -> text + textboxp -> editIndex), textConverted);
                     double dummy;
                     textboxp -> renderNumCharacters = textboxCalculateMaximumCharacters(textConverted, characterLength, textboxp -> size - 1, textboxp -> length - textboxp -> size * 1.2, -1, &dummy);
-                } else if (textboxp -> editIndex > textboxp -> renderStartingIndex + textboxp -> renderNumCharacters || strlen(textboxp -> text) < textboxp -> renderStartingIndex + textboxp -> renderNumCharacters) {
+                } else if (textboxp -> editIndex > textboxp -> renderStartingIndex + textboxp -> renderNumCharacters || (strlen(textboxp -> text) < textboxp -> renderStartingIndex + textboxp -> renderNumCharacters && strlen(textboxp -> text) == textboxp -> editIndex)) {
                     /* set editIndex at the right side of box */
                     char tempHold;
                     tempHold = textboxp -> text[textboxp -> editIndex];
