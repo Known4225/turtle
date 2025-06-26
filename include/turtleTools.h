@@ -1952,7 +1952,28 @@ void textboxUpdate() {
         if (textboxp -> enabled == TT_ELEMENT_HIDE) {
             continue;
         }
-        // printf("editIndex: %d\n", textboxp -> editIndex);
+
+        /* handle keys */
+        if (textboxp -> keyTimeout > 0) {
+            textboxp -> keyTimeout--;
+        }
+        if (textboxp -> lastKey > 0) {
+            if (turtleKeyPressed(textboxp -> lastKey)) {
+                if (textboxp -> keyTimeout == 0) {
+                    textboxp -> keyTimeout = 4;
+                    textboxHandleOtherKey(textboxp, textboxp -> lastKey);
+                }
+            } else {
+                textboxp -> lastKey = 0;
+            }
+        }
+        if (textboxp -> status > 1) {
+            textboxp -> status++;
+            if (textboxp -> status > 128) {
+                textboxp -> status = 2;
+            }
+        }
+
         tt_internalColor(textboxp, TT_COLOR_TEXTBOX_BOX, TT_COLOR_OVERRIDE_SLOT_1);
         turtleRectangle(textboxp -> x, textboxp -> y - textboxp -> size, textboxp -> x + textboxp -> length, textboxp -> y + textboxp -> size);
 
@@ -1981,10 +2002,6 @@ void textboxUpdate() {
         } else if (textboxp -> status > 0) {
             /* editing text */
             /* calculate rendered characters */
-            char tempHold = textboxp -> text[textboxp -> renderStartingIndex + textboxp -> renderNumCharacters];
-            textboxp -> text[textboxp -> renderStartingIndex + textboxp -> renderNumCharacters] = '\0';
-            double currentTextLength = turtleTextGetUnicodeLength((unsigned char *) (textboxp -> text + textboxp -> renderStartingIndex), textboxp -> size - 1);
-            textboxp -> text[textboxp -> renderStartingIndex + textboxp -> renderNumCharacters] = tempHold;
             double totalTextLength = turtleTextGetUnicodeLength((unsigned char *) textboxp -> text, textboxp -> size - 1);
             if (totalTextLength < textboxp -> length - textboxp -> size / 1.5) {
                 textboxp -> renderStartingIndex = 0;
@@ -1992,8 +2009,6 @@ void textboxUpdate() {
                 textboxp -> renderNumCharacters = strlen(textboxp -> text);
             } else {
                 /* not all characters fit in textbox - retract text length */
-                // printf("%.2lf %.2lf\n", currentTextLength, textboxp -> length - textboxp -> size / 1.5);
-                // if (currentTextLength < textboxp -> length - textboxp -> size / 1.5) {
                 if (textboxp -> editIndex < textboxp -> renderStartingIndex) {
                     /* set editIndex at the left side of box */
                     textboxp -> renderStartingIndex = textboxp -> editIndex;
@@ -2004,41 +2019,21 @@ void textboxUpdate() {
                     textboxp -> renderNumCharacters = textboxCalculateMaximumCharacters(textConverted, characterLength, textboxp -> size - 1, textboxp -> length - textboxp -> size * 1.2, -1, &dummy);
                 } else if (textboxp -> editIndex > textboxp -> renderStartingIndex + textboxp -> renderNumCharacters) {
                     /* set editIndex at the right side of box */
+                    char tempHold;
+                    tempHold = textboxp -> text[textboxp -> editIndex];
+                    textboxp -> text[textboxp -> editIndex] = '\0';
                     uint32_t textConverted[strlen(textboxp -> text) + 1];
                     uint32_t characterLength = turtleTextConvertUnicode((unsigned char *) textboxp -> text, textConverted);
                     double textPixelLength;
                     textboxp -> renderStartingIndex = strlen(textboxp -> text) + textboxCalculateMaximumCharacters(textConverted, characterLength, textboxp -> size - 1, textboxp -> length - textboxp -> size * 1.2, 1, &textPixelLength);
                     textboxp -> renderNumCharacters = strlen(textboxp -> text) - textboxp -> renderStartingIndex;
                     textboxp -> renderPixelOffset = textboxp -> length - textboxp -> size / 3 - textPixelLength;
-                }
-                // }
-            }
-
-            /* TODO */
-            
-            if (textboxp -> keyTimeout > 0) {
-                textboxp -> keyTimeout--;
-            }
-            if (textboxp -> lastKey > 0) {
-                if (turtleKeyPressed(textboxp -> lastKey)) {
-                    if (textboxp -> keyTimeout == 0) {
-                        textboxp -> keyTimeout = 4;
-                        textboxHandleOtherKey(textboxp, textboxp -> lastKey);
-                    }
-                } else {
-                    textboxp -> lastKey = 0;
-                }
-            }
-            if (textboxp -> status > 1) {
-                textboxp -> status++;
-                if (textboxp -> status > 128) {
-                    textboxp -> status = 2;
+                    textboxp -> text[textboxp -> editIndex] = tempHold;
                 }
             }
         }
 
         /* draw text and occluding boxes */
-        // printf("%s: %d %d %d\n", textboxp -> text, textboxp -> editIndex, textboxp -> renderStartingIndex, textboxp -> renderNumCharacters);
         char tempHold;
         tempHold = textboxp -> text[textboxp -> renderStartingIndex + textboxp -> renderNumCharacters];
         textboxp -> text[textboxp -> renderStartingIndex + textboxp -> renderNumCharacters] = '\0';
