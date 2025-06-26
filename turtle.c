@@ -170,6 +170,15 @@ int main(int argc, char *argv[]) {
     switchInit("", &yEnabled, -10, -260, 10);
     switchInit("", &zEnabled, -10, -280, 10);
 
+    int8_t sideswipe = 0, checkbox = 1, xbox = 1;
+    tt_switch_t *switch_sideswipe = switchInit("Side Swipe", &sideswipe, 305, 15, 10);
+    tt_switch_t *switch_checkbox = switchInit("Checkbox", &checkbox, 300, 0, 10);
+    tt_switch_t *switch_xbox = switchInit("Xbox", &xbox, 300, -15, 10);
+    switch_sideswipe -> style = TT_SWITCH_STYLE_SIDESWIPE_LEFT;
+    switch_checkbox -> style = TT_SWITCH_STYLE_CHECKBOX;
+    switch_xbox -> style = TT_SWITCH_STYLE_XBOX;
+
+
     list_t *xPositions = list_init();
     list_t *yPositions = list_init();
     for (uint32_t i = 0; i < tt_elements.all -> length; i++) {

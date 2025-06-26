@@ -103,26 +103,27 @@ typedef enum {
     TT_COLOR_POPUP_BUTTON_SELECT = 24,
     TT_COLOR_BUTTON = 27,
     TT_COLOR_BUTTON_SELECT = 30,
-    TT_COLOR_SWITCH_OFF = 33,
-    TT_COLOR_SWITCH_CIRCLE_OFF = 36,
-    TT_COLOR_SWITCH_ON = 39,
-    TT_COLOR_SWITCH_CIRCLE_ON = 42,
-    TT_COLOR_DIAL = 45,
-    TT_COLOR_DIAL_INNER = 48,
-    TT_COLOR_SLIDER_BAR = 51,
-    TT_COLOR_SLIDER_CIRCLE = 54,
-    TT_COLOR_SCROLLBAR_BASE = 57,
-    TT_COLOR_SCROLLBAR_BAR = 60,
-    TT_COLOR_SCROLLBAR_HOVER = 63,
-    TT_COLOR_SCROLLBAR_CLICKED = 66,
-    TT_COLOR_DROPDOWN = 69,
-    TT_COLOR_DROPDOWN_SELECT = 72,
-    TT_COLOR_DROPDOWN_HOVER = 75,
-    TT_COLOR_DROPDOWN_TRIANGLE = 78,
-    TT_COLOR_TEXTBOX_BOX = 81,
-    TT_COLOR_TEXTBOX_PHANTOM_TEXT = 84,
-    TT_COLOR_TEXTBOX_LINE = 87,
-    TT_COLOR_TEXTBOX_SELECT = 90,
+    TT_COLOR_SWITCH_TEXT_HOVER = 33,
+    TT_COLOR_SWITCH_OFF = 36,
+    TT_COLOR_SWITCH_CIRCLE_OFF = 39,
+    TT_COLOR_SWITCH_ON = 42,
+    TT_COLOR_SWITCH_CIRCLE_ON = 45,
+    TT_COLOR_DIAL = 48,
+    TT_COLOR_DIAL_INNER = 51,
+    TT_COLOR_SLIDER_BAR = 54,
+    TT_COLOR_SLIDER_CIRCLE = 57,
+    TT_COLOR_SCROLLBAR_BASE = 60,
+    TT_COLOR_SCROLLBAR_BAR = 63,
+    TT_COLOR_SCROLLBAR_HOVER = 66,
+    TT_COLOR_SCROLLBAR_CLICKED = 69,
+    TT_COLOR_DROPDOWN = 72,
+    TT_COLOR_DROPDOWN_SELECT = 75,
+    TT_COLOR_DROPDOWN_HOVER = 78,
+    TT_COLOR_DROPDOWN_TRIANGLE = 81,
+    TT_COLOR_TEXTBOX_BOX = 84,
+    TT_COLOR_TEXTBOX_PHANTOM_TEXT = 87,
+    TT_COLOR_TEXTBOX_LINE = 90,
+    TT_COLOR_TEXTBOX_SELECT = 93,
 } tt_theme_internal_t;
 
 /* default colours (light theme) */
@@ -138,26 +139,27 @@ double tt_themeColors[] = {
     100.0, 100.0, 100.0, // popup boxes select color (24)
     200.0, 200.0, 200.0, // button color (27)
     160.0, 160.0, 160.0, // button select color (30)
-    180.0, 180.0, 180.0, // switch color off (33)
-    230.0, 230.0, 230.0, // switch circle color off (36)
-    30.0, 30.0, 30.0,    // switch color on (39)
-    0.0, 255.0, 255.0,   // switch circle color on (42)
-    0.0, 0.0, 0.0,       // dial color (45)
-    255.0, 255.0, 255.0, // dial inner circle color (48)
-    120.0, 120.0, 120.0, // slider bar color (51)
-    230.0, 230.0, 230.0, // slider circle color (54)
-    200.0, 200.0, 200.0, // scrollbar bar base color (57)
-    160.0, 160.0, 160.0, // scrollbar bar color (60)
-    120.0, 120.0, 120.0, // scrollbar bar hover color (63)
-    120.0, 120.0, 120.0, // scrollbar bar clicked color (66)
-    160.0, 160.0, 160.0, // dropdown color (69)
-    120.0, 120.0, 120.0, // dropdown select color (72)
-    120.0, 120.0, 120.0, // dropdown hover color (75)
-    100.0, 100.0, 100.0, // dropdown triangle color (78)
-    200.0, 200.0, 200.0, // textbox color (81)
-    180.0, 180.0, 180.0, // textbox phantom text color (84)
-    0.0, 0.0, 0.0,       // textbox line color (87)
-    11.0, 87.0, 208.0,   // textbox select color (90)
+    30.0, 30.0, 30.0,    // switch text hover (33)
+    180.0, 180.0, 180.0, // switch color off (36)
+    230.0, 230.0, 230.0, // switch circle color off (39)
+    30.0, 30.0, 30.0,    // switch color on (42)
+    0.0, 255.0, 255.0,   // switch circle color on (45)
+    0.0, 0.0, 0.0,       // dial color (48)
+    255.0, 255.0, 255.0, // dial inner circle color (51)
+    120.0, 120.0, 120.0, // slider bar color (54)
+    230.0, 230.0, 230.0, // slider circle color (57)
+    200.0, 200.0, 200.0, // scrollbar bar base color (60)
+    160.0, 160.0, 160.0, // scrollbar bar color (63)
+    120.0, 120.0, 120.0, // scrollbar bar hover color (66)
+    120.0, 120.0, 120.0, // scrollbar bar clicked color (69)
+    160.0, 160.0, 160.0, // dropdown color (72)
+    120.0, 120.0, 120.0, // dropdown select color (75)
+    120.0, 120.0, 120.0, // dropdown hover color (78)
+    100.0, 100.0, 100.0, // dropdown triangle color (81)
+    200.0, 200.0, 200.0, // textbox color (84)
+    180.0, 180.0, 180.0, // textbox phantom text color (87)
+    0.0, 0.0, 0.0,       // textbox line color (90)
+    11.0, 87.0, 208.0,   // textbox select color (93)
 };
 
 void tt_setColor(int32_t index) {
@@ -179,26 +181,27 @@ void turtleToolsSetTheme(tt_theme_name_t theme) {
             60.0, 60.0, 60.0,    // popup boxes select color (24)
             80.0, 80.0, 80.0,    // button color (27)
             100.0, 100.0, 100.0, // button select color (30)
-            60.0, 60.0, 60.0,    // switch color off (33)
-            80.0, 80.0, 80.0,    // switch circle color off (36)
-            10.0, 10.0, 10.0,    // switch color on (39)
-            50.0, 230.0, 30.0,   // switch circle color on (42)
-            200.0, 200.0, 200.0, // dial color (45)
-            30.0, 30.0, 30.0,    // dial inner circle color (48)
-            10.0, 10.0, 10.0,    // slider bar color (51)
-            230.0, 230.0, 230.0, // slider circle color (54)
-            50.0, 50.0, 50.0,    // scrollbar bar base color (57)
-            150.0, 150.0, 150.0, // scrollbar bar color (60)
-            170.0, 170.0, 170.0, // scrollbar bar hover color (63)
-            190.0, 190.0, 190.0, // scrollbar bar clicked color (66)
-            60.0, 60.0, 60.0,    // dropdown color (69)
-            80.0, 80.0, 80.0,    // dropdown select color (72)
-            80.0, 80.0, 80.0,    // dropdown hover color (75)
-            160.0, 160.0, 160.0, // dropdown triangle color (78)
-            60.0, 60.0, 60.0,    // textbox color (81)
-            80.0, 80.0, 80.0,    // textbox phantom text color (84)
-            160.0, 160.0, 160.0, // textbox line color (87)
-            11.0, 87.0, 208.0,   // textbox select color (90)
+            160.0, 160.0, 160.0, // switch text hover (33)
+            60.0, 60.0, 60.0,    // switch color off (36)
+            80.0, 80.0, 80.0,    // switch circle color off (39)
+            10.0, 10.0, 10.0,    // switch color on (42)
+            50.0, 230.0, 30.0,   // switch circle color on (45)
+            200.0, 200.0, 200.0, // dial color (48)
+            30.0, 30.0, 30.0,    // dial inner circle color (51)
+            10.0, 10.0, 10.0,    // slider bar color (54)
+            230.0, 230.0, 230.0, // slider circle color (57)
+            50.0, 50.0, 50.0,    // scrollbar bar base color (60)
+            150.0, 150.0, 150.0, // scrollbar bar color (63)
+            170.0, 170.0, 170.0, // scrollbar bar hover color (66)
+            190.0, 190.0, 190.0, // scrollbar bar clicked color (69)
+            60.0, 60.0, 60.0,    // dropdown color (72)
+            80.0, 80.0, 80.0,    // dropdown select color (75)
+            80.0, 80.0, 80.0,    // dropdown hover color (78)
+            160.0, 160.0, 160.0, // dropdown triangle color (81)
+            60.0, 60.0, 60.0,    // textbox color (84)
+            80.0, 80.0, 80.0,    // textbox phantom text color (87)
+            160.0, 160.0, 160.0, // textbox line color (90)
+            11.0, 87.0, 208.0,   // textbox select color (93)
         };
         memcpy(tt_themeColors, tt_themeCopy, sizeof(tt_themeCopy));
     } else if (theme == TT_THEME_COLT) {
@@ -215,62 +218,64 @@ void turtleToolsSetTheme(tt_theme_name_t theme) {
             73.0, 60.0, 60.0,    // popup boxes select color (24)
             89.0, 80.0, 80.0,    // button color (27)
             111.0, 109.0, 100.0, // button select color (30)
-            68.0, 60.0, 60.0,    // switch color off (33)
-            91.0, 80.0, 80.0,    // switch circle color off (36)
-            69.0, 55.0, 53.0,    // switch color on (39)
-            242.0, 242.0, 230.0, // switch circle color on (42)
-            211.0, 211.0, 200.0, // dial color (45)
-            36.0, 30.0, 32.0,    // dial inner circle color (48)
-            69.0, 55.0, 53.0,    // slider bar color (51)
-            242.0, 242.0, 230.0, // slider circle color (54)
-            241.0, 239.0, 236.0, // scrollbar bar base color (57)
-            69.0, 55.0, 53.0,    // scrollbar bar color (60)
-            84.0, 70.0, 68.0,    // scrollbar bar hover color (63)
-            84.0, 70.0, 68.0,    // scrollbar bar clicked color (66)
-            68.0, 60.0, 60.0,    // dropdown color (69)
-            92.0, 80.0, 80.0,    // dropdown select color (72)
-            93.0, 80.0, 80.0,    // dropdown hover color (75)
-            175.0, 171.0, 160.0, // dropdown triangle color (78)
-            89.0, 80.0, 80.0,    // textbox color (81)
-            143.0, 134.0, 134.0, // textbox phantom text color (84)
-            154.0, 160.0, 160.0, // textbox line color (87)
-            11.0, 87.0, 208.0,   // textbox select color (90)
+            154.0, 160.0, 160.0, // switch text hover (33)
+            68.0, 60.0, 60.0,    // switch color off (36)
+            91.0, 80.0, 80.0,    // switch circle color off (39)
+            69.0, 55.0, 53.0,    // switch color on (42)
+            242.0, 242.0, 230.0, // switch circle color on (45)
+            211.0, 211.0, 200.0, // dial color (48)
+            36.0, 30.0, 32.0,    // dial inner circle color (51)
+            69.0, 55.0, 53.0,    // slider bar color (54)
+            242.0, 242.0, 230.0, // slider circle color (57)
+            241.0, 239.0, 236.0, // scrollbar bar base color (60)
+            69.0, 55.0, 53.0,    // scrollbar bar color (63)
+            84.0, 70.0, 68.0,    // scrollbar bar hover color (66)
+            84.0, 70.0, 68.0,    // scrollbar bar clicked color (69)
+            68.0, 60.0, 60.0,    // dropdown color (72)
+            92.0, 80.0, 80.0,    // dropdown select color (75)
+            93.0, 80.0, 80.0,    // dropdown hover color (78)
+            175.0, 171.0, 160.0, // dropdown triangle color (81)
+            89.0, 80.0, 80.0,    // textbox color (84)
+            143.0, 134.0, 134.0, // textbox phantom text color (87)
+            154.0, 160.0, 160.0, // textbox line color (90)
+            11.0, 87.0, 208.0,   // textbox select color (93)
         };
         memcpy(tt_themeColors, tt_themeCopy, sizeof(tt_themeCopy));
     } else if (theme == TT_THEME_NAVY) {
         tt_theme = theme;
         double tt_themeCopy[] = {
             3.0, 3.0, 3.0,       // text color (0)
-            241.0, 239.0, 236.0, // text color alternate (3)
-            21.2, 115.6, 160.2,  // ribbon top bar color (6)
-            74.0, 108.0, 144.0,  // ribbon dropdown color (9)
-            112.0, 146.0, 182.0, // ribbon select color (12)
-            112.0, 146.0, 182.0, // ribbon hover color (15)
-            18.0, 52.0, 88.0,    // popup box color (18)
-            74.0, 108.0, 144.0,  // popup boxes color (21)
-            126.0, 160.0, 196.0, // popup boxes select color (24)
-            18.0, 52.0, 88.0,    // button color (27)
-            74.0, 108.0, 144.0,  // button select color (30)
-            18.0, 52.0, 88.0,    // switch color off (33)
-            241.0, 239.0, 236.0, // switch circle color off (36)
-            18.0, 52.0, 88.0,    // switch color on (39)
-            241.0, 239.0, 236.0, // switch circle color on (42)
-            3.0, 3.0, 3.0,       // dial color (45)
-            212.0, 201.0, 190.0, // dial inner circle color (48)
-            18.0, 52.0, 88.0,    // slider bar color (51)
-            241.0, 239.0, 236.0, // slider circle color (54)
-            241.0, 239.0, 236.0, // scrollbar bar base color (57)
-            33.6, 161.9, 211.6,  // scrollbar bar color (60)
-            50.0, 178.3, 228.0,  // scrollbar bar hover color (63)
-            50.0, 178.3, 228.0,  // scrollbar bar clicked color (66)
-            18.0, 52.0, 88.0,    // dropdown color (69)
-            74.0, 108.0, 144.0,  // dropdown select color (72)
-            74.0, 108.0, 144.0,  // dropdown hover color (75)
-            241.0, 239.0, 236.0, // dropdown triangle color (78)
-            18.0, 52.0, 88.0,    // textbox color (81)
-            112.0, 146.0, 182.0, // textbox phantom text color (84)
-            241.0, 239.0, 236.0, // textbox line color (87)
-            11.0, 87.0, 208.0,   // textbox select color (90)
+        241.0, 239.0, 236.0, // text color alternate (3)
+        21.2, 115.6, 160.2,  // ribbon top bar color (6)
+        74.0, 108.0, 144.0,  // ribbon dropdown color (9)
+        112.0, 146.0, 182.0, // ribbon select color (12)
+        112.0, 146.0, 182.0, // ribbon hover color (15)
+        18.0, 52.0, 88.0,    // popup box color (18)
+        74.0, 108.0, 144.0,  // popup boxes color (21)
+        126.0, 160.0, 196.0, // popup boxes select color (24)
+        18.0, 52.0, 88.0,    // button color (27)
+        74.0, 108.0, 144.0,  // button select color (30)
+        18.0, 52.0, 88.0,    // switch text hover (33)
+        18.0, 52.0, 88.0,    // switch color off (36)
+        241.0, 239.0, 236.0, // switch circle color off (39)
+        18.0, 52.0, 88.0,    // switch color on (42)
+        241.0, 239.0, 236.0, // switch circle color on (45)
+        3.0, 3.0, 3.0,       // dial color (48)
+        212.0, 201.0, 190.0, // dial inner circle color (51)
+        18.0, 52.0, 88.0,    // slider bar color (54)
+        241.0, 239.0, 236.0, // slider circle color (57)
+        241.0, 239.0, 236.0, // scrollbar bar base color (60)
+        33.6, 161.9, 211.6,  // scrollbar bar color (63)
+        50.0, 178.3, 228.0,  // scrollbar bar hover color (66)
+        50.0, 178.3, 228.0,  // scrollbar bar clicked color (69)
+        18.0, 52.0, 88.0,    // dropdown color (72)
+        74.0, 108.0, 144.0,  // dropdown select color (75)
+        74.0, 108.0, 144.0,  // dropdown hover color (78)
+        241.0, 239.0, 236.0, // dropdown triangle color (81)
+        18.0, 52.0, 88.0,    // textbox color (84)
+        112.0, 146.0, 182.0, // textbox phantom text color (87)
+        241.0, 239.0, 236.0, // textbox line color (90)
+        11.0, 87.0, 208.0,   // textbox select color (93)
         };
         memcpy(tt_themeColors, tt_themeCopy, sizeof(tt_themeCopy));
     } else {
@@ -287,26 +292,27 @@ void turtleToolsSetTheme(tt_theme_name_t theme) {
             100.0, 100.0, 100.0, // popup boxes select color (24)
             200.0, 200.0, 200.0, // button color (27)
             160.0, 160.0, 160.0, // button select color (30)
-            180.0, 180.0, 180.0, // switch color off (33)
-            230.0, 230.0, 230.0, // switch circle color off (36)
-            30.0, 30.0, 30.0,    // switch color on (39)
-            0.0, 255.0, 255.0,   // switch circle color on (42)
-            0.0, 0.0, 0.0,       // dial color (45)
-            255.0, 255.0, 255.0, // dial inner circle color (48)
-            120.0, 120.0, 120.0, // slider bar color (51)
-            230.0, 230.0, 230.0, // slider circle color (54)
-            200.0, 200.0, 200.0, // scrollbar bar base color (57)
-            160.0, 160.0, 160.0, // scrollbar bar color (60)
-            120.0, 120.0, 120.0, // scrollbar bar hover color (63)
-            120.0, 120.0, 120.0, // scrollbar bar clicked color (66)
-            160.0, 160.0, 160.0, // dropdown color (69)
-            120.0, 120.0, 120.0, // dropdown select color (72)
-            120.0, 120.0, 120.0, // dropdown hover color (75)
-            100.0, 100.0, 100.0, // dropdown triangle color (78)
-            200.0, 200.0, 200.0, // textbox color (81)
-            180.0, 180.0, 180.0, // textbox phantom text color (84)
-            0.0, 0.0, 0.0,       // textbox line color (87)
-            11.0, 87.0, 208.0,   // textbox select color (90)
+            30.0, 30.0, 30.0,    // switch text hover (33)
+            180.0, 180.0, 180.0, // switch color off (36)
+            230.0, 230.0, 230.0, // switch circle color off (39)
+            30.0, 30.0, 30.0,    // switch color on (42)
+            0.0, 255.0, 255.0,   // switch circle color on (45)
+            0.0, 0.0, 0.0,       // dial color (48)
+            255.0, 255.0, 255.0, // dial inner circle color (51)
+            120.0, 120.0, 120.0, // slider bar color (54)
+            230.0, 230.0, 230.0, // slider circle color (57)
+            200.0, 200.0, 200.0, // scrollbar bar base color (60)
+            160.0, 160.0, 160.0, // scrollbar bar color (63)
+            120.0, 120.0, 120.0, // scrollbar bar hover color (66)
+            120.0, 120.0, 120.0, // scrollbar bar clicked color (69)
+            160.0, 160.0, 160.0, // dropdown color (72)
+            120.0, 120.0, 120.0, // dropdown select color (75)
+            120.0, 120.0, 120.0, // dropdown hover color (78)
+            100.0, 100.0, 100.0, // dropdown triangle color (81)
+            200.0, 200.0, 200.0, // textbox color (84)
+            180.0, 180.0, 180.0, // textbox phantom text color (87)
+            0.0, 0.0, 0.0,       // textbox line color (90)
+            11.0, 87.0, 208.0,   // textbox select color (93)
         };
         memcpy(tt_themeColors, tt_themeCopy, sizeof(tt_themeCopy));
     }
@@ -655,8 +661,10 @@ typedef struct {
 
 typedef enum {
     TT_SWITCH_STYLE_CLASSIC = 0,
-    TT_SWITCH_STYLE_CHECKBOX = 1,
-    TT_SWITCH_STYLE_XBOX = 2,
+    TT_SWITCH_STYLE_SIDESWIPE_LEFT = 1,
+    TT_SWITCH_STYLE_SIDESWIPE_RIGHT = 2,
+    TT_SWITCH_STYLE_CHECKBOX = 3,
+    TT_SWITCH_STYLE_XBOX = 4,
 } tt_switch_style_t;
 
 /* switch */
@@ -817,11 +825,11 @@ typedef enum {
 int32_t tt_color_override_default[] = {
     /*  button                    switch                      dial                  slider                   scrollbar                   dropdown               textbox  */
     TT_COLOR_TEXT_ALTERNATE, TT_COLOR_TEXT,              TT_COLOR_TEXT,       TT_COLOR_TEXT,          0,                          TT_COLOR_TEXT,              TT_COLOR_TEXT_ALTERNATE,
-    TT_COLOR_BUTTON,         TT_COLOR_SWITCH_ON,         TT_COLOR_DIAL,       TT_COLOR_SLIDER_BAR,    TT_COLOR_SCROLLBAR_BASE,    TT_COLOR_TEXT_ALTERNATE,    TT_COLOR_TEXTBOX_BOX,
-    TT_COLOR_BUTTON_SELECT,  TT_COLOR_SWITCH_OFF,        TT_COLOR_DIAL_INNER, TT_COLOR_SLIDER_CIRCLE, TT_COLOR_SCROLLBAR_HOVER,   TT_COLOR_DROPDOWN,          TT_COLOR_TEXTBOX_PHANTOM_TEXT,
-    0,                       TT_COLOR_SWITCH_CIRCLE_ON,  0,                   0,                      TT_COLOR_SCROLLBAR_CLICKED, TT_COLOR_DROPDOWN_SELECT,   TT_COLOR_TEXTBOX_LINE,
-    0,                       TT_COLOR_SWITCH_CIRCLE_OFF, 0,                   0,                      TT_COLOR_SCROLLBAR_BAR,     TT_COLOR_DROPDOWN_HOVER,    TT_COLOR_TEXTBOX_SELECT,
-    0,                       0,                          0,                   0,                      0,                          TT_COLOR_DROPDOWN_TRIANGLE, 0,
+    TT_COLOR_BUTTON,         TT_COLOR_SWITCH_TEXT_HOVER, TT_COLOR_DIAL,       TT_COLOR_SLIDER_BAR,    TT_COLOR_SCROLLBAR_BASE,    TT_COLOR_TEXT_ALTERNATE,    TT_COLOR_TEXTBOX_BOX,
+    TT_COLOR_BUTTON_SELECT,  TT_COLOR_SWITCH_ON,         TT_COLOR_DIAL_INNER, TT_COLOR_SLIDER_CIRCLE, TT_COLOR_SCROLLBAR_HOVER,   TT_COLOR_DROPDOWN,          TT_COLOR_TEXTBOX_PHANTOM_TEXT,
+    0,                       TT_COLOR_SWITCH_OFF,        0,                   0,                      TT_COLOR_SCROLLBAR_CLICKED, TT_COLOR_DROPDOWN_SELECT,   TT_COLOR_TEXTBOX_LINE,
+    0,                       TT_COLOR_SWITCH_CIRCLE_ON,  0,                   0,                      TT_COLOR_SCROLLBAR_BAR,     TT_COLOR_DROPDOWN_HOVER,    TT_COLOR_TEXTBOX_SELECT,
+    0,                       TT_COLOR_SWITCH_CIRCLE_OFF, 0,                   0,                      0,                          TT_COLOR_DROPDOWN_TRIANGLE, 0,
     0,                       0,                          0,                   0,                      0,                          0,                          0,
     0,                       0,                          0,                   0,                      0,                          0,                          0,
 };
@@ -1190,13 +1198,16 @@ void switchUpdate() {
         }
         double switchX = switchp -> x;
         double switchY = switchp -> y;
-        if (switchp -> style == TT_SWITCH_STYLE_CLASSIC) {
-            tt_internalColor(switchp, TT_COLOR_TEXT, TT_COLOR_OVERRIDE_SLOT_0);
-            turtleTextWriteUnicode((unsigned char *) switchp -> label, switchX, switchY + 1.6 * switchp -> size, switchp -> size - 1, 50);
+        double switchClickLeft = switchX;
+        double switchClickRight = switchX;
+        double switchClickDown = switchY;
+        double switchClickUp = switchY;
+        if (switchp -> style == TT_SWITCH_STYLE_CLASSIC || switchp -> style == TT_SWITCH_STYLE_SIDESWIPE_LEFT || switchp -> style == TT_SWITCH_STYLE_SIDESWIPE_RIGHT) {
+            /* render switch */
             if (*(switchp -> variable)) {
-                tt_internalColor(switchp, TT_COLOR_SWITCH_ON, TT_COLOR_OVERRIDE_SLOT_1);
+                tt_internalColor(switchp, TT_COLOR_SWITCH_ON, TT_COLOR_OVERRIDE_SLOT_2);
             } else {
-                tt_internalColor(switchp, TT_COLOR_SWITCH_OFF, TT_COLOR_OVERRIDE_SLOT_2);
+                tt_internalColor(switchp, TT_COLOR_SWITCH_OFF, TT_COLOR_OVERRIDE_SLOT_3);
             }
             turtlePenSize(switchp -> size * 1.2);
             turtleGoto(switchX - switchp -> size * 0.8, switchY);
@@ -1205,38 +1216,51 @@ void switchUpdate() {
             turtlePenUp();
             turtlePenSize(switchp -> size);
             if (*(switchp -> variable)) {
-                tt_internalColor(switchp, TT_COLOR_SWITCH_CIRCLE_ON, TT_COLOR_OVERRIDE_SLOT_3);
+                tt_internalColor(switchp, TT_COLOR_SWITCH_CIRCLE_ON, TT_COLOR_OVERRIDE_SLOT_4);
                 turtleGoto(switchX + switchp -> size * 0.8, switchY);
             } else {
-                tt_internalColor(switchp, TT_COLOR_SWITCH_CIRCLE_OFF, TT_COLOR_OVERRIDE_SLOT_4);
+                tt_internalColor(switchp, TT_COLOR_SWITCH_CIRCLE_OFF, TT_COLOR_OVERRIDE_SLOT_5);
                 turtleGoto(switchX - switchp -> size * 0.8, switchY);
             }
             turtlePenDown();
             turtlePenUp();
-            /* mouse */
-            if (switchp -> enabled == TT_ELEMENT_ENABLED) {
-                if (turtleMouseDown()) {
-                    if (switchp -> status < 0) {
-                        switchp -> status *= -1;
-                    }
+            /* mouse parameters */
+            if (switchp -> style == TT_SWITCH_STYLE_CLASSIC) {
+                switchClickLeft = switchX - switchp -> size * 1.35;
+                switchClickRight = switchX + switchp -> size * 1.35;
+            } else if (switchp -> style == TT_SWITCH_STYLE_SIDESWIPE_LEFT) {
+                double textLength = turtleTextGetUnicodeLength((unsigned char *) switchp -> label, switchp -> size - 1);
+                switchClickLeft = switchX - switchp -> size * 1.35;
+                switchClickRight = switchX + switchp -> size * 2.2 + textLength;
+            } else {
+                double textLength = turtleTextGetUnicodeLength((unsigned char *) switchp -> label, switchp -> size - 1);
+                switchClickLeft = switchX - switchp -> size * 2 - textLength;
+                switchClickRight = switchX + switchp -> size * 1.35;
+            }
+            switchClickDown = switchY - switchp -> size * 0.6;
+            switchClickUp = switchY + switchp -> size * 0.6;
+            /* render text */
+            tt_internalColor(switchp, TT_COLOR_TEXT, TT_COLOR_OVERRIDE_SLOT_0);
+            if (switchp -> style == TT_SWITCH_STYLE_CLASSIC) {
+                turtleTextWriteUnicode((unsigned char *) switchp -> label, switchX, switchY + 1.6 * switchp -> size, switchp -> size - 1, 50);
+            } else if (switchp -> style == TT_SWITCH_STYLE_SIDESWIPE_LEFT) {
+                if (switchp -> status == -1) {
+                    tt_internalColor(switchp, TT_COLOR_SWITCH_TEXT_HOVER, TT_COLOR_OVERRIDE_SLOT_1);
                 } else {
-                    if (turtle.mouseX > switchX - switchp -> size * 1.35 && turtle.mouseX < switchX + switchp -> size * 1.35 && turtle.mouseY > switchY - switchp -> size * 0.6 && turtle.mouseY < switchY + switchp -> size * 0.6) {
-                        switchp -> status = -1;
-                    } else {
-                        switchp -> status = 0;
-                    }
+                    tt_internalColor(switchp, TT_COLOR_TEXT, TT_COLOR_OVERRIDE_SLOT_0);
                 }
-                if (switchp -> status > 0) {
-                    if (*(switchp -> variable)) {
-                        *(switchp -> variable) = 0;
-                    } else {
-                        *(switchp -> variable) = 1;
-                    }
-                    switchp -> status = 0;
+                turtleTextWriteUnicode((unsigned char *) switchp -> label, switchX + switchp -> size * 2, switchY, switchp -> size - 1, 0);
+            } else {
+                if (switchp -> status == -1) {
+                    tt_internalColor(switchp, TT_COLOR_SWITCH_TEXT_HOVER, TT_COLOR_OVERRIDE_SLOT_1);
+                } else {
+                    tt_internalColor(switchp, TT_COLOR_TEXT, TT_COLOR_OVERRIDE_SLOT_0);
                 }
+                turtleTextWriteUnicode((unsigned char *) switchp -> label, switchX - switchp -> size * 2, switchY, switchp -> size - 1, 100);
             }
         } else if (switchp -> style == TT_SWITCH_STYLE_CHECKBOX || switchp -> style == TT_SWITCH_STYLE_XBOX) {
-            tt_internalColor(switchp, TT_COLOR_SWITCH_OFF, TT_COLOR_OVERRIDE_SLOT_2);
+            /* render box */
+            tt_internalColor(switchp, TT_COLOR_SWITCH_OFF, TT_COLOR_OVERRIDE_SLOT_3);
             turtlePenSize(switchp -> size / 6);
             turtleGoto(switchX - switchp -> size / 2, switchY - switchp -> size / 2);
             turtlePenDown();
@@ -1247,10 +1271,16 @@ void switchUpdate() {
             turtlePenUp();
             if (*(switchp -> variable)) {
                 if (switchp -> style == TT_SWITCH_STYLE_CHECKBOX) {
-                    /* check */
+                    /* render check */
+                    tt_internalColor(switchp, TT_COLOR_SWITCH_CIRCLE_ON, TT_COLOR_OVERRIDE_SLOT_4);
+                    turtleGoto(switchX - switchp -> size / 2.5, switchY);
+                    turtlePenDown();
+                    turtleGoto(switchX, switchY - switchp -> size / 2.5);
+                    turtleGoto(switchX + switchp -> size / 2.5, switchY + switchp -> size / 2.5);
+                    turtlePenUp();
                 } else {
-                    /* X */
-                    tt_internalColor(switchp, TT_COLOR_SWITCH_CIRCLE_ON, TT_COLOR_OVERRIDE_SLOT_3);
+                    /* render X */
+                    tt_internalColor(switchp, TT_COLOR_SWITCH_CIRCLE_ON, TT_COLOR_OVERRIDE_SLOT_4);
                     turtleGoto(switchX + switchp -> size / 2.5, switchY + switchp -> size / 2.5);
                     turtlePenDown();
                     turtleGoto(switchX - switchp -> size / 2.5, switchY - switchp -> size / 2.5);
@@ -1260,6 +1290,41 @@ void switchUpdate() {
                     turtleGoto(switchX - switchp -> size / 2.5, switchY + switchp -> size / 2.5);
                     turtlePenUp();
                 }
+            }
+            /* mouse parameters - include text */
+            double textLength = turtleTextGetUnicodeLength((unsigned char *) switchp -> label, switchp -> size - 1);
+            switchClickLeft = switchX - switchp -> size * 0.6;
+            switchClickRight = switchX + switchp -> size * 1.2 + textLength;
+            switchClickDown = switchY - switchp -> size * 0.6;
+            switchClickUp = switchY + switchp -> size * 0.6;
+            /* render text */
+            if (switchp -> status == -1) {
+                tt_internalColor(switchp, TT_COLOR_SWITCH_TEXT_HOVER, TT_COLOR_OVERRIDE_SLOT_1);
+            } else {
+                tt_internalColor(switchp, TT_COLOR_TEXT, TT_COLOR_OVERRIDE_SLOT_0);
+            }
+            turtleTextWriteUnicode((unsigned char *) switchp -> label, switchX + switchp -> size, switchY, switchp -> size - 1, 0);
+        }
+        /* mouse */
+        if (switchp -> enabled == TT_ELEMENT_ENABLED) {
+            if (turtleMouseDown()) {
+                if (switchp -> status < 0) {
+                    switchp -> status *= -1;
+                }
+            } else {
+                if (turtle.mouseX > switchClickLeft && turtle.mouseX < switchClickRight && turtle.mouseY > switchClickDown && turtle.mouseY < switchClickUp) {
+                    switchp -> status = -1;
+                } else {
+                    switchp -> status = 0;
+                }
+            }
+            if (switchp -> status > 0) {
+                if (*(switchp -> variable)) {
+                    *(switchp -> variable) = 0;
+                } else {
+                    *(switchp -> variable) = 1;
+                }
+                switchp -> status = 0;
             }
         }
     }
