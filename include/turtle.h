@@ -650,10 +650,24 @@ void turtle3DTriangle(double x1, double y1, double z1, double x2, double y2, dou
 /* 3D -> 2D using perspective projection matrix */
 void turtlePerspective(double x, double y, double z, double *xOut, double *yOut) {
     /* https://www.scratchapixel.com/lessons/3d-basic-rendering/perspective-and-orthographic-projection-matrix/building-basic-perspective-projection-matrix.html */
+    double transform[16] = {
+        1, 0, 0, 0,
+        0, 1, 0, turtle.cameraDirectionLeftRight,
+        0, 0, 1, turtle.cameraDirectionUpDown,
+        0, 0, 0, 1,
+    };
+    x = x * transform[0 ] + y * transform[1 ] + z * transform[2 ] + transform[3 ];
+    y = x * transform[4 ] + y * transform[5 ] + z * transform[6 ] + transform[7 ];
+    z = x * transform[8 ] + y * transform[9 ] + z * transform[10] + transform[11];
+    double outWTest = x * transform[12] + y * transform[13] + z * transform[14] + transform[15];
+    x /= outWTest;
+    y /= outWTest;
+    z /= outWTest;
     double scalingFactor = 1 / (tan((turtle.cameraFOV / 2) / 57.2958));
-    double near = 1;
+    double near = 0.1;
     double hypot = (x - turtle.cameraX) * (x - turtle.cameraX) + (y - turtle.cameraY) * (y - turtle.cameraY) + (z - turtle.cameraZ) * (z - turtle.cameraZ);
-    double far = hypot * sin((90 - turtle.cameraDirectionUpDown) / 57.2958) * sin((90 - turtle.cameraDirectionLeftRight) / 57.2958);
+    double far = 100;
+    // double far = hypot * sin((90 - turtle.cameraDirectionUpDown) / 57.2958) * sin((90 - turtle.cameraDirectionLeftRight) / 57.2958);
     double threeThree = -far / (far - near);
     double perspective[16] = {
         scalingFactor, 0,             0,                 0,
@@ -661,14 +675,15 @@ void turtlePerspective(double x, double y, double z, double *xOut, double *yOut)
         0,             0,             threeThree,       -1,
         0,             0,             threeThree * near, 0,
     };
-    double outX = x * perspective[0 ] + y * perspective[1 ] + z * perspective[2 ] + perspective[3 ]; 
-    double outY = x * perspective[4 ] + y * perspective[5 ] + z * perspective[6 ] + perspective[7 ]; 
-    // double outZ = x * perspective[8 ] + y * perspective[9 ] + z * perspective[10] + perspective[11]; 
+    double outX = x * perspective[0 ] + y * perspective[1 ] + z * perspective[2 ] + perspective[3 ];
+    double outY = x * perspective[4 ] + y * perspective[5 ] + z * perspective[6 ] + perspective[7 ];
+    // double outZ = x * perspective[8 ] + y * perspective[9 ] + z * perspective[10] + perspective[11];
     double outW = x * perspective[12] + y * perspective[13] + z * perspective[14] + perspective[15];
     outX /= outW;
     outY /= outW;
     *xOut = outX * 640;
     *yOut = outY * 360;
+    printf("%lf %lf\n", *xOut, *yOut);
 }
 
 /* draws the turtle's path on the screen */
