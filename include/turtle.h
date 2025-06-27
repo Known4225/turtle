@@ -55,6 +55,14 @@ typedef struct {
     double penb; // pen blue (0 to 1)
     double pena; // pen alpha (0 to 1)
     double currentColor[4]; // for reducing API color calls
+
+    /* 3D variables */
+    double cameraX;
+    double cameraY;
+    double cameraZ;
+    double cameraFOV;
+    double cameraDirectionLeftRight;
+    double cameraDirectionUpDown;
 } turtleglob_t; // all globals are conSTRUCTed here
 
 turtleglob_t turtle;
@@ -94,38 +102,38 @@ void keySense(GLFWwindow* window, int32_t key, int32_t scancode, int32_t action,
 void mouseSense(GLFWwindow *window, int32_t button, int32_t action, int32_t mods) {
     if (action == GLFW_PRESS) {
         switch(button) {
-            case GLFW_MOUSE_BUTTON_LEFT:
+        case GLFW_MOUSE_BUTTON_LEFT:
             list_append(turtle.keyPressed, (unitype) "m1", 's');
             turtle.mousePressed[0] = 1;
-            break;
-            case GLFW_MOUSE_BUTTON_RIGHT:
+        break;
+        case GLFW_MOUSE_BUTTON_RIGHT:
             list_append(turtle.keyPressed, (unitype) "m2", 's');
             turtle.mousePressed[1] = 1;
-            break;
-            case GLFW_MOUSE_BUTTON_MIDDLE:
+        break;
+        case GLFW_MOUSE_BUTTON_MIDDLE:
             list_append(turtle.keyPressed, (unitype) "m3", 's');
             turtle.mousePressed[2] = 1;
-            break;
-            default:
-            break;
+        break;
+        default:
+        break;
         }
     }
     if (action == GLFW_RELEASE) {
         switch(button) {
-            case GLFW_MOUSE_BUTTON_LEFT:
+        case GLFW_MOUSE_BUTTON_LEFT:
             list_remove(turtle.keyPressed, (unitype) "m1", 's');
             turtle.mousePressed[0] = 0;
-            break;
-            case GLFW_MOUSE_BUTTON_RIGHT:
+        break;
+        case GLFW_MOUSE_BUTTON_RIGHT:
             list_remove(turtle.keyPressed, (unitype) "m2", 's');
             turtle.mousePressed[1] = 0;
-            break;
-            case GLFW_MOUSE_BUTTON_MIDDLE:
+        break;
+        case GLFW_MOUSE_BUTTON_MIDDLE:
             list_remove(turtle.keyPressed, (unitype) "m3", 's');
             turtle.mousePressed[2] = 0;
-            break;
-            default:
-            break;
+        break;
+        default:
+        break;
         }
     }
 }
@@ -198,6 +206,14 @@ void turtleInit(GLFWwindow* window, int32_t minX, int32_t minY, int32_t maxX, in
         turtle.currentColor[i] = 0.0;
     }
     turtle.currentColor[3] = 1.0;
+    /* 3D variables */
+    turtle.cameraX = 0;
+    turtle.cameraY = 0;
+    turtle.cameraZ = 0;
+    turtle.cameraFOV = 90;
+    turtle.cameraDirectionLeftRight = 0;
+    turtle.cameraDirectionUpDown = 0;
+
     turtleSetWorldCoordinates(minX, minY, maxX, maxY);
     turtle.keyCallback = NULL;
     turtle.unicodeCallback = NULL;
@@ -438,6 +454,28 @@ void turtleTriangleRender(double x1, double y1, double x2, double y2, double x3,
     glEnd();
 }
 
+/* draws a quadrilateral */
+void turtleQuadRender(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, double r, double g, double b, double a, double xfact, double yfact) {
+    int8_t colorChange = 0;
+    if (r != turtle.currentColor[0]) {colorChange = 1;}
+    if (g != turtle.currentColor[1]) {colorChange = 1;}
+    if (b != turtle.currentColor[2]) {colorChange = 1;}
+    if (a != turtle.currentColor[3]) {colorChange = 1;}
+    if (colorChange == 1) {
+        glColor4d(r, g, b, a);
+        turtle.currentColor[0] = r;
+        turtle.currentColor[1] = g;
+        turtle.currentColor[2] = b;
+        turtle.currentColor[3] = a;
+    }
+    glBegin(GL_TRIANGLE_FAN);
+    glVertex2d(x1 * xfact, y1 * yfact);
+    glVertex2d(x2 * xfact, y2 * yfact);
+    glVertex2d(x3 * xfact, y3 * yfact);
+    glVertex2d(x4 * xfact, y4 * yfact);
+    glEnd();
+}
+
 /* adds a (blit) triangle to the pipeline (for better speed) */
 void turtleTriangle(double x1, double y1, double x2, double y2, double x3, double y3) {
     list_append(turtle.penPos, (unitype) x1, 'd');
@@ -481,28 +519,6 @@ void turtleTriangleColor(double x1, double y1, double x2, double y2, double x3, 
     list_append(turtle.penPos, (unitype) a, 'd');
     list_append(turtle.penPos, (unitype) 66, 'h'); // blit triangle signifier
     list_append(turtle.penPos, (unitype) 0, 'd'); // zero'd out (wasted space)
-}
-
-/* draws a quadrilateral */
-void turtleQuadRender(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, double r, double g, double b, double a, double xfact, double yfact) {
-    int8_t colorChange = 0;
-    if (r != turtle.currentColor[0]) {colorChange = 1;}
-    if (g != turtle.currentColor[1]) {colorChange = 1;}
-    if (b != turtle.currentColor[2]) {colorChange = 1;}
-    if (a != turtle.currentColor[3]) {colorChange = 1;}
-    if (colorChange == 1) {
-        glColor4d(r, g, b, a);
-        turtle.currentColor[0] = r;
-        turtle.currentColor[1] = g;
-        turtle.currentColor[2] = b;
-        turtle.currentColor[3] = a;
-    }
-    glBegin(GL_TRIANGLE_FAN);
-    glVertex2d(x1 * xfact, y1 * yfact);
-    glVertex2d(x2 * xfact, y2 * yfact);
-    glVertex2d(x3 * xfact, y3 * yfact);
-    glVertex2d(x4 * xfact, y4 * yfact);
-    glEnd();
 }
 
 /* adds a (blit) quad to the pipeline (for better speed) */
@@ -595,10 +611,70 @@ void turtleRectangleColor(double x1, double y1, double x2, double y2, double r, 
     list_append(turtle.penPos, (unitype) y2, 'd');
 }
 
+/* adds a (blit) circle to the pipeline */
+void turtleCircle(double x, double y, double radius) {
+    list_append(turtle.penPos, (unitype) x, 'd');
+    list_append(turtle.penPos, (unitype) y, 'd');
+    list_append(turtle.penPos, (unitype) radius, 'd');
+    list_append(turtle.penPos, (unitype) turtle.penr, 'd');
+    list_append(turtle.penPos, (unitype) turtle.peng, 'd');
+    list_append(turtle.penPos, (unitype) turtle.penb, 'd');
+    list_append(turtle.penPos, (unitype) turtle.pena, 'd');
+    list_append(turtle.penPos, (unitype) 64, 'h'); // blit circle signifier
+    list_append(turtle.penPos, (unitype) turtle.circleprez, 'd');
+}
+
+/* create a triangle in 3D */
+void turtle3DTriangle(double x1, double y1, double z1, double x2, double y2, double z2, double x3, double y3, double z3) {
+    list_append(turtle.penPos, (unitype) x1, 'd');
+    list_append(turtle.penPos, (unitype) y1, 'd');
+    list_append(turtle.penPos, (unitype) z1, 'd');
+    list_append(turtle.penPos, (unitype) turtle.penr, 'd');
+    list_append(turtle.penPos, (unitype) turtle.peng, 'd');
+    list_append(turtle.penPos, (unitype) turtle.penb, 'd');
+    list_append(turtle.penPos, (unitype) turtle.pena, 'd');
+    list_append(turtle.penPos, (unitype) 130, 'h'); // blit 3D triangle signifier
+    list_append(turtle.penPos, (unitype) x2, 'd');
+
+    list_append(turtle.penPos, (unitype) y2, 'd');
+    list_append(turtle.penPos, (unitype) z2, 'd');
+    list_append(turtle.penPos, (unitype) x3, 'd');
+    list_append(turtle.penPos, (unitype) y3, 'd');
+    list_append(turtle.penPos, (unitype) z3, 'd');
+    list_append(turtle.penPos, (unitype) 0, 'd');
+    list_append(turtle.penPos, (unitype) 0, 'd');
+    list_append(turtle.penPos, (unitype) 130, 'h'); // blit 3D triangle signifier
+    list_append(turtle.penPos, (unitype) 0, 'd');
+}
+
+/* 3D -> 2D using perspective projection matrix */
+void turtlePerspective(double x, double y, double z, double *xOut, double *yOut) {
+    /* https://www.scratchapixel.com/lessons/3d-basic-rendering/perspective-and-orthographic-projection-matrix/building-basic-perspective-projection-matrix.html */
+    double scalingFactor = 1 / (tan((turtle.cameraFOV / 2) / 57.2958));
+    double near = 1;
+    double hypot = (x - turtle.cameraX) * (x - turtle.cameraX) + (y - turtle.cameraY) * (y - turtle.cameraY) + (z - turtle.cameraZ) * (z - turtle.cameraZ);
+    double far = hypot * sin((90 - turtle.cameraDirectionUpDown) / 57.2958) * sin((90 - turtle.cameraDirectionLeftRight) / 57.2958);
+    double threeThree = -far / (far - near);
+    double perspective[16] = {
+        scalingFactor, 0,             0,                 0,
+        0,             scalingFactor, 0,                 0,
+        0,             0,             threeThree,       -1,
+        0,             0,             threeThree * near, 0,
+    };
+    double outX = x * perspective[0 ] + y * perspective[1 ] + z * perspective[2 ] + perspective[3 ]; 
+    double outY = x * perspective[4 ] + y * perspective[5 ] + z * perspective[6 ] + perspective[7 ]; 
+    // double outZ = x * perspective[8 ] + y * perspective[9 ] + z * perspective[10] + perspective[11]; 
+    double outW = x * perspective[12] + y * perspective[13] + z * perspective[14] + perspective[15];
+    outX /= outW;
+    outY /= outW;
+    *xOut = outX * 640;
+    *yOut = outY * 360;
+}
+
 /* draws the turtle's path on the screen */
 void turtleUpdate() {
-    // used to have a feature that only redrew the screen if there have been any changes from last frame, but it has been removed.
-    // opted to redraw every frame and not list_copy, an alternative is hashing the penPos list. An interesting idea for sure... for another time
+    /* used to have a feature that only redrew the screen if there have been any changes from last frame, but it has been removed.
+       opted to redraw every frame and not list_copy, an alternative is hashing the penPos list. An interesting idea for sure... for another time */
     int8_t changed = 0;
     uint32_t len = turtle.penPos -> length;
     unitype *ren = turtle.penPos -> data;
@@ -624,30 +700,32 @@ void turtleUpdate() {
         for (int32_t i = 0; i < (int32_t) len; i += 9) {
             if (renType[i] == 'd') {
                 switch (ren[i + 7].h) {
-                    case 0:
-                    if (!(lastSize == ren[i + 2].d) || !(lastPrez != ren[i + 8].d))
+                case 0:
+                    if (!(lastSize == ren[i + 2].d) || !(lastPrez != ren[i + 8].d)) {
                         precomputedLog = ren[i + 8].d * log(2.71 + ren[i + 2].d);
+                    }
                     lastSize = ren[i + 2].d;
                     lastPrez = ren[i + 8].d;
                     turtleCircleRender(ren[i].d, ren[i + 1].d, ren[i + 2].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xfact, yfact, precomputedLog);
-                    break;
-                    case 1:
+                break;
+                case 1:
                     turtleSquareRender(ren[i].d - ren[i + 2].d, ren[i + 1].d - ren[i + 2].d, ren[i].d + ren[i + 2].d, ren[i + 1].d + ren[i + 2].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xfact, yfact);
-                    break;
-                    case 2:
+                break;
+                case 2:
                     turtleTriangleRender(ren[i].d - ren[i + 2].d, ren[i + 1].d - ren[i + 2].d, ren[i].d + ren[i + 2].d, ren[i + 1].d - ren[i + 2].d, ren[i].d, ren[i + 1].d + ren[i + 2].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xfact, yfact);
-                    break;
-                    case 5:
+                break;
+                case 5:
                     if (i - 9 < 0 || renType[i - 9] == 'c') {
-                        if (!(lastSize == ren[i + 2].d) || !(lastPrez != ren[i + 8].d))
+                        if (!(lastSize == ren[i + 2].d) || !(lastPrez != ren[i + 8].d)) {
                             precomputedLog = ren[i + 8].d * log(2.71 + ren[i + 2].d);
+                        }
                         lastSize = ren[i + 2].d;
                         lastPrez = ren[i + 8].d;
                         turtleCircleRender(ren[i].d, ren[i + 1].d, ren[i + 2].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xfact, yfact, precomputedLog);
                     }
-                    break;
-                    default:
-                    break;
+                break;
+                default:
+                break;
                 }
                 if (i + 18 < (int32_t) len && renType[i + 9] == 'd' && ren[i + 7].h < 64 && (ren[i + 7].h == 4 || ren[i + 7].h == 5 || (fabs(ren[i].d - ren[i + 9].d) > ren[i + 2].d / 2 || fabs(ren[i + 1].d - ren[i + 10].d) > ren[i + 2].d / 2))) { // tests for next point continuity and also ensures that the next point is at sufficiently different coordinates
                     double dir = atan((ren[i + 9].d - ren[i].d) / (ren[i + 1].d - ren[i + 10].d));
@@ -663,22 +741,29 @@ void turtleUpdate() {
                     }
                 } else {
                     if (ren[i + 7].h == 4 && i > 8 && renType[i - 8] == 'c') {
-                        if (!(lastSize == ren[i + 2].d) || !(lastPrez != ren[i + 8].d))
+                        if (!(lastSize == ren[i + 2].d) || !(lastPrez != ren[i + 8].d)) {
                             precomputedLog = ren[i + 8].d * log(2.71 + ren[i + 2].d);
+                        }
                         lastSize = ren[i + 2].d;
                         lastPrez = ren[i + 8].d;
                         turtleCircleRender(ren[i].d, ren[i + 1].d, ren[i + 2].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xfact, yfact, precomputedLog);
                     }
                     if (ren[i + 7].h == 5 && i > 8) {
-                        if (!(lastSize == ren[i + 2].d) || !(lastPrez != ren[i + 8].d))
+                        if (!(lastSize == ren[i + 2].d) || !(lastPrez != ren[i + 8].d)) {
                             precomputedLog = ren[i + 8].d * log(2.71 + ren[i + 2].d);
+                        }
                         lastSize = ren[i + 2].d;
                         lastPrez = ren[i + 8].d;
                         turtleCircleRender(ren[i].d, ren[i + 1].d, ren[i + 2].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xfact, yfact, precomputedLog);
                     }
                 }
                 if (ren[i + 7].h == 64) { // blit circle
-
+                    if (!(lastSize == ren[i + 2].d) || !(lastPrez != ren[i + 8].d)) {
+                        precomputedLog = ren[i + 8].d * log(2.71 + ren[i + 2].d);
+                    }
+                    lastSize = ren[i + 2].d;
+                    lastPrez = ren[i + 8].d;
+                    turtleCircleRender(ren[i].d, ren[i + 1].d, ren[i + 2].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xfact, yfact, precomputedLog);
                 }
                 if (ren[i + 7].h == 66) { // blit triangle
                     turtleTriangleRender(ren[i].d, ren[i + 1].d, ren[i + 2].d, ren[i + 8].d, ren[i + 9].d, ren[i + 10].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xfact, yfact);
@@ -687,6 +772,22 @@ void turtleUpdate() {
                 if (ren[i + 7].h == 67) { // blit quad
                     turtleQuadRender(ren[i].d, ren[i + 1].d, ren[i + 2].d, ren[i + 8].d, ren[i + 9].d, ren[i + 10].d, ren[i + 11].d, ren[i + 17].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xfact, yfact);
                     i += 9;
+                }
+                if (ren[i + 7].h == 128) { // blit 3D sphere
+
+                }
+                if (ren[i + 7].h == 129) { // blit 3D circle
+
+                }
+                if (ren[i + 7].h == 130) { // blit 3D triangle
+                    turtlePerspective(ren[i].d, ren[i + 1].d, ren[i + 2].d, &ren[i].d, &ren[i + 1].d);
+                    turtlePerspective(ren[i + 8].d, ren[i + 9].d, ren[i + 10].d, &ren[i + 8].d, &ren[i + 9].d);
+                    turtlePerspective(ren[i + 11].d, ren[i + 12].d, ren[i + 13].d, &ren[i + 11].d, &ren[i + 12].d);
+                    turtleTriangleRender(ren[i].d, ren[i + 1].d, ren[i + 8].d, ren[i + 9].d, ren[i + 11].d, ren[i + 12].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xfact, yfact);
+                    i += 9;
+                }
+                if (ren[i + 7].h == 131) { // blit 3D quad
+
                 }
             }
         }
