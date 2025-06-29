@@ -116,6 +116,7 @@ int main(int argc, char *argv[]) {
     /* initialise osTools */
     osToolsInit(argv[0], window); // must include argv[0] to get executableFilepath, must include GLFW window
     osToolsFileDialogAddExtension("txt"); // add txt to extension restrictions
+    osToolsLoadCSV("test.csv", OSTOOLS_CSV_ROW);
 
     uint32_t tps = 120; // ticks per second (locked to fps in this case)
     uint64_t tick = 0; // count number of ticks since application started

@@ -389,9 +389,7 @@ void unitype_fprint(FILE *fp, unitype item, char type) {
             fprintf(fp, "%p", item.p);
         break;
         case LIST_TYPE_LIST:
-            fputs("[", fp);
             list_fprint_emb(fp, item.r);
-            fputs("]", fp);
         break;
         default:
             printf("unitype_fprint - type %d not recognized\n", type);
