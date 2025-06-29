@@ -213,7 +213,7 @@ list_t *osToolsLoadInternal(char *filename, osToolsCSV rowOrColumn, osToolsCSV c
         listType = 'i';
     break;
     case OSTOOLS_CSV_FIELD_STRING:
-        listType = 's';
+        listType = 'z'; // zstrings avoid double malloc
     break;
     default:
         listType = 'd';
@@ -234,7 +234,8 @@ list_t *osToolsLoadInternal(char *filename, osToolsCSV rowOrColumn, osToolsCSV c
             } else if (fieldType == OSTOOLS_CSV_FIELD_INT) {
                 sscanf((char *) (mappedFile + leftIndex), "%d", (int *) &field);
             } else if (fieldType == OSTOOLS_CSV_FIELD_STRING) {
-                sscanf((char *) (mappedFile + leftIndex), "%s", (char *) &field);
+                field.s = malloc(rightIndex - leftIndex + 1);
+                sscanf((char *) (mappedFile + leftIndex), "%s", field.s);
             }
             if (rowOrColumn == OSTOOLS_CSV_ROW) {
                 list_append(outputList -> data[outputList -> length - 1].r, field, listType);
@@ -264,7 +265,8 @@ list_t *osToolsLoadInternal(char *filename, osToolsCSV rowOrColumn, osToolsCSV c
                 } else if (fieldType == OSTOOLS_CSV_FIELD_INT) {
                     sscanf((char *) (mappedFile + leftIndex), "%d", (int *) &field);
                 } else if (fieldType == OSTOOLS_CSV_FIELD_STRING) {
-                    sscanf((char *) (mappedFile + leftIndex), "%s", (char *) &field);
+                    field.s = malloc(rightIndex - leftIndex + 1);
+                    sscanf((char *) (mappedFile + leftIndex), "%s", field.s);
                 }
                 if (rowOrColumn == OSTOOLS_CSV_ROW) {
                     list_append(outputList -> data[outputList -> length - 1].r, field, listType);
@@ -301,7 +303,8 @@ list_t *osToolsLoadInternal(char *filename, osToolsCSV rowOrColumn, osToolsCSV c
         } else if (fieldType == OSTOOLS_CSV_FIELD_INT) {
             sscanf((char *) (mappedFile + leftIndex), "%d", (int *) &field);
         } else if (fieldType == OSTOOLS_CSV_FIELD_STRING) {
-            sscanf((char *) (mappedFile + leftIndex), "%s", (char *) &field);
+            field.s = malloc(rightIndex - leftIndex + 1);
+            sscanf((char *) (mappedFile + leftIndex), "%s", field.s);
         }
         list_append(outputList -> data[outputList -> length - 1].r, field, listType);
     }
@@ -317,6 +320,16 @@ list_t *osToolsLoadCSV(char *filename, osToolsCSV rowOrColumn) {
 
 /* packages a TSV file into a list (headers are strings, all fields are doubles) - use OSTOOLS_CSV_ROW to put it in a list of lists where each list is a row of the TSV and use OSTOOLS_CSV_COLUMN to output a list of lists where each list is a column of the TSV */
 list_t *osToolsLoadTSV(char *filename, osToolsCSV rowOrColumn) {
+    return osToolsLoadInternal(filename, rowOrColumn, OSTOOLS_TSV, OSTOOLS_CSV_FIELD_DOUBLE);
+}
+
+/* packages a CSV file into a list (headers are strings, all fields are doubles) - use OSTOOLS_CSV_ROW to put it in a list of lists where each list is a row of the CSV and use OSTOOLS_CSV_COLUMN to output a list of lists where each list is a column of the CSV */
+list_t *osToolsLoadCSVDouble(char *filename, osToolsCSV rowOrColumn) {
+    return osToolsLoadInternal(filename, rowOrColumn, OSTOOLS_CSV, OSTOOLS_CSV_FIELD_DOUBLE);
+}
+
+/* packages a TSV file into a list (headers are strings, all fields are doubles) - use OSTOOLS_CSV_ROW to put it in a list of lists where each list is a row of the TSV and use OSTOOLS_CSV_COLUMN to output a list of lists where each list is a column of the TSV */
+list_t *osToolsLoadTSVDouble(char *filename, osToolsCSV rowOrColumn) {
     return osToolsLoadInternal(filename, rowOrColumn, OSTOOLS_TSV, OSTOOLS_CSV_FIELD_DOUBLE);
 }
 

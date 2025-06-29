@@ -109,7 +109,11 @@ void list_append(list_t *list, unitype data, char type) {
         list -> type = realloc(list -> type, list -> realLength);
         list -> data = realloc(list -> data, list -> realLength * sizeof(unitype));
     }
-    list -> type[list -> length] = type;
+    if (type == 'z') {
+        list -> type[list -> length] = 's';
+    } else {
+        list -> type[list -> length] = type;
+    }
     if (type == 's') {
         list -> data[list -> length].s = strdup(data.s);
     } else {
