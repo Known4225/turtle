@@ -144,99 +144,200 @@ void osToolsShowCursor() {
 typedef enum {
     OSTOOLS_CSV_ROW = 0,
     OSTOOLS_CSV_COLUMN = 1,
+    OSTOOLS_CSV = 2,
+    OSTOOLS_TSV = 3,
+    OSTOOLS_CSV_FIELD_DOUBLE = 4,
+    OSTOOLS_CSV_FIELD_INT = 5,
+    OSTOOLS_CSV_FIELD_STRING = 6,
 } osToolsCSV;
 
-/* packages a CSV file into a list - use OSTOOLS_CSV_ROW to put it in a list of lists where each list is a row of the CSV and use OSTOOLS_CSV_COLUMN to output a list of lists where each list is a column of the CSV */
-list_t *osToolsLoadCSV(char *filename, osToolsCSV rowOrColumn) {
+list_t *osToolsLoadInternal(char *filename, osToolsCSV rowOrColumn, osToolsCSV csvOrTsv, osToolsCSV fieldType) {
     uint32_t fileSize;
     uint8_t *mappedFile = osToolsMapFile(filename, &fileSize);
     if (mappedFile == NULL) {
         return NULL;
     }
     list_t *outputList = list_init();
-    if (rowOrColumn == OSTOOLS_CSV_ROW) {
-        /* process headers */
-        list_append(outputList, (unitype) list_init(), 'r');
-        uint32_t rightIndex = 0;
-        uint32_t leftIndex = 0;
-        while (rightIndex < fileSize) {
-            /* case: comma */
-            if (mappedFile[rightIndex] == ',') {
-                mappedFile[rightIndex] = '\0';
+    /* process headers */
+    list_append(outputList, (unitype) list_init(), 'r');
+    uint32_t rightIndex = 0;
+    uint32_t leftIndex = 0;
+    while (rightIndex < fileSize) {
+        /* case: comma */
+        if (mappedFile[rightIndex] == ',') {
+            mappedFile[rightIndex] = '\0';
+            if (rowOrColumn == OSTOOLS_CSV_ROW) {
                 list_append(outputList -> data[0].r, (unitype) (char *) (mappedFile + leftIndex), 's');
-                mappedFile[rightIndex] = ',';
-                leftIndex = rightIndex + 1;
-                while (mappedFile[leftIndex] == ' ') {
-                    rightIndex++;
-                    leftIndex++;
-                }
-            }
-            if (mappedFile[rightIndex] == '\n' || mappedFile[rightIndex] == '\r') {
-                /* case: end of line */
-                if (rightIndex != leftIndex) {
-                    char tempHold = mappedFile[rightIndex];
-                    mappedFile[rightIndex] = '\0';
-                    list_append(outputList -> data[0].r, (unitype) (char *) (mappedFile + leftIndex), 's');
-                    mappedFile[rightIndex] = tempHold;
-                }
-                break;
-            }
-            rightIndex++;
-        }
-        while (mappedFile[rightIndex] == '\r' || mappedFile[rightIndex] == '\n') {
-            rightIndex++;
-        }
-        /* process data (all doubles) */
-        list_append(outputList, (unitype) list_init(), 'r');
-        while (rightIndex < fileSize) {
-            if (mappedFile[rightIndex] == ',') {
-                /* case: comma */
-                mappedFile[rightIndex] = '\0';
-                double field;
-                sscanf((char *) (mappedFile + leftIndex), "%lf", &field);
-                list_append(outputList -> data[outputList -> length - 1].r, (unitype) field, 'd');
-                mappedFile[rightIndex] = ',';
-                leftIndex = rightIndex + 1;
-                while (mappedFile[leftIndex] == ' ') {
-                    rightIndex++;
-                    leftIndex++;
-                }
-            }
-            if (mappedFile[rightIndex] == '\n' || mappedFile[rightIndex] == '\r') {
-                /* case: end of line */
-                if (rightIndex != leftIndex) {
-                    char tempHold = mappedFile[rightIndex];
-                    mappedFile[rightIndex] = '\0';
-                    double field;
-                    sscanf((char *) (mappedFile + leftIndex), "%lf", &field);
-                    list_append(outputList -> data[outputList -> length - 1].r, (unitype) field, 'd');
-                    mappedFile[rightIndex] = tempHold;
-                    while (mappedFile[rightIndex] == '\r' || mappedFile[rightIndex] == '\n') {
-                        rightIndex++;
-                    }
-                    leftIndex = rightIndex;
-                }
+            } else {
+                list_append(outputList -> data[outputList -> length - 1].r, (unitype) (char *) (mappedFile + leftIndex), 's');
                 list_append(outputList, (unitype) list_init(), 'r');
             }
-            rightIndex++;
+            mappedFile[rightIndex] = ',';
+            leftIndex = rightIndex + 1;
+            while (mappedFile[leftIndex] == ' ') {
+                rightIndex++;
+                leftIndex++;
+            }
         }
-        /* catch: if the file doesn't end with a newline */
-        if (rightIndex != leftIndex) {
-            double field;
-            sscanf((char *) (mappedFile + leftIndex), "%lf", &field);
-            list_append(outputList -> data[outputList -> length - 1].r, (unitype) field, 'd');
+        if (mappedFile[rightIndex] == '\n' || mappedFile[rightIndex] == '\r') {
+            /* case: end of line */
+            if (rightIndex != leftIndex) {
+                char tempHold = mappedFile[rightIndex];
+                mappedFile[rightIndex] = '\0';
+                if (rowOrColumn == OSTOOLS_CSV_ROW) {
+                    list_append(outputList -> data[0].r, (unitype) (char *) (mappedFile + leftIndex), 's');
+                } else {
+                    list_append(outputList -> data[outputList -> length - 1].r, (unitype) (char *) (mappedFile + leftIndex), 's');
+                }
+                mappedFile[rightIndex] = tempHold;
+            } else {
+                if (rowOrColumn == OSTOOLS_CSV_COLUMN) {
+                    list_pop(outputList);
+                }
+            }
+            break;
         }
-        list_print(outputList);
-    } else if (rowOrColumn == OSTOOLS_CSV_COLUMN) {
-
+        rightIndex++;
+    }
+    while (mappedFile[rightIndex] == '\r' || mappedFile[rightIndex] == '\n') {
+        rightIndex++;
+    }
+    leftIndex = rightIndex;
+    /* process data (all doubles) */
+    char listType = 'd';
+    switch (fieldType) {
+    case OSTOOLS_CSV_FIELD_DOUBLE:
+        listType = 'd';
+    break;
+    case OSTOOLS_CSV_FIELD_INT:
+        listType = 'i';
+    break;
+    case OSTOOLS_CSV_FIELD_STRING:
+        listType = 's';
+    break;
+    default:
+        listType = 'd';
+    break;
+    }
+    int32_t column = 0; // columns are 0-indexed for the convenience of this parser
+    int32_t row = 2; // start at row 2 (rows are 1-indexed for printouts)
+    if (rowOrColumn == OSTOOLS_CSV_ROW) {
+        list_append(outputList, (unitype) list_init(), 'r');
+    }
+    while (rightIndex < fileSize) {
+        if (mappedFile[rightIndex] == ',') {
+            /* case: comma */
+            mappedFile[rightIndex] = '\0';
+            unitype field;
+            if (fieldType == OSTOOLS_CSV_FIELD_DOUBLE) {
+                sscanf((char *) (mappedFile + leftIndex), "%lf", (double *) &field);
+            } else if (fieldType == OSTOOLS_CSV_FIELD_INT) {
+                sscanf((char *) (mappedFile + leftIndex), "%d", (int *) &field);
+            } else if (fieldType == OSTOOLS_CSV_FIELD_STRING) {
+                sscanf((char *) (mappedFile + leftIndex), "%s", (char *) &field);
+            }
+            if (rowOrColumn == OSTOOLS_CSV_ROW) {
+                list_append(outputList -> data[outputList -> length - 1].r, field, listType);
+            } else if (rowOrColumn == OSTOOLS_CSV_COLUMN) {
+                if (column < outputList -> length) {
+                    list_append(outputList -> data[column].r, field, listType);
+                } else {
+                    printf("osToolsLoadInternal - more data columns than headers at row %d\n", row);
+                }
+            }
+            mappedFile[rightIndex] = ',';
+            leftIndex = rightIndex + 1;
+            while (mappedFile[leftIndex] == ' ') {
+                rightIndex++;
+                leftIndex++;
+            }
+            column++;
+        }
+        if (mappedFile[rightIndex] == '\n' || mappedFile[rightIndex] == '\r') {
+            /* case: end of line */
+            if (rightIndex != leftIndex) {
+                char tempHold = mappedFile[rightIndex];
+                mappedFile[rightIndex] = '\0';
+                unitype field;
+                if (fieldType == OSTOOLS_CSV_FIELD_DOUBLE) {
+                    sscanf((char *) (mappedFile + leftIndex), "%lf", (double *) &field);
+                } else if (fieldType == OSTOOLS_CSV_FIELD_INT) {
+                    sscanf((char *) (mappedFile + leftIndex), "%d", (int *) &field);
+                } else if (fieldType == OSTOOLS_CSV_FIELD_STRING) {
+                    sscanf((char *) (mappedFile + leftIndex), "%s", (char *) &field);
+                }
+                if (rowOrColumn == OSTOOLS_CSV_ROW) {
+                    list_append(outputList -> data[outputList -> length - 1].r, field, listType);
+                } else if (rowOrColumn == OSTOOLS_CSV_COLUMN) {
+                    if (column < outputList -> length) {
+                        list_append(outputList -> data[column].r, field, listType);
+                    } else {
+                        printf("osToolsLoadInternal - more data columns than headers at row %d\n", row);
+                    }
+                }
+                mappedFile[rightIndex] = tempHold;
+            }
+            while (mappedFile[rightIndex] == '\r' || mappedFile[rightIndex] == '\n') {
+                rightIndex++;
+            }
+            leftIndex = rightIndex;
+            if (rowOrColumn == OSTOOLS_CSV_ROW) {
+                list_append(outputList, (unitype) list_init(), 'r');
+            }
+            column = 0;
+            row++;
+        }
+        rightIndex++;
+    }
+    /* catch: if the file doesn't end with a newline */
+    if (leftIndex == fileSize) {
+        if (rowOrColumn == OSTOOLS_CSV_ROW && mappedFile[fileSize - 1] != ',' && mappedFile[fileSize - 1] != ' ') {
+            list_pop(outputList);
+        }
+    } else {
+        unitype field;
+        if (fieldType == OSTOOLS_CSV_FIELD_DOUBLE) {
+            sscanf((char *) (mappedFile + leftIndex), "%lf", (double *) &field);
+        } else if (fieldType == OSTOOLS_CSV_FIELD_INT) {
+            sscanf((char *) (mappedFile + leftIndex), "%d", (int *) &field);
+        } else if (fieldType == OSTOOLS_CSV_FIELD_STRING) {
+            sscanf((char *) (mappedFile + leftIndex), "%s", (char *) &field);
+        }
+        list_append(outputList -> data[outputList -> length - 1].r, field, listType);
     }
     osToolsUnmapFile(mappedFile);
+    list_print(outputList);
     return outputList;
 }
 
-/* packages a TSV file into a list - use OSTOOLS_CSV_ROW to put it in a list of lists where each list is a row of the TSV and use OSTOOLS_CSV_COLUMN to output a list of lists where each list is a column of the TSV */
+/* packages a CSV file into a list (headers are strings, all fields are doubles) - use OSTOOLS_CSV_ROW to put it in a list of lists where each list is a row of the CSV and use OSTOOLS_CSV_COLUMN to output a list of lists where each list is a column of the CSV */
+list_t *osToolsLoadCSV(char *filename, osToolsCSV rowOrColumn) {
+    return osToolsLoadInternal(filename, rowOrColumn, OSTOOLS_CSV, OSTOOLS_CSV_FIELD_DOUBLE);
+}
+
+/* packages a TSV file into a list (headers are strings, all fields are doubles) - use OSTOOLS_CSV_ROW to put it in a list of lists where each list is a row of the TSV and use OSTOOLS_CSV_COLUMN to output a list of lists where each list is a column of the TSV */
 list_t *osToolsLoadTSV(char *filename, osToolsCSV rowOrColumn) {
-    return NULL;
+    return osToolsLoadInternal(filename, rowOrColumn, OSTOOLS_TSV, OSTOOLS_CSV_FIELD_DOUBLE);
+}
+
+/* packages a CSV file into a list (headers are strings, all fields are ints) - use OSTOOLS_CSV_ROW to put it in a list of lists where each list is a row of the CSV and use OSTOOLS_CSV_COLUMN to output a list of lists where each list is a column of the CSV */
+list_t *osToolsLoadCSVInt(char *filename, osToolsCSV rowOrColumn) {
+    return osToolsLoadInternal(filename, rowOrColumn, OSTOOLS_CSV, OSTOOLS_CSV_FIELD_INT);
+}
+
+/* packages a TSV file into a list (headers are strings, all fields are ints) - use OSTOOLS_CSV_ROW to put it in a list of lists where each list is a row of the TSV and use OSTOOLS_CSV_COLUMN to output a list of lists where each list is a column of the TSV */
+list_t *osToolsLoadTSVInt(char *filename, osToolsCSV rowOrColumn) {
+    return osToolsLoadInternal(filename, rowOrColumn, OSTOOLS_TSV, OSTOOLS_CSV_FIELD_INT);
+}
+
+/* packages a CSV file into a list (headers are strings, all fields are strings) - use OSTOOLS_CSV_ROW to put it in a list of lists where each list is a row of the CSV and use OSTOOLS_CSV_COLUMN to output a list of lists where each list is a column of the CSV */
+list_t *osToolsLoadCSVString(char *filename, osToolsCSV rowOrColumn) {
+    return osToolsLoadInternal(filename, rowOrColumn, OSTOOLS_CSV, OSTOOLS_CSV_FIELD_STRING);
+}
+
+/* packages a TSV file into a list (headers are strings, all fields are strings) - use OSTOOLS_CSV_ROW to put it in a list of lists where each list is a row of the TSV and use OSTOOLS_CSV_COLUMN to output a list of lists where each list is a column of the TSV */
+list_t *osToolsLoadTSVString(char *filename, osToolsCSV rowOrColumn) {
+    return osToolsLoadInternal(filename, rowOrColumn, OSTOOLS_TSV, OSTOOLS_CSV_FIELD_STRING);
 }
 
 #ifdef OS_WINDOWS
