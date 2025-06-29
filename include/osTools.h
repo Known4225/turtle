@@ -58,12 +58,18 @@ typedef struct {
     char **extensions; // array of allowed extensions (7 characters long max (cuz *.json;))
 } osToolsFileDialogObject;
 
+typedef struct {
+    list_t *mappedFiles;
+} osToolsMemmapObject;
+
 osToolsGLFWObject osToolsGLFW;
 osToolsClipboardObject osToolsClipboard;
 osToolsFileDialogObject osToolsFileDialog;
+osToolsMemmapObject osToolsMemmap;
 
 /* OS independent functions */
 void osToolsIndependentInit(GLFWwindow *window) {
+    /* initialise glfw cursors */
     osToolsGLFW.osToolsWindow = window;
     osToolsGLFW.standardCursors[0] = glfwCreateStandardCursor(GLFW_ARROW_CURSOR);
     osToolsGLFW.standardCursors[1] = glfwCreateStandardCursor(GLFW_IBEAM_CURSOR);
@@ -71,6 +77,21 @@ void osToolsIndependentInit(GLFWwindow *window) {
     osToolsGLFW.standardCursors[3] = glfwCreateStandardCursor(GLFW_HAND_CURSOR);
     osToolsGLFW.standardCursors[4] = glfwCreateStandardCursor(GLFW_HRESIZE_CURSOR);
     osToolsGLFW.standardCursors[5] = glfwCreateStandardCursor(GLFW_VRESIZE_CURSOR);
+
+    /* initialise memmap module */
+    osToolsMemmap.mappedFiles = list_init();
+}
+
+/* returns clipboard text */
+const char *osToolsClipboardGetText() {
+    osToolsClipboard.text = glfwGetClipboardString(osToolsGLFW.osToolsWindow);
+    return osToolsClipboard.text;
+}
+
+/* takes null terminated strings */
+int32_t osToolsClipboardSetText(const char *input) {
+    glfwSetClipboardString(osToolsGLFW.osToolsWindow, input);
+    return 0;
 }
 
 /*
@@ -119,19 +140,13 @@ void osShowCursor() {
 #include <windows.h>
 #include <shobjidl.h>
 
-typedef struct {
-    list_t *mappedFiles;
-} osToolsMemmapObject;
-
-osToolsMemmapObject osToolsMemmap;
-
 int32_t osToolsInit(char argv0[], GLFWwindow *window) {
     osToolsIndependentInit(window);
     /* get executable filepath */
     GetModuleFileNameA(NULL, osToolsFileDialog.executableFilepath, MAX_PATH);
     if (GetLastError() != ERROR_SUCCESS) {
         strcpy(osToolsFileDialog.executableFilepath, "null");
-        printf("error: could not retrieve executable filepath\n");
+        printf("Error: Could not retrieve executable filepath\n");
     }
     int32_t index = strlen(osToolsFileDialog.executableFilepath) - 1;
     while (index > -1 && osToolsFileDialog.executableFilepath[index] != '\\' && osToolsFileDialog.executableFilepath[index] != '/') {
@@ -146,90 +161,6 @@ int32_t osToolsInit(char argv0[], GLFWwindow *window) {
 
     /* initialise clipboard */
     osToolsClipboard.text = glfwGetClipboardString(osToolsGLFW.osToolsWindow);
-
-    /* initialise memmap module */
-    osToolsMemmap.mappedFiles = list_init();
-    return 0;
-}
-
-/* gets the text from win32Clipboard */
-// int32_t osToolsClipboardGetText() { // gets the text from win32Clipboard
-//     free(osToolsClipboard.text);
-//     if (!OpenClipboard(NULL)) { // https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-openclipboard
-//         printf("error: could not open clipboard\n");
-//         return -1;
-//     }
-//     HANDLE clipboardHandle = GetClipboardData(CF_TEXT); // https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getclipboarddata
-//     LPTSTR wstrData; // WCHAR string
-//     if (clipboardHandle != NULL) {
-//         wstrData = GlobalLock(clipboardHandle); // https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-globallock
-//         if (wstrData != NULL) {
-//             uint32_t i = 0;
-//             uint32_t dynMem = 8; // start with 7 characters
-//             osToolsClipboard.text = malloc(dynMem);
-//             while (wstrData[i] != '\0' && i < 4294967295) {
-//                 osToolsClipboard.text[i] = wstrData[i]; // convert from WCHAR to char
-//                 i++;
-//                 if (i >= dynMem) { // if i is eight we need to realloc to at least 9
-//                     dynMem *= 2;
-//                     osToolsClipboard.text = realloc(osToolsClipboard.text, dynMem);
-//                 }
-//             }
-//             osToolsClipboard.text[i] = '\0';
-//             GlobalUnlock(clipboardHandle);
-//         } else {
-//             printf("error: could not lock clipboard\n");
-//             CloseClipboard();
-//             return -1;
-//         }
-//     } else {
-//         printf("error: could not read from clipboard\n");
-//         CloseClipboard();
-//         return -1;
-//     }
-//     CloseClipboard();
-//     return 0;
-// }
-
-int32_t osToolsClipboardGetText() {
-    osToolsClipboard.text = glfwGetClipboardString(osToolsGLFW.osToolsWindow);
-    return 0;
-}
-
-/* takes null terminated strings */
-// int32_t osToolsClipboardSetText(const char *input) {
-//     if (!OpenClipboard(NULL)) { // technically (according to windows documentation) I should get the HWND (window handle) for the GLFW window, but that requires using the glfw3native.h header which would require lots of rewrites and endanger cross-platform compatibility
-//         printf("error: could not open clipboard\n");
-//         return -1;
-//     }
-//     uint32_t dynMem = strlen(input) + 1; // +1 for the null character
-//     /* GlobalAlloc is like malloc but windows */
-//     /* "Handles" are like pointers to data but not directly, you have to "GlobalLock" to actually access the data */
-//     /* GlobalAlloc allows you to alloc memory at the place that the Handle points to */
-//     HANDLE clipboardBufferHandle = GlobalAlloc(GMEM_MOVEABLE, dynMem); // https://learn.microsoft.com/en-us/windows/win32/sysinfo/handles-and-objects
-//     LPTSTR clipboardBufferObject = GlobalLock(clipboardBufferHandle); // WCHAR string
-//     for (uint32_t i = 0; i < dynMem; i++) {
-//         clipboardBufferObject[i] = input[i]; // convert from char to WCHAR
-//     }
-//     GlobalUnlock(clipboardBufferObject);
-//     /* Empty clipboard: Empties the clipboard and frees handles to data in the clipboard. The function then assigns ownership of the clipboard to the window that currently has the clipboard open. 
-//     This is a problem because our openClipboard window handle (HWND) is NULL, so the ownership doesn't get transferred, but it still works on my machine */
-//     if (!EmptyClipboard()) { // https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-emptyclipboard
-//         printf("error: could not empty clipboard\n");
-//         CloseClipboard();
-//         return -1;
-//     }
-//     if (SetClipboardData(CF_TEXT, clipboardBufferHandle) == NULL) { // https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-setclipboarddata
-//         printf("error: could not set cliboard data\n");
-//         CloseClipboard();
-//         return -1;
-//     }
-//     CloseClipboard();
-//     return 0;
-// }
-
-int32_t osToolsClipboardSetText(const char *input) {
-    glfwSetClipboardString(osToolsGLFW.osToolsWindow, input);
     return 0;
 }
 
@@ -295,10 +226,12 @@ int32_t osToolsFileDialogPrompt(char openOrSave, char *filename) { // 0 - open, 
             }
 
             /* configure title and button text */
-            if (openOrSave == 0) { // open
+            if (openOrSave == 0) {
+                /* open */
                 fileDialog -> lpVtbl -> SetOkButtonLabel(fileDialog, L"Open");
                 fileDialog -> lpVtbl -> SetTitle(fileDialog, L"Open");
-            } else { // save
+            } else {
+                /* save */
                 fileDialog -> lpVtbl -> SetOkButtonLabel(fileDialog, L"Save");
                 fileDialog -> lpVtbl -> SetTitle(fileDialog, L"Save");
             }
@@ -310,8 +243,9 @@ int32_t osToolsFileDialogPrompt(char openOrSave, char *filename) { // 0 - open, 
                 hr = psiResult -> lpVtbl -> GetDisplayName(psiResult, SIGDN_FILESYSPATH, &pszFilePath); // extracts path name
                 if (SUCCEEDED(hr)) {
                     int32_t i = 0;
+                    /* convert from WCHAR to char */
                     while (pszFilePath[i] != '\0' && i < MAX_PATH + 1) {
-                        osToolsFileDialog.selectedFilename[i] = pszFilePath[i]; // convert from WCHAR to char
+                        osToolsFileDialog.selectedFilename[i] = pszFilePath[i];
                         i++;
                     }
                     osToolsFileDialog.selectedFilename[i] = '\0';
@@ -329,55 +263,24 @@ int32_t osToolsFileDialogPrompt(char openOrSave, char *filename) { // 0 - open, 
     return -1;
 }
 
-#define CURSOR_POINTER IDC_ARROW
-#define CURSOR_LOADING IDC_WAIT
-#define CURSOR_HAND IDC_HAND
-#define CURSOR_MOVING IDC_SIZEALL
-#define CURSOR_CROSS IDC_CROSS
-#define CURSOR_UPDOWN IDC_SIZENS
-#define CURSOR_SIDESIDE IDC_SIZEWE
-#define CURSOR_DIAGONALLEFT IDC_SIZENWSE
-#define CURSOR_DIAGONALRIGHT IDC_SIZENESW
-
-/*
-CURSOR_POINTER IDC_ARROW
-CURSOR_LOADING IDC_WAIT
-CURSOR_HAND IDC_HAND
-CURSOR_MOVING IDC_SIZEALL
-CURSOR_CROSS IDC_CROSS
-CURSOR_UPDOWN IDC_SIZENS
-CURSOR_SIDESIDE IDC_SIZEWE
-CURSOR_DIAGONALLEFT IDC_SIZENWSE
-CURSOR_DIAGONALRIGHT IDC_SIZENESW
-*/
-void osWindowsSetCursor(LPCTSTR cursor) {
-    HCURSOR hCursor = LoadCursor(NULL, cursor);
-    SetCursor(hCursor);
-}
-
-void osWindowsHideAndLockCursor() {
-    ShowCursor(0);
-}
-
-void osWindowsShowCursor() {
-    ShowCursor(1);
-}
-
-uint8_t *mapFile(char *filename, uint32_t *sizeOutput) {
+uint8_t *osToolsMapFile(char *filename, uint32_t *sizeOutput) {
     HANDLE fileHandle = CreateFileA(filename, FILE_GENERIC_READ | FILE_GENERIC_WRITE, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
     if (fileHandle == INVALID_HANDLE_VALUE) {
         printf("Could not open file %ld\n", GetLastError());
+        *sizeOutput = 0;
         return NULL;
     }
     if (!GetFileSizeEx(fileHandle, (PLARGE_INTEGER) sizeOutput)) {
         printf("Failed to get size of file\n");
         CloseHandle(fileHandle);
+        *sizeOutput = 0;
         return NULL;
     }
     HANDLE mappingHandle = CreateFileMappingA(fileHandle, NULL, PAGE_READWRITE, 0, 0, NULL);
     if (mappingHandle == NULL) {
         printf("Could not memory map file %ld\n", GetLastError());
         CloseHandle(fileHandle);
+        *sizeOutput = 0;
         return NULL;
     }
     LPVOID address = MapViewOfFile(mappingHandle, FILE_MAP_ALL_ACCESS, 0, 0, 0);
@@ -385,6 +288,7 @@ uint8_t *mapFile(char *filename, uint32_t *sizeOutput) {
         printf("Could not create map view of file %ld\n", GetLastError());
         CloseHandle(fileHandle);
         CloseHandle(mappingHandle);
+        *sizeOutput = 0;
         return NULL;
     }
     list_append(osToolsMemmap.mappedFiles, (unitype) filename, 's'); // filename
@@ -394,7 +298,7 @@ uint8_t *mapFile(char *filename, uint32_t *sizeOutput) {
     return address;
 }
 
-int32_t unmapFile(uint8_t *data) {
+int32_t osToolsUnmapFile(uint8_t *data) {
     UnmapViewOfFile(data);
     int32_t index = -1;
     for (uint32_t i = 0; i < osToolsMemmap.mappedFiles -> length; i += 4) {
@@ -404,7 +308,6 @@ int32_t unmapFile(uint8_t *data) {
         }
     }
     if (index >= 0) {
-        // printf("Closing %s\n", osToolsMemmap.mappedFiles -> data[index].s);
         CloseHandle(osToolsMemmap.mappedFiles -> data[index + 1].p);
         CloseHandle(osToolsMemmap.mappedFiles -> data[index + 2].p);
         list_delete(osToolsMemmap.mappedFiles, index);
@@ -414,12 +317,15 @@ int32_t unmapFile(uint8_t *data) {
         return 0;
     } else {
         printf("Could not find %p in memory mapped index\n", data);
-        return 1;
+        return -1;
     }
 }
 
 #endif
 #ifdef OS_LINUX
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <sys/mman.h>
 
 /* This is the zenity version of osToolsFileDialog.h, it's for linux */
 
@@ -453,18 +359,6 @@ void osToolsInit(char argv0[], GLFWwindow *window) {
     osToolsFileDialog.openOrSave = 0; // open by default
     osToolsFileDialog.numExtensions = 0; // 0 means all extensions
     osToolsFileDialog.extensions = malloc(1 * sizeof(char *)); // malloc list
-}
-
-/* gets the text */
-int32_t osToolsClipboardGetText() {
-    osToolsClipboard.text = strdup(glfwGetClipboardString(osToolsGLFW.osToolsWindow));
-    return 0;
-}
-
-/* takes null terminated strings */
-int32_t osToolsClipboardSetText(const char *input) {
-    glfwSetClipboardString(osToolsGLFW.osToolsWindow, input);
-    return 0;
 }
 
 void osToolsFileDialogAddExtension(char *extension) {
@@ -515,14 +409,12 @@ int32_t osToolsFileDialogPrompt(char openOrSave, char *prename) { // 0 - open, 1
         buildFilter[j + 1] = '\0';
         char filterName[35] = " --file-filter='Specified Types | ";
         strcat(fullCommand, filterName);
-        strcat(fullCommand, buildFilter); // really glad that C is such a good language for string manipulation /s
+        strcat(fullCommand, buildFilter);
     }
 
     /* execute */
-    // printf("%s\n", fullCommand);
     FILE* filenameStream = popen(fullCommand, "r");
     if (fgets(osToolsFileDialog.selectedFilename, 4097, filenameStream) == NULL) { // adds a \n before \0 (?)
-        // printf("Error: fgets\n");
         strcpy(osToolsFileDialog.selectedFilename, "null");
         return -1;
     }
@@ -531,9 +423,46 @@ int32_t osToolsFileDialogPrompt(char openOrSave, char *prename) { // 0 - open, 1
             osToolsFileDialog.selectedFilename[i] = '\0'; // replace all newlines with null characters
         }
     }
-    // printf("Success, filename: %s\n", osToolsFileDialog.filename);
     pclose(filenameStream);
     return 0;
 }
+
+uint8_t *osToolsMapFile(char *filename, uint32_t *sizeOutput) {
+    int32_t fd = open(filename, O_RDWR);
+    struct stat stats;
+    if (fstat(fd, &stats) == -1) {
+        printf("Could not get stats of file %s\n", filename);
+        *sizeOutput = 0;
+        return NULL;
+    }
+    *sizeOutput = stats.st_size;
+    void *out = mmap(NULL, *sizeOutput, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+    if (out == MAP_FAILED) {
+        printf("Could not memory map file %s\n", filename);
+        *sizeOutput = 0;
+        return NULL;
+    }
+    list_append(osToolsMemmap.mappedFiles, (unitype) out, 'l');
+    list_append(osToolsMemmap.mappedFiles, (unitype) *sizeOutput, 'i');
+    return (uint8_t *) out;
+}
+
+int32_t osToolsUnmapFile(uint8_t *data) {
+    int32_t index = -1;
+    for (uint32_t i = 0; i < osToolsMemmap.mappedFiles -> length; i += 2) {
+        if (osToolsMemmap.mappedFiles -> data[i].p == data) {
+            index = i;
+            break;
+        }
+    }
+    if (index >= 0) {
+        munmap(data, osToolsMemmap.mappedFiles -> data[index + 1].i);
+        return 0;
+    } else {
+        printf("Could not find %p in memory mapped index\n", data);
+        return -1;
+    }
+}
+
 #endif
 #endif

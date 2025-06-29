@@ -163,8 +163,8 @@ int main(int argc, char *argv[]) {
     dialInit("Speed", &speed, TT_DIAL_LINEAR, -100, -210, 10, 0, 1000, 1);
     dialInit("Exposure", &exposure, TT_DIAL_EXP, -50, -210, 10, 0, 1000, 1);
     dropdownInit("Source", sources, &sourceIndex, TT_DROPDOWN_ALIGN_LEFT, -10, -207, 10);
-    tt_slider_t *xSlider = sliderInit("", &turtle.cameraDirectionLeftRight, TT_SLIDER_HORIZONTAL, TT_SLIDER_ALIGN_CENTER, -100, -240, 10, 100, -300, 300, 0);
-    tt_slider_t *ySlider = sliderInit("", &turtle.cameraDirectionUpDown, TT_SLIDER_HORIZONTAL, TT_SLIDER_ALIGN_CENTER, -100, -260, 10, 100, -300, 300, 0);
+    tt_slider_t *xSlider = sliderInit("", &x, TT_SLIDER_HORIZONTAL, TT_SLIDER_ALIGN_CENTER, -100, -240, 10, 100, -300, 300, 0);
+    tt_slider_t *ySlider = sliderInit("", &y, TT_SLIDER_HORIZONTAL, TT_SLIDER_ALIGN_CENTER, -100, -260, 10, 100, -300, 300, 0);
     tt_slider_t *zSlider = sliderInit("", &z, TT_SLIDER_HORIZONTAL, TT_SLIDER_ALIGN_CENTER, -100, -280, 10, 100, -300, 300, 0);
     switchInit("", &xEnabled, -10, -240, 10);
     switchInit("", &yEnabled, -10, -260, 10);
@@ -201,8 +201,8 @@ int main(int argc, char *argv[]) {
         turtleTextWriteString("Z", zSlider -> x - zSlider -> length / 2 - xSlider -> size, zSlider -> y, xSlider -> size - 1, 100);
         turtleTextWriteStringf(zSlider -> x + zSlider -> length / 2 + xSlider -> size, zSlider -> y, 4, 0, "%.01lf", round(z) / 10);
 
-        turtlePenColor(0, 0, 0);
-        turtle3DTriangle(-5, 0, 10, 5, 0, 10, 0, 5, 10);
+        // turtlePenColor(0, 0, 0);
+        // turtle3DTriangle(-5, 0, 10, 5, 0, 10, 0, 5, 10);
 
         for (uint32_t i = 0; i < tt_elements.all -> length; i++) {
             if (((tt_button_t *) tt_elements.all -> data[i].p) -> element != TT_ELEMENT_SCROLLBAR) {
