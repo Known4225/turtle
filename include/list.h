@@ -417,7 +417,7 @@ void list_copy(list_t *dest, list_t *src) {
         dest -> type[i] = src -> type[i];
         if (src -> type[i] == 'r') {
             dest -> data[i] = (unitype) (void *) list_init();
-            list_copy(src -> data[i].r, dest -> data[i].r);
+            list_copy(dest -> data[i].r, src -> data[i].r);
         } else {
             if (src -> type[i] == 'p') {
                 memcpy(dest -> data[i].p, src -> data[i].p, sizeof(unitype));
