@@ -124,6 +124,10 @@ void list_append(list_t *list, unitype data, char type) {
 
 /* inserts the item value at list[index] of the list */
 void list_insert(list_t *list, int32_t index, unitype value, char type) {
+    if (list -> length == index) {
+        list_append(list, value, type);
+        return;
+    }
     while (index < 0) {index += list -> length;}
     index %= list -> length;
     list_append(list, (unitype) 0, type);
