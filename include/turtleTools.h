@@ -1260,6 +1260,8 @@ void switchUpdate() {
             }
         } else if (switchp -> style == TT_SWITCH_STYLE_CHECKBOX || switchp -> style == TT_SWITCH_STYLE_XBOX) {
             /* render box */
+            tt_internalColor(switchp, TT_COLOR_SWITCH_ON, TT_COLOR_OVERRIDE_SLOT_2);
+            turtleRectangle(switchX - switchp -> size / 2, switchY - switchp -> size / 2, switchX + switchp -> size / 2, switchY + switchp -> size / 2);
             tt_internalColor(switchp, TT_COLOR_SWITCH_OFF, TT_COLOR_OVERRIDE_SLOT_3);
             turtlePenSize(switchp -> size / 6);
             turtleGoto(switchX - switchp -> size / 2, switchY - switchp -> size / 2);
