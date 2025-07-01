@@ -167,9 +167,27 @@ list_t *osToolsLoadInternal(char *filename, osToolsCSV rowOrColumn, osToolsCSV c
         rightIndex = 3;
         leftIndex = 3;
     }
+    int8_t inQuotes = 0;
     while (rightIndex < fileSize) {
+        if (mappedFile[rightIndex] & 0b10000000) {
+            /* case: unicode */
+            if (mappedFile[rightIndex] & 0b11100000) {
+                if (mappedFile[rightIndex] & 0b11110000) {
+                    rightIndex++;
+                }
+                rightIndex++;
+            }
+            rightIndex += 2; // multi-byte character cannot be a comma, quote, or newline
+        }
+        if (mappedFile[rightIndex] == '"') {
+            /* case: quote */
+            inQuotes = !inQuotes;
+            if (inQuotes) {
+                // leftIndex = rightIndex + 1;
+            }
+        }
         /* case: comma */
-        if (mappedFile[rightIndex] == ',') {
+        if (mappedFile[rightIndex] == ',' && !inQuotes) {
             mappedFile[rightIndex] = '\0';
             if (rowOrColumn == OSTOOLS_CSV_ROW) {
                 list_append(outputList -> data[0].r, (unitype) (char *) (mappedFile + leftIndex), 's');
@@ -184,7 +202,7 @@ list_t *osToolsLoadInternal(char *filename, osToolsCSV rowOrColumn, osToolsCSV c
                 leftIndex++;
             }
         }
-        if (mappedFile[rightIndex] == '\n' || mappedFile[rightIndex] == '\r') {
+        if ((mappedFile[rightIndex] == '\n' || mappedFile[rightIndex] == '\r') && !inQuotes) {
             /* case: end of line */
             if (rightIndex != leftIndex) {
                 char tempHold = mappedFile[rightIndex];
@@ -229,8 +247,26 @@ list_t *osToolsLoadInternal(char *filename, osToolsCSV rowOrColumn, osToolsCSV c
     if (rowOrColumn == OSTOOLS_CSV_ROW) {
         list_append(outputList, (unitype) list_init(), 'r');
     }
+    inQuotes = 0;
     while (rightIndex < fileSize) {
-        if (mappedFile[rightIndex] == ',') {
+        if (mappedFile[rightIndex] & 0b10000000) {
+            /* case: unicode */
+            if (mappedFile[rightIndex] & 0b11100000) {
+                if (mappedFile[rightIndex] & 0b11110000) {
+                    rightIndex++;
+                }
+                rightIndex++;
+            }
+            rightIndex += 2; // multi-byte character cannot be a comma, quote, or newline
+        }
+        if (mappedFile[rightIndex] == '"') {
+            /* case: quote */
+            inQuotes = !inQuotes;
+            if (inQuotes) {
+                // leftIndex = rightIndex + 1;
+            }
+        }
+        if (mappedFile[rightIndex] == ',' && !inQuotes) {
             /* case: comma */
             mappedFile[rightIndex] = '\0';
             unitype field;
@@ -259,7 +295,7 @@ list_t *osToolsLoadInternal(char *filename, osToolsCSV rowOrColumn, osToolsCSV c
             }
             column++;
         }
-        if (mappedFile[rightIndex] == '\n' || mappedFile[rightIndex] == '\r') {
+        if ((mappedFile[rightIndex] == '\n' || mappedFile[rightIndex] == '\r') && !inQuotes) {
             /* case: end of line */
             if (rightIndex != leftIndex) {
                 char tempHold = mappedFile[rightIndex];
@@ -288,6 +324,7 @@ list_t *osToolsLoadInternal(char *filename, osToolsCSV rowOrColumn, osToolsCSV c
                 rightIndex++;
             }
             leftIndex = rightIndex;
+            rightIndex--;
             if (rowOrColumn == OSTOOLS_CSV_ROW) {
                 list_append(outputList, (unitype) list_init(), 'r');
             }
