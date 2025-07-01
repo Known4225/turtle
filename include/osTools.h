@@ -162,6 +162,11 @@ list_t *osToolsLoadInternal(char *filename, osToolsCSV rowOrColumn, osToolsCSV c
     list_append(outputList, (unitype) list_init(), 'r');
     uint32_t rightIndex = 0;
     uint32_t leftIndex = 0;
+    if (fileSize > 3 && mappedFile[0] == 0xEF && mappedFile[1] == 0xBB && mappedFile[2] == 0xBF) {
+        /* UTF8 with BOM */
+        rightIndex = 3;
+        leftIndex = 3;
+    }
     while (rightIndex < fileSize) {
         /* case: comma */
         if (mappedFile[rightIndex] == ',') {
@@ -235,7 +240,7 @@ list_t *osToolsLoadInternal(char *filename, osToolsCSV rowOrColumn, osToolsCSV c
                 sscanf((char *) (mappedFile + leftIndex), "%d", (int *) &field);
             } else if (fieldType == OSTOOLS_CSV_FIELD_STRING) {
                 field.s = malloc(rightIndex - leftIndex + 1);
-                sscanf((char *) (mappedFile + leftIndex), "%s", field.s);
+                strcpy(field.s, (char *) (mappedFile + leftIndex));
             }
             if (rowOrColumn == OSTOOLS_CSV_ROW) {
                 list_append(outputList -> data[outputList -> length - 1].r, field, listType);
@@ -266,7 +271,7 @@ list_t *osToolsLoadInternal(char *filename, osToolsCSV rowOrColumn, osToolsCSV c
                     sscanf((char *) (mappedFile + leftIndex), "%d", (int *) &field);
                 } else if (fieldType == OSTOOLS_CSV_FIELD_STRING) {
                     field.s = malloc(rightIndex - leftIndex + 1);
-                    sscanf((char *) (mappedFile + leftIndex), "%s", field.s);
+                    strcpy(field.s, (char *) (mappedFile + leftIndex));
                 }
                 if (rowOrColumn == OSTOOLS_CSV_ROW) {
                     list_append(outputList -> data[outputList -> length - 1].r, field, listType);
@@ -309,7 +314,6 @@ list_t *osToolsLoadInternal(char *filename, osToolsCSV rowOrColumn, osToolsCSV c
         list_append(outputList -> data[outputList -> length - 1].r, field, listType);
     }
     osToolsUnmapFile(mappedFile);
-    list_print(outputList);
     return outputList;
 }
 
