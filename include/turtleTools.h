@@ -1169,7 +1169,8 @@ void buttonUpdate() {
         }
         tt_internalColor(buttonp, TT_COLOR_TEXT_ALTERNATE, TT_COLOR_OVERRIDE_SLOT_0);
         turtleTextWriteUnicode((unsigned char *) buttonp -> label, buttonX, buttonY, buttonp -> size - 1, 50);
-        if (buttonp -> enabled == TT_ELEMENT_ENABLED) {
+        /* mouse */
+        if (buttonp -> enabled == TT_ELEMENT_ENABLED && ribbonRender.mainselect[2] == -1) {
             if (turtleMouseDown()) {
                 if (buttonp -> status < 0) {
                     buttonp -> status *= -1;
@@ -1308,7 +1309,7 @@ void switchUpdate() {
             turtleTextWriteUnicode((unsigned char *) switchp -> label, switchX + switchp -> size, switchY, switchp -> size - 1, 0);
         }
         /* mouse */
-        if (switchp -> enabled == TT_ELEMENT_ENABLED) {
+        if (switchp -> enabled == TT_ELEMENT_ENABLED && ribbonRender.mainselect[2] == -1) {
             if (turtleMouseDown()) {
                 if (switchp -> status < 0) {
                     switchp -> status *= -1;
@@ -1378,7 +1379,8 @@ void dialUpdate() {
         }
         turtleGoto(dialX + sin(dialAngle / 57.2958) * dialp -> size, dialY + cos(dialAngle / 57.2958) * dialp -> size);
         turtlePenUp();
-        if (dialp -> enabled == TT_ELEMENT_ENABLED) {
+        /* mouse */
+        if (dialp -> enabled == TT_ELEMENT_ENABLED && ribbonRender.mainselect[2] == -1) {
             if (turtleMouseDown()) {
                 if (dialp -> status[0] < 0) {
                     tt_globals.dialAnchorX = dialX;
@@ -1508,7 +1510,8 @@ void sliderUpdate() {
         }
         turtlePenDown();
         turtlePenUp();
-        if (sliderp -> enabled == TT_ELEMENT_ENABLED) {
+        /* mouse */
+        if (sliderp -> enabled == TT_ELEMENT_ENABLED && ribbonRender.mainselect[2] == -1) {
             if (turtleMouseDown()) {
                 if (sliderp -> status < 0) {
                     sliderp -> status *= -1;
@@ -1635,7 +1638,8 @@ void scrollbarUpdate() {
             turtlePenDown();
             turtleGoto(scrollbarp -> x, dragBottom);
             turtlePenUp();
-            if (scrollbarp -> enabled == TT_ELEMENT_ENABLED) {
+            /* mouse */
+            if (scrollbarp -> enabled == TT_ELEMENT_ENABLED && ribbonRender.mainselect[2] == -1) {
                 if (scrollbarp -> status == 2) {
                     tt_globals.barAnchor = dragTop - turtle.mouseY;
                     scrollbarp -> status = 1;
@@ -1729,7 +1733,8 @@ void dropdownUpdate() {
             tt_internalColor(dropdownp, TT_COLOR_DROPDOWN, TT_COLOR_OVERRIDE_SLOT_2);
             turtleRectangle(dropdownXFactor[0], dropdownY - dropdownp -> size * 0.7, dropdownXFactor[1] + dropdownp -> size, dropdownY + dropdownp -> size * 0.7);
         }
-        if (dropdownp -> enabled == TT_ELEMENT_ENABLED) {
+        /* mouse */
+        if (dropdownp -> enabled == TT_ELEMENT_ENABLED && ribbonRender.mainselect[2] == -1) {
             if (turtle.mouseX > dropdownXFactor[0] && turtle.mouseX < dropdownXFactor[1] + dropdownp -> size && turtle.mouseY > dropdownY - dropdownp -> size * 0.7 && turtle.mouseY < dropdownY + dropdownp -> size * 0.7) {
                 if (!turtleMouseDown() && dropdownp -> status == 0) {
                     dropdownp -> status = -1;
@@ -2119,7 +2124,8 @@ void textboxUpdate() {
             turtleRectangle(textboxp -> x + textboxp -> renderPixelOffset + textLength, textboxp -> y - textboxp -> size * 0.8, textboxp -> x + textboxp -> renderPixelOffset + textLength + 1, textboxp -> y + textboxp -> size * 0.8);
         }
 
-        if (textboxp -> enabled == TT_ELEMENT_ENABLED) {
+        /* mouse */
+        if (textboxp -> enabled == TT_ELEMENT_ENABLED && ribbonRender.mainselect[2] == -1) {
             if (turtleMouseDown()) {
                 if (textboxp -> status < 0) {
                     textboxp -> editIndex = strlen(textboxp -> text);
