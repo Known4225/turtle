@@ -18,7 +18,7 @@ a version of turtle that allows textures to be loaded and rendered on the screen
 
 ## TurtleText
 
-turtleText extends the functionality of turtle to allow text to be drawn to the screen using the `turtleTextWriteString()` and `turtleTextWriteUnicode()` functions. A custom font file `fontBez.tgl` is included with the project which supports the latin, greek, and cyrillic alphabets as well as a variety of common characters.
+turtleText extends the functionality of turtle to allow text to be drawn to the screen using the `turtleTextWriteString()` and `turtleTextWriteUnicode()` functions. A custom font file `roberto.tgl` is included with the project which supports the latin, greek, and cyrillic alphabets as well as a variety of common characters.
 
 ## TurtleTools
 
