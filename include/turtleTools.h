@@ -1959,13 +1959,13 @@ int32_t textboxCalculateMaximumCharacters(uint32_t *charlist, int32_t textLength
         int32_t byteCount = 0;
         for (int32_t i = 0; i < textLength; i++) {
             int32_t currentDataAddress = 0;
-            for (int32_t j = 0; j < turtleTextRender.charCount; j++) {
-                if (turtleTextRender.supportedCharReference[j] == charlist[i]) {
+            for (int32_t j = 0; j < turtleText.charCount; j++) {
+                if (turtleText.supportedCharReference[j] == charlist[i]) {
                     currentDataAddress = j;
                     break;
                 }
             }
-            xTrack += (turtleTextRender.fontData[turtleTextRender.fontPointer[currentDataAddress + 1] - 4] + 40) * size;
+            xTrack += (turtleText.fontData[turtleText.fontPointer[currentDataAddress + 1] - 4] + 40) * size;
             byteCount++;
             if (charlist[i] & 0x0000FF00) {
                 byteCount++;
@@ -1990,13 +1990,13 @@ int32_t textboxCalculateMaximumCharacters(uint32_t *charlist, int32_t textLength
         int32_t byteCount = 0;
         for (int32_t i = textLength - 1; i > 0; i--) {
             int32_t currentDataAddress = 0;
-            for (int32_t j = 0; j < turtleTextRender.charCount; j++) {
-                if (turtleTextRender.supportedCharReference[j] == charlist[i]) {
+            for (int32_t j = 0; j < turtleText.charCount; j++) {
+                if (turtleText.supportedCharReference[j] == charlist[i]) {
                     currentDataAddress = j;
                     break;
                 }
             }
-            xTrack += (turtleTextRender.fontData[turtleTextRender.fontPointer[currentDataAddress + 1] - 4] + 40) * size;
+            xTrack += (turtleText.fontData[turtleText.fontPointer[currentDataAddress + 1] - 4] + 40) * size;
             byteCount--;
             if (charlist[i] & 0x0000FF00) {
                 byteCount--;

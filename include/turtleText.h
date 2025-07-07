@@ -8,18 +8,19 @@
 /* turtleText variables */
 typedef struct {
     int32_t bezierPrez; // precision for bezier curves
+    int32_t bezierPrezCurrent;
     int32_t charCount; // number of supported characters
     uint32_t *supportedCharReference; // array containing links from (int) unicode values of characters to an index from 0 to (charCount - 1)
     int32_t *fontPointer; // array containing links from char indices (0 to (charCount - 1)) to their corresponding data position in fontData
     int32_t *fontData; // array containing packaged instructions on how to draw each character in the character set
-} turtleText;
+} turtleText_t;
 
-turtleText turtleTextRender;
+turtleText_t turtleText;
 
 /* initialise values, must supply a font file (tgl) */
 int32_t turtleTextInit(const char *filename) {
     turtlePenColor(0, 0, 0);
-    turtleTextRender.bezierPrez = 10;
+    turtleText.bezierPrez = 10;
 
     /* load file */
     FILE *tgl = fopen(filename, "r");
@@ -38,7 +39,7 @@ int32_t turtleTextInit(const char *filename) {
 
     char line[2048]; // maximum line length
     line[2047] = 0; // canary value
-    turtleTextRender.charCount = 0;
+    turtleText.charCount = 0;
     while (fgets(line, 2048, tgl) != NULL) { // fgets to prevent overflows
         if (line[2047] != 0) {
             printf("Error: line %d in file %s exceeded appropriate length\n", 0, filename);
@@ -145,7 +146,7 @@ int32_t turtleTextInit(const char *filename) {
             list_append(fontDataInit, (unitype) maximums[3], 'i');
         }
         if (maximums[1] < 0) {
-            if (turtleTextRender.charCount == 0)
+            if (turtleText.charCount == 0)
                 list_append(fontDataInit, (unitype) 0, 'i');
             else
                 list_append(fontDataInit, (unitype) 120, 'i');
@@ -157,23 +158,23 @@ int32_t turtleTextInit(const char *filename) {
         } else {
             list_append(fontDataInit, (unitype) maximums[2], 'i');
         }
-        turtleTextRender.charCount += 1;
+        turtleText.charCount += 1;
     }
     list_append(fontPointerInit, (unitype) (int32_t) (fontDataInit -> length), 'i'); // last pointer
-    turtleTextRender.fontData = malloc(sizeof(int32_t) * fontDataInit -> length); // convert lists to arrays (could be optimised cuz we already have the -> data arrays but who really cares this runs once)
+    turtleText.fontData = malloc(sizeof(int32_t) * fontDataInit -> length); // convert lists to arrays (could be optimised cuz we already have the -> data arrays but who really cares this runs once)
     for (uint32_t i = 0; i < fontDataInit -> length; i++) {
-        turtleTextRender.fontData[i] = fontDataInit -> data[i].i;
+        turtleText.fontData[i] = fontDataInit -> data[i].i;
     }
-    turtleTextRender.fontPointer = malloc(sizeof(int32_t) * fontPointerInit -> length);
+    turtleText.fontPointer = malloc(sizeof(int32_t) * fontPointerInit -> length);
     for (uint32_t i = 0; i < fontPointerInit -> length; i++) {
-        turtleTextRender.fontPointer[i] = fontPointerInit -> data[i].i;
+        turtleText.fontPointer[i] = fontPointerInit -> data[i].i;
     }
-    turtleTextRender.supportedCharReference = malloc(sizeof(int32_t) * supportedCharReferenceInit -> length);
+    turtleText.supportedCharReference = malloc(sizeof(int32_t) * supportedCharReferenceInit -> length);
     for (uint32_t i = 0; i < supportedCharReferenceInit -> length; i++) {
-        turtleTextRender.supportedCharReference[i] = supportedCharReferenceInit -> data[i].i;
+        turtleText.supportedCharReference[i] = supportedCharReferenceInit -> data[i].i;
     }
 
-    printf("%d characters loaded from %s\n", turtleTextRender.charCount, filename);
+    printf("%d characters loaded from %s\n", turtleText.charCount, filename);
 
     list_free(fontDataInit);
     list_free(fontPointerInit);
@@ -203,25 +204,25 @@ void renderBezier(double x1, double y1, double x2, double y2, double x3, double 
 /* renders a single character */
 void renderChar(int32_t index, double x, double y, double size) {
     index += 1;
-    int32_t len1 = turtleTextRender.fontData[index];
+    int32_t len1 = turtleText.fontData[index];
     for (int32_t i = 0; i < len1; i++) {
         index += 1;
         if (turtle.pen == 1)
             turtlePenUp();
-        int32_t len2 = turtleTextRender.fontData[index];
+        int32_t len2 = turtleText.fontData[index];
         for (int32_t j = 0; j < len2; j++) {
             index += 1;
-            if (turtleTextRender.fontData[index] == 140894115) { // 140894115 is the b value (reserved)
+            if (turtleText.fontData[index] == 140894115) { // 140894115 is the b value (reserved)
                 index += 4;
-                if (turtleTextRender.fontData[index + 1] != 140894115) {
-                    renderBezier(x + turtleTextRender.fontData[index - 3] * size, y + turtleTextRender.fontData[index - 2] * size, x + turtleTextRender.fontData[index - 1] * size, y + turtleTextRender.fontData[index] * size, x + turtleTextRender.fontData[index + 1] * size, y + turtleTextRender.fontData[index + 2] * size, turtleTextRender.bezierPrez);
+                if (turtleText.fontData[index + 1] != 140894115) {
+                    renderBezier(x + turtleText.fontData[index - 3] * size, y + turtleText.fontData[index - 2] * size, x + turtleText.fontData[index - 1] * size, y + turtleText.fontData[index] * size, x + turtleText.fontData[index + 1] * size, y + turtleText.fontData[index + 2] * size, turtleText.bezierPrezCurrent);
                     index += 2;
                 } else {
-                    renderBezier(x + turtleTextRender.fontData[index - 3] * size, y + turtleTextRender.fontData[index - 2] * size, x + turtleTextRender.fontData[index - 1] * size, y + turtleTextRender.fontData[index] * size, x + turtleTextRender.fontData[index + 2] * size, y + turtleTextRender.fontData[index + 3] * size, turtleTextRender.bezierPrez);
+                    renderBezier(x + turtleText.fontData[index - 3] * size, y + turtleText.fontData[index - 2] * size, x + turtleText.fontData[index - 1] * size, y + turtleText.fontData[index] * size, x + turtleText.fontData[index + 2] * size, y + turtleText.fontData[index + 3] * size, turtleText.bezierPrezCurrent);
                 }
             } else {
                 index += 1;
-                turtleGoto(x + turtleTextRender.fontData[index - 1] * size, y + turtleTextRender.fontData[index] * size);
+                turtleGoto(x + turtleText.fontData[index - 1] * size, y + turtleText.fontData[index] * size);
             }
             turtlePenDown();
         }
@@ -238,13 +239,13 @@ double turtleTextGetLength(const uint32_t *text, int32_t textLength, double size
     double xTrack = 0;
     for (int32_t i = 0; i < textLength; i++) {
         int32_t currentDataAddress = 0;
-        for (int32_t j = 0; j < turtleTextRender.charCount; j++) { // change to hashmap later
-            if (turtleTextRender.supportedCharReference[j] == text[i]) {
+        for (int32_t j = 0; j < turtleText.charCount; j++) { // change to hashmap later
+            if (turtleText.supportedCharReference[j] == text[i]) {
                 currentDataAddress = j;
                 break;
             }
         }
-        xTrack += (turtleTextRender.fontData[turtleTextRender.fontPointer[currentDataAddress + 1] - 4] + 40) * size;
+        xTrack += (turtleText.fontData[turtleText.fontPointer[currentDataAddress + 1] - 4] + 40) * size;
     }
     xTrack -= 40 * size;
     return xTrack;
@@ -309,7 +310,7 @@ double turtleTextGetUnicodeLength(const unsigned char *str, double size) {
 void turtleTextWrite(const uint32_t *text, int32_t textLength, double x, double y, double size, double align) {
     char saveShape = turtle.penshape;
     double saveSize = turtle.pensize;
-    turtleTextRender.bezierPrez = (int32_t) ceil(sqrt(size * 1)); // change the 1 for higher or lower bezier precision
+    turtleText.bezierPrezCurrent = (int32_t) ceil(sqrt(size * turtleText.bezierPrez / 10));
     double xTrack = x;
     size /= 175;
     y -= size * 70;
@@ -321,25 +322,24 @@ void turtleTextWrite(const uint32_t *text, int32_t textLength, double x, double 
     list_t *dataIndStored = list_init();
     for (int32_t i = 0; i < textLength; i++) {
         int32_t currentDataAddress = 0;
-        for (int32_t j = 0; j < turtleTextRender.charCount; j++) { // change to hashmap later
-            if (turtleTextRender.supportedCharReference[j] == text[i]) {
+        for (int32_t j = 0; j < turtleText.charCount; j++) { // change to hashmap later
+            if (turtleText.supportedCharReference[j] == text[i]) {
                 currentDataAddress = j;
                 break;
             }
         }
         list_append(xvals, (unitype) xTrack, 'd');
         list_append(dataIndStored, (unitype) currentDataAddress, 'i');
-        xTrack += (turtleTextRender.fontData[turtleTextRender.fontPointer[currentDataAddress + 1] - 4] + 40) * size;
+        xTrack += (turtleText.fontData[turtleText.fontPointer[currentDataAddress + 1] - 4] + 40) * size;
     }
     xTrack -= 40 * size;
     for (int32_t i = 0; i < textLength; i++) {
-        renderChar((double) turtleTextRender.fontPointer[dataIndStored -> data[i].i], xvals -> data[i].d - ((xTrack - x) * (align / 100)), y, size);
+        renderChar((double) turtleText.fontPointer[dataIndStored -> data[i].i], xvals -> data[i].d - ((xTrack - x) * (align / 100)), y, size);
     }
     list_free(dataIndStored);
     list_free(xvals);
     turtle.penshape = saveShape; // restore the shape and size before the write
     turtle.pensize = saveSize;
-    // no variables in turtleTextRender are changed
 }
 
 /* wrapper function for writing strings easier */

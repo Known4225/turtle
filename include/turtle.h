@@ -63,9 +63,9 @@ typedef struct {
     double cameraFOV;
     double cameraDirectionLeftRight;
     double cameraDirectionUpDown;
-} turtleglob_t; // all globals are conSTRUCTed here
+} turtle_t; // all globals are conSTRUCTed here
 
-turtleglob_t turtle;
+turtle_t turtle;
 
 /* run this to set the bounds of the window in coordinates */
 void turtleSetWorldCoordinates(int32_t minX, int32_t minY, int32_t maxX, int32_t maxY) {
