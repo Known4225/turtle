@@ -144,14 +144,12 @@ void osToolsShowCursor() {
 typedef enum {
     OSTOOLS_CSV_ROW = 0,
     OSTOOLS_CSV_COLUMN = 1,
-    OSTOOLS_CSV = 2,
-    OSTOOLS_TSV = 3,
-    OSTOOLS_CSV_FIELD_DOUBLE = 4,
-    OSTOOLS_CSV_FIELD_INT = 5,
-    OSTOOLS_CSV_FIELD_STRING = 6,
+    OSTOOLS_CSV_FIELD_DOUBLE = 2,
+    OSTOOLS_CSV_FIELD_INT = 3,
+    OSTOOLS_CSV_FIELD_STRING = 4,
 } osToolsCSV;
 
-list_t *osToolsLoadInternal(char *filename, osToolsCSV rowOrColumn, osToolsCSV csvOrTsv, osToolsCSV fieldType) {
+list_t *osToolsLoadInternal(char *filename, osToolsCSV rowOrColumn, char delimeter, osToolsCSV fieldType) {
     uint32_t fileSize;
     uint8_t *mappedFile = osToolsMapFile(filename, &fileSize);
     if (mappedFile == NULL) {
@@ -187,7 +185,7 @@ list_t *osToolsLoadInternal(char *filename, osToolsCSV rowOrColumn, osToolsCSV c
             }
         }
         /* case: comma */
-        if (mappedFile[rightIndex] == ',' && !inQuotes) {
+        if (mappedFile[rightIndex] == delimeter && !inQuotes) {
             mappedFile[rightIndex] = '\0';
             if (rowOrColumn == OSTOOLS_CSV_ROW) {
                 list_append(outputList -> data[0].r, (unitype) (char *) (mappedFile + leftIndex), 's');
@@ -195,7 +193,7 @@ list_t *osToolsLoadInternal(char *filename, osToolsCSV rowOrColumn, osToolsCSV c
                 list_append(outputList -> data[outputList -> length - 1].r, (unitype) (char *) (mappedFile + leftIndex), 's');
                 list_append(outputList, (unitype) list_init(), 'r');
             }
-            mappedFile[rightIndex] = ',';
+            mappedFile[rightIndex] = delimeter;
             leftIndex = rightIndex + 1;
             while (mappedFile[leftIndex] == ' ') {
                 rightIndex++;
@@ -266,7 +264,7 @@ list_t *osToolsLoadInternal(char *filename, osToolsCSV rowOrColumn, osToolsCSV c
                 // leftIndex = rightIndex + 1;
             }
         }
-        if (mappedFile[rightIndex] == ',' && !inQuotes) {
+        if (mappedFile[rightIndex] == delimeter && !inQuotes) {
             /* case: comma */
             mappedFile[rightIndex] = '\0';
             unitype field;
@@ -287,7 +285,7 @@ list_t *osToolsLoadInternal(char *filename, osToolsCSV rowOrColumn, osToolsCSV c
                     printf("osToolsLoadInternal - more data columns than headers at row %d\n", row);
                 }
             }
-            mappedFile[rightIndex] = ',';
+            mappedFile[rightIndex] = delimeter;
             leftIndex = rightIndex + 1;
             while (mappedFile[leftIndex] == ' ') {
                 rightIndex++;
@@ -335,7 +333,7 @@ list_t *osToolsLoadInternal(char *filename, osToolsCSV rowOrColumn, osToolsCSV c
     }
     /* catch: if the file doesn't end with a newline */
     if (leftIndex == fileSize) {
-        if (rowOrColumn == OSTOOLS_CSV_ROW && mappedFile[fileSize - 1] != ',' && mappedFile[fileSize - 1] != ' ') {
+        if (rowOrColumn == OSTOOLS_CSV_ROW && mappedFile[fileSize - 1] != delimeter && mappedFile[fileSize - 1] != ' ') {
             list_pop(outputList);
         }
     } else {
@@ -356,42 +354,22 @@ list_t *osToolsLoadInternal(char *filename, osToolsCSV rowOrColumn, osToolsCSV c
 
 /* packages a CSV file into a list (headers are strings, all fields are doubles) - use OSTOOLS_CSV_ROW to put it in a list of lists where each list is a row of the CSV and use OSTOOLS_CSV_COLUMN to output a list of lists where each list is a column of the CSV */
 list_t *osToolsLoadCSV(char *filename, osToolsCSV rowOrColumn) {
-    return osToolsLoadInternal(filename, rowOrColumn, OSTOOLS_CSV, OSTOOLS_CSV_FIELD_DOUBLE);
-}
-
-/* packages a TSV file into a list (headers are strings, all fields are doubles) - use OSTOOLS_CSV_ROW to put it in a list of lists where each list is a row of the TSV and use OSTOOLS_CSV_COLUMN to output a list of lists where each list is a column of the TSV */
-list_t *osToolsLoadTSV(char *filename, osToolsCSV rowOrColumn) {
-    return osToolsLoadInternal(filename, rowOrColumn, OSTOOLS_TSV, OSTOOLS_CSV_FIELD_DOUBLE);
+    return osToolsLoadInternal(filename, rowOrColumn, ',', OSTOOLS_CSV_FIELD_DOUBLE);
 }
 
 /* packages a CSV file into a list (headers are strings, all fields are doubles) - use OSTOOLS_CSV_ROW to put it in a list of lists where each list is a row of the CSV and use OSTOOLS_CSV_COLUMN to output a list of lists where each list is a column of the CSV */
 list_t *osToolsLoadCSVDouble(char *filename, osToolsCSV rowOrColumn) {
-    return osToolsLoadInternal(filename, rowOrColumn, OSTOOLS_CSV, OSTOOLS_CSV_FIELD_DOUBLE);
-}
-
-/* packages a TSV file into a list (headers are strings, all fields are doubles) - use OSTOOLS_CSV_ROW to put it in a list of lists where each list is a row of the TSV and use OSTOOLS_CSV_COLUMN to output a list of lists where each list is a column of the TSV */
-list_t *osToolsLoadTSVDouble(char *filename, osToolsCSV rowOrColumn) {
-    return osToolsLoadInternal(filename, rowOrColumn, OSTOOLS_TSV, OSTOOLS_CSV_FIELD_DOUBLE);
+    return osToolsLoadInternal(filename, rowOrColumn, ',', OSTOOLS_CSV_FIELD_DOUBLE);
 }
 
 /* packages a CSV file into a list (headers are strings, all fields are ints) - use OSTOOLS_CSV_ROW to put it in a list of lists where each list is a row of the CSV and use OSTOOLS_CSV_COLUMN to output a list of lists where each list is a column of the CSV */
 list_t *osToolsLoadCSVInt(char *filename, osToolsCSV rowOrColumn) {
-    return osToolsLoadInternal(filename, rowOrColumn, OSTOOLS_CSV, OSTOOLS_CSV_FIELD_INT);
-}
-
-/* packages a TSV file into a list (headers are strings, all fields are ints) - use OSTOOLS_CSV_ROW to put it in a list of lists where each list is a row of the TSV and use OSTOOLS_CSV_COLUMN to output a list of lists where each list is a column of the TSV */
-list_t *osToolsLoadTSVInt(char *filename, osToolsCSV rowOrColumn) {
-    return osToolsLoadInternal(filename, rowOrColumn, OSTOOLS_TSV, OSTOOLS_CSV_FIELD_INT);
+    return osToolsLoadInternal(filename, rowOrColumn, ',', OSTOOLS_CSV_FIELD_INT);
 }
 
 /* packages a CSV file into a list (headers are strings, all fields are strings) - use OSTOOLS_CSV_ROW to put it in a list of lists where each list is a row of the CSV and use OSTOOLS_CSV_COLUMN to output a list of lists where each list is a column of the CSV */
 list_t *osToolsLoadCSVString(char *filename, osToolsCSV rowOrColumn) {
-    return osToolsLoadInternal(filename, rowOrColumn, OSTOOLS_CSV, OSTOOLS_CSV_FIELD_STRING);
-}
-
-/* packages a TSV file into a list (headers are strings, all fields are strings) - use OSTOOLS_CSV_ROW to put it in a list of lists where each list is a row of the TSV and use OSTOOLS_CSV_COLUMN to output a list of lists where each list is a column of the TSV */
-list_t *osToolsLoadTSVString(char *filename, osToolsCSV rowOrColumn) {
-    return osToolsLoadInternal(filename, rowOrColumn, OSTOOLS_TSV, OSTOOLS_CSV_FIELD_STRING);
+    return osToolsLoadInternal(filename, rowOrColumn, ',', OSTOOLS_CSV_FIELD_STRING);
 }
 
 #ifdef OS_WINDOWS
