@@ -181,6 +181,11 @@ int main(int argc, char *argv[]) {
     switch_sideswipe -> style = TT_SWITCH_STYLE_SIDESWIPE_LEFT;
     switch_checkbox -> style = TT_SWITCH_STYLE_CHECKBOX;
     switch_xbox -> style = TT_SWITCH_STYLE_XBOX;
+    int8_t textButton = 0, circleButton = 0;
+    tt_button_t *button_textButton = buttonInit("Text Button", &textButton, 330, -30, 10);
+    tt_button_t *button_circleButton = buttonInit("Circle Button", &textButton, 338, -88, 10);
+    button_textButton -> shape = TT_BUTTON_SHAPE_TEXT;
+    button_circleButton -> shape = TT_BUTTON_SHAPE_CIRCLE;
 
 
     list_t *xPositions = list_init();

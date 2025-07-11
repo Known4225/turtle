@@ -643,6 +643,7 @@ typedef enum {
     TT_BUTTON_SHAPE_RECTANGLE = 0,
     TT_BUTTON_SHAPE_ROUNDED_RECTANGLE = 1,
     TT_BUTTON_SHAPE_CIRCLE = 2,
+    TT_BUTTON_SHAPE_TEXT = 3,
 } tt_button_shape_t;
 
 /* button */
@@ -827,7 +828,7 @@ int32_t tt_color_override_default[] = {
     TT_COLOR_TEXT_ALTERNATE, TT_COLOR_TEXT,              TT_COLOR_TEXT,       TT_COLOR_TEXT,          0,                          TT_COLOR_TEXT,              TT_COLOR_TEXT_ALTERNATE,
     TT_COLOR_BUTTON,         TT_COLOR_SWITCH_TEXT_HOVER, TT_COLOR_DIAL,       TT_COLOR_SLIDER_BAR,    TT_COLOR_SCROLLBAR_BASE,    TT_COLOR_TEXT_ALTERNATE,    TT_COLOR_TEXTBOX_BOX,
     TT_COLOR_BUTTON_SELECT,  TT_COLOR_SWITCH_ON,         TT_COLOR_DIAL_INNER, TT_COLOR_SLIDER_CIRCLE, TT_COLOR_SCROLLBAR_HOVER,   TT_COLOR_DROPDOWN,          TT_COLOR_TEXTBOX_PHANTOM_TEXT,
-    0,                       TT_COLOR_SWITCH_OFF,        0,                   0,                      TT_COLOR_SCROLLBAR_CLICKED, TT_COLOR_DROPDOWN_SELECT,   TT_COLOR_TEXTBOX_LINE,
+    TT_COLOR_TEXT,           TT_COLOR_SWITCH_OFF,        0,                   0,                      TT_COLOR_SCROLLBAR_CLICKED, TT_COLOR_DROPDOWN_SELECT,   TT_COLOR_TEXTBOX_LINE,
     0,                       TT_COLOR_SWITCH_CIRCLE_ON,  0,                   0,                      TT_COLOR_SCROLLBAR_BAR,     TT_COLOR_DROPDOWN_HOVER,    TT_COLOR_TEXTBOX_SELECT,
     0,                       TT_COLOR_SWITCH_CIRCLE_OFF, 0,                   0,                      0,                          TT_COLOR_DROPDOWN_TRIANGLE, 0,
     0,                       0,                          0,                   0,                      0,                          0,                          0,
@@ -1166,8 +1167,20 @@ void buttonUpdate() {
             turtleGoto(buttonX - buttonWidth / 2 + buttonp -> size / 2, buttonY - buttonHeight / 2 + buttonp -> size / 2);
             turtlePenUp();
             turtleRectangle(buttonX - buttonWidth / 4, buttonY - buttonHeight / 4, buttonX + buttonWidth / 4, buttonY + buttonHeight / 4);
+        } else if (buttonp -> shape == TT_BUTTON_SHAPE_CIRCLE) {
+            turtleGoto(buttonX, buttonY);
+            turtlePenSize(buttonWidth);
+            turtlePenDown();
+            turtlePenUp();
         }
         tt_internalColor(buttonp, TT_COLOR_TEXT_ALTERNATE, TT_COLOR_OVERRIDE_SLOT_0);
+        if (buttonp -> shape == TT_BUTTON_SHAPE_TEXT) {
+            if (buttonp -> status == 0) {
+                tt_internalColor(buttonp, TT_COLOR_TEXT, TT_COLOR_OVERRIDE_SLOT_3);
+            } else {
+                tt_internalColor(buttonp, TT_COLOR_BUTTON_SELECT, TT_COLOR_OVERRIDE_SLOT_2);
+            }
+        }
         turtleTextWriteUnicode((unsigned char *) buttonp -> label, buttonX, buttonY, buttonp -> size - 1, 50);
         /* mouse */
         if (buttonp -> enabled == TT_ELEMENT_ENABLED && ribbonRender.mainselect[2] == -1) {
@@ -1176,10 +1189,18 @@ void buttonUpdate() {
                     buttonp -> status *= -1;
                 }
             } else {
-                if (turtle.mouseX > buttonX - buttonWidth / 2 && turtle.mouseX < buttonX + buttonWidth / 2 && turtle.mouseY > buttonY - buttonHeight / 2 && turtle.mouseY < buttonY + buttonHeight / 2) {
-                    buttonp -> status = -1;
+                if (buttonp -> shape == TT_BUTTON_SHAPE_CIRCLE) {
+                    if ((turtle.mouseX - buttonX) * (turtle.mouseX - buttonX) + (turtle.mouseY - buttonY) * (turtle.mouseY - buttonY) < buttonWidth * buttonWidth / 4) {
+                        buttonp -> status = -1;
+                    } else {
+                        buttonp -> status = 0;
+                    }
                 } else {
-                    buttonp -> status = 0;
+                    if (turtle.mouseX > buttonX - buttonWidth / 2 && turtle.mouseX < buttonX + buttonWidth / 2 && turtle.mouseY > buttonY - buttonHeight / 2 && turtle.mouseY < buttonY + buttonHeight / 2) {
+                        buttonp -> status = -1;
+                    } else {
+                        buttonp -> status = 0;
+                    }
                 }
             }
             *(buttonp -> variable) = 0;
