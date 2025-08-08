@@ -404,7 +404,6 @@ int32_t ribbonInit(const char *filename) {
             j++;
         }
     }
-    // list_pop(sublist);
     list_t *appendList = list_init();
     list_copy(appendList, sublist);
     list_clear(sublist);

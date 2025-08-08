@@ -118,8 +118,12 @@ int main(int argc, char *argv[]) {
     osToolsFileDialogAddExtension("txt"); // add txt to extension restrictions
     list_t *rowLike = osToolsLoadCSVString("test.csv", OSTOOLS_CSV_ROW);
     list_t *columnLike = osToolsLoadCSVString("test.csv", OSTOOLS_CSV_COLUMN);
-    list_print(rowLike);
-    list_print(columnLike);
+    if (rowLike != NULL) {
+        list_print(rowLike);
+    }
+    if (columnLike != NULL) {
+        list_print(columnLike);
+    }
 
     uint32_t tps = 120; // ticks per second (locked to fps in this case)
     uint64_t tick = 0; // count number of ticks since application started
