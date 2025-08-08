@@ -388,21 +388,23 @@ int32_t ribbonInit(const char *filename) {
             checksum = sscanf(defaultFile + strfp, "%[^,\n]%*c%n,", throw, &fpmove);
             strfp += fpmove;
         }
-        int32_t whitespace = 0;
-        if (throw[0] == ' ') {
-            whitespace += 1;
-        } else {
-            if (j != 0) {
-                list_t *appendList = list_init();
-                list_copy(appendList, sublist);
-                list_clear(sublist);
-                list_append(ribbonRender.options, (unitype) appendList, 'r');
+        if (checksum != EOF) {
+            int32_t whitespace = 0;
+            if (throw[0] == ' ') {
+                whitespace += 1;
+            } else {
+                if (j != 0) {
+                    list_t *appendList = list_init();
+                    list_copy(appendList, sublist);
+                    list_clear(sublist);
+                    list_append(ribbonRender.options, (unitype) appendList, 'r');
+                }
             }
+            list_append(sublist, (unitype) (throw + whitespace), 's');
+            j++;
         }
-        list_append(sublist, (unitype) (throw + whitespace), 's');
-        j++;
     }
-    list_pop(sublist);
+    // list_pop(sublist);
     list_t *appendList = list_init();
     list_copy(appendList, sublist);
     list_clear(sublist);
