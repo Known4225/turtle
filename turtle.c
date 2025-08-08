@@ -107,12 +107,12 @@ int main(int argc, char *argv[]) {
     /* initialize turtle */
     turtleInit(window, -320, -180, 320, 180);
     /* initialise turtleText */
-    turtleTextInit("include/roberto2.tgl");
+    turtleTextInit("include/roberto.tgl");
     /* initialise turtleTools ribbon */
     turtleToolsSetTheme(TT_THEME_DARK); // dark theme preset
-    ribbonInit("include/ribbonConfig2.txt");
+    ribbonInit("include/ribbonConfig.txt");
     /* initialise turtleTools popup */
-    popupInit("include/popupConfig2.txt", -60, -20, 60, 20);
+    popupInit("include/popupConfig.txt", -60, -20, 60, 20);
     /* initialise osTools */
     osToolsInit(argv[0], window); // must include argv[0] to get executableFilepath, must include GLFW window
     osToolsFileDialogAddExtension("txt"); // add txt to extension restrictions
