@@ -380,7 +380,7 @@ int32_t ribbonInit(const char *filename) {
     }
     /* load ribbon options */
     char line[1024]; // maximum size of any list of options
-    while ((fileExists == 0 && ribbonRender.options -> length < defaultRibbonFile -> length) || (fileExists == 1 && fgets(line, 2048, configFile) != NULL)) {
+    while ((fileExists == 0 && ribbonRender.options -> length < defaultRibbonFile -> length) || (fileExists == 1 && fgets(line, 1024, configFile) != NULL)) {
         if (fileExists == 0) {
             memcpy(line, defaultRibbonFile -> data[ribbonRender.options -> length].s, strlen(defaultRibbonFile -> data[ribbonRender.options -> length].s) + 1);
         }
