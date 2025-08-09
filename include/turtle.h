@@ -47,7 +47,7 @@ typedef struct {
     uint8_t pen; // pen status (1 for down, 0 for up)
     uint16_t penshape; // 0 for circle, 1 for square, 2 for triangle
     uint8_t close; // close changes to 1 when the user clicks the x on the window
-    uint8_t shouldClose; // controls whether the window terminates on turtle.close
+    uint8_t popupClose; // controls whether the window terminates on turtle.close
     double circleprez; // how precise circles are (specifically, the number of sides of a circle with diameter e)
     double pensize; // turtle pen size
     double penr; // pen red (0 to 1)
@@ -185,7 +185,7 @@ void turtleInit(GLFWwindow* window, int32_t minX, int32_t minY, int32_t maxX, in
     glClearColor(1.0, 1.0, 1.0, 0.0); // white background by default
     turtle.window = window;
     turtle.close = 0;
-    turtle.shouldClose = 0;
+    turtle.popupClose = 0;
     turtle.keyPressed = list_init();
     turtle.lastscreenbounds[0] = 0;
     turtle.lastscreenbounds[1] = 0;
@@ -811,7 +811,7 @@ void turtleUpdate() {
     glfwPollEvents();
     if (glfwWindowShouldClose(turtle.window)) {
         turtle.close = 1;
-        if (turtle.shouldClose) {
+        if (turtle.popupClose) {
             glfwTerminate();
         }
         

@@ -441,8 +441,8 @@ int32_t turtleTextConvertUnicode(const unsigned char *str, uint32_t *converted) 
     return next;
 }
 
+/* if the font file is not found, use the default font (kept here) */
 void generateDefaultFont(list_t *generatedFont) {
-    /* if the font file is not found, use the generated default font */
     list_append(generatedFont, (unitype) " , 0", 's');
     list_append(generatedFont, (unitype) "A, 2, 3, -160, -100, -100, 60, -40, -100, 2, -137, -40, -63, -40", 's');
     list_append(generatedFont, (unitype) "À, 3, 3, -160, -100, -100, 60, -40, -100, 2, -137, -40, -63, -40, 2, -100, 85, -120, 105", 's');

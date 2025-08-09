@@ -81,7 +81,7 @@ void parsePopupOutput(GLFWwindow *window) {
             glfwSetWindowShouldClose(window, 0);
         }
         if (popup.output[1] == 1) { // close
-            turtle.shouldClose = 1;
+            turtle.popupClose = 1;
         }
     }
 }
@@ -201,7 +201,7 @@ int main(int argc, char *argv[]) {
 
     double scroll = 0.0;
     double scrollFactor = 15;
-    while (turtle.shouldClose == 0) {
+    while (turtle.popupClose == 0) {
         start = clock();
         turtleGetMouseCoords();
         turtleClear();
