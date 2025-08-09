@@ -75,8 +75,10 @@ int32_t turtleTextInit(const char *filename) {
                     fontPar += (uint32_t) parsedInt[abri] << ((i - 1) * 8);
                 }
                 if (fontPar == 0) { // exception for the comma character
+                    printf("line: %s\n", line);
                     fontPar = 44;
                 }
+                // printf("fontPar: %d\n", fontPar);
                 list_append(supportedCharReferenceInit, (unitype) fontPar, 'i'); // adds as an int but will typecast back to unsigned later, this might not work correctly but it also doesn't really matter
                 list_append(fontPointerInit, (unitype) fontDataInit -> length, 'i');
                 firstIndex = fontDataInit -> length;
@@ -791,7 +793,7 @@ void generateDefaultFont(list_t *generatedFont) {
     list_append(generatedFont, (unitype) "ю, 2, 2, -160, 20, -160, -100, 5, -160, -40, b, -120, -40, -120, -100, b, -75, -100, -30, -100, b, -30, -40, -30, 20, b, -75, 20, -120, 20, -120, -40", 's');
     list_append(generatedFont, (unitype) "я, 2, 5, -70, -100, -70, 20, b, -120, 20, -160, 20, b, -160, -10, -160, -40, -130, -40, -70, -40, 2, -125, -40, -160, -100", 's');
     list_append(generatedFont, (unitype) "α, 2, 2, -70, 20, b, -70, -80, -70, -100, -50, -100, 4, b, -70, -10, -80, 20, b, -115, 20, -160, 20, b, -160, -40, -160, -100, b, -115, -100, -70, -100, -70, -70", 's');
-    list_append(generatedFont, (unitype) ", 1, 7, -160, -135, b, -160, 0, -160, 40, b, -120, 40, -85, 40, b, -85, 10, -85, -30, b, -130, -30, -75, -30, b, -75, -60, -75, -100, b, -115, -100, -140, -100, -160, -80", 's');
+    list_append(generatedFont, (unitype) "β, 1, 7, -160, -135, b, -160, 0, -160, 40, b, -120, 40, -85, 40, b, -85, 10, -85, -30, b, -130, -30, -75, -30, b, -75, -60, -75, -100, b, -115, -100, -140, -100, -160, -80", 's');
     list_append(generatedFont, (unitype) "γ, 2, 3, -160, 0, -115, -100, -70, 0, 2, -115, -100, -115, -155", 's');
     list_append(generatedFont, (unitype) "δ, 2, 4, b, -70, -50, -70, 0, b, -115, 0, -160, 0, b, -160, -50, -160, -100, b, -115, -100, -70, -100, -70, -50, 2, b, -92, -4, -145, 10, b, -145, 30, -150, 70, -95, 55", 's');
     list_append(generatedFont, (unitype) "ε, 1, 6, b, -70, -5, -75, 20, b, -115, 20, -160, 20, b, -160, -15, -160, -40, b, -110, -40, -160, -40, b, -160, -75, -160, -100, b, -115, -100, -75, -100, -70, -75", 's');
