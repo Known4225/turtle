@@ -104,27 +104,28 @@ typedef enum {
     TT_COLOR_POPUP_BUTTON_SELECT = 24,
     TT_COLOR_BUTTON = 27,
     TT_COLOR_BUTTON_SELECT = 30,
-    TT_COLOR_SWITCH_TEXT_HOVER = 33,
-    TT_COLOR_SWITCH_OFF = 36,
-    TT_COLOR_SWITCH_CIRCLE_OFF = 39,
-    TT_COLOR_SWITCH_ON = 42,
-    TT_COLOR_SWITCH_CIRCLE_ON = 45,
-    TT_COLOR_DIAL = 48,
-    TT_COLOR_DIAL_INNER = 51,
-    TT_COLOR_SLIDER_BAR = 54,
-    TT_COLOR_SLIDER_CIRCLE = 57,
-    TT_COLOR_SCROLLBAR_BASE = 60,
-    TT_COLOR_SCROLLBAR_BAR = 63,
-    TT_COLOR_SCROLLBAR_HOVER = 66,
-    TT_COLOR_SCROLLBAR_CLICKED = 69,
-    TT_COLOR_DROPDOWN = 72,
-    TT_COLOR_DROPDOWN_SELECT = 75,
-    TT_COLOR_DROPDOWN_HOVER = 78,
-    TT_COLOR_DROPDOWN_TRIANGLE = 81,
-    TT_COLOR_TEXTBOX_BOX = 84,
-    TT_COLOR_TEXTBOX_PHANTOM_TEXT = 87,
-    TT_COLOR_TEXTBOX_LINE = 90,
-    TT_COLOR_TEXTBOX_SELECT = 93,
+    TT_COLOR_BUTTON_CLICKED = 33,
+    TT_COLOR_SWITCH_TEXT_HOVER = 36,
+    TT_COLOR_SWITCH_OFF = 39,
+    TT_COLOR_SWITCH_CIRCLE_OFF = 42,
+    TT_COLOR_SWITCH_ON = 45,
+    TT_COLOR_SWITCH_CIRCLE_ON = 48,
+    TT_COLOR_DIAL = 51,
+    TT_COLOR_DIAL_INNER = 54,
+    TT_COLOR_SLIDER_BAR = 57,
+    TT_COLOR_SLIDER_CIRCLE = 60,
+    TT_COLOR_SCROLLBAR_BASE = 63,
+    TT_COLOR_SCROLLBAR_BAR = 66,
+    TT_COLOR_SCROLLBAR_HOVER = 69,
+    TT_COLOR_SCROLLBAR_CLICKED = 72,
+    TT_COLOR_DROPDOWN = 75,
+    TT_COLOR_DROPDOWN_SELECT = 78,
+    TT_COLOR_DROPDOWN_HOVER = 81,
+    TT_COLOR_DROPDOWN_TRIANGLE = 84,
+    TT_COLOR_TEXTBOX_BOX = 87,
+    TT_COLOR_TEXTBOX_PHANTOM_TEXT = 90,
+    TT_COLOR_TEXTBOX_LINE = 93,
+    TT_COLOR_TEXTBOX_SELECT = 96,
 } tt_theme_internal_t;
 
 /* default colours (light theme) */
@@ -140,27 +141,28 @@ double tt_themeColors[] = {
     100.0, 100.0, 100.0, // popup boxes select color (24)
     200.0, 200.0, 200.0, // button color (27)
     160.0, 160.0, 160.0, // button select color (30)
-    30.0, 30.0, 30.0,    // switch text hover (33)
-    180.0, 180.0, 180.0, // switch color off (36)
-    230.0, 230.0, 230.0, // switch circle color off (39)
-    30.0, 30.0, 30.0,    // switch color on (42)
-    0.0, 255.0, 255.0,   // switch circle color on (45)
-    0.0, 0.0, 0.0,       // dial color (48)
-    255.0, 255.0, 255.0, // dial inner circle color (51)
-    120.0, 120.0, 120.0, // slider bar color (54)
-    230.0, 230.0, 230.0, // slider circle color (57)
-    200.0, 200.0, 200.0, // scrollbar bar base color (60)
-    160.0, 160.0, 160.0, // scrollbar bar color (63)
-    120.0, 120.0, 120.0, // scrollbar bar hover color (66)
-    120.0, 120.0, 120.0, // scrollbar bar clicked color (69)
-    160.0, 160.0, 160.0, // dropdown color (72)
-    120.0, 120.0, 120.0, // dropdown select color (75)
-    120.0, 120.0, 120.0, // dropdown hover color (78)
-    100.0, 100.0, 100.0, // dropdown triangle color (81)
-    200.0, 200.0, 200.0, // textbox color (84)
-    180.0, 180.0, 180.0, // textbox phantom text color (87)
-    0.0, 0.0, 0.0,       // textbox line color (90)
-    11.0, 87.0, 208.0,   // textbox select color (93)
+    180.0, 180.0, 180.0, // button clicked color (33)
+    30.0, 30.0, 30.0,    // switch text hover (36)
+    180.0, 180.0, 180.0, // switch color off (39)
+    230.0, 230.0, 230.0, // switch circle color off (42)
+    30.0, 30.0, 30.0,    // switch color on (45)
+    0.0, 255.0, 255.0,   // switch circle color on (48)
+    0.0, 0.0, 0.0,       // dial color (51)
+    255.0, 255.0, 255.0, // dial inner circle color (54)
+    120.0, 120.0, 120.0, // slider bar color (57)
+    230.0, 230.0, 230.0, // slider circle color (60)
+    200.0, 200.0, 200.0, // scrollbar bar base color (63)
+    160.0, 160.0, 160.0, // scrollbar bar color (66)
+    120.0, 120.0, 120.0, // scrollbar bar hover color (69)
+    120.0, 120.0, 120.0, // scrollbar bar clicked color (72)
+    160.0, 160.0, 160.0, // dropdown color (75)
+    120.0, 120.0, 120.0, // dropdown select color (78)
+    120.0, 120.0, 120.0, // dropdown hover color (81)
+    100.0, 100.0, 100.0, // dropdown triangle color (84)
+    200.0, 200.0, 200.0, // textbox color (87)
+    180.0, 180.0, 180.0, // textbox phantom text color (90)
+    0.0, 0.0, 0.0,       // textbox line color (93)
+    11.0, 87.0, 208.0,   // textbox select color (96)
 };
 
 void tt_setColor(int32_t index) {
@@ -182,27 +184,28 @@ void turtleToolsSetTheme(tt_theme_name_t theme) {
             60.0, 60.0, 60.0,    // popup boxes select color (24)
             80.0, 80.0, 80.0,    // button color (27)
             100.0, 100.0, 100.0, // button select color (30)
-            160.0, 160.0, 160.0, // switch text hover (33)
-            60.0, 60.0, 60.0,    // switch color off (36)
-            80.0, 80.0, 80.0,    // switch circle color off (39)
-            10.0, 10.0, 10.0,    // switch color on (42)
-            50.0, 230.0, 30.0,   // switch circle color on (45)
-            200.0, 200.0, 200.0, // dial color (48)
-            30.0, 30.0, 30.0,    // dial inner circle color (51)
-            10.0, 10.0, 10.0,    // slider bar color (54)
-            230.0, 230.0, 230.0, // slider circle color (57)
-            50.0, 50.0, 50.0,    // scrollbar bar base color (60)
-            150.0, 150.0, 150.0, // scrollbar bar color (63)
-            170.0, 170.0, 170.0, // scrollbar bar hover color (66)
-            190.0, 190.0, 190.0, // scrollbar bar clicked color (69)
-            60.0, 60.0, 60.0,    // dropdown color (72)
-            80.0, 80.0, 80.0,    // dropdown select color (75)
-            80.0, 80.0, 80.0,    // dropdown hover color (78)
-            160.0, 160.0, 160.0, // dropdown triangle color (81)
-            60.0, 60.0, 60.0,    // textbox color (84)
-            80.0, 80.0, 80.0,    // textbox phantom text color (87)
-            160.0, 160.0, 160.0, // textbox line color (90)
-            11.0, 87.0, 208.0,   // textbox select color (93)
+            90.0, 90.0, 90.0,    // button clicked color (33)
+            160.0, 160.0, 160.0, // switch text hover (36)
+            60.0, 60.0, 60.0,    // switch color off (39)
+            80.0, 80.0, 80.0,    // switch circle color off (42)
+            10.0, 10.0, 10.0,    // switch color on (45)
+            50.0, 230.0, 30.0,   // switch circle color on (48)
+            200.0, 200.0, 200.0, // dial color (51)
+            30.0, 30.0, 30.0,    // dial inner circle color (54)
+            10.0, 10.0, 10.0,    // slider bar color (57)
+            230.0, 230.0, 230.0, // slider circle color (60)
+            50.0, 50.0, 50.0,    // scrollbar bar base color (63)
+            150.0, 150.0, 150.0, // scrollbar bar color (66)
+            170.0, 170.0, 170.0, // scrollbar bar hover color (69)
+            190.0, 190.0, 190.0, // scrollbar bar clicked color (72)
+            60.0, 60.0, 60.0,    // dropdown color (75)
+            80.0, 80.0, 80.0,    // dropdown select color (78)
+            80.0, 80.0, 80.0,    // dropdown hover color (81)
+            160.0, 160.0, 160.0, // dropdown triangle color (84)
+            60.0, 60.0, 60.0,    // textbox color (87)
+            80.0, 80.0, 80.0,    // textbox phantom text color (90)
+            160.0, 160.0, 160.0, // textbox line color (93)
+            11.0, 87.0, 208.0,   // textbox select color (96)
         };
         memcpy(tt_themeColors, tt_themeCopy, sizeof(tt_themeCopy));
     } else if (theme == TT_THEME_COLT) {
@@ -219,64 +222,66 @@ void turtleToolsSetTheme(tt_theme_name_t theme) {
             73.0, 60.0, 60.0,    // popup boxes select color (24)
             89.0, 80.0, 80.0,    // button color (27)
             111.0, 109.0, 100.0, // button select color (30)
-            154.0, 160.0, 160.0, // switch text hover (33)
-            68.0, 60.0, 60.0,    // switch color off (36)
-            91.0, 80.0, 80.0,    // switch circle color off (39)
-            69.0, 55.0, 53.0,    // switch color on (42)
-            242.0, 242.0, 230.0, // switch circle color on (45)
-            211.0, 211.0, 200.0, // dial color (48)
-            36.0, 30.0, 32.0,    // dial inner circle color (51)
-            69.0, 55.0, 53.0,    // slider bar color (54)
-            242.0, 242.0, 230.0, // slider circle color (57)
-            241.0, 239.0, 236.0, // scrollbar bar base color (60)
-            69.0, 55.0, 53.0,    // scrollbar bar color (63)
-            84.0, 70.0, 68.0,    // scrollbar bar hover color (66)
-            84.0, 70.0, 68.0,    // scrollbar bar clicked color (69)
-            68.0, 60.0, 60.0,    // dropdown color (72)
-            92.0, 80.0, 80.0,    // dropdown select color (75)
-            93.0, 80.0, 80.0,    // dropdown hover color (78)
-            175.0, 171.0, 160.0, // dropdown triangle color (81)
-            89.0, 80.0, 80.0,    // textbox color (84)
-            143.0, 134.0, 134.0, // textbox phantom text color (87)
-            154.0, 160.0, 160.0, // textbox line color (90)
-            11.0, 87.0, 208.0,   // textbox select color (93)
+            95.0, 93.0, 84.0,    // button clicked color (33)
+            154.0, 160.0, 160.0, // switch text hover (36)
+            68.0, 60.0, 60.0,    // switch color off (39)
+            91.0, 80.0, 80.0,    // switch circle color off (42)
+            69.0, 55.0, 53.0,    // switch color on (45)
+            242.0, 242.0, 230.0, // switch circle color on (48)
+            211.0, 211.0, 200.0, // dial color (51)
+            36.0, 30.0, 32.0,    // dial inner circle color (54)
+            69.0, 55.0, 53.0,    // slider bar color (57)
+            242.0, 242.0, 230.0, // slider circle color (60)
+            241.0, 239.0, 236.0, // scrollbar bar base color (63)
+            69.0, 55.0, 53.0,    // scrollbar bar color (66)
+            84.0, 70.0, 68.0,    // scrollbar bar hover color (69)
+            84.0, 70.0, 68.0,    // scrollbar bar clicked color (72)
+            68.0, 60.0, 60.0,    // dropdown color (75)
+            92.0, 80.0, 80.0,    // dropdown select color (78)
+            93.0, 80.0, 80.0,    // dropdown hover color (81)
+            175.0, 171.0, 160.0, // dropdown triangle color (84)
+            89.0, 80.0, 80.0,    // textbox color (87)
+            143.0, 134.0, 134.0, // textbox phantom text color (90)
+            154.0, 160.0, 160.0, // textbox line color (93)
+            11.0, 87.0, 208.0,   // textbox select color (96)
         };
         memcpy(tt_themeColors, tt_themeCopy, sizeof(tt_themeCopy));
     } else if (theme == TT_THEME_NAVY) {
         tt_theme = theme;
         double tt_themeCopy[] = {
             3.0, 3.0, 3.0,       // text color (0)
-        241.0, 239.0, 236.0, // text color alternate (3)
-        21.2, 115.6, 160.2,  // ribbon top bar color (6)
-        74.0, 108.0, 144.0,  // ribbon dropdown color (9)
-        112.0, 146.0, 182.0, // ribbon select color (12)
-        112.0, 146.0, 182.0, // ribbon hover color (15)
-        18.0, 52.0, 88.0,    // popup box color (18)
-        74.0, 108.0, 144.0,  // popup boxes color (21)
-        126.0, 160.0, 196.0, // popup boxes select color (24)
-        18.0, 52.0, 88.0,    // button color (27)
-        74.0, 108.0, 144.0,  // button select color (30)
-        18.0, 52.0, 88.0,    // switch text hover (33)
-        18.0, 52.0, 88.0,    // switch color off (36)
-        241.0, 239.0, 236.0, // switch circle color off (39)
-        18.0, 52.0, 88.0,    // switch color on (42)
-        241.0, 239.0, 236.0, // switch circle color on (45)
-        3.0, 3.0, 3.0,       // dial color (48)
-        212.0, 201.0, 190.0, // dial inner circle color (51)
-        18.0, 52.0, 88.0,    // slider bar color (54)
-        241.0, 239.0, 236.0, // slider circle color (57)
-        241.0, 239.0, 236.0, // scrollbar bar base color (60)
-        33.6, 161.9, 211.6,  // scrollbar bar color (63)
-        50.0, 178.3, 228.0,  // scrollbar bar hover color (66)
-        50.0, 178.3, 228.0,  // scrollbar bar clicked color (69)
-        18.0, 52.0, 88.0,    // dropdown color (72)
-        74.0, 108.0, 144.0,  // dropdown select color (75)
-        74.0, 108.0, 144.0,  // dropdown hover color (78)
-        241.0, 239.0, 236.0, // dropdown triangle color (81)
-        18.0, 52.0, 88.0,    // textbox color (84)
-        112.0, 146.0, 182.0, // textbox phantom text color (87)
-        241.0, 239.0, 236.0, // textbox line color (90)
-        11.0, 87.0, 208.0,   // textbox select color (93)
+            241.0, 239.0, 236.0, // text color alternate (3)
+            21.2, 115.6, 160.2,  // ribbon top bar color (6)
+            74.0, 108.0, 144.0,  // ribbon dropdown color (9)
+            112.0, 146.0, 182.0, // ribbon select color (12)
+            112.0, 146.0, 182.0, // ribbon hover color (15)
+            18.0, 52.0, 88.0,    // popup box color (18)
+            74.0, 108.0, 144.0,  // popup boxes color (21)
+            126.0, 160.0, 196.0, // popup boxes select color (24)
+            18.0, 52.0, 88.0,    // button color (27)
+            74.0, 108.0, 144.0,  // button select color (30)
+            47.0, 81.0, 117.0,   // button clicked color (33)
+            18.0, 52.0, 88.0,    // switch text hover (36)
+            18.0, 52.0, 88.0,    // switch color off (39)
+            241.0, 239.0, 236.0, // switch circle color off (42)
+            18.0, 52.0, 88.0,    // switch color on (45)
+            241.0, 239.0, 236.0, // switch circle color on (48)
+            3.0, 3.0, 3.0,       // dial color (51)
+            212.0, 201.0, 190.0, // dial inner circle color (54)
+            18.0, 52.0, 88.0,    // slider bar color (57)
+            241.0, 239.0, 236.0, // slider circle color (60)
+            241.0, 239.0, 236.0, // scrollbar bar base color (63)
+            33.6, 161.9, 211.6,  // scrollbar bar color (66)
+            50.0, 178.3, 228.0,  // scrollbar bar hover color (69)
+            50.0, 178.3, 228.0,  // scrollbar bar clicked color (72)
+            18.0, 52.0, 88.0,    // dropdown color (75)
+            74.0, 108.0, 144.0,  // dropdown select color (78)
+            74.0, 108.0, 144.0,  // dropdown hover color (81)
+            241.0, 239.0, 236.0, // dropdown triangle color (84)
+            18.0, 52.0, 88.0,    // textbox color (87)
+            112.0, 146.0, 182.0, // textbox phantom text color (90)
+            241.0, 239.0, 236.0, // textbox line color (93)
+            11.0, 87.0, 208.0,   // textbox select color (96)
         };
         memcpy(tt_themeColors, tt_themeCopy, sizeof(tt_themeCopy));
     } else {
@@ -293,27 +298,28 @@ void turtleToolsSetTheme(tt_theme_name_t theme) {
             100.0, 100.0, 100.0, // popup boxes select color (24)
             200.0, 200.0, 200.0, // button color (27)
             160.0, 160.0, 160.0, // button select color (30)
-            30.0, 30.0, 30.0,    // switch text hover (33)
-            180.0, 180.0, 180.0, // switch color off (36)
-            230.0, 230.0, 230.0, // switch circle color off (39)
-            30.0, 30.0, 30.0,    // switch color on (42)
-            0.0, 255.0, 255.0,   // switch circle color on (45)
-            0.0, 0.0, 0.0,       // dial color (48)
-            255.0, 255.0, 255.0, // dial inner circle color (51)
-            120.0, 120.0, 120.0, // slider bar color (54)
-            230.0, 230.0, 230.0, // slider circle color (57)
-            200.0, 200.0, 200.0, // scrollbar bar base color (60)
-            160.0, 160.0, 160.0, // scrollbar bar color (63)
-            120.0, 120.0, 120.0, // scrollbar bar hover color (66)
-            120.0, 120.0, 120.0, // scrollbar bar clicked color (69)
-            160.0, 160.0, 160.0, // dropdown color (72)
-            120.0, 120.0, 120.0, // dropdown select color (75)
-            120.0, 120.0, 120.0, // dropdown hover color (78)
-            100.0, 100.0, 100.0, // dropdown triangle color (81)
-            200.0, 200.0, 200.0, // textbox color (84)
-            180.0, 180.0, 180.0, // textbox phantom text color (87)
-            0.0, 0.0, 0.0,       // textbox line color (90)
-            11.0, 87.0, 208.0,   // textbox select color (93)
+            180.0, 180.0, 180.0, // button clicked color (33)
+            30.0, 30.0, 30.0,    // switch text hover (36)
+            180.0, 180.0, 180.0, // switch color off (39)
+            230.0, 230.0, 230.0, // switch circle color off (42)
+            30.0, 30.0, 30.0,    // switch color on (45)
+            0.0, 255.0, 255.0,   // switch circle color on (48)
+            0.0, 0.0, 0.0,       // dial color (51)
+            255.0, 255.0, 255.0, // dial inner circle color (54)
+            120.0, 120.0, 120.0, // slider bar color (57)
+            230.0, 230.0, 230.0, // slider circle color (60)
+            200.0, 200.0, 200.0, // scrollbar bar base color (63)
+            160.0, 160.0, 160.0, // scrollbar bar color (66)
+            120.0, 120.0, 120.0, // scrollbar bar hover color (69)
+            120.0, 120.0, 120.0, // scrollbar bar clicked color (72)
+            160.0, 160.0, 160.0, // dropdown color (75)
+            120.0, 120.0, 120.0, // dropdown select color (78)
+            120.0, 120.0, 120.0, // dropdown hover color (81)
+            100.0, 100.0, 100.0, // dropdown triangle color (84)
+            200.0, 200.0, 200.0, // textbox color (87)
+            180.0, 180.0, 180.0, // textbox phantom text color (90)
+            0.0, 0.0, 0.0,       // textbox line color (93)
+            11.0, 87.0, 208.0,   // textbox select color (96)
         };
         memcpy(tt_themeColors, tt_themeCopy, sizeof(tt_themeCopy));
     }
@@ -848,7 +854,7 @@ int32_t tt_color_override_default[] = {
     TT_COLOR_BUTTON,         TT_COLOR_SWITCH_TEXT_HOVER, TT_COLOR_DIAL,       TT_COLOR_SLIDER_BAR,    TT_COLOR_SCROLLBAR_BASE,    TT_COLOR_TEXT_ALTERNATE,    TT_COLOR_TEXTBOX_BOX,
     TT_COLOR_BUTTON_SELECT,  TT_COLOR_SWITCH_ON,         TT_COLOR_DIAL_INNER, TT_COLOR_SLIDER_CIRCLE, TT_COLOR_SCROLLBAR_HOVER,   TT_COLOR_DROPDOWN,          TT_COLOR_TEXTBOX_PHANTOM_TEXT,
     TT_COLOR_TEXT,           TT_COLOR_SWITCH_OFF,        0,                   0,                      TT_COLOR_SCROLLBAR_CLICKED, TT_COLOR_DROPDOWN_SELECT,   TT_COLOR_TEXTBOX_LINE,
-    0,                       TT_COLOR_SWITCH_CIRCLE_ON,  0,                   0,                      TT_COLOR_SCROLLBAR_BAR,     TT_COLOR_DROPDOWN_HOVER,    TT_COLOR_TEXTBOX_SELECT,
+    TT_COLOR_BUTTON_CLICKED, TT_COLOR_SWITCH_CIRCLE_ON,  0,                   0,                      TT_COLOR_SCROLLBAR_BAR,     TT_COLOR_DROPDOWN_HOVER,    TT_COLOR_TEXTBOX_SELECT,
     0,                       TT_COLOR_SWITCH_CIRCLE_OFF, 0,                   0,                      0,                          TT_COLOR_DROPDOWN_TRIANGLE, 0,
     0,                       0,                          0,                   0,                      0,                          0,                          0,
     0,                       0,                          0,                   0,                      0,                          0,                          0,
@@ -1169,7 +1175,9 @@ void buttonUpdate() {
         double buttonY = buttonp -> y;
         double buttonWidth = turtleTextGetUnicodeLength((unsigned char *) buttonp -> label, buttonp -> size) * 1.1;
         double buttonHeight = buttonp -> size * 1.75;
-        if (buttonp -> status == 0) {
+        if (buttonp -> status == 1) {
+            tt_internalColor(buttonp, TT_COLOR_BUTTON_CLICKED, TT_COLOR_OVERRIDE_SLOT_4);
+        } else if (buttonp -> status == 0) {
             tt_internalColor(buttonp, TT_COLOR_BUTTON, TT_COLOR_OVERRIDE_SLOT_1);
         } else {
             tt_internalColor(buttonp, TT_COLOR_BUTTON_SELECT, TT_COLOR_OVERRIDE_SLOT_2);
@@ -1225,7 +1233,7 @@ void buttonUpdate() {
             *(buttonp -> variable) = 0;
             if (buttonp -> status > 0) {
                 *(buttonp -> variable) = 1;
-                buttonp -> status = 0;
+                // buttonp -> status = 0;
             }
         }
     }

@@ -75,10 +75,8 @@ int32_t turtleTextInit(const char *filename) {
                     fontPar += (uint32_t) parsedInt[abri] << ((i - 1) * 8);
                 }
                 if (fontPar == 0) { // exception for the comma character
-                    printf("line: %s\n", line);
                     fontPar = 44;
                 }
-                // printf("fontPar: %d\n", fontPar);
                 list_append(supportedCharReferenceInit, (unitype) fontPar, 'i'); // adds as an int but will typecast back to unsigned later, this might not work correctly but it also doesn't really matter
                 list_append(fontPointerInit, (unitype) fontDataInit -> length, 'i');
                 firstIndex = fontDataInit -> length;
