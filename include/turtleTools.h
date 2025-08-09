@@ -34,6 +34,7 @@ char *strins(char *dest, char *source, int32_t index) {
     return dest;
 }
 
+/* delete a section of a string */
 char *strdel(char *dest, int32_t index, int32_t size) {
     int32_t len = strlen(dest);
     memmove(dest + index, dest + index + size, len - index - size);
@@ -337,11 +338,13 @@ tt_ribbon_t ribbonRender;
 
 /* initialise ribbon */
 int32_t ribbonInit(const char *filename) {
+    /* enable ribbon */
     tt_enabled.ribbonEnabled = 1;
     if (tt_enabled.turtleToolsEnabled == 0) {
         tt_enabled.turtleToolsEnabled = 1;
         tt_elements.all = list_init();
     }
+    /* set ribbon parameters */
     ribbonRender.marginSize = 10; // number of pixels between different items in the ribbon (not affected by ribbonSize)
     ribbonRender.mainselect[0] = -1;
     ribbonRender.mainselect[1] = -1;
@@ -366,49 +369,34 @@ int32_t ribbonInit(const char *filename) {
 
     /* load from config file */
     char fileExists = 1;
-    char defaultFile[] = "File, New, Save, Save As..., Open\n"
-                         "Edit, Undo, Redo, Cut, Copy, Paste\n"
-                         "View, Change Theme, GLFW";
+    list_t *defaultRibbonFile = list_init();
+    list_append(defaultRibbonFile, (unitype) "File, New, Save, Save As..., Open", 's');
+    list_append(defaultRibbonFile, (unitype) "Edit, Undo, Redo, Cut, Copy, Paste", 's');
+    list_append(defaultRibbonFile, (unitype) "View, Change Theme, GLFW", 's');
     FILE *configFile = fopen(filename, "r");
     if (configFile == NULL) {
         printf("Error: file %s not found\n", filename);
         fileExists = 0;
     }
-    list_t *sublist = list_init();
-    int32_t checksum = 0;
-    char throw[256]; // maximum size of any option or sub-option (characters)
-    int32_t j = 0;
-    int32_t strfp = 0;
-    int32_t fpmove = 0;
-    list_clear(sublist);
-    while (checksum != EOF) {
-        if (fileExists) {
-            checksum = fscanf(configFile, "%[^,\n]%*c,", throw);
-        } else {
-            checksum = sscanf(defaultFile + strfp, "%[^,\n]%*c%n,", throw, &fpmove);
-            strfp += fpmove;
+    /* load ribbon options */
+    char line[1024]; // maximum size of any list of options
+    while ((fileExists == 0 && ribbonRender.options -> length < defaultRibbonFile -> length) || (fileExists == 1 && fgets(line, 2048, configFile) != NULL)) {
+        if (fileExists == 0) {
+            memcpy(line, defaultRibbonFile -> data[ribbonRender.options -> length].s, strlen(defaultRibbonFile -> data[ribbonRender.options -> length].s) + 1);
         }
-        if (checksum != EOF) {
-            int32_t whitespace = 0;
-            if (throw[0] == ' ') {
-                whitespace += 1;
-            } else {
-                if (j != 0) {
-                    list_t *appendList = list_init();
-                    list_copy(appendList, sublist);
-                    list_clear(sublist);
-                    list_append(ribbonRender.options, (unitype) appendList, 'r');
-                }
+        if (line[strlen(line) - 1] == '\n') {
+            line[strlen(line) - 1] = '\0'; // cull newline
+        }
+        list_append(ribbonRender.options, (unitype) list_init(), 'r');
+        char *item = strtok(line, ",");
+        while (item != NULL) {
+            if (item[0] == ' ') {
+                item++; // cull leading space
             }
-            list_append(sublist, (unitype) (throw + whitespace), 's');
-            j++;
+            list_append(ribbonRender.options -> data[ribbonRender.options -> length - 1].r, (unitype) item, 's');
+            item = strtok(NULL, ",");
         }
     }
-    list_t *appendList = list_init();
-    list_copy(appendList, sublist);
-    list_clear(sublist);
-    list_append(ribbonRender.options, (unitype) appendList, 'r');
-    list_free(sublist);
     if (fileExists) {
         fclose(configFile);
     }
@@ -417,9 +405,9 @@ int32_t ribbonInit(const char *filename) {
         list_append(ribbonRender.lengths, (unitype) turtleTextGetStringLength(ribbonRender.options -> data[i].r -> data[0].s, 7 * ribbonRender.ribbonSize), 'd');
         double max = 0;
         for (uint32_t j = 1; j < ribbonRender.options -> data[i].r -> length; j++) {
-            double cur = turtleTextGetStringLength(ribbonRender.options -> data[i].r -> data[j].s, 7 * ribbonRender.ribbonSize);
-            if (cur > max) {
-                max = cur;
+            double current = turtleTextGetStringLength(ribbonRender.options -> data[i].r -> data[j].s, 7 * ribbonRender.ribbonSize);
+            if (current > max) {
+                max = current;
             }
         }
         list_append(ribbonRender.lengths, (unitype) max, 'd');
@@ -548,38 +536,40 @@ int32_t popupInit(const char *filename, double minX, double minY, double maxX, d
     popup.style = 0;
     /* read information from config file */
     char fileExists = 1;
-    list_t *defaultFile = list_init();
-    list_append(defaultFile, (unitype) "Are you sure you want to close?", 's');
-    list_append(defaultFile, (unitype) "Cancel", 's');
-    list_append(defaultFile, (unitype) "Close", 's');
+    list_t *defaultPopupFile = list_init();
+    list_append(defaultPopupFile, (unitype) "Are you sure you want to close?", 's');
+    list_append(defaultPopupFile, (unitype) "Cancel", 's');
+    list_append(defaultPopupFile, (unitype) "Close", 's');
     FILE *configFile = fopen(filename, "r");
     if (configFile == NULL) {
         printf("Error: file %s not found\n", filename);
         fileExists = 0;
     }
-    char throw[256] = {1, 0}; // maximum size of message or option
-    char *checksum;
+    char line[256] = {1, 0}; // maximum size of message or option
+    /* read popup message */
     if (fileExists) {
-        checksum = fgets(throw, 256, configFile); // read message
-        throw[strlen(throw) - 1] = '\0'; // cull newline
-        popup.message = strdup(throw);
-    } else {
-        popup.message = strdup(defaultFile -> data[0].s);
-    }
-    popup.options = list_init();
-    while ((fileExists == 0 && popup.options -> length < defaultFile -> length - 1) || (fileExists == 1 && checksum != NULL)) {
-        if (fileExists == 1) {
-            checksum = fgets(throw, 256, configFile);
-            if (checksum != NULL) {
-                if (throw[strlen(throw) - 1] == '\n') {
-                    throw[strlen(throw) - 1] = '\0'; // cull newline
-                }
-                list_append(popup.options, (unitype) strdup(throw), 's');
+        if (fgets(line, 256, configFile) != NULL) {
+            if (line[strlen(line) - 1] == '\n') {
+                line[strlen(line) - 1] = '\0'; // cull newline
             }
+            popup.message = strdup(line);
+        }
+    } else {
+        popup.message = strdup(defaultPopupFile -> data[0].s);
+    }
+    /* read popup options */
+    popup.options = list_init();
+    while ((fileExists == 0 && popup.options -> length < defaultPopupFile -> length - 1) || (fileExists == 1 && fgets(line, 256, configFile) != NULL)) {
+        if (fileExists == 1) {
+            if (line[strlen(line) - 1] == '\n') {
+                line[strlen(line) - 1] = '\0'; // cull newline
+            }
+            list_append(popup.options, (unitype) strdup(line), 's');
         } else {
-            list_append(popup.options, defaultFile -> data[popup.options -> length + 1], 's');
+            list_append(popup.options, defaultPopupFile -> data[popup.options -> length + 1], 's');
         }
     }
+    list_free(defaultPopupFile);
     return 0;
 }
 
