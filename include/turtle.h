@@ -816,7 +816,6 @@ void turtleUpdate() {
         }
         
     }
-    
 }
 
 /* keeps the window open while doing nothing else (from python turtleMainLoop()) */
