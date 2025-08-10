@@ -683,7 +683,7 @@ void turtleUpdate() {
     char changed = 0;
     uint32_t len = turtle.penPos -> length;
     unitype *ren = turtle.penPos -> data;
-    char *renType = turtle.penPos -> type;
+    int8_t *renType = turtle.penPos -> type;
     unsigned long long oldHash = turtle.penHash;
     turtle.penHash = 0; // I don't use this but it's an idea: https://stackoverflow.com/questions/57455444/very-low-collision-non-cryptographic-hashing-function
     for (uint32_t i = 0; i < len; i++) {
