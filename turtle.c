@@ -205,15 +205,25 @@ int main(int argc, char *argv[]) {
         start = clock();
         turtleGetMouseCoords();
         turtleClear();
+        /* update element positions */
+        for (uint32_t i = 0; i < tt_elements.all -> length; i++) {
+            if (((tt_button_t *) tt_elements.all -> data[i].p) -> element != TT_ELEMENT_SCROLLBAR) {
+                ((tt_button_t *) tt_elements.all -> data[i].p) -> x = xPositions -> data[i].d - scrollbarVarX * 5;
+                ((tt_button_t *) tt_elements.all -> data[i].p) -> y = yPositions -> data[i].d + scrollbarVarY * 3.3;
+            }
+        }
+
+        /* write element annotations */
         tt_setColor(TT_COLOR_TEXT);
         turtleTextWriteStringf(-310, -170, 5, 0, "%.2lf, %.2lf", turtle.mouseX, turtle.mouseY);
         turtleTextWriteString("X", xSlider -> x - xSlider -> length / 2 - xSlider -> size, xSlider -> y, xSlider -> size - 1, 100);
-        turtleTextWriteStringf(ySlider -> x + xSlider -> length / 2 + xSlider -> size, xSlider -> y, 4, 0, "%.01lf", round(turtle.cameraDirectionLeftRight) / 10);
+        turtleTextWriteStringf(ySlider -> x + xSlider -> length / 2 + xSlider -> size, xSlider -> y, 4, 0, "%.01lf", round(x) / 10);
         turtleTextWriteString("Y", xSlider -> x - ySlider -> length / 2 - xSlider -> size, ySlider -> y, xSlider -> size - 1, 100);
-        turtleTextWriteStringf(ySlider -> x + ySlider -> length / 2 + xSlider -> size, ySlider -> y, 4, 0, "%.01lf", round(turtle.cameraDirectionUpDown) / 10);
+        turtleTextWriteStringf(ySlider -> x + ySlider -> length / 2 + xSlider -> size, ySlider -> y, 4, 0, "%.01lf", round(y) / 10);
         turtleTextWriteString("Z", zSlider -> x - zSlider -> length / 2 - xSlider -> size, zSlider -> y, xSlider -> size - 1, 100);
         turtleTextWriteStringf(zSlider -> x + zSlider -> length / 2 + xSlider -> size, zSlider -> y, 4, 0, "%.01lf", round(z) / 10);
 
+        /* write all characters supported */
         turtleTextWriteUnicode((uint8_t *) u8"AÀÁĂÄÃÅĀĄÆBCĆČĊÇDĎĐÐEÈÉĚÊËĒĖĘƏFGĞĠHĦ", scrollbarVarX * -5 + 320, scrollbarVarY * 3.3 - 180, 10, 0);
         turtleTextWriteUnicode((uint8_t *) u8"IÌÍÎÏĪİĮJKĶLĹĽĻŁĿMNŃŇÑŅOÒÓÔÖÕŐØŒPQRŔŘSŚŠŞȘ", scrollbarVarX * -5 + 320, scrollbarVarY * 3.3 - 195, 10, 0);
         turtleTextWriteUnicode((uint8_t *) u8"ẞTŤȚÞUÙÚÛÜŮŰŪŲVWXYÝZŹŽŻaàáâăäãåāąæbcć", scrollbarVarX * -5 + 320, scrollbarVarY * 3.3 - 210, 10, 0);
@@ -231,12 +241,6 @@ int main(int argc, char *argv[]) {
         // turtlePenColor(0, 0, 0);
         // turtle3DTriangle(-5, 0, 10, 5, 0, 10, 0, 5, 10);
 
-        for (uint32_t i = 0; i < tt_elements.all -> length; i++) {
-            if (((tt_button_t *) tt_elements.all -> data[i].p) -> element != TT_ELEMENT_SCROLLBAR) {
-                ((tt_button_t *) tt_elements.all -> data[i].p) -> x = xPositions -> data[i].d - scrollbarVarX * 5;
-                ((tt_button_t *) tt_elements.all -> data[i].p) -> y = yPositions -> data[i].d + scrollbarVarY * 3.3;
-            }
-        }
         scroll = turtleMouseWheel();
         if (scroll != 0) {
             if (turtleKeyPressed(GLFW_KEY_LEFT_SHIFT)) {
