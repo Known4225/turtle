@@ -47,8 +47,8 @@ int win32comInit(win32ComPortObject *com, char *name) {
         printf("GetCommState failed with error %d.\n", GetLastError());
         return -1;
     }
-    /* Fill in some DCB values and set the com state: 
-    /* 115200 bps, 8 data bits, no parity, and 1 stop bit. */
+    /* Fill in some DCB values and set the com state:
+       115200 bps, 8 data bits, no parity, and 1 stop bit. */
     dcb.BaudRate = CBR_115200;    // baud rate
     dcb.ByteSize = 8;             // data size, xmit and rcv
     dcb.Parity   = NOPARITY;      // parity bit

@@ -1,3 +1,4 @@
+// #define TURTLE_IMPLEMENTATION
 #include "include/singlefile/turtle.h"
 #include <time.h>
 

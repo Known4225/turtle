@@ -176,10 +176,10 @@ void list_free(list_t *list);
 https://patorjk.com/software/taag/#p=display&f=ANSI%20Shadow
 */
 
-// extern void glColor4d(double r, double g, double b, double a); // genius tactic to stop compiler warnings
-// extern void glBegin(int type);
-// extern void glVertex2d(double x, double y);
-// extern void glEnd();
+extern void glColor4d(double r, double g, double b, double a); // genius tactic to stop compiler warnings
+extern void glBegin(int type);
+extern void glVertex2d(double x, double y);
+extern void glEnd();
 
 typedef struct GLFWwindow GLFWwindow;
 
@@ -897,10 +897,6 @@ extern osToolsClipboardObject osToolsClipboard;
 extern osToolsFileDialogObject osToolsFileDialog;
 extern osToolsMemmapObject osToolsMemmap;
 
-/* forward declarations */
-uint8_t *osToolsMapFile(char *filename, uint32_t *sizeOutput);
-int32_t osToolsUnmapFile(uint8_t *data);
-
 /* OS independent functions */
 void osToolsIndependentInit(GLFWwindow *window);
 
@@ -947,8 +943,24 @@ list_t *osToolsLoadCSVInt(char *filename, osToolsCSV rowOrColumn);
 list_t *osToolsLoadCSVString(char *filename, osToolsCSV rowOrColumn);
 
 #ifdef OS_WINDOWS
+#include <winsock2.h>
+#include <ws2tcpip.h>
 #include <windows.h>
 #include <shobjidl.h>
+
+typedef struct {
+    char name[32];
+    HANDLE comHandle;
+} win32ComPortObject;
+
+#define WIN32TCP_NUM_SOCKETS 32
+
+typedef struct {
+    char *address;
+    char *port;
+    SOCKET connectSocket[WIN32TCP_NUM_SOCKETS];
+    char socketOpen[WIN32TCP_NUM_SOCKETS];
+} win32SocketObject;
 #endif
 
 #ifdef OS_LINUX
@@ -957,7 +969,7 @@ list_t *osToolsLoadCSVString(char *filename, osToolsCSV rowOrColumn);
 #include <sys/mman.h>
 #endif
 
-void osToolsInit(char argv0[], GLFWwindow *window);
+int32_t osToolsInit(char argv0[], GLFWwindow *window);
 
 void osToolsFileDialogAddExtension(char *extension);
 
@@ -966,6 +978,8 @@ int32_t osToolsFileDialogPrompt(char openOrSave, char *prename);
 uint8_t *osToolsMapFile(char *filename, uint32_t *sizeOutput);
 
 int32_t osToolsUnmapFile(uint8_t *data);
+
+
 
 /*
 ██╗  ██╗██╗  ██╗██████╗ ██████╗ ██╗      █████╗ ████████╗███████╗ ██████╗ ██████╗ ███╗   ███╗   ██╗  ██╗
@@ -9340,5 +9354,5090 @@ GLFWAPI VkResult glfwCreateWindowSurface(VkInstance instance, GLFWwindow* window
 #ifdef __cplusplus
 }
 #endif
+
+/*
+██████╗ ███████╗██████╗ ███████╗███╗   ██╗██████╗ ███████╗███╗   ██╗ ██████╗██╗███████╗███████╗
+██╔══██╗██╔════╝██╔══██╗██╔════╝████╗  ██║██╔══██╗██╔════╝████╗  ██║██╔════╝██║██╔════╝██╔════╝
+██║  ██║█████╗  ██████╔╝█████╗  ██╔██╗ ██║██║  ██║█████╗  ██╔██╗ ██║██║     ██║█████╗  ███████╗
+██║  ██║██╔══╝  ██╔═══╝ ██╔══╝  ██║╚██╗██║██║  ██║██╔══╝  ██║╚██╗██║██║     ██║██╔══╝  ╚════██║
+██████╔╝███████╗██║     ███████╗██║ ╚████║██████╔╝███████╗██║ ╚████║╚██████╗██║███████╗███████║
+╚═════╝ ╚══════╝╚═╝     ╚══════╝╚═╝  ╚═══╝╚═════╝ ╚══════╝╚═╝  ╚═══╝ ╚═════╝╚═╝╚══════╝╚══════╝
+https://patorjk.com/software/taag/#p=display&f=ANSI%20Shadow
+*/
+
+/* turtle includes all these modules */
+#ifdef TURTLE_IMPLEMENTATION
+#define UNITYPE_LIST_IMPLEMENTATION
+#define TURTLE_INTERNAL_IMPLEMENTATION
+#define TURTLE_TEXT_IMPLEMENTATION
+#define TURTLE_TOOLS_IMPLEMENTATION
+#define OS_TOOLS_IMPLEMENTATION
+#endif /* TURTLE_IMPLEMENTATION */
+
+/* dependencies */
+#ifdef TURTLE_TOOLS_IMPLEMENTATION
+#ifndef TURTLE_TEXT_IMPLEMENTATION
+#define TURTLE_TEXT_IMPLEMENTATION
+#endif /* TURTLE_TEXT_IMPLEMENTATION */
+#endif /* TURTLE_TOOLS_IMPLEMENTATION */
+
+#ifdef TURTLE_TEXT_IMPLEMENTATION
+#ifndef TURTLE_INTERNAL_IMPLEMENTATION
+#define TURTLE_INTERNAL_IMPLEMENTATION
+#endif /* TURTLE_INTERNAL_IMPLEMENTATION */
+#endif /* TURTLE_TEXT_IMPLEMENTATION */
+
+#ifdef TURTLE_TEXT_IMPLEMENTATION
+#ifndef TURTLE_INTERNAL_IMPLEMENTATION
+#define TURTLE_INTERNAL_IMPLEMENTATION
+#endif /* TURTLE_INTERNAL_IMPLEMENTATION */
+#endif /* TURTLE_TEXT_IMPLEMENTATION */
+
+#ifdef TURTLE_INTERNAL_IMPLEMENTATION
+#ifndef UNITYPE_LIST_IMPLEMENTATION
+#define UNITYPE_LIST_IMPLEMENTATION
+#endif /* UNITYPE_LIST_IMPLEMENTATION */
+#endif /* TURTLE_INTERNAL_IMPLEMENTATION */
+
+#ifdef OS_TOOLS_IMPLEMENTATION
+#ifndef UNITYPE_LIST_IMPLEMENTATION
+#define UNITYPE_LIST_IMPLEMENTATION
+#endif /* UNITYPE_LIST_IMPLEMENTATION */
+#endif /* OS_TOOLS_IMPLEMENTATION */
+
+
+/*
+███████╗ ██████╗ ██╗   ██╗██████╗  ██████╗███████╗
+██╔════╝██╔═══██╗██║   ██║██╔══██╗██╔════╝██╔════╝
+███████╗██║   ██║██║   ██║██████╔╝██║     █████╗  
+╚════██║██║   ██║██║   ██║██╔══██╗██║     ██╔══╝  
+███████║╚██████╔╝╚██████╔╝██║  ██║╚██████╗███████╗
+╚══════╝ ╚═════╝  ╚═════╝ ╚═╝  ╚═╝ ╚═════╝╚══════╝
+https://patorjk.com/software/taag/#p=display&f=ANSI%20Shadow
+*/
+
+#ifdef UNITYPE_LIST_IMPLEMENTATION
+
+/*
+21.04.23:
+unitype list, supports a variety of types
+
+example usage:
+list_t *newList = list_init();
+list_append(newList, (unitype) "hello", 's'); // add to list
+list_append(newList, (unitype) "test", LIST_TYPE_STRING); // add to list using enum
+list_print(newList);
+> [hello, test]
+list_insert(newList, (unitype) 128, 'i', 1);
+list_insert(newList, (unitype) 12.0, 'd', 1);
+list_print(newList);
+> [hello, 12.0, 128, test]
+printf("%s\n", newList -> data[3].s);
+> test
+printf("%d\n", newList -> length);
+> 4 
+list_delete(newList, 0);
+list_print(newList);
+> [12.0, 128, test]
+list_clear(newList);
+list_print(newList);
+> []
+list_free(newList);
+
+Notes:
+Strings added to the list will be "strdup"d - meaning that you can pass in stack allocated buffers and string literals. This does not apply to pointers added to the list which must be heap allocated
+When calling list_clear() or list_free(), the list will free all strings, pointers, and lists within itself. If you don't want this to happen append the item to the list as a uint64
+list_copy will make a copy of all strings, pointers, and lists - it will not use the same pointers (a list can be safely freed after being copied without causing effects to the copied list)
+You must call list_init() when intending to copy a list - all lists must be initialised before any functions can be called on them (if your program is crashing - check to make sure you initialised all your lists)
+*/
+
+/* create a list */
+list_t *list_init() {
+    list_t *list = malloc(sizeof(list_t));
+    list -> length = 0;
+    list -> realLength = 1;
+    list -> type = calloc(1, sizeof(char));
+    list -> data = calloc(1, sizeof(unitype));
+    return list;
+}
+
+/* append to list, must specify type */
+void list_append(list_t *list, unitype data, char type) {
+    if (list -> realLength  <= list -> length) {
+        list -> realLength *= 2;
+        list -> type = realloc(list -> type, list -> realLength);
+        list -> data = realloc(list -> data, list -> realLength * sizeof(unitype));
+    }
+    if (type == 'z') {
+        list -> type[list -> length] = 's';
+    } else {
+        list -> type[list -> length] = type;
+    }
+    if (type == 's') {
+        list -> data[list -> length].s = strdup(data.s);
+    } else {
+        list -> data[list -> length] = data;
+    }
+    list -> length += 1;
+}
+
+/* inserts the item value at list[index] of the list */
+void list_insert(list_t *list, int32_t index, unitype value, char type) {
+    if (list -> length == index) {
+        list_append(list, value, type);
+        return;
+    }
+    while (index < 0) {index += list -> length;}
+    index %= list -> length;
+    list_append(list, (unitype) 0, type);
+    int32_t i;
+    for (i = list -> length - 1; i > index; i--) {
+        list -> data[i] = list -> data[i - 1];
+        list -> type[i] = list -> type[i - 1];
+    }
+    list -> data[i] = value;
+}
+
+/* clears the list */
+void list_clear(list_t *list) {
+    list_free_lite(list);
+    list -> length = 0;
+    list -> realLength = 1;
+    list -> type = calloc(1, sizeof(char));
+    list -> data = calloc(1, sizeof(unitype));
+}
+
+/* pops the last item of the list off and returns it */
+unitype list_pop(list_t *list) {
+    if (list -> length > 0) {
+        list -> length -= 1;
+        unitype ret = list -> data[list -> length];
+        if (list -> type[list -> length] == 'r') {
+            list_free(list -> data[list -> length].r);
+        }
+        if (list -> type[list -> length] == 's' || list -> type[list -> length] == 'p') {
+            free(list -> data[list -> length].p);
+        }
+        list -> type[list -> length] = (char) 0;
+        list -> data[list -> length] = (unitype) 0;
+        if (list -> length <= list -> realLength / 2 && list -> realLength > 1) {
+            list -> realLength /= 2;
+            list -> type = realloc(list -> type, list -> realLength);
+            list -> data = realloc(list -> data, list -> realLength * sizeof(unitype));
+        }
+        return ret;
+    } else {
+        return (unitype) 0;
+    }
+}
+
+/* deletes the item at list[index] of the list and returns it */
+unitype list_delete(list_t *list, int32_t index) {
+    while (index < 0) {index += list -> length;}
+    index %= list -> length;
+    unitype ret = list -> data[index];
+    if (list -> type[index] == 'r') {
+        list_free(list -> data[index].r);
+    }
+    if (list -> type[index] == 's' || list -> type[index] == 'p') {
+        free(list -> data[index].p);
+    }
+    for (uint32_t i = index; i < list -> length - 1 ; i++) {
+        list -> data[i] = list -> data[i + 1];
+        list -> type[i] = list -> type[i + 1];
+    }
+    list -> length -= 1;
+    list -> type[list -> length] = (char) 0;
+    list -> data[list -> length] = (unitype) 0;
+    if (list -> length <= list -> realLength / 2 && list -> realLength > 1) {
+        list -> realLength /= 2;
+        list -> type = realloc(list -> type, list -> realLength);
+        list -> data = realloc(list -> data, list -> realLength * sizeof(unitype));
+    }
+    return ret;
+}
+
+/* deletes many items from the list spanning from [indexMin] to [indexMax - 1] */
+void list_delete_range(list_t *list, uint32_t indexMin, uint32_t indexMax) {
+    if (indexMin > indexMax) {
+        uint32_t swap = indexMin;
+        indexMin = indexMax;
+        indexMax = swap;
+    }
+    int8_t zerod = 0; // edge case: "should've used list_clear"
+    uint32_t difference = (indexMax - indexMin);
+    list -> realLength = list -> length - difference;
+    if (list -> realLength <= 1) {
+        zerod = 1;
+        list -> realLength = 1;
+    }
+    
+    int8_t *newType = malloc(list -> realLength * sizeof(int8_t)); // no need to calloc we're gonna fill it all up anyway
+    unitype *newData = malloc(list -> realLength * sizeof(unitype));
+    for (uint32_t i = 0; i < indexMin; i++) {
+        newType[i] = list -> type[i];
+        newData[i] = list -> data[i];
+    }
+    for (uint32_t i = indexMax; i < list -> length; i++) {
+        newType[i - difference] = list -> type[i];
+        newData[i - difference] = list -> data[i];
+    }
+    list -> length = list -> realLength;
+    if (zerod)
+        list -> length = 0;
+    free(list -> type);
+    free(list -> data);
+    list -> type = newType;
+    list -> data = newData;
+}
+
+/* checks if two unitype items are equal */
+int32_t unitype_check_equal(unitype item1, unitype item2, int8_t typeItem1, int8_t typeItem2) {
+    if ((typeItem1 == 's' || typeItem2 == 's') && typeItem1 != typeItem2) {
+        return 0;
+    }
+
+    switch (typeItem1) {
+        case LIST_TYPE_CHAR:
+            if (item1.c == item2.c) {return 1;}
+            return 0;
+        case LIST_TYPE_INT8:
+        case LIST_TYPE_UINT8: // UINT8 or BOOL
+            if (item1.b == item2.b) {return 1;}
+            return 0;
+        case LIST_TYPE_INT16:
+        case LIST_TYPE_UINT16:
+            if (item1.hu == item2.hu) {return 1;}
+            return 0;
+        case LIST_TYPE_INT32:
+        case LIST_TYPE_UINT32:
+            if (item1.u == item2.u) {return 1;}
+            return 0;
+        case LIST_TYPE_INT64:
+        case LIST_TYPE_UINT64:
+            if (item1.l == item2.l) {return 1;}
+            return 0;
+        case LIST_TYPE_FLOAT:
+            if (item1.f == item2.f) {return 1;}
+            return 0;
+        case LIST_TYPE_DOUBLE:
+            if (item1.d == item2.d) {return 1;}
+            return 0;
+        case LIST_TYPE_STRING:
+            if (strcmp(item1.s, item2.s) == 0) {return 1;}
+            return 0;
+        case LIST_TYPE_POINTER:
+            if (item1.p == item2.p) {return 1;} // questionable
+            return 0;
+        case LIST_TYPE_LIST:
+            if (item1.r == item2.r) {return 1;} // questionable^2 (doesn't check if lists are equivalent/congruent, just compares memory location)
+            return 0;
+        default:
+            printf("unitype_check_equal - type %d not recognized\n", typeItem1);
+            return 0;
+    }
+}
+
+/* returns the index of the first instance of the item in the list, returns -1 if not found */
+int32_t list_find(list_t *list, unitype item, char type) {
+    for (uint32_t i = 0; i < list -> length; i++) {
+        if (unitype_check_equal(list -> data[i], item, list -> type[i], type)) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+/* duplicate of list_find */
+int32_t list_index(list_t *list, unitype item, char type) {
+    for (uint32_t i = 0; i < list -> length; i++) {
+        if (unitype_check_equal(list -> data[i], item, list -> type[i], type)) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+/* counts how many instances of an item is found in the list */
+uint32_t list_count(list_t *list, unitype item, char type) {
+    uint32_t count = 0;
+    for (uint32_t i = 0; i < list -> length; i++) {
+        count += unitype_check_equal(list -> data[i], item, list -> type[i], type);
+    }
+    return count;
+}
+
+/* sort list */
+void list_sort(list_t *list) {
+    /* create min heap */
+    int32_t temp;
+    for (uint32_t i = 2; i < list -> length + 1; i++) {
+        int32_t j = i;
+        while (j > 1 && list -> data[j / 2 - 1].i > list -> data[j - 1].i) {
+            temp = list -> data[j / 2 - 1].i;
+            list -> data[j / 2 - 1].i = list -> data[j - 1].i;
+            list -> data[j - 1].i = temp;
+            j /= 2;
+        }
+    }
+    /* heapsort */
+    for (int32_t i = list -> length - 1; i > 0; i--) {
+        temp = list -> data[0].i;
+        list -> data[0].i = list -> data[i].i;
+        list -> data[i].i = temp;
+        int32_t j = 1;
+        while ((j * 2 - 1 < i && list -> data[j - 1].i > list -> data[j * 2 - 1].i) || (j * 2 < i && list -> data[j - 1].i > list -> data[j * 2].i)) {
+            if (list -> data[j * 2 - 1].i < list -> data[j * 2].i || j * 2 == i) {
+                temp = list -> data[j - 1].i;
+                list -> data[j - 1] = list -> data[j * 2 - 1];
+                list -> data[j * 2 - 1].i = temp;
+                j = j * 2;
+            } else {
+                temp = list -> data[j - 1].i;
+                list -> data[j - 1].i = list -> data[j * 2].i;
+                list -> data[j * 2].i = temp;
+                j *= 2 + 1;
+            }
+        }
+    }
+}
+
+/* deletes the first instance of the item from the list, returns the index the item was at, returns -1 and doesn't modify the list if not found */
+int32_t list_remove(list_t *list, unitype item, char type) {
+    for (uint32_t i = 0; i < list -> length; i++) {
+        if (unitype_check_equal(list -> data[i], item, list -> type[i], type)) {
+            list_delete(list, i);
+            return i;
+        }
+    }
+    return -1;
+}
+
+/* prints a unitype item */
+void unitype_fprint(FILE *fp, unitype item, char type) {
+    switch (type) {
+        case LIST_TYPE_CHAR:
+            fprintf(fp, "%c", item.c);
+        break;
+        case LIST_TYPE_INT8:
+            fprintf(fp, "%hhi", item.b);
+        break;
+        case LIST_TYPE_UINT8: // UINT8 or BOOL
+            fprintf(fp, "%hhu", item.b);
+        break;
+        case LIST_TYPE_INT16:
+            fprintf(fp, "%hi", item.h);
+        break;
+        case LIST_TYPE_UINT16:
+            fprintf(fp, "%hu", item.hu);
+        break;
+        case LIST_TYPE_INT32:
+            fprintf(fp, "%d", item.i);
+        break;
+        case LIST_TYPE_UINT32:
+            fprintf(fp, "%u", item.u);
+        break;
+        case LIST_TYPE_INT64:
+            fprintf(fp, "%lli", item.li);
+        break;
+        case LIST_TYPE_UINT64:
+            fprintf(fp, "%llu", item.l);
+        break;
+        case LIST_TYPE_FLOAT:
+            fprintf(fp, "%f", item.f);
+        break;
+        case LIST_TYPE_DOUBLE:
+            fprintf(fp, "%lf", item.d);
+        break;
+        case LIST_TYPE_STRING:
+            fprintf(fp, "%s", item.s);
+        break;
+        case LIST_TYPE_POINTER:
+            fprintf(fp, "%p", item.p);
+        break;
+        case LIST_TYPE_LIST:
+            list_fprint_emb(fp, item.r);
+        break;
+        default:
+            printf("unitype_fprint - type %d not recognized\n", type);
+            return;
+    }
+}
+
+/* copies one list to another (duplicates strings or pointers) */
+void list_copy(list_t *dest, list_t *src) {
+    list_free_lite(dest);
+    dest -> type = calloc(src -> realLength, sizeof(int32_t));
+    dest -> data = calloc(src -> realLength, sizeof(unitype));
+    uint32_t len = src -> length;
+    dest -> length = len;
+    dest -> realLength = src -> realLength;
+    for (uint32_t i = 0; i < len; i++) {
+        dest -> type[i] = src -> type[i];
+        if (src -> type[i] == 'r') {
+            dest -> data[i] = (unitype) (void *) list_init();
+            list_copy(dest -> data[i].r, src -> data[i].r);
+        } else {
+            if (src -> type[i] == 'p') {
+                memcpy(dest -> data[i].p, src -> data[i].p, sizeof(unitype));
+            } else {
+                if (src -> type[i] == 's') {
+                    dest -> data[i].s = strdup(src -> data[i].s);
+                } else {
+                    dest -> data[i] = src -> data[i];
+                }
+            }
+        }
+    }
+}
+
+/* prints the list without brackets */
+void list_fprint_emb(FILE *fp, list_t *list) {
+    fprintf(fp, "[");
+    if (list -> length == 0) {
+        fprintf(fp, "]");
+        return;
+    }
+    for (uint32_t i = 0; i < list -> length; i++) {
+        unitype_fprint(fp, list -> data[i], list -> type[i]);
+        if (i == list -> length - 1) {
+            fprintf(fp, "]");
+        } else {
+            fprintf(fp, ", ");
+        }
+    }
+}
+
+/* prints the list */
+void list_print(list_t *list) {
+    list_fprint_emb(stdout, list);
+    printf("\n");
+}
+
+/* prints the types of the list */
+void list_print_type(list_t *list) {
+    printf("[");
+    if (list -> length == 0) {
+        printf("]\n");
+        return;
+    }
+    for (uint32_t i = 0; i < list -> length; i++) {
+        printf("%c", list -> type[i]);
+        if (i == list -> length - 1) {
+            printf("]\n");
+        } else {
+            printf(", ");
+        }
+    }
+}
+
+/* frees the list's data but not the list itself */
+void list_free_lite(list_t *list) {
+    for (uint32_t i = 0; i < list -> length; i++) {
+        if (list -> type[i] == 'r') {
+            list_free(list -> data[i].r);
+        }
+        if ((list -> type[i] == 's' || list -> type[i] == 'p') && list -> data[i].p != NULL) {
+            free(list -> data[i].s);
+        }
+    }
+    free(list -> type);
+    free(list -> data);
+}
+
+/* frees the data used by the list */
+void list_free(list_t *list) {
+    list_free_lite(list);
+    free(list);
+}
+
+#endif /* UNITYPE_LIST_IMPLEMENTATION */
+
+#ifdef TURTLE_INTERNAL_IMPLEMENTATION
+
+/* 
+openGL implementation of turtle and the turtletools module
+features:
+adjustable pen (size and colour)
+resizable window support
+keyboard and mouse presses
+*/
+
+turtle_t turtle;
+
+/* run this to set the bounds of the window in coordinates */
+void turtleSetWorldCoordinates(int32_t minX, int32_t minY, int32_t maxX, int32_t maxY) {
+    glfwGetWindowSize(turtle.window, &turtle.screenbounds[0], &turtle.screenbounds[1]);
+    turtle.initscreenbounds[0] = turtle.screenbounds[0];
+    turtle.initscreenbounds[1] = turtle.screenbounds[1];
+    turtle.bounds[0] = minX;
+    turtle.bounds[1] = minY;
+    turtle.bounds[2] = maxX;
+    turtle.bounds[3] = maxY;
+}
+
+/* detect character */
+void unicodeSense(GLFWwindow *window, uint32_t codepoint) {
+    if (turtle.unicodeCallback != NULL) {
+        turtle.unicodeCallback(codepoint);
+    }
+}
+
+/* detect key presses */
+void keySense(GLFWwindow* window, int32_t key, int32_t scancode, int32_t action, int32_t mods) {
+    if (turtle.keyCallback != NULL) {
+        turtle.keyCallback(key, scancode, action);
+    }
+    if (action == GLFW_PRESS) {
+        list_append(turtle.keyPressed, (unitype) key, 'i');
+    }
+    if (action == GLFW_RELEASE) {
+        list_remove(turtle.keyPressed, (unitype) key, 'i');
+    }
+}
+
+/* detect mouse clicks */
+void mouseSense(GLFWwindow *window, int32_t button, int32_t action, int32_t mods) {
+    if (action == GLFW_PRESS) {
+        switch(button) {
+        case GLFW_MOUSE_BUTTON_LEFT:
+            list_append(turtle.keyPressed, (unitype) "m1", 's');
+            turtle.mousePressed[0] = 1;
+        break;
+        case GLFW_MOUSE_BUTTON_RIGHT:
+            list_append(turtle.keyPressed, (unitype) "m2", 's');
+            turtle.mousePressed[1] = 1;
+        break;
+        case GLFW_MOUSE_BUTTON_MIDDLE:
+            list_append(turtle.keyPressed, (unitype) "m3", 's');
+            turtle.mousePressed[2] = 1;
+        break;
+        default:
+        break;
+        }
+    }
+    if (action == GLFW_RELEASE) {
+        switch(button) {
+        case GLFW_MOUSE_BUTTON_LEFT:
+            list_remove(turtle.keyPressed, (unitype) "m1", 's');
+            turtle.mousePressed[0] = 0;
+        break;
+        case GLFW_MOUSE_BUTTON_RIGHT:
+            list_remove(turtle.keyPressed, (unitype) "m2", 's');
+            turtle.mousePressed[1] = 0;
+        break;
+        case GLFW_MOUSE_BUTTON_MIDDLE:
+            list_remove(turtle.keyPressed, (unitype) "m3", 's');
+            turtle.mousePressed[2] = 0;
+        break;
+        default:
+        break;
+        }
+    }
+}
+
+/* detect scroll wheel */
+void scrollSense(GLFWwindow* window, double xoffset, double yoffset) {
+    turtle.scrollY = yoffset;
+}
+
+/* the behavior with the mouse wheel is different since it can't be "on" or "off" */
+double turtleMouseWheel() {
+    double temp = turtle.scrollY;
+    turtle.scrollY = 0;
+    return temp;
+}
+
+/* top level boolean output call to check if the key with code [key] is currently being held down. Uses the GLFW_KEY_X macros */
+int8_t turtleKeyPressed(int32_t key) {
+    return list_count(turtle.keyPressed, (unitype) key, 'c');
+}
+
+/* top level boolean output call to check if the left click button is currently being held down */
+int8_t turtleMouseDown() {
+    return turtle.mousePressed[0];
+}
+
+/* top level boolean output call to check if the right click button is currently being held down */
+int8_t turtleMouseRight() {
+    return turtle.mousePressed[1];
+}
+
+/* top level boolean output call to check if the middle mouse button is currently being held down */
+int8_t turtleMouseMiddle() {
+    return turtle.mousePressed[2];
+}
+
+/* alternate duplicate of top level boolean output call to check if the middle mouse button is currently being held down */
+int8_t turtleMouseMid() {
+    return turtle.mousePressed[2];
+}
+
+/* initializes the turtletools module */
+void turtleInit(GLFWwindow* window, int32_t minX, int32_t minY, int32_t maxX, int32_t maxY) {
+    gladLoadGL();
+    glfwMakeContextCurrent(window); // various glfw things
+    glEnable(GL_ALPHA);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_ONE_MINUS_SRC_ALPHA, GL_SRC_ALPHA);
+    glClearColor(1.0, 1.0, 1.0, 0.0); // white background by default
+    turtle.window = window;
+    turtle.close = 0;
+    turtle.popupClose = 0;
+    turtle.keyPressed = list_init();
+    turtle.lastscreenbounds[0] = 0;
+    turtle.lastscreenbounds[1] = 0;
+    turtle.penPos = list_init();
+    turtle.penHash = 0;
+    turtle.lastLength = 0;
+    turtle.x = 0;
+    turtle.y = 0;
+    turtle.pensize = 1;
+    turtle.penshape = 0;
+    turtle.circleprez = 9; // default circleprez value
+    turtle.pen = 0;
+    turtle.penr = 0.0;
+    turtle.peng = 0.0;
+    turtle.penb = 0.0;
+    turtle.pena = 0.0;
+    for (uint8_t i = 0; i < 3; i++) {
+        turtle.currentColor[i] = 0.0;
+    }
+    turtle.currentColor[3] = 1.0;
+    /* 3D variables */
+    turtle.cameraX = 0;
+    turtle.cameraY = 0;
+    turtle.cameraZ = 0;
+    turtle.cameraFOV = 90;
+    turtle.cameraDirectionLeftRight = 0;
+    turtle.cameraDirectionUpDown = 0;
+
+    turtleSetWorldCoordinates(minX, minY, maxX, maxY);
+    turtle.keyCallback = NULL;
+    turtle.unicodeCallback = NULL;
+    glfwSetCharCallback(window, unicodeSense);
+    glfwSetKeyCallback(window, keySense); // initiate mouse and keyboard detection
+    glfwSetMouseButtonCallback(window, mouseSense);
+    glfwSetScrollCallback(window, scrollSense);
+}
+
+/* gets the mouse coordinates */
+void turtleGetMouseCoords() {
+    glfwGetWindowSize(turtle.window, &turtle.screenbounds[0], &turtle.screenbounds[1]); // get screenbounds
+    glfwGetCursorPos(turtle.window, &turtle.mouseAbsX, &turtle.mouseAbsY); // get mouse positions (absolute)
+    turtle.mouseX = turtle.mouseAbsX;
+    turtle.mouseY = turtle.mouseAbsY;
+    turtle.mouseScaX = turtle.mouseAbsX;
+    turtle.mouseScaY = turtle.mouseAbsY;
+    turtle.mouseX -= (turtle.initscreenbounds[0] / 2) - ((turtle.bounds[2] + turtle.bounds[0]) / 2);
+    turtle.mouseX *= ((double) (turtle.bounds[2] - turtle.bounds[0]) / (double) turtle.initscreenbounds[0]);
+    turtle.mouseY -= (turtle.initscreenbounds[1] / 2) - ((turtle.bounds[3] + turtle.bounds[1]) / 2) + (turtle.screenbounds[1] - turtle.initscreenbounds[1]);
+    turtle.mouseY *= ((double) (turtle.bounds[1] - turtle.bounds[3]) / (double) turtle.initscreenbounds[1]);
+    turtle.mouseScaX -= (turtle.screenbounds[0] / 2) - ((turtle.bounds[2] + turtle.bounds[0]) / 2);
+    turtle.mouseScaX *= ((double) (turtle.bounds[2] - turtle.bounds[0]) / (double) turtle.screenbounds[0]);
+    turtle.mouseScaY -= (turtle.screenbounds[1] / 2) - ((turtle.bounds[3] + turtle.bounds[1]) / 2);
+    turtle.mouseScaY *= ((double) (turtle.bounds[1] - turtle.bounds[3]) / (double) turtle.screenbounds[1]);
+}
+
+/* set the background color */
+void turtleBgColor(double r, double g, double b) {
+    glClearColor(r / 255, g / 255, b / 255, 0.0);
+}
+
+/* set the pen color */
+void turtlePenColor(double r, double g, double b) {
+    turtle.penr = r / 255;
+    turtle.peng = g / 255;
+    turtle.penb = b / 255;
+    turtle.pena = 0.0;
+}
+
+/* set the pen color (with transparency) */
+void turtlePenColorAlpha(double r, double g, double b, double a) {
+    turtle.penr = r / 255;
+    turtle.peng = g / 255;
+    turtle.penb = b / 255;
+    turtle.pena = a / 255;
+}
+
+/* set the pen size */
+void turtlePenSize(double size) {
+    turtle.pensize = size * 0.5; // ensures pensize matches pixel size (a pen size of 240 will be 240 coordinates long)
+}
+
+/* clears all the pen drawings */
+void turtleClear() {
+    // list_free(turtle.penPos);
+    // turtle.penPos = list_init();
+    turtle.penPos -> length = 0; // could be dangerous
+}
+
+/* pen down */
+void turtlePenDown() {
+    if (turtle.pen == 0) {
+        turtle.pen = 1;
+        int8_t changed = 0;
+        int32_t len = turtle.penPos -> length;
+        if (len > 0) {
+            unitype *ren = turtle.penPos -> data;
+            if (ren[len - 9].d != turtle.x) {changed = 1;}
+            if (ren[len - 8].d != turtle.y) {changed = 1;}
+            if (ren[len - 7].d != turtle.pensize) {changed = 1;}
+            if (ren[len - 6].d != turtle.penr) {changed = 1;}
+            if (ren[len - 5].d != turtle.peng) {changed = 1;}
+            if (ren[len - 4].d != turtle.penb) {changed = 1;}
+            if (ren[len - 3].d != turtle.pena) {changed = 1;}
+            if (ren[len - 2].h != turtle.penshape) {changed = 1;}
+            if (ren[len - 1].d != turtle.circleprez) {changed = 1;}
+        } else {
+            changed = 1;
+        }
+        if (changed == 1) {
+            list_append(turtle.penPos, (unitype) turtle.x, 'd');
+            list_append(turtle.penPos, (unitype) turtle.y, 'd');
+            list_append(turtle.penPos, (unitype) turtle.pensize, 'd');
+            list_append(turtle.penPos, (unitype) turtle.penr, 'd');
+            list_append(turtle.penPos, (unitype) turtle.peng, 'd');
+            list_append(turtle.penPos, (unitype) turtle.penb, 'd');
+            list_append(turtle.penPos, (unitype) turtle.pena, 'd');
+            list_append(turtle.penPos, (unitype) turtle.penshape, 'h');
+            list_append(turtle.penPos, (unitype) turtle.circleprez, 'd');
+        }
+    }
+}
+
+/* lift the pen */
+void turtlePenUp() {
+    if (turtle.pen == 1) {
+        turtle.pen = 0;
+        if (turtle.penPos -> length > 0 && turtle.penPos -> type[turtle.penPos -> length - 1] != 'c') {
+            list_append(turtle.penPos, (unitype) 0, 'c');
+            list_append(turtle.penPos, (unitype) 0, 'c');
+            list_append(turtle.penPos, (unitype) 0, 'c');
+            list_append(turtle.penPos, (unitype) 0, 'c');
+            list_append(turtle.penPos, (unitype) 0, 'c');
+            list_append(turtle.penPos, (unitype) 0, 'c');
+            list_append(turtle.penPos, (unitype) 0, 'c');
+            list_append(turtle.penPos, (unitype) 0, 'c');
+            list_append(turtle.penPos, (unitype) 0, 'c');
+        }
+    }
+}
+
+/* set the pen shape ("circle", "square", "triangle", "none", or "connected") */
+void turtlePenShape(char *selection) {
+    if (strcmp(selection, "circle") == 0 || strcmp(selection, "Circle") == 0) {
+        turtle.penshape = 0;
+    }
+    if (strcmp(selection, "square") == 0 || strcmp(selection, "Square") == 0) {
+        turtle.penshape = 1;
+    }
+    if (strcmp(selection, "triangle") == 0 || strcmp(selection, "Triangle") == 0) {
+        turtle.penshape = 2;
+    }
+    if (strcmp(selection, "none") == 0 || strcmp(selection, "None") == 0) {
+        turtle.penshape = 3;
+    }
+    if (strcmp(selection, "connected") == 0 || strcmp(selection, "Connected") == 0) {
+        turtle.penshape = 4;
+    }
+    if (strcmp(selection, "text") == 0 || strcmp(selection, "Text") == 0) {
+        turtle.penshape = 5;
+    }
+}
+
+/* set the circle precision */
+void turtlePenPrez(double prez) {
+    turtle.circleprez = prez;
+}
+
+/* moves the turtle to a coordinate */
+void turtleGoto(double x, double y) {
+    if (fabs(turtle.x - x) > 0.01 || fabs(turtle.y - y) > 0.01) {
+        turtle.x = x;
+        turtle.y = y;
+        if (turtle.pen == 1) {
+            int8_t changed = 0;
+            int32_t len = turtle.penPos -> length;
+            if (len > 0) {
+                unitype *ren = turtle.penPos -> data;
+                if (ren[len - 9].d != turtle.x) {changed = 1;}
+                if (ren[len - 8].d != turtle.y) {changed = 1;}
+                if (ren[len - 7].d != turtle.pensize) {changed = 1;}
+                if (ren[len - 6].d != turtle.penr) {changed = 1;}
+                if (ren[len - 5].d != turtle.peng) {changed = 1;}
+                if (ren[len - 4].d != turtle.penb) {changed = 1;}
+                if (ren[len - 3].d != turtle.pena) {changed = 1;}
+                if (ren[len - 2].h != turtle.penshape) {changed = 1;}
+                if (ren[len - 1].d != turtle.circleprez) {changed = 1;}
+            } else {
+                changed = 1;
+            }
+            if (changed == 1) {
+                list_append(turtle.penPos, (unitype) x, 'd');
+                list_append(turtle.penPos, (unitype) y, 'd');
+                list_append(turtle.penPos, (unitype) turtle.pensize, 'd');
+                list_append(turtle.penPos, (unitype) turtle.penr, 'd');
+                list_append(turtle.penPos, (unitype) turtle.peng, 'd');
+                list_append(turtle.penPos, (unitype) turtle.penb, 'd');
+                list_append(turtle.penPos, (unitype) turtle.pena, 'd');
+                list_append(turtle.penPos, (unitype) turtle.penshape, 'h');
+                list_append(turtle.penPos, (unitype) turtle.circleprez, 'd');
+            }
+        }
+    }
+}
+
+/* draws a circle at the specified x and y (coordinates) */
+void turtleCircleRender(double x, double y, double rad, double r, double g, double b, double a, double xfact, double yfact, double prez) {
+    int8_t colorChange = 0;
+    if (r != turtle.currentColor[0]) {colorChange = 1;}
+    if (g != turtle.currentColor[1]) {colorChange = 1;}
+    if (b != turtle.currentColor[2]) {colorChange = 1;}
+    if (a != turtle.currentColor[3]) {colorChange = 1;}
+    if (colorChange == 1) {
+        glColor4d(r, g, b, a);
+        turtle.currentColor[0] = r;
+        turtle.currentColor[1] = g;
+        turtle.currentColor[2] = b;
+        turtle.currentColor[3] = a;
+    }
+    glBegin(GL_TRIANGLE_FAN);
+    for (double i = 0; i < prez; i++) {
+        glVertex2d((x + rad * sin(2 * i * M_PI / prez)) * xfact, (y + rad * cos(2 * i * M_PI / prez)) * yfact);
+    }
+    glEnd();
+}
+
+/* draws a square */
+void turtleSquareRender(double x1, double y1, double x2, double y2, double r, double g, double b, double a, double xfact, double yfact) {
+    int8_t colorChange = 0;
+    if (r != turtle.currentColor[0]) {colorChange = 1;}
+    if (g != turtle.currentColor[1]) {colorChange = 1;}
+    if (b != turtle.currentColor[2]) {colorChange = 1;}
+    if (a != turtle.currentColor[3]) {colorChange = 1;}
+    if (colorChange == 1) {
+        glColor4d(r, g, b, a);
+        turtle.currentColor[0] = r;
+        turtle.currentColor[1] = g;
+        turtle.currentColor[2] = b;
+        turtle.currentColor[3] = a;
+    }
+    glBegin(GL_TRIANGLE_FAN);
+    glVertex2d(x1 * xfact, y1 * yfact);
+    glVertex2d(x2 * xfact, y1 * yfact);
+    glVertex2d(x2 * xfact, y2 * yfact);
+    glVertex2d(x1 * xfact, y2 * yfact);
+    glEnd();
+}
+
+/* draws a triangle */
+void turtleTriangleRender(double x1, double y1, double x2, double y2, double x3, double y3, double r, double g, double b, double a, double xfact, double yfact) {
+    int8_t colorChange = 0;
+    if (r != turtle.currentColor[0]) {colorChange = 1;}
+    if (g != turtle.currentColor[1]) {colorChange = 1;}
+    if (b != turtle.currentColor[2]) {colorChange = 1;}
+    if (a != turtle.currentColor[3]) {colorChange = 1;}
+    if (colorChange == 1) {
+        glColor4d(r, g, b, a);
+        turtle.currentColor[0] = r;
+        turtle.currentColor[1] = g;
+        turtle.currentColor[2] = b;
+        turtle.currentColor[3] = a;
+    }
+    glBegin(GL_TRIANGLES);
+    glVertex2d(x1 * xfact, y1 * yfact);
+    glVertex2d(x2 * xfact, y2 * yfact);
+    glVertex2d(x3 * xfact, y3 * yfact);
+    glEnd();
+}
+
+/* draws a quadrilateral */
+void turtleQuadRender(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, double r, double g, double b, double a, double xfact, double yfact) {
+    int8_t colorChange = 0;
+    if (r != turtle.currentColor[0]) {colorChange = 1;}
+    if (g != turtle.currentColor[1]) {colorChange = 1;}
+    if (b != turtle.currentColor[2]) {colorChange = 1;}
+    if (a != turtle.currentColor[3]) {colorChange = 1;}
+    if (colorChange == 1) {
+        glColor4d(r, g, b, a);
+        turtle.currentColor[0] = r;
+        turtle.currentColor[1] = g;
+        turtle.currentColor[2] = b;
+        turtle.currentColor[3] = a;
+    }
+    glBegin(GL_TRIANGLE_FAN);
+    glVertex2d(x1 * xfact, y1 * yfact);
+    glVertex2d(x2 * xfact, y2 * yfact);
+    glVertex2d(x3 * xfact, y3 * yfact);
+    glVertex2d(x4 * xfact, y4 * yfact);
+    glEnd();
+}
+
+/* adds a (blit) triangle to the pipeline (for better speed) */
+void turtleTriangle(double x1, double y1, double x2, double y2, double x3, double y3) {
+    list_append(turtle.penPos, (unitype) x1, 'd');
+    list_append(turtle.penPos, (unitype) y1, 'd');
+    list_append(turtle.penPos, (unitype) x2, 'd');
+    list_append(turtle.penPos, (unitype) turtle.penr, 'd');
+    list_append(turtle.penPos, (unitype) turtle.peng, 'd');
+    list_append(turtle.penPos, (unitype) turtle.penb, 'd');
+    list_append(turtle.penPos, (unitype) turtle.pena, 'd');
+    list_append(turtle.penPos, (unitype) 66, 'h'); // blit triangle signifier
+    list_append(turtle.penPos, (unitype) y2, 'd'); // some unconventional formatting but it works
+
+    list_append(turtle.penPos, (unitype) x3, 'd');
+    list_append(turtle.penPos, (unitype) y3, 'd');
+    list_append(turtle.penPos, (unitype) 0, 'd'); // zero'd out (wasted space)
+    list_append(turtle.penPos, (unitype) turtle.penr, 'd'); // duplicate colour data (wasted space)
+    list_append(turtle.penPos, (unitype) turtle.peng, 'd');
+    list_append(turtle.penPos, (unitype) turtle.penb, 'd');
+    list_append(turtle.penPos, (unitype) turtle.pena, 'd');
+    list_append(turtle.penPos, (unitype) 66, 'h'); // blit triangle signifier
+    list_append(turtle.penPos, (unitype) 0, 'd'); // zero'd out (wasted space)
+}
+
+void turtleTriangleColor(double x1, double y1, double x2, double y2, double x3, double y3, double r, double g, double b, double a) {
+    list_append(turtle.penPos, (unitype) x1, 'd');
+    list_append(turtle.penPos, (unitype) y1, 'd');
+    list_append(turtle.penPos, (unitype) x2, 'd');
+    list_append(turtle.penPos, (unitype) (r / 255), 'd');
+    list_append(turtle.penPos, (unitype) (g / 255), 'd');
+    list_append(turtle.penPos, (unitype) (b / 255), 'd');
+    list_append(turtle.penPos, (unitype) (a / 255), 'd');
+    list_append(turtle.penPos, (unitype) 66, 'h'); // blit triangle signifier
+    list_append(turtle.penPos, (unitype) y2, 'd'); // some unconventional formatting but it works
+
+    list_append(turtle.penPos, (unitype) x3, 'd');
+    list_append(turtle.penPos, (unitype) y3, 'd');
+    list_append(turtle.penPos, (unitype) 0, 'd'); // zero'd out (wasted space)
+    list_append(turtle.penPos, (unitype) r, 'd'); // duplicate colour data (wasted space)
+    list_append(turtle.penPos, (unitype) g, 'd');
+    list_append(turtle.penPos, (unitype) b, 'd');
+    list_append(turtle.penPos, (unitype) a, 'd');
+    list_append(turtle.penPos, (unitype) 66, 'h'); // blit triangle signifier
+    list_append(turtle.penPos, (unitype) 0, 'd'); // zero'd out (wasted space)
+}
+
+/* adds a (blit) quad to the pipeline (for better speed) */
+void turtleQuad(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4) {
+    list_append(turtle.penPos, (unitype) x1, 'd');
+    list_append(turtle.penPos, (unitype) y1, 'd');
+    list_append(turtle.penPos, (unitype) x2, 'd');
+    list_append(turtle.penPos, (unitype) turtle.penr, 'd');
+    list_append(turtle.penPos, (unitype) turtle.peng, 'd');
+    list_append(turtle.penPos, (unitype) turtle.penb, 'd');
+    list_append(turtle.penPos, (unitype) turtle.pena, 'd');
+    list_append(turtle.penPos, (unitype) 67, 'h'); // blit quad signifier
+    list_append(turtle.penPos, (unitype) y2, 'd'); // some unconventional formatting but it works
+
+    list_append(turtle.penPos, (unitype) x3, 'd');
+    list_append(turtle.penPos, (unitype) y3, 'd');
+    list_append(turtle.penPos, (unitype) x4, 'd');
+    list_append(turtle.penPos, (unitype) turtle.penr, 'd'); // duplicate colour data (wasted space)
+    list_append(turtle.penPos, (unitype) turtle.peng, 'd');
+    list_append(turtle.penPos, (unitype) turtle.penb, 'd');
+    list_append(turtle.penPos, (unitype) turtle.pena, 'd');
+    list_append(turtle.penPos, (unitype) 67, 'h'); // blit quad signifier
+    list_append(turtle.penPos, (unitype) y4, 'd');
+}
+
+void turtleQuadColor(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, double r, double g, double b, double a) {
+    list_append(turtle.penPos, (unitype) x1, 'd');
+    list_append(turtle.penPos, (unitype) y1, 'd');
+    list_append(turtle.penPos, (unitype) x2, 'd');
+    list_append(turtle.penPos, (unitype) (r / 255), 'd');
+    list_append(turtle.penPos, (unitype) (g / 255), 'd');
+    list_append(turtle.penPos, (unitype) (b / 255), 'd');
+    list_append(turtle.penPos, (unitype) (a / 255), 'd');
+    list_append(turtle.penPos, (unitype) 67, 'h'); // blit quad signifier
+    list_append(turtle.penPos, (unitype) y2, 'd'); // some unconventional formatting but it works
+
+    list_append(turtle.penPos, (unitype) x3, 'd');
+    list_append(turtle.penPos, (unitype) y3, 'd');
+    list_append(turtle.penPos, (unitype) x4, 'd');
+    list_append(turtle.penPos, (unitype) r, 'd'); // duplicate colour data (wasted space)
+    list_append(turtle.penPos, (unitype) g, 'd');
+    list_append(turtle.penPos, (unitype) b, 'd');
+    list_append(turtle.penPos, (unitype) a, 'd');
+    list_append(turtle.penPos, (unitype) 67, 'h'); // blit quad signifier
+    list_append(turtle.penPos, (unitype) y4, 'd');
+}
+
+/* adds a (blit) rectangle to the pipeline (uses quad interface) */
+void turtleRectangle(double x1, double y1, double x2, double y2) {
+    list_append(turtle.penPos, (unitype) x1, 'd');
+    list_append(turtle.penPos, (unitype) y1, 'd');
+    list_append(turtle.penPos, (unitype) x2, 'd');
+    list_append(turtle.penPos, (unitype) turtle.penr, 'd');
+    list_append(turtle.penPos, (unitype) turtle.peng, 'd');
+    list_append(turtle.penPos, (unitype) turtle.penb, 'd');
+    list_append(turtle.penPos, (unitype) turtle.pena, 'd');
+    list_append(turtle.penPos, (unitype) 67, 'h'); // blit quad signifier
+    list_append(turtle.penPos, (unitype) y1, 'd'); // some unconventional formatting but it works
+
+    list_append(turtle.penPos, (unitype) x2, 'd');
+    list_append(turtle.penPos, (unitype) y2, 'd');
+    list_append(turtle.penPos, (unitype) x1, 'd');
+    list_append(turtle.penPos, (unitype) turtle.penr, 'd'); // duplicate colour data (wasted space)
+    list_append(turtle.penPos, (unitype) turtle.peng, 'd');
+    list_append(turtle.penPos, (unitype) turtle.penb, 'd');
+    list_append(turtle.penPos, (unitype) turtle.pena, 'd');
+    list_append(turtle.penPos, (unitype) 67, 'h'); // blit quad signifier
+    list_append(turtle.penPos, (unitype) y2, 'd');
+}
+
+void turtleRectangleColor(double x1, double y1, double x2, double y2, double r, double g, double b, double a) {
+    list_append(turtle.penPos, (unitype) x1, 'd');
+    list_append(turtle.penPos, (unitype) y1, 'd');
+    list_append(turtle.penPos, (unitype) x2, 'd');
+    list_append(turtle.penPos, (unitype) (r / 255), 'd');
+    list_append(turtle.penPos, (unitype) (g / 255), 'd');
+    list_append(turtle.penPos, (unitype) (b / 255), 'd');
+    list_append(turtle.penPos, (unitype) (a / 255), 'd');
+    list_append(turtle.penPos, (unitype) 67, 'h'); // blit quad signifier
+    list_append(turtle.penPos, (unitype) y1, 'd'); // some unconventional formatting but it works
+
+    list_append(turtle.penPos, (unitype) x2, 'd');
+    list_append(turtle.penPos, (unitype) y2, 'd');
+    list_append(turtle.penPos, (unitype) x1, 'd');
+    list_append(turtle.penPos, (unitype) r, 'd'); // duplicate colour data (wasted space)
+    list_append(turtle.penPos, (unitype) g, 'd');
+    list_append(turtle.penPos, (unitype) b, 'd');
+    list_append(turtle.penPos, (unitype) a, 'd');
+    list_append(turtle.penPos, (unitype) 67, 'h'); // blit quad signifier
+    list_append(turtle.penPos, (unitype) y2, 'd');
+}
+
+/* adds a (blit) circle to the pipeline */
+void turtleCircle(double x, double y, double radius) {
+    list_append(turtle.penPos, (unitype) x, 'd');
+    list_append(turtle.penPos, (unitype) y, 'd');
+    list_append(turtle.penPos, (unitype) radius, 'd');
+    list_append(turtle.penPos, (unitype) turtle.penr, 'd');
+    list_append(turtle.penPos, (unitype) turtle.peng, 'd');
+    list_append(turtle.penPos, (unitype) turtle.penb, 'd');
+    list_append(turtle.penPos, (unitype) turtle.pena, 'd');
+    list_append(turtle.penPos, (unitype) 64, 'h'); // blit circle signifier
+    list_append(turtle.penPos, (unitype) turtle.circleprez, 'd');
+}
+
+/* create a triangle in 3D */
+void turtle3DTriangle(double x1, double y1, double z1, double x2, double y2, double z2, double x3, double y3, double z3) {
+    list_append(turtle.penPos, (unitype) x1, 'd');
+    list_append(turtle.penPos, (unitype) y1, 'd');
+    list_append(turtle.penPos, (unitype) z1, 'd');
+    list_append(turtle.penPos, (unitype) turtle.penr, 'd');
+    list_append(turtle.penPos, (unitype) turtle.peng, 'd');
+    list_append(turtle.penPos, (unitype) turtle.penb, 'd');
+    list_append(turtle.penPos, (unitype) turtle.pena, 'd');
+    list_append(turtle.penPos, (unitype) 130, 'h'); // blit 3D triangle signifier
+    list_append(turtle.penPos, (unitype) x2, 'd');
+
+    list_append(turtle.penPos, (unitype) y2, 'd');
+    list_append(turtle.penPos, (unitype) z2, 'd');
+    list_append(turtle.penPos, (unitype) x3, 'd');
+    list_append(turtle.penPos, (unitype) y3, 'd');
+    list_append(turtle.penPos, (unitype) z3, 'd');
+    list_append(turtle.penPos, (unitype) 0, 'd');
+    list_append(turtle.penPos, (unitype) 0, 'd');
+    list_append(turtle.penPos, (unitype) 130, 'h'); // blit 3D triangle signifier
+    list_append(turtle.penPos, (unitype) 0, 'd');
+}
+
+/* 3D -> 2D using perspective projection matrix */
+void turtlePerspective(double x, double y, double z, double *xOut, double *yOut) {
+    /* https://www.scratchapixel.com/lessons/3d-basic-rendering/perspective-and-orthographic-projection-matrix/building-basic-perspective-projection-matrix.html */
+    // double transform[16] = {
+    //     1, 0, 0, 0,
+    //     0, 1, 0, turtle.cameraDirectionLeftRight,
+    //     0, 0, 1, turtle.cameraDirectionUpDown,
+    //     0, 0, 0, 1,
+    // };
+    // x = x * transform[0 ] + y * transform[1 ] + z * transform[2 ] + transform[3 ];
+    // y = x * transform[4 ] + y * transform[5 ] + z * transform[6 ] + transform[7 ];
+    // z = x * transform[8 ] + y * transform[9 ] + z * transform[10] + transform[11];
+    // double outWTest = x * transform[12] + y * transform[13] + z * transform[14] + transform[15];
+    // x /= outWTest;
+    // y /= outWTest;
+    // z /= outWTest;
+    // double scalingFactor = 1 / (tan((turtle.cameraFOV / 2) / 57.2958));
+    // double near = 0.1;
+    // double hypot = (x - turtle.cameraX) * (x - turtle.cameraX) + (y - turtle.cameraY) * (y - turtle.cameraY) + (z - turtle.cameraZ) * (z - turtle.cameraZ);
+    // double far = 100;
+    // // double far = hypot * sin((90 - turtle.cameraDirectionUpDown) / 57.2958) * sin((90 - turtle.cameraDirectionLeftRight) / 57.2958);
+    // double threeThree = -far / (far - near);
+    // double perspective[16] = {
+    //     scalingFactor, 0,             0,                 0,
+    //     0,             scalingFactor, 0,                 0,
+    //     0,             0,             threeThree,       -1,
+    //     0,             0,             threeThree * near, 0,
+    // };
+    // double outX = x * perspective[0 ] + y * perspective[1 ] + z * perspective[2 ] + perspective[3 ];
+    // double outY = x * perspective[4 ] + y * perspective[5 ] + z * perspective[6 ] + perspective[7 ];
+    // // double outZ = x * perspective[8 ] + y * perspective[9 ] + z * perspective[10] + perspective[11];
+    // double outW = x * perspective[12] + y * perspective[13] + z * perspective[14] + perspective[15];
+    // outX /= outW;
+    // outY /= outW;
+    // *xOut = outX * 640;
+    // *yOut = outY * 360;
+    // printf("%lf %lf\n", *xOut, *yOut);
+}
+
+/* draws the turtle's path on the screen */
+void turtleUpdate() {
+    /* used to have a feature that only redrew the screen if there have been any changes from last frame, but it has been removed.
+       opted to redraw every frame and not list_copy, an alternative is hashing the penPos list. An interesting idea for sure... for another time */
+    int8_t changed = 0;
+    uint32_t len = turtle.penPos -> length;
+    unitype *ren = turtle.penPos -> data;
+    int8_t *renType = turtle.penPos -> type;
+    uint64_t oldHash = turtle.penHash;
+    turtle.penHash = 0; // I don't use this but it's an idea: https://stackoverflow.com/questions/57455444/very-low-collision-non-cryptographic-hashing-function
+    for (uint32_t i = 0; i < len; i++) {
+        turtle.penHash += (uint64_t) turtle.penPos -> data[i].p; // simple addition hash. I know not technically safe since i cast all sizes to 8 byte, but it should still work
+    }
+    if (len != turtle.lastLength || oldHash != turtle.penHash) {
+        changed = 1;
+        turtle.lastLength = len;
+    }
+    if (changed) {
+        double xfact = (turtle.bounds[2] - turtle.bounds[0]) / 2;
+        double yfact = (turtle.bounds[3] - turtle.bounds[1]) / 2;
+        xfact = 1 / xfact;
+        yfact = 1 / yfact;
+        double lastSize = -1;
+        double lastPrez = -1;
+        double precomputedLog = 5;
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        for (int32_t i = 0; i < (int32_t) len; i += 9) {
+            if (renType[i] == 'd') {
+                switch (ren[i + 7].h) {
+                case 0:
+                    if (!(lastSize == ren[i + 2].d) || !(lastPrez != ren[i + 8].d)) {
+                        precomputedLog = ren[i + 8].d * log(2.71 + ren[i + 2].d);
+                    }
+                    lastSize = ren[i + 2].d;
+                    lastPrez = ren[i + 8].d;
+                    turtleCircleRender(ren[i].d, ren[i + 1].d, ren[i + 2].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xfact, yfact, precomputedLog);
+                break;
+                case 1:
+                    turtleSquareRender(ren[i].d - ren[i + 2].d, ren[i + 1].d - ren[i + 2].d, ren[i].d + ren[i + 2].d, ren[i + 1].d + ren[i + 2].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xfact, yfact);
+                break;
+                case 2:
+                    turtleTriangleRender(ren[i].d - ren[i + 2].d, ren[i + 1].d - ren[i + 2].d, ren[i].d + ren[i + 2].d, ren[i + 1].d - ren[i + 2].d, ren[i].d, ren[i + 1].d + ren[i + 2].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xfact, yfact);
+                break;
+                case 5:
+                    if (i - 9 < 0 || renType[i - 9] == 'c') {
+                        if (!(lastSize == ren[i + 2].d) || !(lastPrez != ren[i + 8].d)) {
+                            precomputedLog = ren[i + 8].d * log(2.71 + ren[i + 2].d);
+                        }
+                        lastSize = ren[i + 2].d;
+                        lastPrez = ren[i + 8].d;
+                        turtleCircleRender(ren[i].d, ren[i + 1].d, ren[i + 2].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xfact, yfact, precomputedLog);
+                    }
+                break;
+                default:
+                break;
+                }
+                if (i + 18 < (int32_t) len && renType[i + 9] == 'd' && ren[i + 7].h < 64 && (ren[i + 7].h == 4 || ren[i + 7].h == 5 || (fabs(ren[i].d - ren[i + 9].d) > ren[i + 2].d / 2 || fabs(ren[i + 1].d - ren[i + 10].d) > ren[i + 2].d / 2))) { // tests for next point continuity and also ensures that the next point is at sufficiently different coordinates
+                    double dir = atan((ren[i + 9].d - ren[i].d) / (ren[i + 1].d - ren[i + 10].d));
+                    double sinn = sin(dir + M_PI / 2);
+                    double coss = cos(dir + M_PI / 2);
+                    turtleQuadRender(ren[i].d + ren[i + 2].d * sinn, ren[i + 1].d - ren[i + 2].d * coss, ren[i + 9].d + ren[i + 2].d * sinn, ren[i + 10].d - ren[i + 2].d * coss, ren[i + 9].d - ren[i + 2].d * sinn, ren[i + 10].d + ren[i + 2].d * coss, ren[i].d - ren[i + 2].d * sinn, ren[i + 1].d + ren[i + 2].d * coss, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xfact, yfact);
+                    if ((ren[i + 7].h == 4 || ren[i + 7].h == 5) && i + 18 < (int32_t) len && renType[i + 18] == 'd') {
+                        double dir2 = atan((ren[i + 18].d - ren[i + 9].d) / (ren[i + 10].d - ren[i + 19].d));
+                        double sinn2 = sin(dir2 + M_PI / 2);
+                        double coss2 = cos(dir2 + M_PI / 2);
+                        turtleTriangleRender(ren[i + 9].d + ren[i + 2].d * sinn, ren[i + 10].d - ren[i + 2].d * coss, ren[i + 9].d - ren[i + 2].d * sinn, ren[i + 10].d + ren[i + 2].d * coss, ren[i + 9].d + ren[i + 11].d * sinn2, ren[i + 10].d - ren[i + 11].d * coss2, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xfact, yfact); // in a perfect world the program would know which one of these triangles to render (to blend the segments)
+                        turtleTriangleRender(ren[i + 9].d + ren[i + 2].d * sinn, ren[i + 10].d - ren[i + 2].d * coss, ren[i + 9].d - ren[i + 2].d * sinn, ren[i + 10].d + ren[i + 2].d * coss, ren[i + 9].d - ren[i + 11].d * sinn2, ren[i + 10].d + ren[i + 11].d * coss2, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xfact, yfact); // however we live in a world where i am bad at math, so it just renders both no matter what (one has no effect)
+                    }
+                } else {
+                    if (ren[i + 7].h == 4 && i > 8 && renType[i - 8] == 'c') {
+                        if (!(lastSize == ren[i + 2].d) || !(lastPrez != ren[i + 8].d)) {
+                            precomputedLog = ren[i + 8].d * log(2.71 + ren[i + 2].d);
+                        }
+                        lastSize = ren[i + 2].d;
+                        lastPrez = ren[i + 8].d;
+                        turtleCircleRender(ren[i].d, ren[i + 1].d, ren[i + 2].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xfact, yfact, precomputedLog);
+                    }
+                    if (ren[i + 7].h == 5 && i > 8) {
+                        if (!(lastSize == ren[i + 2].d) || !(lastPrez != ren[i + 8].d)) {
+                            precomputedLog = ren[i + 8].d * log(2.71 + ren[i + 2].d);
+                        }
+                        lastSize = ren[i + 2].d;
+                        lastPrez = ren[i + 8].d;
+                        turtleCircleRender(ren[i].d, ren[i + 1].d, ren[i + 2].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xfact, yfact, precomputedLog);
+                    }
+                }
+                if (ren[i + 7].h == 64) { // blit circle
+                    if (!(lastSize == ren[i + 2].d) || !(lastPrez != ren[i + 8].d)) {
+                        precomputedLog = ren[i + 8].d * log(2.71 + ren[i + 2].d);
+                    }
+                    lastSize = ren[i + 2].d;
+                    lastPrez = ren[i + 8].d;
+                    turtleCircleRender(ren[i].d, ren[i + 1].d, ren[i + 2].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xfact, yfact, precomputedLog);
+                }
+                if (ren[i + 7].h == 66) { // blit triangle
+                    turtleTriangleRender(ren[i].d, ren[i + 1].d, ren[i + 2].d, ren[i + 8].d, ren[i + 9].d, ren[i + 10].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xfact, yfact);
+                    i += 9;
+                }
+                if (ren[i + 7].h == 67) { // blit quad
+                    turtleQuadRender(ren[i].d, ren[i + 1].d, ren[i + 2].d, ren[i + 8].d, ren[i + 9].d, ren[i + 10].d, ren[i + 11].d, ren[i + 17].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xfact, yfact);
+                    i += 9;
+                }
+                if (ren[i + 7].h == 128) { // blit 3D sphere
+
+                }
+                if (ren[i + 7].h == 129) { // blit 3D circle
+
+                }
+                if (ren[i + 7].h == 130) { // blit 3D triangle
+                    turtlePerspective(ren[i].d, ren[i + 1].d, ren[i + 2].d, &ren[i].d, &ren[i + 1].d);
+                    turtlePerspective(ren[i + 8].d, ren[i + 9].d, ren[i + 10].d, &ren[i + 8].d, &ren[i + 9].d);
+                    turtlePerspective(ren[i + 11].d, ren[i + 12].d, ren[i + 13].d, &ren[i + 11].d, &ren[i + 12].d);
+                    turtleTriangleRender(ren[i].d, ren[i + 1].d, ren[i + 8].d, ren[i + 9].d, ren[i + 11].d, ren[i + 12].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xfact, yfact);
+                    i += 9;
+                }
+                if (ren[i + 7].h == 131) { // blit 3D quad
+
+                }
+            }
+        }
+        glfwSwapBuffers(turtle.window);
+    }
+    glfwPollEvents();
+    if (glfwWindowShouldClose(turtle.window)) {
+        turtle.close = 1;
+        if (turtle.popupClose) {
+            glfwTerminate();
+        }
+        
+    }
+}
+
+/* keeps the window open while doing nothing else (from python turtleMainLoop()) */
+void turtleMainLoop() {
+    while (turtle.close == 0) {
+        turtleUpdate();
+    }
+}
+
+/* free turtle memory */
+void turtleFree() {
+    list_free(turtle.keyPressed);
+    list_free(turtle.penPos);
+}
+
+#endif /* TURTLE_INTERNAL_IMPLEMENTATION */
+
+#ifdef TURTLE_TEXT_IMPLEMENTATION
+
+/* turtleText uses openGL and the turtle library to render text on the screen */
+
+turtleText_t turtleText;
+
+/* initialise values, must supply a font file (tgl) */
+int32_t turtleTextInit(const char *filename) {
+    turtlePenColor(0, 0, 0);
+    turtleText.bezierPrez = 10;
+
+    /* load file */
+    char fileExists = 1;
+    list_t *generatedFont = list_init();
+    FILE *tgl = fopen(filename, "r");
+    if (tgl == NULL) {
+        printf("Error: could not open file %s, using default\n", filename);
+        generateDefaultFont(generatedFont);
+        fileExists = 0;
+    }
+
+    list_t *fontDataInit = list_init(); // these start as lists and become int arrays
+    list_t *fontPointerInit = list_init();
+    list_t *supportedCharReferenceInit = list_init();
+    uint8_t parsedInt[12]; // max possible length of an int as a string is 11
+    uint32_t fontPar;
+    int32_t oldptr;
+    int32_t strptr;
+
+    char line[2048]; // maximum line length
+    line[2047] = 0; // canary value
+    turtleText.charCount = 0;
+    while ((fileExists == 0 && turtleText.charCount < generatedFont -> length) || (fileExists == 1 && fgets(line, 2048, tgl) != NULL)) { // fgets to prevent overflows
+        if (fileExists == 0) {
+            memcpy(line, generatedFont -> data[turtleText.charCount].s, strlen(generatedFont -> data[turtleText.charCount].s) + 1);
+        }
+        if (line[2047] != 0) {
+            printf("Error: line %d in file %s exceeded appropriate length\n", 0, filename);
+            return -1;
+        }
+
+        oldptr = 0;
+        strptr = 0;
+        int32_t loops = 0;
+        int32_t firstIndex = 0;
+        
+        while (line[strptr] != '\n' && line[strptr] != '\0') {
+            while (line[strptr] != ',' && line[strptr] != '\n' && line[strptr] != '\0') {
+                parsedInt[strptr - oldptr] = line[strptr];
+                strptr += 1;
+            }
+            parsedInt[strptr - oldptr] = '\0';
+            if (oldptr == 0) {
+                fontPar = 0; // parse as unicode char (basically just take the multibyte utf-8 encoding of the character and literal cast it to an uint32_t (maximum of 4 bytes per character in utf-8 (?)))
+                if (strlen((char *) parsedInt) > 4) {
+                    printf("Error: character at line %d too long for uint32_t\n", supportedCharReferenceInit -> length + 1);
+                }
+                for (int32_t i = strlen((char *) parsedInt); i > 0; i--) {
+                    int32_t abri = (strlen((char *) parsedInt) - i);
+                    fontPar += (uint32_t) parsedInt[abri] << ((i - 1) * 8);
+                }
+                if (fontPar == 0) { // exception for the comma character
+                    fontPar = 44;
+                }
+                list_append(supportedCharReferenceInit, (unitype) fontPar, 'i'); // adds as an int but will typecast back to unsigned later, this might not work correctly but it also doesn't really matter
+                list_append(fontPointerInit, (unitype) fontDataInit -> length, 'i');
+                firstIndex = fontDataInit -> length;
+                list_append(fontDataInit, (unitype) 1, 'i');
+            } else {
+                sscanf((char *) parsedInt, "%u", &fontPar); // parse as integer
+                if (strcmp((char *) parsedInt, "b") == 0) {
+                    list_append(fontDataInit, (unitype) 140894115, 'i'); // all b's get converted to the integer 140894115 (chosen semi-randomly)
+                } else {
+                    list_append(fontDataInit, (unitype) fontPar, 'i'); // fontPar will double count when it encounters a b (idk why) so if there's a b we ignore the second fontPar (which is a duplicate of the previous one)
+                }
+                loops += 1;
+            }
+            if (line[strptr] != '\n' && line[strptr] != '\0')
+                strptr += 2;
+            oldptr = strptr;
+        }
+        fontDataInit -> data[firstIndex] = (unitype) loops;
+        firstIndex += 1; // using firstIndex as iteration variable
+        int32_t len1 = fontDataInit -> data[firstIndex].i;
+        int32_t maximums[4] = {-2147483648, -2147483648, 2147483647, 2147483647}; // for describing bounding box of a character
+        
+        /* good programmng alert */
+        #define CHECKS_EMB(ind) \
+            if (fontDataInit -> data[ind].i > maximums[0]) {\
+                maximums[0] = fontDataInit -> data[ind].i;\
+            }\
+            if (fontDataInit -> data[ind].i < maximums[3]) {\
+                maximums[3] = fontDataInit -> data[ind].i;\
+            }\
+            if (fontDataInit -> data[ind + 1].i > maximums[1]) {\
+                maximums[1] = fontDataInit -> data[ind + 1].i;\
+            }\
+            if (fontDataInit -> data[ind + 1].i < maximums[3]) {\
+                maximums[3] = fontDataInit -> data[ind + 1].i;\
+            }
+        for (int32_t i = 0; i < len1; i++) {
+            firstIndex += 1;
+            int32_t len2 = fontDataInit -> data[firstIndex].i;
+            for (int32_t j = 0; j < len2; j++) {
+                firstIndex += 1;
+                if (fontDataInit -> data[firstIndex].i == 140894115) {
+                    firstIndex += 1;
+                    fontDataInit -> data[firstIndex] = (unitype) (fontDataInit -> data[firstIndex].i + 160);
+                    fontDataInit -> data[firstIndex + 1] = (unitype) (fontDataInit -> data[firstIndex + 1].i + 100);
+                    CHECKS_EMB(firstIndex);
+                    firstIndex += 2;
+                    fontDataInit -> data[firstIndex] = (unitype) (fontDataInit -> data[firstIndex].i + 160);
+                    fontDataInit -> data[firstIndex + 1] = (unitype) (fontDataInit -> data[firstIndex + 1].i + 100);
+                    CHECKS_EMB(firstIndex);
+                    firstIndex += 1;
+                    if (fontDataInit -> data[firstIndex + 1].i != 140894115) {
+                        firstIndex += 1;
+                        fontDataInit -> data[firstIndex] = (unitype) (fontDataInit -> data[firstIndex].i + 160);
+                        fontDataInit -> data[firstIndex + 1] = (unitype) (fontDataInit -> data[firstIndex + 1].i + 100);
+                        CHECKS_EMB(firstIndex);
+                        firstIndex += 1;
+                    }
+                } else {
+                    fontDataInit -> data[firstIndex] = (unitype) (fontDataInit -> data[firstIndex].i + 160);
+                    fontDataInit -> data[firstIndex + 1] = (unitype) (fontDataInit -> data[firstIndex + 1].i + 100);
+                    CHECKS_EMB(firstIndex);
+                    firstIndex += 1;
+                }
+            }
+        }
+        if (maximums[0] < 0) {
+            list_append(fontDataInit, (unitype) 90, 'i');
+        } else {
+            list_append(fontDataInit, (unitype) maximums[0], 'i');
+        }
+        if (maximums[3] > 0) {
+            list_append(fontDataInit, (unitype) 0, 'i');
+        } else {
+            list_append(fontDataInit, (unitype) maximums[3], 'i');
+        }
+        if (maximums[1] < 0) {
+            if (turtleText.charCount == 0)
+                list_append(fontDataInit, (unitype) 0, 'i');
+            else
+                list_append(fontDataInit, (unitype) 120, 'i');
+        } else {
+            list_append(fontDataInit, (unitype) maximums[1], 'i');
+        }
+        if (maximums[2] > 0) {
+            list_append(fontDataInit, (unitype) 0, 'i');
+        } else {
+            list_append(fontDataInit, (unitype) maximums[2], 'i');
+        }
+        turtleText.charCount += 1;
+    }
+    list_append(fontPointerInit, (unitype) (int32_t) (fontDataInit -> length), 'i'); // last pointer
+    turtleText.fontData = malloc(sizeof(int32_t) * fontDataInit -> length); // convert lists to arrays (could be optimised cuz we already have the -> data arrays but who really cares this runs once)
+    for (uint32_t i = 0; i < fontDataInit -> length; i++) {
+        turtleText.fontData[i] = fontDataInit -> data[i].i;
+    }
+    turtleText.fontPointer = malloc(sizeof(int32_t) * fontPointerInit -> length);
+    for (uint32_t i = 0; i < fontPointerInit -> length; i++) {
+        turtleText.fontPointer[i] = fontPointerInit -> data[i].i;
+    }
+    turtleText.supportedCharReference = malloc(sizeof(int32_t) * supportedCharReferenceInit -> length);
+    for (uint32_t i = 0; i < supportedCharReferenceInit -> length; i++) {
+        turtleText.supportedCharReference[i] = supportedCharReferenceInit -> data[i].i;
+    }
+
+    if (fileExists) {
+        printf("%d characters loaded from %s\n", turtleText.charCount, filename);
+    } else {
+        printf("%d characters loaded from default font\n", turtleText.charCount);
+    }
+
+    list_free(fontDataInit);
+    list_free(fontPointerInit);
+    list_free(supportedCharReferenceInit);
+    list_free(generatedFont);
+    return 0;
+}
+
+/* render functions */
+
+/* renders a quadratic bezier curve on the screen */
+void renderBezier(double x1, double y1, double x2, double y2, double x3, double y3, int32_t prez) {
+    turtleGoto(x1, y1);
+    turtlePenDown();
+    double iter1 = 1;
+    double iter2 = 0;
+    for (int32_t i = 0; i < prez; i++) {
+        iter1 -= (double) 1 / prez;
+        iter2 += (double) 1 / prez;
+        double t1 = iter1 * iter1;
+        double t2 = iter2 * iter2;
+        double t3 = 2 * iter1 * iter2;
+        turtleGoto(t1 * x1 + t3 * x2 + t2 * x3, t1 * y1 + t3 * y2 + t2 * y3);
+    }
+    turtleGoto(x3, y3);
+}
+
+/* renders a single character */
+void renderChar(int32_t index, double x, double y, double size) {
+    index += 1;
+    int32_t len1 = turtleText.fontData[index];
+    for (int32_t i = 0; i < len1; i++) {
+        index += 1;
+        if (turtle.pen == 1)
+            turtlePenUp();
+        int32_t len2 = turtleText.fontData[index];
+        for (int32_t j = 0; j < len2; j++) {
+            index += 1;
+            if (turtleText.fontData[index] == 140894115) { // 140894115 is the b value (reserved)
+                index += 4;
+                if (turtleText.fontData[index + 1] != 140894115) {
+                    renderBezier(x + turtleText.fontData[index - 3] * size, y + turtleText.fontData[index - 2] * size, x + turtleText.fontData[index - 1] * size, y + turtleText.fontData[index] * size, x + turtleText.fontData[index + 1] * size, y + turtleText.fontData[index + 2] * size, turtleText.bezierPrezCurrent);
+                    index += 2;
+                } else {
+                    renderBezier(x + turtleText.fontData[index - 3] * size, y + turtleText.fontData[index - 2] * size, x + turtleText.fontData[index - 1] * size, y + turtleText.fontData[index] * size, x + turtleText.fontData[index + 2] * size, y + turtleText.fontData[index + 3] * size, turtleText.bezierPrezCurrent);
+                }
+            } else {
+                index += 1;
+                turtleGoto(x + turtleText.fontData[index - 1] * size, y + turtleText.fontData[index] * size);
+            }
+            turtlePenDown();
+        }
+    }
+    turtlePenUp();
+}
+
+/* gets the length of a string in pixels on the screen */
+double turtleTextGetLength(const uint32_t *text, int32_t textLength, double size) {
+    if (textLength == 0) {
+        return 0;
+    }
+    size /= 175;
+    double xTrack = 0;
+    for (int32_t i = 0; i < textLength; i++) {
+        int32_t currentDataAddress = 0;
+        for (int32_t j = 0; j < turtleText.charCount; j++) { // change to hashmap later
+            if (turtleText.supportedCharReference[j] == text[i]) {
+                currentDataAddress = j;
+                break;
+            }
+        }
+        xTrack += (turtleText.fontData[turtleText.fontPointer[currentDataAddress + 1] - 4] + 40) * size;
+    }
+    xTrack -= 40 * size;
+    return xTrack;
+}
+
+/* gets the length of a string in pixels on the screen */
+double turtleTextGetStringLength(const char *str, double size) {
+    uint32_t len = strlen(str);
+    uint32_t converted[len];
+    for (uint32_t i = 0; i < len; i++) {
+        converted[i] = (uint32_t) str[i];
+    }
+    return turtleTextGetLength(converted, len, size);
+}
+
+/* gets the length of a string in pixels on the screen */
+double turtleTextGetStringLengthf(double size, const char *str, ...) {
+    char buffer[1024];
+    va_list args;
+    va_start(args, str);
+    vsnprintf(buffer, 1024, str, args);
+    double out = turtleTextGetStringLength(buffer, size);
+    va_end(args);
+    return out;
+}
+
+/* gets the length of a u-string in pixels on the screen */
+double turtleTextGetUnicodeLength(const unsigned char *str, double size) {
+    int32_t len = strlen((char *) str);
+    uint32_t converted[len];
+    int32_t byteLength;
+    int32_t i = 0;
+    int32_t next = 0;
+    while (i < len) {
+        byteLength = 0;
+        for (uint8_t j = 0; j < 8; j++) {
+            unsigned char mask = 128 >> j;
+            if (str[i] & mask) {
+                byteLength += 1;
+            } else {
+                j = 8; // end loop
+            }
+        }
+        if (byteLength == 0) { // case: ASCII character
+            converted[next] = (uint32_t) str[i];
+            byteLength = 1;
+        } else { // case: multi-byte character
+            uint32_t convert = 0;
+            for (int32_t k = 0; k < byteLength; k++) {
+                convert = convert << 8;
+                convert += (uint32_t) str[i + k];
+            }
+            converted[next] = convert;
+        }
+        i += byteLength;
+        next += 1;
+    }
+    return turtleTextGetLength(converted, next, size);
+}
+
+/* writes to the screen */
+void turtleTextWrite(const uint32_t *text, int32_t textLength, double x, double y, double size, double align) {
+    char saveShape = turtle.penshape;
+    double saveSize = turtle.pensize;
+    turtleText.bezierPrezCurrent = (int32_t) ceil(sqrt(size * turtleText.bezierPrez / 10));
+    double xTrack = x;
+    size /= 175;
+    y -= size * 70;
+    turtlePenSize(20 * size);
+    // turtlePenShape("connected"); // fast
+    // turtlePenShape("circle"); // pretty
+    turtlePenShape("text"); // dedicated setting that blends circle and connected
+    list_t *xvals = list_init();
+    list_t *dataIndStored = list_init();
+    for (int32_t i = 0; i < textLength; i++) {
+        int32_t currentDataAddress = 0;
+        for (int32_t j = 0; j < turtleText.charCount; j++) { // change to hashmap later
+            if (turtleText.supportedCharReference[j] == text[i]) {
+                currentDataAddress = j;
+                break;
+            }
+        }
+        list_append(xvals, (unitype) xTrack, 'd');
+        list_append(dataIndStored, (unitype) currentDataAddress, 'i');
+        xTrack += (turtleText.fontData[turtleText.fontPointer[currentDataAddress + 1] - 4] + 40) * size;
+    }
+    xTrack -= 40 * size;
+    for (int32_t i = 0; i < textLength; i++) {
+        renderChar((double) turtleText.fontPointer[dataIndStored -> data[i].i], xvals -> data[i].d - ((xTrack - x) * (align / 100)), y, size);
+    }
+    list_free(dataIndStored);
+    list_free(xvals);
+    turtle.penshape = saveShape; // restore the shape and size before the write
+    turtle.pensize = saveSize;
+}
+
+/* wrapper function for writing strings easier */
+void turtleTextWriteString(const char *str, double x, double y, double size, double align) {
+    int32_t len = strlen(str);
+    uint32_t converted[len];
+    for (int32_t i = 0; i < len; i++) {
+        converted[i] = (uint32_t) str[i];
+    }
+    turtleTextWrite(converted, len, x, y, size, align);
+}
+
+/* formatted string */
+void turtleTextWriteStringf(double x, double y, double size, double align, const char *str, ...) {
+    char buffer[1024];
+    va_list args;
+    va_start(args, str);
+    vsnprintf(buffer, 1024, str, args);
+    turtleTextWriteString(buffer, x, y, size, align);
+    va_end(args);
+}
+
+/* wrapper function for unicode strings (UTF-8, u8"Hello World") */
+void turtleTextWriteUnicode(const unsigned char *str, double x, double y, double size, double align) {
+    int32_t len = strlen((char *) str);
+    uint32_t converted[len];
+    int32_t byteLength;
+    int32_t i = 0;
+    int32_t next = 0;
+    while (i < len) {
+        byteLength = 0;
+        for (uint8_t j = 0; j < 8; j++) {
+            uint8_t mask = 128 >> j;
+            if (str[i] & mask) {
+                byteLength += 1;
+            } else {
+                j = 8; // end loop
+            }
+        }
+        if (byteLength == 0) { // case: ASCII character
+            converted[next] = (uint32_t) str[i];
+            byteLength = 1;
+        } else { // case: multi-byte character
+            uint32_t convert = 0;
+            for (int32_t k = 0; k < byteLength; k++) {
+                convert = convert << 8;
+                convert += (uint32_t) str[i + k];
+            }
+            converted[next] = convert;
+        }
+        i += byteLength;
+        next += 1;
+    }
+    turtleTextWrite(converted, next, x, y, size, align);
+}
+
+int32_t turtleTextConvertUnicode(const unsigned char *str, uint32_t *converted) {
+    int32_t len = strlen((char *) str);
+    int32_t byteLength;
+    int32_t i = 0;
+    int32_t next = 0;
+    while (i < len) {
+        byteLength = 0;
+        for (uint8_t j = 0; j < 8; j++) {
+            uint8_t mask = 128 >> j;
+            if (str[i] & mask) {
+                byteLength += 1;
+            } else {
+                j = 8; // end loop
+            }
+        }
+        if (byteLength == 0) { // case: ASCII character
+            converted[next] = (uint32_t) str[i];
+            byteLength = 1;
+        } else { // case: multi-byte character
+            uint32_t convert = 0;
+            for (int32_t k = 0; k < byteLength; k++) {
+                convert = convert << 8;
+                convert += (uint32_t) str[i + k];
+            }
+            converted[next] = convert;
+        }
+        i += byteLength;
+        next += 1;
+    }
+    return next;
+}
+
+/* if the font file is not found, use the default font (kept here) */
+void generateDefaultFont(list_t *generatedFont) {
+    list_append(generatedFont, (unitype) " , 0", 's');
+    list_append(generatedFont, (unitype) "A, 2, 3, -160, -100, -100, 60, -40, -100, 2, -137, -40, -63, -40", 's');
+    list_append(generatedFont, (unitype) "À, 3, 3, -160, -100, -100, 60, -40, -100, 2, -137, -40, -63, -40, 2, -100, 85, -120, 105", 's');
+    list_append(generatedFont, (unitype) "Á, 3, 3, -160, -100, -100, 60, -40, -100, 2, -137, -40, -63, -40, 2, -100, 85, -80, 105", 's');
+    list_append(generatedFont, (unitype) "Â, 3, 3, -160, -100, -100, 60, -40, -100, 2, -137, -40, -63, -40, 3, -130, 85, -100, 105, -70, 85", 's');
+    list_append(generatedFont, (unitype) "Ă, 3, 3, -160, -100, -100, 60, -40, -100, 2, -137, -40, -63, -40, 2, b, -130, 105, -130, 85, b, -100, 85, -70, 85, -70, 105", 's');
+    list_append(generatedFont, (unitype) "Ä, 4, 3, -160, -100, -100, 60, -40, -100, 2, -137, -40, -63, -40, 1, -120, 95, 1, -80, 95", 's');
+    list_append(generatedFont, (unitype) "Ã, 3, 3, -160, -100, -100, 60, -40, -100, 2, -137, -40, -63, -40, 4, b, -135, 85, -135, 105, b, -120, 105, -110, 105, b, -100, 95, -90, 85, b, -80, 85, -65, 85, -65, 105", 's');
+    list_append(generatedFont, (unitype) "Å, 3, 3, -160, -100, -100, 60, -40, -100, 2, -137, -40, -63, -40, 4, b, -100, 85, -80, 85, b, -80, 105, -80, 125, b, -100, 125, -120, 125, b, -120, 105, -120, 85, -100, 85", 's');
+    list_append(generatedFont, (unitype) "Ā, 3, 3, -160, -100, -100, 60, -40, -100, 2, -137, -40, -63, -40, 2, -145, 95, -55, 95", 's');
+    list_append(generatedFont, (unitype) "Ą, 2, 2, -137, -40, -63, -40, 4, -160, -100, -100, 60, b, -40, -100, -65, -105, b, -65, -125, -65, -150, -40, -145", 's');
+    list_append(generatedFont, (unitype) "Æ, 4, 2, -118, -40, -50, -40, 4, -160, -100, -50, 60, -50, -100, 50, -100, 2, -50, -20, 40, -20, 2, -50, 60, 50, 60", 's');
+    list_append(generatedFont, (unitype) "B, 2, 5, -160, -100, -160, 60, b, -110, 60, -60, 60, b, -60, 20, -60, -20, -110, -20, -160, -20, 3, b, -110, -20, -60, -20, b, -60, -60, -60, -100, -110, -100, -160, -100", 's');
+    list_append(generatedFont, (unitype) "C, 1, 4, b, -50, 20, -60, 60, b, -100, 60, -160, 60, b, -160, -20, -160, -100, b, -100, -100, -60, -100, -50, -60", 's');
+    list_append(generatedFont, (unitype) "Ć, 2, 4, b, -50, 20, -60, 60, b, -100, 60, -160, 60, b, -160, -20, -160, -100, b, -100, -100, -60, -100, -50, -60, 2, -100, 85, -80, 105", 's');
+    list_append(generatedFont, (unitype) "Č, 2, 4, b, -50, 20, -60, 60, b, -100, 60, -160, 60, b, -160, -20, -160, -100, b, -100, -100, -60, -100, -50, -60, 3, -130, 105, -100, 85, -70, 105", 's');
+    list_append(generatedFont, (unitype) "Ċ, 2, 4, b, -50, 20, -60, 60, b, -100, 60, -160, 60, b, -160, -20, -160, -100, b, -100, -100, -60, -100, -50, -60, 1, -100, 95", 's');
+    list_append(generatedFont, (unitype) "Ç, 2, 4, b, -50, 20, -60, 60, b, -100, 60, -160, 60, b, -160, -20, -160, -100, b, -100, -100, -60, -100, -50, -60, 3, -100, -100, b, -103, -115, -80, -120, b, -80, -135, -80, -160, -105, -155", 's');
+    list_append(generatedFont, (unitype) "D, 1, 5, -160, -100, -160, 60, b, -110, 60, -50, 60, b, -50, -20, -50, -100, -110, -100, -160, -100", 's');
+    list_append(generatedFont, (unitype) "Ď, 2, 5, -160, -100, -160, 60, b, -110, 60, -50, 60, b, -50, -20, -50, -100, -110, -100, -160, -100, 3, -145, 105, -115, 85, -85, 105", 's');
+    list_append(generatedFont, (unitype) "Đ, 2, 5, -160, -100, -160, 60, b, -110, 60, -50, 60, b, -50, -20, -50, -100, -110, -100, -160, -100, 2, -180, -20, -130, -20", 's');
+    list_append(generatedFont, (unitype) "Ð, 2, 5, -160, -100, -160, 60, b, -110, 60, -50, 60, b, -50, -20, -50, -100, -110, -100, -160, -100, 2, -180, -20, -130, -20", 's');
+    list_append(generatedFont, (unitype) "E, 2, 4, -70, -100, -160, -100, -160, 60, -70, 60, 2, -160, -20, -80, -20", 's');
+    list_append(generatedFont, (unitype) "È, 3, 4, -70, -100, -160, -100, -160, 60, -70, 60, 2, -160, -20, -80, -20, 2, -115, 85, -135, 105", 's');
+    list_append(generatedFont, (unitype) "É, 3, 4, -70, -100, -160, -100, -160, 60, -70, 60, 2, -160, -20, -80, -20, 2, -115, 85, -95, 105", 's');
+    list_append(generatedFont, (unitype) "Ě, 3, 4, -70, -100, -160, -100, -160, 60, -70, 60, 2, -160, -20, -80, -20, 3, -145, 105, -115, 85, -85, 105", 's');
+    list_append(generatedFont, (unitype) "Ê, 3, 4, -70, -100, -160, -100, -160, 60, -70, 60, 2, -160, -20, -80, -20, 3, -145, 85, -115, 105, -85, 85", 's');
+    list_append(generatedFont, (unitype) "Ë, 4, 4, -70, -100, -160, -100, -160, 60, -70, 60, 2, -160, -20, -80, -20, 1, -135, 95, 1, -95, 95", 's');
+    list_append(generatedFont, (unitype) "Ē, 3, 4, -70, -100, -160, -100, -160, 60, -70, 60, 2, -160, -20, -80, -20, 2, -145, 95, -85, 95", 's');
+    list_append(generatedFont, (unitype) "Ė, 3, 4, -70, -100, -160, -100, -160, 60, -70, 60, 2, -160, -20, -80, -20, 1, -115, 95", 's');
+    list_append(generatedFont, (unitype) "Ę, 2, 2, -160, -20, -80, -20, 5, -70, 60, -160, 60, -160, -100, b, -70, -100, -95, -105, b, -95, -125, -95, -150, -70, -145", 's');
+    list_append(generatedFont, (unitype) "Ə, 1, 5, -30, -20, b, -160, -20, -160, -100, b, -95, -100, -30, -100, b, -30, -20, -30, 60, b, -95, 60, -125, 60, -140, 45", 's');
+    list_append(generatedFont, (unitype) "F, 2, 3, -160, -100, -160, 60, -70, 60, 2, -160, -20, -80, -20", 's');
+    list_append(generatedFont, (unitype) "G, 1, 6, b, -50, 20, -60, 60, b, -100, 60, -160, 60, b, -160, -20, -160, -100, b, -100, -100, -60, -100, -50, -60, -50, -20, -100, -20", 's');
+    list_append(generatedFont, (unitype) "Ğ, 2, 6, b, -50, 20, -60, 60, b, -100, 60, -160, 60, b, -160, -20, -160, -100, b, -100, -100, -60, -100, -50, -60, -50, -20, -100, -20, 2, b, -135, 105, -135, 85, b, -105, 85, -75, 85, -75, 105", 's');
+    list_append(generatedFont, (unitype) "Ġ, 2, 6, b, -50, 20, -60, 60, b, -100, 60, -160, 60, b, -160, -20, -160, -100, b, -100, -100, -60, -100, -50, -60, -50, -20, -100, -20, 1, -105, 95", 's');
+    list_append(generatedFont, (unitype) "H, 3, 2, -160, -100, -160, 60, 2, -50, -100, -50, 60, 2, -160, -20, -50, -20", 's');
+    list_append(generatedFont, (unitype) "Ħ, 4, 2, -160, -100, -160, 60, 2, -50, -100, -50, 60, 2, -160, -20, -50, -20, 2, -170, 20, -40, 20", 's');
+    list_append(generatedFont, (unitype) "I, 1, 2, -160, -100, -160, 60", 's');
+    list_append(generatedFont, (unitype) "Ì, 2, 2, -160, -100, -160, 60, 2, -160, 90, -170, 110", 's');
+    list_append(generatedFont, (unitype) "Í, 2, 2, -160, -100, -160, 60, 2, -160, 90, -150, 110", 's');
+    list_append(generatedFont, (unitype) "Î, 2, 2, -160, -100, -160, 60, 3, -180, 90, -160, 110, -140, 90", 's');
+    list_append(generatedFont, (unitype) "Ï, 3, 2, -160, -100, -160, 60, 1, -180, 100, 1, -140, 100", 's');
+    list_append(generatedFont, (unitype) "Ī, 2, 2, -160, -100, -160, 60, 2, -180, 100, -140, 100", 's');
+    list_append(generatedFont, (unitype) "İ, 2, 2, -160, -100, -160, 60, 1, -160, 100", 's');
+    list_append(generatedFont, (unitype) "Į, 1, 3, -160, 60, b, -160, -100, -170, -105, b, -170, -115, -170, -125, -160, -125", 's');
+    list_append(generatedFont, (unitype) "J, 1, 3, -70, 60, b, -70, -50, -70, -100, b, -120, -100, -150, -100, -160, -70", 's');
+    list_append(generatedFont, (unitype) "K, 3, 2, -160, -100, -160, 60, 2, -160, -30, -60, 60, 2, -60, -100, -140, -12", 's');
+    list_append(generatedFont, (unitype) "Ķ, 4, 2, -160, -100, -160, 60, 2, -160, -30, -60, 60, 2, -60, -100, -140, -12, 1, b, -115, -105, -115, -120, -125, -125", 's');
+    list_append(generatedFont, (unitype) "L, 1, 3, -160, 60, -160, -100, -70, -100", 's');
+    list_append(generatedFont, (unitype) "Ĺ, 2, 3, -160, 60, -160, -100, -70, -100, 2, -160, 90, -140, 110", 's');
+    list_append(generatedFont, (unitype) "Ľ, 2, 3, -160, 60, -160, -100, -70, -100, 1, b, -105, 40, -95, 55, -95, 70", 's');
+    list_append(generatedFont, (unitype) "Ļ, 2, 3, -160, 60, -160, -100, -70, -100, 1, b, -115, -125, -115, -140, -125, -145", 's');
+    list_append(generatedFont, (unitype) "Ł, 2, 3, -160, 60, -160, -100, -70, -100, 2, -180, -30, -135, -15", 's');
+    list_append(generatedFont, (unitype) "Ŀ, 2, 3, -160, 60, -160, -100, -70, -100, 1, -120, -30", 's');
+    list_append(generatedFont, (unitype) "M, 1, 5, -160, -100, -160, 60, -90, -100, -20, 60, -20, -100", 's');
+    list_append(generatedFont, (unitype) "N, 1, 4, -160, -100, -160, 60, -50, -100, -50, 60", 's');
+    list_append(generatedFont, (unitype) "Ń, 2, 4, -160, -100, -160, 60, -50, -100, -50, 60, 2, -105, 85, -85, 105", 's');
+    list_append(generatedFont, (unitype) "Ň, 2, 4, -160, -100, -160, 60, -50, -100, -50, 60, 3, -135, 105, -105, 85, -75, 105", 's');
+    list_append(generatedFont, (unitype) "Ñ, 2, 4, -160, -100, -160, 60, -50, -100, -50, 60, 4, b, -140, 85, -140, 105, b, -125, 105, -115, 105, b, -105, 95, -95, 85, b, -85, 85, -70, 85, -70, 105", 's');
+    list_append(generatedFont, (unitype) "Ņ, 2, 4, -160, -100, -160, 60, -50, -100, -50, 60, 1, b, -105, -125, -105, -140, -115, -145", 's');
+    list_append(generatedFont, (unitype) "O, 1, 4, b, -40, -20, -40, 60, b, -100, 60, -160, 60, b, -160, -20, -160, -100, b, -100, -100, -40, -100, -40, -20", 's');
+    list_append(generatedFont, (unitype) "Ò, 2, 4, b, -40, -20, -40, 60, b, -100, 60, -160, 60, b, -160, -20, -160, -100, b, -100, -100, -40, -100, -40, -20, 2, -100, 85, -120, 105", 's');
+    list_append(generatedFont, (unitype) "Ó, 2, 4, b, -40, -20, -40, 60, b, -100, 60, -160, 60, b, -160, -20, -160, -100, b, -100, -100, -40, -100, -40, -20, 2, -100, 85, -80, 105", 's');
+    list_append(generatedFont, (unitype) "Ô, 2, 4, b, -40, -20, -40, 60, b, -100, 60, -160, 60, b, -160, -20, -160, -100, b, -100, -100, -40, -100, -40, -20, 3, -130, 85, -100, 105, -70, 85", 's');
+    list_append(generatedFont, (unitype) "Ö, 3, 4, b, -40, -20, -40, 60, b, -100, 60, -160, 60, b, -160, -20, -160, -100, b, -100, -100, -40, -100, -40, -20, 1, -120, 95, 1, -80, 95", 's');
+    list_append(generatedFont, (unitype) "Õ, 2, 4, b, -40, -20, -40, 60, b, -100, 60, -160, 60, b, -160, -20, -160, -100, b, -100, -100, -40, -100, -40, -20, 4, b, -135, 85, -135, 105, b, -120, 105, -110, 105, b, -100, 95, -90, 85, b, -80, 85, -65, 85, -65, 105", 's');
+    list_append(generatedFont, (unitype) "Ő, 3, 4, b, -40, -20, -40, 60, b, -100, 60, -160, 60, b, -160, -20, -160, -100, b, -100, -100, -40, -100, -40, -20, 2, -130, 85, -115, 105, 2, -80, 85, -65, 105", 's');
+    list_append(generatedFont, (unitype) "Ø, 2, 4, b, -40, -20, -40, 60, b, -100, 60, -160, 60, b, -160, -20, -160, -100, b, -100, -100, -40, -100, -40, -20, 2, -40, 60, -160, -100", 's');
+    list_append(generatedFont, (unitype) "Œ, 2, 6, b, -50, -20, -50, 60, b, -105, 60, -160, 60, b, -160, -20, -160, -100, b, -105, -100, -50, -100, -50, -20, -50, 60, 30, 60, 4, 30, -100, -50, -100, -50, -20, 20, -20", 's');
+    list_append(generatedFont, (unitype) "P, 1, 5, -160, -100, -160, 60, b, -100, 60, -60, 60, b, -60, 20, -60, -20, -100, -20, -160, -20", 's');
+    list_append(generatedFont, (unitype) "Q, 2, 4, b, -40, -20, -40, 60, b, -100, 60, -160, 60, b, -160, -20, -160, -100, b, -100, -100, -40, -100, -40, -20, 2, -65, -90, -40, -110", 's');
+    list_append(generatedFont, (unitype) "R, 2, 5, -160, -100, -160, 60, b, -100, 60, -60, 60, b, -60, 20, -60, -20, -100, -20, -160, -20, 2, -100, -20, -60, -100", 's');
+    list_append(generatedFont, (unitype) "Ŕ, 3, 5, -160, -100, -160, 60, b, -100, 60, -60, 60, b, -60, 20, -60, -20, -100, -20, -160, -20, 2, -100, -20, -60, -100, 2, -125, 85, -105, 105", 's');
+    list_append(generatedFont, (unitype) "Ř, 3, 5, -160, -100, -160, 60, b, -100, 60, -60, 60, b, -60, 20, -60, -20, -100, -20, -160, -20, 2, -100, -20, -60, -100, 3, -150, 105, -120, 85, -90, 105", 's');
+    list_append(generatedFont, (unitype) "S, 1, 6, b, -60, 30, -70, 60, b, -110, 60, -160, 60, b, -160, 20, -160, -20, b, -110, -20, -60, -20, b, -60, -60, -60, -100, b, -110, -100, -150, -100, -160, -70", 's');
+    list_append(generatedFont, (unitype) "Ś, 2, 6, b, -60, 30, -70, 60, b, -110, 60, -160, 60, b, -160, 20, -160, -20, b, -110, -20, -60, -20, b, -60, -60, -60, -100, b, -110, -100, -150, -100, -160, -70, 2, -110, 85, -90, 105", 's');
+    list_append(generatedFont, (unitype) "Š, 2, 6, b, -60, 30, -70, 60, b, -110, 60, -160, 60, b, -160, 20, -160, -20, b, -110, -20, -60, -20, b, -60, -60, -60, -100, b, -110, -100, -150, -100, -160, -70, 3, -140, 105, -110, 85, -80, 105", 's');
+    list_append(generatedFont, (unitype) "Ş, 2, 6, b, -60, 30, -70, 60, b, -110, 60, -160, 60, b, -160, 20, -160, -20, b, -110, -20, -60, -20, b, -60, -60, -60, -100, b, -110, -100, -150, -100, -160, -70, 3, -110, -100, b, -113, -115, -90, -120, b, -90, -135, -90, -160, -115, -150", 's');
+    list_append(generatedFont, (unitype) "Ș, 2, 6, b, -60, 30, -70, 60, b, -110, 60, -160, 60, b, -160, 20, -160, -20, b, -110, -20, -60, -20, b, -60, -60, -60, -100, b, -110, -100, -150, -100, -160, -70, 1, b, -110, -125, -110, -140, -120, -145", 's');
+    list_append(generatedFont, (unitype) "ẞ, 1, 5, -160, -100, b, -160, 15, -160, 60, b, -110, 60, -60, 60, -55, 30, b, -105, -20, -40, -15, b, -50, -70, -65, -110, -120, -95", 's');
+    list_append(generatedFont, (unitype) "T, 2, 2, -160, 60, -40, 60, 2, -100, 60, -100, -100", 's');
+    list_append(generatedFont, (unitype) "Ť, 3, 2, -160, 60, -40, 60, 2, -100, 60, -100, -100, 3, -130, 105, -100, 85, -70, 105", 's');
+    list_append(generatedFont, (unitype) "Ț, 3, 2, -160, 60, -40, 60, 2, -100, 60, -100, -100, 1, b, -100, -125, -100, -140, -110, -145", 's');
+    list_append(generatedFont, (unitype) "Þ, 2, 2, -160, -100, -160, 60, 4, -160, 20, b, -105, 20, -60, 20, b, -60, -20, -60, -60, -105, -60, -160, -60", 's');
+    list_append(generatedFont, (unitype) "U, 1, 4, -160, 60, b, -160, -40, -160, -100, b, -105, -100, -50, -100, -50, -40, -50, 60", 's');
+    list_append(generatedFont, (unitype) "Ù, 2, 4, -160, 60, b, -160, -40, -160, -100, b, -105, -100, -50, -100, -50, -40, -50, 60, 2, -105, 85, -125, 105", 's');
+    list_append(generatedFont, (unitype) "Ú, 2, 4, -160, 60, b, -160, -40, -160, -100, b, -105, -100, -50, -100, -50, -40, -50, 60, 2, -105, 85, -85, 105", 's');
+    list_append(generatedFont, (unitype) "Û, 2, 4, -160, 60, b, -160, -40, -160, -100, b, -105, -100, -50, -100, -50, -40, -50, 60, 3, -135, 105, -105, 85, -75, 105", 's');
+    list_append(generatedFont, (unitype) "Ü, 3, 4, -160, 60, b, -160, -40, -160, -100, b, -105, -100, -50, -100, -50, -40, -50, 60, 1, -125, 95, 1, -85, 95", 's');
+    list_append(generatedFont, (unitype) "Ů, 2, 4, -160, 60, b, -160, -40, -160, -100, b, -105, -100, -50, -100, -50, -40, -50, 60, 4, b, -105, 85, -85, 85, b, -85, 105, -85, 125, b, -105, 125, -125, 125, b, -125, 105, -125, 85, -105, 85", 's');
+    list_append(generatedFont, (unitype) "Ű, 3, 4, -160, 60, b, -160, -40, -160, -100, b, -105, -100, -50, -100, -50, -40, -50, 60, 2, -135, 85, -120, 105, 2, -85, 85, -70, 105", 's');
+    list_append(generatedFont, (unitype) "Ū, 2, 4, -160, 60, b, -160, -40, -160, -100, b, -105, -100, -50, -100, -50, -40, -50, 60, 2, -65, 95, -145, 95", 's');
+    list_append(generatedFont, (unitype) "Ų, 2, 4, -160, 60, b, -160, -40, -160, -100, b, -105, -100, -50, -100, -50, -40, -50, 60, 2, b, -95, -100, -115, -105, b, -115, -125, -115, -155, -85, -145", 's');
+    list_append(generatedFont, (unitype) "V, 1, 3, -160, 60, -100, -100, -40, 60", 's');
+    list_append(generatedFont, (unitype) "W, 1, 5, -160, 60, -110, -100, -60, 60, -10, -100, 40, 60", 's');
+    list_append(generatedFont, (unitype) "X, 2, 2, -160, -100, -50, 60, 2, -160, 60, -50, -100", 's');
+    list_append(generatedFont, (unitype) "Y, 2, 3, -160, 60, -100, -30, -40, 60, 2, -100, -30, -100, -100", 's');
+    list_append(generatedFont, (unitype) "Ý, 3, 3, -160, 60, -100, -30, -40, 60, 2, -100, -30, -100, -100, 2, -100, 85, -80, 105", 's');
+    list_append(generatedFont, (unitype) "Z, 1, 4, -50, -100, -160, -100, -50, 60, -160, 60", 's');
+    list_append(generatedFont, (unitype) "Ź, 2, 4, -50, -100, -160, -100, -50, 60, -160, 60, 2, -105, 85, -85, 105", 's');
+    list_append(generatedFont, (unitype) "Ž, 2, 4, -50, -100, -160, -100, -50, 60, -160, 60, 3, -130, 105, -100, 85, -70, 105", 's');
+    list_append(generatedFont, (unitype) "Ż, 2, 4, -50, -100, -160, -100, -50, 60, -160, 60, 1, -100, 95", 's');
+    list_append(generatedFont, (unitype) "А, 2, 3, -160, -100, -100, 60, -40, -100, 2, -137, -40, -63, -40", 's');
+    list_append(generatedFont, (unitype) "Б, 1, 6, -70, 60, -160, 60, -160, -100, b, -110, -100, -60, -100, b, -60, -60, -60, -20, -110, -20, -160, -20", 's');
+    list_append(generatedFont, (unitype) "В, 2, 5, -160, -100, -160, 60, b, -110, 60, -60, 60, b, -60, 20, -60, -20, -110, -20, -160, -20, 3, b, -110, -20, -60, -20, b, -60, -60, -60, -100, -110, -100, -160, -100", 's');
+    list_append(generatedFont, (unitype) "Г, 1, 3, -160, -100, -160, 60, -70, 60", 's');
+    list_append(generatedFont, (unitype) "Ґ, 1, 4, -160, -100, -160, 60, -70, 60, -70, 80", 's');
+    list_append(generatedFont, (unitype) "Ғ, 2, 3, -160, -100, -160, 60, -70, 60, 2, -180, -20, -120, -20", 's');
+    list_append(generatedFont, (unitype) "Д, 2, 4, -160, -140, -160, -100, -20, -100, -20, -140, 3, -40, -100, -40, 60, b, -120, 60, -120, -75, -150, -100", 's');
+    list_append(generatedFont, (unitype) "Ђ, 3, 2, -160, 60, -40, 60, 2, -105, -100, -105, 60, 3, b, -105, -30, -80, -20, b, -55, -20, -25, -20, b, -25, -55, -25, -100, -70, -100", 's');
+    list_append(generatedFont, (unitype) "Е, 2, 4, -70, -100, -160, -100, -160, 60, -70, 60, 2, -160, -20, -80, -20", 's');
+    list_append(generatedFont, (unitype) "Ё, 4, 4, -70, -100, -160, -100, -160, 60, -70, 60, 2, -160, -20, -80, -20, 1, -135, 90, 1, -95, 90", 's');
+    list_append(generatedFont, (unitype) "Є, 2, 4, b, -50, 20, -60, 60, b, -100, 60, -160, 60, b, -160, -20, -160, -100, b, -100, -100, -60, -100, -50, -60, 2, -160, -20, -100, -20", 's');
+    list_append(generatedFont, (unitype) "Ә, 1, 5, -30, -20, b, -160, -20, -160, -100, b, -95, -100, -30, -100, b, -30, -20, -30, 60, b, -95, 60, -125, 60, -140, 45", 's');
+    list_append(generatedFont, (unitype) "Ж, 4, 4, -160, 60, -100, -20, -50, -20, 10, 60, 2, -160, -100, -100, -20, 2, -50, -20, 10, -100, 2, -75, -100, -75, 60", 's');
+    list_append(generatedFont, (unitype) "Ӂ, 5, 4, -160, 60, -100, -20, -50, -20, 10, 60, 2, -160, -100, -100, -20, 2, -50, -20, 10, -100, 2, -75, -100, -75, 60, 2, b, -105, 105, -105, 85, b, -75, 85, -45, 85, -45, 105", 's');
+    list_append(generatedFont, (unitype) "З, 1, 6, b, -160, 30, -145, 60, b, -110, 60, -55, 60, b, -55, 20, -55, -20, b, -115, -20, -55, -20, b, -55, -60, -55, -100, b, -110, -100, -145, -100, -160, -70", 's');
+    list_append(generatedFont, (unitype) "И, 1, 4, -160, 60, -160, -100, -50, 60, -50, -100", 's');
+    list_append(generatedFont, (unitype) "Ӣ, 2, 4, -160, 60, -160, -100, -50, 60, -50, -100, 2, -145, 85, -65, 85", 's');
+    list_append(generatedFont, (unitype) "Й, 2, 4, -160, 60, -160, -100, -50, 60, -50, -100, 2, b, -135, 105, -135, 85, b, -105, 85, -75, 85, -75, 105", 's');
+    list_append(generatedFont, (unitype) "І, 1, 2, -160, -100, -160, 60", 's');
+    list_append(generatedFont, (unitype) "Ї, 3, 2, -160, -100, -160, 60, 1, -170, 100, 1, -150, 100", 's');
+    list_append(generatedFont, (unitype) "Ј, 1, 3, -70, 60, b, -70, -50, -70, -100, b, -120, -100, -150, -100, -160, -70", 's');
+    list_append(generatedFont, (unitype) "К, 3, 2, -160, -100, -160, 60, 3, -160, -20, -135, -20, -60, 60, 2, -134, -20, -60, -100", 's');
+    list_append(generatedFont, (unitype) "Қ, 3, 2, -160, -100, -160, 60, 3, -160, -20, -135, -20, -60, 60, 4, -134, -20, -60, -100, -55, -100, -55, -125", 's');
+    list_append(generatedFont, (unitype) "Ҝ, 4, 2, -160, -100, -160, 60, 3, -160, -20, -115, -20, -60, 60, 2, -115, -20, -60, -100, 2, -135, 15, -135, -55", 's');
+    list_append(generatedFont, (unitype) "Л, 1, 4, b, -160, -100, -145, -100, -140, -75, -130, 60, -50, 60, -50, -100", 's');
+    list_append(generatedFont, (unitype) "Љ, 1, 7, b, -160, -100, -145, -100, -140, -75, -130, 60, -50, 60, -50, -100, b, -10, -100, 40, -100, b, 40, -60, 40, -20, -10, -20, -50, -20", 's');
+    list_append(generatedFont, (unitype) "М, 1, 5, -160, -100, -160, 60, -90, -100, -20, 60, -20, -100", 's');
+    list_append(generatedFont, (unitype) "Н, 3, 2, -160, -100, -160, 60, 2, -160, -20, -50, -20, 2, -50, -100, -50, 60", 's');
+    list_append(generatedFont, (unitype) "Ң, 3, 2, -160, -100, -160, 60, 2, -160, -20, -50, -20, 4, -50, 60, -50, -100, -45, -100, -45, -125", 's');
+    list_append(generatedFont, (unitype) "Њ, 2, 2, -160, -100, -160, 60, 5, -160, -20, b, -10, -20, 40, -20, b, 40, -60, 40, -100, -10, -100, -50, -100, -50, 60", 's');
+    list_append(generatedFont, (unitype) "О, 1, 4, b, -100, -100, -40, -100, b, -40, -20, -40, 60, b, -100, 60, -160, 60, b, -160, -20, -160, -100, -100, -100", 's');
+    list_append(generatedFont, (unitype) "Ө, 1, 5, b, -40, -20, -40, 60, b, -100, 60, -160, 60, b, -160, -20, -160, -100, b, -100, -100, -40, -100, -40, -20, -160, -20", 's');
+    list_append(generatedFont, (unitype) "П, 1, 4, -160, -100, -160, 60, -50, 60, -50, -100", 's');
+    list_append(generatedFont, (unitype) "Р, 1, 5, -160, -100, -160, 60, b, -100, 60, -60, 60, b, -60, 20, -60, -20, -100, -20, -160, -20", 's');
+    list_append(generatedFont, (unitype) "С, 1, 4, b, -50, 20, -60, 60, b, -100, 60, -160, 60, b, -160, -20, -160, -100, b, -100, -100, -60, -100, -50, -60", 's');
+    list_append(generatedFont, (unitype) "Т, 2, 2, -100, -100, -100, 60, 2, -160, 60, -40, 60", 's');
+    list_append(generatedFont, (unitype) "Ћ, 3, 2, -160, 60, -40, 60, 2, -105, 60, -105, -100, 3, b, -105, -30, -85, -20, b, -55, -20, -25, -20, -25, -55, -25, -100", 's');
+    list_append(generatedFont, (unitype) "У, 2, 2, b, -145, -105, -130, -110, -120, -90, -50, 60, 2, -102, -50, -160, 60", 's');
+    list_append(generatedFont, (unitype) "Ӯ, 3, 2, b, -145, -105, -130, -110, -120, -90, -50, 60, 2, -102, -50, -160, 60, 2, -145, 85, -65, 85", 's');
+    list_append(generatedFont, (unitype) "Ү, 2, 3, -160, 60, -100, -30, -40, 60, 2, -100, -30, -100, -100", 's');
+    list_append(generatedFont, (unitype) "Ұ, 3, 3, -160, 60, -100, -30, -40, 60, 2, -100, -30, -100, -100, 2, -150, -30, -50, -30", 's');
+    list_append(generatedFont, (unitype) "Ў, 3, 2, b, -145, -105, -130, -110, -120, -90, -50, 60, 2, -102, -50, -160, 60, 2, b, -130, 105, -130, 85, b, -100, 85, -70, 85, -70, 105", 's');
+    list_append(generatedFont, (unitype) "Ф, 2, 4, b, -90, 40, -160, 45, b, -160, -20, -160, -85, b, -90, -80, -20, -85, b, -20, -20, -20, 45, -90, 40, 2, -90, 60, -90, -100", 's');
+    list_append(generatedFont, (unitype) "Х, 2, 2, -160, -100, -50, 60, 2, -160, 60, -50, -100", 's');
+    list_append(generatedFont, (unitype) "Ҳ, 2, 2, -160, -100, -50, 60, 4, -160, 60, -50, -100, -45, -100, -45, -125", 's');
+    list_append(generatedFont, (unitype) "Һ, 2, 2, -160, -100, -160, 40, 3, b, -160, -30, -140, -10, b, -110, -10, -60, -10, -60, -50, -60, -100", 's');
+    list_append(generatedFont, (unitype) "Ц, 2, 4, -160, 60, -160, -100, -50, -100, -50, 60, 3, -50, -100, -45, -100, -45, -125", 's');
+    list_append(generatedFont, (unitype) "Ч, 2, 2, -50, -100, -50, 60, 3, b, -50, -10, -70, -30, b, -110, -30, -160, -30, -160, 10, -160, 60", 's');
+    list_append(generatedFont, (unitype) "Ҷ, 2, 3, -160, 60, b, -160, 10, -160, -30, b, -110, -30, -70, -30, -50, -10, 4, -50, 60, -50, -100, -45, -100, -45, -125", 's');
+    list_append(generatedFont, (unitype) "Ҹ, 3, 2, -50, -100, -50, 60, 3, b, -50, -10, -70, -30, b, -110, -30, -160, -30, -160, 10, -160, 60, 2, -110, 0, -110, -60", 's');
+    list_append(generatedFont, (unitype) "Џ, 2, 4, -160, 60, -160, -100, -50, -100, -50, 60, 2, -105, -100, -105, -125", 's');
+    list_append(generatedFont, (unitype) "Ш, 2, 4, -160, 60, -160, -100, -85, -100, -85, 60, 3, -85, -100, -10, -100, -10, 60", 's');
+    list_append(generatedFont, (unitype) "Щ, 3, 3, -160, 60, -160, -100, -10, -100, 2, -85, 60, -85, -100, 4, -10, 60, -10, -100, -5, -100, -5, -125", 's');
+    list_append(generatedFont, (unitype) "Ъ, 1, 6, -160, 60, -135, 60, -135, -100, b, -85, -100, -35, -100, b, -35, -60, -35, -20, -85, -20, -135, -20", 's');
+    list_append(generatedFont, (unitype) "Ы, 2, 5, -160, 60, -160, -100, b, -110, -100, -60, -100, b, -60, -60, -60, -20, -110, -20, -160, -20, 2, -30, -100, -30, 60", 's');
+    list_append(generatedFont, (unitype) "Ь, 1, 5, -160, 60, -160, -100, b, -110, -100, -60, -100, b, -60, -60, -60, -20, -110, -20, -160, -20", 's');
+    list_append(generatedFont, (unitype) "Э, 2, 4, b, -160, 20, -150, 60, b, -110, 60, -50, 60, b, -50, -20, -50, -100, b, -110, -100, -150, -100, -160, -60, 2, -50, -20, -110, -20", 's');
+    list_append(generatedFont, (unitype) "Ю, 2, 2, -160, -100, -160, 60, 5, -160, -20, b, -120, -20, -120, -100, b, -60, -100, 0, -100, b, 0, -20, 0, 60, b, -60, 60, -120, 60, -120, -20", 's');
+    list_append(generatedFont, (unitype) "Я, 2, 5, -60, -100, -60, 60, b, -120, 60, -160, 60, b, -160, 20, -160, -20, -120, -20, -60, -20, 2, -120, -20, -160, -100", 's');
+    list_append(generatedFont, (unitype) "Α, 2, 3, -160, -100, -100, 60, -40, -100, 2, -137, -40, -63, -40", 's');
+    list_append(generatedFont, (unitype) "Β, 2, 7, -160, -100, -160, 60, b, -110, 60, -60, 60, b, -60, 20, -60, -20, b, -110, -20, -60, -20, b, -60, -60, -60, -100, -110, -100, -160, -100, 2, -110, -20, -160, -20", 's');
+    list_append(generatedFont, (unitype) "Γ, 1, 3, -160, -100, -160, 60, -70, 60", 's');
+    list_append(generatedFont, (unitype) "Δ, 1, 4, -160, -100, -100, 60, -40, -100, -160, -100", 's');
+    list_append(generatedFont, (unitype) "Ε, 2, 4, -70, -100, -160, -100, -160, 60, -70, 60, 2, -160, -20, -80, -20", 's');
+    list_append(generatedFont, (unitype) "Ζ, 1, 4, -50, -100, -160, -100, -50, 60, -160, 60", 's');
+    list_append(generatedFont, (unitype) "Η, 3, 2, -160, -100, -160, 60, 2, -160, -20, -50, -20, 2, -50, -100, -50, 60", 's');
+    list_append(generatedFont, (unitype) "Θ, 2, 4, b, -100, -100, -40, -100, b, -40, -20, -40, 60, b, -100, 60, -160, 60, b, -160, -20, -160, -100, -100, -100, 2, -140, -20, -60, -20", 's');
+    list_append(generatedFont, (unitype) "Ι, 1, 2, -160, -100, -160, 60", 's');
+    list_append(generatedFont, (unitype) "Κ, 3, 2, -160, -100, -160, 60, 2, -160, -30, -60, 60, 2, -140, -12, -60, -100", 's');
+    list_append(generatedFont, (unitype) "Λ, 1, 3, -160, -100, -100, 60, -40, -100", 's');
+    list_append(generatedFont, (unitype) "Μ, 1, 5, -160, -100, -160, 60, -90, -100, -20, 60, -20, -100", 's');
+    list_append(generatedFont, (unitype) "Ν, 1, 4, -160, -100, -160, 60, -50, -100, -50, 60", 's');
+    list_append(generatedFont, (unitype) "Ξ, 3, 2, -60, -100, -160, -100, 2, -70, -20, -150, -20, 2, -60, 60, -160, 60", 's');
+    list_append(generatedFont, (unitype) "Ο, 1, 4, b, -100, -100, -40, -100, b, -40, -20, -40, 60, b, -100, 60, -160, 60, b, -160, -20, -160, -100, -100, -100", 's');
+    list_append(generatedFont, (unitype) "Π, 1, 4, -160, -100, -160, 60, -50, 60, -50, -100", 's');
+    list_append(generatedFont, (unitype) "Ρ, 1, 5, -160, -100, -160, 60, b, -100, 60, -60, 60, b, -60, 20, -60, -20, -100, -20, -160, -20", 's');
+    list_append(generatedFont, (unitype) "Σ, 1, 5, -60, 60, -160, 60, -100, -20, -160, -100, -60, -100", 's');
+    list_append(generatedFont, (unitype) "Τ, 2, 2, -160, 60, -40, 60, 2, -100, 60, -100, -100", 's');
+    list_append(generatedFont, (unitype) "Υ, 2, 3, -160, 60, -100, -30, -40, 60, 2, -100, -30, -100, -100", 's');
+    list_append(generatedFont, (unitype) "Φ, 2, 2, -95, -100, -95, 60, 4, b, -95, -80, -30, -80, b, -30, -20, -30, 40, b, -95, 40, -160, 40, b, -160, -20, -160, -80, -95, -80", 's');
+    list_append(generatedFont, (unitype) "Χ, 2, 2, -160, -100, -50, 60, 2, -160, 60, -50, -100", 's');
+    list_append(generatedFont, (unitype) "Ψ, 2, 2, -100, -100, -100, 60, 2, b, -160, 60, -160, -30, b, -100, -30, -40, -30, -40, 60", 's');
+    list_append(generatedFont, (unitype) "Ω, 1, 6, -160, -100, b, -115, -100, -160, -70, b, -160, -20, -160, 60, b, -100, 60, -40, 60, b, -40, -20, -40, -70, -85, -100, -40, -100", 's');
+    list_append(generatedFont, (unitype) "a, 2, 3, b, -160, 0, -140, 20, b, -110, 20, -70, 20, -70, -10, -70, -100, 4, b, -70, -50, -90, -40, b, -120, -40, -160, -40, b, -160, -70, -160, -100, b, -120, -100, -80, -100, -70, -80", 's');
+    list_append(generatedFont, (unitype) "à, 3, 3, b, -160, 0, -140, 20, b, -110, 20, -70, 20, -70, -10, -70, -100, 4, b, -70, -50, -90, -40, b, -120, -40, -160, -40, b, -160, -70, -160, -100, b, -120, -100, -80, -100, -70, -80, 2, -110, 45, -130, 65", 's');
+    list_append(generatedFont, (unitype) "á, 3, 3, b, -160, 0, -140, 20, b, -110, 20, -70, 20, -70, -10, -70, -100, 4, b, -70, -50, -90, -40, b, -120, -40, -160, -40, b, -160, -70, -160, -100, b, -120, -100, -80, -100, -70, -80, 2, -110, 45, -90, 65", 's');
+    list_append(generatedFont, (unitype) "â, 3, 3, b, -160, 0, -140, 20, b, -110, 20, -70, 20, -70, -10, -70, -100, 4, b, -70, -50, -90, -40, b, -120, -40, -160, -40, b, -160, -70, -160, -100, b, -120, -100, -80, -100, -70, -80, 3, -145, 45, -115, 65, -85, 45", 's');
+    list_append(generatedFont, (unitype) "ă, 3, 3, b, -160, 0, -140, 20, b, -110, 20, -70, 20, -70, -10, -70, -100, 4, b, -70, -50, -90, -40, b, -120, -40, -160, -40, b, -160, -70, -160, -100, b, -120, -100, -80, -100, -70, -80, 2, b, -145, 65, -145, 45, b, -115, 45, -85, 45, -85, 65", 's');
+    list_append(generatedFont, (unitype) "ä, 4, 3, b, -160, 0, -140, 20, b, -110, 20, -70, 20, -70, -10, -70, -100, 4, b, -70, -50, -90, -40, b, -120, -40, -160, -40, b, -160, -70, -160, -100, b, -120, -100, -80, -100, -70, -80, 1, -135, 55, 1, -95, 55", 's');
+    list_append(generatedFont, (unitype) "ã, 3, 3, b, -160, 0, -140, 20, b, -110, 20, -70, 20, -70, -10, -70, -100, 4, b, -70, -50, -90, -40, b, -120, -40, -160, -40, b, -160, -70, -160, -100, b, -120, -100, -80, -100, -70, -80, 4, b, -150, 45, -150, 65, b, -135, 65, -125, 65, b, -115, 55, -105, 45, b, -95, 45, -80, 45, -80, 65", 's');
+    list_append(generatedFont, (unitype) "å, 3, 3, b, -160, 0, -140, 20, b, -110, 20, -70, 20, -70, -10, -70, -100, 4, b, -70, -50, -90, -40, b, -120, -40, -160, -40, b, -160, -70, -160, -100, b, -120, -100, -80, -100, -70, -80, 4, b, -115, 45, -95, 45, b, -95, 65, -95, 85, b, -115, 85, -135, 85, b, -135, 65, -135, 45, -115, 45", 's');
+    list_append(generatedFont, (unitype) "ā, 3, 3, b, -160, 0, -140, 20, b, -110, 20, -70, 20, -70, -10, -70, -100, 4, b, -70, -50, -90, -40, b, -120, -40, -160, -40, b, -160, -70, -160, -100, b, -120, -100, -80, -100, -70, -80, 2, -145, 55, -85, 55", 's');
+    list_append(generatedFont, (unitype) "ą, 3, 3, b, -160, 0, -140, 20, b, -110, 20, -70, 20, -70, -10, -70, -100, 4, b, -70, -50, -90, -40, b, -120, -40, -160, -40, b, -160, -70, -160, -100, b, -120, -100, -80, -100, -70, -80, 2, b, -70, -100, -95, -105, b, -95, -125, -95, -150, -70, -145", 's');
+    list_append(generatedFont, (unitype) "æ, 4, 3, b, -160, 0, -140, 20, b, -115, 20, -85, 20, -80, -10, -80, -80, 4, b, -80, -50, -90, -40, b, -125, -40, -160, -40, b, -160, -70, -160, -100, b, -125, -100, -90, -100, -80, -80, 3, -80, -40, b, 0, -40, 0, 20, b, -40, 20, -70, 20, -80, -10, 2, b, -80, -40, -85, -100, b, -35, -100, -20, -100, 0, -85", 's');
+    list_append(generatedFont, (unitype) "b, 2, 2, -160, -100, -160, 60, 4, b, -160, -80, -150, -100, b, -115, -100, -70, -100, b, -70, -40, -70, 20, b, -115, 20, -150, 20, -160, 0", 's');
+    list_append(generatedFont, (unitype) "c, 1, 4, b, -70, -10, -80, 20, b, -115, 20, -160, 20, b, -160, -40, -160, -100, b, -115, -100, -80, -100, -70, -70", 's');
+    list_append(generatedFont, (unitype) "ć, 2, 4, b, -70, -10, -80, 20, b, -115, 20, -160, 20, b, -160, -40, -160, -100, b, -115, -100, -80, -100, -70, -70, 2, -110, 45, -90, 65", 's');
+    list_append(generatedFont, (unitype) "č, 2, 4, b, -70, -10, -80, 20, b, -115, 20, -160, 20, b, -160, -40, -160, -100, b, -115, -100, -80, -100, -70, -70, 3, -145, 65, -115, 45, -85, 65", 's');
+    list_append(generatedFont, (unitype) "ċ, 2, 4, b, -70, -10, -80, 20, b, -115, 20, -160, 20, b, -160, -40, -160, -100, b, -115, -100, -80, -100, -70, -70, 1, -115, 55", 's');
+    list_append(generatedFont, (unitype) "ç, 2, 4, b, -70, -10, -80, 20, b, -115, 20, -160, 20, b, -160, -40, -160, -100, b, -115, -100, -80, -100, -70, -70, 3, -115, -100, b, -117, -115, -95, -120, b, -95, -135, -95, -160, -120, -155", 's');
+    list_append(generatedFont, (unitype) "d, 2, 2, -70, -100, -70, 60, 4, b, -70, 0, -80, 20, b, -115, 20, -160, 20, b, -160, -40, -160, -100, b, -115, -100, -80, -100, -70, -80", 's');
+    list_append(generatedFont, (unitype) "ď, 3, 2, -70, -100, -70, 60, 4, b, -70, 0, -80, 20, b, -115, 20, -160, 20, b, -160, -40, -160, -100, b, -115, -100, -80, -100, -70, -80, 1, b, -45, 30, -40, 40, -40, 60", 's');
+    list_append(generatedFont, (unitype) "đ, 3, 2, -70, -100, -70, 60, 4, b, -70, 0, -80, 20, b, -115, 20, -160, 20, b, -160, -40, -160, -100, b, -115, -100, -80, -100, -70, -80, 2, -60, 50, -105, 50", 's');
+    list_append(generatedFont, (unitype) "ð, 2, 5, b, -70, -45, -70, 5, b, -115, 5, -160, 5, b, -160, -45, -160, -100, b, -115, -100, -70, -100, b, -70, -45, -70, 30, -120, 60, 2, -80, 60, -120, 30", 's');
+    list_append(generatedFont, (unitype) "e, 1, 5, -160, -40, b, -70, -40, -70, 20, b, -115, 20, -160, 20, b, -160, -40, -160, -100, b, -115, -100, -90, -100, -70, -85", 's');
+    list_append(generatedFont, (unitype) "è, 2, 5, -160, -40, b, -70, -40, -70, 20, b, -115, 20, -160, 20, b, -160, -40, -160, -100, b, -115, -100, -90, -100, -70, -85, 2, -115, 45, -135, 65", 's');
+    list_append(generatedFont, (unitype) "é, 2, 5, -160, -40, b, -70, -40, -70, 20, b, -115, 20, -160, 20, b, -160, -40, -160, -100, b, -115, -100, -90, -100, -70, -85, 2, -115, 45, -95, 65", 's');
+    list_append(generatedFont, (unitype) "ě, 2, 5, -160, -40, b, -70, -40, -70, 20, b, -115, 20, -160, 20, b, -160, -40, -160, -100, b, -115, -100, -90, -100, -70, -85, 3, -145, 65, -115, 45, -85, 65", 's');
+    list_append(generatedFont, (unitype) "ê, 2, 5, -160, -40, b, -70, -40, -70, 20, b, -115, 20, -160, 20, b, -160, -40, -160, -100, b, -115, -100, -90, -100, -70, -85, 3, -145, 45, -115, 65, -85, 45", 's');
+    list_append(generatedFont, (unitype) "ë, 3, 5, -160, -40, b, -70, -40, -70, 20, b, -115, 20, -160, 20, b, -160, -40, -160, -100, b, -115, -100, -90, -100, -70, -85, 1, -135, 55, 1, -95, 55", 's');
+    list_append(generatedFont, (unitype) "ē, 2, 5, -160, -40, b, -70, -40, -70, 20, b, -115, 20, -160, 20, b, -160, -40, -160, -100, b, -115, -100, -90, -100, -70, -85, 2, -145, 55, -85, 55", 's');
+    list_append(generatedFont, (unitype) "ė, 2, 5, -160, -40, b, -70, -40, -70, 20, b, -115, 20, -160, 20, b, -160, -40, -160, -100, b, -115, -100, -90, -100, -70, -85, 1, -115, 55", 's');
+    list_append(generatedFont, (unitype) "ę, 2, 5, -160, -40, b, -70, -40, -70, 20, b, -115, 20, -160, 20, b, -160, -40, -160, -100, b, -115, -100, -90, -100, -70, -85, 2, b, -90, -95, -120, -105, b, -120, -130, -120, -155, -90, -145", 's');
+    list_append(generatedFont, (unitype) "ə, 1, 5, -70, -40, b, -160, -40, -160, -100, b, -115, -100, -70, -100, b, -70, -40, -70, 20, b, -115, 20, -140, 20, -160, 5", 's');
+    list_append(generatedFont, (unitype) "f, 2, 2, -140, -100, b, -140, 40, -140, 60, -110, 55, 2, -160, 0, -115, 0", 's');
+    list_append(generatedFont, (unitype) "g, 2, 3, -70, 20, b, -70, -120, -70, -160, b, -110, -160, -140, -160, -160, -140, 4, b, -70, 0, -80, 20, b, -115, 20, -160, 20, b, -160, -40, -160, -100, b, -115, -100, -80, -100, -70, -80", 's');
+    list_append(generatedFont, (unitype) "ğ, 3, 3, -70, 20, b, -70, -120, -70, -160, b, -110, -160, -140, -160, -160, -140, 4, b, -70, 0, -80, 20, b, -115, 20, -160, 20, b, -160, -40, -160, -100, b, -115, -100, -80, -100, -70, -80, 2, b, -145, 65, -145, 45, b, -115, 45, -85, 45, -85, 65", 's');
+    list_append(generatedFont, (unitype) "ġ, 3, 3, -70, 20, b, -70, -120, -70, -160, b, -110, -160, -140, -160, -160, -140, 4, b, -70, 0, -80, 20, b, -115, 20, -160, 20, b, -160, -40, -160, -100, b, -115, -100, -80, -100, -70, -80, 1, -115, 55", 's');
+    list_append(generatedFont, (unitype) "h, 2, 2, -160, 60, -160, -100, 3, b, -160, -10, -150, 20, b, -115, 20, -70, 20, -70, -30, -70, -100", 's');
+    list_append(generatedFont, (unitype) "ħ, 3, 2, -160, 60, -160, -100, 3, b, -160, -10, -150, 20, b, -115, 20, -70, 20, -70, -30, -70, -100, 2, -170, 45, -125, 45", 's');
+    list_append(generatedFont, (unitype) "i, 2, 2, -160, -100, -160, 10, 1, -160, 50", 's');
+    list_append(generatedFont, (unitype) "ì, 2, 2, -160, -100, -160, 10, 2, -160, 50, -170, 70", 's');
+    list_append(generatedFont, (unitype) "í, 2, 2, -160, -100, -160, 10, 2, -160, 50, -150, 70", 's');
+    list_append(generatedFont, (unitype) "î, 2, 2, -160, -100, -160, 10, 3, -180, 50, -160, 70, -140, 50", 's');
+    list_append(generatedFont, (unitype) "ï, 3, 2, -160, -100, -160, 10, 1, -175, 50, 1, -145, 50", 's');
+    list_append(generatedFont, (unitype) "ī, 2, 2, -160, -100, -160, 10, 2, -180, 50, -140, 50", 's');
+    list_append(generatedFont, (unitype) "ı, 1, 2, -160, -100, -160, 10", 's');
+    list_append(generatedFont, (unitype) "į, 2, 1, -160, 50, 3, -160, 10, b, -160, -100, -170, -105, b, -170, -115, -170, -125, -160, -125", 's');
+    list_append(generatedFont, (unitype) "j, 2, 3, b, -180, -140, -170, -160, b, -150, -160, -120, -160, -120, -120, -120, 10, 1, -120, 50", 's');
+    list_append(generatedFont, (unitype) "k, 3, 2, -160, -100, -160, 60, 2, -160, -60, -90, 10, 2, -140, -40, -90, -100", 's');
+    list_append(generatedFont, (unitype) "ķ, 4, 2, -160, -100, -160, 60, 2, -160, -60, -90, 10, 2, -140, -40, -90, -100, 1, b, -130, -100, -130, -115, -140, -120", 's');
+    list_append(generatedFont, (unitype) "l, 1, 2, -160, -100, -160, 60", 's');
+    list_append(generatedFont, (unitype) "ĺ, 2, 2, -160, -100, -160, 60, 2, -160, 90, -150, 110", 's');
+    list_append(generatedFont, (unitype) "ľ, 2, 2, -160, -100, -160, 60, 1, b, -135, 50, -130, 60, -130, 80", 's');
+    list_append(generatedFont, (unitype) "ļ, 2, 2, -160, -100, -160, 60, 1, b, -160, -120, -160, -140, -165, -150", 's');
+    list_append(generatedFont, (unitype) "ł, 2, 2, -160, -100, -160, 60, 2, -180, -25, -140, -5", 's');
+    list_append(generatedFont, (unitype) "ŀ, 2, 2, -160, -100, -160, 60, 1, -135, -20", 's');
+    list_append(generatedFont, (unitype) "m, 3, 2, -160, -100, -160, 20, 3, b, -160, 0, -150, 20, b, -120, 20, -80, 20, -80, -20, -80, -100, 3, b, -80, -20, -80, 20, b, -40, 20, 0, 20, 0, -20, 0, -100", 's');
+    list_append(generatedFont, (unitype) "n, 2, 2, -160, -100, -160, 20, 3, b, -160, 0, -150, 20, b, -115, 20, -70, 20, -70, -20, -70, -100", 's');
+    list_append(generatedFont, (unitype) "ń, 3, 2, -160, -100, -160, 20, 3, b, -160, 0, -150, 20, b, -115, 20, -70, 20, -70, -20, -70, -100, 2, -115, 45, -95, 65", 's');
+    list_append(generatedFont, (unitype) "ň, 3, 2, -160, -100, -160, 20, 3, b, -160, 0, -150, 20, b, -115, 20, -70, 20, -70, -20, -70, -100, 3, -145, 65, -115, 45, -85, 65", 's');
+    list_append(generatedFont, (unitype) "ñ, 3, 2, -160, -100, -160, 20, 3, b, -160, 0, -150, 20, b, -115, 20, -70, 20, -70, -20, -70, -100, 4, b, -150, 45, -150, 65, b, -135, 65, -125, 65, b, -115, 55, -105, 45, b, -95, 45, -80, 45, -80, 65", 's');
+    list_append(generatedFont, (unitype) "ņ, 3, 2, -160, -100, -160, 20, 3, b, -160, 0, -150, 20, b, -115, 20, -70, 20, -70, -20, -70, -100, 1, b, -115, -100, -115, -120, -120, -130", 's');
+    list_append(generatedFont, (unitype) "o, 1, 4, b, -115, -100, -70, -100, b, -70, -40, -70, 20, b, -115, 20, -160, 20, b, -160, -40, -160, -100, -115, -100", 's');
+    list_append(generatedFont, (unitype) "ò, 2, 4, b, -115, -100, -70, -100, b, -70, -40, -70, 20, b, -115, 20, -160, 20, b, -160, -40, -160, -100, -115, -100, 2, -115, 45, -135, 65", 's');
+    list_append(generatedFont, (unitype) "ó, 2, 4, b, -115, -100, -70, -100, b, -70, -40, -70, 20, b, -115, 20, -160, 20, b, -160, -40, -160, -100, -115, -100, 2, -115, 45, -95, 65", 's');
+    list_append(generatedFont, (unitype) "ô, 2, 4, b, -115, -100, -70, -100, b, -70, -40, -70, 20, b, -115, 20, -160, 20, b, -160, -40, -160, -100, -115, -100, 3, -145, 45, -115, 65, -85, 45", 's');
+    list_append(generatedFont, (unitype) "ö, 3, 4, b, -115, -100, -70, -100, b, -70, -40, -70, 20, b, -115, 20, -160, 20, b, -160, -40, -160, -100, -115, -100, 1, -135, 55, 1, -95, 55", 's');
+    list_append(generatedFont, (unitype) "õ, 2, 4, b, -115, -100, -70, -100, b, -70, -40, -70, 20, b, -115, 20, -160, 20, b, -160, -40, -160, -100, -115, -100, 4, b, -150, 45, -150, 65, b, -135, 65, -125, 65, b, -115, 55, -105, 45, b, -95, 45, -80, 45, -80, 65", 's');
+    list_append(generatedFont, (unitype) "ő, 3, 4, b, -115, -100, -70, -100, b, -70, -40, -70, 20, b, -115, 20, -160, 20, b, -160, -40, -160, -100, -115, -100, 2, -140, 45, -120, 65, 2, -100, 45, -80, 65", 's');
+    list_append(generatedFont, (unitype) "ø, 2, 4, b, -115, -100, -70, -100, b, -70, -40, -70, 20, b, -115, 20, -160, 20, b, -160, -40, -160, -100, -115, -100, 2, -160, -100, -70, 20", 's');
+    list_append(generatedFont, (unitype) "œ, 1, 8, b, -70, -40, -70, 20, b, -115, 20, -160, 20, b, -160, -40, -160, -100, b, -115, -100, -70, -100, -70, -40, b, 10, -40, 10, 20, b, -30, 20, -60, 20, -70, -10, b, -70, -40, -75, -100, b, -30, -100, -10, -100, 10, -85", 's');
+    list_append(generatedFont, (unitype) "p, 2, 2, -160, -160, -160, 20, 4, b, -160, 0, -150, 20, b, -115, 20, -70, 20, b, -70, -40, -70, -100, b, -115, -100, -150, -100, -160, -80", 's');
+    list_append(generatedFont, (unitype) "q, 2, 2, -70, 20, -70, -160, 4, b, -70, 0, -80, 20, b, -115, 20, -160, 20, b, -160, -40, -160, -100, b, -115, -100, -80, -100, -70, -80", 's');
+    list_append(generatedFont, (unitype) "r, 2, 2, -160, -100, -160, 20, 2, b, -160, 0, -150, 20, b, -110, 20, -90, 20, -80, 10", 's');
+    list_append(generatedFont, (unitype) "ŕ, 3, 2, -160, -100, -160, 20, 2, b, -160, 0, -150, 20, b, -110, 20, -90, 20, -80, 10, 2, -120, 45, -100, 65", 's');
+    list_append(generatedFont, (unitype) "ř, 3, 2, -160, -100, -160, 20, 2, b, -160, 0, -150, 20, b, -110, 20, -90, 20, -80, 10, 3, -145, 65, -115, 45, -85, 65", 's');
+    list_append(generatedFont, (unitype) "s, 1, 6, b, -70, 0, -80, 20, b, -115, 20, -160, 20, b, -160, -10, -160, -40, b, -115, -40, -70, -40, b, -70, -70, -70, -100, b, -115, -100, -150, -100, -160, -80", 's');
+    list_append(generatedFont, (unitype) "ś, 2, 6, b, -70, 0, -80, 20, b, -115, 20, -160, 20, b, -160, -10, -160, -40, b, -115, -40, -70, -40, b, -70, -70, -70, -100, b, -115, -100, -150, -100, -160, -80, 2, -115, 45, -95, 65", 's');
+    list_append(generatedFont, (unitype) "š, 2, 6, b, -70, 0, -80, 20, b, -115, 20, -160, 20, b, -160, -10, -160, -40, b, -115, -40, -70, -40, b, -70, -70, -70, -100, b, -115, -100, -150, -100, -160, -80, 3, -145, 65, -115, 45, -85, 65", 's');
+    list_append(generatedFont, (unitype) "ş, 2, 6, b, -70, 0, -80, 20, b, -115, 20, -160, 20, b, -160, -10, -160, -40, b, -115, -40, -70, -40, b, -70, -70, -70, -100, b, -115, -100, -150, -100, -160, -80, 3, -115, -100, b, -117, -115, -95, -120, b, -95, -135, -95, -160, -120, -155", 's');
+    list_append(generatedFont, (unitype) "ș, 2, 6, b, -70, 0, -80, 20, b, -115, 20, -160, 20, b, -160, -10, -160, -40, b, -115, -40, -70, -40, b, -70, -70, -70, -100, b, -115, -100, -150, -100, -160, -80, 1, b, -115, -110, -115, -125, -120, -140", 's');
+    list_append(generatedFont, (unitype) "ß, 1, 7, -160, -100, b, -160, 15, -160, 60, b, -125, 60, -90, 60, b, -90, 25, -90, 5, b, -110, -10, -130, -25, b, -90, -45, -65, -55, b, -75, -85, -90, -110, -135, -95", 's');
+    list_append(generatedFont, (unitype) "t, 2, 2, -140, 50, b, -140, -70, -140, -100, -110, -100, 2, -160, 20, -120, 20", 's');
+    list_append(generatedFont, (unitype) "ť, 3, 2, -140, 50, b, -140, -70, -140, -100, -110, -100, 2, -160, 20, -120, 20, 1, b, -95, 20, -90, 30, -90, 50", 's');
+    list_append(generatedFont, (unitype) "ț, 3, 2, -140, 50, b, -140, -70, -140, -100, -110, -100, 2, -160, 20, -120, 20, 1, b, -130, -110, -130, -125, -135, -140", 's');
+    list_append(generatedFont, (unitype) "þ, 2, 2, -160, -140, -160, 60, 4, b, -160, 0, -150, 20, b, -115, 20, -70, 20, b, -70, -40, -70, -100, b, -115, -100, -150, -100, -160, -80", 's');
+    list_append(generatedFont, (unitype) "u, 2, 2, -70, 20, -70, -100, 3, b, -70, -80, -80, -100, b, -115, -100, -160, -100, -160, -60, -160, 20", 's');
+    list_append(generatedFont, (unitype) "ù, 3, 2, -70, 20, -70, -100, 3, b, -70, -80, -80, -100, b, -115, -100, -160, -100, -160, -60, -160, 20, 2, -115, 45, -135, 65", 's');
+    list_append(generatedFont, (unitype) "ú, 3, 2, -70, 20, -70, -100, 3, b, -70, -80, -80, -100, b, -115, -100, -160, -100, -160, -60, -160, 20, 2, -115, 45, -95, 65", 's');
+    list_append(generatedFont, (unitype) "û, 3, 2, -70, 20, -70, -100, 3, b, -70, -80, -80, -100, b, -115, -100, -160, -100, -160, -60, -160, 20, 3, -145, 45, -115, 65, -85, 45", 's');
+    list_append(generatedFont, (unitype) "ü, 4, 2, -70, 20, -70, -100, 3, b, -70, -80, -80, -100, b, -115, -100, -160, -100, -160, -60, -160, 20, 1, -135, 55, 1, -95, 55", 's');
+    list_append(generatedFont, (unitype) "ů, 3, 2, -70, 20, -70, -100, 3, b, -70, -80, -80, -100, b, -115, -100, -160, -100, -160, -60, -160, 20, 4, b, -115, 45, -95, 45, b, -95, 65, -95, 85, b, -115, 85, -135, 85, b, -135, 65, -135, 45, -115, 45", 's');
+    list_append(generatedFont, (unitype) "ű, 4, 2, -70, 20, -70, -100, 3, b, -70, -80, -80, -100, b, -115, -100, -160, -100, -160, -60, -160, 20, 2, -100, 45, -80, 65, 2, -140, 45, -120, 65", 's');
+    list_append(generatedFont, (unitype) "ū, 3, 2, -70, 20, -70, -100, 3, b, -70, -80, -80, -100, b, -115, -100, -160, -100, -160, -60, -160, 20, 2, -145, 55, -85, 55", 's');
+    list_append(generatedFont, (unitype) "ų, 1, 6, -160, 20, b, -160, -60, -160, -100, b, -115, -100, -80, -100, -70, -80, -70, 20, b, -70, -100, -95, -105, b, -95, -125, -95, -150, -70, -145", 's');
+    list_append(generatedFont, (unitype) "v, 1, 3, -160, 20, -115, -100, -70, 20", 's');
+    list_append(generatedFont, (unitype) "w, 1, 5, -160, 20, -120, -100, -80, 20, -40, -100, 0, 20", 's');
+    list_append(generatedFont, (unitype) "x, 2, 2, -160, 20, -70, -100, 2, -160, -100, -70, 20", 's');
+    list_append(generatedFont, (unitype) "y, 2, 2, -70, 20, b, -130, -140, -140, -160, -160, -150, 2, -115, -99, -160, 20", 's');
+    list_append(generatedFont, (unitype) "ý, 3, 2, -70, 20, b, -130, -140, -140, -160, -160, -150, 2, -115, -99, -160, 20, 2, -115, 45, -95, 65", 's');
+    list_append(generatedFont, (unitype) "z, 1, 4, -70, -100, -160, -100, -70, 20, -160, 20", 's');
+    list_append(generatedFont, (unitype) "ź, 2, 4, -70, -100, -160, -100, -70, 20, -160, 20, 2, -115, 45, -95, 65", 's');
+    list_append(generatedFont, (unitype) "ž, 2, 4, -70, -100, -160, -100, -70, 20, -160, 20, 3, -145, 65, -115, 45, -85, 65", 's');
+    list_append(generatedFont, (unitype) "ż, 2, 4, -70, -100, -160, -100, -70, 20, -160, 20, 1, -115, 55", 's');
+    list_append(generatedFont, (unitype) "а, 2, 3, b, -160, 0, -140, 20, b, -110, 20, -70, 20, -70, -10, -70, -100, 4, b, -70, -50, -90, -40, b, -120, -40, -160, -40, b, -160, -70, -160, -100, b, -120, -100, -80, -100, -70, -80", 's');
+    list_append(generatedFont, (unitype) "б, 1, 6, b, -160, -45, -160, 5, b, -115, 5, -70, 5, b, -70, -45, -70, -100, b, -115, -100, -160, -100, b, -160, -45, -160, 45, b, -105, 45, -85, 45, -80, 60", 's');
+    list_append(generatedFont, (unitype) "в, 2, 5, -160, -100, b, -160, 20, -130, 20, b, -110, 20, -75, 20, b, -75, -10, -75, -40, -120, -40, -160, -40, 3, b, -120, -40, -75, -40, b, -75, -70, -75, -100, -110, -100, -160, -100", 's');
+    list_append(generatedFont, (unitype) "г, 1, 3, -160, -100, -160, 20, -95, 20", 's');
+    list_append(generatedFont, (unitype) "ґ, 1, 4, -160, -100, -160, 20, -95, 20, -95, 40", 's');
+    list_append(generatedFont, (unitype) "ғ, 2, 3, -150, -100, -150, 20, -85, 20, 2, -160, -30, -130, -30", 's');
+    list_append(generatedFont, (unitype) "д, 2, 4, -160, -135, -160, -100, -50, -100, -50, -135, 3, -65, -100, -65, 20, b, -135, 20, -135, -50, -145, -100", 's');
+    list_append(generatedFont, (unitype) "ђ, 3, 2, -160, -100, -160, 60, 2, -180, 40, -120, 40, 3, b, -160, -10, -150, 20, b, -115, 20, -70, 20, -70, -30, b, -70, -100, -70, -130, -95, -125", 's');
+    list_append(generatedFont, (unitype) "е, 1, 5, -160, -40, b, -70, -40, -70, 20, b, -115, 20, -160, 20, b, -160, -40, -160, -100, b, -115, -100, -90, -100, -70, -85", 's');
+    list_append(generatedFont, (unitype) "ё, 3, 5, -160, -40, b, -70, -40, -70, 20, b, -115, 20, -160, 20, b, -160, -40, -160, -100, b, -115, -100, -90, -100, -70, -85, 1, -135, 55, 1, -95, 55", 's');
+    list_append(generatedFont, (unitype) "є, 2, 4, b, -70, -10, -80, 20, b, -115, 20, -160, 20, b, -160, -40, -160, -100, b, -115, -100, -80, -100, -70, -70, 2, -160, -40, -110, -40", 's');
+    list_append(generatedFont, (unitype) "ә, 1, 5, -70, -40, b, -160, -40, -160, -100, b, -115, -100, -70, -100, b, -70, -40, -70, 20, b, -115, 20, -140, 20, -160, 5", 's');
+    list_append(generatedFont, (unitype) "ж, 4, 4, -160, -100, -115, -40, -75, -40, -30, -100, 2, -160, 20, -115, -40, 2, -75, -40, -30, 20, 2, -95, 20, -95, -100", 's');
+    list_append(generatedFont, (unitype) "ӂ, 5, 4, -160, -100, -115, -40, -75, -40, -30, -100, 2, -160, 20, -115, -40, 2, -75, -40, -30, 20, 2, -95, 20, -95, -100, 2, b, -125, 65, -125, 45, b, -95, 45, -65, 45, -65, 65", 's');
+    list_append(generatedFont, (unitype) "з, 1, 6, b, -160, -5, -155, 20, b, -125, 20, -85, 20, b, -85, -10, -85, -40, b, -120, -40, -85, -40, b, -85, -70, -85, -100, b, -125, -100, -155, -100, -160, -75", 's');
+    list_append(generatedFont, (unitype) "и, 1, 4, -160, 20, -160, -100, -70, 20, -70, -100", 's');
+    list_append(generatedFont, (unitype) "ӣ, 2, 4, -160, 20, -160, -100, -70, 20, -70, -100, 2, -145, 55, -85, 55", 's');
+    list_append(generatedFont, (unitype) "й, 2, 4, -160, 20, -160, -100, -70, 20, -70, -100, 2, b, -145, 65, -145, 45, b, -115, 45, -85, 45, -85, 65", 's');
+    list_append(generatedFont, (unitype) "і, 2, 2, -160, -100, -160, 10, 1, -160, 50", 's');
+    list_append(generatedFont, (unitype) "ї, 3, 2, -160, -100, -160, 10, 1, -175, 50, 1, -145, 50", 's');
+    list_append(generatedFont, (unitype) "ј, 2, 1, -120, 50, 3, -120, 10, b, -120, -120, -120, -160, b, -150, -160, -170, -160, -180, -140", 's');
+    list_append(generatedFont, (unitype) "к, 3, 2, -160, -100, -160, 20, 3, -160, -40, -140, -40, -85, 20, 2, -140, -40, -85, -100", 's');
+    list_append(generatedFont, (unitype) "қ, 3, 2, -160, -100, -160, 20, 3, -160, -40, -140, -40, -85, 20, 4, -140, -40, -85, -100, -80, -100, -80, -125", 's');
+    list_append(generatedFont, (unitype) "ҝ, 4, 2, -160, -100, -160, 20, 3, -160, -40, -125, -40, -85, 20, 2, -125, -40, -85, -100, 2, -140, -15, -140, -65", 's');
+    list_append(generatedFont, (unitype) "л, 1, 4, b, -160, -100, -145, -100, -140, -80, -130, 20, -70, 20, -70, -100", 's');
+    list_append(generatedFont, (unitype) "љ, 1, 7, b, -160, -100, -145, -100, -140, -80, -130, 20, -70, 20, -70, -100, b, -30, -100, 5, -100, b, 5, -70, 5, -40, -30, -40, -70, -40", 's');
+    list_append(generatedFont, (unitype) "м, 1, 5, -160, -100, -160, 20, -100, -100, -40, 20, -40, -100", 's');
+    list_append(generatedFont, (unitype) "н, 3, 2, -160, -100, -160, 20, 2, -160, -40, -70, -40, 2, -70, -100, -70, 20", 's');
+    list_append(generatedFont, (unitype) "ң, 3, 2, -160, -100, -160, 20, 2, -160, -40, -70, -40, 4, -70, 20, -70, -100, -65, -100, -65, -125", 's');
+    list_append(generatedFont, (unitype) "њ, 2, 2, -160, -100, -160, 20, 5, -160, -40, b, -30, -40, 5, -40, b, 5, -70, 5, -100, -30, -100, -70, -100, -70, 20", 's');
+    list_append(generatedFont, (unitype) "о, 1, 4, b, -115, -100, -70, -100, b, -70, -40, -70, 20, b, -115, 20, -160, 20, b, -160, -40, -160, -100, -115, -100", 's');
+    list_append(generatedFont, (unitype) "ө, 1, 5, b, -70, -40, -70, 20, b, -115, 20, -160, 20, b, -160, -40, -160, -100, b, -115, -100, -70, -100, -70, -40, -160, -40", 's');
+    list_append(generatedFont, (unitype) "п, 1, 4, -160, -100, -160, 20, -70, 20, -70, -100", 's');
+    list_append(generatedFont, (unitype) "р, 2, 2, -160, -160, -160, 20, 4, b, -160, 0, -150, 20, b, -115, 20, -70, 20, b, -70, -40, -70, -100, b, -115, -100, -150, -100, -160, -80", 's');
+    list_append(generatedFont, (unitype) "с, 1, 4, b, -70, -10, -80, 20, b, -115, 20, -160, 20, b, -160, -40, -160, -100, b, -115, -100, -80, -100, -70, -70", 's');
+    list_append(generatedFont, (unitype) "т, 2, 2, -160, 20, -70, 20, 2, -115, 20, -115, -100", 's');
+    list_append(generatedFont, (unitype) "ћ, 3, 2, -160, 60, -160, -100, 3, b, -160, -10, -150, 20, b, -115, 20, -70, 20, -70, -30, -70, -100, 2, -170, 45, -125, 45", 's');
+    list_append(generatedFont, (unitype) "у, 2, 2, -160, 20, -115, -100, 2, -70, 20, b, -130, -140, -140, -160, -160, -150", 's');
+    list_append(generatedFont, (unitype) "ӯ, 3, 2, -160, 20, -115, -100, 2, -70, 20, b, -130, -140, -140, -160, -160, -150, 2, -145, 55, -85, 55", 's');
+    list_append(generatedFont, (unitype) "ү, 2, 3, -160, 0, -115, -100, -115, -155, 2, -115, -100, -70, 0", 's');
+    list_append(generatedFont, (unitype) "ұ, 3, 3, -160, 0, -115, -100, -115, -155, 2, -115, -100, -70, 0, 2, -150, -100, -80, -100", 's');
+    list_append(generatedFont, (unitype) "ў, 3, 2, -160, 20, -115, -100, 2, -70, 20, b, -130, -140, -140, -160, -160, -150, 2, b, -145, 65, -145, 45, b, -115, 45, -85, 45, -85, 65", 's');
+    list_append(generatedFont, (unitype) "ф, 2, 2, -100, -140, -100, 60, 4, b, -100, 10, -40, 40, b, -40, -40, -40, -120, b, -100, -90, -160, -120, b, -160, -40, -160, 40, -100, 10", 's');
+    list_append(generatedFont, (unitype) "х, 2, 2, -160, -100, -70, 20, 2, -160, 20, -70, -100", 's');
+    list_append(generatedFont, (unitype) "ҳ, 2, 2, -160, -100, -70, 20, 4, -160, 20, -70, -100, -65, -100, -65, -", 's');
+    list_append(generatedFont, (unitype) "һ, 2, 2, -160, 60, -160, -100, 3, b, -160, -10, -150, 20, b, -115, 20, -70, 20, -70, -30, -70, -100", 's');
+    list_append(generatedFont, (unitype) "ц, 2, 4, -160, 20, -160, -100, -70, -100, -70, 20, 3, -70, -100, -65, -100, -65, -125", 's');
+    list_append(generatedFont, (unitype) "ч, 2, 2, -80, -100, -80, 20, 3, b, -80, -40, -95, -50, b, -120, -50, -160, -50, -160, -15, -160, 20", 's');
+    list_append(generatedFont, (unitype) "ҷ, 2, 3, -160, 20, b, -160, -15, -160, -50, b, -120, -50, -95, -50, -80, -40, 4, -80, 20, -80, -100, -75, -100, -75, -125", 's');
+    list_append(generatedFont, (unitype) "ҹ, 3, 2, -80, -100, -80, 20, 3, b, -80, -40, -95, -50, b, -120, -50, -160, -50, -160, -15, -160, 20, 2, -120, -20, -120, -80", 's');
+    list_append(generatedFont, (unitype) "џ, 2, 4, -160, 20, -160, -100, -70, -100, -70, 20, 2, -115, -100, -115, -125", 's');
+    list_append(generatedFont, (unitype) "ш, 3, 3, -160, 20, -160, -100, -20, -100, 2, -90, 20, -90, -100, 2, -20, 20, -20, -100", 's');
+    list_append(generatedFont, (unitype) "щ, 3, 3, -160, 20, -160, -100, -20, -100, 2, -90, 20, -90, -100, 4, -20, 20, -20, -100, -15, -100, -15, -125", 's');
+    list_append(generatedFont, (unitype) "ъ, 1, 6, -160, 20, -140, 20, -140, -100, b, -100, -100, -60, -100, b, -60, -70, -60, -40, -100, -40, -140, -40", 's');
+    list_append(generatedFont, (unitype) "ы, 2, 5, -160, 20, -160, -100, b, -120, -100, -80, -100, b, -80, -70, -80, -40, -120, -40, -160, -40, 2, -55, -100, -55, 20", 's');
+    list_append(generatedFont, (unitype) "ь, 1, 5, -160, 20, -160, -100, b, -120, -100, -80, -100, b, -80, -70, -80, -40, -120, -40, -160, -40", 's');
+    list_append(generatedFont, (unitype) "э, 2, 4, b, -160, -10, -150, 20, b, -115, 20, -70, 20, b, -70, -40, -70, -100, b, -115, -100, -150, -100, -160, -70, 2, -70, -40, -120, -40", 's');
+    list_append(generatedFont, (unitype) "ю, 2, 2, -160, 20, -160, -100, 5, -160, -40, b, -120, -40, -120, -100, b, -75, -100, -30, -100, b, -30, -40, -30, 20, b, -75, 20, -120, 20, -120, -40", 's');
+    list_append(generatedFont, (unitype) "я, 2, 5, -70, -100, -70, 20, b, -120, 20, -160, 20, b, -160, -10, -160, -40, -130, -40, -70, -40, 2, -125, -40, -160, -100", 's');
+    list_append(generatedFont, (unitype) "α, 2, 2, -70, 20, b, -70, -80, -70, -100, -50, -100, 4, b, -70, -10, -80, 20, b, -115, 20, -160, 20, b, -160, -40, -160, -100, b, -115, -100, -70, -100, -70, -70", 's');
+    list_append(generatedFont, (unitype) "β, 1, 7, -160, -135, b, -160, 0, -160, 40, b, -120, 40, -85, 40, b, -85, 10, -85, -30, b, -130, -30, -75, -30, b, -75, -60, -75, -100, b, -115, -100, -140, -100, -160, -80", 's');
+    list_append(generatedFont, (unitype) "γ, 2, 3, -160, 0, -115, -100, -70, 0, 2, -115, -100, -115, -155", 's');
+    list_append(generatedFont, (unitype) "δ, 2, 4, b, -70, -50, -70, 0, b, -115, 0, -160, 0, b, -160, -50, -160, -100, b, -115, -100, -70, -100, -70, -50, 2, b, -92, -4, -145, 10, b, -145, 30, -150, 70, -95, 55", 's');
+    list_append(generatedFont, (unitype) "ε, 1, 6, b, -70, -5, -75, 20, b, -115, 20, -160, 20, b, -160, -15, -160, -40, b, -110, -40, -160, -40, b, -160, -75, -160, -100, b, -115, -100, -75, -100, -70, -75", 's');
+    list_append(generatedFont, (unitype) "ζ, 1, 4, -160, 40, b, -80, 40, -140, -20, b, -155, -55, -170, -100, b, -110, -100, -70, -100, -100, -135", 's');
+    list_append(generatedFont, (unitype) "η, 2, 2, -160, -100, -160, 20, 3, b, -160, 0, -150, 20, b, -115, 20, -70, 20, -70, -20, -70, -155", 's');
+    list_append(generatedFont, (unitype) "θ, 1, 5, b, -160, -25, -160, -100, b, -115, -100, -70, -100, b, -70, -25, -70, 50, b, -115, 50, -160, 50, -160, -25, -70, -25", 's');
+    list_append(generatedFont, (unitype) "ι, 1, 2, -160, 20, b, -160, -70, -160, -105, -130, -100", 's');
+    list_append(generatedFont, (unitype) "κ, 3, 2, -160, -100, -160, 20, 3, -160, -40, -140, -40, -85, 20, 2, -140, -40, -85, -100", 's');
+    list_append(generatedFont, (unitype) "λ, 2, 2, b, -150, 50, -140, 50, -135, 40, b, -85, -90, -80, -100, -70, -100, 2, -120, 0, -160, -100", 's');
+    list_append(generatedFont, (unitype) "μ, 2, 2, -70, 20, -70, -100, 4, b, -70, -80, -80, -100, b, -115, -100, -160, -100, -160, -60, -160, 20, -160, -155", 's');
+    list_append(generatedFont, (unitype) "µ, 2, 2, -70, 20, -70, -100, 4, b, -70, -80, -80, -100, b, -115, -100, -160, -100, -160, -60, -160, 20, -160, -155", 's');
+    list_append(generatedFont, (unitype) "ν, 1, 3, -160, 20, -115, -100, -70, 20", 's');
+    list_append(generatedFont, (unitype) "ξ, 1, 6, b, -85, 30, -100, 40, b, -120, 40, -160, 40, b, -160, 5, -160, -30, b, -110, -30, -160, -30, b, -160, -65, -160, -100, b, -110, -100, -70, -100, -100, -135", 's');
+    list_append(generatedFont, (unitype) "ο, 1, 4, b, -115, -100, -70, -100, b, -70, -40, -70, 20, b, -115, 20, -160, 20, b, -160, -40, -160, -100, -115, -100", 's');
+    list_append(generatedFont, (unitype) "π, 3, 2, -145, -100, -145, 20, 2, -160, 20, -60, 20, 2, -75, 20, b, -75, -80, -75, -105, -60, -98", 's');
+    list_append(generatedFont, (unitype) "ρ, 1, 5, -160, -160, b, -160, 0, -150, 20, b, -115, 20, -70, 20, b, -70, -40, -70, -100, b, -115, -100, -150, -100, -160, -80", 's');
+    list_append(generatedFont, (unitype) "σ, 1, 5, b, -115, 20, -160, 20, b, -160, -40, -160, -100, b, -115, -100, -70, -100, b, -70, -40, -70, 20, -115, 20, -65, 20", 's');
+    list_append(generatedFont, (unitype) "τ, 2, 2, -160, 20, -70, 20, 2, -115, 20, b, -115, -80, -115, -110, -85, -95", 's');
+    list_append(generatedFont, (unitype) "υ, 1, 4, -160, 20, b, -160, -65, -160, -100, b, -120, -100, -80, -100, b, -80, -50, -80, 0, -100, 20", 's');
+    list_append(generatedFont, (unitype) "φ, 1, 6, -100, -160, b, -100, -10, -100, 25, b, -70, 10, -40, -10, b, -40, -45, -40, -100, b, -100, -100, -160, -100, b, -160, -45, -160, 5, -130, 15", 's');
+    list_append(generatedFont, (unitype) "χ, 2, 2, b, -160, 10, -150, 10, -145, 0, b, -80, -150, -75, -160, -65, -160, 2, -160, -160, -75, 10", 's');
+    list_append(generatedFont, (unitype) "ψ, 2, 2, -100, -160, -100, 20, 4, -160, 20, b, -160, -40, -160, -100, b, -100, -100, -40, -100, b, -40, -40, -40, 0, -50, 20", 's');
+    list_append(generatedFont, (unitype) "ω, 1, 6, b, -145, 20, -160, -5, b, -160, -40, -160, -100, b, -120, -100, -80, -100, b, -80, -30, -80, -100, b, -40, -100, 0, -100, b, 0, -40, 0, -5, -15, 20", 's');
+    list_append(generatedFont, (unitype) "ς, 1, 4, b, -70, -10, -80, 20, b, -115, 20, -160, 20, b, -160, -40, -160, -100, b, -110, -100, -70, -100, -100, -135", 's');
+    list_append(generatedFont, (unitype) "1, 1, 3, -160, 35, -120, 60, -120, -100", 's');
+    list_append(generatedFont, (unitype) "2, 1, 4, -65, -100, b, -160, -100, -70, -15, b, -70, 25, -70, 60, b, -110, 60, -150, 60, -160, 25", 's');
+    list_append(generatedFont, (unitype) "3, 1, 6, b, -160, 30, -150, 60, b, -115, 60, -70, 60, b, -70, 20, -70, -20, b, -120, -20, -70, -20, b, -70, -60, -70, -100, b, -115, -100, -150, -100, -160, -70", 's');
+    list_append(generatedFont, (unitype) "4, 1, 4, -85, -100, -85, 60, -160, -60, -65, -60", 's');
+    list_append(generatedFont, (unitype) "5, 1, 6, -75, 60, -150, 60, b, -160, -30, -140, -5, b, -115, -5, -70, -5, b, -70, -55, -70, -100, b, -115, -100, -150, -100, -160, -75", 's');
+    list_append(generatedFont, (unitype) "6, 1, 5, b, -100, 60, -160, 40, b, -160, -55, -160, -100, b, -118, -100, -75, -100, b, -75, -55, -75, -10, b, -118, -10, -160, -10, -160, -55", 's');
+    list_append(generatedFont, (unitype) "7, 1, 3, -160, 60, -70, 60, -130, -100", 's');
+    list_append(generatedFont, (unitype) "8, 1, 8, b, -118, -15, -75, -15, b, -75, -60, -75, -100, b, -117, -100, -160, -100, b, -160, -60, -160, -15, b, -118, -15, -80, -15, b, -80, 20, -80, 60, b, -117, 60, -155, 60, b, -155, 20, -155, -15, -118, -15", 's');
+    list_append(generatedFont, (unitype) "9, 1, 5, b, -140, -100, -75, -90, b, -75, 15, -75, 60, b, -118, 60, -160, 60, b, -160, 15, -160, -30, b, -118, -30, -75, -30, -75, 15", 's');
+    list_append(generatedFont, (unitype) "0, 1, 4, b, -112, 60, -160, 60, b, -160, -20, -160, -100, b, -112, -100, -65, -100, b, -65, -20, -65, 60, -112, 60", 's');
+    list_append(generatedFont, (unitype) "!, 2, 2, -160, 60, -160, -50, 1, -160, -100", 's');
+    list_append(generatedFont, (unitype) "@, 1, 10, b, -35, -140, -55, -150, b, -80, -150, -160, -150, b, -160, -55, -160, 50, b, -80, 50, 0, 50, b, 0, -55, 0, -100, b, -30, -100, -50, -100, -55, -80, b, -50, -10, -75, 15, b, -100, -5, -120, -25, b, -120, -60, -120, -100, b, -90, -100, -70, -100, -55, -80", 's');
+    list_append(generatedFont, (unitype) "#, 4, 2, -130, -100, -100, 50, 2, -90, -100, -60, 50, 2, -140, 0, -40, 0, 2, -150, -50, -50, -50", 's');
+    list_append(generatedFont, (unitype) "$, 3, 6, b, -80, 35, -90, 60, b, -120, 60, -160, 60, b, -160, 20, -160, -20, b, -120, -20, -80, -20, b, -80, -60, -80, -100, b, -120, -100, -150, -100, -160, -75, 2, -120, 80, -120, 60, 2, -120, -120, -120, -100", 's');
+    list_append(generatedFont, (unitype) "£, 2, 4, b, -55, 30, -60, 60, b, -100, 60, -145, 60, -145, 5, b, -140, -75, -140, -100, -160, -100, -50, -100, 2, -160, -30, -100, -30", 's');
+    list_append(generatedFont, (unitype) "€, 3, 4, b, -60, 50, -70, 60, b, -90, 60, -140, 60, b, -140, -20, -140, -100, b, -90, -100, -70, -100, -60, -90, 2, -160, -5, -80, -5, 2, -160, -35, -80, -35", 's');
+    list_append(generatedFont, (unitype) "₺, 3, 2, -130, 70, b, -130, -100, -60, -100, -60, -10, 2, -160, 10, -90, 50, 2, -160, -30, -90, 10", 's');
+    list_append(generatedFont, (unitype) "₽, 2, 5, -140, -100, -140, 60, b, -80, 60, -40, 60, b, -40, 20, -40, -20, -80, -20, -160, -20, 2, -160, -60, -90, -60", 's');
+    list_append(generatedFont, (unitype) "¥, 4, 3, -160, 60, -110, -30, -60, 60, 2, -110, -30, -110, -100, 2, -150, -30, -70, -30, 2, -150, -60, -70, -60", 's');
+    list_append(generatedFont, (unitype) "₩, 3, 5, -160, 60, -120, -100, -80, 60, -40, -100, 0, 60, 2, -160, 0, 0, 0, 2, -160, -40, 0, -40", 's');
+    list_append(generatedFont, (unitype) "₹, 2, 6, -60, 60, -160, 60, b, -120, 60, -80, 60, b, -80, 20, -80, -20, -120, -20, -160, -20, -80, -100, 2, -160, 20, -60, 20", 's');
+    list_append(generatedFont, (unitype) "₣, 3, 3, -160, -100, -160, 60, -70, 60, 2, -160, -20, -80, -20, 2, -180, -60, -120, -60", 's');
+    list_append(generatedFont, (unitype) "฿, 3, 7, -160, -100, -160, 60, b, -120, 60, -70, 60, b, -70, 20, -70, -20, b, -120, -20, -70, -20, b, -70, -60, -70, -100, -120, -100, -160, -100, 2, -120, -20, -160, -20, 2, -120, 80, -120, -120", 's');
+    list_append(generatedFont, (unitype) "%, 3, 2, -140, -85, -60, 40, 4, b, -135, -10, -110, -10, b, -110, 20, -110, 50, b, -135, 50, -160, 50, b, -160, 20, -160, -10, -135, -10, 4, b, -65, -40, -90, -40, b, -90, -70, -90, -100, b, -65, -100, -40, -100, b, -40, -70, -40, -40, -65, -40", 's');
+    list_append(generatedFont, (unitype) "^, 1, 3, -160, 30, -140, 60, -120, 30", 's');
+    list_append(generatedFont, (unitype) "&, 1, 8, -40, -100, b, -140, 10, -160, 30, b, -160, 45, -160, 80, b, -120, 80, -85, 80, b, -85, 45, -85, 20, b, -110, 5, -160, -25, b, -160, -55, -160, -100, b, -110, -100, -50, -100, -50, -40", 's');
+    list_append(generatedFont, (unitype) "*, 3, 3, -120, 60, -120, 25, -89, 37, 3, -100, -5, -120, 25, -140, -5, 2, -151, 37, -120, 25", 's');
+    list_append(generatedFont, (unitype) "(, 1, 2, b, -120, 70, -160, 50, b, -160, -25, -160, -100, -120, -120", 's');
+    list_append(generatedFont, (unitype) "), 1, 2, b, -160, 70, -120, 50, b, -120, -25, -120, -100, -160, -120", 's');
+    list_append(generatedFont, (unitype) "`, 1, 2, -140, 30, -160, 60", 's');
+    list_append(generatedFont, (unitype) "~, 1, 4, b, -160, -35, -160, -5, b, -132, -5, -115, -5, b, -105, -20, -95, -35, b, -78, -35, -50, -35, -50, -5", 's');
+    list_append(generatedFont, (unitype) "-, 1, 2, -160, -20, -115, -20", 's');
+    list_append(generatedFont, (unitype) "_, 1, 2, -160, -100, -70, -100", 's');
+    list_append(generatedFont, (unitype) "=, 2, 2, -160, -40, -80, -40, 2, -160, 0, -80, 0", 's');
+    list_append(generatedFont, (unitype) "+, 2, 2, -160, -20, -60, -20, 2, -110, -70, -110, 30", 's');
+    list_append(generatedFont, (unitype) "[, 1, 4, -120, 70, -160, 70, -160, -120, -120, -120", 's');
+    list_append(generatedFont, (unitype) "{, 1, 4, b, -120, 70, -150, 70, b, -140, 10, -135, -10, b, -160, -25, -135, -40, b, -140, -60, -150, -120, -120, -120", 's');
+    list_append(generatedFont, (unitype) "], 1, 4, -160, 70, -120, 70, -120, -120, -160, -120", 's');
+    list_append(generatedFont, (unitype) "}, 1, 4, b, -160, 70, -130, 70, b, -140, 10, -145, -10, b, -120, -25, -145, -40, b, -140, -60, -130, -120, -160, -120", 's');
+    list_append(generatedFont, (unitype) "\\, 1, 2, -80, -110, -160, 60", 's');
+    list_append(generatedFont, (unitype) "|, 1, 2, -160, 50, -160, -120", 's');
+    list_append(generatedFont, (unitype) ";, 2, 1, -160, 10, 1, b, -160, -90, -160, -110, -170, -115", 's');
+    list_append(generatedFont, (unitype) ":, 2, 1, -160, 10, 1, -160, -90", 's');
+    list_append(generatedFont, (unitype) "‘, 1, 1, b, -150, 30, -160, 40, -160, 60", 's');
+    list_append(generatedFont, (unitype) "', 1, 2, -160, 60, -160, 30", 's');
+    list_append(generatedFont, (unitype) "’, 1, 1, b, -160, 30, -150, 40, -150, 60", 's');
+    list_append(generatedFont, (unitype) "“, 2, 1, b, -150, 30, -160, 40, -160, 60, 1, b, -125, 30, -135, 40, -135, 60", 's');
+    list_append(generatedFont, (unitype) "\", 2, 2, -160, 60, -160, 30, 2, -135, 60, -135, 30", 's');
+    list_append(generatedFont, (unitype) "”, 2, 1, b, -160, 30, -150, 40, -150, 60, 1, b, -135, 30, -125, 40, -125, 60", 's');
+    list_append(generatedFont, (unitype) ",, 1, 1, b, -160, -90, -160, -110, -170, -115", 's');
+    list_append(generatedFont, (unitype) "<, 1, 3, -80, 25, -160, -20, -80, -65", 's');
+    list_append(generatedFont, (unitype) "., 1, 1, -160, -100", 's');
+    list_append(generatedFont, (unitype) ">, 1, 3, -160, 25, -80, -20, -160, -65", 's');
+    list_append(generatedFont, (unitype) "/, 1, 2, -160, -110, -80, 60", 's');
+    list_append(generatedFont, (unitype) "?, 2, 4, b, -160, 25, -155, 60, b, -120, 60, -80, 60, b, -80, 25, -80, 0, b, -100, -10, -120, -20, -120, -50, 1, -120, -100", 's');
+    list_append(generatedFont, (unitype) "½, 3, 2, -140, -85, -60, 40, 3, -160, 35, -135, 50, -135, -10, 4, b, -80, -55, -75, -35, b, -60, -35, -40, -35, b, -40, -55, -40, -65, -80, -100, -35, -100", 's');
+    list_append(generatedFont, (unitype) "¨, 2, 1, -160, 50, 1, -130, 50", 's');
+}
+
+#endif /* TURTLE_TEXT_IMPLEMENTATION */
+
+#ifdef TURTLE_TOOLS_IMPLEMENTATION
+
+/* turtleTools library includes:
+ribbon: customisable top bar
+popup
+button
+switch
+dial
+slider
+scrollbar
+dropdown
+text box (under development)
+
+TODO:
+using the tab key to select different elements? And allowing them to be changed with the keyboard??
+*/
+
+int randomInt(int lowerBound, int upperBound) { // random integer between lower and upper bound (inclusive)
+    return (rand() % (upperBound - lowerBound + 1) + lowerBound);
+}
+
+double randomDouble(double lowerBound, double upperBound) { // random double between lower and upper bound
+    return (rand() * (upperBound - lowerBound) / RAND_MAX + lowerBound); // probably works idk
+}
+
+/* insert a string to an index in to string */
+char *strins(char *dest, char *source, int32_t index) {
+    int32_t lenDest = strlen(dest);
+    int32_t lenSource = strlen(source);
+    memmove(dest + index + lenSource, dest + index, lenDest - index + 1);
+    memcpy(dest + index, source, lenSource);
+    return dest;
+}
+
+/* delete a section of a string */
+char *strdel(char *dest, int32_t index, int32_t size) {
+    int32_t len = strlen(dest);
+    memmove(dest + index, dest + index + size, len - index - size);
+    for (uint32_t i = 0; i < size + 1; i++) {
+        dest[len - size + i] = '\0';
+    }
+    return dest;
+}
+
+tt_theme_name_t tt_theme;
+tt_enabled_t tt_enabled; // all start at 0 (global variable)
+
+tt_elements_t tt_elements;
+
+/* default colours (light theme) */
+double tt_themeColors[] = {
+    0.0, 0.0, 0.0,       // text color (0)
+    0.0, 0.0, 0.0,       // text color alternate (3)
+    200.0, 200.0, 200.0, // ribbon top bar color (6)
+    140.0, 140.0, 140.0, // ribbon dropdown color (9)
+    160.0, 160.0, 160.0, // ribbon select color (12)
+    100.0, 100.0, 100.0, // ribbon hover color (15)
+    200.0, 200.0, 200.0, // popup box color (18)
+    140.0, 140.0, 140.0, // popup boxes color (21)
+    100.0, 100.0, 100.0, // popup boxes select color (24)
+    200.0, 200.0, 200.0, // button color (27)
+    160.0, 160.0, 160.0, // button select color (30)
+    180.0, 180.0, 180.0, // button clicked color (33)
+    30.0, 30.0, 30.0,    // switch text hover (36)
+    180.0, 180.0, 180.0, // switch color off (39)
+    230.0, 230.0, 230.0, // switch circle color off (42)
+    30.0, 30.0, 30.0,    // switch color on (45)
+    0.0, 255.0, 255.0,   // switch circle color on (48)
+    0.0, 0.0, 0.0,       // dial color (51)
+    255.0, 255.0, 255.0, // dial inner circle color (54)
+    120.0, 120.0, 120.0, // slider bar color (57)
+    230.0, 230.0, 230.0, // slider circle color (60)
+    200.0, 200.0, 200.0, // scrollbar bar base color (63)
+    160.0, 160.0, 160.0, // scrollbar bar color (66)
+    120.0, 120.0, 120.0, // scrollbar bar hover color (69)
+    120.0, 120.0, 120.0, // scrollbar bar clicked color (72)
+    160.0, 160.0, 160.0, // dropdown color (75)
+    120.0, 120.0, 120.0, // dropdown select color (78)
+    120.0, 120.0, 120.0, // dropdown hover color (81)
+    100.0, 100.0, 100.0, // dropdown triangle color (84)
+    200.0, 200.0, 200.0, // textbox color (87)
+    180.0, 180.0, 180.0, // textbox phantom text color (90)
+    0.0, 0.0, 0.0,       // textbox line color (93)
+    11.0, 87.0, 208.0,   // textbox select color (96)
+};
+
+void tt_setColor(int32_t index) {
+    turtlePenColor(tt_themeColors[index], tt_themeColors[index + 1], tt_themeColors[index + 2]);
+}
+
+void turtleToolsSetTheme(tt_theme_name_t theme) {
+    if (theme == TT_THEME_DARK) {
+        tt_theme = theme;
+        double tt_themeCopy[] = {
+            200.0, 200.0, 200.0, // text color (0)
+            160.0, 160.0, 160.0, // text color alternate (3)
+            70.0, 70.0, 70.0,    // ribbon top bar color (6)
+            80.0, 80.0, 80.0,    // ribbon dropdown color (9)
+            60.0, 60.0, 60.0,    // ribbon select color (12)
+            70.0, 70.0, 70.0,    // ribbon hover color (15)
+            10.0, 10.0, 10.0,    // popup box color (18)
+            40.0, 40.0, 40.0,    // popup boxes color (21)
+            60.0, 60.0, 60.0,    // popup boxes select color (24)
+            80.0, 80.0, 80.0,    // button color (27)
+            100.0, 100.0, 100.0, // button select color (30)
+            90.0, 90.0, 90.0,    // button clicked color (33)
+            160.0, 160.0, 160.0, // switch text hover (36)
+            60.0, 60.0, 60.0,    // switch color off (39)
+            80.0, 80.0, 80.0,    // switch circle color off (42)
+            10.0, 10.0, 10.0,    // switch color on (45)
+            50.0, 230.0, 30.0,   // switch circle color on (48)
+            200.0, 200.0, 200.0, // dial color (51)
+            30.0, 30.0, 30.0,    // dial inner circle color (54)
+            10.0, 10.0, 10.0,    // slider bar color (57)
+            230.0, 230.0, 230.0, // slider circle color (60)
+            50.0, 50.0, 50.0,    // scrollbar bar base color (63)
+            150.0, 150.0, 150.0, // scrollbar bar color (66)
+            170.0, 170.0, 170.0, // scrollbar bar hover color (69)
+            190.0, 190.0, 190.0, // scrollbar bar clicked color (72)
+            60.0, 60.0, 60.0,    // dropdown color (75)
+            80.0, 80.0, 80.0,    // dropdown select color (78)
+            80.0, 80.0, 80.0,    // dropdown hover color (81)
+            160.0, 160.0, 160.0, // dropdown triangle color (84)
+            60.0, 60.0, 60.0,    // textbox color (87)
+            80.0, 80.0, 80.0,    // textbox phantom text color (90)
+            160.0, 160.0, 160.0, // textbox line color (93)
+            11.0, 87.0, 208.0,   // textbox select color (96)
+        };
+        memcpy(tt_themeColors, tt_themeCopy, sizeof(tt_themeCopy));
+    } else if (theme == TT_THEME_COLT) {
+        tt_theme = theme;
+        double tt_themeCopy[] = {
+            189.0, 200.0, 203.0, // text color (0)
+            154.0, 160.0, 160.0, // text color alternate (3)
+            84.0, 73.0, 70.0,    // ribbon top bar color (6)
+            93.0, 80.0, 80.0,    // ribbon dropdown color (9)
+            69.0, 55.0, 53.0,    // ribbon select color (12)
+            77.0, 70.0, 70.0,    // ribbon hover color (15)
+            9.0, 10.0, 10.0,     // popup box color (18)
+            52.0, 40.0, 40.0,    // popup boxes color (21)
+            73.0, 60.0, 60.0,    // popup boxes select color (24)
+            89.0, 80.0, 80.0,    // button color (27)
+            111.0, 109.0, 100.0, // button select color (30)
+            95.0, 93.0, 84.0,    // button clicked color (33)
+            154.0, 160.0, 160.0, // switch text hover (36)
+            68.0, 60.0, 60.0,    // switch color off (39)
+            91.0, 80.0, 80.0,    // switch circle color off (42)
+            69.0, 55.0, 53.0,    // switch color on (45)
+            242.0, 242.0, 230.0, // switch circle color on (48)
+            211.0, 211.0, 200.0, // dial color (51)
+            36.0, 30.0, 32.0,    // dial inner circle color (54)
+            69.0, 55.0, 53.0,    // slider bar color (57)
+            242.0, 242.0, 230.0, // slider circle color (60)
+            241.0, 239.0, 236.0, // scrollbar bar base color (63)
+            69.0, 55.0, 53.0,    // scrollbar bar color (66)
+            84.0, 70.0, 68.0,    // scrollbar bar hover color (69)
+            84.0, 70.0, 68.0,    // scrollbar bar clicked color (72)
+            68.0, 60.0, 60.0,    // dropdown color (75)
+            92.0, 80.0, 80.0,    // dropdown select color (78)
+            93.0, 80.0, 80.0,    // dropdown hover color (81)
+            175.0, 171.0, 160.0, // dropdown triangle color (84)
+            89.0, 80.0, 80.0,    // textbox color (87)
+            143.0, 134.0, 134.0, // textbox phantom text color (90)
+            154.0, 160.0, 160.0, // textbox line color (93)
+            11.0, 87.0, 208.0,   // textbox select color (96)
+        };
+        memcpy(tt_themeColors, tt_themeCopy, sizeof(tt_themeCopy));
+    } else if (theme == TT_THEME_NAVY) {
+        tt_theme = theme;
+        double tt_themeCopy[] = {
+            3.0, 3.0, 3.0,       // text color (0)
+            241.0, 239.0, 236.0, // text color alternate (3)
+            21.2, 115.6, 160.2,  // ribbon top bar color (6)
+            74.0, 108.0, 144.0,  // ribbon dropdown color (9)
+            112.0, 146.0, 182.0, // ribbon select color (12)
+            112.0, 146.0, 182.0, // ribbon hover color (15)
+            18.0, 52.0, 88.0,    // popup box color (18)
+            74.0, 108.0, 144.0,  // popup boxes color (21)
+            126.0, 160.0, 196.0, // popup boxes select color (24)
+            18.0, 52.0, 88.0,    // button color (27)
+            74.0, 108.0, 144.0,  // button select color (30)
+            47.0, 81.0, 117.0,   // button clicked color (33)
+            18.0, 52.0, 88.0,    // switch text hover (36)
+            18.0, 52.0, 88.0,    // switch color off (39)
+            241.0, 239.0, 236.0, // switch circle color off (42)
+            18.0, 52.0, 88.0,    // switch color on (45)
+            241.0, 239.0, 236.0, // switch circle color on (48)
+            3.0, 3.0, 3.0,       // dial color (51)
+            212.0, 201.0, 190.0, // dial inner circle color (54)
+            18.0, 52.0, 88.0,    // slider bar color (57)
+            241.0, 239.0, 236.0, // slider circle color (60)
+            241.0, 239.0, 236.0, // scrollbar bar base color (63)
+            33.6, 161.9, 211.6,  // scrollbar bar color (66)
+            50.0, 178.3, 228.0,  // scrollbar bar hover color (69)
+            50.0, 178.3, 228.0,  // scrollbar bar clicked color (72)
+            18.0, 52.0, 88.0,    // dropdown color (75)
+            74.0, 108.0, 144.0,  // dropdown select color (78)
+            74.0, 108.0, 144.0,  // dropdown hover color (81)
+            241.0, 239.0, 236.0, // dropdown triangle color (84)
+            18.0, 52.0, 88.0,    // textbox color (87)
+            112.0, 146.0, 182.0, // textbox phantom text color (90)
+            241.0, 239.0, 236.0, // textbox line color (93)
+            11.0, 87.0, 208.0,   // textbox select color (96)
+        };
+        memcpy(tt_themeColors, tt_themeCopy, sizeof(tt_themeCopy));
+    } else {
+        tt_theme = TT_THEME_LIGHT;
+        double tt_themeCopy[] = {
+            0.0, 0.0, 0.0,       // text color (0)
+            0.0, 0.0, 0.0,       // text color alternate (3)
+            200.0, 200.0, 200.0, // ribbon top bar color (6)
+            140.0, 140.0, 140.0, // ribbon dropdown color (9)
+            160.0, 160.0, 160.0, // ribbon select color (12)
+            100.0, 100.0, 100.0, // ribbon hover color (15)
+            200.0, 200.0, 200.0, // popup box color (18)
+            140.0, 140.0, 140.0, // popup boxes color (21)
+            100.0, 100.0, 100.0, // popup boxes select color (24)
+            200.0, 200.0, 200.0, // button color (27)
+            160.0, 160.0, 160.0, // button select color (30)
+            180.0, 180.0, 180.0, // button clicked color (33)
+            30.0, 30.0, 30.0,    // switch text hover (36)
+            180.0, 180.0, 180.0, // switch color off (39)
+            230.0, 230.0, 230.0, // switch circle color off (42)
+            30.0, 30.0, 30.0,    // switch color on (45)
+            0.0, 255.0, 255.0,   // switch circle color on (48)
+            0.0, 0.0, 0.0,       // dial color (51)
+            255.0, 255.0, 255.0, // dial inner circle color (54)
+            120.0, 120.0, 120.0, // slider bar color (57)
+            230.0, 230.0, 230.0, // slider circle color (60)
+            200.0, 200.0, 200.0, // scrollbar bar base color (63)
+            160.0, 160.0, 160.0, // scrollbar bar color (66)
+            120.0, 120.0, 120.0, // scrollbar bar hover color (69)
+            120.0, 120.0, 120.0, // scrollbar bar clicked color (72)
+            160.0, 160.0, 160.0, // dropdown color (75)
+            120.0, 120.0, 120.0, // dropdown select color (78)
+            120.0, 120.0, 120.0, // dropdown hover color (81)
+            100.0, 100.0, 100.0, // dropdown triangle color (84)
+            200.0, 200.0, 200.0, // textbox color (87)
+            180.0, 180.0, 180.0, // textbox phantom text color (90)
+            0.0, 0.0, 0.0,       // textbox line color (93)
+            11.0, 87.0, 208.0,   // textbox select color (96)
+        };
+        memcpy(tt_themeColors, tt_themeCopy, sizeof(tt_themeCopy));
+    }
+}
+
+/* ribbon */
+
+/* ribbon variables */
+
+tt_ribbon_t ribbonRender;
+
+/* initialise ribbon */
+int32_t ribbonInit(const char *filename) {
+    /* enable ribbon */
+    tt_enabled.ribbonEnabled = 1;
+    if (tt_enabled.turtleToolsEnabled == 0) {
+        tt_enabled.turtleToolsEnabled = 1;
+        tt_elements.all = list_init();
+    }
+    /* set ribbon parameters */
+    ribbonRender.marginSize = 10; // number of pixels between different items in the ribbon (not affected by ribbonSize)
+    ribbonRender.mainselect[0] = -1;
+    ribbonRender.mainselect[1] = -1;
+    ribbonRender.mainselect[2] = -1;
+    ribbonRender.subselect[0] = -1;
+    ribbonRender.subselect[1] = -1;
+    ribbonRender.subselect[2] = -1;
+    ribbonRender.output[0] = 0;
+    ribbonRender.output[1] = -1;
+    ribbonRender.output[2] = -1;
+
+    ribbonRender.mouseDown = 0;
+
+    ribbonRender.bounds[0] = turtle.bounds[0];
+    ribbonRender.bounds[1] = turtle.bounds[1];
+    ribbonRender.bounds[2] = turtle.bounds[2];
+    ribbonRender.bounds[3] = turtle.bounds[3];
+
+    ribbonRender.ribbonSize = 1; // 1 is default, below 1 is smaller, above 1 is larger (scales as a multiplier, 0.1 is 100x smaller than 10)
+    ribbonRender.options = list_init();
+    ribbonRender.lengths = list_init();
+
+    /* load from config file */
+    char fileExists = 1;
+    list_t *defaultRibbonFile = list_init();
+    list_append(defaultRibbonFile, (unitype) "File, New, Save, Save As..., Open", 's');
+    list_append(defaultRibbonFile, (unitype) "Edit, Undo, Redo, Cut, Copy, Paste", 's');
+    list_append(defaultRibbonFile, (unitype) "View, Change Theme, GLFW", 's');
+    FILE *configFile = fopen(filename, "r");
+    if (configFile == NULL) {
+        printf("Error: file %s not found\n", filename);
+        fileExists = 0;
+    }
+    /* load ribbon options */
+    char line[1024]; // maximum size of any list of options
+    while ((fileExists == 0 && ribbonRender.options -> length < defaultRibbonFile -> length) || (fileExists == 1 && fgets(line, 1024, configFile) != NULL)) {
+        if (fileExists == 0) {
+            memcpy(line, defaultRibbonFile -> data[ribbonRender.options -> length].s, strlen(defaultRibbonFile -> data[ribbonRender.options -> length].s) + 1);
+        }
+        if (line[strlen(line) - 1] == '\n') {
+            line[strlen(line) - 1] = '\0'; // cull newline
+        }
+        list_append(ribbonRender.options, (unitype) list_init(), 'r');
+        char *item = strtok(line, ",");
+        while (item != NULL) {
+            if (item[0] == ' ') {
+                item++; // cull leading space
+            }
+            list_append(ribbonRender.options -> data[ribbonRender.options -> length - 1].r, (unitype) item, 's');
+            item = strtok(NULL, ",");
+        }
+    }
+    if (fileExists) {
+        fclose(configFile);
+    }
+
+    for (uint32_t i = 0; i < ribbonRender.options -> length; i++) {
+        list_append(ribbonRender.lengths, (unitype) turtleTextGetStringLength(ribbonRender.options -> data[i].r -> data[0].s, 7 * ribbonRender.ribbonSize), 'd');
+        double max = 0;
+        for (uint32_t j = 1; j < ribbonRender.options -> data[i].r -> length; j++) {
+            double current = turtleTextGetStringLength(ribbonRender.options -> data[i].r -> data[j].s, 7 * ribbonRender.ribbonSize);
+            if (current > max) {
+                max = current;
+            }
+        }
+        list_append(ribbonRender.lengths, (unitype) max, 'd');
+    }
+    return 0;
+}
+
+/* render ribbon */
+void ribbonUpdate() {
+    char shapeSave = turtle.penshape;
+    double sizeSave = turtle.pensize;
+    turtlePenSize(20);
+    turtlePenShape("square");
+    turtleGetMouseCoords(); // get the mouse coordinates (turtle.mouseX, turtle.mouseY)
+    tt_setColor(TT_COLOR_RIBBON_TOP);
+    turtleQuad(ribbonRender.bounds[0], ribbonRender.bounds[3] - 10, ribbonRender.bounds[2], ribbonRender.bounds[3] - 10, ribbonRender.bounds[2], ribbonRender.bounds[3], ribbonRender.bounds[0], ribbonRender.bounds[3]); // render ribbon
+    tt_setColor(TT_COLOR_TEXT_ALTERNATE);
+    double cutoff = ribbonRender.bounds[0] + ribbonRender.marginSize;
+    ribbonRender.mainselect[0] = -1;
+    ribbonRender.subselect[0] = -1;
+    for (uint32_t i = 0; i < ribbonRender.options -> length; i++) {
+        double prevCutoff = cutoff;
+        if (i == (uint32_t) ribbonRender.mainselect[2]) {
+            double xLeft = prevCutoff - ribbonRender.marginSize / 2.0;
+            double xRight = prevCutoff + ribbonRender.lengths -> data[i * 2 + 1].d + ribbonRender.marginSize / 2.0;
+            double yDown = ribbonRender.bounds[3] - 10 - 15 * (ribbonRender.options -> data[i].r -> length - 1) - ribbonRender.marginSize / 2.0;
+            tt_setColor(TT_COLOR_RIBBON_DROPDOWN);
+            turtleQuad(xLeft, ribbonRender.bounds[3] - 10, xRight, ribbonRender.bounds[3] - 10, xRight, yDown, xLeft, yDown); // ribbon highlight
+            for (uint32_t j = 1; j < ribbonRender.options -> data[i].r -> length; j++) {
+                if (turtle.mouseY > ribbonRender.bounds[3] - 10 - 15 * j - ribbonRender.marginSize / 4.0 && turtle.mouseY < ribbonRender.bounds[3] - 10 && turtle.mouseX > xLeft && turtle.mouseX < xRight && ribbonRender.subselect[0] == -1) {
+                    tt_setColor(TT_COLOR_RIBBON_HOVER);
+                    turtleQuad(xLeft, ribbonRender.bounds[3] - 10 - 15 * (j - 1) - ribbonRender.marginSize / 4.0, xRight, ribbonRender.bounds[3] - 10 - 15 * (j - 1) - ribbonRender.marginSize / 4.0, xRight, ribbonRender.bounds[3] - 10 - 15 * j - ribbonRender.marginSize / 3.0, xLeft, ribbonRender.bounds[3] - 10 - 15 * j - ribbonRender.marginSize / 3.0); // dropdown highlight
+                    ribbonRender.subselect[0] = j;
+                }
+                tt_setColor(TT_COLOR_TEXT_ALTERNATE);
+                turtleTextWriteUnicode((unsigned char *) ribbonRender.options -> data[i].r -> data[j].s, prevCutoff, 174.5 - j * 15, 7 * ribbonRender.ribbonSize, 0);
+            }
+        }
+        cutoff += ribbonRender.lengths -> data[i * 2].d + ribbonRender.marginSize;
+        if (turtle.mouseY > ribbonRender.bounds[3] - 10 && turtle.mouseY < ribbonRender.bounds[3] && turtle.mouseX > ribbonRender.bounds[0] + ribbonRender.marginSize / 2.0 && turtle.mouseX < cutoff - ribbonRender.marginSize / 2.0 && ribbonRender.mainselect[0] == -1) { // -217, -195, -164
+            tt_setColor(TT_COLOR_RIBBON_SELECT);
+            turtleQuad(prevCutoff - ribbonRender.marginSize / 2.0, 179, cutoff - ribbonRender.marginSize / 2.0, 179, cutoff - ribbonRender.marginSize / 2.0, 171, prevCutoff - ribbonRender.marginSize / 2.0, 171); // render dropdown
+            ribbonRender.mainselect[0] = i;
+        }
+        tt_setColor(TT_COLOR_TEXT_ALTERNATE);
+        turtleTextWriteUnicode((unsigned char *) ribbonRender.options -> data[i].r -> data[0].s, prevCutoff, 174.5, 7 * ribbonRender.ribbonSize, 0);
+    }
+    if (turtleMouseDown()) { // this is hideous
+        if (ribbonRender.mouseDown == 0) {
+            ribbonRender.mouseDown = 1;
+            if (ribbonRender.subselect[0] == ribbonRender.subselect[1] && ribbonRender.subselect[0] != -1) {
+                ribbonRender.subselect[2] = ribbonRender.subselect[0];
+                ribbonRender.output[0] = 1;
+                ribbonRender.output[1] = ribbonRender.mainselect[2];
+                ribbonRender.output[2] = ribbonRender.subselect[2];
+            }
+            if (ribbonRender.mainselect[0] == ribbonRender.mainselect[1]) {
+                if (ribbonRender.mainselect[0] == ribbonRender.mainselect[2]) {
+                    ribbonRender.mainselect[3] = -1;
+                } else {
+                    ribbonRender.mainselect[2] = ribbonRender.mainselect[0];
+                }
+            }
+        }
+    } else {
+        if (ribbonRender.mouseDown == 1) {
+            if (ribbonRender.subselect[0] != -1) {
+                ribbonRender.subselect[2] = ribbonRender.subselect[0];
+                ribbonRender.output[0] = 1;
+                ribbonRender.output[1] = ribbonRender.mainselect[2];
+                ribbonRender.output[2] = ribbonRender.subselect[2];
+                ribbonRender.mainselect[2] = -1;
+                ribbonRender.subselect[2] = -1;
+            }
+        }
+        if (ribbonRender.mainselect[3] == -1 && ribbonRender.mainselect[0] == ribbonRender.mainselect[2]) {
+            ribbonRender.mainselect[2] = -1;
+        }
+        ribbonRender.mainselect[3] = 0;
+        ribbonRender.mouseDown = 0;
+        ribbonRender.mainselect[1] = ribbonRender.mainselect[0];
+        ribbonRender.subselect[1] = ribbonRender.subselect[0];
+    }
+    turtle.penshape = shapeSave;
+    turtle.pensize = sizeSave;
+}
+
+/* popup */
+
+/* popup variables */
+
+tt_popup_t popup;
+
+/* initialise popup */
+int32_t popupInit(const char *filename, double minX, double minY, double maxX, double maxY) {
+    tt_enabled.popupEnabled = 1;
+    if (tt_enabled.turtleToolsEnabled == 0) {
+        tt_enabled.turtleToolsEnabled = 1;
+        tt_elements.all = list_init();
+    }
+    popup.minX = minX;
+    popup.minY = minY;
+    popup.maxX = maxX;
+    popup.maxY = maxY;
+    popup.output[0] = 0;
+    popup.output[1] = -1;
+    popup.mouseDown = 0;
+    popup.style = 0;
+    /* read information from config file */
+    char fileExists = 1;
+    list_t *defaultPopupFile = list_init();
+    list_append(defaultPopupFile, (unitype) "Are you sure you want to close?", 's');
+    list_append(defaultPopupFile, (unitype) "Cancel", 's');
+    list_append(defaultPopupFile, (unitype) "Close", 's');
+    FILE *configFile = fopen(filename, "r");
+    if (configFile == NULL) {
+        printf("Error: file %s not found\n", filename);
+        fileExists = 0;
+    }
+    char line[256] = {1, 0}; // maximum size of message or option
+    /* read popup message */
+    if (fileExists) {
+        if (fgets(line, 256, configFile) != NULL) {
+            if (line[strlen(line) - 1] == '\n') {
+                line[strlen(line) - 1] = '\0'; // cull newline
+            }
+            popup.message = strdup(line);
+        }
+    } else {
+        popup.message = strdup(defaultPopupFile -> data[0].s);
+    }
+    /* read popup options */
+    popup.options = list_init();
+    while ((fileExists == 0 && popup.options -> length < defaultPopupFile -> length - 1) || (fileExists == 1 && fgets(line, 256, configFile) != NULL)) {
+        if (fileExists == 1) {
+            if (line[strlen(line) - 1] == '\n') {
+                line[strlen(line) - 1] = '\0'; // cull newline
+            }
+            list_append(popup.options, (unitype) strdup(line), 's');
+        } else {
+            list_append(popup.options, defaultPopupFile -> data[popup.options -> length + 1], 's');
+        }
+    }
+    list_free(defaultPopupFile);
+    return 0;
+}
+
+/* render popup */
+void popupUpdate() {
+    if (turtle.close == 1) {
+        tt_setColor(TT_COLOR_POPUP_BOX);
+        turtleRectangle(popup.minX, popup.minY, popup.maxX, popup.maxY);
+        double textSize = 5;
+        double textX = popup.minX + (popup.maxX - popup.minX) / 2;
+        double textY = popup.maxY - textSize * 2;
+        tt_setColor(TT_COLOR_TEXT_ALTERNATE);
+        turtleTextWriteUnicode((unsigned char *) popup.message, textX, textY, textSize, 50);
+        textY -= textSize * 4;
+        double fullLength = 0;
+        for (uint32_t i = 0; i < popup.options -> length; i++) {
+            fullLength += turtleTextGetStringLength(popup.options -> data[i].s, textSize);
+        }
+        /* we have the length of the strings, now we pad with n + 1 padding regions */
+        double padThai = (popup.maxX - popup.minX - fullLength) / (popup.options -> length + 1);
+        textX = popup.minX + padThai;
+        char flagged = 0;
+        if (!turtleMouseDown() && popup.mouseDown == 1) {
+            flagged = 1; // flagged for mouse misbehaviour
+        }
+        for (uint32_t i = 0; i < popup.options -> length; i++) {
+            double strLen = turtleTextGetStringLength(popup.options -> data[i].s, textSize);
+            if (turtle.mouseX > textX - textSize && turtle.mouseX < textX + strLen + textSize &&
+            turtle.mouseY > textY - textSize && turtle.mouseY < textY + textSize) {
+                tt_setColor(TT_COLOR_POPUP_BUTTON_SELECT);
+                turtleRectangle(textX - textSize, textY - textSize, textX + textSize + strLen, textY + textSize);
+                if (turtleMouseDown()) {
+                    if (popup.mouseDown == 0) {
+                        popup.mouseDown = 1;
+                        if (popup.output[0] == 0) {
+                            popup.output[1] = i;
+                        }
+                    }
+                } else {
+                    if (popup.mouseDown == 1) {
+                        popup.mouseDown = 0;
+                        if (popup.output[1] == (int32_t) i) {
+                            popup.output[0] = 1;
+                        }
+                    }
+                }
+            } else {
+                tt_setColor(TT_COLOR_POPUP_BUTTON);
+                turtleRectangle(textX - textSize, textY - textSize, textX + textSize + strLen, textY + textSize);
+            }
+            tt_setColor(TT_COLOR_TEXT_ALTERNATE);
+            turtleTextWriteUnicode((unsigned char *) popup.options -> data[i].s, textX, textY, textSize, 0);
+            textX += strLen + padThai;
+        }
+        if (!turtleMouseDown() && popup.mouseDown == 1 && flagged == 1) {
+            popup.mouseDown = 0;
+            popup.output[0] = 0;
+            popup.output[1] = -1;
+        }
+    }
+}
+
+void popupFree() {
+    free(popup.message);
+}
+
+/* UI tools */
+
+tt_globals_t tt_globals;
+
+/* override colors with color array */
+void tt_colorOverride(void *element, double *colors, uint32_t length) {
+    ((tt_button_t *) element) -> color.colorOverride = 1;
+    memcpy(((tt_button_t *) element) -> color.color, colors, length * sizeof(double));
+}
+
+int32_t tt_color_override_default[] = {
+    /*  button                    switch                      dial                  slider                   scrollbar                   dropdown               textbox  */
+    TT_COLOR_TEXT_ALTERNATE, TT_COLOR_TEXT,              TT_COLOR_TEXT,       TT_COLOR_TEXT,          0,                          TT_COLOR_TEXT,              TT_COLOR_TEXT_ALTERNATE,
+    TT_COLOR_BUTTON,         TT_COLOR_SWITCH_TEXT_HOVER, TT_COLOR_DIAL,       TT_COLOR_SLIDER_BAR,    TT_COLOR_SCROLLBAR_BASE,    TT_COLOR_TEXT_ALTERNATE,    TT_COLOR_TEXTBOX_BOX,
+    TT_COLOR_BUTTON_SELECT,  TT_COLOR_SWITCH_ON,         TT_COLOR_DIAL_INNER, TT_COLOR_SLIDER_CIRCLE, TT_COLOR_SCROLLBAR_HOVER,   TT_COLOR_DROPDOWN,          TT_COLOR_TEXTBOX_PHANTOM_TEXT,
+    TT_COLOR_TEXT,           TT_COLOR_SWITCH_OFF,        0,                   0,                      TT_COLOR_SCROLLBAR_CLICKED, TT_COLOR_DROPDOWN_SELECT,   TT_COLOR_TEXTBOX_LINE,
+    TT_COLOR_BUTTON_CLICKED, TT_COLOR_SWITCH_CIRCLE_ON,  0,                   0,                      TT_COLOR_SCROLLBAR_BAR,     TT_COLOR_DROPDOWN_HOVER,    TT_COLOR_TEXTBOX_SELECT,
+    0,                       TT_COLOR_SWITCH_CIRCLE_OFF, 0,                   0,                      0,                          TT_COLOR_DROPDOWN_TRIANGLE, 0,
+    0,                       0,                          0,                   0,                      0,                          0,                          0,
+    0,                       0,                          0,                   0,                      0,                          0,                          0,
+};
+
+void elementResetColor(void *elementp, int32_t elementType) {
+    for (uint32_t i = 0; i < 8; i += 3) {
+        ((tt_button_t *) elementp) -> color.color[i] = tt_themeColors[tt_color_override_default[(i / 3) * TT_NUMBER_OF_ELEMENTS + elementType]];
+        ((tt_button_t *) elementp) -> color.color[i + 1] = tt_themeColors[tt_color_override_default[(i / 3) * TT_NUMBER_OF_ELEMENTS + elementType] + 1];
+        ((tt_button_t *) elementp) -> color.color[i + 2] = tt_themeColors[tt_color_override_default[(i / 3) * TT_NUMBER_OF_ELEMENTS + elementType] + 2];
+    }
+}
+
+void tt_internalColor(void *elementp, int32_t colorIndex, int32_t overrideIndex) {
+    if (((tt_button_t *) elementp) -> color.colorOverride) {
+        turtlePenColor(((tt_button_t *) elementp) -> color.color[overrideIndex], ((tt_button_t *) elementp) -> color.color[overrideIndex + 1], ((tt_button_t *) elementp) -> color.color[overrideIndex + 2]);
+    } else {
+        turtlePenColor(tt_themeColors[colorIndex], tt_themeColors[colorIndex + 1], tt_themeColors[colorIndex + 2]);
+    }
+}
+
+/* initialise UI elements */
+
+/* create a button */
+tt_button_t *buttonInit(char *label, int8_t *variable, double x, double y, double size) {
+    if (tt_enabled.buttonEnabled == 0) {
+        tt_enabled.buttonEnabled = 1;
+        tt_elements.buttons = list_init();
+    }
+    if (tt_enabled.turtleToolsEnabled == 0) {
+        tt_enabled.turtleToolsEnabled = 1;
+        tt_elements.all = list_init();
+    }
+    tt_button_t *buttonp = malloc(sizeof(tt_button_t));
+    buttonp -> element = TT_ELEMENT_BUTTON;
+    buttonp -> enabled = TT_ELEMENT_ENABLED;
+    if (label == NULL) {
+        memcpy(buttonp -> label, "", strlen("") + 1);
+    } else {
+        memcpy(buttonp -> label, label, strlen(label) + 1);
+    }
+    buttonp -> color.colorOverride = 0;
+    elementResetColor(buttonp, TT_ELEMENT_BUTTON);
+    buttonp -> status = 0;
+    buttonp -> shape = TT_BUTTON_SHAPE_RECTANGLE;
+    buttonp -> x = x;
+    buttonp -> y = y;
+    buttonp -> size = size;
+    *variable = 0; // button starts unpressed
+    buttonp -> variable = variable;
+    list_append(tt_elements.buttons, (unitype) (void *) buttonp, 'p');
+    list_append(tt_elements.all, (unitype) (void *) buttonp, 'l');
+    return buttonp;
+}
+
+void buttonFree(tt_button_t *buttonp) {
+    list_remove(tt_elements.all, (unitype) (uint64_t) buttonp, 'l');
+    list_remove(tt_elements.buttons, (unitype) (void *) buttonp, 'p');
+}
+
+/* create a switch */
+tt_switch_t *switchInit(char *label, int8_t *variable, double x, double y, double size) {
+    if (tt_enabled.switchEnabled == 0) {
+        tt_enabled.switchEnabled = 1;
+        tt_elements.switches = list_init();
+    }
+    if (tt_enabled.turtleToolsEnabled == 0) {
+        tt_enabled.turtleToolsEnabled = 1;
+        tt_elements.all = list_init();
+    }
+    tt_switch_t *switchp = malloc(sizeof(tt_switch_t));
+    switchp -> element = TT_ELEMENT_SWITCH;
+    switchp -> enabled = TT_ELEMENT_ENABLED;
+    if (label == NULL) {
+        memcpy(switchp -> label, "", strlen("") + 1);
+    } else {
+        memcpy(switchp -> label, label, strlen(label) + 1);
+    }
+    switchp -> color.colorOverride = 0;
+    elementResetColor(switchp, TT_ELEMENT_SWITCH);
+    switchp -> status = 0;
+    switchp -> x = x;
+    switchp -> y = y;
+    switchp -> size = size;
+    switchp -> variable = variable;
+    switchp -> style = TT_SWITCH_STYLE_CLASSIC;
+    list_append(tt_elements.switches, (unitype) (void *) switchp, 'p');
+    list_append(tt_elements.all, (unitype) (void *) switchp, 'l');
+    return switchp;
+}
+
+void switchFree(tt_switch_t *switchp) {
+    list_remove(tt_elements.all, (unitype) (uint64_t) switchp, 'l');
+    list_remove(tt_elements.switches, (unitype) (void *) switchp, 'p');
+}
+
+/* create a dial - make renderNumberFactor 0 to hide dial number */
+tt_dial_t *dialInit(char *label, double *variable, tt_dial_type_t type, double x, double y, double size, double bottom, double top, double renderNumberFactor) {
+    if (tt_enabled.dialEnabled == 0) {
+        tt_enabled.dialEnabled = 1;
+        tt_elements.dials = list_init();
+    }
+    if (tt_enabled.turtleToolsEnabled == 0) {
+        tt_enabled.turtleToolsEnabled = 1;
+        tt_elements.all = list_init();
+    }
+    tt_dial_t *dialp = malloc(sizeof(tt_dial_t));
+    dialp -> element = TT_ELEMENT_DIAL;
+    dialp -> enabled = TT_ELEMENT_ENABLED;
+    if (label == NULL) {
+        memcpy(dialp -> label, "", strlen("") + 1);
+    } else {
+        memcpy(dialp -> label, label, strlen(label) + 1);
+    }
+    dialp -> color.colorOverride = 0;
+    elementResetColor(dialp, TT_ELEMENT_DIAL);
+    dialp -> status[0] = 0;
+    dialp -> type = type;
+    dialp -> x = x;
+    dialp -> y = y;
+    dialp -> size = size;
+    dialp -> range[0] = bottom;
+    dialp -> range[1] = top;
+    dialp -> variable = variable;
+    dialp -> renderNumberFactor = renderNumberFactor;
+    dialp -> defaultValue = *variable;
+    list_append(tt_elements.dials, (unitype) (void *) dialp, 'p');
+    list_append(tt_elements.all, (unitype) (void *) dialp, 'l');
+    return dialp;
+}
+
+void dialFree(tt_dial_t *dialp) {
+    list_remove(tt_elements.all, (unitype) (uint64_t) dialp, 'l');
+    list_remove(tt_elements.dials, (unitype) (void *) dialp, 'p');
+}
+
+/* create a slider - make renderNumberFactor 0 to hide slider number */
+tt_slider_t *sliderInit(char *label, double *variable, tt_slider_type_t type, tt_slider_align_t align, double x, double y, double size, double length, double bottom, double top, double renderNumberFactor) {
+    if (tt_enabled.sliderEnabled == 0) {
+        tt_enabled.sliderEnabled = 1;
+        tt_elements.sliders = list_init();
+    }
+    if (tt_enabled.turtleToolsEnabled == 0) {
+        tt_enabled.turtleToolsEnabled = 1;
+        tt_elements.all = list_init();
+    }
+    tt_slider_t *sliderp = malloc(sizeof(tt_slider_t));
+    sliderp -> element = TT_ELEMENT_SLIDER;
+    sliderp -> enabled = TT_ELEMENT_ENABLED;
+    if (label == NULL) {
+        memcpy(sliderp -> label, "", strlen("") + 1);
+    } else {
+        memcpy(sliderp -> label, label, strlen(label) + 1);
+    }
+    sliderp -> color.colorOverride = 0;
+    elementResetColor(sliderp, TT_ELEMENT_SLIDER);
+    sliderp -> status = 0;
+    sliderp -> type = type;
+    sliderp -> align = align;
+    sliderp -> x = x;
+    sliderp -> y = y;
+    sliderp -> size = size;
+    sliderp -> length = length;
+    sliderp -> range[0] = bottom;
+    sliderp -> range[1] = top;
+    sliderp -> variable = variable;
+    sliderp -> renderNumberFactor = renderNumberFactor;
+    sliderp -> defaultValue = *variable;
+    list_append(tt_elements.sliders, (unitype) (void *) sliderp, 'p');
+    list_append(tt_elements.all, (unitype) (void *) sliderp, 'l');
+    return sliderp;
+}
+
+void sliderFree(tt_slider_t *sliderp) {
+    list_remove(tt_elements.all, (unitype) (uint64_t) sliderp, 'l');
+    list_remove(tt_elements.sliders, (unitype) (void *) sliderp, 'p');
+}
+
+/* create a scrollbar */
+tt_scrollbar_t *scrollbarInit(double *variable, tt_scrollbar_type_t type, double x, double y, double size, double length, double barPercentage) {
+    if (tt_enabled.scrollbarEnabled == 0) {
+        tt_enabled.scrollbarEnabled = 1;
+        tt_elements.scrollbars = list_init();
+    }
+    if (tt_enabled.turtleToolsEnabled == 0) {
+        tt_enabled.turtleToolsEnabled = 1;
+        tt_elements.all = list_init();
+    }
+    tt_scrollbar_t *scrollbarp = malloc(sizeof(tt_scrollbar_t));
+    scrollbarp -> element = TT_ELEMENT_SCROLLBAR;
+    scrollbarp -> enabled = TT_ELEMENT_ENABLED;
+    scrollbarp -> color.colorOverride = 0;
+    elementResetColor(scrollbarp, TT_ELEMENT_SCROLLBAR);
+    scrollbarp -> status = 0;
+    scrollbarp -> type = type;
+    scrollbarp -> x = x;
+    scrollbarp -> y = y;
+    scrollbarp -> size = size;
+    scrollbarp -> length = length;
+    scrollbarp -> barPercentage = barPercentage;
+    scrollbarp -> variable = variable;
+    list_append(tt_elements.scrollbars, (unitype) (void *) scrollbarp, 'p');
+    list_append(tt_elements.all, (unitype) (void *) scrollbarp, 'l');
+    return scrollbarp;
+}
+
+void scrollbarFree(tt_scrollbar_t *scrollbarp) {
+    list_remove(tt_elements.all, (unitype) (uint64_t) scrollbarp, 'l');
+    list_remove(tt_elements.scrollbars, (unitype) (void *) scrollbarp, 'p');
+}
+
+void dropdownCalculateMax(tt_dropdown_t *dropdown) {
+    dropdown -> maxXfactor = 0;
+    for (uint32_t i = 0; i < dropdown -> options -> length; i++) {
+        double stringLength = turtleTextGetStringLength(dropdown -> options -> data[i].s, dropdown -> size - 1);
+        if (stringLength > dropdown -> maxXfactor) {
+            dropdown -> maxXfactor = stringLength;
+        }
+    }
+}
+
+/* create a dropdown - use a list of strings for options */
+tt_dropdown_t *dropdownInit(char *label, list_t *options, int32_t *variable, tt_dropdown_align_t align, double x, double y, double size) {
+    if (tt_enabled.dropdownEnabled == 0) {
+        tt_globals.dropdownLogicIndex = -1;
+        tt_enabled.dropdownEnabled = 1;
+        tt_elements.dropdowns = list_init();
+    }
+    if (tt_enabled.turtleToolsEnabled == 0) {
+        tt_enabled.turtleToolsEnabled = 1;
+        tt_elements.all = list_init();
+    }
+    tt_dropdown_t *dropdownp = malloc(sizeof(tt_dropdown_t));
+    dropdownp -> element = TT_ELEMENT_DROPDOWN;
+    dropdownp -> enabled = TT_ELEMENT_ENABLED;
+    if (label == NULL) {
+        memcpy(dropdownp -> label, "", strlen("") + 1);
+    } else {
+        memcpy(dropdownp -> label, label, strlen(label) + 1);
+    }
+    dropdownp -> color.colorOverride = 0;
+    elementResetColor(dropdownp, TT_ELEMENT_DROPDOWN);
+    dropdownp -> options = options;
+    dropdownp -> index = *variable;
+    dropdownp -> status = 0;
+    dropdownp -> align = align;
+    dropdownp -> x = x;
+    dropdownp -> y = y;
+    dropdownp -> size = size;
+    dropdownp -> variable = variable;
+    dropdownCalculateMax(dropdownp);
+    list_append(tt_elements.dropdowns, (unitype) (void *) dropdownp, 'p');
+    list_append(tt_elements.all, (unitype) (void *) dropdownp, 'l');
+    return dropdownp;
+}
+
+void dropdownFree(tt_dropdown_t *dropdownp) {
+    list_remove(tt_elements.all, (unitype) (uint64_t) dropdownp, 'l');
+    list_remove(tt_elements.dropdowns, (unitype) (void *) dropdownp, 'p');
+}
+
+void textboxUnicodeCallback(uint32_t codepoint);
+void textboxKeyCallback(int32_t key, int32_t scancode, int32_t action);
+
+/* create a textbox */
+tt_textbox_t *textboxInit(char *label, uint32_t maxCharacters, double x, double y, double size, double length) {
+    if (tt_enabled.textboxEnabled == 0) {
+        turtle.unicodeCallback = textboxUnicodeCallback;
+        turtle.keyCallback = textboxKeyCallback;
+        tt_enabled.textboxEnabled = 1;
+        tt_elements.textboxes = list_init();
+    }
+    if (tt_enabled.turtleToolsEnabled == 0) {
+        tt_enabled.turtleToolsEnabled = 1;
+        tt_elements.all = list_init();
+    }
+    tt_textbox_t *textboxp = malloc(sizeof(tt_textbox_t));
+    textboxp -> element = TT_ELEMENT_TEXTBOX;
+    textboxp -> enabled = TT_ELEMENT_ENABLED;
+    if (label == NULL) {
+        memcpy(textboxp -> label, "", strlen("") + 1);
+    } else {
+        memcpy(textboxp -> label, label, strlen(label) + 1);
+    }
+    textboxp -> color.colorOverride = 0;
+    elementResetColor(textboxp, TT_ELEMENT_TEXTBOX);
+    textboxp -> status = 0;
+    textboxp -> align = TT_TEXTBOX_ALIGN_LEFT;
+    textboxp -> x = x;
+    textboxp -> y = y;
+    textboxp -> size = size;
+    textboxp -> length = length;
+    textboxp -> text = calloc(maxCharacters + 5, 1);
+    textboxp -> maxCharacters = maxCharacters;
+    textboxp -> editIndex = 0;
+    textboxp -> lastKey = 0;
+    textboxp -> keyTimeout = 0;
+    textboxp -> renderPixelOffset = 0;
+    textboxp -> renderStartingIndex = 0;
+    textboxp -> renderNumCharacters = 0;
+    list_append(tt_elements.textboxes, (unitype) (void *) textboxp, 'p');
+    list_append(tt_elements.all, (unitype) (void *) textboxp, 'l');
+    return textboxp;
+}
+
+void textboxFree(tt_textbox_t *textboxp) {
+    list_remove(tt_elements.all, (unitype) (uint64_t) textboxp, 'l');
+    list_remove(tt_elements.textboxes, (unitype) (void *) textboxp, 'p');
+}
+
+void buttonUpdate() {
+    for (uint32_t i = 0; i < tt_elements.buttons -> length; i++) {
+        tt_button_t *buttonp = (tt_button_t *) (tt_elements.buttons -> data[i].p);
+        if (buttonp -> enabled == TT_ELEMENT_HIDE) {
+            continue;
+        }
+        double buttonX = buttonp -> x;
+        double buttonY = buttonp -> y;
+        double buttonWidth = turtleTextGetUnicodeLength((unsigned char *) buttonp -> label, buttonp -> size) * 1.1;
+        double buttonHeight = buttonp -> size * 1.75;
+        if (buttonp -> status == 1) {
+            tt_internalColor(buttonp, TT_COLOR_BUTTON_CLICKED, TT_COLOR_OVERRIDE_SLOT_4);
+        } else if (buttonp -> status == 0) {
+            tt_internalColor(buttonp, TT_COLOR_BUTTON, TT_COLOR_OVERRIDE_SLOT_1);
+        } else {
+            tt_internalColor(buttonp, TT_COLOR_BUTTON_SELECT, TT_COLOR_OVERRIDE_SLOT_2);
+        }
+        if (buttonp -> shape == TT_BUTTON_SHAPE_RECTANGLE) {
+            turtleRectangle(buttonX - buttonWidth / 2, buttonY - buttonHeight / 2, buttonX + buttonWidth / 2, buttonY + buttonHeight / 2);
+        } else if (buttonp -> shape == TT_BUTTON_SHAPE_ROUNDED_RECTANGLE) {
+            turtlePenSize(buttonp -> size);
+            turtleGoto(buttonX - buttonWidth / 2 + buttonp -> size / 2, buttonY - buttonHeight / 2 + buttonp -> size / 2);
+            turtlePenDown();
+            turtleGoto(buttonX + buttonWidth / 2 - buttonp -> size / 2, buttonY - buttonHeight / 2 + buttonp -> size / 2);
+            turtleGoto(buttonX + buttonWidth / 2 - buttonp -> size / 2, buttonY + buttonHeight / 2 - buttonp -> size / 2);
+            turtleGoto(buttonX - buttonWidth / 2 + buttonp -> size / 2, buttonY + buttonHeight / 2 - buttonp -> size / 2);
+            turtleGoto(buttonX - buttonWidth / 2 + buttonp -> size / 2, buttonY - buttonHeight / 2 + buttonp -> size / 2);
+            turtlePenUp();
+            turtleRectangle(buttonX - buttonWidth / 4, buttonY - buttonHeight / 4, buttonX + buttonWidth / 4, buttonY + buttonHeight / 4);
+        } else if (buttonp -> shape == TT_BUTTON_SHAPE_CIRCLE) {
+            turtleGoto(buttonX, buttonY);
+            turtlePenSize(buttonWidth);
+            turtlePenDown();
+            turtlePenUp();
+        }
+        tt_internalColor(buttonp, TT_COLOR_TEXT_ALTERNATE, TT_COLOR_OVERRIDE_SLOT_0);
+        if (buttonp -> shape == TT_BUTTON_SHAPE_TEXT) {
+            if (buttonp -> status == 0) {
+                tt_internalColor(buttonp, TT_COLOR_TEXT, TT_COLOR_OVERRIDE_SLOT_3);
+            } else {
+                tt_internalColor(buttonp, TT_COLOR_BUTTON_SELECT, TT_COLOR_OVERRIDE_SLOT_2);
+            }
+        }
+        turtleTextWriteUnicode((unsigned char *) buttonp -> label, buttonX, buttonY, buttonp -> size - 1, 50);
+        /* mouse */
+        if (buttonp -> enabled == TT_ELEMENT_ENABLED && ribbonRender.mainselect[2] == -1) {
+            if (turtleMouseDown()) {
+                if (buttonp -> status < 0) {
+                    buttonp -> status *= -1;
+                }
+            } else {
+                if (buttonp -> shape == TT_BUTTON_SHAPE_CIRCLE) {
+                    if ((turtle.mouseX - buttonX) * (turtle.mouseX - buttonX) + (turtle.mouseY - buttonY) * (turtle.mouseY - buttonY) < buttonWidth * buttonWidth / 4) {
+                        buttonp -> status = -1;
+                    } else {
+                        buttonp -> status = 0;
+                    }
+                } else {
+                    if (turtle.mouseX > buttonX - buttonWidth / 2 && turtle.mouseX < buttonX + buttonWidth / 2 && turtle.mouseY > buttonY - buttonHeight / 2 && turtle.mouseY < buttonY + buttonHeight / 2) {
+                        buttonp -> status = -1;
+                    } else {
+                        buttonp -> status = 0;
+                    }
+                }
+            }
+            *(buttonp -> variable) = 0;
+            if (buttonp -> status > 0) {
+                *(buttonp -> variable) = 1;
+                // buttonp -> status = 0;
+            }
+        }
+    }
+}
+
+void switchUpdate() {
+    for (uint32_t i = 0; i < tt_elements.switches -> length; i++) {
+        tt_switch_t *switchp = (tt_switch_t *) (tt_elements.switches -> data[i].p);
+        if (switchp -> enabled == TT_ELEMENT_HIDE) {
+            continue;
+        }
+        double switchX = switchp -> x;
+        double switchY = switchp -> y;
+        double switchClickLeft = switchX;
+        double switchClickRight = switchX;
+        double switchClickDown = switchY;
+        double switchClickUp = switchY;
+        if (switchp -> style == TT_SWITCH_STYLE_CLASSIC || switchp -> style == TT_SWITCH_STYLE_SIDESWIPE_LEFT || switchp -> style == TT_SWITCH_STYLE_SIDESWIPE_RIGHT) {
+            /* render switch */
+            if (*(switchp -> variable)) {
+                tt_internalColor(switchp, TT_COLOR_SWITCH_ON, TT_COLOR_OVERRIDE_SLOT_2);
+            } else {
+                tt_internalColor(switchp, TT_COLOR_SWITCH_OFF, TT_COLOR_OVERRIDE_SLOT_3);
+            }
+            turtlePenSize(switchp -> size * 1.2);
+            turtleGoto(switchX - switchp -> size * 0.8, switchY);
+            turtlePenDown();
+            turtleGoto(switchX + switchp -> size * 0.8, switchY);
+            turtlePenUp();
+            turtlePenSize(switchp -> size);
+            if (*(switchp -> variable)) {
+                tt_internalColor(switchp, TT_COLOR_SWITCH_CIRCLE_ON, TT_COLOR_OVERRIDE_SLOT_4);
+                turtleGoto(switchX + switchp -> size * 0.8, switchY);
+            } else {
+                tt_internalColor(switchp, TT_COLOR_SWITCH_CIRCLE_OFF, TT_COLOR_OVERRIDE_SLOT_5);
+                turtleGoto(switchX - switchp -> size * 0.8, switchY);
+            }
+            turtlePenDown();
+            turtlePenUp();
+            /* mouse parameters */
+            if (switchp -> style == TT_SWITCH_STYLE_CLASSIC) {
+                switchClickLeft = switchX - switchp -> size * 1.35;
+                switchClickRight = switchX + switchp -> size * 1.35;
+            } else if (switchp -> style == TT_SWITCH_STYLE_SIDESWIPE_LEFT) {
+                double textLength = turtleTextGetUnicodeLength((unsigned char *) switchp -> label, switchp -> size - 1);
+                switchClickLeft = switchX - switchp -> size * 1.35;
+                switchClickRight = switchX + switchp -> size * 2.2 + textLength;
+            } else {
+                double textLength = turtleTextGetUnicodeLength((unsigned char *) switchp -> label, switchp -> size - 1);
+                switchClickLeft = switchX - switchp -> size * 2 - textLength;
+                switchClickRight = switchX + switchp -> size * 1.35;
+            }
+            switchClickDown = switchY - switchp -> size * 0.6;
+            switchClickUp = switchY + switchp -> size * 0.6;
+            /* render text */
+            tt_internalColor(switchp, TT_COLOR_TEXT, TT_COLOR_OVERRIDE_SLOT_0);
+            if (switchp -> style == TT_SWITCH_STYLE_CLASSIC) {
+                turtleTextWriteUnicode((unsigned char *) switchp -> label, switchX, switchY + 1.6 * switchp -> size, switchp -> size - 1, 50);
+            } else if (switchp -> style == TT_SWITCH_STYLE_SIDESWIPE_LEFT) {
+                if (switchp -> status == -1) {
+                    tt_internalColor(switchp, TT_COLOR_SWITCH_TEXT_HOVER, TT_COLOR_OVERRIDE_SLOT_1);
+                } else {
+                    tt_internalColor(switchp, TT_COLOR_TEXT, TT_COLOR_OVERRIDE_SLOT_0);
+                }
+                turtleTextWriteUnicode((unsigned char *) switchp -> label, switchX + switchp -> size * 2, switchY, switchp -> size - 1, 0);
+            } else {
+                if (switchp -> status == -1) {
+                    tt_internalColor(switchp, TT_COLOR_SWITCH_TEXT_HOVER, TT_COLOR_OVERRIDE_SLOT_1);
+                } else {
+                    tt_internalColor(switchp, TT_COLOR_TEXT, TT_COLOR_OVERRIDE_SLOT_0);
+                }
+                turtleTextWriteUnicode((unsigned char *) switchp -> label, switchX - switchp -> size * 2, switchY, switchp -> size - 1, 100);
+            }
+        } else if (switchp -> style == TT_SWITCH_STYLE_CHECKBOX || switchp -> style == TT_SWITCH_STYLE_XBOX) {
+            /* render box */
+            tt_internalColor(switchp, TT_COLOR_SWITCH_ON, TT_COLOR_OVERRIDE_SLOT_2);
+            turtleRectangle(switchX - switchp -> size / 2, switchY - switchp -> size / 2, switchX + switchp -> size / 2, switchY + switchp -> size / 2);
+            tt_internalColor(switchp, TT_COLOR_SWITCH_OFF, TT_COLOR_OVERRIDE_SLOT_3);
+            turtlePenSize(switchp -> size / 6);
+            turtleGoto(switchX - switchp -> size / 2, switchY - switchp -> size / 2);
+            turtlePenDown();
+            turtleGoto(switchX + switchp -> size / 2, switchY - switchp -> size / 2);
+            turtleGoto(switchX + switchp -> size / 2, switchY + switchp -> size / 2);
+            turtleGoto(switchX - switchp -> size / 2, switchY + switchp -> size / 2);
+            turtleGoto(switchX - switchp -> size / 2, switchY - switchp -> size / 2);
+            turtlePenUp();
+            if (*(switchp -> variable)) {
+                if (switchp -> style == TT_SWITCH_STYLE_CHECKBOX) {
+                    /* render check */
+                    tt_internalColor(switchp, TT_COLOR_SWITCH_CIRCLE_ON, TT_COLOR_OVERRIDE_SLOT_4);
+                    turtleGoto(switchX - switchp -> size / 2.5, switchY);
+                    turtlePenDown();
+                    turtleGoto(switchX, switchY - switchp -> size / 2.5);
+                    turtleGoto(switchX + switchp -> size / 2.5, switchY + switchp -> size / 2.5);
+                    turtlePenUp();
+                } else {
+                    /* render X */
+                    tt_internalColor(switchp, TT_COLOR_SWITCH_CIRCLE_ON, TT_COLOR_OVERRIDE_SLOT_4);
+                    turtleGoto(switchX + switchp -> size / 2.5, switchY + switchp -> size / 2.5);
+                    turtlePenDown();
+                    turtleGoto(switchX - switchp -> size / 2.5, switchY - switchp -> size / 2.5);
+                    turtlePenUp();
+                    turtleGoto(switchX + switchp -> size / 2.5, switchY - switchp -> size / 2.5);
+                    turtlePenDown();
+                    turtleGoto(switchX - switchp -> size / 2.5, switchY + switchp -> size / 2.5);
+                    turtlePenUp();
+                }
+            }
+            /* mouse parameters - include text */
+            double textLength = turtleTextGetUnicodeLength((unsigned char *) switchp -> label, switchp -> size - 1);
+            switchClickLeft = switchX - switchp -> size * 0.6;
+            switchClickRight = switchX + switchp -> size * 1.2 + textLength;
+            switchClickDown = switchY - switchp -> size * 0.6;
+            switchClickUp = switchY + switchp -> size * 0.6;
+            /* render text */
+            if (switchp -> status == -1) {
+                tt_internalColor(switchp, TT_COLOR_SWITCH_TEXT_HOVER, TT_COLOR_OVERRIDE_SLOT_1);
+            } else {
+                tt_internalColor(switchp, TT_COLOR_TEXT, TT_COLOR_OVERRIDE_SLOT_0);
+            }
+            turtleTextWriteUnicode((unsigned char *) switchp -> label, switchX + switchp -> size, switchY, switchp -> size - 1, 0);
+        }
+        /* mouse */
+        if (switchp -> enabled == TT_ELEMENT_ENABLED && ribbonRender.mainselect[2] == -1) {
+            if (turtleMouseDown()) {
+                if (switchp -> status < 0) {
+                    switchp -> status *= -1;
+                }
+            } else {
+                if (turtle.mouseX > switchClickLeft && turtle.mouseX < switchClickRight && turtle.mouseY > switchClickDown && turtle.mouseY < switchClickUp) {
+                    switchp -> status = -1;
+                } else {
+                    switchp -> status = 0;
+                }
+            }
+            if (switchp -> status > 0) {
+                if (*(switchp -> variable)) {
+                    *(switchp -> variable) = 0;
+                } else {
+                    *(switchp -> variable) = 1;
+                }
+                switchp -> status = 0;
+            }
+        }
+    }
+}
+
+/* angle between two coordinates (in degrees) */
+double angleBetween(double x1, double y1, double x2, double y2) {
+    double output;
+    if (y2 - y1 < 0) {
+        output = 180 + atan((x2 - x1) / (y2 - y1)) * 57.2958;
+    } else {
+        output = atan((x2 - x1) / (y2 - y1)) * 57.2958;
+    }
+    if (output < 0) {
+        output += 360;
+    }
+    return output;
+}
+
+void dialUpdate() {
+    for (uint32_t i = 0; i < tt_elements.dials -> length; i++) {
+        tt_dial_t *dialp = (tt_dial_t *) (tt_elements.dials -> data[i].p);
+        if (dialp -> enabled == TT_ELEMENT_HIDE) {
+            continue;
+        }
+        tt_internalColor(dialp, TT_COLOR_TEXT, TT_COLOR_OVERRIDE_SLOT_0);
+        turtleTextWriteUnicode((unsigned char *) dialp -> label, dialp -> x, dialp -> y + 1.9 * dialp -> size, dialp -> size - 1, 50);
+        turtlePenSize(dialp -> size * 2);
+        double dialX = dialp -> x;
+        double dialY = dialp -> y;
+        turtleGoto(dialX, dialY);
+        tt_internalColor(dialp, TT_COLOR_DIAL, TT_COLOR_OVERRIDE_SLOT_1);
+        turtlePenDown();
+        turtlePenUp();
+        turtlePenSize(dialp -> size * 2 * 0.8);
+        tt_internalColor(dialp, TT_COLOR_DIAL_INNER, TT_COLOR_OVERRIDE_SLOT_2);
+        turtlePenDown();
+        turtlePenUp();
+        tt_internalColor(dialp, TT_COLOR_DIAL, TT_COLOR_OVERRIDE_SLOT_1);
+        turtlePenSize(1);
+        turtlePenDown();
+        double dialAngle;
+        if (dialp -> type == TT_DIAL_LOG) {
+            dialAngle = pow(360, (*(dialp -> variable) - dialp -> range[0]) / (dialp -> range[1] - dialp -> range[0]));
+        } else if (dialp -> type == TT_DIAL_LINEAR) {
+            dialAngle = (*(dialp -> variable) - dialp -> range[0]) / (dialp -> range[1] - dialp -> range[0]) * 360;
+        } else if (dialp -> type == TT_DIAL_EXP) {
+            dialAngle = 360 * (log(((*(dialp -> variable) - dialp -> range[0]) / (dialp -> range[1] - dialp -> range[0])) * 360 + 1) / log(361));
+        }
+        turtleGoto(dialX + sin(dialAngle / 57.2958) * dialp -> size, dialY + cos(dialAngle / 57.2958) * dialp -> size);
+        turtlePenUp();
+        /* mouse */
+        if (dialp -> enabled == TT_ELEMENT_ENABLED && ribbonRender.mainselect[2] == -1) {
+            if (turtleMouseDown()) {
+                if (dialp -> status[0] < 0) {
+                    tt_globals.dialAnchorX = dialX;
+                    tt_globals.dialAnchorY = dialY;
+                    dialp -> status[0] *= -1;
+                    dialp -> status[1] = turtle.mouseX - dialX;
+                }
+            } else if (turtleMouseRight()) {
+                if (dialp -> status[0] < 0) {
+                    *(dialp -> variable) = dialp -> defaultValue;
+                }
+            } else {
+                if (turtle.mouseX > dialX - dialp -> size && turtle.mouseX < dialX + dialp -> size && turtle.mouseY > dialY - dialp -> size && turtle.mouseY < dialY + dialp -> size) {
+                    dialp -> status[0] = -1;
+                } else {
+                    dialp -> status[0] = 0;
+                }
+            }
+            if (dialp -> status[0] > 0) {
+                dialAngle = angleBetween(tt_globals.dialAnchorX, tt_globals.dialAnchorY, turtle.mouseX, turtle.mouseY);
+                if (turtle.mouseY < tt_globals.dialAnchorY) {
+                    dialp -> status[1] = turtle.mouseX - dialX;
+                }
+                if ((dialAngle < 0.000000001 || dialAngle > 180) && turtle.mouseY > tt_globals.dialAnchorY && dialp -> status[1] >= 0) {
+                    dialAngle = 0.000000001;
+                }
+                if ((dialAngle > 359.99999999 || dialAngle < 180) && turtle.mouseY > tt_globals.dialAnchorY && dialp -> status[1] < 0) {
+                    dialAngle = 359.99999999;
+                }
+                if (dialp -> type == TT_DIAL_LOG) {
+                    *(dialp -> variable) = round(dialp -> range[0] + (dialp -> range[1] - dialp -> range[0]) * (log(dialAngle) / log(360)));
+                } else if (dialp -> type == TT_DIAL_LINEAR) {
+                    *(dialp -> variable) = round(dialp -> range[0] + ((dialp -> range[1] - dialp -> range[0]) * dialAngle / 360));
+                } else if (dialp -> type == TT_DIAL_EXP) {
+                    *(dialp -> variable) = round(dialp -> range[0] + (dialp -> range[1] - dialp -> range[0]) * ((pow(361, dialAngle / 360) - 1) / 360));
+                }
+            }
+        }
+        tt_internalColor(dialp, TT_COLOR_TEXT, TT_COLOR_OVERRIDE_SLOT_0);
+        double rounded = round(*(dialp -> variable) * dialp -> renderNumberFactor);
+        turtleTextWriteStringf(dialX + dialp -> size + 3, dialY, 4, 0, "%.0lf", rounded);
+    }
+}
+
+void sliderUpdate() {
+    for (uint32_t i = 0; i < tt_elements.sliders -> length; i++) {
+        tt_slider_t *sliderp = (tt_slider_t *) (tt_elements.sliders -> data[i].p);
+        if (sliderp -> enabled == TT_ELEMENT_HIDE) {
+            continue;
+        }
+        double sliderXLeft;
+        double sliderYLeft;
+        double sliderXRight;
+        double sliderYRight;
+        double sliderAlignFactor;
+        double sliderOffsetXFactor = 0;
+        double sliderOffsetYFactor = 0;
+        double sliderOffsetXFactorSmall = 0;
+        double sliderOffsetYFactorSmall = 0;
+        if (sliderp -> type == TT_SLIDER_HORIZONTAL) {
+            sliderOffsetYFactor = 1.4 * sliderp -> size;
+            sliderOffsetYFactorSmall = -sliderp -> size * 1.2;
+            if (sliderp -> align == TT_SLIDER_ALIGN_LEFT) {
+                sliderXLeft = sliderp -> x;
+                sliderYLeft = sliderp -> y;
+                sliderXRight = sliderp -> x + sliderp -> length;
+                sliderYRight = sliderp -> y;
+                sliderAlignFactor = 0;
+                sliderOffsetXFactor = -sliderp -> size * 0.4;
+                sliderOffsetXFactorSmall = -sliderp -> size * 0.25;
+            } else if (sliderp -> align == TT_SLIDER_ALIGN_CENTER) {
+                sliderXLeft = sliderp -> x - sliderp -> length / 2;
+                sliderYLeft = sliderp -> y;
+                sliderXRight = sliderp -> x + sliderp -> length / 2;
+                sliderYRight = sliderp -> y;
+                sliderAlignFactor = 50;
+            } else if (sliderp -> align == TT_SLIDER_ALIGN_RIGHT) {
+                sliderXLeft = sliderp -> x - sliderp -> length;
+                sliderYLeft = sliderp -> y;
+                sliderXRight = sliderp -> x;
+                sliderYRight = sliderp -> y;
+                sliderAlignFactor = 100;
+                sliderOffsetXFactor = sliderp -> size * 0.4;
+                sliderOffsetXFactorSmall = sliderp -> size * 0.25;
+            }
+        } else if (sliderp -> type == TT_SLIDER_VERTICAL) {
+            sliderOffsetYFactor = 1.4 * sliderp -> size + sliderp -> length / 2;
+            if (sliderp -> align == TT_SLIDER_ALIGN_LEFT) {
+                sliderXLeft = sliderp -> x;
+                sliderYLeft = sliderp -> y - sliderp -> length / 2;
+                sliderXRight = sliderp -> x;
+                sliderYRight = sliderp -> y + sliderp -> length / 2;
+                sliderAlignFactor = 0;
+                sliderOffsetXFactor = -sliderp -> size * 0.4;
+                sliderOffsetXFactorSmall = sliderp -> size * 1;
+            } else if (sliderp -> align == TT_SLIDER_ALIGN_CENTER) {
+                sliderXLeft = sliderp -> x;
+                sliderYLeft = sliderp -> y - sliderp -> length / 2;
+                sliderXRight = sliderp -> x;
+                sliderYRight = sliderp -> y + sliderp -> length / 2;
+                sliderAlignFactor = 50;
+                sliderOffsetYFactorSmall = -1.2 * sliderp -> size - sliderp -> length / 2;
+            } else if (sliderp -> align == TT_SLIDER_ALIGN_RIGHT) {
+                sliderXLeft = sliderp -> x;
+                sliderYLeft = sliderp -> y - sliderp -> length / 2;
+                sliderXRight = sliderp -> x;
+                sliderYRight = sliderp -> y + sliderp -> length / 2;
+                sliderAlignFactor = 100;
+                sliderOffsetXFactor = sliderp -> size * 0.4;
+                sliderOffsetXFactorSmall = -sliderp -> size * 1;
+            }
+        }
+        tt_internalColor(sliderp, TT_COLOR_TEXT, TT_COLOR_OVERRIDE_SLOT_0);
+        turtleTextWriteUnicode((unsigned char *) sliderp -> label, sliderp -> x + sliderOffsetXFactor, sliderp -> y + sliderOffsetYFactor, sliderp -> size - 1, sliderAlignFactor);
+        turtlePenSize(sliderp -> size * 1.2);
+        turtleGoto(sliderXLeft, sliderYLeft);
+        tt_internalColor(sliderp, TT_COLOR_SLIDER_BAR, TT_COLOR_OVERRIDE_SLOT_1);
+        turtlePenDown();
+        turtleGoto(sliderXRight, sliderYRight);
+        turtlePenUp();
+        turtlePenSize(sliderp -> size);
+        tt_internalColor(sliderp, TT_COLOR_SLIDER_CIRCLE, TT_COLOR_OVERRIDE_SLOT_2);
+        if (sliderp -> type == TT_SLIDER_HORIZONTAL) {
+            turtleGoto(sliderXLeft + (sliderXRight - sliderXLeft) * (*(sliderp -> variable) - sliderp -> range[0]) / (sliderp -> range[1] - sliderp -> range[0]), sliderYLeft);
+        } else if (sliderp -> type == TT_SLIDER_VERTICAL) {
+            turtleGoto(sliderXLeft, sliderYLeft + (sliderYRight - sliderYLeft) * (*(sliderp -> variable) - sliderp -> range[0]) / (sliderp -> range[1] - sliderp -> range[0]));
+        }
+        turtlePenDown();
+        turtlePenUp();
+        /* mouse */
+        if (sliderp -> enabled == TT_ELEMENT_ENABLED && ribbonRender.mainselect[2] == -1) {
+            if (turtleMouseDown()) {
+                if (sliderp -> status < 0) {
+                    sliderp -> status *= -1;
+                }
+            } else if (turtleMouseRight()) {
+                if (sliderp -> status < 0) {
+                    *(sliderp -> variable) = sliderp -> defaultValue;
+                }
+            } else {
+                if (turtle.mouseX > sliderXLeft - sliderp -> size * 0.6 && turtle.mouseX < sliderXRight + sliderp -> size * 0.6 && turtle.mouseY > sliderYLeft - sliderp -> size * 0.6 && turtle.mouseY < sliderYRight + sliderp -> size * 0.6) {
+                    sliderp -> status = -1;
+                } else {
+                    sliderp -> status = 0;
+                }
+            }
+            if (sliderp -> status > 0) {
+                if (sliderp -> type == TT_SLIDER_HORIZONTAL) {
+                    *(sliderp -> variable) = round(sliderp -> range[0] + (turtle.mouseX - sliderXLeft) / sliderp -> length * (sliderp -> range[1] - sliderp -> range[0]));
+                } else if (sliderp -> type == TT_SLIDER_VERTICAL) {
+                    *(sliderp -> variable) = round(sliderp -> range[0] + (turtle.mouseY - sliderYLeft) / sliderp -> length * (sliderp -> range[1] - sliderp -> range[0]));
+                }
+                if (*(sliderp -> variable) >= sliderp -> range[1]) {
+                    *(sliderp -> variable) = sliderp -> range[1];
+                }
+                if (*(sliderp -> variable) <= sliderp -> range[0]) {
+                    *(sliderp -> variable) = sliderp -> range[0];
+                }
+            }
+        }
+        if (sliderp -> renderNumberFactor != 0) {
+            tt_internalColor(sliderp, TT_COLOR_TEXT, TT_COLOR_OVERRIDE_SLOT_0);
+            double rounded = round(*(sliderp -> variable) * sliderp -> renderNumberFactor);
+            turtleTextWriteStringf(sliderp -> x + sliderOffsetXFactorSmall, sliderp -> y + sliderOffsetYFactorSmall, 4, sliderAlignFactor, "%.0lf", rounded);
+        }
+    }
+}
+
+/*
+scrollbar range of motion (coordinates):
+scrollbar.length * (1 - scrollbar.barPercentage / 100)
+tip: try to match the ratio of visible content to the scrollbar's barPercentage - if half of the content can be shown on one screen then make the barPercentage 50
+*/
+void scrollbarUpdate() {
+    for (uint32_t i = 0; i < tt_elements.scrollbars -> length; i++) {
+        tt_scrollbar_t *scrollbarp = (tt_scrollbar_t *) (tt_elements.scrollbars -> data[i].p);
+        if (scrollbarp -> enabled == TT_ELEMENT_HIDE) {
+            continue;
+        }
+        if (scrollbarp -> type == TT_SCROLLBAR_HORIZONTAL) {
+            double scrollbarLeft = scrollbarp -> x - scrollbarp -> length / 2;
+            double scrollbarRight = scrollbarp -> x + scrollbarp -> length / 2;
+            double dragLeft = scrollbarLeft + (*(scrollbarp -> variable)) / 100 * (scrollbarp -> length * (1 - scrollbarp -> barPercentage / 100));
+            double dragRight = dragLeft + (scrollbarp -> length * scrollbarp -> barPercentage / 100);
+            turtlePenSize(scrollbarp -> size * 1);
+            tt_internalColor(scrollbarp, TT_COLOR_SCROLLBAR_BASE, TT_COLOR_OVERRIDE_SLOT_1);
+            turtleGoto(scrollbarLeft, scrollbarp -> y);
+            turtlePenDown();
+            turtleGoto(scrollbarRight, scrollbarp -> y);
+            turtlePenUp();
+            turtlePenSize(scrollbarp -> size * 0.8);
+            if (scrollbarp -> status == -1 && turtle.mouseX > dragLeft - scrollbarp -> size * 0.4 && turtle.mouseX < dragRight + scrollbarp -> size * 0.4) {
+                tt_internalColor(scrollbarp, TT_COLOR_SCROLLBAR_HOVER, TT_COLOR_OVERRIDE_SLOT_2);
+            } else if (scrollbarp -> status > 0) {
+                tt_internalColor(scrollbarp, TT_COLOR_SCROLLBAR_CLICKED, TT_COLOR_OVERRIDE_SLOT_3);
+            } else {
+                tt_internalColor(scrollbarp, TT_COLOR_SCROLLBAR_BAR, TT_COLOR_OVERRIDE_SLOT_4);
+            }
+            turtleGoto(dragLeft, scrollbarp -> y);
+            turtlePenDown();
+            turtleGoto(dragRight, scrollbarp -> y);
+            turtlePenUp();
+            if (scrollbarp -> enabled == TT_ELEMENT_ENABLED) {
+                if (scrollbarp -> status == 2) {
+                    tt_globals.barAnchor = turtle.mouseX - dragLeft;
+                    scrollbarp -> status = 1;
+                }
+                if (turtleMouseDown()) {
+                    if (scrollbarp -> status < 0) {
+                        if (turtle.mouseX > dragLeft - scrollbarp -> size * 0.4 && turtle.mouseX < dragRight + scrollbarp -> size * 0.4) {
+                            tt_globals.barAnchor = turtle.mouseX - dragLeft;
+                        } else {
+                            tt_globals.barAnchor = (scrollbarp -> length * scrollbarp -> barPercentage / 100) / 2;
+                            scrollbarp -> status = -2;
+                        }
+                        scrollbarp -> status *= -1;
+                    }
+                } else {
+                    if (turtle.mouseY > scrollbarp -> y - scrollbarp -> size * 0.5 && turtle.mouseY < scrollbarp -> y + scrollbarp -> size * 0.5 && turtle.mouseX < scrollbarRight && turtle.mouseX > scrollbarLeft) {
+                        scrollbarp -> status = -1;
+                    } else {
+                        scrollbarp -> status = 0;
+                    }
+                }
+                if (scrollbarp -> status > 0) {
+                    *(scrollbarp -> variable) = (turtle.mouseX - scrollbarLeft - tt_globals.barAnchor) / (scrollbarp -> length * (1 - scrollbarp -> barPercentage / 100)) * 100;
+                    if (*(scrollbarp -> variable) < 0) {
+                        *(scrollbarp -> variable) = 0;
+                    }
+                    if (*(scrollbarp -> variable) > 100) {
+                        *(scrollbarp -> variable) = 100;
+                    }
+                }
+            }
+        } else if (scrollbarp -> type == TT_SCROLLBAR_VERTICAL) {
+            double scrollbarTop = scrollbarp -> y + scrollbarp -> length / 2;
+            double scrollbarBottom = scrollbarp -> y - scrollbarp -> length / 2;
+            double dragTop = scrollbarTop - (*(scrollbarp -> variable)) / 100 * (scrollbarp -> length * (1 - scrollbarp -> barPercentage / 100));
+            double dragBottom = dragTop - (scrollbarp -> length * scrollbarp -> barPercentage / 100);
+            turtlePenSize(scrollbarp -> size * 1);
+            tt_internalColor(scrollbarp, TT_COLOR_SCROLLBAR_BASE, TT_COLOR_OVERRIDE_SLOT_1);
+            turtleGoto(scrollbarp -> x, scrollbarTop);
+            turtlePenDown();
+            turtleGoto(scrollbarp -> x, scrollbarBottom);
+            turtlePenUp();
+            turtlePenSize(scrollbarp -> size * 0.8);
+            if (scrollbarp -> status == -1 && turtle.mouseY > dragBottom - scrollbarp -> size * 0.4 && turtle.mouseY < dragTop + scrollbarp -> size * 0.4) {
+                tt_internalColor(scrollbarp, TT_COLOR_SCROLLBAR_HOVER, TT_COLOR_OVERRIDE_SLOT_2);
+            } else if (scrollbarp -> status > 0) {
+                tt_internalColor(scrollbarp, TT_COLOR_SCROLLBAR_CLICKED, TT_COLOR_OVERRIDE_SLOT_3);
+            } else {
+                tt_internalColor(scrollbarp, TT_COLOR_SCROLLBAR_BAR, TT_COLOR_OVERRIDE_SLOT_4);
+            }
+            turtleGoto(scrollbarp -> x, dragTop);
+            turtlePenDown();
+            turtleGoto(scrollbarp -> x, dragBottom);
+            turtlePenUp();
+            /* mouse */
+            if (scrollbarp -> enabled == TT_ELEMENT_ENABLED && ribbonRender.mainselect[2] == -1) {
+                if (scrollbarp -> status == 2) {
+                    tt_globals.barAnchor = dragTop - turtle.mouseY;
+                    scrollbarp -> status = 1;
+                }
+                if (turtleMouseDown()) {
+                    if (scrollbarp -> status < 0) {
+                        if (turtle.mouseY > dragBottom - scrollbarp -> size * 0.4 && turtle.mouseY < dragTop + scrollbarp -> size * 0.4) {
+                            tt_globals.barAnchor = dragTop - turtle.mouseY;
+                        } else {
+                            tt_globals.barAnchor = (scrollbarp -> length * scrollbarp -> barPercentage / 100) / 2;
+                            scrollbarp -> status = -2;
+                        }
+                        scrollbarp -> status *= -1;
+                    }
+                } else {
+                    if (turtle.mouseX > scrollbarp -> x - scrollbarp -> size * 0.5 && turtle.mouseX < scrollbarp -> x + scrollbarp -> size * 0.5 && turtle.mouseY > scrollbarBottom && turtle.mouseY < scrollbarTop) {
+                        scrollbarp -> status = -1;
+                    } else {
+                        scrollbarp -> status = 0;
+                    }
+                }
+                if (scrollbarp -> status > 0) {
+                    *(scrollbarp -> variable) = (scrollbarTop - turtle.mouseY - tt_globals.barAnchor) / (scrollbarp -> length * (1 - scrollbarp -> barPercentage / 100)) * 100;
+                    if (*(scrollbarp -> variable) < 0) {
+                        *(scrollbarp -> variable) = 0;
+                    }
+                    if (*(scrollbarp -> variable) > 100) {
+                        *(scrollbarp -> variable) = 100;
+                    }
+                }
+            }
+        }
+    }
+}
+
+void dropdownUpdate() {
+    int32_t logicIndex = -1;
+    for (uint32_t i = 0; i < tt_elements.dropdowns -> length; i++) {
+        tt_dropdown_t *dropdownp = (tt_dropdown_t *) (tt_elements.dropdowns -> data[i].p);
+        if (dropdownp -> enabled == TT_ELEMENT_HIDE) {
+            continue;
+        }
+        /* render dropdown default position */
+        double dropdownX = dropdownp -> x;
+        double dropdownY = dropdownp -> y;
+        double xfactor = turtleTextGetUnicodeLength((unsigned char *) dropdownp -> options -> data[dropdownp -> index].s, dropdownp -> size - 1);
+        double itemHeight = (dropdownp -> size * 1.5);
+        double dropdownXFactor[2];
+        double dropdownMaxXFactor[2];
+        double dropdownAlignFactor;
+        if (strlen(dropdownp -> label) > 0) {
+            tt_internalColor(dropdownp, TT_COLOR_TEXT, TT_COLOR_OVERRIDE_SLOT_0);
+            if (dropdownp -> align == TT_DROPDOWN_ALIGN_LEFT) {
+                dropdownXFactor[0] = dropdownX;
+                dropdownXFactor[1] = dropdownX + xfactor + dropdownp -> size;
+                dropdownMaxXFactor[0] = dropdownX;
+                dropdownMaxXFactor[1] = dropdownX + dropdownp -> maxXfactor + dropdownp -> size / 2.5;
+                if (dropdownXFactor[1] > dropdownMaxXFactor[1]) {
+                    dropdownMaxXFactor[1] = dropdownXFactor[1] + dropdownp -> size;
+                }
+                dropdownAlignFactor = 0;
+                turtleTextWriteUnicode((unsigned char *) dropdownp -> label, dropdownX + dropdownp -> size / 5, dropdownY + 1.6 * dropdownp -> size, dropdownp -> size - 1, dropdownAlignFactor);
+            } else if (dropdownp -> align == TT_DROPDOWN_ALIGN_CENTER) {
+                dropdownXFactor[0] = dropdownX - xfactor / 2 - dropdownp -> size;
+                dropdownXFactor[1] = dropdownX + xfactor / 2;
+                dropdownMaxXFactor[0] = dropdownX - dropdownp -> maxXfactor / 2 - dropdownp -> size / 2;
+                dropdownMaxXFactor[1] = dropdownX + dropdownp -> maxXfactor / 2 + dropdownp -> size / 2;
+                if (dropdownXFactor[1] - dropdownXFactor[0] > dropdownMaxXFactor[1] - dropdownMaxXFactor[0] - dropdownp -> size) {
+                    dropdownMaxXFactor[0] = dropdownXFactor[0];
+                    dropdownMaxXFactor[1] = dropdownXFactor[1] + dropdownp -> size;
+                }
+                dropdownAlignFactor = 50;
+                turtleTextWriteUnicode((unsigned char *) dropdownp -> label, dropdownX, dropdownY + 1.6 * dropdownp -> size, dropdownp -> size - 1, dropdownAlignFactor);
+            } else if (dropdownp -> align == TT_DROPDOWN_ALIGN_RIGHT) {
+                dropdownXFactor[0] = dropdownX - xfactor - dropdownp -> size * 2;
+                dropdownXFactor[1] = dropdownX - dropdownp -> size;
+                dropdownMaxXFactor[0] = dropdownX - dropdownp -> maxXfactor - dropdownp -> size * 2;
+                dropdownMaxXFactor[1] = dropdownX;
+                dropdownAlignFactor = 100;
+                turtleTextWriteUnicode((unsigned char *) dropdownp -> label, dropdownX - dropdownp -> size / 5, dropdownY + 1.6 * dropdownp -> size, dropdownp -> size - 1, dropdownAlignFactor);
+            }
+        }
+        logicIndex = tt_globals.dropdownLogicIndex;
+        if ((int32_t) i > logicIndex && dropdownp -> status == -1) {
+            tt_internalColor(dropdownp, TT_COLOR_DROPDOWN_SELECT, TT_COLOR_OVERRIDE_SLOT_3);
+            turtleRectangle(dropdownXFactor[0], dropdownY - dropdownp -> size * 0.7, dropdownXFactor[1] + dropdownp -> size, dropdownY + dropdownp -> size * 0.7);
+        } else if (dropdownp -> status >= 1) {
+            tt_internalColor(dropdownp, TT_COLOR_DROPDOWN, TT_COLOR_OVERRIDE_SLOT_2);
+            turtleRectangle(dropdownMaxXFactor[0], dropdownY - dropdownp -> size * 0.7 - (dropdownp -> options -> length - 1) * itemHeight, dropdownMaxXFactor[1], dropdownY + dropdownp -> size * 0.7);
+        } else {
+            tt_internalColor(dropdownp, TT_COLOR_DROPDOWN, TT_COLOR_OVERRIDE_SLOT_2);
+            turtleRectangle(dropdownXFactor[0], dropdownY - dropdownp -> size * 0.7, dropdownXFactor[1] + dropdownp -> size, dropdownY + dropdownp -> size * 0.7);
+        }
+        /* mouse */
+        if (dropdownp -> enabled == TT_ELEMENT_ENABLED && ribbonRender.mainselect[2] == -1) {
+            if (turtle.mouseX > dropdownXFactor[0] && turtle.mouseX < dropdownXFactor[1] + dropdownp -> size && turtle.mouseY > dropdownY - dropdownp -> size * 0.7 && turtle.mouseY < dropdownY + dropdownp -> size * 0.7) {
+                if (!turtleMouseDown() && dropdownp -> status == 0) {
+                    dropdownp -> status = -1;
+                    logicIndex = -1;
+                }
+            } else {
+                if (dropdownp -> status == -1) {
+                    dropdownp -> status = 0;
+                    logicIndex = -1;
+                }
+            }
+            if (dropdownp -> status == -1) {
+                if ((int32_t) i > logicIndex && turtleMouseDown()) {
+                    dropdownp -> status = 1;
+                }
+            }
+            if (dropdownp -> status == 1) {
+                if (!turtleMouseDown()) {
+                    if (turtle.mouseX > dropdownMaxXFactor[0] && turtle.mouseX < dropdownMaxXFactor[1] && turtle.mouseY > dropdownY - dropdownp -> size * 0.7 - (dropdownp -> options -> length - 1) * itemHeight && turtle.mouseY < dropdownY + dropdownp -> size * 0.7 - itemHeight) {
+                        uint32_t selected = round((dropdownY - turtle.mouseY) / itemHeight);
+                        if (selected != 0) {
+                            if (dropdownp -> index >= selected) {
+                                dropdownp -> index = selected - 1;
+                            } else {
+                                dropdownp -> index = selected;
+                            }
+                            *dropdownp -> variable = dropdownp -> index;
+                        }
+                        dropdownp -> status = -2;
+                    } else {
+                        dropdownp -> status = 2;
+                        logicIndex = -1;
+                    }
+                }
+            }
+            if (dropdownp -> status == -2) {
+                if (!turtleMouseDown()) {
+                    dropdownp -> status = 0;
+                    logicIndex = -1;
+                }
+            }
+
+            if (dropdownp -> status == 2 || dropdownp -> status == 1) {
+                if (turtle.mouseX > dropdownMaxXFactor[0] && turtle.mouseX < dropdownMaxXFactor[1] && turtle.mouseY > dropdownY - dropdownp -> size * 0.7 - (dropdownp -> options -> length - 1) * itemHeight && turtle.mouseY < dropdownY + dropdownp -> size * 0.7) {
+                    uint32_t selected = round((dropdownY - turtle.mouseY) / itemHeight);
+                    tt_internalColor(dropdownp, TT_COLOR_DROPDOWN_HOVER, TT_COLOR_OVERRIDE_SLOT_4);
+                    turtleRectangle(dropdownMaxXFactor[0], dropdownY - dropdownp -> size * 0.7 - selected * itemHeight, dropdownMaxXFactor[1], dropdownY + dropdownp -> size * 0.7 - selected * itemHeight);
+                    if (turtleMouseDown() && dropdownp -> status == 2) {
+                        if (selected != 0) {
+                            if (dropdownp -> index >= selected) {
+                                dropdownp -> index = selected - 1;
+                            } else {
+                                dropdownp -> index = selected;
+                            }
+                            *dropdownp -> variable = dropdownp -> index;
+                        }
+                        dropdownp -> status = -2;
+                    }
+                } else {
+                    if (turtleMouseDown() && dropdownp -> status == 2) {
+                        dropdownp -> status = 0;
+                    }
+                }
+                tt_internalColor(dropdownp, TT_COLOR_TEXT_ALTERNATE, TT_COLOR_OVERRIDE_SLOT_1);
+                int32_t renderIndex = 1;
+                for (uint32_t i = 0; i < dropdownp -> options -> length; i++) {
+                    if (i != dropdownp -> index) {
+                        if (dropdownp -> align == TT_DROPDOWN_ALIGN_LEFT) {
+                            turtleTextWriteUnicode((unsigned char *) dropdownp -> options -> data[i].s, dropdownMaxXFactor[0] + dropdownp -> size / 5, dropdownY - renderIndex * itemHeight, dropdownp -> size - 1, dropdownAlignFactor);
+                        } else if (dropdownp -> align == TT_DROPDOWN_ALIGN_CENTER) {
+                            turtleTextWriteUnicode((unsigned char *) dropdownp -> options -> data[i].s, (dropdownMaxXFactor[0] + dropdownMaxXFactor[1]) / 2, dropdownY - renderIndex * itemHeight, dropdownp -> size - 1, dropdownAlignFactor);
+                        } else if (dropdownp -> align == TT_DROPDOWN_ALIGN_RIGHT) {
+                            turtleTextWriteUnicode((unsigned char *) dropdownp -> options -> data[i].s, dropdownMaxXFactor[1] - dropdownp -> size * 1.6, dropdownY - renderIndex * itemHeight, dropdownp -> size - 1, dropdownAlignFactor);
+                        }
+                        renderIndex++;
+                    }
+                }
+            }
+            if (dropdownp -> status >= 1) {
+                logicIndex = i;
+            }
+            tt_globals.dropdownLogicIndex = logicIndex;
+        }
+        tt_internalColor(dropdownp, TT_COLOR_TEXT_ALTERNATE, TT_COLOR_OVERRIDE_SLOT_1);
+        if (dropdownp -> align == TT_DROPDOWN_ALIGN_LEFT) {
+            turtleTextWriteUnicode((unsigned char *) dropdownp -> options -> data[dropdownp -> index].s, dropdownXFactor[0] + dropdownp -> size / 5, dropdownY, dropdownp -> size - 1, dropdownAlignFactor);
+        } else if (dropdownp -> align == TT_DROPDOWN_ALIGN_CENTER) {
+            turtleTextWriteUnicode((unsigned char *) dropdownp -> options -> data[dropdownp -> index].s, (dropdownXFactor[0] + dropdownXFactor[1]) / 2, dropdownY, dropdownp -> size - 1, dropdownAlignFactor);
+        } else if (dropdownp -> align == TT_DROPDOWN_ALIGN_RIGHT) {
+            turtleTextWriteUnicode((unsigned char *) dropdownp -> options -> data[dropdownp -> index].s, dropdownXFactor[1] - dropdownp -> size * 0.6, dropdownY, dropdownp -> size - 1, dropdownAlignFactor);
+        }
+        tt_internalColor(dropdownp, TT_COLOR_DROPDOWN_TRIANGLE, TT_COLOR_OVERRIDE_SLOT_5);
+        if (dropdownp -> status >= 1) {
+            turtleTriangle(dropdownXFactor[1] + dropdownp -> size * 0.4, dropdownY + dropdownp -> size * 0.4, dropdownXFactor[1] + dropdownp -> size * 0.4, dropdownY - dropdownp -> size * 0.4, dropdownXFactor[1] - dropdownp -> size * 0.2, dropdownY);
+        } else {
+            turtleTriangle(dropdownXFactor[1] + dropdownp -> size * 0.6, dropdownY + dropdownp -> size * 0.3, dropdownXFactor[1] - dropdownp -> size * 0.2, dropdownY + dropdownp -> size * 0.3, dropdownXFactor[1] + dropdownp -> size * 0.2, dropdownY - dropdownp -> size * 0.3);
+        }
+    }
+}
+
+void textboxAddKey(tt_textbox_t *textboxp, int32_t key) {
+    int32_t len = strlen(textboxp -> text);
+    /* https://stackoverflow.com/questions/42012563/convert-unicode-code-points-to-utf-8-and-utf-32 */
+    uint32_t uKey = key;
+    uint8_t buffer[5] = {0};
+    int32_t size = 1;
+    if (uKey <= 0x7F) {
+        buffer[0] = uKey;
+    } else if (uKey <= 0x7FF) {
+        buffer[0] = 0xC0 | (uKey >> 6);            /* 110xxxxx */
+        buffer[1] = 0x80 | (uKey & 0x3F);          /* 10xxxxxx */
+        size = 2;
+    } else if (uKey <= 0xFFFF) {
+        buffer[0] = 0xE0 | (uKey >> 12);           /* 1110xxxx */
+        buffer[1] = 0x80 | ((uKey >> 6) & 0x3F);   /* 10xxxxxx */
+        buffer[2] = 0x80 | (uKey & 0x3F);          /* 10xxxxxx */
+        size = 3;
+    } else if (uKey <= 0x10FFFF) {
+        buffer[0] = 0xF0 | (uKey >> 18);           /* 11110xxx */
+        buffer[1] = 0x80 | ((uKey >> 12) & 0x3F);  /* 10xxxxxx */
+        buffer[2] = 0x80 | ((uKey >> 6) & 0x3F);   /* 10xxxxxx */
+        buffer[3] = 0x80 | (uKey & 0x3F);          /* 10xxxxxx */
+        size = 4;
+    }
+    if (len < textboxp -> maxCharacters) {
+        strins(textboxp -> text, (char *) buffer, textboxp -> editIndex);
+        textboxp -> editIndex += size;
+    }
+}
+
+void textboxUnicodeCallback(uint32_t codepoint) {
+    for (uint32_t i = 0; i < tt_elements.textboxes -> length; i++) {
+        tt_textbox_t *textboxp = (tt_textbox_t *) (tt_elements.textboxes -> data[i].p);
+        if (textboxp -> status > 1) {
+            textboxAddKey(textboxp, codepoint);
+            break;
+        }
+    }
+}
+
+void textboxHandleOtherKey(tt_textbox_t *textboxp, int32_t key) {
+    int32_t len = strlen(textboxp -> text);
+    if (key == GLFW_KEY_BACKSPACE) {
+        if (textboxp -> editIndex <= 0) {
+            return;
+        }
+        int32_t size = 1;
+        if (textboxp -> text[textboxp -> editIndex - 1] & 0b10000000) {
+            while ((textboxp -> text[textboxp -> editIndex - 1] & 0b01000000) == 0) {
+                textboxp -> editIndex--;
+                size++;
+            }
+        }
+        textboxp -> editIndex--;
+        strdel(textboxp -> text, textboxp -> editIndex, size);
+    } else if (key == GLFW_KEY_DELETE) {
+        if (textboxp -> editIndex >= len) {
+            return;
+        }
+        int32_t size = 1;
+        if (textboxp -> text[textboxp -> editIndex] & 0b10000000) {
+            if (textboxp -> text[textboxp -> editIndex] & 0b00100000) {
+                if (textboxp -> text[textboxp -> editIndex] & 0b00010000) {
+                    size++;
+                }
+                size++;
+            }
+            size++;
+        }
+        strdel(textboxp -> text, textboxp -> editIndex, size);
+    } else if (key == GLFW_KEY_ENTER) {
+        textboxp -> status = 0;
+    } else if (key == GLFW_KEY_LEFT) {
+        textboxp -> status = 2;
+        if (textboxp -> editIndex <= 0) {
+            return;
+        }
+        if (textboxp -> text[textboxp -> editIndex - 1] & 0b10000000) {
+            while ((textboxp -> text[textboxp -> editIndex - 1] & 0b01000000) == 0) {
+                textboxp -> editIndex--;
+            }
+        }
+        textboxp -> editIndex--;
+    } else if (key == GLFW_KEY_RIGHT) {
+        textboxp -> status = 2;
+        if (textboxp -> editIndex >= len) {
+            return;
+        }
+        if (textboxp -> text[textboxp -> editIndex] & 0b10000000) {
+            if (textboxp -> text[textboxp -> editIndex] & 0b00100000) {
+                if (textboxp -> text[textboxp -> editIndex] & 0b00010000) {
+                    textboxp -> editIndex++;
+                }
+                textboxp -> editIndex++;
+            }
+            textboxp -> editIndex++;
+        }
+        textboxp -> editIndex++;
+    }
+}
+
+void textboxKeyCallback(int32_t key, int32_t scancode, int32_t action) {
+    /* non-printable keys */
+    if (action == GLFW_PRESS) {
+        for (uint32_t i = 0; i < tt_elements.textboxes -> length; i++) {
+            tt_textbox_t *textboxp = (tt_textbox_t *) (tt_elements.textboxes -> data[i].p);
+            if (textboxp -> status > 1) {
+                textboxp -> lastKey = key;
+                textboxp -> keyTimeout = 50;
+                textboxHandleOtherKey(textboxp, key);
+                break;
+            }
+        }
+    }
+}
+
+int32_t textboxCalculateMaximumCharacters(uint32_t *charlist, int32_t textLength, double size, double lengthPixels, int8_t sweepDirection, double *outputLength) {
+    if (sweepDirection == -1) {
+        /* sweep from the back to the front */
+        size /= 175;
+        double xTrack = 0;
+        int32_t byteCount = 0;
+        for (int32_t i = 0; i < textLength; i++) {
+            int32_t currentDataAddress = 0;
+            for (int32_t j = 0; j < turtleText.charCount; j++) {
+                if (turtleText.supportedCharReference[j] == charlist[i]) {
+                    currentDataAddress = j;
+                    break;
+                }
+            }
+            xTrack += (turtleText.fontData[turtleText.fontPointer[currentDataAddress + 1] - 4] + 40) * size;
+            byteCount++;
+            if (charlist[i] & 0x0000FF00) {
+                byteCount++;
+                if (charlist[i] & 0x00FF0000) {
+                    byteCount++;
+                    if (charlist[i] & 0xFF000000) {
+                        byteCount++;
+                    }
+                }
+            }
+            if (xTrack - 40 * size > lengthPixels) {
+                *outputLength = xTrack - 40 * size;
+                return byteCount;
+            }
+        }
+        *outputLength = xTrack - 40 * size;
+        return byteCount;
+    } else if (sweepDirection == 1) {
+        /* sweep from the front to the back */
+        size /= 175;
+        double xTrack = 0;
+        int32_t byteCount = 0;
+        for (int32_t i = textLength - 1; i > 0; i--) {
+            int32_t currentDataAddress = 0;
+            for (int32_t j = 0; j < turtleText.charCount; j++) {
+                if (turtleText.supportedCharReference[j] == charlist[i]) {
+                    currentDataAddress = j;
+                    break;
+                }
+            }
+            xTrack += (turtleText.fontData[turtleText.fontPointer[currentDataAddress + 1] - 4] + 40) * size;
+            byteCount--;
+            if (charlist[i] & 0x0000FF00) {
+                byteCount--;
+                if (charlist[i] & 0x00FF0000) {
+                    byteCount--;
+                    if (charlist[i] & 0xFF000000) {
+                        byteCount--;
+                    }
+                }
+            }
+            if (xTrack - 40 * size > lengthPixels) {
+                *outputLength = xTrack - 40 * size;
+                return byteCount;
+            }
+        }
+        *outputLength = xTrack - 40 * size;
+        return byteCount;
+    }
+    return 0;
+}
+
+void textboxUpdate() {
+    for (uint32_t i = 0; i < tt_elements.textboxes -> length; i++) {
+        tt_textbox_t *textboxp = (tt_textbox_t *) (tt_elements.textboxes -> data[i].p);
+        if (textboxp -> enabled == TT_ELEMENT_HIDE) {
+            continue;
+        }
+
+        /* handle keys */
+        if (textboxp -> keyTimeout > 0) {
+            textboxp -> keyTimeout--;
+        }
+        if (textboxp -> lastKey > 0) {
+            if (turtleKeyPressed(textboxp -> lastKey)) {
+                if (textboxp -> keyTimeout == 0) {
+                    textboxp -> keyTimeout = 4;
+                    textboxHandleOtherKey(textboxp, textboxp -> lastKey);
+                }
+            } else {
+                textboxp -> lastKey = 0;
+            }
+        }
+        if (textboxp -> status > 1) {
+            textboxp -> status++;
+            if (textboxp -> status > 128) {
+                textboxp -> status = 2;
+            }
+        }
+
+        tt_internalColor(textboxp, TT_COLOR_TEXTBOX_BOX, TT_COLOR_OVERRIDE_SLOT_1);
+        turtleRectangle(textboxp -> x, textboxp -> y - textboxp -> size, textboxp -> x + textboxp -> length, textboxp -> y + textboxp -> size);
+
+        if (textboxp -> status <= 0) {
+            textboxp -> renderPixelOffset = textboxp -> size / 3;
+            textboxp -> renderStartingIndex = 0;
+            /* textbox idle */
+            if (strlen(textboxp -> text) == 0) {
+                /* render label */
+                textboxp -> renderNumCharacters = 0;
+                tt_internalColor(textboxp, TT_COLOR_TEXTBOX_PHANTOM_TEXT, TT_COLOR_OVERRIDE_SLOT_2);
+                turtleTextWriteUnicode((unsigned char *) textboxp -> label, textboxp -> x + textboxp -> size / 2, textboxp -> y, textboxp -> size - 1, 0);
+            } else {
+                /* calculate rendered characters */
+                double totalTextLength = turtleTextGetUnicodeLength((unsigned char *) textboxp -> text, textboxp -> size - 1);
+                if (totalTextLength < textboxp -> length - textboxp -> size / 1.5) {
+                    textboxp -> renderNumCharacters = strlen(textboxp -> text);
+                } else {
+                    /* not all characters fit in textbox - retract text length */
+                    uint32_t textConverted[strlen(textboxp -> text) + 1];
+                    uint32_t characterLength = turtleTextConvertUnicode((unsigned char *) textboxp -> text, textConverted);
+                    double dummy;
+                    textboxp -> renderNumCharacters = textboxCalculateMaximumCharacters(textConverted, characterLength, textboxp -> size - 1, textboxp -> length - textboxp -> size * 1.2, -1, &dummy);
+                }
+            }
+        } else if (textboxp -> status > 0) {
+            /* editing text */
+            /* calculate rendered characters */
+            double totalTextLength = turtleTextGetUnicodeLength((unsigned char *) textboxp -> text, textboxp -> size - 1);
+            if (totalTextLength < textboxp -> length - textboxp -> size / 1.5) {
+                textboxp -> renderStartingIndex = 0;
+                textboxp -> renderPixelOffset = textboxp -> size / 3;
+                textboxp -> renderNumCharacters = strlen(textboxp -> text);
+            } else {
+                /* not all characters fit in textbox - retract text length */
+                if (textboxp -> editIndex < textboxp -> renderStartingIndex) {
+                    /* set editIndex at the left side of box */
+                    textboxp -> renderStartingIndex = textboxp -> editIndex;
+                    textboxp -> renderPixelOffset = textboxp -> size / 3;
+                    uint32_t textConverted[strlen(textboxp -> text) + 1];
+                    uint32_t characterLength = turtleTextConvertUnicode((unsigned char *) (textboxp -> text + textboxp -> editIndex), textConverted);
+                    double dummy;
+                    textboxp -> renderNumCharacters = textboxCalculateMaximumCharacters(textConverted, characterLength, textboxp -> size - 1, textboxp -> length - textboxp -> size * 1.2, -1, &dummy);
+                } else if (textboxp -> editIndex > textboxp -> renderStartingIndex + textboxp -> renderNumCharacters || (strlen(textboxp -> text) < textboxp -> renderStartingIndex + textboxp -> renderNumCharacters && strlen(textboxp -> text) == textboxp -> editIndex)) {
+                    /* set editIndex at the right side of box */
+                    char tempHold;
+                    tempHold = textboxp -> text[textboxp -> editIndex];
+                    textboxp -> text[textboxp -> editIndex] = '\0';
+                    uint32_t textConverted[strlen(textboxp -> text) + 1];
+                    uint32_t characterLength = turtleTextConvertUnicode((unsigned char *) textboxp -> text, textConverted);
+                    double textPixelLength;
+                    textboxp -> renderStartingIndex = strlen(textboxp -> text) + textboxCalculateMaximumCharacters(textConverted, characterLength, textboxp -> size - 1, textboxp -> length - textboxp -> size * 1.2, 1, &textPixelLength);
+                    textboxp -> renderNumCharacters = strlen(textboxp -> text) - textboxp -> renderStartingIndex;
+                    textboxp -> renderPixelOffset = textboxp -> length - textboxp -> size / 3 - textPixelLength;
+                    textboxp -> text[textboxp -> editIndex] = tempHold;
+                }
+            }
+        }
+
+        /* draw text and occluding boxes */
+        char tempHold;
+        tempHold = textboxp -> text[textboxp -> renderStartingIndex + textboxp -> renderNumCharacters];
+        textboxp -> text[textboxp -> renderStartingIndex + textboxp -> renderNumCharacters] = '\0';
+        tt_internalColor(textboxp, TT_COLOR_TEXT_ALTERNATE, TT_COLOR_OVERRIDE_SLOT_0);
+        turtleTextWriteUnicode((unsigned char *) (textboxp -> text + textboxp -> renderStartingIndex), textboxp -> x + textboxp -> renderPixelOffset, textboxp -> y, textboxp -> size - 1, 0);
+        textboxp -> text[textboxp -> renderStartingIndex + textboxp -> renderNumCharacters] = tempHold;
+        tt_internalColor(textboxp, TT_COLOR_TEXTBOX_BOX, TT_COLOR_OVERRIDE_SLOT_1);
+        turtleRectangle(textboxp -> x, textboxp -> y - textboxp -> size, textboxp -> x + textboxp -> size / 4, textboxp -> y + textboxp -> size);
+        turtleRectangle(textboxp -> x + textboxp -> length, textboxp -> y - textboxp -> size, textboxp -> x + textboxp -> length - textboxp -> size / 4, textboxp -> y + textboxp -> size);
+        if (textboxp -> status > 0 && textboxp -> status < 66) {
+            char tempHold = textboxp -> text[textboxp -> editIndex];
+            textboxp -> text[textboxp -> editIndex] = '\0';
+            double textLength = turtleTextGetUnicodeLength((unsigned char *) (textboxp -> text + textboxp -> renderStartingIndex), textboxp -> size - 1);
+            textboxp -> text[textboxp -> editIndex] = tempHold;
+            tt_internalColor(textboxp, TT_COLOR_TEXTBOX_LINE, TT_COLOR_OVERRIDE_SLOT_3);
+            turtleRectangle(textboxp -> x + textboxp -> renderPixelOffset + textLength, textboxp -> y - textboxp -> size * 0.8, textboxp -> x + textboxp -> renderPixelOffset + textLength + 1, textboxp -> y + textboxp -> size * 0.8);
+        }
+
+        /* mouse */
+        if (textboxp -> enabled == TT_ELEMENT_ENABLED && ribbonRender.mainselect[2] == -1) {
+            if (turtleMouseDown()) {
+                if (textboxp -> status < 0) {
+                    textboxp -> editIndex = strlen(textboxp -> text);
+                    textboxp -> status *= -1;
+                }
+                if (textboxp -> status > 1 && (turtle.mouseX < textboxp -> x || turtle.mouseX > textboxp -> x + textboxp -> length || turtle.mouseY < textboxp -> y - textboxp -> size || turtle.mouseY > textboxp -> y + textboxp -> size)) {
+                    textboxp -> status = 0;
+                }
+            } else {
+                if (textboxp -> status == 1) {
+                    textboxp -> status = 2;
+                } else if (textboxp -> status < 2) {
+                    if (turtle.mouseX > textboxp -> x && turtle.mouseX < textboxp -> x + textboxp -> length && turtle.mouseY > textboxp -> y - textboxp -> size && turtle.mouseY < textboxp -> y + textboxp -> size) {
+                        textboxp -> status = -1;
+                    } else {
+                        textboxp -> status = 0;
+                    }
+                }
+            }
+        }
+    }
+}
+
+void turtleToolsUpdate() {
+    char shapeSave = turtle.penshape;
+    turtlePenShape("circle");
+    if (tt_enabled.buttonEnabled) {
+        buttonUpdate();
+    }
+    if (tt_enabled.switchEnabled) {
+        switchUpdate();
+    }
+    if (tt_enabled.dialEnabled) {
+        dialUpdate();
+    }
+    if (tt_enabled.sliderEnabled) {
+        sliderUpdate();
+    }
+    if (tt_enabled.textboxEnabled) {
+        textboxUpdate();
+    }
+    if (tt_enabled.dropdownEnabled) {
+        dropdownUpdate();
+    }
+    if (tt_enabled.scrollbarEnabled) {
+        scrollbarUpdate();
+    }
+    if (tt_enabled.ribbonEnabled) {
+        ribbonUpdate();
+    }
+    if (tt_enabled.popupEnabled) {
+        popupUpdate();
+    }
+    turtle.penshape = shapeSave;
+}
+
+void turtleToolsUpdateUI() {
+    char shapeSave = turtle.penshape;
+    turtlePenShape("circle");
+    if (tt_enabled.buttonEnabled) {
+        buttonUpdate();
+    }
+    if (tt_enabled.switchEnabled) {
+        switchUpdate();
+    }
+    if (tt_enabled.dialEnabled) {
+        dialUpdate();
+    }
+    if (tt_enabled.sliderEnabled) {
+        sliderUpdate();
+    }
+    if (tt_enabled.textboxEnabled) {
+        textboxUpdate();
+    }
+    if (tt_enabled.dropdownEnabled) {
+        dropdownUpdate();
+    }
+    if (tt_enabled.scrollbarEnabled) {
+        scrollbarUpdate();
+    }
+    turtle.penshape = shapeSave;
+}
+
+void turtleToolsUpdateRibbonPopup() {
+    char shapeSave = turtle.penshape;
+    turtlePenShape("circle");
+    if (tt_enabled.ribbonEnabled) {
+        ribbonUpdate();
+    }
+    if (tt_enabled.popupEnabled) {
+        popupUpdate();
+    }
+    turtle.penshape = shapeSave;
+}
+
+#endif /* TURTLE_TOOLS_IMPLEMENTATION */
+
+#ifdef OS_TOOLS_IMPLEMENTATION
+
+/*
+Created by Ryan Srichai
+
+a note on COM objects:
+COM objects are C++ classes/structs
+This means that it has methods
+This is simulated in C via lpVtbl (vtable) which is an array of function pointers
+Use the lpVtbl member of a struct to call methods via STRUCTNAME -> lpVtbl -> METHODNAME(args)
+https://www.codeproject.com/Articles/13601/COM-in-plain-C
+
+Under the hood, the pointer to the struct is also a pointer to an array of function pointers (lbVtbl)
+The struct is therefore the size of the number of elements of the lbVtbl array * 8 plus the data in the struct which succeeds it
+
+Whenever we call one of these methods, we have to pass in the object (which implicitly happens in OOP languages)
+Actually, we pass in a pointer to the object, obviously i'm quite familiar with this
+
+One more nuance is that whenever we pass a COM object in a function as an argument, it must always be &object
+This is because in order to call methods we use object -> lpVtbl -> method, I mean we could use object.lpVtbl -> method but it's easier and allocates less stack memory to just use pointers
+
+So whenever you take C++ COM object sample code, just follow this process:
+change all the methods to -> lpVtbl -> methods
+Add &obj as the first argument of every method
+Change obj to &obj for all objects passed as arguments to functions or methods
+
+That's it! (probably)
+
+IFileDialog: https://learn.microsoft.com/en-us/windows/win32/api/shobjidl_core/nn-shobjidl_core-ifiledialog
+Clipboard: https://learn.microsoft.com/en-us/windows/win32/dataxchg/clipboard
+Cursor: https://learn.microsoft.com/en-us/windows/win32/learnwin32/setting-the-cursor-image
+Sockets: https://learn.microsoft.com/en-us/windows/win32/winsock/tcp-ip-raw-sockets-2
+
+idea: try glfwGetClipboardString and glfwSetClipboardString
+*/
+
+/* global objects */
+osToolsGLFWObject osToolsGLFW;
+osToolsClipboardObject osToolsClipboard;
+osToolsFileDialogObject osToolsFileDialog;
+osToolsMemmapObject osToolsMemmap;
+
+/* OS independent functions */
+void osToolsIndependentInit(GLFWwindow *window) {
+    /* initialise glfw cursors */
+    osToolsGLFW.osToolsWindow = window;
+    osToolsGLFW.standardCursors[0] = glfwCreateStandardCursor(GLFW_ARROW_CURSOR);
+    osToolsGLFW.standardCursors[1] = glfwCreateStandardCursor(GLFW_IBEAM_CURSOR);
+    osToolsGLFW.standardCursors[2] = glfwCreateStandardCursor(GLFW_CROSSHAIR_CURSOR);
+    osToolsGLFW.standardCursors[3] = glfwCreateStandardCursor(GLFW_HAND_CURSOR);
+    osToolsGLFW.standardCursors[4] = glfwCreateStandardCursor(GLFW_HRESIZE_CURSOR);
+    osToolsGLFW.standardCursors[5] = glfwCreateStandardCursor(GLFW_VRESIZE_CURSOR);
+
+    /* initialise memmap module */
+    osToolsMemmap.mappedFiles = list_init();
+}
+
+/* returns clipboard text */
+const char *osToolsClipboardGetText() {
+    osToolsClipboard.text = glfwGetClipboardString(osToolsGLFW.osToolsWindow);
+    return osToolsClipboard.text;
+}
+
+/* takes null terminated strings */
+int32_t osToolsClipboardSetText(const char *input) {
+    glfwSetClipboardString(osToolsGLFW.osToolsWindow, input);
+    return 0;
+}
+
+/*
+GLFW_ARROW_CURSOR
+GLFW_IBEAM_CURSOR
+GLFW_CROSSHAIR_CURSOR
+GLFW_HAND_CURSOR
+GLFW_HRESIZE_CURSOR
+GLFW_VRESIZE_CURSOR
+*/
+void osToolsSetCursor(uint32_t cursor) {
+    switch (cursor) {
+    case GLFW_ARROW_CURSOR:
+        glfwSetCursor(osToolsGLFW.osToolsWindow, osToolsGLFW.standardCursors[0]);
+    break;
+    case GLFW_IBEAM_CURSOR:
+        glfwSetCursor(osToolsGLFW.osToolsWindow, osToolsGLFW.standardCursors[1]);
+    break;
+    case GLFW_CROSSHAIR_CURSOR:
+        glfwSetCursor(osToolsGLFW.osToolsWindow, osToolsGLFW.standardCursors[2]);
+    break;
+    case GLFW_HAND_CURSOR:
+        glfwSetCursor(osToolsGLFW.osToolsWindow, osToolsGLFW.standardCursors[3]);
+    break;
+    case GLFW_HRESIZE_CURSOR:
+        glfwSetCursor(osToolsGLFW.osToolsWindow, osToolsGLFW.standardCursors[4]);
+    break;
+    case GLFW_VRESIZE_CURSOR:
+        glfwSetCursor(osToolsGLFW.osToolsWindow, osToolsGLFW.standardCursors[5]);
+    break;
+    default:
+        glfwSetCursor(osToolsGLFW.osToolsWindow, osToolsGLFW.standardCursors[0]);
+    break;
+    }
+}
+
+void osToolsHideAndLockCursor() {
+    glfwSetInputMode(osToolsGLFW.osToolsWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+}
+
+void osToolsShowCursor() {
+    glfwSetInputMode(osToolsGLFW.osToolsWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+}
+
+list_t *osToolsLoadInternal(char *filename, osToolsCSV rowOrColumn, char delimeter, osToolsCSV fieldType) {
+    uint32_t fileSize;
+    uint8_t *mappedFile = osToolsMapFile(filename, &fileSize);
+    if (mappedFile == NULL) {
+        return NULL;
+    }
+    list_t *outputList = list_init();
+    /* process headers */
+    list_append(outputList, (unitype) list_init(), 'r');
+    uint32_t rightIndex = 0;
+    uint32_t leftIndex = 0;
+    if (fileSize > 3 && mappedFile[0] == 0xEF && mappedFile[1] == 0xBB && mappedFile[2] == 0xBF) {
+        /* UTF8 with BOM */
+        rightIndex = 3;
+        leftIndex = 3;
+    }
+    int8_t inQuotes = 0;
+    while (rightIndex < fileSize) {
+        if (mappedFile[rightIndex] & 0b10000000) {
+            /* case: unicode */
+            if (mappedFile[rightIndex] & 0b11100000) {
+                if (mappedFile[rightIndex] & 0b11110000) {
+                    rightIndex++;
+                }
+                rightIndex++;
+            }
+            rightIndex += 2; // multi-byte character cannot be a comma, quote, or newline
+        }
+        if (mappedFile[rightIndex] == '"') {
+            /* case: quote */
+            inQuotes = !inQuotes;
+            if (inQuotes) {
+                // leftIndex = rightIndex + 1;
+            }
+        }
+        /* case: comma */
+        if (mappedFile[rightIndex] == delimeter && !inQuotes) {
+            mappedFile[rightIndex] = '\0';
+            if (rowOrColumn == OSTOOLS_CSV_ROW) {
+                list_append(outputList -> data[0].r, (unitype) (char *) (mappedFile + leftIndex), 's');
+            } else {
+                list_append(outputList -> data[outputList -> length - 1].r, (unitype) (char *) (mappedFile + leftIndex), 's');
+                list_append(outputList, (unitype) list_init(), 'r');
+            }
+            mappedFile[rightIndex] = delimeter;
+            leftIndex = rightIndex + 1;
+            while (mappedFile[leftIndex] == ' ') {
+                rightIndex++;
+                leftIndex++;
+            }
+        }
+        if ((mappedFile[rightIndex] == '\n' || mappedFile[rightIndex] == '\r') && !inQuotes) {
+            /* case: end of line */
+            if (rightIndex != leftIndex) {
+                char tempHold = mappedFile[rightIndex];
+                mappedFile[rightIndex] = '\0';
+                if (rowOrColumn == OSTOOLS_CSV_ROW) {
+                    list_append(outputList -> data[0].r, (unitype) (char *) (mappedFile + leftIndex), 's');
+                } else {
+                    list_append(outputList -> data[outputList -> length - 1].r, (unitype) (char *) (mappedFile + leftIndex), 's');
+                }
+                mappedFile[rightIndex] = tempHold;
+            } else {
+                if (rowOrColumn == OSTOOLS_CSV_COLUMN) {
+                    list_pop(outputList);
+                }
+            }
+            break;
+        }
+        rightIndex++;
+    }
+    while (mappedFile[rightIndex] == '\r' || mappedFile[rightIndex] == '\n') {
+        rightIndex++;
+    }
+    leftIndex = rightIndex;
+    /* process data (all doubles) */
+    char listType = 'd';
+    switch (fieldType) {
+    case OSTOOLS_CSV_FIELD_DOUBLE:
+        listType = 'd';
+    break;
+    case OSTOOLS_CSV_FIELD_INT:
+        listType = 'i';
+    break;
+    case OSTOOLS_CSV_FIELD_STRING:
+        listType = 'z'; // zstrings avoid double malloc
+    break;
+    default:
+        listType = 'd';
+    break;
+    }
+    int32_t column = 0; // columns are 0-indexed for the convenience of this parser
+    int32_t row = 2; // start at row 2 (rows are 1-indexed for printouts)
+    if (rowOrColumn == OSTOOLS_CSV_ROW) {
+        list_append(outputList, (unitype) list_init(), 'r');
+    }
+    inQuotes = 0;
+    while (rightIndex < fileSize) {
+        if (mappedFile[rightIndex] & 0b10000000) {
+            /* case: unicode */
+            if (mappedFile[rightIndex] & 0b11100000) {
+                if (mappedFile[rightIndex] & 0b11110000) {
+                    rightIndex++;
+                }
+                rightIndex++;
+            }
+            rightIndex += 2; // multi-byte character cannot be a comma, quote, or newline
+        }
+        if (mappedFile[rightIndex] == '"') {
+            /* case: quote */
+            inQuotes = !inQuotes;
+            if (inQuotes) {
+                // leftIndex = rightIndex + 1;
+            }
+        }
+        if (mappedFile[rightIndex] == delimeter && !inQuotes) {
+            /* case: comma */
+            mappedFile[rightIndex] = '\0';
+            unitype field;
+            if (fieldType == OSTOOLS_CSV_FIELD_DOUBLE) {
+                sscanf((char *) (mappedFile + leftIndex), "%lf", (double *) &field);
+            } else if (fieldType == OSTOOLS_CSV_FIELD_INT) {
+                sscanf((char *) (mappedFile + leftIndex), "%d", (int *) &field);
+            } else if (fieldType == OSTOOLS_CSV_FIELD_STRING) {
+                field.s = malloc(rightIndex - leftIndex + 1);
+                strcpy(field.s, (char *) (mappedFile + leftIndex));
+            }
+            if (rowOrColumn == OSTOOLS_CSV_ROW) {
+                list_append(outputList -> data[outputList -> length - 1].r, field, listType);
+            } else if (rowOrColumn == OSTOOLS_CSV_COLUMN) {
+                if (column < outputList -> length) {
+                    list_append(outputList -> data[column].r, field, listType);
+                } else {
+                    printf("osToolsLoadInternal - more data columns than headers at row %d\n", row);
+                }
+            }
+            mappedFile[rightIndex] = delimeter;
+            leftIndex = rightIndex + 1;
+            while (mappedFile[leftIndex] == ' ') {
+                rightIndex++;
+                leftIndex++;
+            }
+            column++;
+        }
+        if ((mappedFile[rightIndex] == '\n' || mappedFile[rightIndex] == '\r') && !inQuotes) {
+            /* case: end of line */
+            if (rightIndex != leftIndex) {
+                char tempHold = mappedFile[rightIndex];
+                mappedFile[rightIndex] = '\0';
+                unitype field;
+                if (fieldType == OSTOOLS_CSV_FIELD_DOUBLE) {
+                    sscanf((char *) (mappedFile + leftIndex), "%lf", (double *) &field);
+                } else if (fieldType == OSTOOLS_CSV_FIELD_INT) {
+                    sscanf((char *) (mappedFile + leftIndex), "%d", (int *) &field);
+                } else if (fieldType == OSTOOLS_CSV_FIELD_STRING) {
+                    field.s = malloc(rightIndex - leftIndex + 1);
+                    strcpy(field.s, (char *) (mappedFile + leftIndex));
+                }
+                if (rowOrColumn == OSTOOLS_CSV_ROW) {
+                    list_append(outputList -> data[outputList -> length - 1].r, field, listType);
+                } else if (rowOrColumn == OSTOOLS_CSV_COLUMN) {
+                    if (column < outputList -> length) {
+                        list_append(outputList -> data[column].r, field, listType);
+                    } else {
+                        printf("osToolsLoadInternal - more data columns than headers at row %d\n", row);
+                    }
+                }
+                mappedFile[rightIndex] = tempHold;
+            }
+            while (mappedFile[rightIndex] == '\r' || mappedFile[rightIndex] == '\n') {
+                rightIndex++;
+            }
+            leftIndex = rightIndex;
+            rightIndex--;
+            if (rowOrColumn == OSTOOLS_CSV_ROW) {
+                list_append(outputList, (unitype) list_init(), 'r');
+            }
+            column = 0;
+            row++;
+        }
+        rightIndex++;
+    }
+    /* catch: if the file doesn't end with a newline */
+    if (leftIndex == fileSize) {
+        if (rowOrColumn == OSTOOLS_CSV_ROW && mappedFile[fileSize - 1] != delimeter && mappedFile[fileSize - 1] != ' ') {
+            list_pop(outputList);
+        }
+    } else {
+        unitype field;
+        if (fieldType == OSTOOLS_CSV_FIELD_DOUBLE) {
+            sscanf((char *) (mappedFile + leftIndex), "%lf", (double *) &field);
+        } else if (fieldType == OSTOOLS_CSV_FIELD_INT) {
+            sscanf((char *) (mappedFile + leftIndex), "%d", (int *) &field);
+        } else if (fieldType == OSTOOLS_CSV_FIELD_STRING) {
+            field.s = malloc(rightIndex - leftIndex + 1);
+            sscanf((char *) (mappedFile + leftIndex), "%s", field.s);
+        }
+        list_append(outputList -> data[outputList -> length - 1].r, field, listType);
+    }
+    osToolsUnmapFile(mappedFile);
+    return outputList;
+}
+
+/* packages a CSV file into a list (headers are strings, all fields are doubles) - use OSTOOLS_CSV_ROW to put it in a list of lists where each list is a row of the CSV and use OSTOOLS_CSV_COLUMN to output a list of lists where each list is a column of the CSV */
+list_t *osToolsLoadCSV(char *filename, osToolsCSV rowOrColumn) {
+    return osToolsLoadInternal(filename, rowOrColumn, ',', OSTOOLS_CSV_FIELD_DOUBLE);
+}
+
+/* packages a CSV file into a list (headers are strings, all fields are doubles) - use OSTOOLS_CSV_ROW to put it in a list of lists where each list is a row of the CSV and use OSTOOLS_CSV_COLUMN to output a list of lists where each list is a column of the CSV */
+list_t *osToolsLoadCSVDouble(char *filename, osToolsCSV rowOrColumn) {
+    return osToolsLoadInternal(filename, rowOrColumn, ',', OSTOOLS_CSV_FIELD_DOUBLE);
+}
+
+/* packages a CSV file into a list (headers are strings, all fields are ints) - use OSTOOLS_CSV_ROW to put it in a list of lists where each list is a row of the CSV and use OSTOOLS_CSV_COLUMN to output a list of lists where each list is a column of the CSV */
+list_t *osToolsLoadCSVInt(char *filename, osToolsCSV rowOrColumn) {
+    return osToolsLoadInternal(filename, rowOrColumn, ',', OSTOOLS_CSV_FIELD_INT);
+}
+
+/* packages a CSV file into a list (headers are strings, all fields are strings) - use OSTOOLS_CSV_ROW to put it in a list of lists where each list is a row of the CSV and use OSTOOLS_CSV_COLUMN to output a list of lists where each list is a column of the CSV */
+list_t *osToolsLoadCSVString(char *filename, osToolsCSV rowOrColumn) {
+    return osToolsLoadInternal(filename, rowOrColumn, ',', OSTOOLS_CSV_FIELD_STRING);
+}
+
+#ifdef OS_WINDOWS
+
+int32_t osToolsInit(char argv0[], GLFWwindow *window) {
+    osToolsIndependentInit(window);
+    /* get executable filepath */
+    GetModuleFileNameA(NULL, osToolsFileDialog.executableFilepath, MAX_PATH);
+    if (GetLastError() != ERROR_SUCCESS) {
+        strcpy(osToolsFileDialog.executableFilepath, "null");
+        printf("Error: Could not retrieve executable filepath\n");
+    }
+    int32_t index = strlen(osToolsFileDialog.executableFilepath) - 1;
+    while (index > -1 && osToolsFileDialog.executableFilepath[index] != '\\' && osToolsFileDialog.executableFilepath[index] != '/') {
+        index--;
+    }
+    osToolsFileDialog.executableFilepath[index + 1] = '\0';
+    /* initialise file dialog */
+    strcpy(osToolsFileDialog.selectedFilename, "null");
+    osToolsFileDialog.openOrSave = 0; // open by default
+    osToolsFileDialog.numExtensions = 0; // 0 means all extensions
+    osToolsFileDialog.extensions = malloc(1 * sizeof(char *)); // malloc list
+
+    /* initialise clipboard */
+    osToolsClipboard.text = glfwGetClipboardString(osToolsGLFW.osToolsWindow);
+    return 0;
+}
+
+void osToolsFileDialogAddExtension(char *extension) {
+    if (strlen(extension) <= 4) {
+        osToolsFileDialog.numExtensions += 1;
+        osToolsFileDialog.extensions = realloc(osToolsFileDialog.extensions, osToolsFileDialog.numExtensions * sizeof(char *));
+        osToolsFileDialog.extensions[osToolsFileDialog.numExtensions - 1] = strdup(extension);
+    } else {
+        printf("extension name: %s too long\n", extension);
+    }
+}
+
+int32_t osToolsFileDialogPrompt(char openOrSave, char *filename) { // 0 - open, 1 - save, filename refers to autofill filename ("null" or empty string for no autofill)
+    osToolsFileDialog.openOrSave = openOrSave;
+    HRESULT hr = CoInitializeEx(NULL, 0); // https://learn.microsoft.com/en-us/windows/win32/api/objbase/ne-objbase-coinit
+    if (SUCCEEDED(hr)) {
+        IFileDialog *fileDialog;
+        IShellItem *psiResult;
+        PWSTR pszFilePath = NULL;
+        hr = CoCreateInstance(&CLSID_FileOpenDialog, NULL, CLSCTX_ALL, &IID_IFileOpenDialog, (void**) &fileDialog);
+        if (SUCCEEDED(hr)) {
+            fileDialog -> lpVtbl -> SetOptions(fileDialog, 0); // https://learn.microsoft.com/en-us/windows/win32/api/shobjidl_core/ne-shobjidl_core-_fileopendialogoptions from my tests these don't seem to do anything
+
+            /* configure autofill filename */
+            if (openOrSave == 1 && strcmp(filename, "null") != 0) {
+                int32_t i = 0;
+                unsigned short prename[MAX_PATH + 1];
+                while (filename[i] != '\0' && i < MAX_PATH + 1) {
+                    prename[i] = filename[i]; // convert from char to WCHAR
+                    i++;
+                }
+                prename[i] = '\0';
+                fileDialog -> lpVtbl -> SetFileName(fileDialog, prename);
+            }
+
+            /* load file restrictions
+            Info: each COMDLG creates one more entry to the dropdown to the right of the text box in the file dialog window
+            You can only see files that are specified in the types on the current COMDLG_FILTERSPEC selected in the dropdown
+            Thats why I shove all the types into one COMDLG_FILTERSPEC, because I want the user to be able to see all compatible files at once
+            */
+            if (osToolsFileDialog.numExtensions > 0) {
+                COMDLG_FILTERSPEC *fileExtensions = malloc(sizeof(COMDLG_FILTERSPEC)); // just one filter
+                WCHAR *buildFilter = malloc(10 * osToolsFileDialog.numExtensions * sizeof(WCHAR));
+                int32_t j = 0;
+                for (int32_t i = 0; i < osToolsFileDialog.numExtensions; i++) {
+                    buildFilter[j] = (unsigned short) '*';
+                    buildFilter[j + 1] = (unsigned short) '.';
+                    j += 2;
+                    for (uint32_t k = 0; k < strlen(osToolsFileDialog.extensions[i]) && k < 8; k++) {
+                        buildFilter[j] = osToolsFileDialog.extensions[i][k];
+                        j += 1;
+                    }
+                    buildFilter[j] = (unsigned short) ';';
+                    j += 1;
+                }
+                buildFilter[j] = (unsigned short) '\0';
+                (*fileExtensions).pszName = L"Specified Types";
+                (*fileExtensions).pszSpec = buildFilter;
+                fileDialog -> lpVtbl -> SetFileTypes(fileDialog, 1, fileExtensions);
+                free(buildFilter);
+                free(fileExtensions);
+            }
+
+            /* configure title and button text */
+            if (openOrSave == 0) {
+                /* open */
+                fileDialog -> lpVtbl -> SetOkButtonLabel(fileDialog, L"Open");
+                fileDialog -> lpVtbl -> SetTitle(fileDialog, L"Open");
+            } else {
+                /* save */
+                fileDialog -> lpVtbl -> SetOkButtonLabel(fileDialog, L"Save");
+                fileDialog -> lpVtbl -> SetTitle(fileDialog, L"Save");
+            }
+
+            /* execute */
+            fileDialog -> lpVtbl -> Show(fileDialog, NULL); // opens window
+            hr = fileDialog -> lpVtbl -> GetResult(fileDialog, &psiResult); // succeeds if a file is selected
+            if (SUCCEEDED(hr)){
+                hr = psiResult -> lpVtbl -> GetDisplayName(psiResult, SIGDN_FILESYSPATH, &pszFilePath); // extracts path name
+                if (SUCCEEDED(hr)) {
+                    int32_t i = 0;
+                    /* convert from WCHAR to char */
+                    while (pszFilePath[i] != '\0' && i < MAX_PATH + 1) {
+                        osToolsFileDialog.selectedFilename[i] = pszFilePath[i];
+                        i++;
+                    }
+                    osToolsFileDialog.selectedFilename[i] = '\0';
+                    CoTaskMemFree(pszFilePath);
+                    return 0;
+                }
+                psiResult -> lpVtbl -> Release(psiResult);
+            }
+            fileDialog -> lpVtbl -> Release(fileDialog);
+        } else {
+            printf("ERROR - HRESULT: %lx\n", hr);
+        }
+        CoUninitialize();
+    }
+    return -1;
+}
+
+uint8_t *osToolsMapFile(char *filename, uint32_t *sizeOutput) {
+    HANDLE fileHandle = CreateFileA(filename, FILE_GENERIC_READ | FILE_GENERIC_WRITE, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+    if (fileHandle == INVALID_HANDLE_VALUE) {
+        printf("Could not open file %ld\n", GetLastError());
+        *sizeOutput = 0;
+        return NULL;
+    }
+    if (!GetFileSizeEx(fileHandle, (PLARGE_INTEGER) sizeOutput)) {
+        printf("Failed to get size of file\n");
+        CloseHandle(fileHandle);
+        *sizeOutput = 0;
+        return NULL;
+    }
+    HANDLE mappingHandle = CreateFileMappingA(fileHandle, NULL, PAGE_READWRITE, 0, 0, NULL);
+    if (mappingHandle == NULL) {
+        printf("Could not memory map file %ld\n", GetLastError());
+        CloseHandle(fileHandle);
+        *sizeOutput = 0;
+        return NULL;
+    }
+    LPVOID address = MapViewOfFile(mappingHandle, FILE_MAP_ALL_ACCESS, 0, 0, 0);
+    if (address == NULL) {
+        printf("Could not create map view of file %ld\n", GetLastError());
+        CloseHandle(fileHandle);
+        CloseHandle(mappingHandle);
+        *sizeOutput = 0;
+        return NULL;
+    }
+    list_append(osToolsMemmap.mappedFiles, (unitype) filename, 's'); // filename
+    list_append(osToolsMemmap.mappedFiles, (unitype) fileHandle, 'l'); // file handle (uint64_t so no free on list_delete)
+    list_append(osToolsMemmap.mappedFiles, (unitype) mappingHandle, 'l'); // mapping handle (uint64_t so no free on list_delete)
+    list_append(osToolsMemmap.mappedFiles, (unitype) address, 'l'); // file data (uint64_t so no free on list_delete)
+    return address;
+}
+
+int32_t osToolsUnmapFile(uint8_t *data) {
+    UnmapViewOfFile(data);
+    int32_t index = -1;
+    for (uint32_t i = 0; i < osToolsMemmap.mappedFiles -> length; i += 4) {
+        if (osToolsMemmap.mappedFiles -> data[i + 3].p == data) {
+            index = i;
+            break;
+        }
+    }
+    if (index >= 0) {
+        CloseHandle(osToolsMemmap.mappedFiles -> data[index + 1].p);
+        CloseHandle(osToolsMemmap.mappedFiles -> data[index + 2].p);
+        list_delete(osToolsMemmap.mappedFiles, index);
+        list_delete(osToolsMemmap.mappedFiles, index);
+        list_delete(osToolsMemmap.mappedFiles, index);
+        list_delete(osToolsMemmap.mappedFiles, index);
+        return 0;
+    } else {
+        printf("Could not find %p in memory mapped index\n", data);
+        return -1;
+    }
+}
+
+/*
+windows COM port support
+https://learn.microsoft.com/en-us/windows/win32/devio/configuring-a-communications-resource
+*/
+
+win32ComPortObject win32com;
+
+/* opens a com port */
+int win32comInit(win32ComPortObject *com, char *name) {
+    strcpy(com -> name, name);
+    DCB dcb;
+    BOOL fSuccess;
+    /* https://support.microsoft.com/en-us/topic/howto-specify-serial-ports-larger-than-com9-db9078a5-b7b6-bf00-240f-f749ebfd913e */
+    char comName[24] = "\\\\.\\";
+    if (strlen(name) > 4) {
+        strcpy(comName + strlen(comName), name);
+    } else {
+        strcpy(comName, name);
+    }
+    com -> comHandle = CreateFileA(comName, GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, NULL);
+    if (com -> comHandle == INVALID_HANDLE_VALUE) {
+        printf("Could not open com port %s, error %d\n", name, GetLastError());
+        return -1;
+    } else {
+        printf("Successfully opened port %s\n", name);
+    }
+    /* Initialize the DCB structure. */
+    SecureZeroMemory(&dcb, sizeof(DCB));
+    dcb.DCBlength = sizeof(DCB);
+    /* Build on the current configuration by first retrieving all current */
+    /* settings. */
+    fSuccess = GetCommState(com -> comHandle, &dcb);
+    if (!fSuccess) {
+        /* Handle the error. */
+        printf("GetCommState failed with error %d.\n", GetLastError());
+        return -1;
+    }
+    /* Fill in some DCB values and set the com state: 
+       115200 bps, 8 data bits, no parity, and 1 stop bit. */
+    dcb.BaudRate = CBR_115200;    // baud rate
+    dcb.ByteSize = 8;             // data size, xmit and rcv
+    dcb.Parity   = NOPARITY;      // parity bit
+    dcb.StopBits = ONESTOPBIT;    // stop bit
+    fSuccess = SetCommState(com -> comHandle, &dcb);
+    if (!fSuccess) {
+        /* Handle the error. */
+        printf("SetCommState failed with error %d.\n", GetLastError());
+        return -1;
+    }
+    /* Get the comm config again. */
+    fSuccess = GetCommState(com -> comHandle, &dcb);
+    if (!fSuccess) {
+        /* Handle the error. */
+        printf("GetCommState failed with error %d.\n", GetLastError());
+        return -1;
+    }
+    return 0;
+}
+
+/* returns number of bytes sent */
+int win32comSend(win32ComPortObject *com, unsigned char *data, int length) {
+    /* https://www.codeproject.com/Articles/3061/Creating-a-Serial-communication-on-Win32#sending */
+    DWORD bytes;
+    if (WriteFile(com -> comHandle, data, length, &bytes, NULL) == 0) {
+        printf("win32comSend failed with error %d\n", GetLastError());
+        return -1;
+    }
+    return bytes;
+}
+
+/* returns number of bytes received */
+int win32comReceive(win32ComPortObject *com, unsigned char *buffer, int length) {
+    DWORD bytes;
+    if (ReadFile(com -> comHandle, buffer, length, &bytes, NULL) == 0) {
+        printf("win32comReceive failed with error %d\n", GetLastError());
+        return -1;
+    }
+    return bytes;
+}
+
+/* closes a com port */
+int win32comClose(win32ComPortObject *com) {
+    if (CloseHandle(com -> comHandle) == 0) {
+        printf("win32comClosefailed with error %d\n", GetLastError());
+        return -1;
+    }
+    return 0;
+}
+
+/*
+https://gist.github.com/mmozeiko/c0dfcc8fec527a90a02145d2cc0bfb6d
+https://learn.microsoft.com/en-us/windows/win32/winsock/complete-server-code
+https://learn.microsoft.com/en-us/windows/win32/winsock/complete-client-code
+*/
+
+win32SocketObject win32Socket;
+
+int win32tcpInit(char *address, char *port) {
+    for (int i = 0; i < WIN32TCP_NUM_SOCKETS; i++) {
+        win32Socket.connectSocket[i] = 0;
+        win32Socket.socketOpen[i] = 0;
+    }
+    win32Socket.address = address;
+    win32Socket.port = port;
+    char modifiable[strlen(address) + 1];
+    strcpy(modifiable, address);
+    char *check = strtok(modifiable, ".");
+    int segments = 0;
+    unsigned char ipAddress[4] = {0};
+    while (check != NULL) {
+        if (segments > 3) {
+            printf("Could not initialise win32tcp - invalid ip address\n");
+            return 1;
+        }
+        int segmentValue = atoi(check);
+        if (segmentValue > 255 || segmentValue < 0) {
+            printf("Could not initialise win32tcp - invalid ip address\n");
+            return 1;
+        }
+        ipAddress[segments] = segmentValue;
+        check = strtok(NULL, ".");
+        segments++;
+    }
+    if (segments != 4) {
+        printf("Could not initialise win32tcp - invalid ip address\n");
+        return 1;
+    }
+    /* Initialize Winsock */
+    WSADATA wsaData;
+    int status;
+    status = WSAStartup(MAKEWORD(2,2), &wsaData);
+    if (status != 0) {
+        return 1;
+    }
+    
+    /* hints */
+    struct addrinfo hints;
+    struct addrinfo *result;
+    struct addrinfo *ptr;
+    ZeroMemory(&hints, sizeof(hints));
+    hints.ai_family = AF_INET; // IPv4
+    hints.ai_socktype = SOCK_STREAM;
+    hints.ai_protocol = IPPROTO_TCP;
+
+    /* Resolve the server address and port */
+    status = getaddrinfo(address, port, &hints, &result);
+    if (status != 0) {
+        WSACleanup();
+        return 1;
+    }
+
+    /* Attempt to connect to an address until one succeeds */
+    for (ptr = result; ptr != NULL; ptr = ptr -> ai_next) {
+
+        /* Create a SOCKET for connecting to server */
+        win32Socket.connectSocket[0] = socket(ptr -> ai_family, ptr -> ai_socktype, ptr -> ai_protocol);
+        if (win32Socket.connectSocket[0] == INVALID_SOCKET) {
+            WSACleanup();
+            return 1;
+        }
+
+        /* Connect to server */
+        status = connect(win32Socket.connectSocket[0], ptr -> ai_addr, (int) ptr -> ai_addrlen);
+        if (status == SOCKET_ERROR) {
+            closesocket(win32Socket.connectSocket[0]);
+            win32Socket.connectSocket[0] = INVALID_SOCKET;
+            continue;
+        }
+        break;
+    }
+
+    // /* Send an initial buffer */
+    // char sendbuf[2] = {12, 34};
+    // status = send(win32Socket.connectSocket[0], sendbuf, 2, 0);
+    // if (status == SOCKET_ERROR) {
+    //     closesocket(win32Socket.connectSocket[0]);
+    //     WSACleanup();
+    //     return 1;
+    // }
+
+    // printf("Bytes Sent: %ld\n", status);
+
+    /* shutdown the connection since no more data will be sent */
+    status = shutdown(win32Socket.connectSocket[0], SD_SEND);
+    if (status == SOCKET_ERROR) {
+        closesocket(win32Socket.connectSocket[0]);
+        WSACleanup();
+        return 1;
+    }
+
+    /* Receive until the peer closes the connection */
+    int recvbuflen = 512;
+    char recvbuf[recvbuflen];
+    do {
+
+        status = recv(win32Socket.connectSocket[0], recvbuf, recvbuflen, 0);
+        if (status > 0) {
+            // printf("Bytes received: %d\n", status);
+        } else if (status == 0) {
+            // printf("Connection closed\n");
+        } else {
+            // printf("recv failed with error: %d\n", WSAGetLastError());
+        }
+
+    } while (status > 0);
+
+    /* cleanup */
+    closesocket(win32Socket.connectSocket[0]);
+    printf("Successfully connected to %d.%d.%d.%d\n", ipAddress[0], ipAddress[1], ipAddress[2], ipAddress[3]);
+    return 0;
+}
+
+int win32newSocket() {
+
+}
+
+SOCKET *win32tcpCreateSocket() {
+    /* define socket index */
+    int socketIndex = 0;
+    for (int i = 0; i < WIN32TCP_NUM_SOCKETS; i++) {
+        if (win32Socket.socketOpen[i] == 0) {
+            win32Socket.socketOpen[i] = 1;
+            socketIndex = i;
+            break;
+        }
+    }
+    if (socketIndex == WIN32TCP_NUM_SOCKETS) {
+        /* no sockets left */
+        return NULL;
+    }
+    /* hints */
+    struct addrinfo hints;
+    struct addrinfo *result;
+    struct addrinfo *ptr;
+    ZeroMemory(&hints, sizeof(hints));
+    hints.ai_family = AF_INET; // IPv4
+    hints.ai_socktype = SOCK_STREAM;
+    hints.ai_protocol = IPPROTO_TCP;
+
+    /* Resolve the server address and port */
+    int status = getaddrinfo(win32Socket.address, win32Socket.port, &hints, &result);
+    if (status != 0) {
+        WSACleanup();
+        return NULL;
+    }
+
+    /* Attempt to connect to an address until one succeeds */
+    for (ptr = result; ptr != NULL; ptr = ptr -> ai_next) {
+
+        /* Create a SOCKET for connecting to server */
+        win32Socket.connectSocket[socketIndex] = socket(ptr -> ai_family, ptr -> ai_socktype, ptr -> ai_protocol);
+        if (win32Socket.connectSocket[socketIndex] == INVALID_SOCKET) {
+            WSACleanup();
+            return NULL;
+        }
+
+        /* Connect to server */
+        status = connect(win32Socket.connectSocket[socketIndex], ptr -> ai_addr, (int) ptr -> ai_addrlen);
+        if (status == SOCKET_ERROR) {
+            closesocket(win32Socket.connectSocket[socketIndex]);
+            win32Socket.connectSocket[socketIndex] = INVALID_SOCKET;
+            continue;
+        }
+        break;
+    }
+    // unsigned long mode;
+    // printf("ioctlsocket %d\n", ioctlsocket(win32Socket.connectSocket[socketIndex], FIONBIO, &mode));
+    return &win32Socket.connectSocket[socketIndex];
+}
+
+int win32tcpSend(SOCKET *socket, unsigned char *data, int length) {
+    int status = send(*socket, data, length, 0 );
+    if (status == SOCKET_ERROR) {
+        closesocket(*socket);
+        return 1;
+    }
+    return 0;
+}
+
+int win32tcpReceive(SOCKET *socket, unsigned char *buffer, int length) {
+    int status = 1;
+    int bytes = 0;
+    while (status > 0) {
+        status = recv(*socket, buffer, length, 0);
+        if (status > 0) {
+            // printf("Bytes received: %d\n", status);
+        } else if (status == 0) {
+            // printf("Connection closed\n");
+        } else {
+            // printf("recv failed with error: %d\n", WSAGetLastError());
+        }
+        bytes += status;
+        if (bytes >= length) {
+            return bytes;
+        }
+    }
+    return bytes;
+}
+
+int win32tcpReceive2(SOCKET *socket, unsigned char *buffer, int length) {
+    int status = 1;
+    status = recv(*socket, buffer, length, 0);
+    if (status > 0) {
+        // printf("Bytes received: %d\n", status);
+    } else if (status == 0) {
+        // printf("Connection closed\n");
+    } else {
+        // printf("recv failed with error: %d\n", WSAGetLastError());
+    }
+    return status;
+}
+
+void win32tcpDeinit() {
+    WSACleanup();
+}
+
+#endif
+#ifdef OS_LINUX
+
+/* This is the zenity version of osToolsFileDialog.h, it's for linux */
+
+/* 
+a note on zenity:
+FILE* filenameStream = popen("zenity --file-selection", "r"); (popen runs the first argument in the shell as a bash script)
+this function returns a pointer to a stream of data that contains only the filepath
+popen with (zenity --file-selection) will not return a FILE* to the location of the file. You cannot read the file from this FILE*, you must call fopen on the filename
+
+additionally, filters can be added with
+FILE* filenameStream = popen("zenity --file-selection --file-filter='Name | *.ext *.ext2 *.ext3'", "r");
+This is similar to COMDLG_FILTERSPEC struct's pszName and pszSpec, so you can add more filter "profiles" by using multiple --file-filter tags in the command
+*/
+
+int32_t osToolsInit(char argv0[], GLFWwindow *window) {
+    osToolsIndependentInit(window);
+    /* get executable filepath */
+    FILE *exStringFile = popen("pwd", "r");
+    fscanf(exStringFile, "%s", osToolsFileDialog.executableFilepath);
+    strcat(osToolsFileDialog.executableFilepath, "/");
+    strcat(osToolsFileDialog.executableFilepath, argv0);
+    
+    int32_t index = strlen(osToolsFileDialog.executableFilepath) - 1;
+    while (index > -1 && osToolsFileDialog.executableFilepath[index] != '/') {
+        index--;
+    }
+    osToolsFileDialog.executableFilepath[index + 1] = '\0';
+
+    /* initialise file dialog */
+    strcpy(osToolsFileDialog.selectedFilename, "null");
+    osToolsFileDialog.openOrSave = 0; // open by default
+    osToolsFileDialog.numExtensions = 0; // 0 means all extensions
+    osToolsFileDialog.extensions = malloc(1 * sizeof(char *)); // malloc list
+    return 0;
+}
+
+void osToolsFileDialogAddExtension(char *extension) {
+    if (strlen(extension) <= 4) {
+        osToolsFileDialog.numExtensions += 1;
+        osToolsFileDialog.extensions = realloc(osToolsFileDialog.extensions, osToolsFileDialog.numExtensions * 8);
+        osToolsFileDialog.extensions[osToolsFileDialog.numExtensions - 1] = strdup(extension);
+    } else {
+        printf("extension name: %s too long\n", extension);
+    }
+}
+
+int32_t osToolsFileDialogPrompt(char openOrSave, char *prename) { // 0 - open, 1 - save, prename refers to autofill filename ("null" or empty string for no autofill)
+    char fullCommand[23 + 13 + 256 + 15 + 34 + 7 * osToolsFileDialog.numExtensions + 14 + 1]; // 23 for zenity --file-selection, 13 for --filename=', 256 for prename, 15 for --title='Open', 34 for --file-filter='Specified Types | , 7 for each extension, 14 for title, 1 for \0
+    strcpy(fullCommand, "zenity --file-selection");
+    /* configure autofill filename */
+    if (openOrSave == 1 && strcmp(prename, "null") != 0) {
+        strcat(fullCommand, " --filename='");
+        strcat(fullCommand, prename);
+        strcat(fullCommand, "'");
+    }
+
+    /* configure title */
+    char title[16] = " --title='Open'";
+    if (openOrSave == 1) {
+        strcpy(title, " --title='Save'");
+    }
+    strcat(fullCommand, title);
+
+    /* configure extensions */
+    if (osToolsFileDialog.numExtensions > 0) {
+        char buildFilter[7 * osToolsFileDialog.numExtensions + 1]; // last space is replaced with ' and followed by \0
+        int32_t j = 0;
+        for (int32_t i = 0; i < osToolsFileDialog.numExtensions; i++) {
+            buildFilter[j] = '*';
+            buildFilter[j + 1] = '.';
+            j += 2;
+            for (uint32_t k = 0; k < strlen(osToolsFileDialog.extensions[i]) && k < 8; k++) {
+                buildFilter[j] = osToolsFileDialog.extensions[i][k];
+                j += 1;
+            }
+            if (i != osToolsFileDialog.numExtensions - 1) { // dont add space if it's the last element
+                buildFilter[j] = ' ';
+                j += 1;
+            }
+        }
+        buildFilter[j] = '\'';
+        buildFilter[j + 1] = '\0';
+        char filterName[35] = " --file-filter='Specified Types | ";
+        strcat(fullCommand, filterName);
+        strcat(fullCommand, buildFilter);
+    }
+
+    /* execute */
+    FILE* filenameStream = popen(fullCommand, "r");
+    if (fgets(osToolsFileDialog.selectedFilename, 4097, filenameStream) == NULL) { // adds a \n before \0 (?)
+        strcpy(osToolsFileDialog.selectedFilename, "null");
+        return -1;
+    }
+    for (uint32_t i = 0; i < 4096; i++) {
+        if (osToolsFileDialog.selectedFilename[i] == '\n') {
+            osToolsFileDialog.selectedFilename[i] = '\0'; // replace all newlines with null characters
+        }
+    }
+    pclose(filenameStream);
+    return 0;
+}
+
+uint8_t *osToolsMapFile(char *filename, uint32_t *sizeOutput) {
+    int32_t fd = open(filename, O_RDWR);
+    struct stat stats;
+    if (fstat(fd, &stats) == -1) {
+        printf("Could not get stats of file %s\n", filename);
+        *sizeOutput = 0;
+        return NULL;
+    }
+    *sizeOutput = stats.st_size;
+    void *out = mmap(NULL, *sizeOutput, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+    if (out == MAP_FAILED) {
+        printf("Could not memory map file %s\n", filename);
+        *sizeOutput = 0;
+        return NULL;
+    }
+    list_append(osToolsMemmap.mappedFiles, (unitype) out, 'l');
+    list_append(osToolsMemmap.mappedFiles, (unitype) *sizeOutput, 'i');
+    return (uint8_t *) out;
+}
+
+int32_t osToolsUnmapFile(uint8_t *data) {
+    int32_t index = -1;
+    for (uint32_t i = 0; i < osToolsMemmap.mappedFiles -> length; i += 2) {
+        if (osToolsMemmap.mappedFiles -> data[i].p == data) {
+            index = i;
+            break;
+        }
+    }
+    if (index >= 0) {
+        munmap(data, osToolsMemmap.mappedFiles -> data[index + 1].i);
+        return 0;
+    } else {
+        printf("Could not find %p in memory mapped index\n", data);
+        return -1;
+    }
+}
+
+#endif
+
+#endif /* OS_TOOLS_IMPLEMENTATION */
 
 #endif /* TURTLELIB */
