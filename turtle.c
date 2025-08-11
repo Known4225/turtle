@@ -1,5 +1,5 @@
 // #define TURTLE_IMPLEMENTATION
-#include "include/singlefile/turtle.h"
+#include "turtle.h"
 #include <time.h>
 
 void parseRibbonOutput() {
@@ -107,17 +107,17 @@ int main(int argc, char *argv[]) {
     /* initialize turtle */
     turtleInit(window, -320, -180, 320, 180);
     /* initialise turtleText */
-    turtleTextInit("include/roberto.tgl");
+    turtleTextInit("config/roberto.tgl");
     /* initialise turtleTools ribbon */
     turtleToolsSetTheme(TT_THEME_DARK); // dark theme preset
-    ribbonInit("include/ribbonConfig.txt");
+    ribbonInit("config/ribbonConfig.txt");
     /* initialise turtleTools popup */
-    popupInit("include/popupConfig.txt", -60, -20, 60, 20);
+    popupInit("config/popupConfig.txt", -60, -20, 60, 20);
     /* initialise osTools */
     osToolsInit(argv[0], window); // must include argv[0] to get executableFilepath, must include GLFW window
     osToolsFileDialogAddExtension("txt"); // add txt to extension restrictions
-    list_t *rowLike = osToolsLoadCSVString("test.csv", OSTOOLS_CSV_ROW);
-    list_t *columnLike = osToolsLoadCSVString("test.csv", OSTOOLS_CSV_COLUMN);
+    list_t *rowLike = osToolsLoadCSVString("config/test.csv", OSTOOLS_CSV_ROW);
+    list_t *columnLike = osToolsLoadCSVString("config/test.csv", OSTOOLS_CSV_COLUMN);
     if (rowLike != NULL) {
         list_print(rowLike);
     }
