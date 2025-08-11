@@ -1,3 +1,0 @@
-File, New, Save, Save As..., Open
-Edit, Undo, Redo, Cut, Copy, Paste
-View, Change Theme, GLFW
