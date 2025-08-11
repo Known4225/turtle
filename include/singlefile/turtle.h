@@ -7,9 +7,6 @@ This header contains all of the turtle, turtleText, turtleTools, and osTools fun
 #ifndef TURTLELIB
 #define TURTLELIB
 
-typedef struct GLFWwindow GLFWwindow;
-typedef struct GLFWcursor GLFWcursor;
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -183,6 +180,8 @@ https://patorjk.com/software/taag/#p=display&f=ANSI%20Shadow
 // extern void glBegin(int type);
 // extern void glVertex2d(double x, double y);
 // extern void glEnd();
+
+typedef struct GLFWwindow GLFWwindow;
 
 typedef struct {
     GLFWwindow* window; // the window
@@ -868,6 +867,8 @@ void turtleToolsUpdateRibbonPopup();
  ╚═════╝ ╚══════╝   ╚═╝    ╚═════╝  ╚═════╝ ╚══════╝╚══════╝╚═╝╚═╝  ╚═╝
 https://patorjk.com/software/taag/#p=display&f=ANSI%20Shadow
 */
+
+typedef struct GLFWcursor GLFWcursor;
 
 typedef struct {
     GLFWwindow *osToolsWindow;
