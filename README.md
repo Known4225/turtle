@@ -21,7 +21,7 @@ The turtle libraries uses the [singlefile header implementation](https://github.
 
 Only define this macro `TURTLE_IMPLEMENTATION` in one file.
 
-Additionally, turtle can be used as a precompiled library. To make this library, run `make lib` (or `make winlib` on windows). It can then be linked in your project, with no need to ever `#define TURTLE_IMPLEMENTATION`. Binaries for these libraries for windows (64-bit) and linux (x86-64) are in the `Windows/` and `Linux/` folders respectively (as well as necessary binaries for the glfw and glad libraries for these platforms).
+Additionally, turtle can be used as a precompiled library. To make this library, run `make winlib` on windows (or `make lib` on linux). It can then be linked in your project, with no need to ever `#define TURTLE_IMPLEMENTATION`. Binaries for these libraries for windows (64-bit) and linux (x86-64) are in the `Windows/` and `Linux/` folders respectively (as well as necessary binaries for the glfw and glad libraries for these platforms).
 
 # Modules
 
@@ -52,6 +52,8 @@ osTools contains file dialog, clipboard, and other operating system integration 
 # Example project
 
 An example project, `turtle.c` is included with the repository. The binaries for this project for windows (64-bit) and linux (x86-64) are included in the repository and can be run without dependencies. The project showcases some of turtle's features and is intended to be a guide on how to code with turtle.
+
+The example project can be built with `make win` on windows or `make` on linux. Windows requires `gcc` and the ability to run makefiles, I recommend [w64devkit](https://github.com/skeeto/w64devkit).
 
 ## Config
 
