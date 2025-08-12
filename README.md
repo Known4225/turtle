@@ -29,7 +29,7 @@ The turtle libraries are separated into distinct modules
 
 ## Unitype list
 
-list is an implementation of resizable lists, similar to the way lists in python work. You're able to add many C primitive types to this list, include integers, floats, and strings. Use functions like `list_init()`, `list_append()`, and `list -> data[index].d`.
+list is an implementation of resizable lists, similar to the way lists in python work. You're able to add many C primitive types to this list including integers, floats, and strings. Use functions like `list_init()`, `list_append()`, and `list -> data[index].d`.
 
 ## Turtle
 
