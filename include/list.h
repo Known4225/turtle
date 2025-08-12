@@ -1,10 +1,3 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdbool.h>
-#include <stdint.h>
-#include <math.h>
-
 /*
 ██╗     ██╗███████╗████████╗██╗  ██╗
 ██║     ██║██╔════╝╚══██╔══╝██║  ██║
@@ -15,6 +8,14 @@
 https://patorjk.com/software/taag/#p=display&f=ANSI%20Shadow
 */
 
+#ifndef UNITYPE_LIST_H
+#define UNITYPE_LIST_H
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdbool.h>
+#include <stdint.h>
 
 /*
 21.04.23:
@@ -156,3 +157,5 @@ void list_free_lite(list_t *list);
 
 /* frees the data used by the list */
 void list_free(list_t *list);
+
+#endif /* UNITYPE_LIST_H */

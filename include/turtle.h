@@ -8,6 +8,15 @@
 https://patorjk.com/software/taag/#p=display&f=ANSI%20Shadow
 */
 
+#ifndef TURTLE_INTERNAL_H
+#define TURTLE_INTERNAL_H
+
+#include <math.h>
+#ifndef M_PI
+    #define M_PI 3.14159265358979323846
+#endif
+#include "glad.h"
+#include "glfw3.h"
 #include "list.h"
 
 extern void glColor4d(double r, double g, double b, double a); // genius tactic to stop compiler warnings
@@ -175,3 +184,5 @@ void turtleMainLoop();
 
 /* free turtle memory */
 void turtleFree();
+
+#endif /* TURTLE_INTERNAL_H */

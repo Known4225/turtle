@@ -8,6 +8,9 @@
 https://patorjk.com/software/taag/#p=display&f=ANSI%20Shadow
 */
 
+#ifndef TURTLE_TEXT_H
+#define TURTLE_TEXT_H
+
 #include "turtle.h"
 #include <stdarg.h>
 
@@ -62,3 +65,5 @@ int32_t turtleTextConvertUnicode(const unsigned char *str, uint32_t *converted);
 
 /* if the font file is not found, use the default font (kept here) */
 void generateDefaultFont(list_t *generatedFont);
+
+#endif /* TURTLE_TEXT_H */

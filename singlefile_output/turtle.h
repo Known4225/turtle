@@ -1,12 +1,5 @@
-#ifndef TURTLELIB
-#define TURTLELIB
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdbool.h>
-#include <stdint.h>
-#include <math.h>
+#ifndef TURTLE_H
+#define TURTLE_H
 
 /*
 ██╗     ██╗███████╗████████╗██╗  ██╗
@@ -18,6 +11,14 @@
 https://patorjk.com/software/taag/#p=display&f=ANSI%20Shadow
 */
 
+#ifndef UNITYPE_LIST_H
+#define UNITYPE_LIST_H
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdbool.h>
+#include <stdint.h>
 
 /*
 21.04.23:
@@ -160,6 +161,8 @@ void list_free_lite(list_t *list);
 /* frees the data used by the list */
 void list_free(list_t *list);
 
+#endif /* UNITYPE_LIST_H */
+
 /*
 ████████╗██╗   ██╗██████╗ ████████╗██╗     ███████╗   ██╗  ██╗
 ╚══██╔══╝██║   ██║██╔══██╗╚══██╔══╝██║     ██╔════╝   ██║  ██║
@@ -170,7 +173,13 @@ void list_free(list_t *list);
 https://patorjk.com/software/taag/#p=display&f=ANSI%20Shadow
 */
 
-#include "list.h"
+#ifndef TURTLE_INTERNAL_H
+#define TURTLE_INTERNAL_H
+
+#include <math.h>
+#ifndef M_PI
+    #define M_PI 3.14159265358979323846
+#endif
 
 extern void glColor4d(double r, double g, double b, double a); // genius tactic to stop compiler warnings
 extern void glBegin(int type);
@@ -338,6 +347,8 @@ void turtleMainLoop();
 /* free turtle memory */
 void turtleFree();
 
+#endif /* TURTLE_INTERNAL_H */
+
 /*
 ████████╗██╗   ██╗██████╗ ████████╗██╗     ███████╗████████╗███████╗██╗  ██╗████████╗██╗  ██╗
 ╚══██╔══╝██║   ██║██╔══██╗╚══██╔══╝██║     ██╔════╝╚══██╔══╝██╔════╝╚██╗██╔╝╚══██╔══╝██║  ██║
@@ -348,7 +359,9 @@ void turtleFree();
 https://patorjk.com/software/taag/#p=display&f=ANSI%20Shadow
 */
 
-#include "turtle.h"
+#ifndef TURTLE_TEXT_H
+#define TURTLE_TEXT_H
+
 #include <stdarg.h>
 
 /* turtleText variables */
@@ -403,6 +416,8 @@ int32_t turtleTextConvertUnicode(const unsigned char *str, uint32_t *converted);
 /* if the font file is not found, use the default font (kept here) */
 void generateDefaultFont(list_t *generatedFont);
 
+#endif /* TURTLE_TEXT_H */
+
 /*
 ████████╗██╗   ██╗██████╗ ████████╗██╗     ███████╗████████╗ ██████╗  ██████╗ ██╗     ███████╗   ██╗  ██╗
 ╚══██╔══╝██║   ██║██╔══██╗╚══██╔══╝██║     ██╔════╝╚══██╔══╝██╔═══██╗██╔═══██╗██║     ██╔════╝   ██║  ██║
@@ -413,7 +428,9 @@ void generateDefaultFont(list_t *generatedFont);
 https://patorjk.com/software/taag/#p=display&f=ANSI%20Shadow
 */
 
-#include "turtleText.h"
+#ifndef TURTLE_TOOLS_H
+#define TURTLE_TOOLS_H
+
 
 /* random integer between lower and upper bound (inclusive) */
 int randomInt(int lowerBound, int upperBound);
@@ -857,6 +874,8 @@ void turtleToolsUpdateUI();
 
 void turtleToolsUpdateRibbonPopup();
 
+#endif /* TURTLETOOLS_H */
+
 /*
  ██████╗ ███████╗████████╗ ██████╗  ██████╗ ██╗     ███████╗   ██╗  ██╗
 ██╔═══██╗██╔════╝╚══██╔══╝██╔═══██╗██╔═══██╗██║     ██╔════╝   ██║  ██║
@@ -867,7 +886,9 @@ void turtleToolsUpdateRibbonPopup();
 https://patorjk.com/software/taag/#p=display&f=ANSI%20Shadow
 */
 
-#include "turtle.h"
+#ifndef OS_TOOLS_H
+#define OS_TOOLS_H
+
 
 typedef struct GLFWcursor GLFWcursor;
 
@@ -979,6 +1000,8 @@ int32_t osToolsFileDialogPrompt(char openOrSave, char *prename);
 uint8_t *osToolsMapFile(char *filename, uint32_t *sizeOutput);
 
 int32_t osToolsUnmapFile(uint8_t *data);
+
+#endif /* OS_TOOLS_H */
 
 #ifndef __khrplatform_h_
 #define __khrplatform_h_
@@ -1380,7 +1403,6 @@ GLAPI int gladLoadGL(void);
 
 GLAPI int gladLoadGLLoader(GLADloadproc);
 
-#include "khrplatform.h"
 typedef unsigned int GLenum;
 typedef unsigned char GLboolean;
 typedef unsigned int GLbitfield;
@@ -9381,7 +9403,7 @@ GLFWAPI VkResult glfwCreateWindowSurface(VkInstance instance, GLFWwindow* window
 ╚══════╝ ╚═════╝  ╚═════╝ ╚═╝  ╚═╝ ╚═════╝╚══════╝
 https://patorjk.com/software/taag/#p=display&f=ANSI%20Shadow
 */
-#include "include/list.h"
+#ifdef UNITYPE_LIST_IMPLEMENTATION
 
 /*
 21.04.23:
@@ -9816,7 +9838,8 @@ void list_free(list_t *list) {
     free(list);
 }
 
-#include "include/turtle.h"
+#endif /* UNITYPE_LIST_IMPLEMENTATION */
+#ifdef TURTLE_INTERNAL_IMPLEMENTATION
 
 /* 
 openGL implementation of turtle and the turtletools module
@@ -10592,7 +10615,8 @@ void turtleFree() {
     list_free(turtle.penPos);
 }
 
-#include "include/turtleText.h"
+#endif /* TURTLE_INTERNAL_IMPLEMENTATION */
+#ifdef TURTLE_TEXT_IMPLEMENTATION
 
 /* turtleText uses openGL and the turtle library to render text on the screen */
 
@@ -11454,7 +11478,8 @@ void generateDefaultFont(list_t *generatedFont) {
     list_append(generatedFont, (unitype) "¨, 2, 1, -160, 50, 1, -130, 50", 's');
 }
 
-#include "include/turtleTools.h"
+#endif /* TURTLE_TEXT_IMPLEMENTATION */
+#ifdef TURTLE_TOOLS_IMPLEMENTATION
 
 /* turtleTools library includes:
 ribbon: customisable top bar
@@ -13419,7 +13444,8 @@ void turtleToolsUpdateRibbonPopup() {
     turtle.penshape = shapeSave;
 }
 
-#include "include/osTools.h"
+#endif /* TURTLE_TOOLS_IMPLEMENTATION */
+#ifdef OS_TOOLS_IMPLEMENTATION
 
 /*
 Created by Ryan Srichai
@@ -14395,6 +14421,7 @@ int32_t osToolsUnmapFile(uint8_t *data) {
 
 #endif
 
+#endif /* OS_TOOLS_IMPLEMENTATION */
 
 
-#endif /* TURTLELIB */
+#endif /* TURTLE_H */

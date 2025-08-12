@@ -8,6 +8,9 @@
 https://patorjk.com/software/taag/#p=display&f=ANSI%20Shadow
 */
 
+#ifndef OS_TOOLS_H
+#define OS_TOOLS_H
+
 #include "turtle.h"
 
 typedef struct GLFWcursor GLFWcursor;
@@ -120,3 +123,5 @@ int32_t osToolsFileDialogPrompt(char openOrSave, char *prename);
 uint8_t *osToolsMapFile(char *filename, uint32_t *sizeOutput);
 
 int32_t osToolsUnmapFile(uint8_t *data);
+
+#endif /* OS_TOOLS_H */

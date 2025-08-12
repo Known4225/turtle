@@ -6,11 +6,12 @@ This application bundles all turtle libraries into a single portable header file
 
 #include <stdio.h>
 #include <stdint.h>
+#include <string.h>
 
 /* define output file */
 const char outputFile[] = "singlefile_output/turtle.h";
 
-const char wrappingMacro[] = "TURTLELIB"; // this macro guards the entire file
+const char wrappingMacro[] = "TURTLE_H"; // this macro guards the entire file
 const char sourceMacro[] = "TURTLE_IMPLEMENTATION"; // this macro enables all source implementation macros
 
 /* define header files in order from top to bottom of output file */
@@ -27,11 +28,11 @@ const char headerFiles[][128] = {
 
 /* define source files in order from top to bottom of output file */
 const char sourceFiles[][128] = {
-    "list.c",
-    "turtle.c",
-    "turtleText.c",
-    "turtleTools.c",
-    "osTools.c",
+    "source/list.c",
+    "source/turtle.c",
+    "source/turtleText.c",
+    "source/turtleTools.c",
+    "source/osTools.c",
 };
 
 /* these macros correspond to the source files */
@@ -43,6 +44,10 @@ const char implementationMacros[][128] = {
     "OS_TOOLS_IMPLEMENTATION"
 };
 
+int32_t headerLength = sizeof(headerFiles) / 128;
+int32_t sourceLength = sizeof(sourceFiles) / 128;
+int32_t macrosLength = sizeof(implementationMacros) / 128;
+
 const int32_t dependencyTree[] = {
     0, 0, 0, 0, 0, // list has no dependencies
     1, 0, 0, 0, 0, // turtle internal requires on list
@@ -51,11 +56,30 @@ const int32_t dependencyTree[] = {
     0, 1, 0, 0, 0, // os tools requires turtle internal
 };
 
+/* check if this line of code should not be included in the final output, return 1 if the line is blacklisted */
+int32_t lineBlacklist(char *line) {
+    /* blacklist any #includes to my own files (as they won't exist in the singlefile version) */
+    if (line[0] != '#') {
+        return 0;
+    }
+    char blacklisted[headerLength * 2][128];
+    for (int32_t i = 0; i < headerLength; i++) {
+        sprintf(blacklisted[i], "#include \"%s\"\n", headerFiles[i]);
+    }
+    for (int32_t i = 0; i < headerLength; i++) {
+        sprintf(blacklisted[i + headerLength], "#include \"%s\"\n", headerFiles[i] + 8);
+    }
+    for (int32_t i = 0; i < headerLength * 2; i++) {
+        // printf("%s%s\n", blacklisted[i], line);
+        if (strcmp(blacklisted[i], line) == 0) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
 int main(int argc, char *argv[]) {
     // printf("%d %d %d\n", sizeof(headerFiles), sizeof(sourceFiles), sizeof(implementationMacros));
-    int32_t headerLength = sizeof(headerFiles) / 128;
-    int32_t sourceLength = sizeof(sourceFiles) / 128;
-    int32_t macrosLength = sizeof(implementationMacros) / 128;
     /* check for file existence */
     for (int32_t i = 0; i < headerLength; i++) {
         FILE *fileExists = fopen(headerFiles[i], "r");
@@ -81,11 +105,11 @@ int main(int argc, char *argv[]) {
     /* add headers */
     for (int32_t i = 0; i < headerLength; i++) {
         FILE *headerfp = fopen(headerFiles[i], "r");
-        uint8_t buffer[4096];
-        size_t bytesToWrite = 0;
-        while (bytesToWrite = fread(buffer, 1, 1, headerfp) != 0) { // stg fread returned 1 even when it was fread(buffer, 1, 4096, headerfp), why?
-            // printf("%d\n", bytesToWrite);
-            fwrite(buffer, 1, 1, outputfp);
+        uint8_t buffer[4096]; // line cannot exceed 4096 characters, my longest line is 446 characters so I think we're safe
+        while (fgets(buffer, 4096, headerfp) != NULL) {
+            if (!lineBlacklist(buffer)) {
+                fprintf(outputfp, "%s", buffer);
+            }
         }
         fwrite("\n", 1, 1, outputfp);
         fclose(headerfp);
@@ -125,17 +149,22 @@ int main(int argc, char *argv[]) {
 https://patorjk.com/software/taag/#p=display&f=ANSI%%20Shadow\n\
 */\n");
     for (int32_t i = 0; i < sourceLength; i++) {
+        fprintf(outputfp, "#ifdef %s\n", implementationMacros[i]);
         FILE *sourcefp = fopen(sourceFiles[i], "r");
         uint8_t buffer[4096];
-        size_t bytesToWrite = 0;
-        while (bytesToWrite = fread(buffer, 1, 1, sourcefp) != 0) {
-            fwrite(buffer, 1, 1, outputfp);
+        while (fgets(buffer, 4096, sourcefp) != NULL) {
+            if (!lineBlacklist(buffer)) {
+                fprintf(outputfp, "%s", buffer);
+            }
         }
         fwrite("\n", 1, 1, outputfp);
         fclose(sourcefp);
+        fprintf(outputfp, "#endif /* %s */\n", implementationMacros[i]);
     }
 
     /* add wrapping macro endif */
     fprintf(outputfp, "\n\n#endif /* %s */\n", wrappingMacro);
     fclose(outputfp);
+
+    printf("Successfully exported singlefile header to %s\n", outputFile);
 }

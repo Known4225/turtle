@@ -1,775 +1,277 @@
-#include "include/turtle.h"
+#include "include/turtleTools.h"
+#include "include/osTools.h"
+#include <time.h>
 
-/* 
-openGL implementation of turtle and the turtletools module
-features:
-adjustable pen (size and colour)
-resizable window support
-keyboard and mouse presses
-*/
-
-turtle_t turtle;
-
-/* run this to set the bounds of the window in coordinates */
-void turtleSetWorldCoordinates(int32_t minX, int32_t minY, int32_t maxX, int32_t maxY) {
-    glfwGetWindowSize(turtle.window, &turtle.screenbounds[0], &turtle.screenbounds[1]);
-    turtle.initscreenbounds[0] = turtle.screenbounds[0];
-    turtle.initscreenbounds[1] = turtle.screenbounds[1];
-    turtle.bounds[0] = minX;
-    turtle.bounds[1] = minY;
-    turtle.bounds[2] = maxX;
-    turtle.bounds[3] = maxY;
-}
-
-/* detect character */
-void unicodeSense(GLFWwindow *window, uint32_t codepoint) {
-    if (turtle.unicodeCallback != NULL) {
-        turtle.unicodeCallback(codepoint);
-    }
-}
-
-/* detect key presses */
-void keySense(GLFWwindow* window, int32_t key, int32_t scancode, int32_t action, int32_t mods) {
-    if (turtle.keyCallback != NULL) {
-        turtle.keyCallback(key, scancode, action);
-    }
-    if (action == GLFW_PRESS) {
-        list_append(turtle.keyPressed, (unitype) key, 'i');
-    }
-    if (action == GLFW_RELEASE) {
-        list_remove(turtle.keyPressed, (unitype) key, 'i');
-    }
-}
-
-/* detect mouse clicks */
-void mouseSense(GLFWwindow *window, int32_t button, int32_t action, int32_t mods) {
-    if (action == GLFW_PRESS) {
-        switch(button) {
-        case GLFW_MOUSE_BUTTON_LEFT:
-            list_append(turtle.keyPressed, (unitype) "m1", 's');
-            turtle.mousePressed[0] = 1;
-        break;
-        case GLFW_MOUSE_BUTTON_RIGHT:
-            list_append(turtle.keyPressed, (unitype) "m2", 's');
-            turtle.mousePressed[1] = 1;
-        break;
-        case GLFW_MOUSE_BUTTON_MIDDLE:
-            list_append(turtle.keyPressed, (unitype) "m3", 's');
-            turtle.mousePressed[2] = 1;
-        break;
-        default:
-        break;
-        }
-    }
-    if (action == GLFW_RELEASE) {
-        switch(button) {
-        case GLFW_MOUSE_BUTTON_LEFT:
-            list_remove(turtle.keyPressed, (unitype) "m1", 's');
-            turtle.mousePressed[0] = 0;
-        break;
-        case GLFW_MOUSE_BUTTON_RIGHT:
-            list_remove(turtle.keyPressed, (unitype) "m2", 's');
-            turtle.mousePressed[1] = 0;
-        break;
-        case GLFW_MOUSE_BUTTON_MIDDLE:
-            list_remove(turtle.keyPressed, (unitype) "m3", 's');
-            turtle.mousePressed[2] = 0;
-        break;
-        default:
-        break;
-        }
-    }
-}
-
-/* detect scroll wheel */
-void scrollSense(GLFWwindow* window, double xoffset, double yoffset) {
-    turtle.scrollY = yoffset;
-}
-
-/* the behavior with the mouse wheel is different since it can't be "on" or "off" */
-double turtleMouseWheel() {
-    double temp = turtle.scrollY;
-    turtle.scrollY = 0;
-    return temp;
-}
-
-/* top level boolean output call to check if the key with code [key] is currently being held down. Uses the GLFW_KEY_X macros */
-int8_t turtleKeyPressed(int32_t key) {
-    return list_count(turtle.keyPressed, (unitype) key, 'c');
-}
-
-/* top level boolean output call to check if the left click button is currently being held down */
-int8_t turtleMouseDown() {
-    return turtle.mousePressed[0];
-}
-
-/* top level boolean output call to check if the right click button is currently being held down */
-int8_t turtleMouseRight() {
-    return turtle.mousePressed[1];
-}
-
-/* top level boolean output call to check if the middle mouse button is currently being held down */
-int8_t turtleMouseMiddle() {
-    return turtle.mousePressed[2];
-}
-
-/* alternate duplicate of top level boolean output call to check if the middle mouse button is currently being held down */
-int8_t turtleMouseMid() {
-    return turtle.mousePressed[2];
-}
-
-/* initializes the turtletools module */
-void turtleInit(GLFWwindow* window, int32_t minX, int32_t minY, int32_t maxX, int32_t maxY) {
-    gladLoadGL();
-    glfwMakeContextCurrent(window); // various glfw things
-    glEnable(GL_ALPHA);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_ONE_MINUS_SRC_ALPHA, GL_SRC_ALPHA);
-    glClearColor(1.0, 1.0, 1.0, 0.0); // white background by default
-    turtle.window = window;
-    turtle.close = 0;
-    turtle.popupClose = 0;
-    turtle.keyPressed = list_init();
-    turtle.lastscreenbounds[0] = 0;
-    turtle.lastscreenbounds[1] = 0;
-    turtle.penPos = list_init();
-    turtle.penHash = 0;
-    turtle.lastLength = 0;
-    turtle.x = 0;
-    turtle.y = 0;
-    turtle.pensize = 1;
-    turtle.penshape = 0;
-    turtle.circleprez = 9; // default circleprez value
-    turtle.pen = 0;
-    turtle.penr = 0.0;
-    turtle.peng = 0.0;
-    turtle.penb = 0.0;
-    turtle.pena = 0.0;
-    for (uint8_t i = 0; i < 3; i++) {
-        turtle.currentColor[i] = 0.0;
-    }
-    turtle.currentColor[3] = 1.0;
-    /* 3D variables */
-    turtle.cameraX = 0;
-    turtle.cameraY = 0;
-    turtle.cameraZ = 0;
-    turtle.cameraFOV = 90;
-    turtle.cameraDirectionLeftRight = 0;
-    turtle.cameraDirectionUpDown = 0;
-
-    turtleSetWorldCoordinates(minX, minY, maxX, maxY);
-    turtle.keyCallback = NULL;
-    turtle.unicodeCallback = NULL;
-    glfwSetCharCallback(window, unicodeSense);
-    glfwSetKeyCallback(window, keySense); // initiate mouse and keyboard detection
-    glfwSetMouseButtonCallback(window, mouseSense);
-    glfwSetScrollCallback(window, scrollSense);
-}
-
-/* gets the mouse coordinates */
-void turtleGetMouseCoords() {
-    glfwGetWindowSize(turtle.window, &turtle.screenbounds[0], &turtle.screenbounds[1]); // get screenbounds
-    glfwGetCursorPos(turtle.window, &turtle.mouseAbsX, &turtle.mouseAbsY); // get mouse positions (absolute)
-    turtle.mouseX = turtle.mouseAbsX;
-    turtle.mouseY = turtle.mouseAbsY;
-    turtle.mouseScaX = turtle.mouseAbsX;
-    turtle.mouseScaY = turtle.mouseAbsY;
-    turtle.mouseX -= (turtle.initscreenbounds[0] / 2) - ((turtle.bounds[2] + turtle.bounds[0]) / 2);
-    turtle.mouseX *= ((double) (turtle.bounds[2] - turtle.bounds[0]) / (double) turtle.initscreenbounds[0]);
-    turtle.mouseY -= (turtle.initscreenbounds[1] / 2) - ((turtle.bounds[3] + turtle.bounds[1]) / 2) + (turtle.screenbounds[1] - turtle.initscreenbounds[1]);
-    turtle.mouseY *= ((double) (turtle.bounds[1] - turtle.bounds[3]) / (double) turtle.initscreenbounds[1]);
-    turtle.mouseScaX -= (turtle.screenbounds[0] / 2) - ((turtle.bounds[2] + turtle.bounds[0]) / 2);
-    turtle.mouseScaX *= ((double) (turtle.bounds[2] - turtle.bounds[0]) / (double) turtle.screenbounds[0]);
-    turtle.mouseScaY -= (turtle.screenbounds[1] / 2) - ((turtle.bounds[3] + turtle.bounds[1]) / 2);
-    turtle.mouseScaY *= ((double) (turtle.bounds[1] - turtle.bounds[3]) / (double) turtle.screenbounds[1]);
-}
-
-/* set the background color */
-void turtleBgColor(double r, double g, double b) {
-    glClearColor(r / 255, g / 255, b / 255, 0.0);
-}
-
-/* set the pen color */
-void turtlePenColor(double r, double g, double b) {
-    turtle.penr = r / 255;
-    turtle.peng = g / 255;
-    turtle.penb = b / 255;
-    turtle.pena = 0.0;
-}
-
-/* set the pen color (with transparency) */
-void turtlePenColorAlpha(double r, double g, double b, double a) {
-    turtle.penr = r / 255;
-    turtle.peng = g / 255;
-    turtle.penb = b / 255;
-    turtle.pena = a / 255;
-}
-
-/* set the pen size */
-void turtlePenSize(double size) {
-    turtle.pensize = size * 0.5; // ensures pensize matches pixel size (a pen size of 240 will be 240 coordinates long)
-}
-
-/* clears all the pen drawings */
-void turtleClear() {
-    // list_free(turtle.penPos);
-    // turtle.penPos = list_init();
-    turtle.penPos -> length = 0; // could be dangerous
-}
-
-/* pen down */
-void turtlePenDown() {
-    if (turtle.pen == 0) {
-        turtle.pen = 1;
-        int8_t changed = 0;
-        int32_t len = turtle.penPos -> length;
-        if (len > 0) {
-            unitype *ren = turtle.penPos -> data;
-            if (ren[len - 9].d != turtle.x) {changed = 1;}
-            if (ren[len - 8].d != turtle.y) {changed = 1;}
-            if (ren[len - 7].d != turtle.pensize) {changed = 1;}
-            if (ren[len - 6].d != turtle.penr) {changed = 1;}
-            if (ren[len - 5].d != turtle.peng) {changed = 1;}
-            if (ren[len - 4].d != turtle.penb) {changed = 1;}
-            if (ren[len - 3].d != turtle.pena) {changed = 1;}
-            if (ren[len - 2].h != turtle.penshape) {changed = 1;}
-            if (ren[len - 1].d != turtle.circleprez) {changed = 1;}
-        } else {
-            changed = 1;
-        }
-        if (changed == 1) {
-            list_append(turtle.penPos, (unitype) turtle.x, 'd');
-            list_append(turtle.penPos, (unitype) turtle.y, 'd');
-            list_append(turtle.penPos, (unitype) turtle.pensize, 'd');
-            list_append(turtle.penPos, (unitype) turtle.penr, 'd');
-            list_append(turtle.penPos, (unitype) turtle.peng, 'd');
-            list_append(turtle.penPos, (unitype) turtle.penb, 'd');
-            list_append(turtle.penPos, (unitype) turtle.pena, 'd');
-            list_append(turtle.penPos, (unitype) turtle.penshape, 'h');
-            list_append(turtle.penPos, (unitype) turtle.circleprez, 'd');
-        }
-    }
-}
-
-/* lift the pen */
-void turtlePenUp() {
-    if (turtle.pen == 1) {
-        turtle.pen = 0;
-        if (turtle.penPos -> length > 0 && turtle.penPos -> type[turtle.penPos -> length - 1] != 'c') {
-            list_append(turtle.penPos, (unitype) 0, 'c');
-            list_append(turtle.penPos, (unitype) 0, 'c');
-            list_append(turtle.penPos, (unitype) 0, 'c');
-            list_append(turtle.penPos, (unitype) 0, 'c');
-            list_append(turtle.penPos, (unitype) 0, 'c');
-            list_append(turtle.penPos, (unitype) 0, 'c');
-            list_append(turtle.penPos, (unitype) 0, 'c');
-            list_append(turtle.penPos, (unitype) 0, 'c');
-            list_append(turtle.penPos, (unitype) 0, 'c');
-        }
-    }
-}
-
-/* set the pen shape ("circle", "square", "triangle", "none", or "connected") */
-void turtlePenShape(char *selection) {
-    if (strcmp(selection, "circle") == 0 || strcmp(selection, "Circle") == 0) {
-        turtle.penshape = 0;
-    }
-    if (strcmp(selection, "square") == 0 || strcmp(selection, "Square") == 0) {
-        turtle.penshape = 1;
-    }
-    if (strcmp(selection, "triangle") == 0 || strcmp(selection, "Triangle") == 0) {
-        turtle.penshape = 2;
-    }
-    if (strcmp(selection, "none") == 0 || strcmp(selection, "None") == 0) {
-        turtle.penshape = 3;
-    }
-    if (strcmp(selection, "connected") == 0 || strcmp(selection, "Connected") == 0) {
-        turtle.penshape = 4;
-    }
-    if (strcmp(selection, "text") == 0 || strcmp(selection, "Text") == 0) {
-        turtle.penshape = 5;
-    }
-}
-
-/* set the circle precision */
-void turtlePenPrez(double prez) {
-    turtle.circleprez = prez;
-}
-
-/* moves the turtle to a coordinate */
-void turtleGoto(double x, double y) {
-    if (fabs(turtle.x - x) > 0.01 || fabs(turtle.y - y) > 0.01) {
-        turtle.x = x;
-        turtle.y = y;
-        if (turtle.pen == 1) {
-            int8_t changed = 0;
-            int32_t len = turtle.penPos -> length;
-            if (len > 0) {
-                unitype *ren = turtle.penPos -> data;
-                if (ren[len - 9].d != turtle.x) {changed = 1;}
-                if (ren[len - 8].d != turtle.y) {changed = 1;}
-                if (ren[len - 7].d != turtle.pensize) {changed = 1;}
-                if (ren[len - 6].d != turtle.penr) {changed = 1;}
-                if (ren[len - 5].d != turtle.peng) {changed = 1;}
-                if (ren[len - 4].d != turtle.penb) {changed = 1;}
-                if (ren[len - 3].d != turtle.pena) {changed = 1;}
-                if (ren[len - 2].h != turtle.penshape) {changed = 1;}
-                if (ren[len - 1].d != turtle.circleprez) {changed = 1;}
-            } else {
-                changed = 1;
+void parseRibbonOutput() {
+    if (ribbonRender.output[0] == 1) {
+        ribbonRender.output[0] = 0;
+        if (ribbonRender.output[1] == 0) { // File
+            if (ribbonRender.output[2] == 1) { // New
+                printf("New\n");
             }
-            if (changed == 1) {
-                list_append(turtle.penPos, (unitype) x, 'd');
-                list_append(turtle.penPos, (unitype) y, 'd');
-                list_append(turtle.penPos, (unitype) turtle.pensize, 'd');
-                list_append(turtle.penPos, (unitype) turtle.penr, 'd');
-                list_append(turtle.penPos, (unitype) turtle.peng, 'd');
-                list_append(turtle.penPos, (unitype) turtle.penb, 'd');
-                list_append(turtle.penPos, (unitype) turtle.pena, 'd');
-                list_append(turtle.penPos, (unitype) turtle.penshape, 'h');
-                list_append(turtle.penPos, (unitype) turtle.circleprez, 'd');
-            }
-        }
-    }
-}
-
-/* draws a circle at the specified x and y (coordinates) */
-void turtleCircleRender(double x, double y, double rad, double r, double g, double b, double a, double xfact, double yfact, double prez) {
-    int8_t colorChange = 0;
-    if (r != turtle.currentColor[0]) {colorChange = 1;}
-    if (g != turtle.currentColor[1]) {colorChange = 1;}
-    if (b != turtle.currentColor[2]) {colorChange = 1;}
-    if (a != turtle.currentColor[3]) {colorChange = 1;}
-    if (colorChange == 1) {
-        glColor4d(r, g, b, a);
-        turtle.currentColor[0] = r;
-        turtle.currentColor[1] = g;
-        turtle.currentColor[2] = b;
-        turtle.currentColor[3] = a;
-    }
-    glBegin(GL_TRIANGLE_FAN);
-    for (double i = 0; i < prez; i++) {
-        glVertex2d((x + rad * sin(2 * i * M_PI / prez)) * xfact, (y + rad * cos(2 * i * M_PI / prez)) * yfact);
-    }
-    glEnd();
-}
-
-/* draws a square */
-void turtleSquareRender(double x1, double y1, double x2, double y2, double r, double g, double b, double a, double xfact, double yfact) {
-    int8_t colorChange = 0;
-    if (r != turtle.currentColor[0]) {colorChange = 1;}
-    if (g != turtle.currentColor[1]) {colorChange = 1;}
-    if (b != turtle.currentColor[2]) {colorChange = 1;}
-    if (a != turtle.currentColor[3]) {colorChange = 1;}
-    if (colorChange == 1) {
-        glColor4d(r, g, b, a);
-        turtle.currentColor[0] = r;
-        turtle.currentColor[1] = g;
-        turtle.currentColor[2] = b;
-        turtle.currentColor[3] = a;
-    }
-    glBegin(GL_TRIANGLE_FAN);
-    glVertex2d(x1 * xfact, y1 * yfact);
-    glVertex2d(x2 * xfact, y1 * yfact);
-    glVertex2d(x2 * xfact, y2 * yfact);
-    glVertex2d(x1 * xfact, y2 * yfact);
-    glEnd();
-}
-
-/* draws a triangle */
-void turtleTriangleRender(double x1, double y1, double x2, double y2, double x3, double y3, double r, double g, double b, double a, double xfact, double yfact) {
-    int8_t colorChange = 0;
-    if (r != turtle.currentColor[0]) {colorChange = 1;}
-    if (g != turtle.currentColor[1]) {colorChange = 1;}
-    if (b != turtle.currentColor[2]) {colorChange = 1;}
-    if (a != turtle.currentColor[3]) {colorChange = 1;}
-    if (colorChange == 1) {
-        glColor4d(r, g, b, a);
-        turtle.currentColor[0] = r;
-        turtle.currentColor[1] = g;
-        turtle.currentColor[2] = b;
-        turtle.currentColor[3] = a;
-    }
-    glBegin(GL_TRIANGLES);
-    glVertex2d(x1 * xfact, y1 * yfact);
-    glVertex2d(x2 * xfact, y2 * yfact);
-    glVertex2d(x3 * xfact, y3 * yfact);
-    glEnd();
-}
-
-/* draws a quadrilateral */
-void turtleQuadRender(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, double r, double g, double b, double a, double xfact, double yfact) {
-    int8_t colorChange = 0;
-    if (r != turtle.currentColor[0]) {colorChange = 1;}
-    if (g != turtle.currentColor[1]) {colorChange = 1;}
-    if (b != turtle.currentColor[2]) {colorChange = 1;}
-    if (a != turtle.currentColor[3]) {colorChange = 1;}
-    if (colorChange == 1) {
-        glColor4d(r, g, b, a);
-        turtle.currentColor[0] = r;
-        turtle.currentColor[1] = g;
-        turtle.currentColor[2] = b;
-        turtle.currentColor[3] = a;
-    }
-    glBegin(GL_TRIANGLE_FAN);
-    glVertex2d(x1 * xfact, y1 * yfact);
-    glVertex2d(x2 * xfact, y2 * yfact);
-    glVertex2d(x3 * xfact, y3 * yfact);
-    glVertex2d(x4 * xfact, y4 * yfact);
-    glEnd();
-}
-
-/* adds a (blit) triangle to the pipeline (for better speed) */
-void turtleTriangle(double x1, double y1, double x2, double y2, double x3, double y3) {
-    list_append(turtle.penPos, (unitype) x1, 'd');
-    list_append(turtle.penPos, (unitype) y1, 'd');
-    list_append(turtle.penPos, (unitype) x2, 'd');
-    list_append(turtle.penPos, (unitype) turtle.penr, 'd');
-    list_append(turtle.penPos, (unitype) turtle.peng, 'd');
-    list_append(turtle.penPos, (unitype) turtle.penb, 'd');
-    list_append(turtle.penPos, (unitype) turtle.pena, 'd');
-    list_append(turtle.penPos, (unitype) 66, 'h'); // blit triangle signifier
-    list_append(turtle.penPos, (unitype) y2, 'd'); // some unconventional formatting but it works
-
-    list_append(turtle.penPos, (unitype) x3, 'd');
-    list_append(turtle.penPos, (unitype) y3, 'd');
-    list_append(turtle.penPos, (unitype) 0, 'd'); // zero'd out (wasted space)
-    list_append(turtle.penPos, (unitype) turtle.penr, 'd'); // duplicate colour data (wasted space)
-    list_append(turtle.penPos, (unitype) turtle.peng, 'd');
-    list_append(turtle.penPos, (unitype) turtle.penb, 'd');
-    list_append(turtle.penPos, (unitype) turtle.pena, 'd');
-    list_append(turtle.penPos, (unitype) 66, 'h'); // blit triangle signifier
-    list_append(turtle.penPos, (unitype) 0, 'd'); // zero'd out (wasted space)
-}
-
-void turtleTriangleColor(double x1, double y1, double x2, double y2, double x3, double y3, double r, double g, double b, double a) {
-    list_append(turtle.penPos, (unitype) x1, 'd');
-    list_append(turtle.penPos, (unitype) y1, 'd');
-    list_append(turtle.penPos, (unitype) x2, 'd');
-    list_append(turtle.penPos, (unitype) (r / 255), 'd');
-    list_append(turtle.penPos, (unitype) (g / 255), 'd');
-    list_append(turtle.penPos, (unitype) (b / 255), 'd');
-    list_append(turtle.penPos, (unitype) (a / 255), 'd');
-    list_append(turtle.penPos, (unitype) 66, 'h'); // blit triangle signifier
-    list_append(turtle.penPos, (unitype) y2, 'd'); // some unconventional formatting but it works
-
-    list_append(turtle.penPos, (unitype) x3, 'd');
-    list_append(turtle.penPos, (unitype) y3, 'd');
-    list_append(turtle.penPos, (unitype) 0, 'd'); // zero'd out (wasted space)
-    list_append(turtle.penPos, (unitype) r, 'd'); // duplicate colour data (wasted space)
-    list_append(turtle.penPos, (unitype) g, 'd');
-    list_append(turtle.penPos, (unitype) b, 'd');
-    list_append(turtle.penPos, (unitype) a, 'd');
-    list_append(turtle.penPos, (unitype) 66, 'h'); // blit triangle signifier
-    list_append(turtle.penPos, (unitype) 0, 'd'); // zero'd out (wasted space)
-}
-
-/* adds a (blit) quad to the pipeline (for better speed) */
-void turtleQuad(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4) {
-    list_append(turtle.penPos, (unitype) x1, 'd');
-    list_append(turtle.penPos, (unitype) y1, 'd');
-    list_append(turtle.penPos, (unitype) x2, 'd');
-    list_append(turtle.penPos, (unitype) turtle.penr, 'd');
-    list_append(turtle.penPos, (unitype) turtle.peng, 'd');
-    list_append(turtle.penPos, (unitype) turtle.penb, 'd');
-    list_append(turtle.penPos, (unitype) turtle.pena, 'd');
-    list_append(turtle.penPos, (unitype) 67, 'h'); // blit quad signifier
-    list_append(turtle.penPos, (unitype) y2, 'd'); // some unconventional formatting but it works
-
-    list_append(turtle.penPos, (unitype) x3, 'd');
-    list_append(turtle.penPos, (unitype) y3, 'd');
-    list_append(turtle.penPos, (unitype) x4, 'd');
-    list_append(turtle.penPos, (unitype) turtle.penr, 'd'); // duplicate colour data (wasted space)
-    list_append(turtle.penPos, (unitype) turtle.peng, 'd');
-    list_append(turtle.penPos, (unitype) turtle.penb, 'd');
-    list_append(turtle.penPos, (unitype) turtle.pena, 'd');
-    list_append(turtle.penPos, (unitype) 67, 'h'); // blit quad signifier
-    list_append(turtle.penPos, (unitype) y4, 'd');
-}
-
-void turtleQuadColor(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, double r, double g, double b, double a) {
-    list_append(turtle.penPos, (unitype) x1, 'd');
-    list_append(turtle.penPos, (unitype) y1, 'd');
-    list_append(turtle.penPos, (unitype) x2, 'd');
-    list_append(turtle.penPos, (unitype) (r / 255), 'd');
-    list_append(turtle.penPos, (unitype) (g / 255), 'd');
-    list_append(turtle.penPos, (unitype) (b / 255), 'd');
-    list_append(turtle.penPos, (unitype) (a / 255), 'd');
-    list_append(turtle.penPos, (unitype) 67, 'h'); // blit quad signifier
-    list_append(turtle.penPos, (unitype) y2, 'd'); // some unconventional formatting but it works
-
-    list_append(turtle.penPos, (unitype) x3, 'd');
-    list_append(turtle.penPos, (unitype) y3, 'd');
-    list_append(turtle.penPos, (unitype) x4, 'd');
-    list_append(turtle.penPos, (unitype) r, 'd'); // duplicate colour data (wasted space)
-    list_append(turtle.penPos, (unitype) g, 'd');
-    list_append(turtle.penPos, (unitype) b, 'd');
-    list_append(turtle.penPos, (unitype) a, 'd');
-    list_append(turtle.penPos, (unitype) 67, 'h'); // blit quad signifier
-    list_append(turtle.penPos, (unitype) y4, 'd');
-}
-
-/* adds a (blit) rectangle to the pipeline (uses quad interface) */
-void turtleRectangle(double x1, double y1, double x2, double y2) {
-    list_append(turtle.penPos, (unitype) x1, 'd');
-    list_append(turtle.penPos, (unitype) y1, 'd');
-    list_append(turtle.penPos, (unitype) x2, 'd');
-    list_append(turtle.penPos, (unitype) turtle.penr, 'd');
-    list_append(turtle.penPos, (unitype) turtle.peng, 'd');
-    list_append(turtle.penPos, (unitype) turtle.penb, 'd');
-    list_append(turtle.penPos, (unitype) turtle.pena, 'd');
-    list_append(turtle.penPos, (unitype) 67, 'h'); // blit quad signifier
-    list_append(turtle.penPos, (unitype) y1, 'd'); // some unconventional formatting but it works
-
-    list_append(turtle.penPos, (unitype) x2, 'd');
-    list_append(turtle.penPos, (unitype) y2, 'd');
-    list_append(turtle.penPos, (unitype) x1, 'd');
-    list_append(turtle.penPos, (unitype) turtle.penr, 'd'); // duplicate colour data (wasted space)
-    list_append(turtle.penPos, (unitype) turtle.peng, 'd');
-    list_append(turtle.penPos, (unitype) turtle.penb, 'd');
-    list_append(turtle.penPos, (unitype) turtle.pena, 'd');
-    list_append(turtle.penPos, (unitype) 67, 'h'); // blit quad signifier
-    list_append(turtle.penPos, (unitype) y2, 'd');
-}
-
-void turtleRectangleColor(double x1, double y1, double x2, double y2, double r, double g, double b, double a) {
-    list_append(turtle.penPos, (unitype) x1, 'd');
-    list_append(turtle.penPos, (unitype) y1, 'd');
-    list_append(turtle.penPos, (unitype) x2, 'd');
-    list_append(turtle.penPos, (unitype) (r / 255), 'd');
-    list_append(turtle.penPos, (unitype) (g / 255), 'd');
-    list_append(turtle.penPos, (unitype) (b / 255), 'd');
-    list_append(turtle.penPos, (unitype) (a / 255), 'd');
-    list_append(turtle.penPos, (unitype) 67, 'h'); // blit quad signifier
-    list_append(turtle.penPos, (unitype) y1, 'd'); // some unconventional formatting but it works
-
-    list_append(turtle.penPos, (unitype) x2, 'd');
-    list_append(turtle.penPos, (unitype) y2, 'd');
-    list_append(turtle.penPos, (unitype) x1, 'd');
-    list_append(turtle.penPos, (unitype) r, 'd'); // duplicate colour data (wasted space)
-    list_append(turtle.penPos, (unitype) g, 'd');
-    list_append(turtle.penPos, (unitype) b, 'd');
-    list_append(turtle.penPos, (unitype) a, 'd');
-    list_append(turtle.penPos, (unitype) 67, 'h'); // blit quad signifier
-    list_append(turtle.penPos, (unitype) y2, 'd');
-}
-
-/* adds a (blit) circle to the pipeline */
-void turtleCircle(double x, double y, double radius) {
-    list_append(turtle.penPos, (unitype) x, 'd');
-    list_append(turtle.penPos, (unitype) y, 'd');
-    list_append(turtle.penPos, (unitype) radius, 'd');
-    list_append(turtle.penPos, (unitype) turtle.penr, 'd');
-    list_append(turtle.penPos, (unitype) turtle.peng, 'd');
-    list_append(turtle.penPos, (unitype) turtle.penb, 'd');
-    list_append(turtle.penPos, (unitype) turtle.pena, 'd');
-    list_append(turtle.penPos, (unitype) 64, 'h'); // blit circle signifier
-    list_append(turtle.penPos, (unitype) turtle.circleprez, 'd');
-}
-
-/* create a triangle in 3D */
-void turtle3DTriangle(double x1, double y1, double z1, double x2, double y2, double z2, double x3, double y3, double z3) {
-    list_append(turtle.penPos, (unitype) x1, 'd');
-    list_append(turtle.penPos, (unitype) y1, 'd');
-    list_append(turtle.penPos, (unitype) z1, 'd');
-    list_append(turtle.penPos, (unitype) turtle.penr, 'd');
-    list_append(turtle.penPos, (unitype) turtle.peng, 'd');
-    list_append(turtle.penPos, (unitype) turtle.penb, 'd');
-    list_append(turtle.penPos, (unitype) turtle.pena, 'd');
-    list_append(turtle.penPos, (unitype) 130, 'h'); // blit 3D triangle signifier
-    list_append(turtle.penPos, (unitype) x2, 'd');
-
-    list_append(turtle.penPos, (unitype) y2, 'd');
-    list_append(turtle.penPos, (unitype) z2, 'd');
-    list_append(turtle.penPos, (unitype) x3, 'd');
-    list_append(turtle.penPos, (unitype) y3, 'd');
-    list_append(turtle.penPos, (unitype) z3, 'd');
-    list_append(turtle.penPos, (unitype) 0, 'd');
-    list_append(turtle.penPos, (unitype) 0, 'd');
-    list_append(turtle.penPos, (unitype) 130, 'h'); // blit 3D triangle signifier
-    list_append(turtle.penPos, (unitype) 0, 'd');
-}
-
-/* 3D -> 2D using perspective projection matrix */
-void turtlePerspective(double x, double y, double z, double *xOut, double *yOut) {
-    /* https://www.scratchapixel.com/lessons/3d-basic-rendering/perspective-and-orthographic-projection-matrix/building-basic-perspective-projection-matrix.html */
-    // double transform[16] = {
-    //     1, 0, 0, 0,
-    //     0, 1, 0, turtle.cameraDirectionLeftRight,
-    //     0, 0, 1, turtle.cameraDirectionUpDown,
-    //     0, 0, 0, 1,
-    // };
-    // x = x * transform[0 ] + y * transform[1 ] + z * transform[2 ] + transform[3 ];
-    // y = x * transform[4 ] + y * transform[5 ] + z * transform[6 ] + transform[7 ];
-    // z = x * transform[8 ] + y * transform[9 ] + z * transform[10] + transform[11];
-    // double outWTest = x * transform[12] + y * transform[13] + z * transform[14] + transform[15];
-    // x /= outWTest;
-    // y /= outWTest;
-    // z /= outWTest;
-    // double scalingFactor = 1 / (tan((turtle.cameraFOV / 2) / 57.2958));
-    // double near = 0.1;
-    // double hypot = (x - turtle.cameraX) * (x - turtle.cameraX) + (y - turtle.cameraY) * (y - turtle.cameraY) + (z - turtle.cameraZ) * (z - turtle.cameraZ);
-    // double far = 100;
-    // // double far = hypot * sin((90 - turtle.cameraDirectionUpDown) / 57.2958) * sin((90 - turtle.cameraDirectionLeftRight) / 57.2958);
-    // double threeThree = -far / (far - near);
-    // double perspective[16] = {
-    //     scalingFactor, 0,             0,                 0,
-    //     0,             scalingFactor, 0,                 0,
-    //     0,             0,             threeThree,       -1,
-    //     0,             0,             threeThree * near, 0,
-    // };
-    // double outX = x * perspective[0 ] + y * perspective[1 ] + z * perspective[2 ] + perspective[3 ];
-    // double outY = x * perspective[4 ] + y * perspective[5 ] + z * perspective[6 ] + perspective[7 ];
-    // // double outZ = x * perspective[8 ] + y * perspective[9 ] + z * perspective[10] + perspective[11];
-    // double outW = x * perspective[12] + y * perspective[13] + z * perspective[14] + perspective[15];
-    // outX /= outW;
-    // outY /= outW;
-    // *xOut = outX * 640;
-    // *yOut = outY * 360;
-    // printf("%lf %lf\n", *xOut, *yOut);
-}
-
-/* draws the turtle's path on the screen */
-void turtleUpdate() {
-    /* used to have a feature that only redrew the screen if there have been any changes from last frame, but it has been removed.
-       opted to redraw every frame and not list_copy, an alternative is hashing the penPos list. An interesting idea for sure... for another time */
-    int8_t changed = 0;
-    uint32_t len = turtle.penPos -> length;
-    unitype *ren = turtle.penPos -> data;
-    int8_t *renType = turtle.penPos -> type;
-    uint64_t oldHash = turtle.penHash;
-    turtle.penHash = 0; // I don't use this but it's an idea: https://stackoverflow.com/questions/57455444/very-low-collision-non-cryptographic-hashing-function
-    for (uint32_t i = 0; i < len; i++) {
-        turtle.penHash += (uint64_t) turtle.penPos -> data[i].p; // simple addition hash. I know not technically safe since i cast all sizes to 8 byte, but it should still work
-    }
-    if (len != turtle.lastLength || oldHash != turtle.penHash) {
-        changed = 1;
-        turtle.lastLength = len;
-    }
-    if (changed) {
-        double xfact = (turtle.bounds[2] - turtle.bounds[0]) / 2;
-        double yfact = (turtle.bounds[3] - turtle.bounds[1]) / 2;
-        xfact = 1 / xfact;
-        yfact = 1 / yfact;
-        double lastSize = -1;
-        double lastPrez = -1;
-        double precomputedLog = 5;
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        for (int32_t i = 0; i < (int32_t) len; i += 9) {
-            if (renType[i] == 'd') {
-                switch (ren[i + 7].h) {
-                case 0:
-                    if (!(lastSize == ren[i + 2].d) || !(lastPrez != ren[i + 8].d)) {
-                        precomputedLog = ren[i + 8].d * log(2.71 + ren[i + 2].d);
-                    }
-                    lastSize = ren[i + 2].d;
-                    lastPrez = ren[i + 8].d;
-                    turtleCircleRender(ren[i].d, ren[i + 1].d, ren[i + 2].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xfact, yfact, precomputedLog);
-                break;
-                case 1:
-                    turtleSquareRender(ren[i].d - ren[i + 2].d, ren[i + 1].d - ren[i + 2].d, ren[i].d + ren[i + 2].d, ren[i + 1].d + ren[i + 2].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xfact, yfact);
-                break;
-                case 2:
-                    turtleTriangleRender(ren[i].d - ren[i + 2].d, ren[i + 1].d - ren[i + 2].d, ren[i].d + ren[i + 2].d, ren[i + 1].d - ren[i + 2].d, ren[i].d, ren[i + 1].d + ren[i + 2].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xfact, yfact);
-                break;
-                case 5:
-                    if (i - 9 < 0 || renType[i - 9] == 'c') {
-                        if (!(lastSize == ren[i + 2].d) || !(lastPrez != ren[i + 8].d)) {
-                            precomputedLog = ren[i + 8].d * log(2.71 + ren[i + 2].d);
-                        }
-                        lastSize = ren[i + 2].d;
-                        lastPrez = ren[i + 8].d;
-                        turtleCircleRender(ren[i].d, ren[i + 1].d, ren[i + 2].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xfact, yfact, precomputedLog);
-                    }
-                break;
-                default:
-                break;
-                }
-                if (i + 18 < (int32_t) len && renType[i + 9] == 'd' && ren[i + 7].h < 64 && (ren[i + 7].h == 4 || ren[i + 7].h == 5 || (fabs(ren[i].d - ren[i + 9].d) > ren[i + 2].d / 2 || fabs(ren[i + 1].d - ren[i + 10].d) > ren[i + 2].d / 2))) { // tests for next point continuity and also ensures that the next point is at sufficiently different coordinates
-                    double dir = atan((ren[i + 9].d - ren[i].d) / (ren[i + 1].d - ren[i + 10].d));
-                    double sinn = sin(dir + M_PI / 2);
-                    double coss = cos(dir + M_PI / 2);
-                    turtleQuadRender(ren[i].d + ren[i + 2].d * sinn, ren[i + 1].d - ren[i + 2].d * coss, ren[i + 9].d + ren[i + 2].d * sinn, ren[i + 10].d - ren[i + 2].d * coss, ren[i + 9].d - ren[i + 2].d * sinn, ren[i + 10].d + ren[i + 2].d * coss, ren[i].d - ren[i + 2].d * sinn, ren[i + 1].d + ren[i + 2].d * coss, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xfact, yfact);
-                    if ((ren[i + 7].h == 4 || ren[i + 7].h == 5) && i + 18 < (int32_t) len && renType[i + 18] == 'd') {
-                        double dir2 = atan((ren[i + 18].d - ren[i + 9].d) / (ren[i + 10].d - ren[i + 19].d));
-                        double sinn2 = sin(dir2 + M_PI / 2);
-                        double coss2 = cos(dir2 + M_PI / 2);
-                        turtleTriangleRender(ren[i + 9].d + ren[i + 2].d * sinn, ren[i + 10].d - ren[i + 2].d * coss, ren[i + 9].d - ren[i + 2].d * sinn, ren[i + 10].d + ren[i + 2].d * coss, ren[i + 9].d + ren[i + 11].d * sinn2, ren[i + 10].d - ren[i + 11].d * coss2, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xfact, yfact); // in a perfect world the program would know which one of these triangles to render (to blend the segments)
-                        turtleTriangleRender(ren[i + 9].d + ren[i + 2].d * sinn, ren[i + 10].d - ren[i + 2].d * coss, ren[i + 9].d - ren[i + 2].d * sinn, ren[i + 10].d + ren[i + 2].d * coss, ren[i + 9].d - ren[i + 11].d * sinn2, ren[i + 10].d + ren[i + 11].d * coss2, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xfact, yfact); // however we live in a world where i am bad at math, so it just renders both no matter what (one has no effect)
+            if (ribbonRender.output[2] == 2) { // Save
+                if (strcmp(osToolsFileDialog.selectedFilename, "null") == 0) {
+                    if (osToolsFileDialogPrompt(1, "") != -1) {
+                        printf("Saved to: %s\n", osToolsFileDialog.selectedFilename);
                     }
                 } else {
-                    if (ren[i + 7].h == 4 && i > 8 && renType[i - 8] == 'c') {
-                        if (!(lastSize == ren[i + 2].d) || !(lastPrez != ren[i + 8].d)) {
-                            precomputedLog = ren[i + 8].d * log(2.71 + ren[i + 2].d);
-                        }
-                        lastSize = ren[i + 2].d;
-                        lastPrez = ren[i + 8].d;
-                        turtleCircleRender(ren[i].d, ren[i + 1].d, ren[i + 2].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xfact, yfact, precomputedLog);
-                    }
-                    if (ren[i + 7].h == 5 && i > 8) {
-                        if (!(lastSize == ren[i + 2].d) || !(lastPrez != ren[i + 8].d)) {
-                            precomputedLog = ren[i + 8].d * log(2.71 + ren[i + 2].d);
-                        }
-                        lastSize = ren[i + 2].d;
-                        lastPrez = ren[i + 8].d;
-                        turtleCircleRender(ren[i].d, ren[i + 1].d, ren[i + 2].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xfact, yfact, precomputedLog);
-                    }
+                    printf("Saved to: %s\n", osToolsFileDialog.selectedFilename);
                 }
-                if (ren[i + 7].h == 64) { // blit circle
-                    if (!(lastSize == ren[i + 2].d) || !(lastPrez != ren[i + 8].d)) {
-                        precomputedLog = ren[i + 8].d * log(2.71 + ren[i + 2].d);
-                    }
-                    lastSize = ren[i + 2].d;
-                    lastPrez = ren[i + 8].d;
-                    turtleCircleRender(ren[i].d, ren[i + 1].d, ren[i + 2].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xfact, yfact, precomputedLog);
+            }
+            if (ribbonRender.output[2] == 3) { // Save As...
+                if (osToolsFileDialogPrompt(1, "") != -1) {
+                    printf("Saved to: %s\n", osToolsFileDialog.selectedFilename);
                 }
-                if (ren[i + 7].h == 66) { // blit triangle
-                    turtleTriangleRender(ren[i].d, ren[i + 1].d, ren[i + 2].d, ren[i + 8].d, ren[i + 9].d, ren[i + 10].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xfact, yfact);
-                    i += 9;
-                }
-                if (ren[i + 7].h == 67) { // blit quad
-                    turtleQuadRender(ren[i].d, ren[i + 1].d, ren[i + 2].d, ren[i + 8].d, ren[i + 9].d, ren[i + 10].d, ren[i + 11].d, ren[i + 17].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xfact, yfact);
-                    i += 9;
-                }
-                if (ren[i + 7].h == 128) { // blit 3D sphere
-
-                }
-                if (ren[i + 7].h == 129) { // blit 3D circle
-
-                }
-                if (ren[i + 7].h == 130) { // blit 3D triangle
-                    turtlePerspective(ren[i].d, ren[i + 1].d, ren[i + 2].d, &ren[i].d, &ren[i + 1].d);
-                    turtlePerspective(ren[i + 8].d, ren[i + 9].d, ren[i + 10].d, &ren[i + 8].d, &ren[i + 9].d);
-                    turtlePerspective(ren[i + 11].d, ren[i + 12].d, ren[i + 13].d, &ren[i + 11].d, &ren[i + 12].d);
-                    turtleTriangleRender(ren[i].d, ren[i + 1].d, ren[i + 8].d, ren[i + 9].d, ren[i + 11].d, ren[i + 12].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xfact, yfact);
-                    i += 9;
-                }
-                if (ren[i + 7].h == 131) { // blit 3D quad
-
+            }
+            if (ribbonRender.output[2] == 4) { // Open
+                if (osToolsFileDialogPrompt(0, "") != -1) {
+                    printf("Loaded data from: %s\n", osToolsFileDialog.selectedFilename);
                 }
             }
         }
-        glfwSwapBuffers(turtle.window);
-    }
-    glfwPollEvents();
-    if (glfwWindowShouldClose(turtle.window)) {
-        turtle.close = 1;
-        if (turtle.popupClose) {
-            glfwTerminate();
+        if (ribbonRender.output[1] == 1) { // Edit
+            if (ribbonRender.output[2] == 1) { // Undo
+                printf("Undo\n");
+            }
+            if (ribbonRender.output[2] == 2) { // Redo
+                printf("Redo\n");
+            }
+            if (ribbonRender.output[2] == 3) { // Cut
+                osToolsClipboardSetText("test123");
+                printf("Cut \"test123\" to clipboard!\n");
+            }
+            if (ribbonRender.output[2] == 4) { // Copy
+                osToolsClipboardSetText("test345");
+                printf("Copied \"test345\" to clipboard!\n");
+            }
+            if (ribbonRender.output[2] == 5) { // Paste
+                osToolsClipboardGetText();
+                printf("Pasted \"%s\" from clipboard!\n", osToolsClipboard.text);
+            }
         }
-        
+        if (ribbonRender.output[1] == 2) { // View
+            if (ribbonRender.output[2] == 1) { // Change theme
+                printf("Change theme\n");
+                if (tt_theme == TT_THEME_DARK) {
+                    turtleBgColor(36, 30, 32);
+                    turtleToolsSetTheme(TT_THEME_COLT);
+                } else if (tt_theme == TT_THEME_COLT) {
+                    turtleBgColor(212, 201, 190);
+                    turtleToolsSetTheme(TT_THEME_NAVY);
+                } else if (tt_theme == TT_THEME_NAVY) {
+                    turtleBgColor(255, 255, 255);
+                    turtleToolsSetTheme(TT_THEME_LIGHT);
+                } else if (tt_theme == TT_THEME_LIGHT) {
+                    turtleBgColor(30, 30, 30);
+                    turtleToolsSetTheme(TT_THEME_DARK);
+                }
+            } 
+            if (ribbonRender.output[2] == 2) { // GLFW
+                printf("GLFW settings\n");
+            } 
+        }
     }
 }
 
-/* keeps the window open while doing nothing else (from python turtleMainLoop()) */
-void turtleMainLoop() {
-    while (turtle.close == 0) {
-        turtleUpdate();
+void parsePopupOutput(GLFWwindow *window) {
+    if (popup.output[0] == 1) {
+        popup.output[0] = 0; // untoggle
+        if (popup.output[1] == 0) { // cancel
+            turtle.close = 0;
+            glfwSetWindowShouldClose(window, 0);
+        }
+        if (popup.output[1] == 1) { // close
+            turtle.popupClose = 1;
+        }
     }
 }
 
-/* free turtle memory */
-void turtleFree() {
-    list_free(turtle.keyPressed);
-    list_free(turtle.penPos);
+int main(int argc, char *argv[]) {
+    /* Initialize glfw */
+    if (!glfwInit()) {
+        return -1;
+    }
+    glfwWindowHint(GLFW_SAMPLES, 4); // MSAA (Anti-Aliasing) with 4 samples (must be done before window is created (?))
+
+    /* Create a windowed mode window and its OpenGL context */
+    const GLFWvidmode *monitorSize = glfwGetVideoMode(glfwGetPrimaryMonitor());
+    int32_t windowHeight = monitorSize -> height * 0.85;
+    GLFWwindow *window = glfwCreateWindow(windowHeight * 16 / 9, windowHeight, "turtle demo", NULL, NULL);
+    if (!window) {
+        glfwTerminate();
+        return -1;
+    }
+    glfwMakeContextCurrent(window);
+    glfwSetWindowSizeLimits(window, windowHeight * 16 / 9, windowHeight, windowHeight * 16 / 9, windowHeight);
+
+    /* initialize turtle */
+    turtleInit(window, -320, -180, 320, 180);
+    /* initialise turtleText */
+    turtleTextInit("config/roberto.tgl");
+    /* initialise turtleTools ribbon */
+    turtleToolsSetTheme(TT_THEME_DARK); // dark theme preset
+    ribbonInit("config/ribbonConfig.txt");
+    /* initialise turtleTools popup */
+    popupInit("config/popupConfig.txt", -60, -20, 60, 20);
+    /* initialise osTools */
+    osToolsInit(argv[0], window); // must include argv[0] to get executableFilepath, must include GLFW window
+    osToolsFileDialogAddExtension("txt"); // add txt to extension restrictions
+    list_t *rowLike = osToolsLoadCSVString("config/test.csv", OSTOOLS_CSV_ROW);
+    list_t *columnLike = osToolsLoadCSVString("config/test.csv", OSTOOLS_CSV_COLUMN);
+    if (rowLike != NULL) {
+        list_print(rowLike);
+    }
+    if (columnLike != NULL) {
+        list_print(columnLike);
+    }
+
+    uint32_t tps = 120; // ticks per second (locked to fps in this case)
+    uint64_t tick = 0; // count number of ticks since application started
+    clock_t start, end;
+
+    turtleBgColor(30, 30, 30);
+    int8_t buttonVar, switchVar = 0;
+    int32_t dropdownVar = 0;
+    double dialVar = 0.0, sliderVar = 0.0, scrollbarVarX = 0.0, scrollbarVarY = 0.0;
+    list_t *dropdownOptions = list_init();
+    list_append(dropdownOptions, (unitype) "a", 's');
+    list_append(dropdownOptions, (unitype) "long item", 's');
+    list_append(dropdownOptions, (unitype) "very long item name", 's');
+    list_append(dropdownOptions, (unitype) "b", 's');
+    list_append(dropdownOptions, (unitype) "c", 's');
+    list_append(dropdownOptions, (unitype) "d", 's');
+    list_append(dropdownOptions, (unitype) "e", 's');
+    tt_button_t *button = buttonInit("button", &buttonVar, 150, 20, 10);
+    button -> shape = TT_BUTTON_SHAPE_ROUNDED_RECTANGLE;
+    switchInit("switch", &switchVar, 150, -20, 10);
+    dialInit("dial", &dialVar, TT_DIAL_EXP, -150, 20, 10, 0, 1000, 1);
+    dialInit("dial", &dialVar, TT_DIAL_LINEAR, -150, -20, 10, 0, 1000, 1);
+    sliderInit("slider", &sliderVar, TT_SLIDER_HORIZONTAL, TT_SLIDER_ALIGN_LEFT, -100, 35, 10, 50, 0, 255, 1);
+    sliderInit("slider", &sliderVar, TT_SLIDER_HORIZONTAL, TT_SLIDER_ALIGN_CENTER, 0, 35, 10, 50, 0, 255, 1);
+    sliderInit("slider", &sliderVar, TT_SLIDER_HORIZONTAL, TT_SLIDER_ALIGN_RIGHT, 100, 35, 10, 50, 0, 255, 1);
+    sliderInit("slider", &sliderVar, TT_SLIDER_VERTICAL, TT_SLIDER_ALIGN_LEFT, -100, -35, 10, 50, 0, 255, 1);
+    sliderInit("slider", &sliderVar, TT_SLIDER_VERTICAL, TT_SLIDER_ALIGN_CENTER, 0, -35, 10, 50, 0, 255, 1);
+    sliderInit("slider", &sliderVar, TT_SLIDER_VERTICAL, TT_SLIDER_ALIGN_RIGHT, 100, -35, 10, 50, 0, 255, 1);
+    scrollbarInit(&scrollbarVarX, TT_SCROLLBAR_HORIZONTAL, 20, -170, 10, 550, 50);
+    scrollbarInit(&scrollbarVarY, TT_SCROLLBAR_VERTICAL, 310, 0, 10, 320, 33);
+    dropdownInit("dropdown", dropdownOptions, &dropdownVar, TT_DROPDOWN_ALIGN_CENTER, 0, 70, 10);
+    textboxInit("Textbox", 128, -50, -110, 10, 100);
+
+    double power = 0.0, speed = 0.0, exposure = 0.0, x = 103, y = 95, z = 215;
+    int8_t xEnabled = 0, yEnabled = 1, zEnabled = 0;
+    list_t *sources = list_init();
+    int sourceIndex = 0;
+    list_append(sources, (unitype) "None", 's');
+    list_append(sources, (unitype) "SP932", 's');
+    list_append(sources, (unitype) "SP932U", 's');
+    list_append(sources, (unitype) "SP928", 's');
+    list_append(sources, (unitype) "SP1203", 's');
+    list_append(sources, (unitype) "SP-1550M", 's');
+    dialInit("Power", &power, TT_DIAL_LINEAR, -150, -210, 10, 0, 100, 1);
+    dialInit("Speed", &speed, TT_DIAL_LINEAR, -100, -210, 10, 0, 1000, 1);
+    dialInit("Exposure", &exposure, TT_DIAL_EXP, -50, -210, 10, 0, 1000, 1);
+    dropdownInit("Source", sources, &sourceIndex, TT_DROPDOWN_ALIGN_LEFT, -10, -207, 10);
+    tt_slider_t *xSlider = sliderInit("", &x, TT_SLIDER_HORIZONTAL, TT_SLIDER_ALIGN_CENTER, -100, -240, 10, 100, -300, 300, 0);
+    tt_slider_t *ySlider = sliderInit("", &y, TT_SLIDER_HORIZONTAL, TT_SLIDER_ALIGN_CENTER, -100, -260, 10, 100, -300, 300, 0);
+    tt_slider_t *zSlider = sliderInit("", &z, TT_SLIDER_HORIZONTAL, TT_SLIDER_ALIGN_CENTER, -100, -280, 10, 100, -300, 300, 0);
+    switchInit("", &xEnabled, -10, -240, 10);
+    switchInit("", &yEnabled, -10, -260, 10);
+    switchInit("", &zEnabled, -10, -280, 10);
+
+    int8_t sideswipe = 0, checkbox = 1, xbox = 1;
+    tt_switch_t *switch_sideswipe = switchInit("Side Swipe", &sideswipe, 305, 15, 10);
+    tt_switch_t *switch_checkbox = switchInit("Checkbox", &checkbox, 300, 0, 10);
+    tt_switch_t *switch_xbox = switchInit("Xbox", &xbox, 300, -15, 10);
+    switch_sideswipe -> style = TT_SWITCH_STYLE_SIDESWIPE_LEFT;
+    switch_checkbox -> style = TT_SWITCH_STYLE_CHECKBOX;
+    switch_xbox -> style = TT_SWITCH_STYLE_XBOX;
+    int8_t textButton = 0, circleButton = 0;
+    tt_button_t *button_textButton = buttonInit("Text Button", &textButton, 330, -30, 10);
+    tt_button_t *button_circleButton = buttonInit("Circle Button", &circleButton, 338, -88, 10);
+    button_textButton -> shape = TT_BUTTON_SHAPE_TEXT;
+    button_circleButton -> shape = TT_BUTTON_SHAPE_CIRCLE;
+
+
+    list_t *xPositions = list_init();
+    list_t *yPositions = list_init();
+    for (uint32_t i = 0; i < tt_elements.all -> length; i++) {
+        list_append(xPositions, (unitype) ((tt_button_t *) tt_elements.all -> data[i].p) -> x, 'd');
+        list_append(yPositions, (unitype) ((tt_button_t *) tt_elements.all -> data[i].p) -> y, 'd');
+    }
+
+    double scroll = 0.0;
+    double scrollFactor = 15;
+    while (turtle.popupClose == 0) {
+        start = clock();
+        turtleGetMouseCoords();
+        turtleClear();
+        /* update element positions */
+        for (uint32_t i = 0; i < tt_elements.all -> length; i++) {
+            if (((tt_button_t *) tt_elements.all -> data[i].p) -> element != TT_ELEMENT_SCROLLBAR) {
+                ((tt_button_t *) tt_elements.all -> data[i].p) -> x = xPositions -> data[i].d - scrollbarVarX * 5;
+                ((tt_button_t *) tt_elements.all -> data[i].p) -> y = yPositions -> data[i].d + scrollbarVarY * 3.3;
+            }
+        }
+
+        /* write element annotations */
+        tt_setColor(TT_COLOR_TEXT);
+        turtleTextWriteStringf(-310, -170, 5, 0, "%.2lf, %.2lf", turtle.mouseX, turtle.mouseY);
+        turtleTextWriteString("X", xSlider -> x - xSlider -> length / 2 - xSlider -> size, xSlider -> y, xSlider -> size - 1, 100);
+        turtleTextWriteStringf(ySlider -> x + xSlider -> length / 2 + xSlider -> size, xSlider -> y, 4, 0, "%.01lf", round(x) / 10);
+        turtleTextWriteString("Y", xSlider -> x - ySlider -> length / 2 - xSlider -> size, ySlider -> y, xSlider -> size - 1, 100);
+        turtleTextWriteStringf(ySlider -> x + ySlider -> length / 2 + xSlider -> size, ySlider -> y, 4, 0, "%.01lf", round(y) / 10);
+        turtleTextWriteString("Z", zSlider -> x - zSlider -> length / 2 - xSlider -> size, zSlider -> y, xSlider -> size - 1, 100);
+        turtleTextWriteStringf(zSlider -> x + zSlider -> length / 2 + xSlider -> size, zSlider -> y, 4, 0, "%.01lf", round(z) / 10);
+
+        /* write all characters supported */
+        turtleTextWriteUnicode((uint8_t *) u8"AÀÁĂÄÃÅĀĄÆBCĆČĊÇDĎĐÐEÈÉĚÊËĒĖĘƏFGĞĠHĦ", scrollbarVarX * -5 + 320, scrollbarVarY * 3.3 - 180, 10, 0);
+        turtleTextWriteUnicode((uint8_t *) u8"IÌÍÎÏĪİĮJKĶLĹĽĻŁĿMNŃŇÑŅOÒÓÔÖÕŐØŒPQRŔŘSŚŠŞȘ", scrollbarVarX * -5 + 320, scrollbarVarY * 3.3 - 195, 10, 0);
+        turtleTextWriteUnicode((uint8_t *) u8"ẞTŤȚÞUÙÚÛÜŮŰŪŲVWXYÝZŹŽŻaàáâăäãåāąæbcć", scrollbarVarX * -5 + 320, scrollbarVarY * 3.3 - 210, 10, 0);
+        turtleTextWriteUnicode((uint8_t *) u8"čċçdďđðeèéěêëēėęəfgğġhħiìíîïīıįjkķlĺľļłŀmnńňñņoòóôö", scrollbarVarX * -5 + 320, scrollbarVarY * 3.3 - 225, 10, 0);
+        turtleTextWriteUnicode((uint8_t *) u8"õőøœpqrŕřsśšşșßtťțþuùúûüůűūųvwxyýzźžż", scrollbarVarX * -5 + 320, scrollbarVarY * 3.3 - 240, 10, 0);
+        turtleTextWriteUnicode((uint8_t *) u8"АБВГҐҒДЂЕЁЄӘЖӁЗИӢЙІЇЈКҚҜЛЉМНҢЊОӨПРСТ", scrollbarVarX * -5 + 320, scrollbarVarY * 3.3 - 255, 10, 0);
+        turtleTextWriteUnicode((uint8_t *) u8"ЋУӮҮҰЎФХҲҺЦЧҶҸЏШЩЪЫЬЭЮЯабвгґғдђеёєәж", scrollbarVarX * -5 + 320, scrollbarVarY * 3.3 - 270, 10, 0);
+        turtleTextWriteUnicode((uint8_t *) u8"ӂзиӣйіїјкқҝлљмнңњоөпрстћуӯүұўфхҳһцчҷҹџшщъ", scrollbarVarX * -5 + 320, scrollbarVarY * 3.3 - 285, 10, 0);
+        turtleTextWriteUnicode((uint8_t *) u8"ыьэюя", scrollbarVarX * -5 + 320, scrollbarVarY * 3.3 - 300, 10, 0);
+        turtleTextWriteUnicode((uint8_t *) u8"ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩ", scrollbarVarX * -5 + 320, scrollbarVarY * 3.3 - 315, 10, 0);
+        turtleTextWriteUnicode((uint8_t *) u8"αβγδεζηθικλμνξοπρσςτυφχψω", scrollbarVarX * -5 + 320, scrollbarVarY * 3.3 - 330, 10, 0);
+        turtleTextWriteUnicode((uint8_t *) u8"1234567890!@#$£€₺₽¥₩₹₣฿%^&*()`~-_=+[{]}\\|;:‘'’“\"”,", scrollbarVarX * -5 + 320, scrollbarVarY * 3.3 - 345, 10, 0);
+        turtleTextWriteUnicode((uint8_t *) u8"<.>/?½¨", scrollbarVarX * -5 + 320, scrollbarVarY * 3.3 - 360, 10, 0);
+
+        // turtlePenColor(0, 0, 0);
+        // turtle3DTriangle(-5, 0, 10, 5, 0, 10, 0, 5, 10);
+
+        scroll = turtleMouseWheel();
+        if (scroll != 0) {
+            if (turtleKeyPressed(GLFW_KEY_LEFT_SHIFT)) {
+                scrollbarVarX -= scroll * scrollFactor;
+                if (scrollbarVarX < 0) {
+                    scrollbarVarX = 0;
+                }
+                if (scrollbarVarX > 100) {
+                    scrollbarVarX = 100;
+                }
+            } else {
+                scrollbarVarY -= scroll * scrollFactor;
+                if (scrollbarVarY < 0) {
+                    scrollbarVarY = 0;
+                }
+                if (scrollbarVarY > 100) {
+                    scrollbarVarY = 100;
+                }
+            }
+        }
+        turtleToolsUpdate(); // update turtleTools
+        parseRibbonOutput(); // user defined function to use ribbon
+        parsePopupOutput(window); // user defined function to use popup
+        turtleUpdate(); // update the screen
+        end = clock();
+        while ((double) (end - start) / CLOCKS_PER_SEC < (1.0 / tps)) {
+            end = clock();
+        }
+        tick++;
+    }
+    turtleFree();
+    glfwTerminate();
+    return 0;
 }
