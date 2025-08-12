@@ -1,4 +1,4 @@
-#include "include/turtle.h"
+#include "../include/turtle.h"
 
 /* 
 openGL implementation of turtle and the turtletools module

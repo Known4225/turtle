@@ -13983,7 +13983,7 @@ int win32comInit(win32ComPortObject *com, char *name) {
     }
     com -> comHandle = CreateFileA(comName, GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, NULL);
     if (com -> comHandle == INVALID_HANDLE_VALUE) {
-        printf("Could not open com port %s, error %d\n", name, GetLastError());
+        printf("Could not open com port %s, error %ld\n", name, GetLastError());
         return -1;
     } else {
         printf("Successfully opened port %s\n", name);
@@ -13996,7 +13996,7 @@ int win32comInit(win32ComPortObject *com, char *name) {
     fSuccess = GetCommState(com -> comHandle, &dcb);
     if (!fSuccess) {
         /* Handle the error. */
-        printf("GetCommState failed with error %d.\n", GetLastError());
+        printf("GetCommState failed with error %ld.\n", GetLastError());
         return -1;
     }
     /* Fill in some DCB values and set the com state: 
@@ -14008,14 +14008,14 @@ int win32comInit(win32ComPortObject *com, char *name) {
     fSuccess = SetCommState(com -> comHandle, &dcb);
     if (!fSuccess) {
         /* Handle the error. */
-        printf("SetCommState failed with error %d.\n", GetLastError());
+        printf("SetCommState failed with error %ld.\n", GetLastError());
         return -1;
     }
     /* Get the comm config again. */
     fSuccess = GetCommState(com -> comHandle, &dcb);
     if (!fSuccess) {
         /* Handle the error. */
-        printf("GetCommState failed with error %d.\n", GetLastError());
+        printf("GetCommState failed with error %ld.\n", GetLastError());
         return -1;
     }
     return 0;
@@ -14026,7 +14026,7 @@ int win32comSend(win32ComPortObject *com, unsigned char *data, int length) {
     /* https://www.codeproject.com/Articles/3061/Creating-a-Serial-communication-on-Win32#sending */
     DWORD bytes;
     if (WriteFile(com -> comHandle, data, length, &bytes, NULL) == 0) {
-        printf("win32comSend failed with error %d\n", GetLastError());
+        printf("win32comSend failed with error %ld\n", GetLastError());
         return -1;
     }
     return bytes;
@@ -14036,7 +14036,7 @@ int win32comSend(win32ComPortObject *com, unsigned char *data, int length) {
 int win32comReceive(win32ComPortObject *com, unsigned char *buffer, int length) {
     DWORD bytes;
     if (ReadFile(com -> comHandle, buffer, length, &bytes, NULL) == 0) {
-        printf("win32comReceive failed with error %d\n", GetLastError());
+        printf("win32comReceive failed with error %ld\n", GetLastError());
         return -1;
     }
     return bytes;
@@ -14045,7 +14045,7 @@ int win32comReceive(win32ComPortObject *com, unsigned char *buffer, int length) 
 /* closes a com port */
 int win32comClose(win32ComPortObject *com) {
     if (CloseHandle(com -> comHandle) == 0) {
-        printf("win32comClosefailed with error %d\n", GetLastError());
+        printf("win32comClosefailed with error %ld\n", GetLastError());
         return -1;
     }
     return 0;
@@ -14175,7 +14175,7 @@ int win32tcpInit(char *address, char *port) {
 }
 
 int win32newSocket() {
-
+    return 0;
 }
 
 SOCKET *win32tcpCreateSocket() {
@@ -14233,7 +14233,7 @@ SOCKET *win32tcpCreateSocket() {
 }
 
 int win32tcpSend(SOCKET *socket, unsigned char *data, int length) {
-    int status = send(*socket, data, length, 0 );
+    int status = send(*socket, (const char *) data, length, 0 );
     if (status == SOCKET_ERROR) {
         closesocket(*socket);
         return 1;
@@ -14245,7 +14245,7 @@ int win32tcpReceive(SOCKET *socket, unsigned char *buffer, int length) {
     int status = 1;
     int bytes = 0;
     while (status > 0) {
-        status = recv(*socket, buffer, length, 0);
+        status = recv(*socket, (char *) buffer, length, 0);
         if (status > 0) {
             // printf("Bytes received: %d\n", status);
         } else if (status == 0) {
@@ -14263,7 +14263,7 @@ int win32tcpReceive(SOCKET *socket, unsigned char *buffer, int length) {
 
 int win32tcpReceive2(SOCKET *socket, unsigned char *buffer, int length) {
     int status = 1;
-    status = recv(*socket, buffer, length, 0);
+    status = recv(*socket, (char *) buffer, length, 0);
     if (status > 0) {
         // printf("Bytes received: %d\n", status);
     } else if (status == 0) {

@@ -1,4 +1,4 @@
-#include "include/turtleText.h"
+#include "../include/turtleText.h"
 
 /* turtleText uses openGL and the turtle library to render text on the screen */
 

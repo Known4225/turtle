@@ -9,7 +9,7 @@ This application bundles all turtle libraries into a single portable header file
 #include <string.h>
 
 /* define output file */
-const char outputFile[] = "singlefile_output/turtle.h";
+const char outputFile[] = "turtle.h";
 
 const char wrappingMacro[] = "TURTLE_H"; // this macro guards the entire file
 const char sourceMacro[] = "TURTLE_IMPLEMENTATION"; // this macro enables all source implementation macros
@@ -59,19 +59,26 @@ const int32_t dependencyTree[] = {
 /* check if this line of code should not be included in the final output, return 1 if the line is blacklisted */
 int32_t lineBlacklist(char *line) {
     /* blacklist any #includes to my own files (as they won't exist in the singlefile version) */
-    if (line[0] != '#') {
+    if (line[0] != '#' || line[1] != 'i') {
         return 0;
     }
-    char blacklisted[headerLength * 2][128];
+    char blacklisted[headerLength * 6][128];
     for (int32_t i = 0; i < headerLength; i++) {
-        sprintf(blacklisted[i], "#include \"%s\"\n", headerFiles[i]);
+        sprintf(blacklisted[i], "#include \"%s\"\r\n", headerFiles[i] + 8); // linux
+        sprintf(blacklisted[i + headerLength], "#include \"%s\"\n", headerFiles[i] + 8); // windows (ridiculous, windows turns \n into \r\n for NO REASON)
     }
     for (int32_t i = 0; i < headerLength; i++) {
-        sprintf(blacklisted[i + headerLength], "#include \"%s\"\n", headerFiles[i] + 8);
+        sprintf(blacklisted[i + headerLength * 2], "#include \"%s\"\r\n", headerFiles[i]);
+        sprintf(blacklisted[i + headerLength * 3], "#include \"%s\"\n", headerFiles[i]);
     }
-    for (int32_t i = 0; i < headerLength * 2; i++) {
-        // printf("%s%s\n", blacklisted[i], line);
+    for (int32_t i = 0; i < headerLength; i++) {
+        sprintf(blacklisted[i + headerLength * 4], "#include \"../%s\"\r\n", headerFiles[i]);
+        sprintf(blacklisted[i + headerLength * 5], "#include \"../%s\"\n", headerFiles[i]);
+    }
+    for (int32_t i = 0; i < headerLength * 6; i++) {
+        // printf("%s%s %d\n", blacklisted[i], line, strcmp(blacklisted[i], line));
         if (strcmp(blacklisted[i], line) == 0) {
+            // printf("found %s", blacklisted[i]);
             return 1;
         }
     }
