@@ -14,3 +14,5 @@ winlib:
 	cp turtle.h turtlelib.c
 	gcc turtlelib.c -c -L./Windows -lglfw3 -lopengl32 -lgdi32 -lglad -lole32 -luuid -lwsock32 -lWs2_32 -DTURTLE_IMPLEMENTATION -DOS_WINDOWS -O3 -o Windows/turtle.lib
 	rm turtlelib.c
+singlefile:
+	gcc --version
