@@ -35,12 +35,14 @@ typedef struct {
     int32_t screenbounds[2]; // list of screen bounds (pixels)
     int32_t lastscreenbounds[2]; // list of screen bounds last frame
     int32_t initscreenbounds[2]; // screenbounds at initialisation
+    int32_t initbounds[4]; // list of coordinate bounds at initialisation (minX, minY, maxX, maxY)
     int32_t bounds[4]; // list of coordinate bounds (minX, minY, maxX, maxY)
+    double centerAndScale[4]; // centerX, centerY, ratioX, ratioY
     double mouseX; // mouseX and mouseY variables
     double mouseY;
     double scrollY;
-    double mouseScaX;
-    double mouseScaY;
+    // double mouseScaX;
+    // double mouseScaY;
     double mouseAbsX;
     double mouseAbsY;
     double x; // x and y position of the turtle
@@ -141,16 +143,16 @@ void turtlePenPrez(double prez);
 void turtleGoto(double x, double y);
 
 /* draws a circle at the specified x and y (coordinates) */
-void turtleCircleRender(double x, double y, double rad, double r, double g, double b, double a, double xfact, double yfact, double prez);
+void turtleCircleRender(double x, double y, double rad, double r, double g, double b, double a, double xcenter, double ycenter, double xfact, double yfact, double prez);
 
 /* draws a square */
-void turtleSquareRender(double x1, double y1, double x2, double y2, double r, double g, double b, double a, double xfact, double yfact);
+void turtleSquareRender(double x1, double y1, double x2, double y2, double r, double g, double b, double a, double xcenter, double ycenter, double xfact, double yfact);
 
 /* draws a triangle */
-void turtleTriangleRender(double x1, double y1, double x2, double y2, double x3, double y3, double r, double g, double b, double a, double xfact, double yfact);
+void turtleTriangleRender(double x1, double y1, double x2, double y2, double x3, double y3, double r, double g, double b, double a, double xcenter, double ycenter, double xfact, double yfact);
 
 /* draws a quadrilateral */
-void turtleQuadRender(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, double r, double g, double b, double a, double xfact, double yfact);
+void turtleQuadRender(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, double r, double g, double b, double a, double xcenter, double ycenter, double xfact, double yfact);
 
 /* adds a (blit) triangle to the pipeline (for better speed) */
 void turtleTriangle(double x1, double y1, double x2, double y2, double x3, double y3);
