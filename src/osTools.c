@@ -1,6 +1,12 @@
-#include "../include/osTools.h"
-
 /*
+ ██████╗ ███████╗████████╗ ██████╗  ██████╗ ██╗     ███████╗    ██████╗
+██╔═══██╗██╔════╝╚══██╔══╝██╔═══██╗██╔═══██╗██║     ██╔════╝   ██╔════╝
+██║   ██║███████╗   ██║   ██║   ██║██║   ██║██║     ███████╗   ██║     
+██║   ██║╚════██║   ██║   ██║   ██║██║   ██║██║     ╚════██║   ██║     
+╚██████╔╝███████║   ██║   ╚██████╔╝╚██████╔╝███████╗███████║██╗╚██████╗
+ ╚═════╝ ╚══════╝   ╚═╝    ╚═════╝  ╚═════╝ ╚══════╝╚══════╝╚═╝ ╚═════╝
+https://patorjk.com/software/taag/#p=display&f=ANSI%20Shadow
+
 Created by Ryan Srichai
 
 a note on COM objects:
@@ -33,6 +39,8 @@ Sockets: https://learn.microsoft.com/en-us/windows/win32/winsock/tcp-ip-raw-sock
 
 idea: try glfwGetClipboardString and glfwSetClipboardString
 */
+
+#include "../include/osTools.h"
 
 /* global objects */
 osToolsGLFWObject osToolsGLFW;

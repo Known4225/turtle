@@ -1,6 +1,12 @@
-#include "../include/list.h"
-
 /*
+██╗     ██╗███████╗████████╗ ██████╗
+██║     ██║██╔════╝╚══██╔══╝██╔════╝
+██║     ██║███████╗   ██║   ██║     
+██║     ██║╚════██║   ██║   ██║     
+███████╗██║███████║   ██║██╗╚██████╗
+╚══════╝╚═╝╚══════╝   ╚═╝╚═╝ ╚═════╝
+https://patorjk.com/software/taag/#p=display&f=ANSI%20Shadow
+
 21.04.23:
 unitype list, supports a variety of types
 
@@ -32,6 +38,8 @@ When calling list_clear() or list_free(), the list will free all strings, pointe
 list_copy will make a copy of all strings, pointers, and lists - it will not use the same pointers (a list can be safely freed after being copied without causing effects to the copied list)
 You must call list_init() when intending to copy a list - all lists must be initialised before any functions can be called on them (if your program is crashing - check to make sure you initialised all your lists)
 */
+
+#include "../include/list.h"
 
 /* create a list */
 list_t *list_init() {

@@ -1,12 +1,20 @@
-#include "../include/turtle.h"
+/*
+████████╗██╗   ██╗██████╗ ████████╗██╗     ███████╗    ██████╗
+╚══██╔══╝██║   ██║██╔══██╗╚══██╔══╝██║     ██╔════╝   ██╔════╝
+   ██║   ██║   ██║██████╔╝   ██║   ██║     █████╗     ██║     
+   ██║   ██║   ██║██╔══██╗   ██║   ██║     ██╔══╝     ██║     
+   ██║   ╚██████╔╝██║  ██║   ██║   ███████╗███████╗██╗╚██████╗
+   ╚═╝    ╚═════╝ ╚═╝  ╚═╝   ╚═╝   ╚══════╝╚══════╝╚═╝ ╚═════╝
+https://patorjk.com/software/taag/#p=display&f=ANSI%20Shadow
 
-/* 
 openGL implementation of turtle and the turtletools module
 features:
 adjustable pen (size and colour)
 resizable window support
 keyboard and mouse presses
 */
+
+#include "../include/turtle.h"
 
 turtle_t turtle;
 
@@ -15,8 +23,6 @@ void turtleSetWorldCoordinates(int32_t minX, int32_t minY, int32_t maxX, int32_t
     glfwGetWindowSize(turtle.window, &turtle.screenbounds[0], &turtle.screenbounds[1]);
     turtle.centerAndScale[0] = (double) (maxX + minX) / 2;
     turtle.centerAndScale[1] = (double) (maxY + minY) / 2;
-    // turtle.centerAndScale[0] = 150;
-    // turtle.centerAndScale[1] = 0;
     turtle.centerAndScale[2] = (double) (maxX - minX) / 2 * turtle.screenbounds[0];
     turtle.centerAndScale[3] = (double) (maxY - minY) / 2 * turtle.screenbounds[1];
     turtle.initscreenbounds[0] = turtle.screenbounds[0];
@@ -25,7 +31,6 @@ void turtleSetWorldCoordinates(int32_t minX, int32_t minY, int32_t maxX, int32_t
     turtle.bounds[1] = minY;
     turtle.bounds[2] = maxX;
     turtle.bounds[3] = maxY;
-    // memcpy(turtle.bounds, turtle.initbounds, 4 * sizeof(int32_t));
 }
 
 /* detect character */
@@ -419,7 +424,6 @@ void turtleQuadRender(double x1, double y1, double x2, double y2, double x3, dou
         turtle.currentColor[3] = a;
     }
     glBegin(GL_TRIANGLE_FAN);
-    // printf("%lf %lf %lf %lf %lf %lf %lf %lf\n", x1 * xfact, y1 * yfact, x2 * xfact, y2 * yfact, x3 * xfact, y3 * yfact, x4 * xfact, y4 * yfact);
     glVertex2d(x1 * xfact + xcenter, y1 * yfact + ycenter);
     glVertex2d(x2 * xfact + xcenter, y2 * yfact + ycenter);
     glVertex2d(x3 * xfact + xcenter, y3 * yfact + ycenter);
@@ -659,17 +663,11 @@ void turtleUpdate() {
     turtle.bounds[2] = turtle.centerAndScale[0] + turtle.centerAndScale[2] / turtle.screenbounds[0];
     turtle.bounds[1] = turtle.centerAndScale[1] - turtle.centerAndScale[3] / turtle.screenbounds[1];
     turtle.bounds[3] = turtle.centerAndScale[1] + turtle.centerAndScale[3] / turtle.screenbounds[1];
-    // printf("centerAndScale: %lf %lf %lf %lf\n", turtle.centerAndScale[0], turtle.centerAndScale[1], turtle.centerAndScale[2], turtle.centerAndScale[3]);
-    // printf("bounds: %d %d %d %d\n", turtle.bounds[0], turtle.bounds[1], turtle.bounds[2], turtle.bounds[3]);
-    changed = 1;
     if (changed) {
         double xfact = 1.0 / ((turtle.bounds[2] - turtle.bounds[0]) / 2);
         double yfact = 1.0 / ((turtle.bounds[3] - turtle.bounds[1]) / 2);
         double xcenter = (double) turtle.screenbounds[0] / turtle.initscreenbounds[0] - 1;
         double ycenter = (double) turtle.screenbounds[1] / turtle.initscreenbounds[1] - 1;
-        // xfact = 0.003125;
-        // yfact = 0.005556;
-        // printf("center and fact: %lf %lf %lf %lf\n", xcenter, ycenter, xfact, yfact);
         double lastSize = -1;
         double lastPrez = -1;
         double precomputedLog = 5;
