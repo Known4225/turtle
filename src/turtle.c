@@ -27,10 +27,11 @@ void turtleSetWorldCoordinates(int32_t minX, int32_t minY, int32_t maxX, int32_t
     turtle.centerAndScale[3] = (double) (maxY - minY) / 2 * turtle.screenbounds[1];
     turtle.initscreenbounds[0] = turtle.screenbounds[0];
     turtle.initscreenbounds[1] = turtle.screenbounds[1];
-    turtle.bounds[0] = minX;
-    turtle.bounds[1] = minY;
-    turtle.bounds[2] = maxX;
-    turtle.bounds[3] = maxY;
+    turtle.initbounds[0] = minX;
+    turtle.initbounds[1] = minY;
+    turtle.initbounds[2] = maxX;
+    turtle.initbounds[3] = maxY;
+    memcpy(turtle.bounds, turtle.initbounds, 4 * sizeof(int32_t));
 }
 
 /* detect character */
@@ -180,20 +181,11 @@ void turtleInit(GLFWwindow* window, int32_t minX, int32_t minY, int32_t maxX, in
 
 /* gets the mouse coordinates */
 void turtleGetMouseCoords() {
-    glfwGetWindowSize(turtle.window, &turtle.screenbounds[0], &turtle.screenbounds[1]); // get screenbounds
     glfwGetCursorPos(turtle.window, &turtle.mouseAbsX, &turtle.mouseAbsY); // get mouse positions (absolute)
     turtle.mouseX = turtle.mouseAbsX;
     turtle.mouseY = turtle.mouseAbsY;
-    // turtle.mouseScaX = turtle.mouseAbsX;
-    // turtle.mouseScaY = turtle.mouseAbsY;
-    turtle.mouseX -= turtle.centerAndScale[0];
-    turtle.mouseX *= turtle.centerAndScale[2];
-    turtle.mouseY -= turtle.centerAndScale[1];
-    turtle.mouseY *= turtle.centerAndScale[3];
-    // turtle.mouseScaX -= (turtle.screenbounds[0] / 2) - ((turtle.bounds[2] + turtle.bounds[0]) / 2);
-    // turtle.mouseScaX *= ((double) (turtle.bounds[2] - turtle.bounds[0]) / (double) turtle.screenbounds[0]);
-    // turtle.mouseScaY -= (turtle.screenbounds[1] / 2) - ((turtle.bounds[3] + turtle.bounds[1]) / 2);
-    // turtle.mouseScaY *= ((double) (turtle.bounds[1] - turtle.bounds[3]) / (double) turtle.screenbounds[1]);
+    turtle.mouseX = (turtle.mouseAbsX - turtle.screenbounds[0] / 2) / turtle.screenbounds[0] * (turtle.initbounds[2] - turtle.initbounds[0]);
+    turtle.mouseY = (turtle.mouseAbsY - turtle.screenbounds[1] / 2) / turtle.screenbounds[1] * (turtle.initbounds[1] - turtle.initbounds[3]);
 }
 
 /* set the background color */
@@ -659,6 +651,11 @@ void turtleUpdate() {
         turtle.lastLength = len;
     }
     glfwGetWindowSize(turtle.window, &turtle.screenbounds[0], &turtle.screenbounds[1]);
+    if (turtle.screenbounds[0] != turtle.lastscreenbounds[0] || turtle.screenbounds[1] != turtle.lastscreenbounds[1]) {
+        changed = 1;
+        turtle.lastscreenbounds[0] = turtle.screenbounds[0];
+        turtle.lastscreenbounds[1] = turtle.screenbounds[1];
+    }
     turtle.bounds[0] = turtle.centerAndScale[0] - turtle.centerAndScale[2] / turtle.screenbounds[0];
     turtle.bounds[2] = turtle.centerAndScale[0] + turtle.centerAndScale[2] / turtle.screenbounds[0];
     turtle.bounds[1] = turtle.centerAndScale[1] - turtle.centerAndScale[3] / turtle.screenbounds[1];

@@ -102,7 +102,7 @@ int main(int argc, char *argv[]) {
         return -1;
     }
     glfwMakeContextCurrent(window);
-    glfwSetWindowSizeLimits(window, windowHeight * 16 / 9 * 0.5, windowHeight * 0.5, windowHeight * 16 / 9 / 0.85, windowHeight / 0.85);
+    glfwSetWindowSizeLimits(window, windowHeight * 16 / 9 * 0.5, windowHeight * 0.5, windowHeight * 16 / 9 / 0.9, windowHeight / 0.9);
 
     /* initialize turtle */
     turtleInit(window, -320, -180, 320, 180);
