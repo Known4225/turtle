@@ -975,6 +975,20 @@ typedef struct {
     HANDLE comHandle;
 } win32ComPortObject;
 
+extern win32ComPortObject win32com;
+
+/* opens a com port */
+int win32comInit(win32ComPortObject *com, char *name);
+
+/* returns number of bytes sent */
+int win32comSend(win32ComPortObject *com, unsigned char *data, int length);
+
+/* returns number of bytes received */
+int win32comReceive(win32ComPortObject *com, unsigned char *buffer, int length);
+
+/* closes a com port */
+int win32comClose(win32ComPortObject *com);
+
 #define WIN32TCP_NUM_SOCKETS 32
 
 typedef struct {
@@ -983,6 +997,22 @@ typedef struct {
     SOCKET connectSocket[WIN32TCP_NUM_SOCKETS];
     char socketOpen[WIN32TCP_NUM_SOCKETS];
 } win32SocketObject;
+
+extern win32SocketObject win32Socket;
+
+int win32tcpInit(char *address, char *port);
+
+int win32newSocket();
+
+SOCKET *win32tcpCreateSocket();
+
+int win32tcpSend(SOCKET *socket, unsigned char *data, int length);
+
+int win32tcpReceive(SOCKET *socket, unsigned char *buffer, int length);
+
+int win32tcpReceive2(SOCKET *socket, unsigned char *buffer, int length);
+
+void win32tcpDeinit();
 #endif
 
 #ifdef OS_LINUX
