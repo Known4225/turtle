@@ -58,3 +58,10 @@ The example project can be built with `make win` on windows or `make` on linux. 
 ## Config
 
 The example project has a set of files in the `config/` folder that can be modified to change certain aspects of the project (the font, the ribbon, and the popup). If these files are not found then default versions of these configurations are used (which happen to be identical to the ones in the `config/` folder).
+
+# To Do
+- Cleanup Win32Com and Win32Tcp
+- Fix window resizing in turtle (stretch)
+- Textures (enable/disable with macro, default off)
+- Linux COM and TCP/IP support
+- Mono font

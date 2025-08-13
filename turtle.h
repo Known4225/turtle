@@ -1,18 +1,5 @@
-/*
-Created 10.09.25 by Ryan Srichai
-
-This header contains all of the turtle, turtleText, turtleTools, and osTools functionality. This singlefile implementation condenses and simplifies the development process.
-*/
-
-#ifndef TURTLELIB
-#define TURTLELIB
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdbool.h>
-#include <stdint.h>
-#include <math.h>
+#ifndef TURTLE_H
+#define TURTLE_H
 
 /*
 ██╗     ██╗███████╗████████╗██╗  ██╗
@@ -24,6 +11,14 @@ This header contains all of the turtle, turtleText, turtleTools, and osTools fun
 https://patorjk.com/software/taag/#p=display&f=ANSI%20Shadow
 */
 
+#ifndef UNITYPE_LIST_H
+#define UNITYPE_LIST_H
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdbool.h>
+#include <stdint.h>
 
 /*
 21.04.23:
@@ -166,6 +161,8 @@ void list_free_lite(list_t *list);
 /* frees the data used by the list */
 void list_free(list_t *list);
 
+#endif /* UNITYPE_LIST_H */
+
 /*
 ████████╗██╗   ██╗██████╗ ████████╗██╗     ███████╗   ██╗  ██╗
 ╚══██╔══╝██║   ██║██╔══██╗╚══██╔══╝██║     ██╔════╝   ██║  ██║
@@ -175,6 +172,14 @@ void list_free(list_t *list);
    ╚═╝    ╚═════╝ ╚═╝  ╚═╝   ╚═╝   ╚══════╝╚══════╝╚═╝╚═╝  ╚═╝
 https://patorjk.com/software/taag/#p=display&f=ANSI%20Shadow
 */
+
+#ifndef TURTLE_INTERNAL_H
+#define TURTLE_INTERNAL_H
+
+#include <math.h>
+#ifndef M_PI
+    #define M_PI 3.14159265358979323846
+#endif
 
 extern void glColor4d(double r, double g, double b, double a); // genius tactic to stop compiler warnings
 extern void glBegin(int type);
@@ -342,6 +347,8 @@ void turtleMainLoop();
 /* free turtle memory */
 void turtleFree();
 
+#endif /* TURTLE_INTERNAL_H */
+
 /*
 ████████╗██╗   ██╗██████╗ ████████╗██╗     ███████╗████████╗███████╗██╗  ██╗████████╗██╗  ██╗
 ╚══██╔══╝██║   ██║██╔══██╗╚══██╔══╝██║     ██╔════╝╚══██╔══╝██╔════╝╚██╗██╔╝╚══██╔══╝██║  ██║
@@ -351,6 +358,9 @@ void turtleFree();
    ╚═╝    ╚═════╝ ╚═╝  ╚═╝   ╚═╝   ╚══════╝╚══════╝   ╚═╝   ╚══════╝╚═╝  ╚═╝   ╚═╝╚═╝╚═╝  ╚═╝
 https://patorjk.com/software/taag/#p=display&f=ANSI%20Shadow
 */
+
+#ifndef TURTLE_TEXT_H
+#define TURTLE_TEXT_H
 
 #include <stdarg.h>
 
@@ -406,6 +416,8 @@ int32_t turtleTextConvertUnicode(const unsigned char *str, uint32_t *converted);
 /* if the font file is not found, use the default font (kept here) */
 void generateDefaultFont(list_t *generatedFont);
 
+#endif /* TURTLE_TEXT_H */
+
 /*
 ████████╗██╗   ██╗██████╗ ████████╗██╗     ███████╗████████╗ ██████╗  ██████╗ ██╗     ███████╗   ██╗  ██╗
 ╚══██╔══╝██║   ██║██╔══██╗╚══██╔══╝██║     ██╔════╝╚══██╔══╝██╔═══██╗██╔═══██╗██║     ██╔════╝   ██║  ██║
@@ -415,6 +427,10 @@ void generateDefaultFont(list_t *generatedFont);
    ╚═╝    ╚═════╝ ╚═╝  ╚═╝   ╚═╝   ╚══════╝╚══════╝   ╚═╝    ╚═════╝  ╚═════╝ ╚══════╝╚══════╝╚═╝╚═╝  ╚═╝
 https://patorjk.com/software/taag/#p=display&f=ANSI%20Shadow
 */
+
+#ifndef TURTLE_TOOLS_H
+#define TURTLE_TOOLS_H
+
 
 /* random integer between lower and upper bound (inclusive) */
 int randomInt(int lowerBound, int upperBound);
@@ -858,6 +874,8 @@ void turtleToolsUpdateUI();
 
 void turtleToolsUpdateRibbonPopup();
 
+#endif /* TURTLETOOLS_H */
+
 /*
  ██████╗ ███████╗████████╗ ██████╗  ██████╗ ██╗     ███████╗   ██╗  ██╗
 ██╔═══██╗██╔════╝╚══██╔══╝██╔═══██╗██╔═══██╗██║     ██╔════╝   ██║  ██║
@@ -867,6 +885,10 @@ void turtleToolsUpdateRibbonPopup();
  ╚═════╝ ╚══════╝   ╚═╝    ╚═════╝  ╚═════╝ ╚══════╝╚══════╝╚═╝╚═╝  ╚═╝
 https://patorjk.com/software/taag/#p=display&f=ANSI%20Shadow
 */
+
+#ifndef OS_TOOLS_H
+#define OS_TOOLS_H
+
 
 typedef struct GLFWcursor GLFWcursor;
 
@@ -953,6 +975,20 @@ typedef struct {
     HANDLE comHandle;
 } win32ComPortObject;
 
+extern win32ComPortObject win32com;
+
+/* opens a com port */
+int win32comInit(win32ComPortObject *com, char *name);
+
+/* returns number of bytes sent */
+int win32comSend(win32ComPortObject *com, unsigned char *data, int length);
+
+/* returns number of bytes received */
+int win32comReceive(win32ComPortObject *com, unsigned char *buffer, int length);
+
+/* closes a com port */
+int win32comClose(win32ComPortObject *com);
+
 #define WIN32TCP_NUM_SOCKETS 32
 
 typedef struct {
@@ -961,6 +997,22 @@ typedef struct {
     SOCKET connectSocket[WIN32TCP_NUM_SOCKETS];
     char socketOpen[WIN32TCP_NUM_SOCKETS];
 } win32SocketObject;
+
+extern win32SocketObject win32Socket;
+
+int win32tcpInit(char *address, char *port);
+
+int win32newSocket();
+
+SOCKET *win32tcpCreateSocket();
+
+int win32tcpSend(SOCKET *socket, unsigned char *data, int length);
+
+int win32tcpReceive(SOCKET *socket, unsigned char *buffer, int length);
+
+int win32tcpReceive2(SOCKET *socket, unsigned char *buffer, int length);
+
+void win32tcpDeinit();
 #endif
 
 #ifdef OS_LINUX
@@ -979,17 +1031,10 @@ uint8_t *osToolsMapFile(char *filename, uint32_t *sizeOutput);
 
 int32_t osToolsUnmapFile(uint8_t *data);
 
+#endif /* OS_TOOLS_H */
 
-
-/*
-██╗  ██╗██╗  ██╗██████╗ ██████╗ ██╗      █████╗ ████████╗███████╗ ██████╗ ██████╗ ███╗   ███╗   ██╗  ██╗
-██║ ██╔╝██║  ██║██╔══██╗██╔══██╗██║     ██╔══██╗╚══██╔══╝██╔════╝██╔═══██╗██╔══██╗████╗ ████║   ██║  ██║
-█████╔╝ ███████║██████╔╝██████╔╝██║     ███████║   ██║   █████╗  ██║   ██║██████╔╝██╔████╔██║   ███████║
-██╔═██╗ ██╔══██║██╔══██╗██╔═══╝ ██║     ██╔══██║   ██║   ██╔══╝  ██║   ██║██╔══██╗██║╚██╔╝██║   ██╔══██║
-██║  ██╗██║  ██║██║  ██║██║     ███████╗██║  ██║   ██║   ██║     ╚██████╔╝██║  ██║██║ ╚═╝ ██║██╗██║  ██║
-╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝     ╚══════╝╚═╝  ╚═╝   ╚═╝   ╚═╝      ╚═════╝ ╚═╝  ╚═╝╚═╝     ╚═╝╚═╝╚═╝  ╚═╝
-https://patorjk.com/software/taag/#p=display&f=ANSI%20Shadow
-*/
+#ifndef __khrplatform_h_
+#define __khrplatform_h_
 
 /*
 ** Copyright (c) 2008-2018 The Khronos Group Inc.
@@ -1298,15 +1343,7 @@ typedef enum {
     KHRONOS_BOOLEAN_ENUM_FORCE_SIZE = KHRONOS_MAX_ENUM
 } khronos_boolean_enum_t;
 
-/*
- ██████╗ ██╗      █████╗ ██████╗    ██╗  ██╗
-██╔════╝ ██║     ██╔══██╗██╔══██╗   ██║  ██║
-██║  ███╗██║     ███████║██║  ██║   ███████║
-██║   ██║██║     ██╔══██║██║  ██║   ██╔══██║
-╚██████╔╝███████╗██║  ██║██████╔╝██╗██║  ██║
- ╚═════╝ ╚══════╝╚═╝  ╚═╝╚═════╝ ╚═╝╚═╝  ╚═╝
-https://patorjk.com/software/taag/#p=display&f=ANSI%20Shadow
-*/
+#endif /* __khrplatform_h_ */
 
 /*
 
@@ -3437,16 +3474,6 @@ GLAPI PFNGLSECONDARYCOLORP3UIVPROC glad_glSecondaryColorP3uiv;
 
 #endif
 
-/*
- ██████╗ ██╗     ███████╗██╗    ██╗██████╗    ██╗  ██╗
-██╔════╝ ██║     ██╔════╝██║    ██║╚════██╗   ██║  ██║
-██║  ███╗██║     █████╗  ██║ █╗ ██║ █████╔╝   ███████║
-██║   ██║██║     ██╔══╝  ██║███╗██║ ╚═══██╗   ██╔══██║
-╚██████╔╝███████╗██║     ╚███╔███╔╝██████╔╝██╗██║  ██║
- ╚═════╝ ╚══════╝╚═╝      ╚══╝╚══╝ ╚═════╝ ╚═╝╚═╝  ╚═╝
-https://patorjk.com/software/taag/#p=display&f=ANSI%20Shadow
-*/
-
 /*************************************************************************
  * GLFW 3.3 - www.glfw.org
  * A library for OpenGL, window and input
@@ -3475,6 +3502,8 @@ https://patorjk.com/software/taag/#p=display&f=ANSI%20Shadow
  *
  *************************************************************************/
 
+#ifndef _glfw3_h_
+#define _glfw3_h_
 
 #ifdef __cplusplus
 extern "C" {
@@ -9355,17 +9384,11 @@ GLFWAPI VkResult glfwCreateWindowSurface(VkInstance instance, GLFWwindow* window
 }
 #endif
 
-/*
-██████╗ ███████╗██████╗ ███████╗███╗   ██╗██████╗ ███████╗███╗   ██╗ ██████╗██╗███████╗███████╗
-██╔══██╗██╔════╝██╔══██╗██╔════╝████╗  ██║██╔══██╗██╔════╝████╗  ██║██╔════╝██║██╔════╝██╔════╝
-██║  ██║█████╗  ██████╔╝█████╗  ██╔██╗ ██║██║  ██║█████╗  ██╔██╗ ██║██║     ██║█████╗  ███████╗
-██║  ██║██╔══╝  ██╔═══╝ ██╔══╝  ██║╚██╗██║██║  ██║██╔══╝  ██║╚██╗██║██║     ██║██╔══╝  ╚════██║
-██████╔╝███████╗██║     ███████╗██║ ╚████║██████╔╝███████╗██║ ╚████║╚██████╗██║███████╗███████║
-╚═════╝ ╚══════╝╚═╝     ╚══════╝╚═╝  ╚═══╝╚═════╝ ╚══════╝╚═╝  ╚═══╝ ╚═════╝╚═╝╚══════╝╚══════╝
-https://patorjk.com/software/taag/#p=display&f=ANSI%20Shadow
-*/
+#endif /* _glfw3_h_ */
 
-/* turtle includes all these modules */
+
+
+
 #ifdef TURTLE_IMPLEMENTATION
 #define UNITYPE_LIST_IMPLEMENTATION
 #define TURTLE_INTERNAL_IMPLEMENTATION
@@ -9374,37 +9397,32 @@ https://patorjk.com/software/taag/#p=display&f=ANSI%20Shadow
 #define OS_TOOLS_IMPLEMENTATION
 #endif /* TURTLE_IMPLEMENTATION */
 
-/* dependencies */
+#ifdef TURTLE_INTERNAL_IMPLEMENTATION
+#ifndef UNITYPE_LIST_IMPLEMENTATION
+#error UNITYPE_LIST_IMPLEMENTATION not defined
+#endif /* UNITYPE_LIST_IMPLEMENTATION */
+#endif /* TURTLE_INTERNAL_IMPLEMENTATION */
+
+
+#ifdef TURTLE_TEXT_IMPLEMENTATION
+#ifndef TURTLE_INTERNAL_IMPLEMENTATION
+#error TURTLE_INTERNAL_IMPLEMENTATION not defined
+#endif /* TURTLE_INTERNAL_IMPLEMENTATION */
+#endif /* TURTLE_TEXT_IMPLEMENTATION */
+
+
 #ifdef TURTLE_TOOLS_IMPLEMENTATION
 #ifndef TURTLE_TEXT_IMPLEMENTATION
-#define TURTLE_TEXT_IMPLEMENTATION
+#error TURTLE_TEXT_IMPLEMENTATION not defined
 #endif /* TURTLE_TEXT_IMPLEMENTATION */
 #endif /* TURTLE_TOOLS_IMPLEMENTATION */
 
-#ifdef TURTLE_TEXT_IMPLEMENTATION
-#ifndef TURTLE_INTERNAL_IMPLEMENTATION
-#define TURTLE_INTERNAL_IMPLEMENTATION
-#endif /* TURTLE_INTERNAL_IMPLEMENTATION */
-#endif /* TURTLE_TEXT_IMPLEMENTATION */
-
-#ifdef TURTLE_TEXT_IMPLEMENTATION
-#ifndef TURTLE_INTERNAL_IMPLEMENTATION
-#define TURTLE_INTERNAL_IMPLEMENTATION
-#endif /* TURTLE_INTERNAL_IMPLEMENTATION */
-#endif /* TURTLE_TEXT_IMPLEMENTATION */
-
-#ifdef TURTLE_INTERNAL_IMPLEMENTATION
-#ifndef UNITYPE_LIST_IMPLEMENTATION
-#define UNITYPE_LIST_IMPLEMENTATION
-#endif /* UNITYPE_LIST_IMPLEMENTATION */
-#endif /* TURTLE_INTERNAL_IMPLEMENTATION */
 
 #ifdef OS_TOOLS_IMPLEMENTATION
-#ifndef UNITYPE_LIST_IMPLEMENTATION
-#define UNITYPE_LIST_IMPLEMENTATION
-#endif /* UNITYPE_LIST_IMPLEMENTATION */
+#ifndef TURTLE_INTERNAL_IMPLEMENTATION
+#error TURTLE_INTERNAL_IMPLEMENTATION not defined
+#endif /* TURTLE_INTERNAL_IMPLEMENTATION */
 #endif /* OS_TOOLS_IMPLEMENTATION */
-
 
 /*
 ███████╗ ██████╗ ██╗   ██╗██████╗  ██████╗███████╗
@@ -9415,7 +9433,6 @@ https://patorjk.com/software/taag/#p=display&f=ANSI%20Shadow
 ╚══════╝ ╚═════╝  ╚═════╝ ╚═╝  ╚═╝ ╚═════╝╚══════╝
 https://patorjk.com/software/taag/#p=display&f=ANSI%20Shadow
 */
-
 #ifdef UNITYPE_LIST_IMPLEMENTATION
 
 /*
@@ -9852,7 +9869,6 @@ void list_free(list_t *list) {
 }
 
 #endif /* UNITYPE_LIST_IMPLEMENTATION */
-
 #ifdef TURTLE_INTERNAL_IMPLEMENTATION
 
 /* 
@@ -10630,7 +10646,6 @@ void turtleFree() {
 }
 
 #endif /* TURTLE_INTERNAL_IMPLEMENTATION */
-
 #ifdef TURTLE_TEXT_IMPLEMENTATION
 
 /* turtleText uses openGL and the turtle library to render text on the screen */
@@ -11494,7 +11509,6 @@ void generateDefaultFont(list_t *generatedFont) {
 }
 
 #endif /* TURTLE_TEXT_IMPLEMENTATION */
-
 #ifdef TURTLE_TOOLS_IMPLEMENTATION
 
 /* turtleTools library includes:
@@ -13461,7 +13475,6 @@ void turtleToolsUpdateRibbonPopup() {
 }
 
 #endif /* TURTLE_TOOLS_IMPLEMENTATION */
-
 #ifdef OS_TOOLS_IMPLEMENTATION
 
 /*
@@ -14000,7 +14013,7 @@ int win32comInit(win32ComPortObject *com, char *name) {
     }
     com -> comHandle = CreateFileA(comName, GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, NULL);
     if (com -> comHandle == INVALID_HANDLE_VALUE) {
-        printf("Could not open com port %s, error %d\n", name, GetLastError());
+        printf("Could not open com port %s, error %ld\n", name, GetLastError());
         return -1;
     } else {
         printf("Successfully opened port %s\n", name);
@@ -14013,7 +14026,7 @@ int win32comInit(win32ComPortObject *com, char *name) {
     fSuccess = GetCommState(com -> comHandle, &dcb);
     if (!fSuccess) {
         /* Handle the error. */
-        printf("GetCommState failed with error %d.\n", GetLastError());
+        printf("GetCommState failed with error %ld.\n", GetLastError());
         return -1;
     }
     /* Fill in some DCB values and set the com state: 
@@ -14025,14 +14038,14 @@ int win32comInit(win32ComPortObject *com, char *name) {
     fSuccess = SetCommState(com -> comHandle, &dcb);
     if (!fSuccess) {
         /* Handle the error. */
-        printf("SetCommState failed with error %d.\n", GetLastError());
+        printf("SetCommState failed with error %ld.\n", GetLastError());
         return -1;
     }
     /* Get the comm config again. */
     fSuccess = GetCommState(com -> comHandle, &dcb);
     if (!fSuccess) {
         /* Handle the error. */
-        printf("GetCommState failed with error %d.\n", GetLastError());
+        printf("GetCommState failed with error %ld.\n", GetLastError());
         return -1;
     }
     return 0;
@@ -14043,7 +14056,7 @@ int win32comSend(win32ComPortObject *com, unsigned char *data, int length) {
     /* https://www.codeproject.com/Articles/3061/Creating-a-Serial-communication-on-Win32#sending */
     DWORD bytes;
     if (WriteFile(com -> comHandle, data, length, &bytes, NULL) == 0) {
-        printf("win32comSend failed with error %d\n", GetLastError());
+        printf("win32comSend failed with error %ld\n", GetLastError());
         return -1;
     }
     return bytes;
@@ -14053,7 +14066,7 @@ int win32comSend(win32ComPortObject *com, unsigned char *data, int length) {
 int win32comReceive(win32ComPortObject *com, unsigned char *buffer, int length) {
     DWORD bytes;
     if (ReadFile(com -> comHandle, buffer, length, &bytes, NULL) == 0) {
-        printf("win32comReceive failed with error %d\n", GetLastError());
+        printf("win32comReceive failed with error %ld\n", GetLastError());
         return -1;
     }
     return bytes;
@@ -14062,7 +14075,7 @@ int win32comReceive(win32ComPortObject *com, unsigned char *buffer, int length) 
 /* closes a com port */
 int win32comClose(win32ComPortObject *com) {
     if (CloseHandle(com -> comHandle) == 0) {
-        printf("win32comClosefailed with error %d\n", GetLastError());
+        printf("win32comClosefailed with error %ld\n", GetLastError());
         return -1;
     }
     return 0;
@@ -14192,7 +14205,7 @@ int win32tcpInit(char *address, char *port) {
 }
 
 int win32newSocket() {
-
+    return 0;
 }
 
 SOCKET *win32tcpCreateSocket() {
@@ -14250,7 +14263,7 @@ SOCKET *win32tcpCreateSocket() {
 }
 
 int win32tcpSend(SOCKET *socket, unsigned char *data, int length) {
-    int status = send(*socket, data, length, 0 );
+    int status = send(*socket, (const char *) data, length, 0 );
     if (status == SOCKET_ERROR) {
         closesocket(*socket);
         return 1;
@@ -14262,7 +14275,7 @@ int win32tcpReceive(SOCKET *socket, unsigned char *buffer, int length) {
     int status = 1;
     int bytes = 0;
     while (status > 0) {
-        status = recv(*socket, buffer, length, 0);
+        status = recv(*socket, (char *) buffer, length, 0);
         if (status > 0) {
             // printf("Bytes received: %d\n", status);
         } else if (status == 0) {
@@ -14280,7 +14293,7 @@ int win32tcpReceive(SOCKET *socket, unsigned char *buffer, int length) {
 
 int win32tcpReceive2(SOCKET *socket, unsigned char *buffer, int length) {
     int status = 1;
-    status = recv(*socket, buffer, length, 0);
+    status = recv(*socket, (char *) buffer, length, 0);
     if (status > 0) {
         // printf("Bytes received: %d\n", status);
     } else if (status == 0) {
@@ -14440,4 +14453,5 @@ int32_t osToolsUnmapFile(uint8_t *data) {
 
 #endif /* OS_TOOLS_IMPLEMENTATION */
 
-#endif /* TURTLELIB */
+
+#endif /* TURTLE_H */
