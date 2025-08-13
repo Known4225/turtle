@@ -1,7 +1,7 @@
 /*
 Written by Ryan Srichai 11.08.25
 
-This application bundles all turtle libraries into a single portable header file, singlefile_output/turtle.h
+This application bundles all turtle libraries into a single portable header file, turtle.h
 */
 
 #include <stdio.h>
