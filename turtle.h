@@ -181,11 +181,11 @@ https://patorjk.com/software/taag/#p=display&f=ANSI%20Shadow
     #define M_PI 3.14159265358979323846
 #endif
 
+/* required forward declarations (for packaging) */
 extern void glColor4d(double r, double g, double b, double a); // genius tactic to stop compiler warnings
 extern void glBegin(int type);
 extern void glVertex2d(double x, double y);
 extern void glEnd();
-
 typedef struct GLFWwindow GLFWwindow;
 
 typedef struct {
@@ -892,6 +892,7 @@ https://patorjk.com/software/taag/#p=display&f=ANSI%20Shadow
 #define OS_TOOLS_H
 
 
+/* required forward declarations (for packaging) */
 typedef struct GLFWcursor GLFWcursor;
 
 typedef struct {

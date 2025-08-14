@@ -12,7 +12,11 @@ https://patorjk.com/software/taag/#p=display&f=ANSI%20Shadow
 #define OS_TOOLS_H
 
 #include "list.h"
+#include "glad.h"
+#include "glfw3.h"
+#include "list.h"
 
+/* required forward declarations (for packaging) */
 typedef struct GLFWcursor GLFWcursor;
 
 typedef struct {
