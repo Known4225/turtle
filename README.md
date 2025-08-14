@@ -61,7 +61,7 @@ The example project has a set of files in the `config/` folder that can be modif
 
 # To Do
 - Cleanup Win32Com and Win32Tcp
-- Fix window resizing in turtle (stretch)
+- Write wiki/documentation
 - Textures (enable/disable with macro, default off)
 - Linux COM and TCP/IP support
 - Mono font
