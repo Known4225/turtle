@@ -390,7 +390,7 @@ int32_t osToolsFileDialogPrompt(char openOrSave, char *filename) { // 0 - open, 
             /* configure autofill filename */
             if (openOrSave == 1 && strcmp(filename, "null") != 0) {
                 int32_t i = 0;
-                unsigned short prename[MAX_PATH + 1];
+                uint16_t prename[MAX_PATH + 1];
                 while (filename[i] != '\0' && i < MAX_PATH + 1) {
                     prename[i] = filename[i]; // convert from char to WCHAR
                     i++;
@@ -409,17 +409,17 @@ int32_t osToolsFileDialogPrompt(char openOrSave, char *filename) { // 0 - open, 
                 WCHAR *buildFilter = malloc(10 * osToolsFileDialog.numExtensions * sizeof(WCHAR));
                 int32_t j = 0;
                 for (int32_t i = 0; i < osToolsFileDialog.numExtensions; i++) {
-                    buildFilter[j] = (unsigned short) '*';
-                    buildFilter[j + 1] = (unsigned short) '.';
+                    buildFilter[j] = (uint16_t) '*';
+                    buildFilter[j + 1] = (uint16_t) '.';
                     j += 2;
                     for (uint32_t k = 0; k < strlen(osToolsFileDialog.extensions[i]) && k < 8; k++) {
                         buildFilter[j] = osToolsFileDialog.extensions[i][k];
                         j += 1;
                     }
-                    buildFilter[j] = (unsigned short) ';';
+                    buildFilter[j] = (uint16_t) ';';
                     j += 1;
                 }
-                buildFilter[j] = (unsigned short) '\0';
+                buildFilter[j] = (uint16_t) '\0';
                 (*fileExtensions).pszName = L"Specified Types";
                 (*fileExtensions).pszSpec = buildFilter;
                 fileDialog -> lpVtbl -> SetFileTypes(fileDialog, 1, fileExtensions);
@@ -531,7 +531,7 @@ https://learn.microsoft.com/en-us/windows/win32/devio/configuring-a-communicatio
 win32ComPortObject win32com;
 
 /* opens a com port */
-int win32comInit(win32ComPortObject *com, char *name) {
+int32_t win32comInit(win32ComPortObject *com, char *name) {
     strcpy(com -> name, name);
     DCB dcb;
     BOOL fSuccess;
@@ -583,7 +583,7 @@ int win32comInit(win32ComPortObject *com, char *name) {
 }
 
 /* returns number of bytes sent */
-int win32comSend(win32ComPortObject *com, unsigned char *data, int length) {
+int32_t win32comSend(win32ComPortObject *com, uint8_t *data, int32_t length) {
     /* https://www.codeproject.com/Articles/3061/Creating-a-Serial-communication-on-Win32#sending */
     DWORD bytes;
     if (WriteFile(com -> comHandle, data, length, &bytes, NULL) == 0) {
@@ -594,7 +594,7 @@ int win32comSend(win32ComPortObject *com, unsigned char *data, int length) {
 }
 
 /* returns number of bytes received */
-int win32comReceive(win32ComPortObject *com, unsigned char *buffer, int length) {
+int32_t win32comReceive(win32ComPortObject *com, uint8_t *buffer, int32_t length) {
     DWORD bytes;
     if (ReadFile(com -> comHandle, buffer, length, &bytes, NULL) == 0) {
         printf("win32comReceive failed with error %ld\n", GetLastError());
@@ -604,7 +604,7 @@ int win32comReceive(win32ComPortObject *com, unsigned char *buffer, int length) 
 }
 
 /* closes a com port */
-int win32comClose(win32ComPortObject *com) {
+int32_t win32comClose(win32ComPortObject *com) {
     if (CloseHandle(com -> comHandle) == 0) {
         printf("win32comClosefailed with error %ld\n", GetLastError());
         return -1;
@@ -620,8 +620,8 @@ https://learn.microsoft.com/en-us/windows/win32/winsock/complete-client-code
 
 win32SocketObject win32Socket;
 
-int win32tcpInit(char *address, char *port) {
-    for (int i = 0; i < WIN32TCP_NUM_SOCKETS; i++) {
+int32_t win32tcpInit(char *address, char *port) {
+    for (int32_t i = 0; i < WIN32TCP_NUM_SOCKETS; i++) {
         win32Socket.connectSocket[i] = 0;
         win32Socket.socketOpen[i] = 0;
     }
@@ -630,14 +630,14 @@ int win32tcpInit(char *address, char *port) {
     char modifiable[strlen(address) + 1];
     strcpy(modifiable, address);
     char *check = strtok(modifiable, ".");
-    int segments = 0;
-    unsigned char ipAddress[4] = {0};
+    int32_t segments = 0;
+    uint8_t ipAddress[4] = {0};
     while (check != NULL) {
         if (segments > 3) {
             printf("Could not initialise win32tcp - invalid ip address\n");
             return 1;
         }
-        int segmentValue = atoi(check);
+        int32_t segmentValue = atoi(check);
         if (segmentValue > 255 || segmentValue < 0) {
             printf("Could not initialise win32tcp - invalid ip address\n");
             return 1;
@@ -652,7 +652,7 @@ int win32tcpInit(char *address, char *port) {
     }
     /* Initialize Winsock */
     WSADATA wsaData;
-    int status;
+    int32_t status;
     status = WSAStartup(MAKEWORD(2,2), &wsaData);
     if (status != 0) {
         return 1;
@@ -676,7 +676,6 @@ int win32tcpInit(char *address, char *port) {
 
     /* Attempt to connect to an address until one succeeds */
     for (ptr = result; ptr != NULL; ptr = ptr -> ai_next) {
-
         /* Create a SOCKET for connecting to server */
         win32Socket.connectSocket[0] = socket(ptr -> ai_family, ptr -> ai_socktype, ptr -> ai_protocol);
         if (win32Socket.connectSocket[0] == INVALID_SOCKET) {
@@ -714,10 +713,10 @@ int win32tcpInit(char *address, char *port) {
     }
 
     /* Receive until the peer closes the connection */
-    int recvbuflen = 512;
+    int32_t recvbuflen = 512;
     char recvbuf[recvbuflen];
-    do {
-
+    status = 1;
+    while (status > 0) {
         status = recv(win32Socket.connectSocket[0], recvbuf, recvbuflen, 0);
         if (status > 0) {
             // printf("Bytes received: %d\n", status);
@@ -726,8 +725,7 @@ int win32tcpInit(char *address, char *port) {
         } else {
             // printf("recv failed with error: %d\n", WSAGetLastError());
         }
-
-    } while (status > 0);
+    }
 
     /* cleanup */
     closesocket(win32Socket.connectSocket[0]);
@@ -735,14 +733,10 @@ int win32tcpInit(char *address, char *port) {
     return 0;
 }
 
-int win32newSocket() {
-    return 0;
-}
-
 SOCKET *win32tcpCreateSocket() {
     /* define socket index */
-    int socketIndex = 0;
-    for (int i = 0; i < WIN32TCP_NUM_SOCKETS; i++) {
+    int32_t socketIndex = 0;
+    for (int32_t i = 0; i < WIN32TCP_NUM_SOCKETS; i++) {
         if (win32Socket.socketOpen[i] == 0) {
             win32Socket.socketOpen[i] = 1;
             socketIndex = i;
@@ -763,7 +757,7 @@ SOCKET *win32tcpCreateSocket() {
     hints.ai_protocol = IPPROTO_TCP;
 
     /* Resolve the server address and port */
-    int status = getaddrinfo(win32Socket.address, win32Socket.port, &hints, &result);
+    int32_t status = getaddrinfo(win32Socket.address, win32Socket.port, &hints, &result);
     if (status != 0) {
         WSACleanup();
         return NULL;
@@ -771,14 +765,12 @@ SOCKET *win32tcpCreateSocket() {
 
     /* Attempt to connect to an address until one succeeds */
     for (ptr = result; ptr != NULL; ptr = ptr -> ai_next) {
-
         /* Create a SOCKET for connecting to server */
         win32Socket.connectSocket[socketIndex] = socket(ptr -> ai_family, ptr -> ai_socktype, ptr -> ai_protocol);
         if (win32Socket.connectSocket[socketIndex] == INVALID_SOCKET) {
             WSACleanup();
             return NULL;
         }
-
         /* Connect to server */
         status = connect(win32Socket.connectSocket[socketIndex], ptr -> ai_addr, (int) ptr -> ai_addrlen);
         if (status == SOCKET_ERROR) {
@@ -788,13 +780,13 @@ SOCKET *win32tcpCreateSocket() {
         }
         break;
     }
-    // unsigned long mode;
+    // uint32_t mode;
     // printf("ioctlsocket %d\n", ioctlsocket(win32Socket.connectSocket[socketIndex], FIONBIO, &mode));
     return &win32Socket.connectSocket[socketIndex];
 }
 
-int win32tcpSend(SOCKET *socket, unsigned char *data, int length) {
-    int status = send(*socket, (const char *) data, length, 0 );
+int32_t win32tcpSend(SOCKET *socket, uint8_t *data, int32_t length) {
+    int32_t status = send(*socket, (const char *) data, length, 0 );
     if (status == SOCKET_ERROR) {
         closesocket(*socket);
         return 1;
@@ -802,9 +794,9 @@ int win32tcpSend(SOCKET *socket, unsigned char *data, int length) {
     return 0;
 }
 
-int win32tcpReceive(SOCKET *socket, unsigned char *buffer, int length) {
-    int status = 1;
-    int bytes = 0;
+int32_t win32tcpReceive(SOCKET *socket, uint8_t *buffer, int32_t length) {
+    int32_t status = 1;
+    int32_t bytes = 0;
     while (status > 0) {
         status = recv(*socket, (char *) buffer, length, 0);
         if (status > 0) {
@@ -822,8 +814,8 @@ int win32tcpReceive(SOCKET *socket, unsigned char *buffer, int length) {
     return bytes;
 }
 
-int win32tcpReceive2(SOCKET *socket, unsigned char *buffer, int length) {
-    int status = 1;
+int32_t win32tcpReceive2(SOCKET *socket, uint8_t *buffer, int32_t length) {
+    int32_t status = 1;
     status = recv(*socket, (char *) buffer, length, 0);
     if (status > 0) {
         // printf("Bytes received: %d\n", status);

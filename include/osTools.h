@@ -129,8 +129,6 @@ extern win32SocketObject win32Socket;
 
 int win32tcpInit(char *address, char *port);
 
-int win32newSocket();
-
 SOCKET *win32tcpCreateSocket();
 
 int win32tcpSend(SOCKET *socket, unsigned char *data, int length);
