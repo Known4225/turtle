@@ -9619,7 +9619,7 @@ void list_delete_range(list_t *list, uint32_t indexMin, uint32_t indexMax) {
 
 /* checks if two unitype items are equal */
 int32_t unitype_check_equal(unitype item1, unitype item2, int8_t typeItem1, int8_t typeItem2) {
-    if ((typeItem1 == 's' || typeItem2 == 's') && typeItem1 != typeItem2) {
+    if ((typeItem1 == 's' || typeItem2 == 's' || typeItem1 == 'p' || typeItem2 == 'p' || typeItem1 == 'r' || typeItem2 == 'r') && typeItem1 != typeItem2) {
         return 0;
     }
 
