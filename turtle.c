@@ -87,7 +87,7 @@ void parsePopupOutput(GLFWwindow *window) {
 }
 
 int main(int argc, char *argv[]) {
-    /* Initialize glfw */
+    /* Initialise glfw */
     if (!glfwInit()) {
         return -1;
     }
@@ -104,7 +104,7 @@ int main(int argc, char *argv[]) {
     glfwMakeContextCurrent(window);
     glfwSetWindowSizeLimits(window, windowHeight * 16 / 9 * 0.4, windowHeight * 0.4, windowHeight * 16 / 9, windowHeight);
 
-    /* initialize turtle */
+    /* initialise turtle */
     turtleInit(window, -320, -180, 320, 180);
     glfwSetWindowSize(window, windowHeight * 16 / 9 * 0.85, monitorSize -> height * 0.85); // doing it this way ensures the window spawns in the top left of the monitor and fixes resizing limits
     /* initialise turtleText */
