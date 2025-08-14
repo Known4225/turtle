@@ -50,10 +50,10 @@ int32_t macrosLength = sizeof(implementationMacros) / 128;
 
 const int32_t dependencyTree[] = {
     0, 0, 0, 0, 0, // list has no dependencies
-    1, 0, 0, 0, 0, // turtle internal requires on list
-    0, 1, 0, 0, 0, // turtle text requires on turtle internal
-    0, 0, 1, 0, 0, // turtle tools requires on turtle text
-    0, 1, 0, 0, 0, // os tools requires turtle internal
+    1, 0, 0, 0, 0, // turtle internal requires list
+    0, 1, 0, 0, 0, // turtle text requires turtle internal
+    0, 0, 1, 0, 0, // turtle tools requires turtle text
+    1, 0, 0, 0, 0, // os tools requires list
 };
 
 /* check if this line of code should not be included in the final output, return 1 if the line is blacklisted */
