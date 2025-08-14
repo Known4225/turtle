@@ -95,17 +95,18 @@ int main(int argc, char *argv[]) {
 
     /* Create a windowed mode window and its OpenGL context */
     const GLFWvidmode *monitorSize = glfwGetVideoMode(glfwGetPrimaryMonitor());
-    int32_t windowHeight = monitorSize -> height * 0.85;
+    int32_t windowHeight = monitorSize -> height;
     GLFWwindow *window = glfwCreateWindow(windowHeight * 16 / 9, windowHeight, "turtle demo", NULL, NULL);
     if (!window) {
         glfwTerminate();
         return -1;
     }
     glfwMakeContextCurrent(window);
-    glfwSetWindowSizeLimits(window, windowHeight * 16 / 9 * 0.5, windowHeight * 0.5, windowHeight * 16 / 9 / 0.85, windowHeight / 0.85);
+    glfwSetWindowSizeLimits(window, windowHeight * 16 / 9 * 0.4, windowHeight * 0.4, windowHeight * 16 / 9, windowHeight);
 
     /* initialize turtle */
     turtleInit(window, -320, -180, 320, 180);
+    glfwSetWindowSize(window, windowHeight * 16 / 9 * 0.85, monitorSize -> height * 0.85); // doing it this way ensures the window spawns in the top left of the monitor and fixes resizing limits
     /* initialise turtleText */
     turtleTextInit("config/roberto.tgl");
     /* initialise turtleTools ribbon */
