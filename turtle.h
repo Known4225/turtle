@@ -189,7 +189,7 @@ extern void glEnd();
 typedef struct GLFWwindow GLFWwindow;
 
 typedef struct {
-    GLFWwindow* window; // the window
+    GLFWwindow *window; // the window
     list_t *keyPressed; // global keyPressed and mousePressed list
     void (*keyCallback)(int32_t key, int32_t scancode, int32_t action);
     void (*unicodeCallback)(uint32_t codepoint);
@@ -242,13 +242,13 @@ void turtleSetWorldCoordinates(int32_t minX, int32_t minY, int32_t maxX, int32_t
 void unicodeSense(GLFWwindow *window, uint32_t codepoint);
 
 /* detect key presses */
-void keySense(GLFWwindow* window, int32_t key, int32_t scancode, int32_t action, int32_t mods);
+void keySense(GLFWwindow *window, int32_t key, int32_t scancode, int32_t action, int32_t mods);
 
 /* detect mouse clicks */
 void mouseSense(GLFWwindow *window, int32_t button, int32_t action, int32_t mods);
 
 /* detect scroll wheel */
-void scrollSense(GLFWwindow* window, double xoffset, double yoffset);
+void scrollSense(GLFWwindow *window, double xoffset, double yoffset);
 
 /* the behavior with the mouse wheel is different since it can't be "on" or "off" */
 double turtleMouseWheel();
@@ -268,8 +268,8 @@ int8_t turtleMouseMiddle();
 /* alternate duplicate of top level boolean output call to check if the middle mouse button is currently being held down */
 int8_t turtleMouseMid();
 
-/* initializes the turtletools module */
-void turtleInit(GLFWwindow* window, int32_t minX, int32_t minY, int32_t maxX, int32_t maxY);
+/* initialises the turtle module */
+void turtleInit(GLFWwindow *window, int32_t minX, int32_t minY, int32_t maxX, int32_t maxY);
 
 /* gets the mouse coordinates */
 void turtleGetMouseCoords();
@@ -621,6 +621,8 @@ typedef enum {
     TT_BUTTON_SHAPE_TEXT = 3,
 } tt_button_shape_t;
 
+#define TT_LABEL_LENGTH_LIMIT 24
+
 /* button */
 typedef struct {
     tt_element_names_t element;
@@ -630,7 +632,7 @@ typedef struct {
     double y;
     double size;
     int8_t *variable; // 1 if button is being pressed, 0 otherwise
-    char label[24];
+    char label[TT_LABEL_LENGTH_LIMIT];
     int32_t status;
     tt_button_shape_t shape;
 } tt_button_t;
@@ -652,7 +654,7 @@ typedef struct {
     double y;
     double size;
     int8_t *variable; // 1 if switch is flipped, 0 otherwise
-    char label[24];
+    char label[TT_LABEL_LENGTH_LIMIT];
     int32_t status;
     tt_switch_style_t style;
 } tt_switch_t;
@@ -672,7 +674,7 @@ typedef struct {
     double y;
     double size;
     double *variable; // value of dial
-    char label[24];
+    char label[TT_LABEL_LENGTH_LIMIT];
     int32_t status[2];
     tt_dial_type_t type;
     double range[2];
@@ -700,7 +702,7 @@ typedef struct {
     double y;
     double size;
     double *variable; // value of slider
-    char label[24];
+    char label[TT_LABEL_LENGTH_LIMIT];
     int32_t status;
     tt_slider_type_t type;
     tt_slider_align_t align;
@@ -745,7 +747,7 @@ typedef struct {
     double y;
     double size;
     int32_t *variable; // index of dropdown selected
-    char label[24];
+    char label[TT_LABEL_LENGTH_LIMIT];
     list_t *options;
     uint32_t index;
     int32_t status;
@@ -767,7 +769,7 @@ typedef struct {
     double y;
     double size;
     char *text;
-    char label[24];
+    char label[TT_LABEL_LENGTH_LIMIT];
     int32_t status;
     tt_textbox_align_t align;
     double length;
@@ -10902,8 +10904,9 @@ void renderChar(int32_t index, double x, double y, double size) {
     int32_t len1 = turtleText.fontData[index];
     for (int32_t i = 0; i < len1; i++) {
         index += 1;
-        if (turtle.pen == 1)
+        if (turtle.pen == 1) {
             turtlePenUp();
+        }
         int32_t len2 = turtleText.fontData[index];
         for (int32_t j = 0; j < len2; j++) {
             index += 1;
