@@ -3,86 +3,88 @@
 #include <time.h>
 
 void parseRibbonOutput() {
-    if (ribbonRender.output[0] == 1) {
-        ribbonRender.output[0] = 0;
-        if (ribbonRender.output[1] == 0) { // File
-            if (ribbonRender.output[2] == 1) { // New
-                printf("New\n");
-            }
-            if (ribbonRender.output[2] == 2) { // Save
-                if (strcmp(osToolsFileDialog.selectedFilename, "null") == 0) {
-                    if (osToolsFileDialogPrompt(1, "") != -1) {
-                        printf("Saved to: %s\n", osToolsFileDialog.selectedFilename);
-                    }
-                } else {
-                    printf("Saved to: %s\n", osToolsFileDialog.selectedFilename);
-                }
-            }
-            if (ribbonRender.output[2] == 3) { // Save As...
+    if (ribbonRender.output[0] == 0) {
+        return;
+    }
+    ribbonRender.output[0] = 0;
+    if (ribbonRender.output[1] == 0) { // File
+        if (ribbonRender.output[2] == 1) { // New
+            printf("New\n");
+        }
+        if (ribbonRender.output[2] == 2) { // Save
+            if (strcmp(osToolsFileDialog.selectedFilename, "null") == 0) {
                 if (osToolsFileDialogPrompt(1, "") != -1) {
                     printf("Saved to: %s\n", osToolsFileDialog.selectedFilename);
                 }
-            }
-            if (ribbonRender.output[2] == 4) { // Open
-                if (osToolsFileDialogPrompt(0, "") != -1) {
-                    printf("Loaded data from: %s\n", osToolsFileDialog.selectedFilename);
-                }
+            } else {
+                printf("Saved to: %s\n", osToolsFileDialog.selectedFilename);
             }
         }
-        if (ribbonRender.output[1] == 1) { // Edit
-            if (ribbonRender.output[2] == 1) { // Undo
-                printf("Undo\n");
-            }
-            if (ribbonRender.output[2] == 2) { // Redo
-                printf("Redo\n");
-            }
-            if (ribbonRender.output[2] == 3) { // Cut
-                osToolsClipboardSetText("test123");
-                printf("Cut \"test123\" to clipboard!\n");
-            }
-            if (ribbonRender.output[2] == 4) { // Copy
-                osToolsClipboardSetText("test345");
-                printf("Copied \"test345\" to clipboard!\n");
-            }
-            if (ribbonRender.output[2] == 5) { // Paste
-                osToolsClipboardGetText();
-                printf("Pasted \"%s\" from clipboard!\n", osToolsClipboard.text);
+        if (ribbonRender.output[2] == 3) { // Save As...
+            if (osToolsFileDialogPrompt(1, "") != -1) {
+                printf("Saved to: %s\n", osToolsFileDialog.selectedFilename);
             }
         }
-        if (ribbonRender.output[1] == 2) { // View
-            if (ribbonRender.output[2] == 1) { // Change theme
-                printf("Change theme\n");
-                if (tt_theme == TT_THEME_DARK) {
-                    turtleBgColor(36, 30, 32);
-                    turtleToolsSetTheme(TT_THEME_COLT);
-                } else if (tt_theme == TT_THEME_COLT) {
-                    turtleBgColor(212, 201, 190);
-                    turtleToolsSetTheme(TT_THEME_NAVY);
-                } else if (tt_theme == TT_THEME_NAVY) {
-                    turtleBgColor(255, 255, 255);
-                    turtleToolsSetTheme(TT_THEME_LIGHT);
-                } else if (tt_theme == TT_THEME_LIGHT) {
-                    turtleBgColor(30, 30, 30);
-                    turtleToolsSetTheme(TT_THEME_DARK);
-                }
-            } 
-            if (ribbonRender.output[2] == 2) { // GLFW
-                printf("GLFW settings\n");
-            } 
+        if (ribbonRender.output[2] == 4) { // Open
+            if (osToolsFileDialogPrompt(0, "") != -1) {
+                printf("Loaded data from: %s\n", osToolsFileDialog.selectedFilename);
+            }
         }
+    }
+    if (ribbonRender.output[1] == 1) { // Edit
+        if (ribbonRender.output[2] == 1) { // Undo
+            printf("Undo\n");
+        }
+        if (ribbonRender.output[2] == 2) { // Redo
+            printf("Redo\n");
+        }
+        if (ribbonRender.output[2] == 3) { // Cut
+            osToolsClipboardSetText("test123");
+            printf("Cut \"test123\" to clipboard!\n");
+        }
+        if (ribbonRender.output[2] == 4) { // Copy
+            osToolsClipboardSetText("test345");
+            printf("Copied \"test345\" to clipboard!\n");
+        }
+        if (ribbonRender.output[2] == 5) { // Paste
+            osToolsClipboardGetText();
+            printf("Pasted \"%s\" from clipboard!\n", osToolsClipboard.text);
+        }
+    }
+    if (ribbonRender.output[1] == 2) { // View
+        if (ribbonRender.output[2] == 1) { // Change theme
+            printf("Change theme\n");
+            if (tt_theme == TT_THEME_DARK) {
+                turtleBgColor(36, 30, 32);
+                turtleToolsSetTheme(TT_THEME_COLT);
+            } else if (tt_theme == TT_THEME_COLT) {
+                turtleBgColor(212, 201, 190);
+                turtleToolsSetTheme(TT_THEME_NAVY);
+            } else if (tt_theme == TT_THEME_NAVY) {
+                turtleBgColor(255, 255, 255);
+                turtleToolsSetTheme(TT_THEME_LIGHT);
+            } else if (tt_theme == TT_THEME_LIGHT) {
+                turtleBgColor(30, 30, 30);
+                turtleToolsSetTheme(TT_THEME_DARK);
+            }
+        } 
+        if (ribbonRender.output[2] == 2) { // GLFW
+            printf("GLFW settings\n");
+        } 
     }
 }
 
 void parsePopupOutput(GLFWwindow *window) {
-    if (popup.output[0] == 1) {
-        popup.output[0] = 0; // untoggle
-        if (popup.output[1] == 0) { // cancel
-            turtle.close = 0;
-            glfwSetWindowShouldClose(window, 0);
-        }
-        if (popup.output[1] == 1) { // close
-            turtle.popupClose = 1;
-        }
+    if (popup.output[0] == 0) {
+        return;
+    }
+    popup.output[0] = 0; // untoggle
+    if (popup.output[1] == 0) { // cancel
+        turtle.close = 0;
+        glfwSetWindowShouldClose(window, 0);
+    }
+    if (popup.output[1] == 1) { // close
+        turtle.popupClose = 1;
     }
 }
 
