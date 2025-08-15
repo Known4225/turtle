@@ -113,7 +113,7 @@ int main(int argc, char *argv[]) {
     turtleToolsSetTheme(TT_THEME_DARK); // dark theme preset
     ribbonInit("config/ribbonConfig.txt");
     /* initialise turtleTools popup */
-    popupInit("config/popupConfig.txt", -60, -20, 60, 20);
+    popupInit("config/popupConfig.txt", -70, -20, 70, 20);
     /* initialise osTools */
     osToolsInit(argv[0], window); // must include argv[0] to get executableFilepath, must include GLFW window
     osToolsFileDialogAddExtension("txt"); // add txt to extension restrictions
@@ -188,7 +188,7 @@ int main(int argc, char *argv[]) {
     switch_xbox -> style = TT_SWITCH_STYLE_XBOX;
     int8_t textButton = 0, circleButton = 0;
     tt_button_t *button_textButton = buttonInit("Text Button", &textButton, 330, -30, 10);
-    tt_button_t *button_circleButton = buttonInit("Circle Button", &circleButton, 338, -88, 10);
+    tt_button_t *button_circleButton = buttonInit("Circle Button", &circleButton, 338, -100, 10);
     button_textButton -> shape = TT_BUTTON_SHAPE_TEXT;
     button_circleButton -> shape = TT_BUTTON_SHAPE_CIRCLE;
 
@@ -225,19 +225,19 @@ int main(int argc, char *argv[]) {
         turtleTextWriteStringf(zSlider -> x + zSlider -> length / 2 + xSlider -> size, zSlider -> y, 4, 0, "%.01lf", round(z) / 10);
 
         /* write all characters supported */
-        turtleTextWriteUnicode((uint8_t *) u8"AÀÁĂÄÃÅĀĄÆBCĆČĊÇDĎĐÐEÈÉĚÊËĒĖĘƏFGĞĠHĦ", scrollbarVarX * -5 + 320, scrollbarVarY * 3.3 - 180, 10, 0);
-        turtleTextWriteUnicode((uint8_t *) u8"IÌÍÎÏĪİĮJKĶLĹĽĻŁĿMNŃŇÑŅOÒÓÔÖÕŐØŒPQRŔŘSŚŠŞȘ", scrollbarVarX * -5 + 320, scrollbarVarY * 3.3 - 195, 10, 0);
-        turtleTextWriteUnicode((uint8_t *) u8"ẞTŤȚÞUÙÚÛÜŮŰŪŲVWXYÝZŹŽŻaàáâăäãåāąæbcć", scrollbarVarX * -5 + 320, scrollbarVarY * 3.3 - 210, 10, 0);
-        turtleTextWriteUnicode((uint8_t *) u8"čċçdďđðeèéěêëēėęəfgğġhħiìíîïīıįjkķlĺľļłŀmnńňñņoòóôö", scrollbarVarX * -5 + 320, scrollbarVarY * 3.3 - 225, 10, 0);
-        turtleTextWriteUnicode((uint8_t *) u8"õőøœpqrŕřsśšşșßtťțþuùúûüůűūųvwxyýzźžż", scrollbarVarX * -5 + 320, scrollbarVarY * 3.3 - 240, 10, 0);
-        turtleTextWriteUnicode((uint8_t *) u8"АБВГҐҒДЂЕЁЄӘЖӁЗИӢЙІЇЈКҚҜЛЉМНҢЊОӨПРСТ", scrollbarVarX * -5 + 320, scrollbarVarY * 3.3 - 255, 10, 0);
-        turtleTextWriteUnicode((uint8_t *) u8"ЋУӮҮҰЎФХҲҺЦЧҶҸЏШЩЪЫЬЭЮЯабвгґғдђеёєәж", scrollbarVarX * -5 + 320, scrollbarVarY * 3.3 - 270, 10, 0);
-        turtleTextWriteUnicode((uint8_t *) u8"ӂзиӣйіїјкқҝлљмнңњоөпрстћуӯүұўфхҳһцчҷҹџшщъ", scrollbarVarX * -5 + 320, scrollbarVarY * 3.3 - 285, 10, 0);
-        turtleTextWriteUnicode((uint8_t *) u8"ыьэюя", scrollbarVarX * -5 + 320, scrollbarVarY * 3.3 - 300, 10, 0);
-        turtleTextWriteUnicode((uint8_t *) u8"ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩ", scrollbarVarX * -5 + 320, scrollbarVarY * 3.3 - 315, 10, 0);
-        turtleTextWriteUnicode((uint8_t *) u8"αβγδεζηθικλμνξοπρσςτυφχψω", scrollbarVarX * -5 + 320, scrollbarVarY * 3.3 - 330, 10, 0);
-        turtleTextWriteUnicode((uint8_t *) u8"1234567890!@#$£€₺₽¥₩₹₣฿%^&*()`~-_=+[{]}\\|;:‘'’“\"”,", scrollbarVarX * -5 + 320, scrollbarVarY * 3.3 - 345, 10, 0);
-        turtleTextWriteUnicode((uint8_t *) u8"<.>/?½¨", scrollbarVarX * -5 + 320, scrollbarVarY * 3.3 - 360, 10, 0);
+        turtleTextWriteUnicode((uint8_t *) u8"AÀÁĂÄÃÅĀĄÆBCĆČĊÇDĎĐÐEÈÉĚÊËĒĖĘƏFGĞĠHĦ", scrollbarVarX * -5 + 260, scrollbarVarY * 3.3 - 180, 10, 0);
+        turtleTextWriteUnicode((uint8_t *) u8"IÌÍÎÏĪİĮJKĶLĹĽĻŁĿMNŃŇÑŅOÒÓÔÖÕŐØŒPQRŔ", scrollbarVarX * -5 + 260, scrollbarVarY * 3.3 - 195, 10, 0);
+        turtleTextWriteUnicode((uint8_t *) u8"ŘSŚŠŞȘẞTŤȚÞUÙÚÛÜŮŰŪŲVWXYÝZŹŽŻaàáâăäã", scrollbarVarX * -5 + 260, scrollbarVarY * 3.3 - 210, 10, 0);
+        turtleTextWriteUnicode((uint8_t *) u8"åāąæbcćčċçdďđðeèéěêëēėęəfgğġhħiìíîïī", scrollbarVarX * -5 + 260, scrollbarVarY * 3.3 - 225, 10, 0);
+        turtleTextWriteUnicode((uint8_t *) u8"ıįjkķlĺľļłŀmnńňñņoòóôöõőøœpqrŕřsśšşș", scrollbarVarX * -5 + 260, scrollbarVarY * 3.3 - 240, 10, 0);
+        turtleTextWriteUnicode((uint8_t *) u8"ßtťțþuùúûüůűūųvwxyýzźžżАБВГҐҒДЂЕЁЄӘЖ", scrollbarVarX * -5 + 260, scrollbarVarY * 3.3 - 255, 10, 0);
+        turtleTextWriteUnicode((uint8_t *) u8"ӁЗИӢЙІЇЈКҚҜЛЉМНҢЊОӨПРСТЋУӮҮҰЎФХҲҺЦЧҶ", scrollbarVarX * -5 + 260, scrollbarVarY * 3.3 - 270, 10, 0);
+        turtleTextWriteUnicode((uint8_t *) u8"ҸЏШЩЪЫЬЭЮЯабвгґғдђеёєәжӂзиӣйіїјкқҝлљ", scrollbarVarX * -5 + 260, scrollbarVarY * 3.3 - 285, 10, 0);
+        turtleTextWriteUnicode((uint8_t *) u8"мнңњоөпрстћуӯүұўфхҳһцчҷҹџшщъыьэюя", scrollbarVarX * -5 + 260, scrollbarVarY * 3.3 - 300, 10, 0);
+        turtleTextWriteUnicode((uint8_t *) u8"ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩ", scrollbarVarX * -5 + 260, scrollbarVarY * 3.3 - 315, 10, 0);
+        turtleTextWriteUnicode((uint8_t *) u8"αβγδεζηθικλμνξοπρσςτυφχψω", scrollbarVarX * -5 + 260, scrollbarVarY * 3.3 - 330, 10, 0);
+        turtleTextWriteUnicode((uint8_t *) u8"1234567890!@#$£€₺₽¥₩₹₣฿%^&*()`~-_=+[", scrollbarVarX * -5 + 260, scrollbarVarY * 3.3 - 345, 10, 0);
+        turtleTextWriteUnicode((uint8_t *) u8"{]}\\|;:‘'’“\"”,<.>/?½¨", scrollbarVarX * -5 + 260, scrollbarVarY * 3.3 - 360, 10, 0);
 
         // turtlePenColor(0, 0, 0);
         // turtle3DTriangle(-5, 0, 10, 5, 0, 10, 0, 5, 10);

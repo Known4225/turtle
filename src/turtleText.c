@@ -53,6 +53,8 @@ int32_t turtleTextInit(const char *filename) {
         strptr = 0;
         int32_t loops = 0;
         int32_t firstIndex = 0;
+        int8_t widthProceed = 0;
+        int32_t savedWidth = -2147483640;
         
         while (line[strptr] != '\n' && line[strptr] != '\0') {
             while (line[strptr] != ',' && line[strptr] != '\n' && line[strptr] != '\0') {
@@ -71,6 +73,7 @@ int32_t turtleTextInit(const char *filename) {
                 }
                 if (fontPar == 0) { // exception for the comma character
                     fontPar = 44;
+                    strptr += 1;
                 }
                 list_append(supportedCharReferenceInit, (unitype) fontPar, 'i'); // adds as an int but will typecast back to unsigned later, this might not work correctly but it also doesn't really matter
                 list_append(fontPointerInit, (unitype) fontDataInit -> length, 'i');
@@ -78,21 +81,29 @@ int32_t turtleTextInit(const char *filename) {
                 list_append(fontDataInit, (unitype) 1, 'i');
             } else {
                 sscanf((char *) parsedInt, "%u", &fontPar); // parse as integer
-                if (strcmp((char *) parsedInt, "b") == 0) {
+                if (strcmp((char *) parsedInt, "w") == 0) { // w is a width specifier
+                    widthProceed = 1;
+                    loops -= 1; // counter loops, this field does not count
+                } else if (widthProceed) {
+                    savedWidth = fontPar;
+                    widthProceed = 0;
+                    loops -= 1; // counter loops, this field does not count
+                } else if (strcmp((char *) parsedInt, "b") == 0) {
                     list_append(fontDataInit, (unitype) 140894115, 'i'); // all b's get converted to the integer 140894115 (chosen semi-randomly)
                 } else {
                     list_append(fontDataInit, (unitype) fontPar, 'i'); // fontPar will double count when it encounters a b (idk why) so if there's a b we ignore the second fontPar (which is a duplicate of the previous one)
                 }
                 loops += 1;
             }
-            if (line[strptr] != '\n' && line[strptr] != '\0')
+            if (line[strptr] != '\n' && line[strptr] != '\0') {
                 strptr += 2;
+            }
             oldptr = strptr;
         }
         fontDataInit -> data[firstIndex] = (unitype) loops;
         firstIndex += 1; // using firstIndex as iteration variable
         int32_t len1 = fontDataInit -> data[firstIndex].i;
-        int32_t maximums[4] = {-2147483648, -2147483648, 2147483647, 2147483647}; // for describing bounding box of a character
+        int32_t maximums[4] = {-2147483648, -2147483648, 2147483647, 2147483647}; // for describing bounding box of a character (positive X, positive Y, negative X, negative Y)
         
         /* good programmng alert */
         #define CHECKS_EMB(ind) \
@@ -138,10 +149,14 @@ int32_t turtleTextInit(const char *filename) {
                 }
             }
         }
-        if (maximums[0] < 0) {
-            list_append(fontDataInit, (unitype) 90, 'i');
+        if (savedWidth != -2147483640) {
+            list_append(fontDataInit, (unitype) savedWidth, 'i');
         } else {
-            list_append(fontDataInit, (unitype) maximums[0], 'i');
+            if (maximums[0] < 0) {
+                list_append(fontDataInit, (unitype) 90, 'i'); // default width of character
+            } else {
+                list_append(fontDataInit, (unitype) maximums[0], 'i');
+            }
         }
         if (maximums[3] > 0) {
             list_append(fontDataInit, (unitype) 0, 'i');
@@ -149,10 +164,11 @@ int32_t turtleTextInit(const char *filename) {
             list_append(fontDataInit, (unitype) maximums[3], 'i');
         }
         if (maximums[1] < 0) {
-            if (turtleText.charCount == 0)
+            if (turtleText.charCount == 0) {
                 list_append(fontDataInit, (unitype) 0, 'i');
-            else
+            } else {
                 list_append(fontDataInit, (unitype) 120, 'i');
+            }
         } else {
             list_append(fontDataInit, (unitype) maximums[1], 'i');
         }
@@ -164,6 +180,7 @@ int32_t turtleTextInit(const char *filename) {
         turtleText.charCount += 1;
     }
     list_append(fontPointerInit, (unitype) (int32_t) (fontDataInit -> length), 'i'); // last pointer
+    // list_print(fontDataInit);
     turtleText.fontData = malloc(sizeof(int32_t) * fontDataInit -> length); // convert lists to arrays (could be optimised cuz we already have the -> data arrays but who really cares this runs once)
     for (uint32_t i = 0; i < fontDataInit -> length; i++) {
         turtleText.fontData[i] = fontDataInit -> data[i].i;
