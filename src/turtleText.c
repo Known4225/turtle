@@ -232,8 +232,9 @@ void renderChar(int32_t index, double x, double y, double size) {
     int32_t len1 = turtleText.fontData[index];
     for (int32_t i = 0; i < len1; i++) {
         index += 1;
-        if (turtle.pen == 1)
+        if (turtle.pen == 1) {
             turtlePenUp();
+        }
         int32_t len2 = turtleText.fontData[index];
         for (int32_t j = 0; j < len2; j++) {
             index += 1;
