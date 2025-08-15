@@ -189,7 +189,7 @@ extern void glEnd();
 typedef struct GLFWwindow GLFWwindow;
 
 typedef struct {
-    GLFWwindow* window; // the window
+    GLFWwindow *window; // the window
     list_t *keyPressed; // global keyPressed and mousePressed list
     void (*keyCallback)(int32_t key, int32_t scancode, int32_t action);
     void (*unicodeCallback)(uint32_t codepoint);
@@ -242,13 +242,13 @@ void turtleSetWorldCoordinates(int32_t minX, int32_t minY, int32_t maxX, int32_t
 void unicodeSense(GLFWwindow *window, uint32_t codepoint);
 
 /* detect key presses */
-void keySense(GLFWwindow* window, int32_t key, int32_t scancode, int32_t action, int32_t mods);
+void keySense(GLFWwindow *window, int32_t key, int32_t scancode, int32_t action, int32_t mods);
 
 /* detect mouse clicks */
 void mouseSense(GLFWwindow *window, int32_t button, int32_t action, int32_t mods);
 
 /* detect scroll wheel */
-void scrollSense(GLFWwindow* window, double xoffset, double yoffset);
+void scrollSense(GLFWwindow *window, double xoffset, double yoffset);
 
 /* the behavior with the mouse wheel is different since it can't be "on" or "off" */
 double turtleMouseWheel();
@@ -268,8 +268,8 @@ int8_t turtleMouseMiddle();
 /* alternate duplicate of top level boolean output call to check if the middle mouse button is currently being held down */
 int8_t turtleMouseMid();
 
-/* initializes the turtletools module */
-void turtleInit(GLFWwindow* window, int32_t minX, int32_t minY, int32_t maxX, int32_t maxY);
+/* initialises the turtle module */
+void turtleInit(GLFWwindow *window, int32_t minX, int32_t minY, int32_t maxX, int32_t maxY);
 
 /* gets the mouse coordinates */
 void turtleGetMouseCoords();
@@ -10902,8 +10902,9 @@ void renderChar(int32_t index, double x, double y, double size) {
     int32_t len1 = turtleText.fontData[index];
     for (int32_t i = 0; i < len1; i++) {
         index += 1;
-        if (turtle.pen == 1)
+        if (turtle.pen == 1) {
             turtlePenUp();
+        }
         int32_t len2 = turtleText.fontData[index];
         for (int32_t j = 0; j < len2; j++) {
             index += 1;
