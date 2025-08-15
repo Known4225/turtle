@@ -621,6 +621,8 @@ typedef enum {
     TT_BUTTON_SHAPE_TEXT = 3,
 } tt_button_shape_t;
 
+#define TT_LABEL_LENGTH_LIMIT 24
+
 /* button */
 typedef struct {
     tt_element_names_t element;
@@ -630,7 +632,7 @@ typedef struct {
     double y;
     double size;
     int8_t *variable; // 1 if button is being pressed, 0 otherwise
-    char label[24];
+    char label[TT_LABEL_LENGTH_LIMIT];
     int32_t status;
     tt_button_shape_t shape;
 } tt_button_t;
@@ -652,7 +654,7 @@ typedef struct {
     double y;
     double size;
     int8_t *variable; // 1 if switch is flipped, 0 otherwise
-    char label[24];
+    char label[TT_LABEL_LENGTH_LIMIT];
     int32_t status;
     tt_switch_style_t style;
 } tt_switch_t;
@@ -672,7 +674,7 @@ typedef struct {
     double y;
     double size;
     double *variable; // value of dial
-    char label[24];
+    char label[TT_LABEL_LENGTH_LIMIT];
     int32_t status[2];
     tt_dial_type_t type;
     double range[2];
@@ -700,7 +702,7 @@ typedef struct {
     double y;
     double size;
     double *variable; // value of slider
-    char label[24];
+    char label[TT_LABEL_LENGTH_LIMIT];
     int32_t status;
     tt_slider_type_t type;
     tt_slider_align_t align;
@@ -745,7 +747,7 @@ typedef struct {
     double y;
     double size;
     int32_t *variable; // index of dropdown selected
-    char label[24];
+    char label[TT_LABEL_LENGTH_LIMIT];
     list_t *options;
     uint32_t index;
     int32_t status;
@@ -767,7 +769,7 @@ typedef struct {
     double y;
     double size;
     char *text;
-    char label[24];
+    char label[TT_LABEL_LENGTH_LIMIT];
     int32_t status;
     tt_textbox_align_t align;
     double length;
