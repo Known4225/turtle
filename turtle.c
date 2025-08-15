@@ -108,7 +108,7 @@ int main(int argc, char *argv[]) {
     turtleInit(window, -320, -180, 320, 180);
     glfwSetWindowSize(window, windowHeight * 16 / 9 * 0.85, monitorSize -> height * 0.85); // doing it this way ensures the window spawns in the top left of the monitor and fixes resizing limits
     /* initialise turtleText */
-    turtleTextInit("config/robertoMono.tgl");
+    turtleTextInit("config/roberto.tgl");
     /* initialise turtleTools ribbon */
     turtleToolsSetTheme(TT_THEME_DARK); // dark theme preset
     ribbonInit("config/ribbonConfig.txt");
