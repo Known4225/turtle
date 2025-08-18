@@ -12,6 +12,8 @@ The combination of functions that the turtle libraries provide make it ideal for
 
 # How to use
 
+See the [wiki](https://github.com/Known4225/turtle/wiki/Building-a-project-with-turtle) for detailed information on how to build a project with turtle.
+
 The turtle libraries uses the [singlefile header implementation](https://github.com/r-lyeh/single_file_libs). To use in your projects, include it with:
 
 ```C
@@ -53,7 +55,7 @@ osTools contains file dialog, clipboard, and other operating system integration 
 
 An example project, `turtle.c` is included with the repository. The binaries for this project for windows (64-bit) and linux (x86-64) are included in the repository and can be run without dependencies. The project showcases some of turtle's features and is intended to be a guide on how to code with turtle.
 
-The example project can be built with `make win` on windows or `make` on linux. Windows requires `gcc` and the ability to run makefiles, I recommend [w64devkit](https://github.com/skeeto/w64devkit).
+The example project can be built with `make win` on windows or `make` on linux. Windows requires `gcc` and the ability to run makefiles, I recommend [w64devkit](https://github.com/skeeto/w64devkit/releases).
 
 ## Config
 
@@ -64,4 +66,5 @@ The example project has a set of files in the `config/` folder that can be modif
 - Write wiki/documentation
 - Fix turtle initialisation with non center 0, 0 coordinates
 - Textures (enable/disable with macro, default off)
+
 - Linux COM and TCP/IP support
