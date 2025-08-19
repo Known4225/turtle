@@ -11,6 +11,15 @@ https://patorjk.com/software/taag/#p=display&f=ANSI%20Shadow
 #ifndef TURTLE_TEXT_H
 #define TURTLE_TEXT_H
 
+/* enabling this option will render the string "pppp" at a higher y than "PPPP" such that the center of their Y values will match */
+// #define TURTLE_TEXT_DO_DYNAMIC_Y_CENTERING
+
+/* enabling this option will make text rendering faster by culling the circles on ends of text - this might make the text look pretty bad */
+// #define TURTLE_TEXT_FAST_PEN
+
+/* enabling this option will add extra circles significantly decreasing the speed but increasing the render quality */
+// #define TURTLE_TEXT_PRETTY_PEN
+
 #include "turtle.h"
 #include <stdarg.h>
 

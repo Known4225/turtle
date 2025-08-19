@@ -343,13 +343,21 @@ void turtleTextWrite(const uint32_t *text, int32_t textLength, double x, double 
     double saveSize = turtle.pensize;
     turtleText.bezierPrezCurrent = (int32_t) ceil(sqrt(size * turtleText.bezierPrez / 10));
     double xTrack = x;
+    #ifdef TURTLE_TEXT_DO_DYNAMIC_Y_CENTERING
     double maxY = 0;
     double minY = 0;
+    #endif
     size /= 175;
     turtlePenSize(20 * size);
-    // turtlePenShape("connected"); // fast
-    // turtlePenShape("circle"); // pretty
+    #if defined(TURTLE_TEXT_FAST_PEN) && !defined(TURTLE_TEXT_PRETTY_PEN)
+    turtlePenShape("connected"); // fast
+    #else
+    #if !defined(TURTLE_TEXT_FAST_PEN) && defined(TURTLE_TEXT_PRETTY_PEN)
+    turtlePenShape("circle"); // pretty
+    #else
     turtlePenShape("text"); // dedicated setting that blends circle and connected
+    #endif
+    #endif
     list_t *xvals = list_init();
     list_t *dataIndStored = list_init();
     for (int32_t i = 0; i < textLength; i++) {
@@ -363,16 +371,21 @@ void turtleTextWrite(const uint32_t *text, int32_t textLength, double x, double 
         list_append(xvals, (unitype) xTrack, 'd');
         list_append(dataIndStored, (unitype) currentDataAddress, 'i');
         xTrack += (turtleText.fontData[turtleText.fontPointer[currentDataAddress + 1] - 4] + 40) * size;
-        // printf("%d\n", turtleText.fontData[turtleText.fontPointer[currentDataAddress + 1] - 4]);
+        #ifdef TURTLE_TEXT_DO_DYNAMIC_Y_CENTERING
         if (maxY < turtleText.fontData[turtleText.fontPointer[currentDataAddress + 1] - 3]) {
             maxY = turtleText.fontData[turtleText.fontPointer[currentDataAddress + 1] - 3];
         }
         if (minY > turtleText.fontData[turtleText.fontPointer[currentDataAddress + 1] - 1]) {
             minY = turtleText.fontData[turtleText.fontPointer[currentDataAddress + 1] - 1];
         }
+        #endif
     }
     xTrack -= 40 * size;
+    #ifdef TURTLE_TEXT_DO_DYNAMIC_Y_CENTERING
     y -= (maxY + minY) / 2 * size;
+    #else
+    y -= 80 * size;
+    #endif
     for (int32_t i = 0; i < textLength; i++) {
         renderChar(turtleText.fontPointer[dataIndStored -> data[i].i], xvals -> data[i].d - ((xTrack - x) * (align / 100)), y, size);
     }
