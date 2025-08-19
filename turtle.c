@@ -194,7 +194,6 @@ int main(int argc, char *argv[]) {
     button_textButton -> shape = TT_BUTTON_SHAPE_TEXT;
     button_circleButton -> shape = TT_BUTTON_SHAPE_CIRCLE;
 
-
     list_t *xPositions = list_init();
     list_t *yPositions = list_init();
     for (uint32_t i = 0; i < tt_elements.all -> length; i++) {
@@ -263,6 +262,10 @@ int main(int argc, char *argv[]) {
                     scrollbarVarY = 100;
                 }
             }
+        }
+        if (buttonVar) {
+            printf("button clicked\n");
+            buttonVar = 0;
         }
         turtleToolsUpdate(); // update turtleTools
         parseRibbonOutput(); // user defined function to use ribbon

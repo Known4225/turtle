@@ -915,8 +915,11 @@ void buttonUpdate() {
         /* mouse */
         if (buttonp -> enabled == TT_ELEMENT_ENABLED && ribbonRender.mainselect[2] == -1) {
             if (turtleMouseDown()) {
-                if (buttonp -> status < 0) {
-                    buttonp -> status *= -1;
+                if (buttonp -> status == 2) {
+                    buttonp -> status = 1;
+                }
+                if (buttonp -> status == -1) {
+                    buttonp -> status = 2;
                 }
             } else {
                 if (buttonp -> shape == TT_BUTTON_SHAPE_CIRCLE) {
@@ -933,10 +936,13 @@ void buttonUpdate() {
                     }
                 }
             }
-            *(buttonp -> variable) = 0;
-            if (buttonp -> status > 0) {
+            if (buttonp -> status > 1) {
                 *(buttonp -> variable) = 1;
                 // buttonp -> status = 0;
+            } else {
+                if (buttonp -> status < 1) {
+                    *(buttonp -> variable) = 0;
+                }
             }
         }
     }
