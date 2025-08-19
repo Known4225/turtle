@@ -87,6 +87,9 @@ void turtleTextWriteStringf(double x, double y, double size, double align, const
 /* wrapper function for unicode strings (UTF-8, u8"Hello World") */
 void turtleTextWriteUnicode(const unsigned char *str, double x, double y, double size, double align);
 
+/* formatted utf-8 string */
+void turtleTextWriteUnicodef(double x, double y, double size, double align, const unsigned char *str, ...);
+
 int32_t turtleTextConvertUnicode(const unsigned char *str, uint32_t *converted);
 
 /* if the font file is not found, use the default font (kept here) */

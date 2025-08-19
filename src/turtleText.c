@@ -449,6 +449,16 @@ void turtleTextWriteUnicode(const unsigned char *str, double x, double y, double
     turtleTextWrite(converted, next, x, y, size, align);
 }
 
+/* formatted utf-8 string */
+void turtleTextWriteUnicodef(double x, double y, double size, double align, const unsigned char *str, ...) {
+    char buffer[1024];
+    va_list args;
+    va_start(args, str);
+    vsnprintf(buffer, 1024, str, args);
+    turtleTextWriteUnicode(buffer, x, y, size, align);
+    va_end(args);
+}
+
 int32_t turtleTextConvertUnicode(const unsigned char *str, uint32_t *converted) {
     int32_t len = strlen((char *) str);
     int32_t byteLength;

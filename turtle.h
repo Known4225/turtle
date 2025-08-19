@@ -439,6 +439,9 @@ void turtleTextWriteStringf(double x, double y, double size, double align, const
 /* wrapper function for unicode strings (UTF-8, u8"Hello World") */
 void turtleTextWriteUnicode(const unsigned char *str, double x, double y, double size, double align);
 
+/* formatted utf-8 string */
+void turtleTextWriteUnicodef(double x, double y, double size, double align, const unsigned char *str, ...);
+
 int32_t turtleTextConvertUnicode(const unsigned char *str, uint32_t *converted);
 
 /* if the font file is not found, use the default font (kept here) */
@@ -10541,8 +10544,22 @@ void turtlePerspective(double x, double y, double z, double *xOut, double *yOut)
     // printf("%lf %lf\n", *xOut, *yOut);
 }
 
-/* draws the turtle's path on the screen */
+/* draws the turtle's path on the screen, "this could all be a shader" */
 void turtleUpdate() {
+    /* bad fix to a niche problem part 1 */
+    if (turtle.pen == 1) {
+        if (turtle.penPos -> length > 0 && turtle.penPos -> type[turtle.penPos -> length - 1] != 'c') {
+            list_append(turtle.penPos, (unitype) 0, 'c');
+            list_append(turtle.penPos, (unitype) 0, 'c');
+            list_append(turtle.penPos, (unitype) 0, 'c');
+            list_append(turtle.penPos, (unitype) 0, 'c');
+            list_append(turtle.penPos, (unitype) 0, 'c');
+            list_append(turtle.penPos, (unitype) 0, 'c');
+            list_append(turtle.penPos, (unitype) 0, 'c');
+            list_append(turtle.penPos, (unitype) 0, 'c');
+            list_append(turtle.penPos, (unitype) 0, 'c');
+        }
+    }
     /* used to have a feature that only redrew the screen if there have been any changes from last frame, but it has been removed.
        opted to redraw every frame and not list_copy, an alternative is hashing the penPos list. An interesting idea for sure... for another time */
     int8_t changed = 0;
@@ -10672,6 +10689,12 @@ void turtleUpdate() {
             }
         }
         glfwSwapBuffers(turtle.window);
+    }
+    /* bad fix to niche problem part 2 */
+    if (turtle.pen == 1) {
+        for (int8_t i = 0; i < 9; i++) {
+            list_pop(turtle.penPos);
+        }
     }
     glfwPollEvents();
     if (glfwWindowShouldClose(turtle.window)) {
@@ -11145,6 +11168,16 @@ void turtleTextWriteUnicode(const unsigned char *str, double x, double y, double
         next += 1;
     }
     turtleTextWrite(converted, next, x, y, size, align);
+}
+
+/* formatted utf-8 string */
+void turtleTextWriteUnicodef(double x, double y, double size, double align, const unsigned char *str, ...) {
+    char buffer[1024];
+    va_list args;
+    va_start(args, str);
+    vsnprintf(buffer, 1024, str, args);
+    turtleTextWriteUnicode(buffer, x, y, size, align);
+    va_end(args);
 }
 
 int32_t turtleTextConvertUnicode(const unsigned char *str, uint32_t *converted) {
