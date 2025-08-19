@@ -374,6 +374,23 @@ typedef struct {
     uint32_t *supportedCharReference; // array containing links from (int) unicode values of characters to an index from 0 to (charCount - 1)
     int32_t *fontPointer; // array containing links from char indices (0 to (charCount - 1)) to their corresponding data position in fontData
     int32_t *fontData; // array containing packaged instructions on how to draw each character in the character set
+    /*
+    Format:
+    maximum x coordinate
+    maximum y coordinate
+    minimum x coordinate
+    minimum y coordinate
+    outer loops {
+        inner loops {
+            coordinates
+            ...
+        }
+        inner loops {
+            coordinates
+            ...
+        }
+    }
+    */
 } turtleText_t;
 
 extern turtleText_t turtleText;
@@ -10783,7 +10800,7 @@ int32_t turtleTextInit(const char *filename) {
                 maximums[0] = fontDataInit -> data[ind].i;\
             }\
             if (fontDataInit -> data[ind].i < maximums[3]) {\
-                maximums[3] = fontDataInit -> data[ind].i;\
+                maximums[2] = fontDataInit -> data[ind].i;\
             }\
             if (fontDataInit -> data[ind + 1].i > maximums[1]) {\
                 maximums[1] = fontDataInit -> data[ind + 1].i;\
@@ -10821,6 +10838,7 @@ int32_t turtleTextInit(const char *filename) {
                 }
             }
         }
+        /* maxX */
         if (savedWidth != -2147483640) {
             list_append(fontDataInit, (unitype) savedWidth, 'i');
         } else {
@@ -10830,11 +10848,7 @@ int32_t turtleTextInit(const char *filename) {
                 list_append(fontDataInit, (unitype) maximums[0], 'i');
             }
         }
-        if (maximums[3] > 0) {
-            list_append(fontDataInit, (unitype) 0, 'i');
-        } else {
-            list_append(fontDataInit, (unitype) maximums[3], 'i');
-        }
+        /* maxY */
         if (maximums[1] < 0) {
             if (turtleText.charCount == 0) {
                 list_append(fontDataInit, (unitype) 0, 'i');
@@ -10844,12 +10858,20 @@ int32_t turtleTextInit(const char *filename) {
         } else {
             list_append(fontDataInit, (unitype) maximums[1], 'i');
         }
+        /* minX */
         if (maximums[2] > 0) {
             list_append(fontDataInit, (unitype) 0, 'i');
         } else {
             list_append(fontDataInit, (unitype) maximums[2], 'i');
         }
+        /* minY */
+        if (maximums[3] > 0) {
+            list_append(fontDataInit, (unitype) 0, 'i');
+        } else {
+            list_append(fontDataInit, (unitype) maximums[3], 'i');
+        }
         turtleText.charCount += 1;
+        // printf("maxX: %d, maxY: %d, minX: %d, minY: %d\n", fontDataInit -> data[fontDataInit -> length - 4].i, fontDataInit -> data[fontDataInit -> length - 3].i, fontDataInit -> data[fontDataInit -> length - 2].i, fontDataInit -> data[fontDataInit -> length - 1].i);
     }
     list_append(fontPointerInit, (unitype) (int32_t) (fontDataInit -> length), 'i'); // last pointer
     // list_print(fontDataInit);
@@ -11010,8 +11032,9 @@ void turtleTextWrite(const uint32_t *text, int32_t textLength, double x, double 
     double saveSize = turtle.pensize;
     turtleText.bezierPrezCurrent = (int32_t) ceil(sqrt(size * turtleText.bezierPrez / 10));
     double xTrack = x;
+    double maxY = 0;
+    double minY = 0;
     size /= 175;
-    y -= size * 70;
     turtlePenSize(20 * size);
     // turtlePenShape("connected"); // fast
     // turtlePenShape("circle"); // pretty
@@ -11029,10 +11052,18 @@ void turtleTextWrite(const uint32_t *text, int32_t textLength, double x, double 
         list_append(xvals, (unitype) xTrack, 'd');
         list_append(dataIndStored, (unitype) currentDataAddress, 'i');
         xTrack += (turtleText.fontData[turtleText.fontPointer[currentDataAddress + 1] - 4] + 40) * size;
+        // printf("%d\n", turtleText.fontData[turtleText.fontPointer[currentDataAddress + 1] - 4]);
+        if (maxY < turtleText.fontData[turtleText.fontPointer[currentDataAddress + 1] - 3]) {
+            maxY = turtleText.fontData[turtleText.fontPointer[currentDataAddress + 1] - 3];
+        }
+        if (minY > turtleText.fontData[turtleText.fontPointer[currentDataAddress + 1] - 1]) {
+            minY = turtleText.fontData[turtleText.fontPointer[currentDataAddress + 1] - 1];
+        }
     }
     xTrack -= 40 * size;
+    y -= (maxY + minY) / 2 * size;
     for (int32_t i = 0; i < textLength; i++) {
-        renderChar((double) turtleText.fontPointer[dataIndStored -> data[i].i], xvals -> data[i].d - ((xTrack - x) * (align / 100)), y, size);
+        renderChar(turtleText.fontPointer[dataIndStored -> data[i].i], xvals -> data[i].d - ((xTrack - x) * (align / 100)), y, size);
     }
     list_free(dataIndStored);
     list_free(xvals);

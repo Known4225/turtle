@@ -22,6 +22,23 @@ typedef struct {
     uint32_t *supportedCharReference; // array containing links from (int) unicode values of characters to an index from 0 to (charCount - 1)
     int32_t *fontPointer; // array containing links from char indices (0 to (charCount - 1)) to their corresponding data position in fontData
     int32_t *fontData; // array containing packaged instructions on how to draw each character in the character set
+    /*
+    Format:
+    maximum x coordinate
+    maximum y coordinate
+    minimum x coordinate
+    minimum y coordinate
+    outer loops {
+        inner loops {
+            coordinates
+            ...
+        }
+        inner loops {
+            coordinates
+            ...
+        }
+    }
+    */
 } turtleText_t;
 
 extern turtleText_t turtleText;
