@@ -69,6 +69,8 @@ typedef struct {
 
 extern turtle_t turtle;
 
+void printTurtle();
+
 /* run this to set the bounds of the window in coordinates */
 void turtleSetWorldCoordinates(int32_t minX, int32_t minY, int32_t maxX, int32_t maxY);
 
@@ -85,19 +87,19 @@ void scrollSense(GLFWwindow* window, double xoffset, double yoffset);
 double turtleMouseWheel();
 
 /* top level boolean output call to check if the key with code [key] is currently being held down. Uses the GLFW_KEY_X macros */
-char turtleKeyPressed(int32_t key);
+int8_t turtleKeyPressed(int32_t key);
 
 /* top level boolean output call to check if the left click button is currently being held down */
-char turtleMouseDown();
+int8_t turtleMouseDown();
 
 /* top level boolean output call to check if the right click button is currently being held down */
-char turtleMouseRight();
+int8_t turtleMouseRight();
 
 /* top level boolean output call to check if the middle mouse button is currently being held down */
-char turtleMouseMiddle();
+int8_t turtleMouseMiddle();
 
 /* alternate duplicate of top level boolean output call to check if the middle mouse button is currently being held down */
-char turtleMouseMid();
+int8_t turtleMouseMid();
 
 /* initializes the turtletools module */
 void turtleInit(GLFWwindow* window, int32_t minX, int32_t minY, int32_t maxX, int32_t maxY);

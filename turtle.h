@@ -497,6 +497,8 @@ typedef struct {
 
 extern turtle_t turtle;
 
+void printTurtle();
+
 /* run this to set the bounds of the window in coordinates */
 void turtleSetWorldCoordinates(int32_t minX, int32_t minY, int32_t maxX, int32_t maxY);
 
@@ -513,19 +515,19 @@ void scrollSense(GLFWwindow* window, double xoffset, double yoffset);
 double turtleMouseWheel();
 
 /* top level boolean output call to check if the key with code [key] is currently being held down. Uses the GLFW_KEY_X macros */
-char turtleKeyPressed(int32_t key);
+int8_t turtleKeyPressed(int32_t key);
 
 /* top level boolean output call to check if the left click button is currently being held down */
-char turtleMouseDown();
+int8_t turtleMouseDown();
 
 /* top level boolean output call to check if the right click button is currently being held down */
-char turtleMouseRight();
+int8_t turtleMouseRight();
 
 /* top level boolean output call to check if the middle mouse button is currently being held down */
-char turtleMouseMiddle();
+int8_t turtleMouseMiddle();
 
 /* alternate duplicate of top level boolean output call to check if the middle mouse button is currently being held down */
-char turtleMouseMid();
+int8_t turtleMouseMid();
 
 /* initializes the turtletools module */
 void turtleInit(GLFWwindow* window, int32_t minX, int32_t minY, int32_t maxX, int32_t maxY);
@@ -10396,6 +10398,54 @@ keyboard and mouse presses
 
 turtle_t turtle;
 
+/* initializes the turtletools module */
+void turtleInit(GLFWwindow* window, int32_t minX, int32_t minY, int32_t maxX, int32_t maxY) {
+    gladLoadGL();
+    glfwMakeContextCurrent(window); // various glfw things
+    glEnable(GL_ALPHA);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_ONE_MINUS_SRC_ALPHA, GL_SRC_ALPHA);
+    glClearColor(1.0, 1.0, 1.0, 0.0); // white background by default
+    turtle.window = window;
+    turtle.close = 0;
+    turtle.popupClose = 0;
+    turtle.keyPressed = list_init();
+    turtle.lastscreenbounds[0] = 0;
+    turtle.lastscreenbounds[1] = 0;
+    turtle.penPos = list_init();
+    turtle.penHash = 0;
+    turtle.lastLength = 0;
+    turtle.x = 0;
+    turtle.y = 0;
+    turtle.pensize = 1;
+    turtle.penshape = 0;
+    turtle.circleprez = 9; // default circleprez value
+    turtle.pen = 0;
+    turtle.penr = 0.0;
+    turtle.peng = 0.0;
+    turtle.penb = 0.0;
+    turtle.pena = 0.0;
+    for (uint8_t i = 0; i < 3; i++) {
+        turtle.currentColor[i] = 0.0;
+    }
+    turtle.currentColor[3] = 1.0;
+    /* 3D variables */
+    turtle.cameraX = 0;
+    turtle.cameraY = 0;
+    turtle.cameraZ = 0;
+    turtle.cameraFOV = 90;
+    turtle.cameraDirectionLeftRight = 0;
+    turtle.cameraDirectionUpDown = 0;
+
+    turtleSetWorldCoordinates(minX, minY, maxX, maxY);
+    turtle.keyCallback = NULL;
+    turtle.unicodeCallback = NULL;
+    glfwSetCharCallback(window, unicodeSense);
+    glfwSetKeyCallback(window, keySense); // initiate mouse and keyboard detection
+    glfwSetMouseButtonCallback(window, mouseSense);
+    glfwSetScrollCallback(window, scrollSense);
+}
+
 /* run this to set the bounds of the window in coordinates */
 void turtleSetWorldCoordinates(int32_t minX, int32_t minY, int32_t maxX, int32_t maxY) {
     glfwGetWindowSize(turtle.window, &turtle.screenbounds[0], &turtle.screenbounds[1]);
@@ -10507,54 +10557,6 @@ int8_t turtleMouseMiddle() {
 /* alternate duplicate of top level boolean output call to check if the middle mouse button is currently being held down */
 int8_t turtleMouseMid() {
     return turtle.mousePressed[2];
-}
-
-/* initializes the turtletools module */
-void turtleInit(GLFWwindow* window, int32_t minX, int32_t minY, int32_t maxX, int32_t maxY) {
-    gladLoadGL();
-    glfwMakeContextCurrent(window); // various glfw things
-    glEnable(GL_ALPHA);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_ONE_MINUS_SRC_ALPHA, GL_SRC_ALPHA);
-    glClearColor(1.0, 1.0, 1.0, 0.0); // white background by default
-    turtle.window = window;
-    turtle.close = 0;
-    turtle.popupClose = 0;
-    turtle.keyPressed = list_init();
-    turtle.lastscreenbounds[0] = 0;
-    turtle.lastscreenbounds[1] = 0;
-    turtle.penPos = list_init();
-    turtle.penHash = 0;
-    turtle.lastLength = 0;
-    turtle.x = 0;
-    turtle.y = 0;
-    turtle.pensize = 1;
-    turtle.penshape = 0;
-    turtle.circleprez = 9; // default circleprez value
-    turtle.pen = 0;
-    turtle.penr = 0.0;
-    turtle.peng = 0.0;
-    turtle.penb = 0.0;
-    turtle.pena = 0.0;
-    for (uint8_t i = 0; i < 3; i++) {
-        turtle.currentColor[i] = 0.0;
-    }
-    turtle.currentColor[3] = 1.0;
-    /* 3D variables */
-    turtle.cameraX = 0;
-    turtle.cameraY = 0;
-    turtle.cameraZ = 0;
-    turtle.cameraFOV = 90;
-    turtle.cameraDirectionLeftRight = 0;
-    turtle.cameraDirectionUpDown = 0;
-
-    turtleSetWorldCoordinates(minX, minY, maxX, maxY);
-    turtle.keyCallback = NULL;
-    turtle.unicodeCallback = NULL;
-    glfwSetCharCallback(window, unicodeSense);
-    glfwSetKeyCallback(window, keySense); // initiate mouse and keyboard detection
-    glfwSetMouseButtonCallback(window, mouseSense);
-    glfwSetScrollCallback(window, scrollSense);
 }
 
 /* gets the mouse coordinates */
@@ -11192,33 +11194,129 @@ turtle_t turtle;
 
 /* shader code */
 const char *turtleVertexShaderSource =
-    "#version 330 core\n"
-    "layout(location = 0) in vec2 vPosition;\n"
-    "layout(location = 1) in vec4 vColor;\n"
-    "layout(location = 2) in vec3 textureCoordVert;\n"
-    "out vec4 shadeColor;\n"
-    "out vec2 textureCoordFrag;\n"
-    "out float textureIndex;\n"
-    "void main() {\n"
-    "    gl_Position = vec4(vPosition, 0.0, 1.0);\n"
-    "    shadeColor = vColor;\n"
-    "    textureCoordFrag = textureCoordVert.xy;\n"
-    "    textureIndex = textureCoordVert.z;\n"
-    "}\0";
+"#version 330 core\n"
+"layout(location = 0) in vec2 vPosition;\n"
+"layout(location = 1) in vec4 vColor;\n"
+"layout(location = 2) in vec3 textureCoordVert;\n"
+"out vec4 shadeColor;\n"
+"out vec2 textureCoordFrag;\n"
+"out float textureIndex;\n"
+"void main() {\n"
+"    gl_Position = vec4(vPosition, 0.0, 1.0);\n"
+"    shadeColor = vColor;\n"
+"    textureCoordFrag = textureCoordVert.xy;\n"
+"    textureIndex = textureCoordVert.z;\n"
+"}\0";
+
 const char *turtleFragmentShaderSource = 
-    "#version 330 core\n"
-    "uniform sampler2DArray textureImages;\n"
-    "in vec4 shadeColor;\n;"
-    "in vec2 textureCoordFrag;\n"
-    "in float textureIndex;\n"
-    "out vec4 fragColor;\n"
-    "void main() {\n"
-    "    if (textureIndex > 0.5) {\n"
-    "        fragColor = texture(textureImages, vec3(textureCoordFrag, textureIndex)) * shadeColor;\n"
-    "    } else {\n"
-    "        fragColor = shadeColor;\n"
-    "    }\n"
-    "}\0";
+"#version 330 core\n"
+"uniform sampler2DArray textureImages;\n"
+"in vec4 shadeColor;\n;"
+"in vec2 textureCoordFrag;\n"
+"in float textureIndex;\n"
+"out vec4 fragColor;\n"
+"void main() {\n"
+"    if (textureIndex > 0.5) {\n"
+"        fragColor = texture(textureImages, vec3(textureCoordFrag, textureIndex)) * shadeColor;\n"
+"    } else {\n"
+"        fragColor = shadeColor;\n"
+"    }\n"
+"}\0";
+
+/* initializes the turtletools module */
+void turtleInit(GLFWwindow* window, int32_t minX, int32_t minY, int32_t maxX, int32_t maxY) {
+    // gladLoadGL(); // fixed pipeline
+    glfwMakeContextCurrent(window); // various glfw things
+    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+        printf("could not initialise glad\n");
+    }
+    if (glGenVertexArrays == NULL) {
+        printf("couldn't load openGL\n");
+    }
+
+    /* set up shaders */
+    uint32_t VAO;
+    glGenVertexArrays(1, &VAO);
+    glBindVertexArray(VAO);
+
+    uint32_t VBO;
+    glGenBuffers(1, &VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * BUFFER_OBJECT_SIZE, (void *) 0); // position attribute
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(float) * BUFFER_OBJECT_SIZE, (void *) (2 * sizeof(float))); // color attribute
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(float) * BUFFER_OBJECT_SIZE, (void *) (6 * sizeof(float))); // texture coordinate attribute
+
+    int32_t vertexShader = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vertexShader, 1, &turtleVertexShaderSource, NULL);
+    glCompileShader(vertexShader);
+    char errorMessage[512];
+    int32_t success;
+    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
+    if (!success) {
+        glGetShaderInfoLog(vertexShader, 512, NULL, errorMessage);
+        printf("Error compiling vertex shader\n");
+        printf("%s\n", errorMessage);
+    }
+    int32_t fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fragmentShader, 1, &turtleFragmentShaderSource, NULL);
+    glCompileShader(fragmentShader);
+    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
+    if (!success) {
+        glGetShaderInfoLog(fragmentShader, 512, NULL, errorMessage);
+        printf("Error compiling fragment shader\n");
+        printf("%s\n", errorMessage);
+    }
+    int32_t shaderProgram = glCreateProgram();
+    glAttachShader(shaderProgram, vertexShader);
+    glAttachShader(shaderProgram, fragmentShader);
+    glLinkProgram(shaderProgram);
+    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
+    if (!success) {
+        glGetShaderInfoLog(shaderProgram, 512, NULL, errorMessage);
+        printf("Error linking shaders\n");
+        printf("%s\n", errorMessage);
+    }
+    
+    glUseProgram(shaderProgram);
+    // glDeleteShader(vertexShader);
+    // glDeleteShader(fragmentShader);
+    // glDeleteProgram(shaderProgram);
+
+    glEnable(GL_ALPHA);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glClearColor(1.0, 1.0, 1.0, 0.0); // white background by default
+    turtle.window = window;
+    turtle.close = 0;
+    turtle.popupClose = 0;
+    turtle.keyPressed = list_init();
+    turtle.lastscreenbounds[0] = 0;
+    turtle.lastscreenbounds[1] = 0;
+    turtle.penPos = list_init();
+    turtle.bufferList = bufferList_init();
+    turtle.x = 0;
+    turtle.y = 0;
+    turtle.pensize = 1;
+    turtle.penshape = 0;
+    turtle.circleprez = 9; // default circleprez value
+    turtle.pen = 0;
+    turtle.penr = 0.0;
+    turtle.peng = 0.0;
+    turtle.penb = 0.0;
+    turtle.pena = 1.0;
+    for (uint8_t i = 0; i < 3; i++) {
+        turtle.currentColor[i] = 0.0;
+    }
+    turtle.currentColor[3] = 1.0;
+    turtleSetWorldCoordinates(minX, minY, maxX, maxY);
+    glfwSetKeyCallback(window, keySense); // initiate mouse and keyboard detection
+    glfwSetMouseButtonCallback(window, mouseSense);
+    glfwSetScrollCallback(window, scrollSense);
+}
 
 /* run this to set the bounds of the window in coordinates */
 void turtleSetWorldCoordinates(int32_t minX, int32_t minY, int32_t maxX, int32_t maxY) {
@@ -11290,123 +11388,28 @@ double turtleMouseWheel() {
 }
 
 /* top level boolean output call to check if the key with code [key] is currently being held down. Uses the GLFW_KEY_X macros */
-char turtleKeyPressed(int32_t key) {
+int8_t turtleKeyPressed(int32_t key) {
     return list_count(turtle.keyPressed, (unitype) key, 'c');
 }
 
 /* top level boolean output call to check if the left click button is currently being held down */
-char turtleMouseDown() {
+int8_t turtleMouseDown() {
     return turtle.mousePressed[0];
 }
 
 /* top level boolean output call to check if the right click button is currently being held down */
-char turtleMouseRight() {
+int8_t turtleMouseRight() {
     return turtle.mousePressed[1];
 }
 
 /* top level boolean output call to check if the middle mouse button is currently being held down */
-char turtleMouseMiddle() {
+int8_t turtleMouseMiddle() {
     return turtle.mousePressed[2];
 }
 
 /* alternate duplicate of top level boolean output call to check if the middle mouse button is currently being held down */
-char turtleMouseMid() {
+int8_t turtleMouseMid() {
     return turtle.mousePressed[2];
-}
-
-/* initializes the turtletools module */
-void turtleInit(GLFWwindow* window, int32_t minX, int32_t minY, int32_t maxX, int32_t maxY) {
-    // gladLoadGL(); // fixed pipeline
-    glfwMakeContextCurrent(window); // various glfw things
-    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-        printf("could not initialise glad\n");
-    }
-    if (glGenVertexArrays == NULL) {
-        printf("couldn't load openGL\n");
-    }
-
-    /* set up shaders */
-    uint32_t VAO;
-    glGenVertexArrays(1, &VAO);
-    glBindVertexArray(VAO);
-
-    uint32_t VBO;
-    glGenBuffers(1, &VBO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * BUFFER_OBJECT_SIZE, (void *) 0); // position attribute
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(float) * BUFFER_OBJECT_SIZE, (void *) (2 * sizeof(float))); // color attribute
-    glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(float) * BUFFER_OBJECT_SIZE, (void *) (6 * sizeof(float))); // texture coordinate attribute
-
-    int32_t vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertexShader, 1, &turtleVertexShaderSource, NULL);
-    glCompileShader(vertexShader);
-    char errorMessage[512];
-    int32_t success;
-    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
-    if (!success) {
-        glGetShaderInfoLog(vertexShader, 512, NULL, errorMessage);
-        printf("Error compiling vertex shader\n");
-        printf("%s\n", errorMessage);
-    }
-    int32_t fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragmentShader, 1, &turtleFragmentShaderSource, NULL);
-    glCompileShader(fragmentShader);
-    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
-    if (!success) {
-        glGetShaderInfoLog(fragmentShader, 512, NULL, errorMessage);
-        printf("Error compiling fragment shader\n");
-        printf("%s\n", errorMessage);
-    }
-    int32_t shaderProgram = glCreateProgram();
-    glAttachShader(shaderProgram, vertexShader);
-    glAttachShader(shaderProgram, fragmentShader);
-    glLinkProgram(shaderProgram);
-    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
-    if (!success) {
-        glGetShaderInfoLog(shaderProgram, 512, NULL, errorMessage);
-        printf("Error linking shaders\n");
-        printf("%s\n", errorMessage);
-    }
-    
-    glUseProgram(shaderProgram);
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
-    glDeleteProgram(shaderProgram);
-
-    glEnable(GL_ALPHA);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glClearColor(1.0, 1.0, 1.0, 0.0); // white background by default
-    turtle.window = window;
-    turtle.close = 0;
-    turtle.popupClose = 0;
-    turtle.keyPressed = list_init();
-    turtle.lastscreenbounds[0] = 0;
-    turtle.lastscreenbounds[1] = 0;
-    turtle.penPos = list_init();
-    turtle.bufferList = bufferList_init();
-    turtle.x = 0;
-    turtle.y = 0;
-    turtle.pensize = 1;
-    turtle.penshape = 0;
-    turtle.circleprez = 9; // default circleprez value
-    turtle.pen = 0;
-    turtle.penr = 0.0;
-    turtle.peng = 0.0;
-    turtle.penb = 0.0;
-    turtle.pena = 1.0;
-    for (uint8_t i = 0; i < 3; i++) {
-        turtle.currentColor[i] = 0.0;
-    }
-    turtle.currentColor[3] = 1.0;
-    turtleSetWorldCoordinates(minX, minY, maxX, maxY);
-    glfwSetKeyCallback(window, keySense); // initiate mouse and keyboard detection
-    glfwSetMouseButtonCallback(window, mouseSense);
-    glfwSetScrollCallback(window, scrollSense);
 }
 
 /* gets the mouse coordinates */
@@ -11801,6 +11804,12 @@ void turtleTexture(int32_t textureCode, double x1, double y1, double x2, double 
     list_append(turtle.penPos, (unitype) (b / 255), 'd');
 }
 
+void printTurtle() {
+    // printf("%p", turtle.window);
+    // printf("%d %d %d %d", turtle.mousePressed[0], turtle.mousePressed[1], turtle.mousePressed[2], turtle.mousePressed[3]);
+    // printf("%d %d %d %d %d", turtle.lastLength, turtle.pen, turtle.penshape, turtle.close, turtle.popupClose);
+}
+
 // draws the turtle's path on the screen
 void turtleUpdate() {
     // used to have a feature that only redrew the screen if there have been any changes from last frame, but it has been removed.
@@ -11920,9 +11929,8 @@ void turtleUpdate() {
         if (turtle.popupClose) {
             glfwTerminate();
         }
-        
     }
-    
+    printTurtle();
 }
 
 /* keeps the window open while doing nothing else */

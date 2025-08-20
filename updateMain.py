@@ -9,6 +9,14 @@ import os
 import shutil
 import subprocess
 
+# Build on development
+outWindows = subprocess.run("make winrel")
+outWindows = subprocess.run("make winreltextures")
+outLinux = subprocess.run("wsl -e make rel")
+outLinux = subprocess.run("wsl -e make reltextures")
+if outWindows.returncode != 0 or outLinux.returncode != 0:
+    quit()
+
 # Check if file exists
 if not os.path.isfile("turtle.h"):
     print("Could not find file turtle.h")
@@ -28,7 +36,7 @@ shutil.copy("turtle.h", "../turtle-main/turtle.h")
 shutil.copy("Windows/turtle.lib", "../turtle-main/Windows/turtle.lib")
 shutil.copy("Linux/libturtle.a", "../turtle-main/Linux/libturtle.a")
 
-# Build with windows
+# Build on main
 os.chdir("../turtle-main")
 outWindows = subprocess.run("make winrel")
 outLinux = subprocess.run("wsl -e make rel")

@@ -4,127 +4,34 @@ turtle_t turtle;
 
 /* shader code */
 const char *turtleVertexShaderSource =
-    "#version 330 core\n"
-    "layout(location = 0) in vec2 vPosition;\n"
-    "layout(location = 1) in vec4 vColor;\n"
-    "layout(location = 2) in vec3 textureCoordVert;\n"
-    "out vec4 shadeColor;\n"
-    "out vec2 textureCoordFrag;\n"
-    "out float textureIndex;\n"
-    "void main() {\n"
-    "    gl_Position = vec4(vPosition, 0.0, 1.0);\n"
-    "    shadeColor = vColor;\n"
-    "    textureCoordFrag = textureCoordVert.xy;\n"
-    "    textureIndex = textureCoordVert.z;\n"
-    "}\0";
+"#version 330 core\n"
+"layout(location = 0) in vec2 vPosition;\n"
+"layout(location = 1) in vec4 vColor;\n"
+"layout(location = 2) in vec3 textureCoordVert;\n"
+"out vec4 shadeColor;\n"
+"out vec2 textureCoordFrag;\n"
+"out float textureIndex;\n"
+"void main() {\n"
+"    gl_Position = vec4(vPosition, 0.0, 1.0);\n"
+"    shadeColor = vColor;\n"
+"    textureCoordFrag = textureCoordVert.xy;\n"
+"    textureIndex = textureCoordVert.z;\n"
+"}\0";
+
 const char *turtleFragmentShaderSource = 
-    "#version 330 core\n"
-    "uniform sampler2DArray textureImages;\n"
-    "in vec4 shadeColor;\n;"
-    "in vec2 textureCoordFrag;\n"
-    "in float textureIndex;\n"
-    "out vec4 fragColor;\n"
-    "void main() {\n"
-    "    if (textureIndex > 0.5) {\n"
-    "        fragColor = texture(textureImages, vec3(textureCoordFrag, textureIndex)) * shadeColor;\n"
-    "    } else {\n"
-    "        fragColor = shadeColor;\n"
-    "    }\n"
-    "}\0";
-
-/* run this to set the bounds of the window in coordinates */
-void turtleSetWorldCoordinates(int32_t minX, int32_t minY, int32_t maxX, int32_t maxY) {
-    glfwGetWindowSize(turtle.window, &turtle.screenbounds[0], &turtle.screenbounds[1]);
-    turtle.initscreenbounds[0] = turtle.screenbounds[0];
-    turtle.initscreenbounds[1] = turtle.screenbounds[1];
-    turtle.bounds[0] = minX;
-    turtle.bounds[1] = minY;
-    turtle.bounds[2] = maxX;
-    turtle.bounds[3] = maxY;
-}
-
-/* detect key presses */
-void keySense(GLFWwindow *window, int32_t key, int32_t scancode, int32_t action, int32_t mods) {
-    if (action == GLFW_PRESS) {
-        list_append(turtle.keyPressed, (unitype) key, 'i');
-    }
-    if (action == GLFW_RELEASE) {
-        list_remove(turtle.keyPressed, (unitype) key, 'i');
-    }
-}
-
-/* detect mouse clicks */
-void mouseSense(GLFWwindow* window, int32_t button, int32_t action, int32_t mods) {
-    if (action == GLFW_PRESS) {
-        switch(button) {
-            case GLFW_MOUSE_BUTTON_LEFT:
-            list_append(turtle.keyPressed, (unitype) "m1", 's');
-            turtle.mousePressed[0] = 1;
-            break;
-            case GLFW_MOUSE_BUTTON_RIGHT:
-            list_append(turtle.keyPressed, (unitype) "m2", 's');
-            turtle.mousePressed[1] = 1;
-            break;
-            case GLFW_MOUSE_BUTTON_MIDDLE:
-            list_append(turtle.keyPressed, (unitype) "m3", 's');
-            turtle.mousePressed[2] = 1;
-            break;
-        }
-    }
-    if (action == GLFW_RELEASE) {
-        switch(button) {
-            case GLFW_MOUSE_BUTTON_LEFT:
-            list_remove(turtle.keyPressed, (unitype) "m1", 's');
-            turtle.mousePressed[0] = 0;
-            break;
-            case GLFW_MOUSE_BUTTON_RIGHT:
-            list_remove(turtle.keyPressed, (unitype) "m2", 's');
-            turtle.mousePressed[1] = 0;
-            break;
-            case GLFW_MOUSE_BUTTON_MIDDLE:
-            list_remove(turtle.keyPressed, (unitype) "m3", 's');
-            turtle.mousePressed[2] = 0;
-            break;
-        }
-    }
-}
-
-/* detect scroll wheel */
-void scrollSense(GLFWwindow* window, double xoffset, double yoffset) {
-    turtle.scrollY = yoffset;
-}
-
-/* the behavior with the mouse wheel is different since it can't be "on" or "off" */
-double turtleMouseWheel() {
-    double temp = turtle.scrollY;
-    turtle.scrollY = 0;
-    return temp;
-}
-
-/* top level boolean output call to check if the key with code [key] is currently being held down. Uses the GLFW_KEY_X macros */
-char turtleKeyPressed(int32_t key) {
-    return list_count(turtle.keyPressed, (unitype) key, 'c');
-}
-
-/* top level boolean output call to check if the left click button is currently being held down */
-char turtleMouseDown() {
-    return turtle.mousePressed[0];
-}
-
-/* top level boolean output call to check if the right click button is currently being held down */
-char turtleMouseRight() {
-    return turtle.mousePressed[1];
-}
-
-/* top level boolean output call to check if the middle mouse button is currently being held down */
-char turtleMouseMiddle() {
-    return turtle.mousePressed[2];
-}
-
-/* alternate duplicate of top level boolean output call to check if the middle mouse button is currently being held down */
-char turtleMouseMid() {
-    return turtle.mousePressed[2];
-}
+"#version 330 core\n"
+"uniform sampler2DArray textureImages;\n"
+"in vec4 shadeColor;\n;"
+"in vec2 textureCoordFrag;\n"
+"in float textureIndex;\n"
+"out vec4 fragColor;\n"
+"void main() {\n"
+"    if (textureIndex > 0.5) {\n"
+"        fragColor = texture(textureImages, vec3(textureCoordFrag, textureIndex)) * shadeColor;\n"
+"    } else {\n"
+"        fragColor = shadeColor;\n"
+"    }\n"
+"}\0";
 
 /* initializes the turtletools module */
 void turtleInit(GLFWwindow* window, int32_t minX, int32_t minY, int32_t maxX, int32_t maxY) {
@@ -219,6 +126,100 @@ void turtleInit(GLFWwindow* window, int32_t minX, int32_t minY, int32_t maxX, in
     glfwSetKeyCallback(window, keySense); // initiate mouse and keyboard detection
     glfwSetMouseButtonCallback(window, mouseSense);
     glfwSetScrollCallback(window, scrollSense);
+}
+
+/* run this to set the bounds of the window in coordinates */
+void turtleSetWorldCoordinates(int32_t minX, int32_t minY, int32_t maxX, int32_t maxY) {
+    glfwGetWindowSize(turtle.window, &turtle.screenbounds[0], &turtle.screenbounds[1]);
+    turtle.initscreenbounds[0] = turtle.screenbounds[0];
+    turtle.initscreenbounds[1] = turtle.screenbounds[1];
+    turtle.bounds[0] = minX;
+    turtle.bounds[1] = minY;
+    turtle.bounds[2] = maxX;
+    turtle.bounds[3] = maxY;
+}
+
+/* detect key presses */
+void keySense(GLFWwindow *window, int32_t key, int32_t scancode, int32_t action, int32_t mods) {
+    if (action == GLFW_PRESS) {
+        list_append(turtle.keyPressed, (unitype) key, 'i');
+    }
+    if (action == GLFW_RELEASE) {
+        list_remove(turtle.keyPressed, (unitype) key, 'i');
+    }
+}
+
+/* detect mouse clicks */
+void mouseSense(GLFWwindow* window, int32_t button, int32_t action, int32_t mods) {
+    if (action == GLFW_PRESS) {
+        switch(button) {
+            case GLFW_MOUSE_BUTTON_LEFT:
+            list_append(turtle.keyPressed, (unitype) "m1", 's');
+            turtle.mousePressed[0] = 1;
+            break;
+            case GLFW_MOUSE_BUTTON_RIGHT:
+            list_append(turtle.keyPressed, (unitype) "m2", 's');
+            turtle.mousePressed[1] = 1;
+            break;
+            case GLFW_MOUSE_BUTTON_MIDDLE:
+            list_append(turtle.keyPressed, (unitype) "m3", 's');
+            turtle.mousePressed[2] = 1;
+            break;
+        }
+    }
+    if (action == GLFW_RELEASE) {
+        switch(button) {
+            case GLFW_MOUSE_BUTTON_LEFT:
+            list_remove(turtle.keyPressed, (unitype) "m1", 's');
+            turtle.mousePressed[0] = 0;
+            break;
+            case GLFW_MOUSE_BUTTON_RIGHT:
+            list_remove(turtle.keyPressed, (unitype) "m2", 's');
+            turtle.mousePressed[1] = 0;
+            break;
+            case GLFW_MOUSE_BUTTON_MIDDLE:
+            list_remove(turtle.keyPressed, (unitype) "m3", 's');
+            turtle.mousePressed[2] = 0;
+            break;
+        }
+    }
+}
+
+/* detect scroll wheel */
+void scrollSense(GLFWwindow* window, double xoffset, double yoffset) {
+    turtle.scrollY = yoffset;
+}
+
+/* the behavior with the mouse wheel is different since it can't be "on" or "off" */
+double turtleMouseWheel() {
+    double temp = turtle.scrollY;
+    turtle.scrollY = 0;
+    return temp;
+}
+
+/* top level boolean output call to check if the key with code [key] is currently being held down. Uses the GLFW_KEY_X macros */
+int8_t turtleKeyPressed(int32_t key) {
+    return list_count(turtle.keyPressed, (unitype) key, 'c');
+}
+
+/* top level boolean output call to check if the left click button is currently being held down */
+int8_t turtleMouseDown() {
+    return turtle.mousePressed[0];
+}
+
+/* top level boolean output call to check if the right click button is currently being held down */
+int8_t turtleMouseRight() {
+    return turtle.mousePressed[1];
+}
+
+/* top level boolean output call to check if the middle mouse button is currently being held down */
+int8_t turtleMouseMiddle() {
+    return turtle.mousePressed[2];
+}
+
+/* alternate duplicate of top level boolean output call to check if the middle mouse button is currently being held down */
+int8_t turtleMouseMid() {
+    return turtle.mousePressed[2];
 }
 
 /* gets the mouse coordinates */
@@ -613,6 +614,12 @@ void turtleTexture(int32_t textureCode, double x1, double y1, double x2, double 
     list_append(turtle.penPos, (unitype) (b / 255), 'd');
 }
 
+void printTurtle() {
+    // printf("%p", turtle.window);
+    // printf("%d %d %d %d", turtle.mousePressed[0], turtle.mousePressed[1], turtle.mousePressed[2], turtle.mousePressed[3]);
+    // printf("%d %d %d %d %d", turtle.lastLength, turtle.pen, turtle.penshape, turtle.close, turtle.popupClose);
+}
+
 // draws the turtle's path on the screen
 void turtleUpdate() {
     // used to have a feature that only redrew the screen if there have been any changes from last frame, but it has been removed.
@@ -732,9 +739,8 @@ void turtleUpdate() {
         if (turtle.popupClose) {
             glfwTerminate();
         }
-        
     }
-    
+    printTurtle();
 }
 
 /* keeps the window open while doing nothing else */

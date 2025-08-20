@@ -18,6 +18,54 @@ keyboard and mouse presses
 
 turtle_t turtle;
 
+/* initializes the turtletools module */
+void turtleInit(GLFWwindow* window, int32_t minX, int32_t minY, int32_t maxX, int32_t maxY) {
+    gladLoadGL();
+    glfwMakeContextCurrent(window); // various glfw things
+    glEnable(GL_ALPHA);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_ONE_MINUS_SRC_ALPHA, GL_SRC_ALPHA);
+    glClearColor(1.0, 1.0, 1.0, 0.0); // white background by default
+    turtle.window = window;
+    turtle.close = 0;
+    turtle.popupClose = 0;
+    turtle.keyPressed = list_init();
+    turtle.lastscreenbounds[0] = 0;
+    turtle.lastscreenbounds[1] = 0;
+    turtle.penPos = list_init();
+    turtle.penHash = 0;
+    turtle.lastLength = 0;
+    turtle.x = 0;
+    turtle.y = 0;
+    turtle.pensize = 1;
+    turtle.penshape = 0;
+    turtle.circleprez = 9; // default circleprez value
+    turtle.pen = 0;
+    turtle.penr = 0.0;
+    turtle.peng = 0.0;
+    turtle.penb = 0.0;
+    turtle.pena = 0.0;
+    for (uint8_t i = 0; i < 3; i++) {
+        turtle.currentColor[i] = 0.0;
+    }
+    turtle.currentColor[3] = 1.0;
+    /* 3D variables */
+    turtle.cameraX = 0;
+    turtle.cameraY = 0;
+    turtle.cameraZ = 0;
+    turtle.cameraFOV = 90;
+    turtle.cameraDirectionLeftRight = 0;
+    turtle.cameraDirectionUpDown = 0;
+
+    turtleSetWorldCoordinates(minX, minY, maxX, maxY);
+    turtle.keyCallback = NULL;
+    turtle.unicodeCallback = NULL;
+    glfwSetCharCallback(window, unicodeSense);
+    glfwSetKeyCallback(window, keySense); // initiate mouse and keyboard detection
+    glfwSetMouseButtonCallback(window, mouseSense);
+    glfwSetScrollCallback(window, scrollSense);
+}
+
 /* run this to set the bounds of the window in coordinates */
 void turtleSetWorldCoordinates(int32_t minX, int32_t minY, int32_t maxX, int32_t maxY) {
     glfwGetWindowSize(turtle.window, &turtle.screenbounds[0], &turtle.screenbounds[1]);
@@ -129,54 +177,6 @@ int8_t turtleMouseMiddle() {
 /* alternate duplicate of top level boolean output call to check if the middle mouse button is currently being held down */
 int8_t turtleMouseMid() {
     return turtle.mousePressed[2];
-}
-
-/* initializes the turtletools module */
-void turtleInit(GLFWwindow* window, int32_t minX, int32_t minY, int32_t maxX, int32_t maxY) {
-    gladLoadGL();
-    glfwMakeContextCurrent(window); // various glfw things
-    glEnable(GL_ALPHA);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_ONE_MINUS_SRC_ALPHA, GL_SRC_ALPHA);
-    glClearColor(1.0, 1.0, 1.0, 0.0); // white background by default
-    turtle.window = window;
-    turtle.close = 0;
-    turtle.popupClose = 0;
-    turtle.keyPressed = list_init();
-    turtle.lastscreenbounds[0] = 0;
-    turtle.lastscreenbounds[1] = 0;
-    turtle.penPos = list_init();
-    turtle.penHash = 0;
-    turtle.lastLength = 0;
-    turtle.x = 0;
-    turtle.y = 0;
-    turtle.pensize = 1;
-    turtle.penshape = 0;
-    turtle.circleprez = 9; // default circleprez value
-    turtle.pen = 0;
-    turtle.penr = 0.0;
-    turtle.peng = 0.0;
-    turtle.penb = 0.0;
-    turtle.pena = 0.0;
-    for (uint8_t i = 0; i < 3; i++) {
-        turtle.currentColor[i] = 0.0;
-    }
-    turtle.currentColor[3] = 1.0;
-    /* 3D variables */
-    turtle.cameraX = 0;
-    turtle.cameraY = 0;
-    turtle.cameraZ = 0;
-    turtle.cameraFOV = 90;
-    turtle.cameraDirectionLeftRight = 0;
-    turtle.cameraDirectionUpDown = 0;
-
-    turtleSetWorldCoordinates(minX, minY, maxX, maxY);
-    turtle.keyCallback = NULL;
-    turtle.unicodeCallback = NULL;
-    glfwSetCharCallback(window, unicodeSense);
-    glfwSetKeyCallback(window, keySense); // initiate mouse and keyboard detection
-    glfwSetMouseButtonCallback(window, mouseSense);
-    glfwSetScrollCallback(window, scrollSense);
 }
 
 /* gets the mouse coordinates */

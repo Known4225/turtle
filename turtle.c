@@ -271,6 +271,7 @@ int main(int argc, char *argv[]) {
         parseRibbonOutput(); // user defined function to use ribbon
         parsePopupOutput(window); // user defined function to use popup
         turtleUpdate(); // update the screen
+        printTurtle();
         end = clock();
         while ((double) (end - start) / CLOCKS_PER_SEC < (1.0 / tps)) {
             end = clock();
