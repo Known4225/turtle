@@ -18,6 +18,9 @@ https://patorjk.com/software/taag/#p=display&f=ANSI%20Shadow
 #include "glad.h"
 #include "glfw3.h"
 #include "list.h"
+#ifdef TURTLE_ENABLE_TEXTURES
+#include "bufferList.h"
+#endif /* TURTLE_ENABLE_TEXTURES */
 
 /* required forward declarations (for packaging) */
 extern void glColor4d(double r, double g, double b, double a); // genius tactic to stop compiler warnings
@@ -45,6 +48,9 @@ typedef struct {
     double mouseAbsY;
     double x; // x and y position of the turtle
     double y;
+    #ifdef TURTLE_ENABLE_TEXTURES
+    bufferList_t bufferList;
+    #endif /* TURTLE_ENABLE_TEXTURES */
     list_t *penPos; // a list of where to draw
     uint64_t penHash; // the penPos list is hashed and this hash is used to determine if any changes occured between frames
     uint32_t lastLength; // the penPos list's length is saved and if it is different from last frame we know we have to redraw
@@ -139,6 +145,15 @@ void turtlePenPrez(double prez);
 
 /* moves the turtle to a coordinate */
 void turtleGoto(double x, double y);
+
+#ifdef TURTLE_ENABLE_TEXTURES
+/* function to add a vertex to the turtle.bufferList */
+void addVertex(double x, double y, double r, double g, double b, double a, double tx, double ty, double useTexture);
+
+void turtleTextureRender(int32_t textureCode, double x1, double y1, double x2, double y2, double r, double g, double b, double rot, double xfact, double yfact);
+
+void turtleTexture(int32_t textureCode, double x1, double y1, double x2, double y2, double rot, double r, double g, double b);
+#endif /* TURTLE_ENABLE_TEXTURES */
 
 /* draws a circle at the specified x and y (coordinates) */
 void turtleCircleRender(double x, double y, double rad, double r, double g, double b, double a, double xcenter, double ycenter, double xfact, double yfact, double prez);

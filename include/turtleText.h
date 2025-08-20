@@ -20,7 +20,7 @@ https://patorjk.com/software/taag/#p=display&f=ANSI%20Shadow
 /* enabling this option will add extra circles significantly decreasing the speed but increasing the render quality */
 // #define TURTLE_TEXT_PRETTY_PEN
 
-#include "turtleTextures.h"
+#include "turtle.h"
 #include <stdarg.h>
 
 /* turtleText variables */
