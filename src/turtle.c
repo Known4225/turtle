@@ -541,17 +541,17 @@ void turtleCircleRender(double x, double y, double rad, double r, double g, doub
     int32_t p = (int32_t) prez;
     if (p > 0) {
         // p--;
-        float originX = x * xfact;
-        float originY = (y + rad) * yfact;
-        addVertex(originX + xcenter, originY + ycenter, r, g, b, a, 0, 0, 0);
+        float originX = x * xfact + xcenter;
+        float originY = (y + rad) * yfact + ycenter;
+        addVertex(originX, originY, r, g, b, a, 0, 0, 0);
         addVertex((x + rad * sin(2 * 1 * M_PI / prez)) * xfact + xcenter, (y + rad * cos(2 * 1 * M_PI / prez)) * yfact + ycenter, r, g, b, a, 0, 0, 0);
         int32_t i = 0;
         for (; i < p; i++) {
             addVertex((x + rad * sin(2 * i * M_PI / prez)) * xfact + xcenter, (y + rad * cos(2 * i * M_PI / prez)) * yfact + ycenter, r, g, b, a, 0, 0, 0);
-            addVertex(originX + xcenter, originY + ycenter, r, g, b, a, 0, 0, 0);
+            addVertex(originX, originY, r, g, b, a, 0, 0, 0);
             addVertex(turtle.bufferList -> data[turtle.bufferList -> length - BUFFER_OBJECT_SIZE * 2], turtle.bufferList -> data[turtle.bufferList -> length - BUFFER_OBJECT_SIZE * 2 + 1], r, g, b, a, 0, 0, 0);
         }
-        addVertex((x + rad * sin(2 * i * M_PI / prez)) * xfact, (y + rad * cos(2 * i * M_PI / prez)) * yfact, r, g, b, a, 0, 0, 0);
+        addVertex((x + rad * sin(2 * i * M_PI / prez)) * xfact + xcenter, (y + rad * cos(2 * i * M_PI / prez)) * yfact + ycenter, r, g, b, a, 0, 0, 0);
     }
 }
 
@@ -876,6 +876,9 @@ void turtleUpdate() {
     turtle.bounds[1] = turtle.centerAndScale[1] - turtle.centerAndScale[3] / turtle.screenbounds[1];
     turtle.bounds[3] = turtle.centerAndScale[1] + turtle.centerAndScale[3] / turtle.screenbounds[1];
     if (changed) {
+        #ifdef TURTLE_ENABLE_TEXTURES
+        turtle.bufferList -> length = 0;
+        #endif /* TURTLE_ENABLE_TEXTURES */
         double xfact = 1.0 / ((turtle.bounds[2] - turtle.bounds[0]) / 2);
         double yfact = 1.0 / ((turtle.bounds[3] - turtle.bounds[1]) / 2);
         double xcenter = (double) turtle.screenbounds[0] / turtle.initscreenbounds[0] - 1;
@@ -984,7 +987,6 @@ void turtleUpdate() {
             }
         }
         #ifdef TURTLE_ENABLE_TEXTURES
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glBufferData(GL_ARRAY_BUFFER, sizeof(float) * turtle.bufferList -> length, turtle.bufferList -> data, GL_STATIC_DRAW);
         glDrawArrays(GL_TRIANGLES, 0, turtle.bufferList -> length / BUFFER_OBJECT_SIZE);
         #endif /* TURTLE_ENABLE_TEXTURES */
