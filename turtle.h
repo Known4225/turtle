@@ -259,6 +259,7 @@ https://patorjk.com/software/taag/#p=display&f=ANSI%20Shadow
     #define M_PI 3.14159265358979323846
 #endif
 #ifdef TURTLE_ENABLE_TEXTURES
+#define BUFFER_OBJECT_SIZE 9
 #endif /* TURTLE_ENABLE_TEXTURES */
 
 /* required forward declarations (for packaging) */
@@ -288,7 +289,7 @@ typedef struct {
     double x; // x and y position of the turtle
     double y;
     #ifdef TURTLE_ENABLE_TEXTURES
-    bufferList_t bufferList;
+    bufferList_t *bufferList;
     #endif /* TURTLE_ENABLE_TEXTURES */
     list_t *penPos; // a list of where to draw
     uint64_t penHash; // the penPos list is hashed and this hash is used to determine if any changes occured between frames
@@ -10731,18 +10732,18 @@ void addVertex(double x, double y, double r, double g, double b, double a, doubl
 }
 
 /* draws a circle at the specified x and y (coordinates) */
-void turtleCircleRender(double x, double y, double rad, double r, double g, double b, double a, double xfact, double yfact, double prez) {
+void turtleCircleRender(double x, double y, double rad, double r, double g, double b, double a, double xcenter, double ycenter, double xfact, double yfact, double prez) {
     int32_t p = (int32_t) prez;
     if (p > 0) {
         // p--;
         float originX = x * xfact;
         float originY = (y + rad) * yfact;
-        addVertex(originX, originY, r, g, b, a, 0, 0, 0);
-        addVertex((x + rad * sin(2 * 1 * M_PI / prez)) * xfact, (y + rad * cos(2 * 1 * M_PI / prez)) * yfact, r, g, b, a, 0, 0, 0);
+        addVertex(originX + xcenter, originY + ycenter, r, g, b, a, 0, 0, 0);
+        addVertex((x + rad * sin(2 * 1 * M_PI / prez)) * xfact + xcenter, (y + rad * cos(2 * 1 * M_PI / prez)) * yfact + ycenter, r, g, b, a, 0, 0, 0);
         int32_t i = 0;
         for (; i < p; i++) {
-            addVertex((x + rad * sin(2 * i * M_PI / prez)) * xfact, (y + rad * cos(2 * i * M_PI / prez)) * yfact, r, g, b, a, 0, 0, 0);
-            addVertex(originX, originY, r, g, b, a, 0, 0, 0);
+            addVertex((x + rad * sin(2 * i * M_PI / prez)) * xfact + xcenter, (y + rad * cos(2 * i * M_PI / prez)) * yfact + ycenter, r, g, b, a, 0, 0, 0);
+            addVertex(originX + xcenter, originY + ycenter, r, g, b, a, 0, 0, 0);
             addVertex(turtle.bufferList -> data[turtle.bufferList -> length - BUFFER_OBJECT_SIZE * 2], turtle.bufferList -> data[turtle.bufferList -> length - BUFFER_OBJECT_SIZE * 2 + 1], r, g, b, a, 0, 0, 0);
         }
         addVertex((x + rad * sin(2 * i * M_PI / prez)) * xfact, (y + rad * cos(2 * i * M_PI / prez)) * yfact, r, g, b, a, 0, 0, 0);
@@ -10750,32 +10751,32 @@ void turtleCircleRender(double x, double y, double rad, double r, double g, doub
 }
 
 /* draws a square */
-void turtleSquareRender(double x1, double y1, double x2, double y2, double r, double g, double b, double a, double xfact, double yfact) {
+void turtleSquareRender(double x1, double y1, double x2, double y2, double r, double g, double b, double a, double xcenter, double ycenter, double xfact, double yfact) {
     // float square[24] = {x1 * xfact, y1 * yfact, r, g, b, a, x2 * xfact, y1 * yfact, r, g, b, a, x2 * xfact, y2 * yfact, r, g, b, a, x1 * xfact, y2 * yfact, r, g, b, a};
-    addVertex(x1 * xfact, y1 * yfact, r, g, b, a, 0, 0, 0);
-    addVertex(x2 * xfact, y1 * yfact, r, g, b, a, 0, 0, 0);
-    addVertex(x2 * xfact, y2 * yfact, r, g, b, a, 0, 0, 0);
-    addVertex(x1 * xfact, y1 * yfact, r, g, b, a, 0, 0, 0);
-    addVertex(x2 * xfact, y2 * yfact, r, g, b, a, 0, 0, 0);
-    addVertex(x1 * xfact, y2 * yfact, r, g, b, a, 0, 0, 0);
+    addVertex(x1 * xfact + xcenter, y1 * yfact + ycenter, r, g, b, a, 0, 0, 0);
+    addVertex(x2 * xfact + xcenter, y1 * yfact + ycenter, r, g, b, a, 0, 0, 0);
+    addVertex(x2 * xfact + xcenter, y2 * yfact + ycenter, r, g, b, a, 0, 0, 0);
+    addVertex(x1 * xfact + xcenter, y1 * yfact + ycenter, r, g, b, a, 0, 0, 0);
+    addVertex(x2 * xfact + xcenter, y2 * yfact + ycenter, r, g, b, a, 0, 0, 0);
+    addVertex(x1 * xfact + xcenter, y2 * yfact + ycenter, r, g, b, a, 0, 0, 0);
 }
 
 /* draws a triangle */
-void turtleTriangleRender(double x1, double y1, double x2, double y2, double x3, double y3, double r, double g, double b, double a, double xfact, double yfact) {
+void turtleTriangleRender(double x1, double y1, double x2, double y2, double x3, double y3, double r, double g, double b, double a, double xcenter, double ycenter, double xfact, double yfact) {
     // float triangle[18] = {x1 * xfact, y1 * yfact, r, g, b, a, x2 * xfact, y2 * yfact, r, g, b, a, x3 * xfact, y3 * yfact, r, g, b, a};
-    addVertex(x1 * xfact, y1 * yfact, r, g, b, a, 0, 0, 0);
-    addVertex(x2 * xfact, y2 * yfact, r, g, b, a, 0, 0, 0);
-    addVertex(x3 * xfact, y3 * yfact, r, g, b, a, 0, 0, 0);
+    addVertex(x1 * xfact + xcenter, y1 * yfact + ycenter, r, g, b, a, 0, 0, 0);
+    addVertex(x2 * xfact + xcenter, y2 * yfact + ycenter, r, g, b, a, 0, 0, 0);
+    addVertex(x3 * xfact + xcenter, y3 * yfact + ycenter, r, g, b, a, 0, 0, 0);
 }
 
 /* draws a quadrilateral */
-void turtleQuadRender(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, double r, double g, double b, double a, double xfact, double yfact) {
-    addVertex(x1 * xfact, y1 * yfact, r, g, b, a, 0, 0, 0);
-    addVertex(x2 * xfact, y2 * yfact, r, g, b, a, 0, 0, 0);
-    addVertex(x3 * xfact, y3 * yfact, r, g, b, a, 0, 0, 0);
-    addVertex(x1 * xfact, y1 * yfact, r, g, b, a, 0, 0, 0);
-    addVertex(x3 * xfact, y3 * yfact, r, g, b, a, 0, 0, 0);
-    addVertex(x4 * xfact, y4 * yfact, r, g, b, a, 0, 0, 0);
+void turtleQuadRender(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, double r, double g, double b, double a, double xcenter, double ycenter, double xfact, double yfact) {
+    addVertex(x1 * xfact + xcenter, y1 * yfact + ycenter, r, g, b, a, 0, 0, 0);
+    addVertex(x2 * xfact + xcenter, y2 * yfact + ycenter, r, g, b, a, 0, 0, 0);
+    addVertex(x3 * xfact + xcenter, y3 * yfact + ycenter, r, g, b, a, 0, 0, 0);
+    addVertex(x1 * xfact + xcenter, y1 * yfact + ycenter, r, g, b, a, 0, 0, 0);
+    addVertex(x3 * xfact + xcenter, y3 * yfact + ycenter, r, g, b, a, 0, 0, 0);
+    addVertex(x4 * xfact + xcenter, y4 * yfact + ycenter, r, g, b, a, 0, 0, 0);
 }
 
 void turtleTextureRender(int32_t textureCode, double x1, double y1, double x2, double y2, double r, double g, double b, double rot, double xfact, double yfact) {
@@ -11028,7 +11029,6 @@ void turtlePerspective(double x, double y, double z, double *xOut, double *yOut)
     // printf("%lf %lf\n", *xOut, *yOut);
 }
 
-#ifndef TURTLE_ENABLE_TEXTURES
 /* draws the turtle's path on the screen, "this could all be a shader" */
 void turtleUpdate() {
     /* bad fix to a niche problem part 1 */
@@ -11155,24 +11155,34 @@ void turtleUpdate() {
                     turtleQuadRender(ren[i].d, ren[i + 1].d, ren[i + 2].d, ren[i + 8].d, ren[i + 9].d, ren[i + 10].d, ren[i + 11].d, ren[i + 17].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xcenter, ycenter, xfact, yfact);
                     i += 9;
                 }
-                if (ren[i + 7].h == 128) { // blit 3D sphere
+                #ifdef TURTLE_ENABLE_TEXTURES
+                if (ren[i + 7].h >= 128) { // blit texture (rectangle)
+                    turtleTextureRender(ren[i + 7].h - 128, ren[i].d, ren[i + 1].d, ren[i + 2].d, ren[i + 3].d, ren[i + 5].d, ren[i + 6].d, ren[i + 8].d, ren[i + 4].d / 57.2958, xfact, yfact);
+                }
+                #endif /* TURTLE_ENABLE_TEXTURES */
+                // if (ren[i + 7].h == 256) { // blit 3D sphere
 
-                }
-                if (ren[i + 7].h == 129) { // blit 3D circle
+                // }
+                // if (ren[i + 7].h == 257) { // blit 3D circle
 
-                }
-                if (ren[i + 7].h == 130) { // blit 3D triangle
-                    turtlePerspective(ren[i].d, ren[i + 1].d, ren[i + 2].d, &ren[i].d, &ren[i + 1].d);
-                    turtlePerspective(ren[i + 8].d, ren[i + 9].d, ren[i + 10].d, &ren[i + 8].d, &ren[i + 9].d);
-                    turtlePerspective(ren[i + 11].d, ren[i + 12].d, ren[i + 13].d, &ren[i + 11].d, &ren[i + 12].d);
-                    turtleTriangleRender(ren[i].d, ren[i + 1].d, ren[i + 8].d, ren[i + 9].d, ren[i + 11].d, ren[i + 12].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xcenter, ycenter, xfact, yfact);
-                    i += 9;
-                }
-                if (ren[i + 7].h == 131) { // blit 3D quad
+                // }
+                // if (ren[i + 7].h == 258) { // blit 3D triangle
+                //     turtlePerspective(ren[i].d, ren[i + 1].d, ren[i + 2].d, &ren[i].d, &ren[i + 1].d);
+                //     turtlePerspective(ren[i + 8].d, ren[i + 9].d, ren[i + 10].d, &ren[i + 8].d, &ren[i + 9].d);
+                //     turtlePerspective(ren[i + 11].d, ren[i + 12].d, ren[i + 13].d, &ren[i + 11].d, &ren[i + 12].d);
+                //     turtleTriangleRender(ren[i].d, ren[i + 1].d, ren[i + 8].d, ren[i + 9].d, ren[i + 11].d, ren[i + 12].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xcenter, ycenter, xfact, yfact);
+                //     i += 9;
+                // }
+                // if (ren[i + 7].h == 259) { // blit 3D quad
 
-                }
+                // }
             }
         }
+        #ifdef TURTLE_ENABLE_TEXTURES
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(float) * turtle.bufferList -> length, turtle.bufferList -> data, GL_STATIC_DRAW);
+        glDrawArrays(GL_TRIANGLES, 0, turtle.bufferList -> length / BUFFER_OBJECT_SIZE);
+        #endif /* TURTLE_ENABLE_TEXTURES */
         glfwSwapBuffers(turtle.window);
     }
     /* bad fix to niche problem part 2 */
@@ -11189,9 +11199,8 @@ void turtleUpdate() {
         }
     }
 }
-#endif /* TURTLE_ENABLE_TEXTURES */
 
-#ifdef TURTLE_ENABLE_TEXTURES
+#ifdef NEVERUSEDAAAAAAAAAAAAAAA
 /* draws the turtle's path on the screen */
 void turtleUpdate() {
     // used to have a feature that only redrew the screen if there have been any changes from last frame, but it has been removed.
@@ -11313,7 +11322,7 @@ void turtleUpdate() {
         }
     }
 }
-#endif /* TURTLE_ENABLE_TEXTURES */
+#endif /* NEVERUSEDAAAAAAAAAAAAAAA */
 
 /* keeps the window open while doing nothing else (from python turtleMainLoop()) */
 void turtleMainLoop() {

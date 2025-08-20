@@ -20,6 +20,7 @@ https://patorjk.com/software/taag/#p=display&f=ANSI%20Shadow
 #include "list.h"
 #ifdef TURTLE_ENABLE_TEXTURES
 #include "bufferList.h"
+#define BUFFER_OBJECT_SIZE 9
 #endif /* TURTLE_ENABLE_TEXTURES */
 
 /* required forward declarations (for packaging) */
@@ -49,7 +50,7 @@ typedef struct {
     double x; // x and y position of the turtle
     double y;
     #ifdef TURTLE_ENABLE_TEXTURES
-    bufferList_t bufferList;
+    bufferList_t *bufferList;
     #endif /* TURTLE_ENABLE_TEXTURES */
     list_t *penPos; // a list of where to draw
     uint64_t penHash; // the penPos list is hashed and this hash is used to determine if any changes occured between frames
