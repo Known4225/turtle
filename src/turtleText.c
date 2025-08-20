@@ -454,8 +454,8 @@ void turtleTextWriteUnicodef(double x, double y, double size, double align, cons
     char buffer[1024];
     va_list args;
     va_start(args, str);
-    vsnprintf(buffer, 1024, str, args);
-    turtleTextWriteUnicode(buffer, x, y, size, align);
+    vsnprintf(buffer, 1024, (char *) str, args);
+    turtleTextWriteUnicode((unsigned char *) buffer, x, y, size, align);
     va_end(args);
 }
 

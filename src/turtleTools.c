@@ -878,7 +878,7 @@ void buttonUpdate() {
         double buttonY = buttonp -> y;
         double buttonWidth = turtleTextGetUnicodeLength((unsigned char *) buttonp -> label, buttonp -> size) * 1.1;
         double buttonHeight = buttonp -> size * 1.75;
-        if (buttonp -> status == 1) {
+        if (buttonp -> status > 0) {
             tt_internalColor(buttonp, TT_COLOR_BUTTON_CLICKED, TT_COLOR_OVERRIDE_SLOT_4);
         } else if (buttonp -> status == 0) {
             tt_internalColor(buttonp, TT_COLOR_BUTTON, TT_COLOR_OVERRIDE_SLOT_1);

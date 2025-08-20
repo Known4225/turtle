@@ -41,8 +41,6 @@ typedef struct {
     double mouseX; // mouseX and mouseY variables
     double mouseY;
     double scrollY;
-    // double mouseScaX;
-    // double mouseScaY;
     double mouseAbsX;
     double mouseAbsY;
     double x; // x and y position of the turtle
