@@ -63,6 +63,9 @@ The example project has a set of files in the `config/` folder that can be modif
 
 # To Do
 - Cleanup Win32Com and Win32Tcp
+- Change osTools interface (specify accepted file types per call instead of globally)
+    - Use lists instead of reallocing char arrays
+- Using files for popup and ribbon config is weird - at least make an option in the code to default to (for more portability)
 - Figure out a consistent convention for alpha values
 - Write wiki/documentation
 - Fix turtle initialisation with non center 0, 0 coordinates
