@@ -151,7 +151,7 @@ void turtleGoto(double x, double y);
 /* function to add a vertex to the turtle.bufferList */
 void addVertex(double x, double y, double r, double g, double b, double a, double tx, double ty, double useTexture);
 
-void turtleTextureRender(int32_t textureCode, double x1, double y1, double x2, double y2, double r, double g, double b, double rot, double xfact, double yfact);
+void turtleTextureRender(int32_t textureCode, double x1, double y1, double x2, double y2, double r, double g, double b, double rot, double xcenter, double ycenter, double xfact, double yfact);
 
 void turtleTexture(int32_t textureCode, double x1, double y1, double x2, double y2, double rot, double r, double g, double b);
 #endif /* TURTLE_ENABLE_TEXTURES */

@@ -337,6 +337,45 @@ double turtleTextGetUnicodeLength(const unsigned char *str, double size) {
     return turtleTextGetLength(converted, next, size);
 }
 
+void turtleTextTruncateString(char *str, double size, double width, int8_t leftRight) {
+    int32_t length = strlen(str);
+    size /= 175;
+    double xTrack = 0;
+    if (leftRight) {
+        /* right */
+        for (int32_t i = 0; i < length; i++) {
+            int32_t currentDataAddress = 0;
+            for (int32_t j = 0; j < turtleText.charCount; j++) { // change to hashmap later
+                if (turtleText.supportedCharReference[j] == str[i]) {
+                    currentDataAddress = j;
+                    break;
+                }
+            }
+            xTrack += (turtleText.fontData[turtleText.fontPointer[currentDataAddress + 1] - 4] + 40) * size;
+            if (xTrack - 40 * size > width) {
+                str[i] = '\0';
+                return;
+            }
+        }
+    } else {
+        /* left */
+        for (int32_t i = length - 1; i > -1; i--) {
+            int32_t currentDataAddress = 0;
+            for (int32_t j = 0; j < turtleText.charCount; j++) { // change to hashmap later
+                if (turtleText.supportedCharReference[j] == str[i]) {
+                    currentDataAddress = j;
+                    break;
+                }
+            }
+            xTrack += (turtleText.fontData[turtleText.fontPointer[currentDataAddress + 1] - 4] + 40) * size;
+            if (xTrack - 40 * size > width) {
+                memmove(str, str + i + 1, length - i);
+                return;
+            }
+        }
+    }
+}
+
 /* writes to the screen */
 void turtleTextWrite(const uint32_t *text, int32_t textLength, double x, double y, double size, double align) {
     char saveShape = turtle.penshape;

@@ -43,13 +43,18 @@ idea: try glfwGetClipboardString and glfwSetClipboardString
 #include "../include/osTools.h"
 
 /* global objects */
-osToolsGLFWObject osToolsGLFW;
-osToolsClipboardObject osToolsClipboard;
-osToolsFileDialogObject osToolsFileDialog;
-osToolsMemmapObject osToolsMemmap;
+ost_glfw_t osToolsGLFW;
+ost_clipboard_t osToolsClipboard;
+ost_file_dialog_t osToolsFileDialog;
+ost_memmap_t osToolsMemmap;
 
 /* OS independent functions */
 void osToolsIndependentInit(GLFWwindow *window) {
+    /* initialise file dialog */
+    osToolsFileDialog.selectedFilenames = list_init();
+    osToolsFileDialog.globalExtensions = list_init();
+    /* initialise clipboard */
+    osToolsClipboard.text = glfwGetClipboardString(osToolsGLFW.osToolsWindow);
     /* initialise glfw cursors */
     osToolsGLFW.osToolsWindow = window;
     osToolsGLFW.standardCursors[0] = glfwCreateStandardCursor(GLFW_ARROW_CURSOR);
@@ -58,6 +63,22 @@ void osToolsIndependentInit(GLFWwindow *window) {
     osToolsGLFW.standardCursors[3] = glfwCreateStandardCursor(GLFW_HAND_CURSOR);
     osToolsGLFW.standardCursors[4] = glfwCreateStandardCursor(GLFW_HRESIZE_CURSOR);
     osToolsGLFW.standardCursors[5] = glfwCreateStandardCursor(GLFW_VRESIZE_CURSOR);
+    /* initialise non-standard cursors */
+    GLFWimage leftDiagonalCursor;
+    leftDiagonalCursor.width = 32;
+    leftDiagonalCursor.height = 32;
+    leftDiagonalCursor.pixels = (unsigned char *) leftDiagonalCursorData;
+    osToolsGLFW.standardCursors[6] = glfwCreateCursor(&leftDiagonalCursor, 8, 8);
+    GLFWimage rightDiagonalCursor;
+    rightDiagonalCursor.width = 32;
+    rightDiagonalCursor.height = 32;
+    rightDiagonalCursor.pixels = (unsigned char *) rightDiagonalCursorData;
+    osToolsGLFW.standardCursors[7] = glfwCreateCursor(&rightDiagonalCursor, 8, 8);
+    GLFWimage moveCursor;
+    moveCursor.width = 32;
+    moveCursor.height = 32;
+    moveCursor.pixels = (unsigned char *) moveCursorData;
+    osToolsGLFW.standardCursors[8] = glfwCreateCursor(&moveCursor, 12, 12);
 
     /* initialise memmap module */
     osToolsMemmap.mappedFiles = list_init();
@@ -82,6 +103,9 @@ GLFW_CROSSHAIR_CURSOR
 GLFW_HAND_CURSOR
 GLFW_HRESIZE_CURSOR
 GLFW_VRESIZE_CURSOR
+GLFW_DLESIZE_CURSOR
+GLFW_DRESIZE_CURSOR
+GLFW_MOVE_CURSOR
 */
 void osToolsSetCursor(uint32_t cursor) {
     switch (cursor) {
@@ -103,6 +127,15 @@ void osToolsSetCursor(uint32_t cursor) {
     case GLFW_VRESIZE_CURSOR:
         glfwSetCursor(osToolsGLFW.osToolsWindow, osToolsGLFW.standardCursors[5]);
     break;
+    case GLFW_DLESIZE_CURSOR:
+        glfwSetCursor(osToolsGLFW.osToolsWindow, osToolsGLFW.standardCursors[6]);
+    break;
+    case GLFW_DRESIZE_CURSOR:
+        glfwSetCursor(osToolsGLFW.osToolsWindow, osToolsGLFW.standardCursors[7]);
+    break;
+    case GLFW_MOVE_CURSOR:
+        glfwSetCursor(osToolsGLFW.osToolsWindow, osToolsGLFW.standardCursors[8]);
+    break;
     default:
         glfwSetCursor(osToolsGLFW.osToolsWindow, osToolsGLFW.standardCursors[0]);
     break;
@@ -117,7 +150,7 @@ void osToolsShowCursor() {
     glfwSetInputMode(osToolsGLFW.osToolsWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 }
 
-list_t *osToolsLoadInternal(char *filename, osToolsCSV rowOrColumn, char delimeter, osToolsCSV fieldType) {
+list_t *osToolsLoadInternal(char *filename, ost_csv_t rowOrColumn, char delimeter, ost_csv_field_t fieldType) {
     uint32_t fileSize;
     uint8_t *mappedFile = osToolsMapFile(filename, &fileSize);
     if (mappedFile == NULL) {
@@ -321,23 +354,35 @@ list_t *osToolsLoadInternal(char *filename, osToolsCSV rowOrColumn, char delimet
 }
 
 /* packages a CSV file into a list (headers are strings, all fields are doubles) - use OSTOOLS_CSV_ROW to put it in a list of lists where each list is a row of the CSV and use OSTOOLS_CSV_COLUMN to output a list of lists where each list is a column of the CSV */
-list_t *osToolsLoadCSV(char *filename, osToolsCSV rowOrColumn) {
+list_t *osToolsLoadCSV(char *filename, ost_csv_t rowOrColumn) {
     return osToolsLoadInternal(filename, rowOrColumn, ',', OSTOOLS_CSV_FIELD_DOUBLE);
 }
 
 /* packages a CSV file into a list (headers are strings, all fields are doubles) - use OSTOOLS_CSV_ROW to put it in a list of lists where each list is a row of the CSV and use OSTOOLS_CSV_COLUMN to output a list of lists where each list is a column of the CSV */
-list_t *osToolsLoadCSVDouble(char *filename, osToolsCSV rowOrColumn) {
+list_t *osToolsLoadCSVDouble(char *filename, ost_csv_t rowOrColumn) {
     return osToolsLoadInternal(filename, rowOrColumn, ',', OSTOOLS_CSV_FIELD_DOUBLE);
 }
 
 /* packages a CSV file into a list (headers are strings, all fields are ints) - use OSTOOLS_CSV_ROW to put it in a list of lists where each list is a row of the CSV and use OSTOOLS_CSV_COLUMN to output a list of lists where each list is a column of the CSV */
-list_t *osToolsLoadCSVInt(char *filename, osToolsCSV rowOrColumn) {
+list_t *osToolsLoadCSVInt(char *filename, ost_csv_t rowOrColumn) {
     return osToolsLoadInternal(filename, rowOrColumn, ',', OSTOOLS_CSV_FIELD_INT);
 }
 
 /* packages a CSV file into a list (headers are strings, all fields are strings) - use OSTOOLS_CSV_ROW to put it in a list of lists where each list is a row of the CSV and use OSTOOLS_CSV_COLUMN to output a list of lists where each list is a column of the CSV */
-list_t *osToolsLoadCSVString(char *filename, osToolsCSV rowOrColumn) {
+list_t *osToolsLoadCSVString(char *filename, ost_csv_t rowOrColumn) {
     return osToolsLoadInternal(filename, rowOrColumn, ',', OSTOOLS_CSV_FIELD_STRING);
+}
+
+void osToolsFileDialogClearGlobalExtensions() {
+    list_clear(osToolsFileDialog.globalExtensions);
+}
+
+void osToolsFileDialogAddGlobalExtension(char *extension) {
+    list_append(osToolsFileDialog.globalExtensions, (unitype) extension, 's');
+}
+
+void osToolsFileDialogSetGlobalExtensions(list_t *extensions) {
+    list_copy(osToolsFileDialog.globalExtensions, extensions);
 }
 
 #ifdef OS_WINDOWS
@@ -355,114 +400,146 @@ int32_t osToolsInit(char argv0[], GLFWwindow *window) {
         index--;
     }
     osToolsFileDialog.executableFilepath[index + 1] = '\0';
-    /* initialise file dialog */
-    strcpy(osToolsFileDialog.selectedFilename, "null");
-    osToolsFileDialog.openOrSave = 0; // open by default
-    osToolsFileDialog.numExtensions = 0; // 0 means all extensions
-    osToolsFileDialog.extensions = malloc(1 * sizeof(char *)); // malloc list
-
-    /* initialise clipboard */
-    osToolsClipboard.text = glfwGetClipboardString(osToolsGLFW.osToolsWindow);
     return 0;
 }
 
-void osToolsFileDialogAddExtension(char *extension) {
-    if (strlen(extension) <= 4) {
-        osToolsFileDialog.numExtensions += 1;
-        osToolsFileDialog.extensions = realloc(osToolsFileDialog.extensions, osToolsFileDialog.numExtensions * sizeof(char *));
-        osToolsFileDialog.extensions[osToolsFileDialog.numExtensions - 1] = strdup(extension);
-    } else {
-        printf("extension name: %s too long\n", extension);
+int32_t osToolsFileDialogPrompt(ost_file_dialog_save_t openOrSave, ost_file_dialog_multiselect_t multiselect, ost_file_dialog_folder_t folder, char *prename, list_t *extensions) {
+    HRESULT hr = CoInitializeEx(NULL, 0); // https://learn.microsoft.com/en-us/windows/win32/api/objbase/ne-objbase-coinit
+    if (FAILED(hr)) {
+        return -1;
     }
+    IFileOpenDialog *fileDialog;
+    IShellItemArray *psiResultArray;
+    PWSTR pszFilePath = NULL;
+    hr = CoCreateInstance(&CLSID_FileOpenDialog, NULL, CLSCTX_ALL, &IID_IFileOpenDialog, (void **) &fileDialog);
+    if (FAILED(hr)) {
+        CoUninitialize();
+        return -1;
+    }
+    FILEOPENDIALOGOPTIONS options = 0;
+    if (openOrSave == OSTOOLS_FILE_DIALOG_SAVE) {
+        /* prompt user if trying to overwrite file when saving */
+        options |= FOS_OVERWRITEPROMPT;
+    }
+    if (openOrSave == OSTOOLS_FILE_DIALOG_OPEN && multiselect == OSTOOLS_FILE_DIALOG_MULTI_SELECT) {
+        /* enable multiselect */
+        options |= FOS_ALLOWMULTISELECT;
+    }
+    if (folder) {
+        /* switch to folder-only prompt */
+        options |= FOS_PICKFOLDERS;
+    }
+    fileDialog -> lpVtbl -> SetOptions(fileDialog, options); // https://learn.microsoft.com/en-us/windows/win32/api/shobjidl_core/ne-shobjidl_core-_fileopendialogoptions
+    /* configure autofill filename */
+    if (strcmp(prename, "null") != 0) {
+        int32_t i = 0;
+        WCHAR prename[MAX_PATH + 1];
+        while (prename[i] != '\0' && i < MAX_PATH + 1) {
+            prename[i] = prename[i]; // convert from char to WCHAR
+            i++;
+        }
+        prename[i] = '\0';
+        fileDialog -> lpVtbl -> SetFileName(fileDialog, prename);
+    }
+
+    /* load file restrictions
+    Info: each COMDLG creates one more entry to the dropdown to the right of the text box in the file dialog window
+    You can only see files that are specified in the types on the current COMDLG_FILTERSPEC selected in the dropdown
+    Thats why I shove all the types into one COMDLG_FILTERSPEC, because I want the user to be able to see all compatible files at once
+    */
+    if (extensions == NULL) {
+        extensions = osToolsFileDialog.globalExtensions;
+    }
+    if (extensions -> length > 0 && folder == 0) {
+        COMDLG_FILTERSPEC *fileExtensions = malloc(sizeof(COMDLG_FILTERSPEC)); // just one filter
+        int32_t totalMemory = 1;
+        for (int32_t i = 0; i < extensions -> length; i++) {
+            totalMemory += strlen(extensions -> data[i].s) + 3;
+        }
+        WCHAR *buildFilter = malloc(totalMemory * 2);
+        int32_t j = 0;
+        for (int32_t i = 0; i < extensions -> length; i++) {
+            buildFilter[j] = (uint16_t) '*';
+            buildFilter[j + 1] = (uint16_t) '.';
+            j += 2;
+            for (uint32_t k = 0; k < strlen(extensions -> data[i].s) && k < 8; k++) {
+                buildFilter[j] = extensions -> data[i].s[k];
+                j += 1;
+            }
+            buildFilter[j] = (uint16_t) ';';
+            j += 1;
+        }
+        buildFilter[j] = (uint16_t) '\0';
+        // printf("malloc'd %d bytes and used %d of them\n", totalMemory, j + 1);
+        (*fileExtensions).pszName = L"Specified Types";
+        (*fileExtensions).pszSpec = buildFilter;
+        fileDialog -> lpVtbl -> SetFileTypes(fileDialog, 1, fileExtensions);
+        free(buildFilter);
+        free(fileExtensions);
+    }
+
+    /* configure title and button text */
+    if (openOrSave == OSTOOLS_FILE_DIALOG_OPEN) {
+        /* open */
+        fileDialog -> lpVtbl -> SetOkButtonLabel(fileDialog, L"Open");
+        fileDialog -> lpVtbl -> SetTitle(fileDialog, L"Open");
+    } else if (openOrSave == OSTOOLS_FILE_DIALOG_SAVE) {
+        /* save */
+        fileDialog -> lpVtbl -> SetOkButtonLabel(fileDialog, L"Save");
+        fileDialog -> lpVtbl -> SetTitle(fileDialog, L"Save");
+    }
+
+    /* execute */
+    fileDialog -> lpVtbl -> Show(fileDialog, NULL); // opens window
+    hr = fileDialog -> lpVtbl -> GetResults(fileDialog, &psiResultArray); // succeeds if a file is selected
+    if (FAILED(hr)) {
+        printf("failed GetResult %ld\n", hr);
+        fileDialog -> lpVtbl -> Release(fileDialog);
+        CoUninitialize();
+        return -1;
+    }
+    DWORD numberOfSelectedFiles;
+    psiResultArray -> lpVtbl -> GetCount(psiResultArray, &numberOfSelectedFiles);
+    list_clear(osToolsFileDialog.selectedFilenames);
+    for (int32_t i = 0; i < numberOfSelectedFiles; i++) {
+        IShellItem *psiResult;
+        hr = psiResultArray -> lpVtbl -> GetItemAt(psiResultArray, 0, &psiResult);
+        hr |= psiResult -> lpVtbl -> GetDisplayName(psiResult, SIGDN_FILESYSPATH, &pszFilePath); // extracts path name
+        if (FAILED(hr)) {
+            psiResult -> lpVtbl -> Release(psiResult);
+            fileDialog -> lpVtbl -> Release(fileDialog);
+            CoUninitialize();
+            return -1;
+        }
+        int32_t i = 0;
+        /* convert from WCHAR to char */
+        int32_t pathLength = wcslen(pszFilePath);
+        char addToSelectedFilenames[pathLength + 2];
+        while (pszFilePath[i] != '\0' && i < MAX_PATH + 1) {
+            addToSelectedFilenames[i] = pszFilePath[i];
+            i++;
+        }
+        if (folder) {
+            addToSelectedFilenames[i] = '\\';
+            addToSelectedFilenames[i + 1] = '\0';
+        } else {
+            addToSelectedFilenames[i] = '\0';
+        }
+        list_append(osToolsFileDialog.selectedFilenames, (unitype) addToSelectedFilenames, 's');
+        psiResult -> lpVtbl -> Release(psiResult);
+        CoTaskMemFree(pszFilePath);
+    }
+    fileDialog -> lpVtbl -> Release(fileDialog);
+    CoUninitialize();
+    return 0;
 }
 
-int32_t osToolsFileDialogPrompt(char openOrSave, char *filename) { // 0 - open, 1 - save, filename refers to autofill filename ("null" or empty string for no autofill)
-    osToolsFileDialog.openOrSave = openOrSave;
-    HRESULT hr = CoInitializeEx(NULL, 0); // https://learn.microsoft.com/en-us/windows/win32/api/objbase/ne-objbase-coinit
-    if (SUCCEEDED(hr)) {
-        IFileDialog *fileDialog;
-        IShellItem *psiResult;
-        PWSTR pszFilePath = NULL;
-        hr = CoCreateInstance(&CLSID_FileOpenDialog, NULL, CLSCTX_ALL, &IID_IFileOpenDialog, (void**) &fileDialog);
-        if (SUCCEEDED(hr)) {
-            fileDialog -> lpVtbl -> SetOptions(fileDialog, 0); // https://learn.microsoft.com/en-us/windows/win32/api/shobjidl_core/ne-shobjidl_core-_fileopendialogoptions from my tests these don't seem to do anything
+int32_t osToolsFileDialogSave(ost_file_dialog_multiselect_t multiselect, ost_file_dialog_folder_t folder, char *prename, list_t *extensions) {
+    return osToolsFileDialogPrompt(OSTOOLS_FILE_DIALOG_SAVE, multiselect, folder, prename, extensions);
+}
 
-            /* configure autofill filename */
-            if (openOrSave == 1 && strcmp(filename, "null") != 0) {
-                int32_t i = 0;
-                uint16_t prename[MAX_PATH + 1];
-                while (filename[i] != '\0' && i < MAX_PATH + 1) {
-                    prename[i] = filename[i]; // convert from char to WCHAR
-                    i++;
-                }
-                prename[i] = '\0';
-                fileDialog -> lpVtbl -> SetFileName(fileDialog, prename);
-            }
-
-            /* load file restrictions
-            Info: each COMDLG creates one more entry to the dropdown to the right of the text box in the file dialog window
-            You can only see files that are specified in the types on the current COMDLG_FILTERSPEC selected in the dropdown
-            Thats why I shove all the types into one COMDLG_FILTERSPEC, because I want the user to be able to see all compatible files at once
-            */
-            if (osToolsFileDialog.numExtensions > 0) {
-                COMDLG_FILTERSPEC *fileExtensions = malloc(sizeof(COMDLG_FILTERSPEC)); // just one filter
-                WCHAR *buildFilter = malloc(10 * osToolsFileDialog.numExtensions * sizeof(WCHAR));
-                int32_t j = 0;
-                for (int32_t i = 0; i < osToolsFileDialog.numExtensions; i++) {
-                    buildFilter[j] = (uint16_t) '*';
-                    buildFilter[j + 1] = (uint16_t) '.';
-                    j += 2;
-                    for (uint32_t k = 0; k < strlen(osToolsFileDialog.extensions[i]) && k < 8; k++) {
-                        buildFilter[j] = osToolsFileDialog.extensions[i][k];
-                        j += 1;
-                    }
-                    buildFilter[j] = (uint16_t) ';';
-                    j += 1;
-                }
-                buildFilter[j] = (uint16_t) '\0';
-                (*fileExtensions).pszName = L"Specified Types";
-                (*fileExtensions).pszSpec = buildFilter;
-                fileDialog -> lpVtbl -> SetFileTypes(fileDialog, 1, fileExtensions);
-                free(buildFilter);
-                free(fileExtensions);
-            }
-
-            /* configure title and button text */
-            if (openOrSave == 0) {
-                /* open */
-                fileDialog -> lpVtbl -> SetOkButtonLabel(fileDialog, L"Open");
-                fileDialog -> lpVtbl -> SetTitle(fileDialog, L"Open");
-            } else {
-                /* save */
-                fileDialog -> lpVtbl -> SetOkButtonLabel(fileDialog, L"Save");
-                fileDialog -> lpVtbl -> SetTitle(fileDialog, L"Save");
-            }
-
-            /* execute */
-            fileDialog -> lpVtbl -> Show(fileDialog, NULL); // opens window
-            hr = fileDialog -> lpVtbl -> GetResult(fileDialog, &psiResult); // succeeds if a file is selected
-            if (SUCCEEDED(hr)){
-                hr = psiResult -> lpVtbl -> GetDisplayName(psiResult, SIGDN_FILESYSPATH, &pszFilePath); // extracts path name
-                if (SUCCEEDED(hr)) {
-                    int32_t i = 0;
-                    /* convert from WCHAR to char */
-                    while (pszFilePath[i] != '\0' && i < MAX_PATH + 1) {
-                        osToolsFileDialog.selectedFilename[i] = pszFilePath[i];
-                        i++;
-                    }
-                    osToolsFileDialog.selectedFilename[i] = '\0';
-                    CoTaskMemFree(pszFilePath);
-                    return 0;
-                }
-                psiResult -> lpVtbl -> Release(psiResult);
-            }
-            fileDialog -> lpVtbl -> Release(fileDialog);
-        } else {
-            printf("ERROR - HRESULT: %lx\n", hr);
-        }
-        CoUninitialize();
-    }
-    return -1;
+int32_t osToolsFileDialogOpen(ost_file_dialog_multiselect_t multiselect, ost_file_dialog_folder_t folder, char *prename, list_t *extensions) {
+    return osToolsFileDialogPrompt(OSTOOLS_FILE_DIALOG_OPEN, multiselect, folder, prename, extensions);
 }
 
 uint8_t *osToolsMapFile(char *filename, uint32_t *sizeOutput) {
@@ -521,6 +598,123 @@ int32_t osToolsUnmapFile(uint8_t *data) {
         printf("Could not find %p in memory mapped index\n", data);
         return -1;
     }
+}
+
+list_t *osToolsListFilesAndFolders(char *directory) {
+    /* https://learn.microsoft.com/en-us/windows/win32/fileio/listing-the-files-in-a-directory */
+    list_t *output = list_init();
+    if (strlen(directory) > MAX_PATH - 3) {
+        printf("osToolsListFiles: Directory name too long\n");
+        return output;
+    }
+    char directoryFor[MAX_PATH];
+    strcpy(directoryFor, directory);
+    strcat(directoryFor, "\\*");
+    WIN32_FIND_DATA findData;
+    HANDLE fileHandle = FindFirstFile(directoryFor, &findData);
+    if (fileHandle == INVALID_HANDLE_VALUE) {
+        printf("osToolsListFiles: Handle invalid error %ld\n", GetLastError());
+        return output;
+    }
+    LARGE_INTEGER filesize;
+    do {
+        if (strcmp(findData.cFileName, ".") == 0 || strcmp(findData.cFileName, "..") == 0) {
+            continue;
+        }
+        list_append(output, (unitype) findData.cFileName, 's'); // add filename
+        if (findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
+            /* directory */
+            list_append(output, (unitype) (int64_t) -1, LIST_TYPE_INT64);
+        } else {
+            filesize.LowPart = findData.nFileSizeLow;
+            filesize.HighPart = findData.nFileSizeHigh;
+            list_append(output, (unitype) (int64_t) filesize.QuadPart, LIST_TYPE_INT64);
+        }
+    } while (FindNextFile(fileHandle, &findData) != 0);
+    return output;
+}
+
+list_t *osToolsListFiles(char *directory) {
+    /* https://learn.microsoft.com/en-us/windows/win32/fileio/listing-the-files-in-a-directory */
+    list_t *output = list_init();
+    if (strlen(directory) > MAX_PATH - 3) {
+        printf("osToolsListFiles: Directory name too long\n");
+        return output;
+    }
+    char directoryFor[MAX_PATH];
+    strcpy(directoryFor, directory);
+    strcat(directoryFor, "\\*");
+    WIN32_FIND_DATA findData;
+    HANDLE fileHandle = FindFirstFile(directoryFor, &findData);
+    if (fileHandle == INVALID_HANDLE_VALUE) {
+        printf("osToolsListFiles: Handle invalid error %ld\n", GetLastError());
+        return output;
+    }
+    LARGE_INTEGER filesize;
+    do {
+        if (!(findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
+            filesize.LowPart = findData.nFileSizeLow;
+            filesize.HighPart = findData.nFileSizeHigh;
+            list_append(output, (unitype) findData.cFileName, 's'); // add filename
+            list_append(output, (unitype) (int64_t) filesize.QuadPart, LIST_TYPE_INT64);
+        }
+    } while (FindNextFile(fileHandle, &findData) != 0);
+    /* sort list https://stackoverflow.com/questions/39048747/how-in-the-world-does-windows-file-explorer-sort-by-name 
+    I'm actually just not going to sort them */
+    return output;
+}
+
+list_t *osToolsListFolders(char *directory) {
+    /* https://learn.microsoft.com/en-us/windows/win32/fileio/listing-the-files-in-a-directory */
+    list_t *output = list_init();
+    if (strlen(directory) > MAX_PATH - 3) {
+        printf("osToolsListFiles: Directory name too long\n");
+        return output;
+    }
+    char directoryFor[MAX_PATH];
+    strcpy(directoryFor, directory);
+    strcat(directoryFor, "\\*");
+    WIN32_FIND_DATA findData;
+    HANDLE fileHandle = FindFirstFile(directoryFor, &findData);
+    if (fileHandle == INVALID_HANDLE_VALUE) {
+        printf("osToolsListFiles: Handle invalid error %ld\n", GetLastError());
+        return output;
+    }
+    do {
+        if (strcmp(findData.cFileName, ".") == 0 || strcmp(findData.cFileName, "..") == 0) {
+            continue;
+        }
+        if (findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
+            /* directory */
+            list_append(output, (unitype) findData.cFileName, 's'); // add filename
+        }
+    } while (FindNextFile(fileHandle, &findData) != 0);
+    return output;
+}
+
+void osToolsCreateFolder(char *folder) {
+    /* https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-createdirectory */
+    CreateDirectory(folder, NULL);
+}
+
+void osToolsDeleteFolder(char *folder) {
+    /* https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-removedirectorya */
+    char directoryFor[MAX_PATH + 10] = "rd /s /q ";
+    int32_t len = strlen(folder);
+    char *holdingCell = strdup(folder);
+    for (int32_t i = 0; i < len; i++) {
+        if (holdingCell[i] == '/') {
+            holdingCell[i] = '\\';
+        }
+    }
+    strcat(directoryFor, holdingCell);
+    free(holdingCell);
+    system(directoryFor);
+    // RemoveDirectoryA(folder);
+}
+
+void osToolsCloseConsole() {
+    FreeConsole();
 }
 
 /*
@@ -860,30 +1054,18 @@ int32_t osToolsInit(char argv0[], GLFWwindow *window) {
         index--;
     }
     osToolsFileDialog.executableFilepath[index + 1] = '\0';
-
-    /* initialise file dialog */
-    strcpy(osToolsFileDialog.selectedFilename, "null");
-    osToolsFileDialog.openOrSave = 0; // open by default
-    osToolsFileDialog.numExtensions = 0; // 0 means all extensions
-    osToolsFileDialog.extensions = malloc(1 * sizeof(char *)); // malloc list
     return 0;
 }
 
-void osToolsFileDialogAddExtension(char *extension) {
-    if (strlen(extension) <= 4) {
-        osToolsFileDialog.numExtensions += 1;
-        osToolsFileDialog.extensions = realloc(osToolsFileDialog.extensions, osToolsFileDialog.numExtensions * 8);
-        osToolsFileDialog.extensions[osToolsFileDialog.numExtensions - 1] = strdup(extension);
-    } else {
-        printf("extension name: %s too long\n", extension);
+int32_t osToolsFileDialogPrompt(ost_file_dialog_save_t openOrSave, ost_file_dialog_multiselect_t multiselect, ost_file_dialog_folder_t folder, char *prename, list_t *extensions) {
+    int32_t totalMemory = 23 + 13 + strlen(prename) + 15 + 34 + 14 + 1; // 23 for zenity --file-selection, 13 for --filename=', prename, 15 for --title='Open', 34 for --file-filter='Specified Types | , added per extension, 14 for title, 1 for \0
+    for (int32_t i = 0; i < extensions -> length; i++) {
+        totalMemory += strlen(extensions -> data[i].s) + 3;
     }
-}
-
-int32_t osToolsFileDialogPrompt(char openOrSave, char *prename) { // 0 - open, 1 - save, prename refers to autofill filename ("null" or empty string for no autofill)
-    char fullCommand[23 + 13 + 256 + 15 + 34 + 7 * osToolsFileDialog.numExtensions + 14 + 1]; // 23 for zenity --file-selection, 13 for --filename=', 256 for prename, 15 for --title='Open', 34 for --file-filter='Specified Types | , 7 for each extension, 14 for title, 1 for \0
+    char fullCommand[totalMemory];
     strcpy(fullCommand, "zenity --file-selection");
     /* configure autofill filename */
-    if (openOrSave == 1 && strcmp(prename, "null") != 0) {
+    if (strcmp(prename, "null") != 0) {
         strcat(fullCommand, " --filename='");
         strcat(fullCommand, prename);
         strcat(fullCommand, "'");
@@ -897,7 +1079,7 @@ int32_t osToolsFileDialogPrompt(char openOrSave, char *prename) { // 0 - open, 1
     strcat(fullCommand, title);
 
     /* configure extensions */
-    if (osToolsFileDialog.numExtensions > 0) {
+    if (osToolsFileDialog.extensions -> length > 0) {
         char buildFilter[7 * osToolsFileDialog.numExtensions + 1]; // last space is replaced with ' and followed by \0
         int32_t j = 0;
         for (int32_t i = 0; i < osToolsFileDialog.numExtensions; i++) {
@@ -922,15 +1104,15 @@ int32_t osToolsFileDialogPrompt(char openOrSave, char *prename) { // 0 - open, 1
 
     /* execute */
     FILE* filenameStream = popen(fullCommand, "r");
-    if (fgets(osToolsFileDialog.selectedFilename, 4097, filenameStream) == NULL) { // adds a \n before \0 (?)
-        strcpy(osToolsFileDialog.selectedFilename, "null");
-        return -1;
-    }
-    for (uint32_t i = 0; i < 4096; i++) {
-        if (osToolsFileDialog.selectedFilename[i] == '\n') {
-            osToolsFileDialog.selectedFilename[i] = '\0'; // replace all newlines with null characters
-        }
-    }
+    // if (fgets(osToolsFileDialog.selectedFilename, 4097, filenameStream) == NULL) { // adds a \n before \0 (?)
+    //     strcpy(osToolsFileDialog.selectedFilename, "null");
+    //     return -1;
+    // }
+    // for (uint32_t i = 0; i < 4096; i++) {
+    //     if (osToolsFileDialog.selectedFilename[i] == '\n') {
+    //         osToolsFileDialog.selectedFilename[i] = '\0'; // replace all newlines with null characters
+    //     }
+    // }
     pclose(filenameStream);
     return 0;
 }
@@ -972,4 +1154,117 @@ int32_t osToolsUnmapFile(uint8_t *data) {
     }
 }
 
+void osToolsCloseConsole() {
+    /* don't know how to do this yet - https://unix.stackexchange.com/questions/743272/programatically-start-a-background-process-under-linux */
+    return;
+}
+
 #endif
+
+/* created using https://notisrac.github.io/FileToCArray (32 bit RGBA) */
+const uint32_t moveCursorData[1024] = {
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0xff000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0xff000000, 0xffffffff, 0xff000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0xff000000, 0xffffffff, 0xffffffff, 0xffffffff, 0xff000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0xff000000, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xff000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0xff000000, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xff000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0xff000000, 0xff000000, 0xff000000, 0xff000000, 0xffffffff, 0xff000000, 0xff000000, 0xff000000, 0xff000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0xff000000, 0xffffffff, 0xff000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0xff000000, 0xff000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0xff000000, 0xffffffff, 0xff000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0xff000000, 0xff000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0xff000000, 0xffffffff, 0xff000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0xff000000, 0xffffffff, 0xff000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0xff000000, 0xffffffff, 0xff000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0xff000000, 0xffffffff, 0xffffffff, 0xff000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0xff000000, 0xffffffff, 0xff000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0xff000000, 0xffffffff, 0xffffffff, 0xff000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0xff000000, 0xffffffff, 0xffffffff, 0xffffffff, 0xff000000, 0xff000000, 0xff000000, 0xff000000, 0xff000000, 0xff000000, 0xffffffff, 0xff000000, 0xff000000, 0xff000000, 0xff000000, 0xff000000, 0xff000000, 0xffffffff, 0xffffffff, 0xffffffff, 0xff000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0xff000000, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xff000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0xff000000, 0xffffffff, 0xffffffff, 0xffffffff, 0xff000000, 0xff000000, 0xff000000, 0xff000000, 0xff000000, 0xff000000, 0xffffffff, 0xff000000, 0xff000000, 0xff000000, 0xff000000, 0xff000000, 0xff000000, 0xffffffff, 0xffffffff, 0xffffffff, 0xff000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0xff000000, 0xffffffff, 0xffffffff, 0xff000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0xff000000, 0xffffffff, 0xff000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0xff000000, 0xffffffff, 0xffffffff, 0xff000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0xff000000, 0xffffffff, 0xff000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0xff000000, 0xffffffff, 0xff000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0xff000000, 0xffffffff, 0xff000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0xff000000, 0xff000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0xff000000, 0xffffffff, 0xff000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0xff000000, 0xff000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0xff000000, 0xffffffff, 0xff000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0xff000000, 0xff000000, 0xff000000, 0xff000000, 0xffffffff, 0xff000000, 0xff000000, 0xff000000, 0xff000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0xff000000, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xff000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0xff000000, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xff000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0xff000000, 0xffffffff, 0xffffffff, 0xffffffff, 0xff000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0xff000000, 0xffffffff, 0xff000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0xff000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000
+};
+
+/* created using https://notisrac.github.io/FileToCArray (32 bit RGBA) */
+const uint32_t leftDiagonalCursorData[1024] = {
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0xff000000, 0xff000000, 0xff000000, 0xff000000, 0xff000000, 0xff000000, 0xff000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0xff000000, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xff000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0xff000000, 0xffffffff, 0xffffffff, 0xffffffff, 0xff000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0xff000000, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xff000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0xff000000, 0xffffffff, 0xffffffff, 0xffffffff, 0xff000000, 0xffffffff, 0xff000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0xff000000, 0xffffffff, 0xffffffff, 0xffffffff, 0xff000000, 0x00000000, 0xff000000, 0xff000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0xff000000, 0xffffffff, 0xffffffff, 0xffffffff, 0xff000000, 0x00000000, 0x00000000, 0x00000000, 0xff000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0xff000000, 0xffffffff, 0xffffffff, 0xffffffff, 0xff000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0xff000000, 0xffffffff, 0xffffffff, 0xffffffff, 0xff000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0xff000000, 0xffffffff, 0xffffffff, 0xffffffff, 0xff000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0xff000000, 0x00000000, 0x00000000, 0x00000000, 0xff000000, 0xffffffff, 0xffffffff, 0xffffffff, 0xff000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0xff000000, 0xff000000, 0x00000000, 0xff000000, 0xffffffff, 0xffffffff, 0xffffffff, 0xff000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0xff000000, 0xffffffff, 0xff000000, 0xffffffff, 0xffffffff, 0xffffffff, 0xff000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0xff000000, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xff000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0xff000000, 0xffffffff, 0xffffffff, 0xffffffff, 0xff000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0xff000000, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xff000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0xff000000, 0xff000000, 0xff000000, 0xff000000, 0xff000000, 0xff000000, 0xff000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000
+};
+
+/* created using https://notisrac.github.io/FileToCArray (32 bit RGBA) */
+const uint32_t rightDiagonalCursorData[1024] = {
+    0xff000000, 0xff000000, 0xff000000, 0xff000000, 0xff000000, 0xff000000, 0xff000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0xff000000, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xff000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0xff000000, 0xffffffff, 0xffffffff, 0xffffffff, 0xff000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0xff000000, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xff000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0xff000000, 0xffffffff, 0xff000000, 0xffffffff, 0xffffffff, 0xffffffff, 0xff000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0xff000000, 0xff000000, 0x00000000, 0xff000000, 0xffffffff, 0xffffffff, 0xffffffff, 0xff000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0xff000000, 0x00000000, 0x00000000, 0x00000000, 0xff000000, 0xffffffff, 0xffffffff, 0xffffffff, 0xff000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0xff000000, 0xffffffff, 0xffffffff, 0xffffffff, 0xff000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0xff000000, 0xffffffff, 0xffffffff, 0xffffffff, 0xff000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0xff000000, 0xffffffff, 0xffffffff, 0xffffffff, 0xff000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0xff000000, 0xffffffff, 0xffffffff, 0xffffffff, 0xff000000, 0x00000000, 0x00000000, 0x00000000, 0xff000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0xff000000, 0xffffffff, 0xffffffff, 0xffffffff, 0xff000000, 0x00000000, 0xff000000, 0xff000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0xff000000, 0xffffffff, 0xffffffff, 0xffffffff, 0xff000000, 0xffffffff, 0xff000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0xff000000, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xff000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0xff000000, 0xffffffff, 0xffffffff, 0xffffffff, 0xff000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0xff000000, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xff000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0xff000000, 0xff000000, 0xff000000, 0xff000000, 0xff000000, 0xff000000, 0xff000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000
+};

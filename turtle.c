@@ -13,22 +13,22 @@ void parseRibbonOutput() {
             printf("New\n");
         }
         if (ribbonRender.output[2] == 2) { // Save
-            if (strcmp(osToolsFileDialog.selectedFilename, "null") == 0) {
-                if (osToolsFileDialogPrompt(1, "") != -1) {
-                    printf("Saved to: %s\n", osToolsFileDialog.selectedFilename);
+            if (strcmp(osToolsFileDialog.selectedFilenames -> data[0].s, "null") == 0) {
+                if (osToolsFileDialogSave(OSTOOLS_FILE_DIALOG_SINGLE_SELECT, OSTOOLS_FILE_DIALOG_FILE, "", NULL) != -1) {
+                    printf("Saved to: %s\n", osToolsFileDialog.selectedFilenames -> data[0].s);
                 }
             } else {
-                printf("Saved to: %s\n", osToolsFileDialog.selectedFilename);
+                printf("Saved to: %s\n", osToolsFileDialog.selectedFilenames -> data[0].s);
             }
         }
         if (ribbonRender.output[2] == 3) { // Save As...
-            if (osToolsFileDialogPrompt(1, "") != -1) {
-                printf("Saved to: %s\n", osToolsFileDialog.selectedFilename);
+            if (osToolsFileDialogSave(OSTOOLS_FILE_DIALOG_SINGLE_SELECT, OSTOOLS_FILE_DIALOG_FILE, "", NULL) != -1) {
+                printf("Saved to: %s\n", osToolsFileDialog.selectedFilenames -> data[0].s);
             }
         }
         if (ribbonRender.output[2] == 4) { // Open
-            if (osToolsFileDialogPrompt(0, "") != -1) {
-                printf("Loaded data from: %s\n", osToolsFileDialog.selectedFilename);
+            if (osToolsFileDialogOpen(OSTOOLS_FILE_DIALOG_SINGLE_SELECT, OSTOOLS_FILE_DIALOG_FILE, "", NULL) != -1) {
+                printf("Loaded data from: %s\n", osToolsFileDialog.selectedFilenames -> data[0].s);
             }
         }
     }
@@ -119,7 +119,7 @@ int main(int argc, char *argv[]) {
     popupInit("config/popupConfig.txt", -70, -20, 70, 20);
     /* initialise osTools */
     osToolsInit(argv[0], window); // must include argv[0] to get executableFilepath, must include GLFW window
-    osToolsFileDialogAddExtension("txt"); // add txt to extension restrictions
+    osToolsFileDialogAddGlobalExtension("txt"); // add txt to extension restrictions
     list_t *rowLike = osToolsLoadCSVString("config/test.csv", OSTOOLS_CSV_ROW);
     list_t *columnLike = osToolsLoadCSVString("config/test.csv", OSTOOLS_CSV_COLUMN);
     if (rowLike != NULL) {

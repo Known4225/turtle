@@ -43,6 +43,7 @@ typedef struct {
     int8_t dialEnabled;
     int8_t sliderEnabled;
     int8_t scrollbarEnabled;
+    int8_t contextEnabled;
     int8_t dropdownEnabled;
     int8_t textboxEnabled;
 } tt_enabled_t;
@@ -55,9 +56,10 @@ typedef enum {
     TT_ELEMENT_DIAL = 2,
     TT_ELEMENT_SLIDER = 3,
     TT_ELEMENT_SCROLLBAR = 4,
-    TT_ELEMENT_DROPDOWN = 5,
-    TT_ELEMENT_TEXTBOX = 6,
-    TT_NUMBER_OF_ELEMENTS = 7,
+    TT_ELEMENT_CONTEXT = 5,
+    TT_ELEMENT_DROPDOWN = 6,
+    TT_ELEMENT_TEXTBOX = 7,
+    TT_NUMBER_OF_ELEMENTS = 8,
 } tt_element_names_t;
 
 typedef struct {
@@ -67,6 +69,7 @@ typedef struct {
     list_t *dials;
     list_t *sliders;
     list_t *scrollbars;
+    list_t *contexts;
     list_t *dropdowns;
     list_t *textboxes;
 } tt_elements_t;
@@ -136,6 +139,12 @@ extern tt_ribbon_t ribbonRender;
 /* initialise ribbon */
 int32_t ribbonInit(const char *filename);
 
+/* initialise ribbon with a list instead of a config file - this function frees the list so you don't have to */
+int32_t ribbonInitList(list_t *config);
+
+/* internal */
+int32_t ribbonInitInternal(FILE *configFile, list_t *configList, int8_t fileExists);
+
 /* render ribbon */
 void ribbonUpdate();
 
@@ -164,11 +173,18 @@ typedef struct {
 extern tt_popup_t popup;
 
 /* initialise popup */
-int32_t popupInit(const char *filename, double minX, double minY, double maxX, double maxY);
+int32_t popupInit(char *filename, double minX, double minY, double maxX, double maxY);
+
+/* initialise popup with a list instead of a config file - this function frees the list so you don't have to */
+int32_t popupInitList(list_t *config, double minX, double minY, double maxX, double maxY);
+
+/* internal */
+int32_t popupInitInternal(FILE *configFile, list_t *configList, int8_t fileExists, double minX, double minY, double maxX, double maxY);
 
 /* render popup */
 void popupUpdate();
 
+/* free popup */
 void popupFree();
 
 /* UI tools */
@@ -200,7 +216,7 @@ typedef enum {
     TT_BUTTON_SHAPE_TEXT = 3,
 } tt_button_shape_t;
 
-#define TT_LABEL_LENGTH_LIMIT 24
+#define TT_LABEL_LENGTH_LIMIT 128
 
 /* button */
 typedef struct {
@@ -312,6 +328,29 @@ typedef struct {
 } tt_scrollbar_t;
 
 typedef enum {
+    TT_CONTEXT_DIRECTION_UP_LEFT = 0,
+    TT_CONTEXT_DIRECTION_UP_RIGHT = 1,
+    TT_CONTEXT_DIRECTION_DOWN_LEFT = 1,
+    TT_CONTEXT_DIRECTION_DOWN_RIGHT = 1,
+} tt_context_direction_t;
+
+/* context menu */
+typedef struct {
+    tt_element_names_t element;
+    tt_element_enabled_t enabled;
+    tt_color_override_t color;
+    double x;
+    double y;
+    double size;
+    int32_t *variable; // index of selected option
+    list_t *options;
+    int32_t index;
+    int32_t status;
+    tt_context_direction_t direction;
+    double maxXfactor;
+} tt_context_t;
+
+typedef enum {
     TT_DROPDOWN_ALIGN_LEFT = 0,
     TT_DROPDOWN_ALIGN_CENTER = 1,
     TT_DROPDOWN_ALIGN_RIGHT = 2,
@@ -407,7 +446,13 @@ tt_scrollbar_t *scrollbarInit(double *variable, tt_scrollbar_type_t type, double
 
 void scrollbarFree(tt_scrollbar_t *scrollbarp);
 
-void dropdownCalculateMax(tt_dropdown_t *dropdown);
+void contextCalculateMax(tt_context_t *contextp);
+
+tt_context_t *contextInit(list_t *options, int32_t *variable, double x, double y, double size);
+
+void contextFree(tt_context_t *contextp);
+
+void dropdownCalculateMax(tt_dropdown_t *dropdownp);
 
 /* create a dropdown - use a list of strings for options */
 tt_dropdown_t *dropdownInit(char *label, list_t *options, int32_t *variable, tt_dropdown_align_t align, double x, double y, double size);

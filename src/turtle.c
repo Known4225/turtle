@@ -121,7 +121,7 @@ void turtleInit(GLFWwindow* window, int32_t minX, int32_t minY, int32_t maxX, in
     glfwMakeContextCurrent(window); // various glfw things
     glEnable(GL_ALPHA);
     glEnable(GL_BLEND);
-    glBlendFunc(GL_ONE_MINUS_SRC_ALPHA, GL_SRC_ALPHA);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glClearColor(1.0, 1.0, 1.0, 0.0); // white background by default
     turtle.window = window;
     turtle.close = 0;
@@ -287,7 +287,7 @@ void turtleGetMouseCoords() {
 
 /* set the background color */
 void turtleBgColor(double r, double g, double b) {
-    glClearColor(r / 255, g / 255, b / 255, 0.0);
+    glClearColor(r / 255, g / 255, b / 255, 255.0);
 }
 
 /* set the pen color */
@@ -295,7 +295,7 @@ void turtlePenColor(double r, double g, double b) {
     turtle.penr = r / 255;
     turtle.peng = g / 255;
     turtle.penb = b / 255;
-    turtle.pena = 0.0;
+    turtle.pena = 255.0;
 }
 
 /* set the pen color (with transparency) */
@@ -303,7 +303,7 @@ void turtlePenColorAlpha(double r, double g, double b, double a) {
     turtle.penr = r / 255;
     turtle.peng = g / 255;
     turtle.penb = b / 255;
-    turtle.pena = a / 255;
+    turtle.pena = 1.0 - a / 255;
 }
 
 /* set the pen size */
@@ -584,7 +584,8 @@ void turtleQuadRender(double x1, double y1, double x2, double y2, double x3, dou
     addVertex(x4 * xfact + xcenter, y4 * yfact + ycenter, r, g, b, a, 0, 0, 0);
 }
 
-void turtleTextureRender(int32_t textureCode, double x1, double y1, double x2, double y2, double r, double g, double b, double rot, double xfact, double yfact) {
+void turtleTextureRender(int32_t textureCode, double x1, double y1, double x2, double y2, double r, double g, double b, double rot, double xcenter, double ycenter, double xfact, double yfact) {
+    rot += M_PI; // messed up somewhere and this is the simplest way to fix it (rotate 180)
     /* do the rotation math here - rotate on center */
     double avgX = (x1 + x2) / 2;
     double avgY = (y1 + y2) / 2;
@@ -602,12 +603,12 @@ void turtleTextureRender(int32_t textureCode, double x1, double y1, double x2, d
     double y3 = avgY + x2Displace * cosRot + y1Displace * sinRot;
     double x4 = avgX + x1Displace * sinRot - y2Displace * cosRot;
     double y4 = avgY + x1Displace * cosRot + y2Displace * sinRot;
-    addVertex(x1 * xfact, y1 * yfact, r, g, b, 1.0, 0, 0, textureCode);
-    addVertex(x3 * xfact, y3 * yfact, r, g, b, 1.0, 1, 0, textureCode);
-    addVertex(x2 * xfact, y2 * yfact, r, g, b, 1.0, 1, 1, textureCode);
-    addVertex(x1 * xfact, y1 * yfact, r, g, b, 1.0, 0, 0, textureCode);
-    addVertex(x4 * xfact, y4 * yfact, r, g, b, 1.0, 0, 1, textureCode);
-    addVertex(x2 * xfact, y2 * yfact, r, g, b, 1.0, 1, 1, textureCode);
+    addVertex(x1 * xfact + xcenter, y1 * yfact + ycenter, r, g, b, 1.0, 0, 0, textureCode);
+    addVertex(x3 * xfact + xcenter, y3 * yfact + ycenter, r, g, b, 1.0, 0, 1, textureCode);
+    addVertex(x2 * xfact + xcenter, y2 * yfact + ycenter, r, g, b, 1.0, 1, 1, textureCode);
+    addVertex(x1 * xfact + xcenter, y1 * yfact + ycenter, r, g, b, 1.0, 0, 0, textureCode);
+    addVertex(x4 * xfact + xcenter, y4 * yfact + ycenter, r, g, b, 1.0, 1, 0, textureCode);
+    addVertex(x2 * xfact + xcenter, y2 * yfact + ycenter, r, g, b, 1.0, 1, 1, textureCode);
 }
 
 // adds a (blit) rectangular texture
@@ -965,7 +966,7 @@ void turtleUpdate() {
                 }
                 #ifdef TURTLE_ENABLE_TEXTURES
                 if (ren[i + 7].h >= 128) { // blit texture (rectangle)
-                    turtleTextureRender(ren[i + 7].h - 128, ren[i].d, ren[i + 1].d, ren[i + 2].d, ren[i + 3].d, ren[i + 5].d, ren[i + 6].d, ren[i + 8].d, ren[i + 4].d / 57.2958, xfact, yfact);
+                    turtleTextureRender(ren[i + 7].h - 128, ren[i].d, ren[i + 1].d, ren[i + 2].d, ren[i + 3].d, ren[i + 5].d, ren[i + 6].d, ren[i + 8].d, ren[i + 4].d / 57.2958, xcenter, ycenter, xfact, yfact);
                 }
                 #endif /* TURTLE_ENABLE_TEXTURES */
                 // if (ren[i + 7].h == 256) { // blit 3D sphere

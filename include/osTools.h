@@ -11,39 +11,46 @@ https://patorjk.com/software/taag/#p=display&f=ANSI%20Shadow
 #ifndef OS_TOOLS_H
 #define OS_TOOLS_H
 
+#define OS_WINDOWS
+#define OS_LINUX
+
 #include "list.h"
 #include "glad.h"
 #include "glfw3.h"
 
 /* required forward declarations (for packaging) */
 typedef struct GLFWcursor GLFWcursor;
+extern const uint32_t moveCursorData[1024];
+extern const uint32_t leftDiagonalCursorData[1024];
+extern const uint32_t rightDiagonalCursorData[1024];
+#define GLFW_DLESIZE_CURSOR     0x00036007
+#define GLFW_DRESIZE_CURSOR     0x00036008
+#define GLFW_MOVE_CURSOR        0x00036009
 
 typedef struct {
     GLFWwindow *osToolsWindow;
-    GLFWcursor *standardCursors[6];
-} osToolsGLFWObject;
+    GLFWcursor *standardCursors[10];
+} ost_glfw_t;
 
 typedef struct {
     const char *text; // clipboard text data (heap allocated)
-} osToolsClipboardObject;
+} ost_clipboard_t;
 
 typedef struct {
     char executableFilepath[4096 + 1]; // filepath of executable
-    char selectedFilename[4096 + 1]; // output filename - maximum filepath is 260 characters on windows and 4096 on linux
-    char openOrSave; // 0 - open, 1 - save
-    int32_t numExtensions; // number of extensions
-    char **extensions; // array of allowed extensions (7 characters long max (cuz *.json;))
-} osToolsFileDialogObject;
+    list_t *selectedFilenames; // output filenames from osToolsFileDialogPrompt (erased with every call, only has multiple items when multiselect is used)
+    list_t *globalExtensions; // list of global extensions accepted by file dialog
+} ost_file_dialog_t;
 
 typedef struct {
     list_t *mappedFiles;
-} osToolsMemmapObject;
+} ost_memmap_t;
 
 /* global objects */
-extern osToolsGLFWObject osToolsGLFW;
-extern osToolsClipboardObject osToolsClipboard;
-extern osToolsFileDialogObject osToolsFileDialog;
-extern osToolsMemmapObject osToolsMemmap;
+extern ost_glfw_t osToolsGLFW;
+extern ost_clipboard_t osToolsClipboard;
+extern ost_file_dialog_t osToolsFileDialog;
+extern ost_memmap_t osToolsMemmap;
 
 /* OS independent functions */
 void osToolsIndependentInit(GLFWwindow *window);
@@ -61,6 +68,9 @@ GLFW_CROSSHAIR_CURSOR
 GLFW_HAND_CURSOR
 GLFW_HRESIZE_CURSOR
 GLFW_VRESIZE_CURSOR
+GLFW_DLESIZE_CURSOR
+GLFW_DRESIZE_CURSOR
+GLFW_MOVE_CURSOR
 */
 void osToolsSetCursor(uint32_t cursor);
 
@@ -71,24 +81,30 @@ void osToolsShowCursor();
 typedef enum {
     OSTOOLS_CSV_ROW = 0,
     OSTOOLS_CSV_COLUMN = 1,
-    OSTOOLS_CSV_FIELD_DOUBLE = 2,
-    OSTOOLS_CSV_FIELD_INT = 3,
-    OSTOOLS_CSV_FIELD_STRING = 4,
-} osToolsCSV;
+} ost_csv_t;
 
-list_t *osToolsLoadInternal(char *filename, osToolsCSV rowOrColumn, char delimeter, osToolsCSV fieldType);
+typedef enum {
+    OSTOOLS_CSV_FIELD_DOUBLE = 0,
+    OSTOOLS_CSV_FIELD_INT = 1,
+    OSTOOLS_CSV_FIELD_STRING = 2,
+} ost_csv_field_t;
+
+list_t *osToolsLoadInternal(char *filename, ost_csv_t rowOrColumn, char delimeter, ost_csv_field_t fieldType);
 
 /* packages a CSV file into a list (headers are strings, all fields are doubles) - use OSTOOLS_CSV_ROW to put it in a list of lists where each list is a row of the CSV and use OSTOOLS_CSV_COLUMN to output a list of lists where each list is a column of the CSV */
-list_t *osToolsLoadCSV(char *filename, osToolsCSV rowOrColumn);
+list_t *osToolsLoadCSV(char *filename, ost_csv_t rowOrColumn);
 
 /* packages a CSV file into a list (headers are strings, all fields are doubles) - use OSTOOLS_CSV_ROW to put it in a list of lists where each list is a row of the CSV and use OSTOOLS_CSV_COLUMN to output a list of lists where each list is a column of the CSV */
-list_t *osToolsLoadCSVDouble(char *filename, osToolsCSV rowOrColumn);
+list_t *osToolsLoadCSVDouble(char *filename, ost_csv_t rowOrColumn);
 
 /* packages a CSV file into a list (headers are strings, all fields are ints) - use OSTOOLS_CSV_ROW to put it in a list of lists where each list is a row of the CSV and use OSTOOLS_CSV_COLUMN to output a list of lists where each list is a column of the CSV */
-list_t *osToolsLoadCSVInt(char *filename, osToolsCSV rowOrColumn);
+list_t *osToolsLoadCSVInt(char *filename, ost_csv_t rowOrColumn);
 
 /* packages a CSV file into a list (headers are strings, all fields are strings) - use OSTOOLS_CSV_ROW to put it in a list of lists where each list is a row of the CSV and use OSTOOLS_CSV_COLUMN to output a list of lists where each list is a column of the CSV */
-list_t *osToolsLoadCSVString(char *filename, osToolsCSV rowOrColumn);
+list_t *osToolsLoadCSVString(char *filename, ost_csv_t rowOrColumn);
+
+/* untether the program from the console that spawned it - will close a console if the program is run independently */
+void osToolsCloseConsole();
 
 #ifdef OS_WINDOWS
 #include <winsock2.h>
@@ -147,12 +163,62 @@ void win32tcpDeinit();
 
 int32_t osToolsInit(char argv0[], GLFWwindow *window);
 
-void osToolsFileDialogAddExtension(char *extension);
+/* clear the list of global extensions */
+void osToolsFileDialogClearGlobalExtensions();
 
-int32_t osToolsFileDialogPrompt(char openOrSave, char *prename);
+/* add a single extension to the global file extensions */
+void osToolsFileDialogAddGlobalExtension(char *extension);
+
+/* copies the data from the list to the global extensions (you can free the list passed in immediately after calling this) */
+void osToolsFileDialogSetGlobalExtensions(list_t *extensions);
+
+typedef enum {
+    OSTOOLS_FILE_DIALOG_OPEN = 0,
+    OSTOOLS_FILE_DIALOG_SAVE = 1,
+} ost_file_dialog_save_t;
+
+typedef enum {
+    OSTOOLS_FILE_DIALOG_SINGLE_SELECT = 0,
+    OSTOOLS_FILE_DIALOG_MULTI_SELECT = 1,
+} ost_file_dialog_multiselect_t;
+
+typedef enum {
+    OSTOOLS_FILE_DIALOG_FILE = 0,
+    OSTOOLS_FILE_DIALOG_FOLDER = 1,
+} ost_file_dialog_folder_t;
+
+/*
+openOrSave: 0 - open, 1 - save
+multiselect: 0 - single file select, 1 - multiselect, can only use when opening (cannot save to multiple files)
+folder: 0 - file dialog, 1 - folder dialog
+prename: refers to autofill filename ("null" or empty string for no autofill)
+extensions: pass in a list of accepted file extensions or pass in NULL to use global list of extensions
+*/
+int32_t osToolsFileDialogPrompt(ost_file_dialog_save_t openOrSave, ost_file_dialog_multiselect_t multiselect, ost_file_dialog_folder_t folder, char *prename, list_t *extensions);
+
+/* save dialog */
+int32_t osToolsFileDialogSave(ost_file_dialog_multiselect_t multiselect, ost_file_dialog_folder_t folder, char *prename, list_t *extensions);
+
+/* open dialog */
+int32_t osToolsFileDialogOpen(ost_file_dialog_multiselect_t multiselect, ost_file_dialog_folder_t folder, char *prename, list_t *extensions);
 
 uint8_t *osToolsMapFile(char *filename, uint32_t *sizeOutput);
 
 int32_t osToolsUnmapFile(uint8_t *data);
+
+/* lists files in a directory (does NOT list folders), format [name, size, name, size, ...] */
+list_t *osToolsListFiles(char *directory);
+
+/* non-recursive, lists folders in a directory, format [name, name, ...] */
+list_t *osToolsListFolders(char *directory);
+
+/* lists files and folders in a directory, format [name, size, name, size, ...] (size is -1 for folders) */
+list_t *osToolsListFilesAndFolders(char *directory);
+
+/* create a folder */
+void osToolsCreateFolder(char *folder);
+
+/* delete a folder (and all files and subfolders) */
+void osToolsDeleteFolder(char *folder);
 
 #endif /* OS_TOOLS_H */
