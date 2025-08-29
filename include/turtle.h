@@ -50,7 +50,8 @@ typedef struct {
     double x; // x and y position of the turtle
     double y;
     #ifdef TURTLE_ENABLE_TEXTURES
-    bufferList_t *bufferList;
+    bufferList_t *bufferList; // resizable list to donate to GPU
+    list_t *textureList; // list of texture filenames (set to "" for unloaded)
     #endif /* TURTLE_ENABLE_TEXTURES */
     list_t *penPos; // a list of where to draw
     uint64_t penHash; // the penPos list is hashed and this hash is used to determine if any changes occured between frames
@@ -151,9 +152,17 @@ void turtleGoto(double x, double y);
 /* function to add a vertex to the turtle.bufferList */
 void addVertex(double x, double y, double r, double g, double b, double a, double tx, double ty, double useTexture);
 
-void turtleTextureRender(int32_t textureCode, double x1, double y1, double x2, double y2, double r, double g, double b, double rot, double xcenter, double ycenter, double xfact, double yfact);
+typedef int32_t turtle_texture_t;
 
-void turtleTexture(int32_t textureCode, double x1, double y1, double x2, double y2, double rot, double r, double g, double b);
+/* load a png, jpg, or bmp to GPU memory as a texture */
+turtle_texture_t turtleTextureLoad(char *filename);
+
+/* remove a texture from GPU memory */
+int32_t turtleTextureUnload(turtle_texture_t textureCode);
+
+void turtleTextureRender(turtle_texture_t texture, double x1, double y1, double x2, double y2, double r, double g, double b, double rot, double xcenter, double ycenter, double xfact, double yfact);
+
+void turtleTexture(turtle_texture_t texture, double x1, double y1, double x2, double y2, double rot, double r, double g, double b);
 #endif /* TURTLE_ENABLE_TEXTURES */
 
 /* draws a circle at the specified x and y (coordinates) */

@@ -289,7 +289,8 @@ typedef struct {
     double x; // x and y position of the turtle
     double y;
     #ifdef TURTLE_ENABLE_TEXTURES
-    bufferList_t *bufferList;
+    bufferList_t *bufferList; // resizable list to donate to GPU
+    list_t *textureList; // list of texture filenames (set to "" for unloaded)
     #endif /* TURTLE_ENABLE_TEXTURES */
     list_t *penPos; // a list of where to draw
     uint64_t penHash; // the penPos list is hashed and this hash is used to determine if any changes occured between frames
@@ -390,9 +391,17 @@ void turtleGoto(double x, double y);
 /* function to add a vertex to the turtle.bufferList */
 void addVertex(double x, double y, double r, double g, double b, double a, double tx, double ty, double useTexture);
 
-void turtleTextureRender(int32_t textureCode, double x1, double y1, double x2, double y2, double r, double g, double b, double rot, double xcenter, double ycenter, double xfact, double yfact);
+typedef int32_t turtle_texture_t;
 
-void turtleTexture(int32_t textureCode, double x1, double y1, double x2, double y2, double rot, double r, double g, double b);
+/* load a png, jpg, or bmp to GPU memory as a texture */
+turtle_texture_t turtleTextureLoad(char *filename);
+
+/* remove a texture from GPU memory */
+int32_t turtleTextureUnload(turtle_texture_t textureCode);
+
+void turtleTextureRender(turtle_texture_t texture, double x1, double y1, double x2, double y2, double r, double g, double b, double rot, double xcenter, double ycenter, double xfact, double yfact);
+
+void turtleTexture(turtle_texture_t texture, double x1, double y1, double x2, double y2, double rot, double r, double g, double b);
 #endif /* TURTLE_ENABLE_TEXTURES */
 
 /* draws a circle at the specified x and y (coordinates) */
@@ -1060,9 +1069,6 @@ https://patorjk.com/software/taag/#p=display&f=ANSI%20Shadow
 
 #ifndef OS_TOOLS_H
 #define OS_TOOLS_H
-
-// #define OS_WINDOWS
-// #define OS_LINUX
 
 
 /* required forward declarations (for packaging) */
@@ -10427,6 +10433,7 @@ void turtleInit(GLFWwindow* window, int32_t minX, int32_t minY, int32_t maxX, in
     glDeleteShader(fragmentShader);
     glDeleteProgram(shaderProgram);
     turtle.bufferList = bufferList_init();
+    turtle.textureList = list_init();
     #endif /* TURTLE_ENABLE_TEXTURES */
     glfwMakeContextCurrent(window); // various glfw things
     glEnable(GL_ALPHA);
@@ -10921,6 +10928,31 @@ void turtleTextureRender(int32_t textureCode, double x1, double y1, double x2, d
     addVertex(x2 * xfact + xcenter, y2 * yfact + ycenter, r, g, b, 1.0, 1, 1, textureCode);
 }
 
+turtle_texture_t turtleTextureLoad(char *filename) {
+    /* determine encoding */
+    /* load image */
+    /* load to GPU */
+    turtle_texture_t textureCode = 0;
+    /* update list */
+    while (textureCode >= turtle.textureList -> length) {
+        list_append(turtle.textureList, (unitype) "", 's');
+    }
+    free(turtle.textureList -> data[textureCode].s);
+    turtle.textureList -> data[textureCode].s = strdup(filename);
+    return textureCode;
+}
+
+int32_t turtleTextureUnload(turtle_texture_t textureCode) {
+    /* update list */
+    if (textureCode >= turtle.textureList -> length) {
+        return -1;
+    }
+    free(turtle.textureList -> data[textureCode].s);
+    turtle.textureList -> data[textureCode].s = strdup("");
+    /* remove from GPU */
+    return 0;
+}
+
 // adds a (blit) rectangular texture
 void turtleTexture(int32_t textureCode, double x1, double y1, double x2, double y2, double rot, double r, double g, double b) {
     list_append(turtle.penPos, (unitype) x1, 'd');
@@ -11348,7 +11380,7 @@ void turtleUpdate() {
     turtle.bounds[1] = turtle.centerAndScale[1] - turtle.centerAndScale[3] / turtle.screenbounds[1];
     turtle.bounds[3] = turtle.centerAndScale[1] + turtle.centerAndScale[3] / turtle.screenbounds[1];
     if (changed) {
-        turtle.bufferList -> length = 0;
+        turtle.bufferList -> length = 0; // don't bother freeing the memory
         double xfact = (turtle.bounds[2] - turtle.bounds[0]) / 2;
         double yfact = (turtle.bounds[3] - turtle.bounds[1]) / 2;
         xfact = 1 / xfact;

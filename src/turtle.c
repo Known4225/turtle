@@ -19,6 +19,7 @@ keyboard and mouse presses
 turtle_t turtle;
 
 #ifdef TURTLE_ENABLE_TEXTURES
+#define STB_IMAGE_IMPLEMENTATION
 /* shader code */
 const char *turtleVertexShaderSource =
 "#version 330 core\n"
@@ -117,6 +118,7 @@ void turtleInit(GLFWwindow* window, int32_t minX, int32_t minY, int32_t maxX, in
     glDeleteShader(fragmentShader);
     glDeleteProgram(shaderProgram);
     turtle.bufferList = bufferList_init();
+    turtle.textureList = list_init();
     #endif /* TURTLE_ENABLE_TEXTURES */
     glfwMakeContextCurrent(window); // various glfw things
     glEnable(GL_ALPHA);
@@ -611,6 +613,31 @@ void turtleTextureRender(int32_t textureCode, double x1, double y1, double x2, d
     addVertex(x2 * xfact + xcenter, y2 * yfact + ycenter, r, g, b, 1.0, 1, 1, textureCode);
 }
 
+turtle_texture_t turtleTextureLoad(char *filename) {
+    /* determine encoding */
+    /* load image */
+    /* load to GPU */
+    turtle_texture_t textureCode = 0;
+    /* update list */
+    while (textureCode >= turtle.textureList -> length) {
+        list_append(turtle.textureList, (unitype) "", 's');
+    }
+    free(turtle.textureList -> data[textureCode].s);
+    turtle.textureList -> data[textureCode].s = strdup(filename);
+    return textureCode;
+}
+
+int32_t turtleTextureUnload(turtle_texture_t textureCode) {
+    /* update list */
+    if (textureCode >= turtle.textureList -> length) {
+        return -1;
+    }
+    free(turtle.textureList -> data[textureCode].s);
+    turtle.textureList -> data[textureCode].s = strdup("");
+    /* remove from GPU */
+    return 0;
+}
+
 // adds a (blit) rectangular texture
 void turtleTexture(int32_t textureCode, double x1, double y1, double x2, double y2, double rot, double r, double g, double b) {
     list_append(turtle.penPos, (unitype) x1, 'd');
@@ -878,7 +905,7 @@ void turtleUpdate() {
     turtle.bounds[3] = turtle.centerAndScale[1] + turtle.centerAndScale[3] / turtle.screenbounds[1];
     if (changed) {
         #ifdef TURTLE_ENABLE_TEXTURES
-        turtle.bufferList -> length = 0;
+        turtle.bufferList -> length = 0; // don't bother freeing the memory
         #endif /* TURTLE_ENABLE_TEXTURES */
         double xfact = 1.0 / ((turtle.bounds[2] - turtle.bounds[0]) / 2);
         double yfact = 1.0 / ((turtle.bounds[3] - turtle.bounds[1]) / 2);
@@ -1007,130 +1034,6 @@ void turtleUpdate() {
         }
     }
 }
-
-#ifdef NEVERUSEDAAAAAAAAAAAAAAA
-/* draws the turtle's path on the screen */
-void turtleUpdate() {
-    // used to have a feature that only redrew the screen if there have been any changes from last frame, but it has been removed.
-    // opted to redraw every frame and not list_copy, an alternative is hashing the penPos list. An interesting idea for sure... for another time
-    char changed = 0;
-    uint32_t len = turtle.penPos -> length;
-    unitype *ren = turtle.penPos -> data;
-    int8_t *renType = turtle.penPos -> type;
-    unsigned long long oldHash = turtle.penHash;
-    turtle.penHash = 0; // I don't use this but it's an idea: https://stackoverflow.com/questions/57455444/very-low-collision-non-cryptographic-hashing-function
-    for (uint32_t i = 0; i < len; i++) {
-        turtle.penHash += (unsigned long long) turtle.penPos -> data[i].p; // simple addition hash. I know not technically safe since i cast all sizes to 8 byte, but it should still work
-    }
-    // printf("%lld %lld\n", oldHash, turtle.penHash);
-    if (len != turtle.lastLength || oldHash != turtle.penHash) {
-        changed = 1;
-        turtle.lastLength = len;
-    }
-    glfwGetWindowSize(turtle.window, &turtle.screenbounds[0], &turtle.screenbounds[1]);
-    if (turtle.screenbounds[0] != turtle.lastscreenbounds[0] || turtle.screenbounds[1] != turtle.lastscreenbounds[1]) {
-        changed = 1;
-        turtle.lastscreenbounds[0] = turtle.screenbounds[0];
-        turtle.lastscreenbounds[1] = turtle.screenbounds[1];
-    }
-    turtle.bounds[0] = turtle.centerAndScale[0] - turtle.centerAndScale[2] / turtle.screenbounds[0];
-    turtle.bounds[2] = turtle.centerAndScale[0] + turtle.centerAndScale[2] / turtle.screenbounds[0];
-    turtle.bounds[1] = turtle.centerAndScale[1] - turtle.centerAndScale[3] / turtle.screenbounds[1];
-    turtle.bounds[3] = turtle.centerAndScale[1] + turtle.centerAndScale[3] / turtle.screenbounds[1];
-    if (changed) {
-        turtle.bufferList -> length = 0;
-        double xfact = (turtle.bounds[2] - turtle.bounds[0]) / 2;
-        double yfact = (turtle.bounds[3] - turtle.bounds[1]) / 2;
-        xfact = 1 / xfact;
-        yfact = 1 / yfact;
-        double lastSize = -1;
-        double lastPrez = -1;
-        double precomputedLog = 5;
-        for (int32_t i = 0; i < (int32_t) len; i += 9) {
-            if (renType[i] == 'd') {
-                switch (ren[i + 7].h) {
-                    case 0:
-                    if (!(lastSize == ren[i + 2].d) || !(lastPrez != ren[i + 8].d))
-                        precomputedLog = ren[i + 8].d * log(2.71 + ren[i + 2].d);
-                    lastSize = ren[i + 2].d;
-                    lastPrez = ren[i + 8].d;
-                    turtleCircleRender(ren[i].d, ren[i + 1].d, ren[i + 2].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xfact, yfact, precomputedLog);
-                    break;
-                    case 1:
-                    turtleSquareRender(ren[i].d - ren[i + 2].d, ren[i + 1].d - ren[i + 2].d, ren[i].d + ren[i + 2].d, ren[i + 1].d + ren[i + 2].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xfact, yfact);
-                    break;
-                    case 2:
-                    turtleTriangleRender(ren[i].d - ren[i + 2].d, ren[i + 1].d - ren[i + 2].d, ren[i].d + ren[i + 2].d, ren[i + 1].d - ren[i + 2].d, ren[i].d, ren[i + 1].d + ren[i + 2].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xfact, yfact);
-                    break;
-                    case 5:
-                    if (i - 9 < 0 || renType[i - 9] == 'c') {
-                        if (!(lastSize == ren[i + 2].d) || !(lastPrez != ren[i + 8].d))
-                            precomputedLog = ren[i + 8].d * log(2.71 + ren[i + 2].d);
-                        lastSize = ren[i + 2].d;
-                        lastPrez = ren[i + 8].d;
-                        turtleCircleRender(ren[i].d, ren[i + 1].d, ren[i + 2].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xfact, yfact, precomputedLog);
-                    }
-                    break;
-                }
-                if (i + 9 < (int32_t) len && renType[i + 9] == 'd' && ren[i + 7].h < 64 && (ren[i + 7].h == 4 || ren[i + 7].h == 5 || (fabs(ren[i].d - ren[i + 9].d) > ren[i + 2].d / 2 || fabs(ren[i + 1].d - ren[i + 10].d) > ren[i + 2].d / 2))) { // tests for next point continuity and also ensures that the next point is at sufficiently different coordinates
-                    double dir = atan((ren[i + 9].d - ren[i].d) / (ren[i + 1].d - ren[i + 10].d));
-                    double sinn = sin(dir + M_PI / 2);
-                    double coss = cos(dir + M_PI / 2);
-                    turtleQuadRender(ren[i].d + ren[i + 2].d * sinn, ren[i + 1].d - ren[i + 2].d * coss, ren[i + 9].d + ren[i + 2].d * sinn, ren[i + 10].d - ren[i + 2].d * coss, ren[i + 9].d - ren[i + 2].d * sinn, ren[i + 10].d + ren[i + 2].d * coss, ren[i].d - ren[i + 2].d * sinn, ren[i + 1].d + ren[i + 2].d * coss, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xfact, yfact);
-                    if ((ren[i + 7].h == 4 || ren[i + 7].h == 5) && i + 18 < (int32_t) len && renType[i + 18] == 'd') {
-                        double dir2 = atan((ren[i + 18].d - ren[i + 9].d) / (ren[i + 10].d - ren[i + 19].d));
-                        double sinn2 = sin(dir2 + M_PI / 2);
-                        double coss2 = cos(dir2 + M_PI / 2);
-                        turtleTriangleRender(ren[i + 9].d + ren[i + 2].d * sinn, ren[i + 10].d - ren[i + 2].d * coss, ren[i + 9].d - ren[i + 2].d * sinn, ren[i + 10].d + ren[i + 2].d * coss, ren[i + 9].d + ren[i + 11].d * sinn2, ren[i + 10].d - ren[i + 11].d * coss2, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xfact, yfact); // in a perfect world the program would know which one of these triangles to render (to blend the segments)
-                        turtleTriangleRender(ren[i + 9].d + ren[i + 2].d * sinn, ren[i + 10].d - ren[i + 2].d * coss, ren[i + 9].d - ren[i + 2].d * sinn, ren[i + 10].d + ren[i + 2].d * coss, ren[i + 9].d - ren[i + 11].d * sinn2, ren[i + 10].d + ren[i + 11].d * coss2, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xfact, yfact); // however we live in a world where i am bad at math, so it just renders both no matter what (one has no effect)
-                    }
-                } else {
-                    if (ren[i + 7].h == 4 && i > 8 && renType[i - 8] == 'c') {
-                        if (!(lastSize == ren[i + 2].d) || !(lastPrez != ren[i + 8].d))
-                            precomputedLog = ren[i + 8].d * log(2.71 + ren[i + 2].d);
-                        lastSize = ren[i + 2].d;
-                        lastPrez = ren[i + 8].d;
-                        turtleCircleRender(ren[i].d, ren[i + 1].d, ren[i + 2].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xfact, yfact, precomputedLog);
-                    }
-                    if (ren[i + 7].h == 5 && i > 8) {
-                        if (!(lastSize == ren[i + 2].d) || !(lastPrez != ren[i + 8].d))
-                            precomputedLog = ren[i + 8].d * log(2.71 + ren[i + 2].d);
-                        lastSize = ren[i + 2].d;
-                        lastPrez = ren[i + 8].d;
-                        turtleCircleRender(ren[i].d, ren[i + 1].d, ren[i + 2].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xfact, yfact, precomputedLog);
-                    }
-                }
-                if (ren[i + 7].h == 64) { // blit circle
-
-                }
-                if (ren[i + 7].h == 66) { // blit triangle
-                    turtleTriangleRender(ren[i].d, ren[i + 1].d, ren[i + 2].d, ren[i + 8].d, ren[i + 9].d, ren[i + 10].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xfact, yfact);
-                    i += 9;
-                }
-                if (ren[i + 7].h == 67) { // blit quad
-                    turtleQuadRender(ren[i].d, ren[i + 1].d, ren[i + 2].d, ren[i + 8].d, ren[i + 9].d, ren[i + 10].d, ren[i + 11].d, ren[i + 17].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xfact, yfact);
-                    i += 9;
-                }
-                if (ren[i + 7].h >= 128) { // blit texture (rectangle)
-                    turtleTextureRender(ren[i + 7].h - 128, ren[i].d, ren[i + 1].d, ren[i + 2].d, ren[i + 3].d, ren[i + 5].d, ren[i + 6].d, ren[i + 8].d, ren[i + 4].d / 57.2958, xfact, yfact);
-                }
-            }
-        }
-        // printf("len: %d\n", turtle.bufferList -> length / BUFFER_OBJECT_SIZE); // print number of triangles
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(float) * turtle.bufferList -> length, turtle.bufferList -> data, GL_STATIC_DRAW);
-        glDrawArrays(GL_TRIANGLES, 0, turtle.bufferList -> length / BUFFER_OBJECT_SIZE);
-        glfwSwapBuffers(turtle.window);
-    }
-    glfwPollEvents();
-    if (glfwWindowShouldClose(turtle.window)) {
-        turtle.close = 1;
-        if (turtle.popupClose) {
-            glfwTerminate();
-        }
-    }
-}
-#endif /* NEVERUSEDAAAAAAAAAAAAAAA */
 
 /* keeps the window open while doing nothing else (from python turtleMainLoop()) */
 void turtleMainLoop() {
