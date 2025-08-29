@@ -11,8 +11,8 @@ https://patorjk.com/software/taag/#p=display&f=ANSI%20Shadow
 #ifndef OS_TOOLS_H
 #define OS_TOOLS_H
 
-#define OS_WINDOWS
-#define OS_LINUX
+// #define OS_WINDOWS
+// #define OS_LINUX
 
 #include "list.h"
 #include "glad.h"

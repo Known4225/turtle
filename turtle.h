@@ -14894,6 +14894,14 @@ void osToolsFileDialogSetGlobalExtensions(list_t *extensions) {
     list_copy(osToolsFileDialog.globalExtensions, extensions);
 }
 
+int32_t osToolsFileDialogSave(ost_file_dialog_multiselect_t multiselect, ost_file_dialog_folder_t folder, char *prename, list_t *extensions) {
+    return osToolsFileDialogPrompt(OSTOOLS_FILE_DIALOG_SAVE, multiselect, folder, prename, extensions);
+}
+
+int32_t osToolsFileDialogOpen(ost_file_dialog_multiselect_t multiselect, ost_file_dialog_folder_t folder, char *prename, list_t *extensions) {
+    return osToolsFileDialogPrompt(OSTOOLS_FILE_DIALOG_OPEN, multiselect, folder, prename, extensions);
+}
+
 #ifdef OS_WINDOWS
 
 int32_t osToolsInit(char argv0[], GLFWwindow *window) {
@@ -15041,14 +15049,6 @@ int32_t osToolsFileDialogPrompt(ost_file_dialog_save_t openOrSave, ost_file_dial
     fileDialog -> lpVtbl -> Release(fileDialog);
     CoUninitialize();
     return 0;
-}
-
-int32_t osToolsFileDialogSave(ost_file_dialog_multiselect_t multiselect, ost_file_dialog_folder_t folder, char *prename, list_t *extensions) {
-    return osToolsFileDialogPrompt(OSTOOLS_FILE_DIALOG_SAVE, multiselect, folder, prename, extensions);
-}
-
-int32_t osToolsFileDialogOpen(ost_file_dialog_multiselect_t multiselect, ost_file_dialog_folder_t folder, char *prename, list_t *extensions) {
-    return osToolsFileDialogPrompt(OSTOOLS_FILE_DIALOG_OPEN, multiselect, folder, prename, extensions);
 }
 
 uint8_t *osToolsMapFile(char *filename, uint32_t *sizeOutput) {
@@ -15554,7 +15554,9 @@ int32_t osToolsInit(char argv0[], GLFWwindow *window) {
     osToolsIndependentInit(window);
     /* get executable filepath */
     FILE *exStringFile = popen("pwd", "r");
-    fscanf(exStringFile, "%s", osToolsFileDialog.executableFilepath);
+    if (fscanf(exStringFile, "%s", osToolsFileDialog.executableFilepath) == 0) {
+        return -1;
+    }
     strcat(osToolsFileDialog.executableFilepath, "/");
     strcat(osToolsFileDialog.executableFilepath, argv0);
     
@@ -15588,40 +15590,27 @@ int32_t osToolsFileDialogPrompt(ost_file_dialog_save_t openOrSave, ost_file_dial
     strcat(fullCommand, title);
 
     /* configure extensions */
-    if (osToolsFileDialog.numExtensions > 0) {
-        char buildFilter[7 * osToolsFileDialog.numExtensions + 1]; // last space is replaced with ' and followed by \0
-        int32_t j = 0;
-        for (int32_t i = 0; i < osToolsFileDialog.numExtensions; i++) {
-            buildFilter[j] = '*';
-            buildFilter[j + 1] = '.';
-            j += 2;
-            for (uint32_t k = 0; k < strlen(osToolsFileDialog.extensions[i]) && k < 8; k++) {
-                buildFilter[j] = osToolsFileDialog.extensions[i][k];
-                j += 1;
-            }
-            if (i != osToolsFileDialog.numExtensions - 1) { // dont add space if it's the last element
-                buildFilter[j] = ' ';
-                j += 1;
-            }
-        }
-        buildFilter[j] = '\'';
-        buildFilter[j + 1] = '\0';
+    if (extensions == NULL) {
+        extensions = osToolsFileDialog.globalExtensions;
+    }
+    if (extensions -> length > 0) {
         char filterName[35] = " --file-filter='Specified Types | ";
         strcat(fullCommand, filterName);
+    }
+    for (int32_t i = 0; i < extensions -> length; i++) {
+        char buildFilter[strlen(extensions -> data[i].s) + 5];
+        buildFilter[0] = '*';
+        buildFilter[1] = '.';
+        buildFilter[2] = '\0';
+        strcat(buildFilter, extensions -> data[i].s);
+        if (i != extensions -> length - 1) { // dont add space if it's the last element
+            strcat(buildFilter, " ");
+        }
         strcat(fullCommand, buildFilter);
     }
 
     /* execute */
     FILE* filenameStream = popen(fullCommand, "r");
-    // if (fgets(osToolsFileDialog.selectedFilename, 4097, filenameStream) == NULL) { // adds a \n before \0 (?)
-    //     strcpy(osToolsFileDialog.selectedFilename, "null");
-    //     return -1;
-    // }
-    // for (uint32_t i = 0; i < 4096; i++) {
-    //     if (osToolsFileDialog.selectedFilename[i] == '\n') {
-    //         osToolsFileDialog.selectedFilename[i] = '\0'; // replace all newlines with null characters
-    //     }
-    // }
     pclose(filenameStream);
     return 0;
 }
