@@ -1,4 +1,5 @@
 #ifdef TURTLE_ENABLE_TEXTURES
+#define STB_IMAGE_IMPLEMENTATION
 
 /* stb_image - v2.30 - public domain image loader - http://nothings.org/stb
                                   no warranty implied; use at your own risk

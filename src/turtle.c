@@ -119,6 +119,10 @@ void turtleInit(GLFWwindow* window, int32_t minX, int32_t minY, int32_t maxX, in
     glDeleteProgram(shaderProgram);
     turtle.bufferList = bufferList_init();
     turtle.textureList = list_init();
+    list_append(turtle.textureList, (unitype) "null", 's'); // cannot have texture code of 0 because of shader using 0 as the non-texture code
+    /* setup texture parameters */
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGB, 2048, 2048, 100, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL); // 100 textures at 2048x2048
     #endif /* TURTLE_ENABLE_TEXTURES */
     glfwMakeContextCurrent(window); // various glfw things
     glEnable(GL_ALPHA);
@@ -629,14 +633,36 @@ void turtleTextureRenderInternal(turtle_texture_t texture, double x1, double y1,
 turtle_texture_t turtleTextureLoad(char *filename) {
     /* determine encoding */
     /* load image */
-    /* load to GPU */
-    turtle_texture_t texture = 0;
-    /* update list */
-    while (texture >= turtle.textureList -> length) {
-        list_append(turtle.textureList, (unitype) "", 's');
+    int width;
+    int height;
+    int nbChannels;
+    unsigned char *image = stbi_load(filename, &width, &height, &nbChannels, 0);
+    if (image == NULL) {
+        printf("Could not load image %s\n", filename);
+        return -1;
     }
-    free(turtle.textureList -> data[texture].s);
-    turtle.textureList -> data[texture].s = strdup(filename);
+    uint32_t encoding = GL_RGB;
+    if (nbChannels == 4) {
+        encoding = GL_RGBA;
+    }
+    /* find first available texture */
+    turtle_texture_t texture = -1;
+    for (int32_t i = 0; i < turtle.textureList -> length; i++) {
+        if (strcmp(turtle.textureList -> data[i].s, "") == 0) {
+            texture = i;
+            free(turtle.textureList -> data[texture].s);
+            turtle.textureList -> data[texture].s = strdup(filename);
+            break;
+        }
+    }
+    if (texture == -1) {
+        texture = turtle.textureList -> length;
+        list_append(turtle.textureList, (unitype) filename, 's');
+    }
+    /* load to GPU */
+    glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, texture, width, height, 1, encoding, GL_UNSIGNED_BYTE, image);
+    glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
+    stbi_free(image);
     return texture;
 }
 
