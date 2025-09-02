@@ -438,7 +438,7 @@ void turtleGoto(double x, double y) {
 
 #ifndef TURTLE_ENABLE_TEXTURES
 /* draws a circle at the specified x and y (coordinates) */
-void turtleCircleRender(double x, double y, double rad, double r, double g, double b, double a, double xcenter, double ycenter, double xfact, double yfact, double prez) {
+void turtleCircleRenderInternal(double x, double y, double rad, double r, double g, double b, double a, double xcenter, double ycenter, double xfact, double yfact, double prez) {
     int8_t colorChange = 0;
     if (r != turtle.currentColor[0]) {colorChange = 1;}
     if (g != turtle.currentColor[1]) {colorChange = 1;}
@@ -459,7 +459,7 @@ void turtleCircleRender(double x, double y, double rad, double r, double g, doub
 }
 
 /* draws a square */
-void turtleSquareRender(double x1, double y1, double x2, double y2, double r, double g, double b, double a, double xcenter, double ycenter, double xfact, double yfact) {
+void turtleSquareRenderInternal(double x1, double y1, double x2, double y2, double r, double g, double b, double a, double xcenter, double ycenter, double xfact, double yfact) {
     int8_t colorChange = 0;
     if (r != turtle.currentColor[0]) {colorChange = 1;}
     if (g != turtle.currentColor[1]) {colorChange = 1;}
@@ -481,7 +481,7 @@ void turtleSquareRender(double x1, double y1, double x2, double y2, double r, do
 }
 
 /* draws a triangle */
-void turtleTriangleRender(double x1, double y1, double x2, double y2, double x3, double y3, double r, double g, double b, double a, double xcenter, double ycenter, double xfact, double yfact) {
+void turtleTriangleRenderInternal(double x1, double y1, double x2, double y2, double x3, double y3, double r, double g, double b, double a, double xcenter, double ycenter, double xfact, double yfact) {
     int8_t colorChange = 0;
     if (r != turtle.currentColor[0]) {colorChange = 1;}
     if (g != turtle.currentColor[1]) {colorChange = 1;}
@@ -502,7 +502,7 @@ void turtleTriangleRender(double x1, double y1, double x2, double y2, double x3,
 }
 
 /* draws a quadrilateral */
-void turtleQuadRender(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, double r, double g, double b, double a, double xcenter, double ycenter, double xfact, double yfact) {
+void turtleQuadRenderInternal(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, double r, double g, double b, double a, double xcenter, double ycenter, double xfact, double yfact) {
     int8_t colorChange = 0;
     if (r != turtle.currentColor[0]) {colorChange = 1;}
     if (g != turtle.currentColor[1]) {colorChange = 1;}
@@ -522,6 +522,19 @@ void turtleQuadRender(double x1, double y1, double x2, double y2, double x3, dou
     glVertex2d(x4 * xfact + xcenter, y4 * yfact + ycenter);
     glEnd();
 }
+
+turtle_texture_t turtleTextureLoad(char *filename) {
+    printf("WARNING: TURTLE_ENABLE_TEXTURES not enabled - textures will not render\n");
+    return -1;
+}
+
+int32_t turtleTextureUnload(turtle_texture_t texture) {
+    return -1;
+}
+
+void turtleTexture(turtle_texture_t texture, double x1, double y1, double x2, double y2, double rot, double r, double g, double b) {
+    return;
+}
 #endif /* TURTLE_ENABLE_TEXTURES */
 
 #ifdef TURTLE_ENABLE_TEXTURES
@@ -539,7 +552,7 @@ void addVertex(double x, double y, double r, double g, double b, double a, doubl
 }
 
 /* draws a circle at the specified x and y (coordinates) */
-void turtleCircleRender(double x, double y, double rad, double r, double g, double b, double a, double xcenter, double ycenter, double xfact, double yfact, double prez) {
+void turtleCircleRenderInternal(double x, double y, double rad, double r, double g, double b, double a, double xcenter, double ycenter, double xfact, double yfact, double prez) {
     int32_t p = (int32_t) prez;
     if (p > 0) {
         // p--;
@@ -558,7 +571,7 @@ void turtleCircleRender(double x, double y, double rad, double r, double g, doub
 }
 
 /* draws a square */
-void turtleSquareRender(double x1, double y1, double x2, double y2, double r, double g, double b, double a, double xcenter, double ycenter, double xfact, double yfact) {
+void turtleSquareRenderInternal(double x1, double y1, double x2, double y2, double r, double g, double b, double a, double xcenter, double ycenter, double xfact, double yfact) {
     // float square[24] = {x1 * xfact, y1 * yfact, r, g, b, a, x2 * xfact, y1 * yfact, r, g, b, a, x2 * xfact, y2 * yfact, r, g, b, a, x1 * xfact, y2 * yfact, r, g, b, a};
     addVertex(x1 * xfact + xcenter, y1 * yfact + ycenter, r, g, b, a, 0, 0, 0);
     addVertex(x2 * xfact + xcenter, y1 * yfact + ycenter, r, g, b, a, 0, 0, 0);
@@ -569,7 +582,7 @@ void turtleSquareRender(double x1, double y1, double x2, double y2, double r, do
 }
 
 /* draws a triangle */
-void turtleTriangleRender(double x1, double y1, double x2, double y2, double x3, double y3, double r, double g, double b, double a, double xcenter, double ycenter, double xfact, double yfact) {
+void turtleTriangleRenderInternal(double x1, double y1, double x2, double y2, double x3, double y3, double r, double g, double b, double a, double xcenter, double ycenter, double xfact, double yfact) {
     // float triangle[18] = {x1 * xfact, y1 * yfact, r, g, b, a, x2 * xfact, y2 * yfact, r, g, b, a, x3 * xfact, y3 * yfact, r, g, b, a};
     addVertex(x1 * xfact + xcenter, y1 * yfact + ycenter, r, g, b, a, 0, 0, 0);
     addVertex(x2 * xfact + xcenter, y2 * yfact + ycenter, r, g, b, a, 0, 0, 0);
@@ -577,7 +590,7 @@ void turtleTriangleRender(double x1, double y1, double x2, double y2, double x3,
 }
 
 /* draws a quadrilateral */
-void turtleQuadRender(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, double r, double g, double b, double a, double xcenter, double ycenter, double xfact, double yfact) {
+void turtleQuadRenderInternal(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, double r, double g, double b, double a, double xcenter, double ycenter, double xfact, double yfact) {
     addVertex(x1 * xfact + xcenter, y1 * yfact + ycenter, r, g, b, a, 0, 0, 0);
     addVertex(x2 * xfact + xcenter, y2 * yfact + ycenter, r, g, b, a, 0, 0, 0);
     addVertex(x3 * xfact + xcenter, y3 * yfact + ycenter, r, g, b, a, 0, 0, 0);
@@ -586,7 +599,7 @@ void turtleQuadRender(double x1, double y1, double x2, double y2, double x3, dou
     addVertex(x4 * xfact + xcenter, y4 * yfact + ycenter, r, g, b, a, 0, 0, 0);
 }
 
-void turtleTextureRender(int32_t textureCode, double x1, double y1, double x2, double y2, double r, double g, double b, double rot, double xcenter, double ycenter, double xfact, double yfact) {
+void turtleTextureRenderInternal(turtle_texture_t texture, double x1, double y1, double x2, double y2, double r, double g, double b, double rot, double xcenter, double ycenter, double xfact, double yfact) {
     rot += M_PI; // messed up somewhere and this is the simplest way to fix it (rotate 180)
     /* do the rotation math here - rotate on center */
     double avgX = (x1 + x2) / 2;
@@ -605,41 +618,40 @@ void turtleTextureRender(int32_t textureCode, double x1, double y1, double x2, d
     double y3 = avgY + x2Displace * cosRot + y1Displace * sinRot;
     double x4 = avgX + x1Displace * sinRot - y2Displace * cosRot;
     double y4 = avgY + x1Displace * cosRot + y2Displace * sinRot;
-    addVertex(x1 * xfact + xcenter, y1 * yfact + ycenter, r, g, b, 1.0, 0, 0, textureCode);
-    addVertex(x3 * xfact + xcenter, y3 * yfact + ycenter, r, g, b, 1.0, 0, 1, textureCode);
-    addVertex(x2 * xfact + xcenter, y2 * yfact + ycenter, r, g, b, 1.0, 1, 1, textureCode);
-    addVertex(x1 * xfact + xcenter, y1 * yfact + ycenter, r, g, b, 1.0, 0, 0, textureCode);
-    addVertex(x4 * xfact + xcenter, y4 * yfact + ycenter, r, g, b, 1.0, 1, 0, textureCode);
-    addVertex(x2 * xfact + xcenter, y2 * yfact + ycenter, r, g, b, 1.0, 1, 1, textureCode);
+    addVertex(x1 * xfact + xcenter, y1 * yfact + ycenter, r, g, b, 1.0, 0, 0, texture);
+    addVertex(x3 * xfact + xcenter, y3 * yfact + ycenter, r, g, b, 1.0, 0, 1, texture);
+    addVertex(x2 * xfact + xcenter, y2 * yfact + ycenter, r, g, b, 1.0, 1, 1, texture);
+    addVertex(x1 * xfact + xcenter, y1 * yfact + ycenter, r, g, b, 1.0, 0, 0, texture);
+    addVertex(x4 * xfact + xcenter, y4 * yfact + ycenter, r, g, b, 1.0, 1, 0, texture);
+    addVertex(x2 * xfact + xcenter, y2 * yfact + ycenter, r, g, b, 1.0, 1, 1, texture);
 }
 
 turtle_texture_t turtleTextureLoad(char *filename) {
     /* determine encoding */
     /* load image */
     /* load to GPU */
-    turtle_texture_t textureCode = 0;
+    turtle_texture_t texture = 0;
     /* update list */
-    while (textureCode >= turtle.textureList -> length) {
+    while (texture >= turtle.textureList -> length) {
         list_append(turtle.textureList, (unitype) "", 's');
     }
-    free(turtle.textureList -> data[textureCode].s);
-    turtle.textureList -> data[textureCode].s = strdup(filename);
-    return textureCode;
+    free(turtle.textureList -> data[texture].s);
+    turtle.textureList -> data[texture].s = strdup(filename);
+    return texture;
 }
 
-int32_t turtleTextureUnload(turtle_texture_t textureCode) {
+int32_t turtleTextureUnload(turtle_texture_t texture) {
     /* update list */
-    if (textureCode >= turtle.textureList -> length) {
+    if (texture >= turtle.textureList -> length || texture < 0) {
         return -1;
     }
-    free(turtle.textureList -> data[textureCode].s);
-    turtle.textureList -> data[textureCode].s = strdup("");
+    free(turtle.textureList -> data[texture].s);
+    turtle.textureList -> data[texture].s = strdup("");
     /* remove from GPU */
     return 0;
 }
 
-// adds a (blit) rectangular texture
-void turtleTexture(int32_t textureCode, double x1, double y1, double x2, double y2, double rot, double r, double g, double b) {
+void turtleTexture(turtle_texture_t texture, double x1, double y1, double x2, double y2, double rot, double r, double g, double b) {
     list_append(turtle.penPos, (unitype) x1, 'd');
     list_append(turtle.penPos, (unitype) y1, 'd');
     list_append(turtle.penPos, (unitype) x2, 'd');
@@ -647,7 +659,7 @@ void turtleTexture(int32_t textureCode, double x1, double y1, double x2, double 
     list_append(turtle.penPos, (unitype) rot, 'd'); // rotation (degrees, bearing)
     list_append(turtle.penPos, (unitype) (r / 255), 'd');
     list_append(turtle.penPos, (unitype) (g / 255), 'd');
-    list_append(turtle.penPos, (unitype) (128 + textureCode), 'h'); // blit texture signifier + texture code - limited to 32639 textures
+    list_append(turtle.penPos, (unitype) (128 + texture), 'h'); // blit texture signifier + texture code - limited to 32639 textures
     list_append(turtle.penPos, (unitype) (b / 255), 'd');
 }
 #endif /* TURTLE_ENABLE_TEXTURES */
@@ -887,7 +899,7 @@ void turtleUpdate() {
     uint64_t oldHash = turtle.penHash;
     turtle.penHash = 0; // I don't use this but it's an idea: https://stackoverflow.com/questions/57455444/very-low-collision-non-cryptographic-hashing-function
     for (uint32_t i = 0; i < len; i++) {
-        turtle.penHash += (uint64_t) turtle.penPos -> data[i].p; // simple addition hash. I know not technically safe since i cast all sizes to 8 byte, but it should still work
+        turtle.penHash += turtle.penPos -> data[i].l; // simple addition hash. I know not technically safe since i cast all sizes to 8 byte, but it should still work
     }
     if (len != turtle.lastLength || oldHash != turtle.penHash) {
         changed = 1;
@@ -924,13 +936,13 @@ void turtleUpdate() {
                     }
                     lastSize = ren[i + 2].d;
                     lastPrez = ren[i + 8].d;
-                    turtleCircleRender(ren[i].d, ren[i + 1].d, ren[i + 2].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xcenter, ycenter, xfact, yfact, precomputedLog);
+                    turtleCircleRenderInternal(ren[i].d, ren[i + 1].d, ren[i + 2].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xcenter, ycenter, xfact, yfact, precomputedLog);
                 break;
                 case 1:
-                    turtleSquareRender(ren[i].d - ren[i + 2].d, ren[i + 1].d - ren[i + 2].d, ren[i].d + ren[i + 2].d, ren[i + 1].d + ren[i + 2].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xcenter, ycenter, xfact, yfact);
+                    turtleSquareRenderInternal(ren[i].d - ren[i + 2].d, ren[i + 1].d - ren[i + 2].d, ren[i].d + ren[i + 2].d, ren[i + 1].d + ren[i + 2].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xcenter, ycenter, xfact, yfact);
                 break;
                 case 2:
-                    turtleTriangleRender(ren[i].d - ren[i + 2].d, ren[i + 1].d - ren[i + 2].d, ren[i].d + ren[i + 2].d, ren[i + 1].d - ren[i + 2].d, ren[i].d, ren[i + 1].d + ren[i + 2].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xcenter, ycenter, xfact, yfact);
+                    turtleTriangleRenderInternal(ren[i].d - ren[i + 2].d, ren[i + 1].d - ren[i + 2].d, ren[i].d + ren[i + 2].d, ren[i + 1].d - ren[i + 2].d, ren[i].d, ren[i + 1].d + ren[i + 2].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xcenter, ycenter, xfact, yfact);
                 break;
                 case 5:
                     if (i - 9 < 0 || renType[i - 9] == 'c') {
@@ -939,7 +951,7 @@ void turtleUpdate() {
                         }
                         lastSize = ren[i + 2].d;
                         lastPrez = ren[i + 8].d;
-                        turtleCircleRender(ren[i].d, ren[i + 1].d, ren[i + 2].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xcenter, ycenter, xfact, yfact, precomputedLog);
+                        turtleCircleRenderInternal(ren[i].d, ren[i + 1].d, ren[i + 2].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xcenter, ycenter, xfact, yfact, precomputedLog);
                     }
                 break;
                 default:
@@ -949,13 +961,13 @@ void turtleUpdate() {
                     double dir = atan((ren[i + 9].d - ren[i].d) / (ren[i + 1].d - ren[i + 10].d));
                     double sinn = sin(dir + M_PI / 2);
                     double coss = cos(dir + M_PI / 2);
-                    turtleQuadRender(ren[i].d + ren[i + 2].d * sinn, ren[i + 1].d - ren[i + 2].d * coss, ren[i + 9].d + ren[i + 2].d * sinn, ren[i + 10].d - ren[i + 2].d * coss, ren[i + 9].d - ren[i + 2].d * sinn, ren[i + 10].d + ren[i + 2].d * coss, ren[i].d - ren[i + 2].d * sinn, ren[i + 1].d + ren[i + 2].d * coss, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xcenter, ycenter, xfact, yfact);
+                    turtleQuadRenderInternal(ren[i].d + ren[i + 2].d * sinn, ren[i + 1].d - ren[i + 2].d * coss, ren[i + 9].d + ren[i + 2].d * sinn, ren[i + 10].d - ren[i + 2].d * coss, ren[i + 9].d - ren[i + 2].d * sinn, ren[i + 10].d + ren[i + 2].d * coss, ren[i].d - ren[i + 2].d * sinn, ren[i + 1].d + ren[i + 2].d * coss, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xcenter, ycenter, xfact, yfact);
                     if ((ren[i + 7].h == 4 || ren[i + 7].h == 5) && i + 18 < (int32_t) len && renType[i + 18] == 'd') {
                         double dir2 = atan((ren[i + 18].d - ren[i + 9].d) / (ren[i + 10].d - ren[i + 19].d));
                         double sinn2 = sin(dir2 + M_PI / 2);
                         double coss2 = cos(dir2 + M_PI / 2);
-                        turtleTriangleRender(ren[i + 9].d + ren[i + 2].d * sinn, ren[i + 10].d - ren[i + 2].d * coss, ren[i + 9].d - ren[i + 2].d * sinn, ren[i + 10].d + ren[i + 2].d * coss, ren[i + 9].d + ren[i + 11].d * sinn2, ren[i + 10].d - ren[i + 11].d * coss2, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xcenter, ycenter, xfact, yfact); // in a perfect world the program would know which one of these triangles to render (to blend the segments)
-                        turtleTriangleRender(ren[i + 9].d + ren[i + 2].d * sinn, ren[i + 10].d - ren[i + 2].d * coss, ren[i + 9].d - ren[i + 2].d * sinn, ren[i + 10].d + ren[i + 2].d * coss, ren[i + 9].d - ren[i + 11].d * sinn2, ren[i + 10].d + ren[i + 11].d * coss2, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xcenter, ycenter, xfact, yfact); // however we live in a world where i am bad at math, so it just renders both no matter what (one has no effect)
+                        turtleTriangleRenderInternal(ren[i + 9].d + ren[i + 2].d * sinn, ren[i + 10].d - ren[i + 2].d * coss, ren[i + 9].d - ren[i + 2].d * sinn, ren[i + 10].d + ren[i + 2].d * coss, ren[i + 9].d + ren[i + 11].d * sinn2, ren[i + 10].d - ren[i + 11].d * coss2, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xcenter, ycenter, xfact, yfact); // in a perfect world the program would know which one of these triangles to render (to blend the segments)
+                        turtleTriangleRenderInternal(ren[i + 9].d + ren[i + 2].d * sinn, ren[i + 10].d - ren[i + 2].d * coss, ren[i + 9].d - ren[i + 2].d * sinn, ren[i + 10].d + ren[i + 2].d * coss, ren[i + 9].d - ren[i + 11].d * sinn2, ren[i + 10].d + ren[i + 11].d * coss2, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xcenter, ycenter, xfact, yfact); // however we live in a world where i am bad at math, so it just renders both no matter what (one has no effect)
                     }
                 } else {
                     if (ren[i + 7].h == 4 && i > 8 && renType[i - 8] == 'c') {
@@ -964,7 +976,7 @@ void turtleUpdate() {
                         }
                         lastSize = ren[i + 2].d;
                         lastPrez = ren[i + 8].d;
-                        turtleCircleRender(ren[i].d, ren[i + 1].d, ren[i + 2].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xcenter, ycenter, xfact, yfact, precomputedLog);
+                        turtleCircleRenderInternal(ren[i].d, ren[i + 1].d, ren[i + 2].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xcenter, ycenter, xfact, yfact, precomputedLog);
                     }
                     if (ren[i + 7].h == 5 && i > 8) {
                         if (!(lastSize == ren[i + 2].d) || !(lastPrez != ren[i + 8].d)) {
@@ -972,7 +984,7 @@ void turtleUpdate() {
                         }
                         lastSize = ren[i + 2].d;
                         lastPrez = ren[i + 8].d;
-                        turtleCircleRender(ren[i].d, ren[i + 1].d, ren[i + 2].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xcenter, ycenter, xfact, yfact, precomputedLog);
+                        turtleCircleRenderInternal(ren[i].d, ren[i + 1].d, ren[i + 2].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xcenter, ycenter, xfact, yfact, precomputedLog);
                     }
                 }
                 if (ren[i + 7].h == 64) { // blit circle
@@ -981,19 +993,19 @@ void turtleUpdate() {
                     }
                     lastSize = ren[i + 2].d;
                     lastPrez = ren[i + 8].d;
-                    turtleCircleRender(ren[i].d, ren[i + 1].d, ren[i + 2].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xcenter, ycenter, xfact, yfact, precomputedLog);
+                    turtleCircleRenderInternal(ren[i].d, ren[i + 1].d, ren[i + 2].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xcenter, ycenter, xfact, yfact, precomputedLog);
                 }
                 if (ren[i + 7].h == 66) { // blit triangle
-                    turtleTriangleRender(ren[i].d, ren[i + 1].d, ren[i + 2].d, ren[i + 8].d, ren[i + 9].d, ren[i + 10].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xcenter, ycenter, xfact, yfact);
+                    turtleTriangleRenderInternal(ren[i].d, ren[i + 1].d, ren[i + 2].d, ren[i + 8].d, ren[i + 9].d, ren[i + 10].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xcenter, ycenter, xfact, yfact);
                     i += 9;
                 }
                 if (ren[i + 7].h == 67) { // blit quad
-                    turtleQuadRender(ren[i].d, ren[i + 1].d, ren[i + 2].d, ren[i + 8].d, ren[i + 9].d, ren[i + 10].d, ren[i + 11].d, ren[i + 17].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xcenter, ycenter, xfact, yfact);
+                    turtleQuadRenderInternal(ren[i].d, ren[i + 1].d, ren[i + 2].d, ren[i + 8].d, ren[i + 9].d, ren[i + 10].d, ren[i + 11].d, ren[i + 17].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xcenter, ycenter, xfact, yfact);
                     i += 9;
                 }
                 #ifdef TURTLE_ENABLE_TEXTURES
                 if (ren[i + 7].h >= 128) { // blit texture (rectangle)
-                    turtleTextureRender(ren[i + 7].h - 128, ren[i].d, ren[i + 1].d, ren[i + 2].d, ren[i + 3].d, ren[i + 5].d, ren[i + 6].d, ren[i + 8].d, ren[i + 4].d / 57.2958, xcenter, ycenter, xfact, yfact);
+                    turtleTextureRenderInternal(ren[i + 7].h - 128, ren[i].d, ren[i + 1].d, ren[i + 2].d, ren[i + 3].d, ren[i + 5].d, ren[i + 6].d, ren[i + 8].d, ren[i + 4].d / 57.2958, xcenter, ycenter, xfact, yfact);
                 }
                 #endif /* TURTLE_ENABLE_TEXTURES */
                 // if (ren[i + 7].h == 256) { // blit 3D sphere
@@ -1006,7 +1018,7 @@ void turtleUpdate() {
                 //     turtlePerspective(ren[i].d, ren[i + 1].d, ren[i + 2].d, &ren[i].d, &ren[i + 1].d);
                 //     turtlePerspective(ren[i + 8].d, ren[i + 9].d, ren[i + 10].d, &ren[i + 8].d, &ren[i + 9].d);
                 //     turtlePerspective(ren[i + 11].d, ren[i + 12].d, ren[i + 13].d, &ren[i + 11].d, &ren[i + 12].d);
-                //     turtleTriangleRender(ren[i].d, ren[i + 1].d, ren[i + 8].d, ren[i + 9].d, ren[i + 11].d, ren[i + 12].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xcenter, ycenter, xfact, yfact);
+                //     turtleTriangleRenderInternal(ren[i].d, ren[i + 1].d, ren[i + 8].d, ren[i + 9].d, ren[i + 11].d, ren[i + 12].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xcenter, ycenter, xfact, yfact);
                 //     i += 9;
                 // }
                 // if (ren[i + 7].h == 259) { // blit 3D quad

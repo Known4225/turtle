@@ -1,4 +1,3 @@
-#define TURTLE_ENABLE_TEXTURES
 #include "include/turtleTools.h"
 #include "include/osTools.h"
 #include <time.h>
@@ -128,6 +127,7 @@ int main(int argc, char *argv[]) {
     if (columnLike != NULL) {
         list_print(columnLike);
     }
+    turtle_texture_t empvImage = turtleTextureLoad("images/EMPV.png");
 
     uint32_t tps = 120; // ticks per second (locked to fps in this case)
     uint64_t tick = 0; // count number of ticks since application started
@@ -240,6 +240,9 @@ int main(int argc, char *argv[]) {
         turtleTextWriteUnicode((uint8_t *) u8"αβγδεζηθικλμνξοπρσςτυφχψω", scrollbarVarX * -5 + 260, scrollbarVarY * 3.3 - 330, 10, 0);
         turtleTextWriteUnicode((uint8_t *) u8"1234567890!@#$£€₺₽¥₩₹₣฿%^&*()`~-_=+[", scrollbarVarX * -5 + 260, scrollbarVarY * 3.3 - 345, 10, 0);
         turtleTextWriteUnicode((uint8_t *) u8"{]}\\|;:‘'’“\"”,<.>/?½¨", scrollbarVarX * -5 + 260, scrollbarVarY * 3.3 - 360, 10, 0);
+        
+        /* draw texture */
+        turtleTexture(empvImage, scrollbarVarX * -5 + 400, scrollbarVarY * 3.3, scrollbarVarX * -5 + 500, scrollbarVarY * 3.3 - 100, 0, 255, 255, 255);
 
         // turtlePenColor(0, 0, 0);
         // turtle3DTriangle(-5, 0, 10, 5, 0, 10, 0, 5, 10);

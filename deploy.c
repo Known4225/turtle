@@ -18,6 +18,7 @@ const char sourceMacro[] = "TURTLE_IMPLEMENTATION"; // this macro enables all so
 const char headerFiles[][128] = {
     "include/list.h",
     "include/bufferList.h",
+    "include/stb_image.h",
     "include/turtle.h",
     "include/turtleText.h",
     "include/turtleTools.h",
