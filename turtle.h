@@ -34194,7 +34194,8 @@ int32_t osToolsInit(char argv0[], GLFWwindow *window) {
 }
 
 int32_t osToolsFileDialogPrompt(ost_file_dialog_save_t openOrSave, ost_file_dialog_multiselect_t multiselect, ost_file_dialog_folder_t folder, char *prename, list_t *extensions) {
-    int32_t totalMemory = 23 + 13 + strlen(prename) + 15 + 34 + 14 + 1; // 23 for zenity --file-selection, 13 for --filename=', prename, 15 for --title='Open', 34 for --file-filter='Specified Types | , added per extension, 14 for title, 1 for \0
+    printf("start file\n");
+    int32_t totalMemory = 23 + 14 + strlen(prename) + 15 + 7 + 20 + 11 + 17 + 12 + 36 + 21; // 23 for zenity --file-selection, 14 for --filename=', prename, 15 for --title='Open', 7 for --save, 20 for --confirm-overwrite, 11 for --multiple, 17 for --separator="\n", 12 for --directory, 36 for --file-filter='Specified Types | , added per extension, 20 for if I got this wrong, 1 for \0
     for (int32_t i = 0; i < extensions -> length; i++) {
         totalMemory += strlen(extensions -> data[i].s) + 3;
     }
@@ -34202,24 +34203,35 @@ int32_t osToolsFileDialogPrompt(ost_file_dialog_save_t openOrSave, ost_file_dial
     strcpy(fullCommand, "zenity --file-selection");
     /* configure autofill filename */
     if (strcmp(prename, "null") != 0) {
-        strcat(fullCommand, " --filename='");
+        strcat(fullCommand, " --filename=\"");
         strcat(fullCommand, prename);
-        strcat(fullCommand, "'");
+        strcat(fullCommand, "\"");
     }
 
     /* configure title */
-    char title[16] = " --title='Open'";
     if (openOrSave == 1) {
-        strcpy(title, " --title='Save'");
+        strcpy(fullCommand, " --title=\"Save\"");
+        strcpy(fullCommand, " --save");
+        strcpy(fullCommand, " --confirm-overwrite");
+    } else {
+        strcat(fullCommand, " --title=\"Open\"");
     }
-    strcat(fullCommand, title);
+
+    /* configure multiselect and folder */
+    if (multiselect) {
+        strcpy(fullCommand, " --multiple");
+        strcpy(fullCommand,  "--separator=\"\n\"");
+    }
+    if (folder) {
+        strcpy(fullCommand, " --directory");
+    }
 
     /* configure extensions */
     if (extensions == NULL) {
         extensions = osToolsFileDialog.globalExtensions;
     }
     if (extensions -> length > 0) {
-        char filterName[35] = " --file-filter='Specified Types | ";
+        char filterName[35] = " --file-filter=\"Specified Types | ";
         strcat(fullCommand, filterName);
     }
     for (int32_t i = 0; i < extensions -> length; i++) {
@@ -34228,14 +34240,43 @@ int32_t osToolsFileDialogPrompt(ost_file_dialog_save_t openOrSave, ost_file_dial
         buildFilter[1] = '.';
         buildFilter[2] = '\0';
         strcat(buildFilter, extensions -> data[i].s);
-        if (i != extensions -> length - 1) { // dont add space if it's the last element
+        if (i == extensions -> length - 1) { // dont add space if it's the last element
+            strcat(buildFilter, "\"");
+        } else {
             strcat(buildFilter, " ");
         }
         strcat(fullCommand, buildFilter);
     }
+    printf("%s\n", fullCommand);
 
     /* execute */
     FILE* filenameStream = popen(fullCommand, "r");
+    char output[4097];
+    if (fgets(output, 4097, filenameStream) == NULL) { // adds a \n before \0 (?)
+        return -1;
+    }
+    list_clear(osToolsFileDialog.selectedFilenames);
+    int32_t startPoint = 0;
+    for (uint32_t i = 0; i < 4096; i++) {
+        if (output[i] == '\n') {
+            output[i] = '\0'; // replace all newlines with null characters
+            list_append(osToolsFileDialog.selectedFilenames, (unitype) (output + startPoint), 's');
+            startPoint = i + 1;
+        }
+    }
+    char runningBuffer[4097];
+    memcpy(runningBuffer, output + startPoint, 4096 - startPoint);
+    while (fgets(runningBuffer + 4096 - startPoint, 4097 - startPoint, filenameStream) != NULL) {
+        startPoint = 0;
+        for (uint32_t i = 0; i < 4096; i++) {
+            if (output[i] == '\n') {
+                output[i] = '\0'; // replace all newlines with null characters
+                list_append(osToolsFileDialog.selectedFilenames, (unitype) (output + startPoint), 's');
+                startPoint = i + 1;
+            }
+        }
+    }
+    list_print(osToolsFileDialog.selectedFilenames);
     pclose(filenameStream);
     return 0;
 }
