@@ -33552,13 +33552,17 @@ int32_t osToolsFileDialogPrompt(ost_file_dialog_save_t openOrSave, ost_file_dial
     if (FAILED(hr)) {
         return -1;
     }
-    IFileOpenDialog *fileDialog;
-    IShellItemArray *psiResultArray;
+    /* polymorphism in C */
+    IFileOpenDialog *openDialog;
+    IFileSaveDialog *saveDialog;
+    IFileDialog *fileDialog;
     PWSTR pszFilePath = NULL;
     if (openOrSave == OSTOOLS_FILE_DIALOG_SAVE) {
-        hr = CoCreateInstance(&CLSID_FileSaveDialog, NULL, CLSCTX_ALL, &IID_IFileSaveDialog, (void **) &fileDialog);
+        hr = CoCreateInstance(&CLSID_FileSaveDialog, NULL, CLSCTX_ALL, &IID_IFileSaveDialog, (void **) &saveDialog);
+        fileDialog = (IFileDialog *) saveDialog;
     } else if (openOrSave == OSTOOLS_FILE_DIALOG_OPEN) {
-        hr = CoCreateInstance(&CLSID_FileOpenDialog, NULL, CLSCTX_ALL, &IID_IFileOpenDialog, (void **) &fileDialog);
+        hr = CoCreateInstance(&CLSID_FileOpenDialog, NULL, CLSCTX_ALL, &IID_IFileOpenDialog, (void **) &openDialog);
+        fileDialog = (IFileDialog *) openDialog;
     }
     if (FAILED(hr)) {
         CoUninitialize();
@@ -33638,26 +33642,59 @@ int32_t osToolsFileDialogPrompt(ost_file_dialog_save_t openOrSave, ost_file_dial
     }
 
     /* execute */
+    IShellItemArray *psiResultArray;
+    IShellItem *psiResult;
     fileDialog -> lpVtbl -> Show(fileDialog, NULL); // opens window
-    hr = fileDialog -> lpVtbl -> GetResults(fileDialog, &psiResultArray); // succeeds if a file is selected
-    if (FAILED(hr)) {
-        printf("failed GetResult %ld\n", hr);
-        fileDialog -> lpVtbl -> Release(fileDialog);
-        CoUninitialize();
-        return -1;
-    }
-    DWORD numberOfSelectedFiles;
-    psiResultArray -> lpVtbl -> GetCount(psiResultArray, &numberOfSelectedFiles);
-    list_clear(osToolsFileDialog.selectedFilenames);
-    for (int32_t i = 0; i < numberOfSelectedFiles; i++) {
-        IShellItem *psiResult;
-        hr = psiResultArray -> lpVtbl -> GetItemAt(psiResultArray, 0, &psiResult);
-        hr |= psiResult -> lpVtbl -> GetDisplayName(psiResult, SIGDN_FILESYSPATH, &pszFilePath); // extracts path name
+    if (openOrSave == OSTOOLS_FILE_DIALOG_OPEN && multiselect == OSTOOLS_FILE_DIALOG_MULTI_SELECT) {
+        hr = openDialog -> lpVtbl -> GetResults(openDialog, &psiResultArray); // succeeds if a file is selected
         if (FAILED(hr)) {
-            psiResult -> lpVtbl -> Release(psiResult);
+            printf("failed GetResults %ld\n", hr);
             fileDialog -> lpVtbl -> Release(fileDialog);
             CoUninitialize();
             return -1;
+        }
+        DWORD numberOfSelectedFiles;
+        psiResultArray -> lpVtbl -> GetCount(psiResultArray, &numberOfSelectedFiles);
+        list_clear(osToolsFileDialog.selectedFilenames);
+        for (int32_t i = 0; i < numberOfSelectedFiles; i++) {
+            IShellItem *psiResult;
+            hr = psiResultArray -> lpVtbl -> GetItemAt(psiResultArray, 0, &psiResult);
+            hr |= psiResult -> lpVtbl -> GetDisplayName(psiResult, SIGDN_FILESYSPATH, &pszFilePath); // extracts path name
+            if (FAILED(hr)) {
+                psiResult -> lpVtbl -> Release(psiResult);
+                fileDialog -> lpVtbl -> Release(fileDialog);
+                CoUninitialize();
+                return -1;
+            }
+            int32_t i = 0;
+            /* convert from WCHAR to char */
+            int32_t pathLength = wcslen(pszFilePath);
+            char addToSelectedFilenames[pathLength + 2];
+            while (pszFilePath[i] != '\0' && i < MAX_PATH + 1) {
+                addToSelectedFilenames[i] = pszFilePath[i];
+                i++;
+            }
+            if (folder) {
+                addToSelectedFilenames[i] = '\\';
+                addToSelectedFilenames[i + 1] = '\0';
+            } else {
+                addToSelectedFilenames[i] = '\0';
+            }
+            list_append(osToolsFileDialog.selectedFilenames, (unitype) addToSelectedFilenames, 's');
+            psiResult -> lpVtbl -> Release(psiResult);
+            CoTaskMemFree(pszFilePath);
+        }
+    } else {
+        hr = fileDialog -> lpVtbl -> GetResult(fileDialog, &psiResult); // succeeds if a file is selected
+        if (FAILED(hr)) {
+            printf("failed GetResult %ld\n", hr);
+            fileDialog -> lpVtbl -> Release(fileDialog);
+            CoUninitialize();
+            return -1;
+        }
+        hr = psiResult -> lpVtbl -> GetDisplayName(psiResult, SIGDN_FILESYSPATH, &pszFilePath); // extracts path name
+        if (FAILED(hr)) {
+            psiResult -> lpVtbl -> Release(psiResult);
         }
         int32_t i = 0;
         /* convert from WCHAR to char */
@@ -34266,7 +34303,6 @@ int32_t osToolsFileDialogPrompt(ost_file_dialog_save_t openOrSave, ost_file_dial
         list_append(osToolsFileDialog.selectedFilenames, (unitype) output, 's');
         files++;
     }
-    list_print(osToolsFileDialog.selectedFilenames);
     pclose(filenameStream);
     if (files == 0) {
         return -1;

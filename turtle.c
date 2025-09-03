@@ -27,7 +27,8 @@ void parseRibbonOutput() {
         }
         if (ribbonRender.output[2] == 4) { // Open
             if (osToolsFileDialogOpen(OSTOOLS_FILE_DIALOG_MULTIPLE_SELECT, OSTOOLS_FILE_DIALOG_FILE, "", NULL) != -1) {
-                printf("Loaded data from: %s\n", osToolsFileDialog.selectedFilenames -> data[0].s);
+                printf("Loaded data from: ");
+                list_print(osToolsFileDialog.selectedFilenames);
             }
         }
     }
