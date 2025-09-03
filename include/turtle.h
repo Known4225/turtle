@@ -52,14 +52,23 @@ typedef struct {
     #ifdef TURTLE_ENABLE_TEXTURES
     bufferList_t *bufferList; // resizable list to donate to GPU
     list_t *textureList; // list of texture filenames (set to "" for unloaded)
+    int32_t textureWidth;
+    int32_t textureHeight;
+    #endif /* TURTLE_ENABLE_TEXTURES */
+    #ifndef TURTLE_ENABLE_TEXTURES
+    /* this bit exists so that there is no size difference between compiled and linked struct (in case you compile without textures but link library with textures) */
+    void *bufferList;
+    void *textureList;
+    int32_t textureWidth;
+    int32_t textureHeight;
     #endif /* TURTLE_ENABLE_TEXTURES */
     list_t *penPos; // a list of where to draw
     uint64_t penHash; // the penPos list is hashed and this hash is used to determine if any changes occured between frames
-    uint64_t penshape; // 0 for circle, 1 for square, 2 for triangle
     uint32_t lastLength; // the penPos list's length is saved and if it is different from last frame we know we have to redraw
-    uint32_t pen; // pen status (1 for down, 0 for up)
-    uint32_t close; // close changes to 1 when the user clicks the x on the window
-    uint32_t popupClose; // controls whether the window terminates on turtle.close
+    uint16_t penshape; // 0 for circle, 1 for square, 2 for triangle
+    uint8_t pen; // pen status (1 for down, 0 for up)
+    uint8_t close; // close changes to 1 when the user clicks the x on the window
+    uint8_t popupClose; // controls whether the window terminates on turtle.close
     double circleprez; // how precise circles are (specifically, the number of sides of a circle with diameter e)
     double pensize; // turtle pen size
     double penr; // pen red (0 to 1)
@@ -148,13 +157,17 @@ void turtlePenPrez(double prez);
 /* moves the turtle to a coordinate */
 void turtleGoto(double x, double y);
 
-typedef int32_t turtle_texture_t;
+typedef struct {
+    int32_t id;
+    int16_t width;
+    int16_t height;
+} turtle_texture_t;
 
 #ifdef TURTLE_ENABLE_TEXTURES
 /* function to add a vertex to the turtle.bufferList */
 void addVertex(double x, double y, double r, double g, double b, double a, double tx, double ty, double useTexture);
 
-void turtleTextureRenderInternal(turtle_texture_t texture, double x1, double y1, double x2, double y2, double r, double g, double b, double rot, double xcenter, double ycenter, double xfact, double yfact);
+void turtleTextureRenderInternal(int32_t textureCode, double x1, double y1, double x2, double y2, double r, double g, double b, double rot, double xcenter, double ycenter, double xfact, double yfact);
 #endif /* TURTLE_ENABLE_TEXTURES */
 
 /* load a png, jpg, or bmp to GPU memory as a texture */
@@ -165,6 +178,9 @@ int32_t turtleTextureUnload(turtle_texture_t texture);
 
 /* adds a (blit) rectangular texture */
 void turtleTexture(turtle_texture_t texture, double x1, double y1, double x2, double y2, double rot, double r, double g, double b);
+
+/* print texture information */
+void turtlePrintTexture(turtle_texture_t texture);
 
 /* draws a circle at the specified x and y (coordinates) */
 void turtleCircleRenderInternal(double x, double y, double rad, double r, double g, double b, double a, double xcenter, double ycenter, double xfact, double yfact, double prez);

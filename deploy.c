@@ -19,6 +19,7 @@ const char headerFiles[][128] = {
     "include/list.h",
     "include/bufferList.h",
     "include/stb_image.h",
+    "include/stb_image_resize2.h",
     "include/turtle.h",
     "include/turtleText.h",
     "include/turtleTools.h",

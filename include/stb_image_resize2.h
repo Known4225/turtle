@@ -1,3 +1,6 @@
+#ifdef TURTLE_ENABLE_TEXTURES
+#define STB_IMAGE_RESIZE_IMPLEMENTATION
+
 /* stb_image_resize2 - v2.14 - public domain image resizing
 
    by Jeff Roberts (v2) and Jorge L Rodriguez
@@ -841,7 +844,7 @@ STBIRDEF void stbir_resize_split_profile_info( STBIR_PROFILE_INFO * out_info, ST
 
 
 #ifndef STBIR__HEADER_FILENAME
-#define STBIR__HEADER_FILENAME "stb_image_resize2.h"
+#define STBIR__HEADER_FILENAME "include/stb_image_resize2.h"
 #endif
 
 // the internal pixel layout enums are in a different order, so we can easily do range comparisons of types
@@ -10625,3 +10628,5 @@ ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ------------------------------------------------------------------------------
 */
+
+#endif /* TURTLE_ENABLE_TEXTURES */
