@@ -124,7 +124,7 @@ void turtleInit(GLFWwindow* window, int32_t minX, int32_t minY, int32_t maxX, in
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     turtle.textureWidth = 2048;
     turtle.textureHeight = 2048;
-    glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGB, turtle.textureWidth, turtle.textureHeight, 100, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL); // 100 textures at 2048x2048
+    glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA, turtle.textureWidth, turtle.textureHeight, 100, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL); // 100 textures at 2048x2048
     #endif /* TURTLE_ENABLE_TEXTURES */
     glfwMakeContextCurrent(window); // various glfw things
     glEnable(GL_ALPHA);
