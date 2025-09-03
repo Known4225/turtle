@@ -33555,7 +33555,11 @@ int32_t osToolsFileDialogPrompt(ost_file_dialog_save_t openOrSave, ost_file_dial
     IFileOpenDialog *fileDialog;
     IShellItemArray *psiResultArray;
     PWSTR pszFilePath = NULL;
-    hr = CoCreateInstance(&CLSID_FileOpenDialog, NULL, CLSCTX_ALL, &IID_IFileOpenDialog, (void **) &fileDialog);
+    if (openOrSave == OSTOOLS_FILE_DIALOG_SAVE) {
+        hr = CoCreateInstance(&CLSID_FileSaveDialog, NULL, CLSCTX_ALL, &IID_IFileSaveDialog, (void **) &fileDialog);
+    } else if (openOrSave == OSTOOLS_FILE_DIALOG_OPEN) {
+        hr = CoCreateInstance(&CLSID_FileOpenDialog, NULL, CLSCTX_ALL, &IID_IFileOpenDialog, (void **) &fileDialog);
+    }
     if (FAILED(hr)) {
         CoUninitialize();
         return -1;
