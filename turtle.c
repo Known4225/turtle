@@ -128,8 +128,8 @@ int main(int argc, char *argv[]) {
         list_print(columnLike);
     }
     // turtle_texture_t empvImage = turtleTextureLoad("images/ANDi.png");
-    // turtle_texture_t empvImage = turtleTextureLoad("images/image0.jpg");
-    turtle_texture_t empvImage = turtleTextureLoad("images/EMPV.png");
+    turtle_texture_t empvImage = turtleTextureLoad("images/image0.jpg");
+    // turtle_texture_t empvImage = turtleTextureLoad("images/EMPV.png");
     turtlePrintTexture(empvImage);
 
     uint32_t tps = 120; // ticks per second (locked to fps in this case)

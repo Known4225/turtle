@@ -29080,8 +29080,8 @@ void turtleInit(GLFWwindow* window, int32_t minX, int32_t minY, int32_t maxX, in
     list_append(turtle.textureList, (unitype) "null", 's'); // cannot have texture code of 0 because of shader using 0 as the non-texture code
     /* setup texture parameters */
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    turtle.textureWidth = 2048;
-    turtle.textureHeight = 2048;
+    turtle.textureWidth = 1024;
+    turtle.textureHeight = 1024;
     glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA, turtle.textureWidth, turtle.textureHeight, 100, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL); // 100 textures at 2048x2048
     #endif /* TURTLE_ENABLE_TEXTURES */
     glfwMakeContextCurrent(window); // various glfw things
