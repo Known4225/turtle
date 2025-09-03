@@ -176,7 +176,9 @@ typedef enum {
 
 typedef enum {
     OSTOOLS_FILE_DIALOG_SINGLE_SELECT = 0,
+    OSTOOLS_FILE_DIALOG_MULTISELECT = 1,
     OSTOOLS_FILE_DIALOG_MULTI_SELECT = 1,
+    OSTOOLS_FILE_DIALOG_MULTIPLE_SELECT = 1,
 } ost_file_dialog_multiselect_t;
 
 typedef enum {

@@ -19874,7 +19874,9 @@ typedef enum {
 
 typedef enum {
     OSTOOLS_FILE_DIALOG_SINGLE_SELECT = 0,
+    OSTOOLS_FILE_DIALOG_MULTISELECT = 1,
     OSTOOLS_FILE_DIALOG_MULTI_SELECT = 1,
+    OSTOOLS_FILE_DIALOG_MULTIPLE_SELECT = 1,
 } ost_file_dialog_multiselect_t;
 
 typedef enum {
@@ -33573,7 +33575,7 @@ int32_t osToolsFileDialogPrompt(ost_file_dialog_save_t openOrSave, ost_file_dial
     }
     fileDialog -> lpVtbl -> SetOptions(fileDialog, options); // https://learn.microsoft.com/en-us/windows/win32/api/shobjidl_core/ne-shobjidl_core-_fileopendialogoptions
     /* configure autofill filename */
-    if (strcmp(prename, "null") != 0) {
+    if (prename != NULL && strcmp(prename, "null") != 0 && strcmp(prename, "") != 0) {
         int32_t i = 0;
         WCHAR prename[MAX_PATH + 1];
         while (prename[i] != '\0' && i < MAX_PATH + 1) {
@@ -34194,7 +34196,9 @@ int32_t osToolsInit(char argv0[], GLFWwindow *window) {
 }
 
 int32_t osToolsFileDialogPrompt(ost_file_dialog_save_t openOrSave, ost_file_dialog_multiselect_t multiselect, ost_file_dialog_folder_t folder, char *prename, list_t *extensions) {
-    printf("start file\n");
+    if (extensions == NULL) {
+        extensions = osToolsFileDialog.globalExtensions;
+    }
     int32_t totalMemory = 23 + 14 + strlen(prename) + 15 + 7 + 20 + 11 + 17 + 12 + 36 + 21; // 23 for zenity --file-selection, 14 for --filename=', prename, 15 for --title='Open', 7 for --save, 20 for --confirm-overwrite, 11 for --multiple, 17 for --separator="\n", 12 for --directory, 36 for --file-filter='Specified Types | , added per extension, 20 for if I got this wrong, 1 for \0
     for (int32_t i = 0; i < extensions -> length; i++) {
         totalMemory += strlen(extensions -> data[i].s) + 3;
@@ -34202,34 +34206,31 @@ int32_t osToolsFileDialogPrompt(ost_file_dialog_save_t openOrSave, ost_file_dial
     char fullCommand[totalMemory];
     strcpy(fullCommand, "zenity --file-selection");
     /* configure autofill filename */
-    if (strcmp(prename, "null") != 0) {
+    if (prename != NULL, strcmp(prename, "null") != 0 && strcmp(prename, "") != 0) {
         strcat(fullCommand, " --filename=\"");
         strcat(fullCommand, prename);
         strcat(fullCommand, "\"");
     }
 
     /* configure title */
-    if (openOrSave == 1) {
-        strcpy(fullCommand, " --title=\"Save\"");
-        strcpy(fullCommand, " --save");
-        strcpy(fullCommand, " --confirm-overwrite");
-    } else {
+    if (openOrSave == OSTOOLS_FILE_DIALOG_SAVE) {
+        strcat(fullCommand, " --title=\"Save\"");
+        strcat(fullCommand, " --save");
+        strcat(fullCommand, " --confirm-overwrite");
+    } else if (openOrSave == OSTOOLS_FILE_DIALOG_OPEN) {
         strcat(fullCommand, " --title=\"Open\"");
     }
 
     /* configure multiselect and folder */
     if (multiselect) {
-        strcpy(fullCommand, " --multiple");
-        strcpy(fullCommand,  "--separator=\"\n\"");
+        strcat(fullCommand, " --multiple");
+        strcat(fullCommand,  " --separator=\"\n\"");
     }
     if (folder) {
-        strcpy(fullCommand, " --directory");
+        strcat(fullCommand, " --directory");
     }
 
     /* configure extensions */
-    if (extensions == NULL) {
-        extensions = osToolsFileDialog.globalExtensions;
-    }
     if (extensions -> length > 0) {
         char filterName[35] = " --file-filter=\"Specified Types | ";
         strcat(fullCommand, filterName);
@@ -34247,37 +34248,25 @@ int32_t osToolsFileDialogPrompt(ost_file_dialog_save_t openOrSave, ost_file_dial
         }
         strcat(fullCommand, buildFilter);
     }
-    printf("%s\n", fullCommand);
+    printf("%s\n", fullCommand); // zenity --file-selection --title="Save" --save --confirm-overwrite --file-filter="Specified Types | *.txt"
 
     /* execute */
     FILE* filenameStream = popen(fullCommand, "r");
     char output[4097];
-    if (fgets(output, 4097, filenameStream) == NULL) { // adds a \n before \0 (?)
-        return -1;
-    }
-    list_clear(osToolsFileDialog.selectedFilenames);
-    int32_t startPoint = 0;
-    for (uint32_t i = 0; i < 4096; i++) {
-        if (output[i] == '\n') {
-            output[i] = '\0'; // replace all newlines with null characters
-            list_append(osToolsFileDialog.selectedFilenames, (unitype) (output + startPoint), 's');
-            startPoint = i + 1;
+    int32_t files = 0;
+    while (fgets(output, 4097, filenameStream) != NULL) {
+        if (files == 0) {
+            list_clear(osToolsFileDialog.selectedFilenames);
         }
-    }
-    char runningBuffer[4097];
-    memcpy(runningBuffer, output + startPoint, 4096 - startPoint);
-    while (fgets(runningBuffer + 4096 - startPoint, 4097 - startPoint, filenameStream) != NULL) {
-        startPoint = 0;
-        for (uint32_t i = 0; i < 4096; i++) {
-            if (output[i] == '\n') {
-                output[i] = '\0'; // replace all newlines with null characters
-                list_append(osToolsFileDialog.selectedFilenames, (unitype) (output + startPoint), 's');
-                startPoint = i + 1;
-            }
-        }
+        output[strlen(output) - 1] = '\0';
+        list_append(osToolsFileDialog.selectedFilenames, (unitype) output, 's');
+        files++;
     }
     list_print(osToolsFileDialog.selectedFilenames);
     pclose(filenameStream);
+    if (files == 0) {
+        return -1;
+    }
     return 0;
 }
 
