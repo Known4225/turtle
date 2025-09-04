@@ -12,22 +12,23 @@ void parseRibbonOutput() {
             printf("New\n");
         }
         if (ribbonRender.output[2] == 2) { // Save
-            if (strcmp(osToolsFileDialog.selectedFilename, "null") == 0) {
-                if (osToolsFileDialogPrompt(1, "") != -1) {
-                    printf("Saved to: %s\n", osToolsFileDialog.selectedFilename);
+            if (osToolsFileDialog.selectedFilenames -> length == 0) {
+                if (osToolsFileDialogSave(OSTOOLS_FILE_DIALOG_SINGLE_SELECT, OSTOOLS_FILE_DIALOG_FILE, "", NULL) != -1) {
+                    printf("Saved to: %s\n", osToolsFileDialog.selectedFilenames -> data[0].s);
                 }
             } else {
-                printf("Saved to: %s\n", osToolsFileDialog.selectedFilename);
+                printf("Saved to: %s\n", osToolsFileDialog.selectedFilenames -> data[0].s);
             }
         }
         if (ribbonRender.output[2] == 3) { // Save As...
-            if (osToolsFileDialogPrompt(1, "") != -1) {
-                printf("Saved to: %s\n", osToolsFileDialog.selectedFilename);
+            if (osToolsFileDialogSave(OSTOOLS_FILE_DIALOG_SINGLE_SELECT, OSTOOLS_FILE_DIALOG_FILE, "", NULL) != -1) {
+                printf("Saved to: %s\n", osToolsFileDialog.selectedFilenames -> data[0].s);
             }
         }
         if (ribbonRender.output[2] == 4) { // Open
-            if (osToolsFileDialogPrompt(0, "") != -1) {
-                printf("Loaded data from: %s\n", osToolsFileDialog.selectedFilename);
+            if (osToolsFileDialogOpen(OSTOOLS_FILE_DIALOG_MULTIPLE_SELECT, OSTOOLS_FILE_DIALOG_FILE, "", NULL) != -1) {
+                printf("Loaded data from: ");
+                list_print(osToolsFileDialog.selectedFilenames);
             }
         }
     }
@@ -118,7 +119,7 @@ int main(int argc, char *argv[]) {
     popupInit("config/popupConfig.txt", -70, -20, 70, 20);
     /* initialise osTools */
     osToolsInit(argv[0], window); // must include argv[0] to get executableFilepath, must include GLFW window
-    osToolsFileDialogAddExtension("txt"); // add txt to extension restrictions
+    osToolsFileDialogAddGlobalExtension("txt"); // add txt to extension restrictions
     list_t *rowLike = osToolsLoadCSVString("config/test.csv", OSTOOLS_CSV_ROW);
     list_t *columnLike = osToolsLoadCSVString("config/test.csv", OSTOOLS_CSV_COLUMN);
     if (rowLike != NULL) {
@@ -127,6 +128,19 @@ int main(int argc, char *argv[]) {
     if (columnLike != NULL) {
         list_print(columnLike);
     }
+    // turtle_texture_t empvImage = turtleTextureLoad("images/ANDi.png");
+    turtle_texture_t empvImage = turtleTextureLoad("images/image0.jpg");
+    // turtle_texture_t empvImage = turtleTextureLoad("images/EMPV.png");
+    turtlePrintTexture(empvImage);
+    list_t *folders = osToolsListFolders(".");
+    list_t *files = osToolsListFiles(".");
+    list_t *filesAndFolders = osToolsListFilesAndFolders(".");
+    list_print(folders);
+    list_print(files);
+    list_print(filesAndFolders);
+    list_free(folders);
+    list_free(files);
+    list_free(filesAndFolders);
 
     uint32_t tps = 120; // ticks per second (locked to fps in this case)
     uint64_t tick = 0; // count number of ticks since application started
@@ -194,7 +208,6 @@ int main(int argc, char *argv[]) {
     button_textButton -> shape = TT_BUTTON_SHAPE_TEXT;
     button_circleButton -> shape = TT_BUTTON_SHAPE_CIRCLE;
 
-
     list_t *xPositions = list_init();
     list_t *yPositions = list_init();
     for (uint32_t i = 0; i < tt_elements.all -> length; i++) {
@@ -240,6 +253,9 @@ int main(int argc, char *argv[]) {
         turtleTextWriteUnicode((uint8_t *) u8"αβγδεζηθικλμνξοπρσςτυφχψω", scrollbarVarX * -5 + 260, scrollbarVarY * 3.3 - 330, 10, 0);
         turtleTextWriteUnicode((uint8_t *) u8"1234567890!@#$£€₺₽¥₩₹₣฿%^&*()`~-_=+[", scrollbarVarX * -5 + 260, scrollbarVarY * 3.3 - 345, 10, 0);
         turtleTextWriteUnicode((uint8_t *) u8"{]}\\|;:‘'’“\"”,<.>/?½¨", scrollbarVarX * -5 + 260, scrollbarVarY * 3.3 - 360, 10, 0);
+        
+        /* draw texture */
+        turtleTexture(empvImage, scrollbarVarX * -5 + 400, scrollbarVarY * 3.3 - 100, scrollbarVarX * -5 + 500, scrollbarVarY * 3.3, 0, 255, 255, 255);
 
         // turtlePenColor(0, 0, 0);
         // turtle3DTriangle(-5, 0, 10, 5, 0, 10, 0, 5, 10);
@@ -263,6 +279,10 @@ int main(int argc, char *argv[]) {
                     scrollbarVarY = 100;
                 }
             }
+        }
+        if (buttonVar) {
+            printf("button clicked\n");
+            buttonVar = 0;
         }
         turtleToolsUpdate(); // update turtleTools
         parseRibbonOutput(); // user defined function to use ribbon
