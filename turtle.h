@@ -28982,7 +28982,7 @@ turtle_t turtle;
 #ifdef TURTLE_ENABLE_TEXTURES
 #define STB_IMAGE_IMPLEMENTATION
 /* shader code */
-const char *turtleVertexShaderSource =
+const char *turtleVertexShaderSource = 
 "#version 330 core\n"
 "layout(location = 0) in vec2 vPosition;\n"
 "layout(location = 1) in vec4 vColor;\n"
@@ -29083,6 +29083,7 @@ void turtleInit(GLFWwindow* window, int32_t minX, int32_t minY, int32_t maxX, in
     list_append(turtle.textureList, (unitype) "null", 's'); // cannot have texture code of 0 because of shader using 0 as the non-texture code
     /* setup texture parameters */
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     turtle.textureWidth = 1024;
     turtle.textureHeight = 1024;
     glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA, turtle.textureWidth, turtle.textureHeight, 100, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL); // 100 textures at 2048x2048
@@ -29573,7 +29574,6 @@ void turtleQuadRenderInternal(double x1, double y1, double x2, double y2, double
 }
 
 void turtleTextureRenderInternal(int32_t textureCode, double x1, double y1, double x2, double y2, double r, double g, double b, double rot, double xcenter, double ycenter, double xfact, double yfact) {
-    rot += M_PI; // messed up somewhere and this is the simplest way to fix it (rotate 180)
     /* do the rotation math here - rotate on center */
     double avgX = (x1 + x2) / 2;
     double avgY = (y1 + y2) / 2;
@@ -29583,20 +29583,20 @@ void turtleTextureRenderInternal(int32_t textureCode, double x1, double y1, doub
     double y1Displace = y1 - avgY;
     double x2Displace = x2 - avgX;
     double y2Displace = y2 - avgY;
-    x1 = avgX + x1Displace * sinRot - y1Displace * cosRot;
-    y1 = avgY + x1Displace * cosRot + y1Displace * sinRot;
-    x2 = avgX + x2Displace * sinRot - y2Displace * cosRot;
-    y2 = avgY + x2Displace * cosRot + y2Displace * sinRot;
-    double x3 = avgX + x2Displace * sinRot - y1Displace * cosRot;
-    double y3 = avgY + x2Displace * cosRot + y1Displace * sinRot;
-    double x4 = avgX + x1Displace * sinRot - y2Displace * cosRot;
-    double y4 = avgY + x1Displace * cosRot + y2Displace * sinRot;
-    addVertex(x1 * xfact + xcenter, y1 * yfact + ycenter, r, g, b, 1.0, 0, 0, textureCode);
-    addVertex(x3 * xfact + xcenter, y3 * yfact + ycenter, r, g, b, 1.0, 0, 1, textureCode);
-    addVertex(x2 * xfact + xcenter, y2 * yfact + ycenter, r, g, b, 1.0, 1, 1, textureCode);
-    addVertex(x1 * xfact + xcenter, y1 * yfact + ycenter, r, g, b, 1.0, 0, 0, textureCode);
-    addVertex(x4 * xfact + xcenter, y4 * yfact + ycenter, r, g, b, 1.0, 1, 0, textureCode);
-    addVertex(x2 * xfact + xcenter, y2 * yfact + ycenter, r, g, b, 1.0, 1, 1, textureCode);
+    x1 = avgX + x1Displace * cosRot - y1Displace * sinRot;
+    y1 = avgY + x1Displace * sinRot + y1Displace * cosRot;
+    x2 = avgX + x2Displace * cosRot - y2Displace * sinRot;
+    y2 = avgY + x2Displace * sinRot + y2Displace * cosRot;
+    double x3 = avgX + x2Displace * cosRot - y1Displace * sinRot;
+    double y3 = avgY + x2Displace * sinRot + y1Displace * cosRot;
+    double x4 = avgX + x1Displace * cosRot - y2Displace * sinRot;
+    double y4 = avgY + x1Displace * sinRot + y2Displace * cosRot;
+    addVertex(x4 * xfact + xcenter, y4 * yfact + ycenter, r, g, b, 1.0, 0, 0, textureCode);
+    addVertex(x1 * xfact + xcenter, y1 * yfact + ycenter, r, g, b, 1.0, 0, 1, textureCode);
+    addVertex(x3 * xfact + xcenter, y3 * yfact + ycenter, r, g, b, 1.0, 1, 1, textureCode);
+    addVertex(x4 * xfact + xcenter, y4 * yfact + ycenter, r, g, b, 1.0, 0, 0, textureCode);
+    addVertex(x2 * xfact + xcenter, y2 * yfact + ycenter, r, g, b, 1.0, 1, 0, textureCode);
+    addVertex(x3 * xfact + xcenter, y3 * yfact + ycenter, r, g, b, 1.0, 1, 1, textureCode);
 }
 
 turtle_texture_t turtleTextureLoad(char *filename) {
