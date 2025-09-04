@@ -216,9 +216,9 @@ list_t *osToolsListFolders(char *directory);
 list_t *osToolsListFilesAndFolders(char *directory);
 
 /* create a folder */
-void osToolsCreateFolder(char *folder);
+int32_t osToolsCreateFolder(char *folder);
 
 /* delete a folder (and all files and subfolders) */
-void osToolsDeleteFolder(char *folder);
+int32_t osToolsDeleteFolder(char *folder);
 
 #endif /* OS_TOOLS_H */

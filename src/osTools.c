@@ -659,7 +659,9 @@ list_t *osToolsListFilesAndFolders(char *directory) {
     }
     LARGE_INTEGER filesize;
     do {
-        c
+        if (strcmp(findData.cFileName, ".") == 0 || strcmp(findData.cFileName, "..") == 0) {
+            continue;
+        }
         list_append(output, (unitype) findData.cFileName, 's'); // add filename
         if (findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
             /* directory */
@@ -731,12 +733,12 @@ list_t *osToolsListFolders(char *directory) {
     return output;
 }
 
-void osToolsCreateFolder(char *folder) {
+int32_t osToolsCreateFolder(char *folder) {
     /* https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-createdirectory */
-    CreateDirectory(folder, NULL);
+    return CreateDirectory(folder, NULL);
 }
 
-void osToolsDeleteFolder(char *folder) {
+int32_t osToolsDeleteFolder(char *folder) {
     /* https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-removedirectorya */
     char directoryFor[MAX_PATH + 10] = "rd /s /q ";
     int32_t len = strlen(folder);
@@ -748,7 +750,7 @@ void osToolsDeleteFolder(char *folder) {
     }
     strcat(directoryFor, holdingCell);
     free(holdingCell);
-    system(directoryFor);
+    return system(directoryFor);
     // RemoveDirectoryA(folder);
 }
 
@@ -1225,6 +1227,7 @@ list_t *osToolsListFilesAndFolders(char *directory) {
         dstream = readdir(dir);
     }
     closedir(dir);
+    return output;
 }
 
 list_t *osToolsListFiles(char *directory) {
@@ -1247,6 +1250,7 @@ list_t *osToolsListFiles(char *directory) {
         dstream = readdir(dir);
     }
     closedir(dir);
+    return output;
 }
 
 list_t *osToolsListFolders(char *directory) {
@@ -1273,14 +1277,17 @@ list_t *osToolsListFolders(char *directory) {
         dstream = readdir(dir);
     }
     closedir(dir);
+    return output;
 }
 
-void osToolsCreateFolder(char *folder) {
-
+int32_t osToolsCreateFolder(char *folder) {
+    return mkdir(folder, 0755);
 }
 
-void osToolsDeleteFolder(char *folder) {
-
+int32_t osToolsDeleteFolder(char *folder) {
+    char command[5000] = "rm -rf ";
+    strcat(command, folder);
+    return system(command);
 }
 
 void osToolsCloseConsole() {
