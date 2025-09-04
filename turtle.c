@@ -128,9 +128,7 @@ int main(int argc, char *argv[]) {
     if (columnLike != NULL) {
         list_print(columnLike);
     }
-    // turtle_texture_t empvImage = turtleTextureLoad("images/ANDi.png");
-    turtle_texture_t empvImage = turtleTextureLoad("images/image0.jpg");
-    // turtle_texture_t empvImage = turtleTextureLoad("images/EMPV.png");
+    turtle_texture_t empvImage = turtleTextureLoad("images/EMPV.png");
     turtlePrintTexture(empvImage);
     list_t *folders = osToolsListFolders(".");
     list_t *files = osToolsListFiles(".");
@@ -255,7 +253,7 @@ int main(int argc, char *argv[]) {
         turtleTextWriteUnicode((uint8_t *) u8"{]}\\|;:‘'’“\"”,<.>/?½¨", scrollbarVarX * -5 + 260, scrollbarVarY * 3.3 - 360, 10, 0);
         
         /* draw texture */
-        turtleTexture(empvImage, scrollbarVarX * -5 + 400, scrollbarVarY * 3.3 - 100, scrollbarVarX * -5 + 500, scrollbarVarY * 3.3, 0, 255, 255, 255);
+        turtleTexture(empvImage, scrollbarVarX * -5 + 400, scrollbarVarY * 3.3 - 145, scrollbarVarX * -5 + 700, scrollbarVarY * 3.3 + 24, 0, 255, 255, 255);
 
         // turtlePenColor(0, 0, 0);
         // turtle3DTriangle(-5, 0, 10, 5, 0, 10, 0, 5, 10);

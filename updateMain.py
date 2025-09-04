@@ -10,11 +10,11 @@ import shutil
 import subprocess
 
 # Build on development
-outWindows = subprocess.run("make winrel")
-outWindows = subprocess.run("make winreltextures")
-outLinux = subprocess.run("wsl -e make rel")
-outLinux = subprocess.run("wsl -e make reltextures")
-if outWindows.returncode != 0 or outLinux.returncode != 0:
+outWindows = subprocess.run("make winrel").returncode
+outWindows = subprocess.run("make winreltextures").returncode or outWindows
+outLinux = subprocess.run("wsl -e make rel").returncode
+outLinux = subprocess.run("wsl -e make reltextures").returncode or outLinux
+if outWindows != 0 or outLinux != 0:
     quit()
 
 # Check if file exists
@@ -31,17 +31,28 @@ if not os.path.isdir("../turtle-main"):
     print("Could not find directory ../turtle-main")
     quit()
 
+print("\
+████████╗██╗   ██╗██████╗ ████████╗██╗     ███████╗    ███╗   ███╗ █████╗ ██╗███╗   ██╗\n\
+╚══██╔══╝██║   ██║██╔══██╗╚══██╔══╝██║     ██╔════╝    ████╗ ████║██╔══██╗██║████╗  ██║\n\
+   ██║   ██║   ██║██████╔╝   ██║   ██║     █████╗█████╗██╔████╔██║███████║██║██╔██╗ ██║\n\
+   ██║   ██║   ██║██╔══██╗   ██║   ██║     ██╔══╝╚════╝██║╚██╔╝██║██╔══██║██║██║╚██╗██║\n\
+   ██║   ╚██████╔╝██║  ██║   ██║   ███████╗███████╗    ██║ ╚═╝ ██║██║  ██║██║██║ ╚████║\n\
+   ╚═╝    ╚═════╝ ╚═╝  ╚═╝   ╚═╝   ╚══════╝╚══════╝    ╚═╝     ╚═╝╚═╝  ╚═╝╚═╝╚═╝  ╚═══╝")
 # Move files to turtle-main
 shutil.copy("turtle.h", "../turtle-main/turtle.h")
 shutil.copy("Windows/turtle.lib", "../turtle-main/Windows/turtle.lib")
+shutil.copy("Windows/turtletextures.lib", "../turtle-main/Windows/turtletextures.lib")
 shutil.copy("Linux/libturtle.a", "../turtle-main/Linux/libturtle.a")
+shutil.copy("Linux/libturtletextures.a", "../turtle-main/Linux/libturtletextures.a")
 
 # Build on main
 os.chdir("../turtle-main")
-outWindows = subprocess.run("make winrel")
-outLinux = subprocess.run("wsl -e make rel")
+outWindows = subprocess.run("make winrel").returncode
+outWindows = subprocess.run("make winreltextures").returncode or outWindows
+outLinux = subprocess.run("wsl -e make rel").returncode
+outLinux = subprocess.run("wsl -e make reltextures").returncode or outLinux
 # Push to git if checks passed
-if outWindows.returncode == 0 and outLinux.returncode == 0:
+if outWindows == 0 and outLinux == 0:
     subprocess.run("git add .")
     commitMessage = input("Enter commit message: ")
     subprocess.run(f"git commit -m\"{commitMessage}\"")
