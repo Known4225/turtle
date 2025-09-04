@@ -2,7 +2,7 @@
 
 The turtle libraries are a set of openGL libraries written in C that add functionality similar to the [python turtle graphics library](https://docs.python.org/3/library/turtle.html). These libraries also include other functionality including the ability to write text, interact with the file system, and basic UI elements.
 
-The turtle toolset only works on windows and linux. It uses the [glfw window library](https://www.glfw.org/) and the [glad opengl loader](https://glad.dav1d.de/).
+The turtle toolset only works on windows and linux. It uses the [glfw window library](https://www.glfw.org/), the [glad opengl loader](https://glad.dav1d.de/), and [stb_image and stbi_resize2](https://github.com/nothings/stb) for image rendering.
 
 The combination of functions that the turtle libraries provide make it ideal for lightweight GUI applications such as [EMPV](https://github.com/Severson-Group/EMPV) or [logicgates](https://github.com/Known4225/Logic-Gates-OpenGL).
 
