@@ -156,6 +156,7 @@ void win32tcpDeinit();
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/mman.h>
+#include <dirent.h>
 #endif
 
 int32_t osToolsInit(char argv0[], GLFWwindow *window);

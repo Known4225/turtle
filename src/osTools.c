@@ -659,9 +659,7 @@ list_t *osToolsListFilesAndFolders(char *directory) {
     }
     LARGE_INTEGER filesize;
     do {
-        if (strcmp(findData.cFileName, ".") == 0 || strcmp(findData.cFileName, "..") == 0) {
-            continue;
-        }
+        c
         list_append(output, (unitype) findData.cFileName, 's'); // add filename
         if (findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
             /* directory */
@@ -709,7 +707,7 @@ list_t *osToolsListFolders(char *directory) {
     /* https://learn.microsoft.com/en-us/windows/win32/fileio/listing-the-files-in-a-directory */
     list_t *output = list_init();
     if (strlen(directory) > MAX_PATH - 3) {
-        printf("osToolsListFiles: Directory name too long\n");
+        printf("osToolsListFolders: Directory name too long\n");
         return output;
     }
     char directoryFor[MAX_PATH];
@@ -718,7 +716,7 @@ list_t *osToolsListFolders(char *directory) {
     WIN32_FIND_DATA findData;
     HANDLE fileHandle = FindFirstFile(directoryFor, &findData);
     if (fileHandle == INVALID_HANDLE_VALUE) {
-        printf("osToolsListFiles: Handle invalid error %ld\n", GetLastError());
+        printf("osToolsListFolders: Handle invalid error %ld\n", GetLastError());
         return output;
     }
     do {
@@ -1209,6 +1207,80 @@ int32_t osToolsUnmapFile(uint8_t *data) {
         printf("Could not find %p in memory mapped index\n", data);
         return -1;
     }
+}
+
+list_t *osToolsListFilesAndFolders(char *directory) {
+    list_t *output = list_init();
+    DIR *dir = opendir(directory);
+    if (dir == NULL) {
+        return output;
+    }
+    struct dirent *dstream = readdir(dir);
+    while (dstream != NULL) {
+        if (strcmp(dstream -> d_name, ".") == 0 || strcmp(dstream -> d_name, "..") == 0) {
+            dstream = readdir(dir);
+            continue;
+        }
+        list_append(output, (unitype) dstream -> d_name, 's');
+        dstream = readdir(dir);
+    }
+    closedir(dir);
+}
+
+list_t *osToolsListFiles(char *directory) {
+    list_t *output = list_init();
+    DIR *dir = opendir(directory);
+    if (dir == NULL) {
+        return output;
+    }
+    struct dirent *dstream = readdir(dir);
+    while (dstream != NULL) {
+        char fullpath[5000] = "";
+        strcat(fullpath, directory);
+        strcat(fullpath, "/");
+        strcat(fullpath, dstream -> d_name);
+        struct stat checkType;
+        stat(fullpath, &checkType);
+        if (S_ISREG(checkType.st_mode)) {
+            list_append(output, (unitype) dstream -> d_name, 's');
+        }
+        dstream = readdir(dir);
+    }
+    closedir(dir);
+}
+
+list_t *osToolsListFolders(char *directory) {
+    list_t *output = list_init();
+    DIR *dir = opendir(directory);
+    if (dir == NULL) {
+        return output;
+    }
+    struct dirent *dstream = readdir(dir);
+    while (dstream != NULL) {
+        if (strcmp(dstream -> d_name, ".") == 0 || strcmp(dstream -> d_name, "..") == 0) {
+            dstream = readdir(dir);
+            continue;
+        }
+        char fullpath[5000] = "";
+        strcat(fullpath, directory);
+        strcat(fullpath, "/");
+        strcat(fullpath, dstream -> d_name);
+        struct stat checkType;
+        stat(fullpath, &checkType);
+        if (S_ISDIR(checkType.st_mode)) {
+            list_append(output, (unitype) dstream -> d_name, 's');
+        }
+        dstream = readdir(dir);
+    }
+    closedir(dir);
+}
+
+void osToolsCreateFolder(char *folder) {
+
+}
+
+void osToolsDeleteFolder(char *folder) {
+
 }
 
 void osToolsCloseConsole() {

@@ -132,6 +132,15 @@ int main(int argc, char *argv[]) {
     turtle_texture_t empvImage = turtleTextureLoad("images/image0.jpg");
     // turtle_texture_t empvImage = turtleTextureLoad("images/EMPV.png");
     turtlePrintTexture(empvImage);
+    list_t *folders = osToolsListFolders(".");
+    list_t *files = osToolsListFiles(".");
+    list_t *filesAndFolders = osToolsListFilesAndFolders(".");
+    list_print(folders);
+    list_print(files);
+    list_print(filesAndFolders);
+    list_free(folders);
+    list_free(files);
+    list_free(filesAndFolders);
 
     uint32_t tps = 120; // ticks per second (locked to fps in this case)
     uint64_t tick = 0; // count number of ticks since application started
