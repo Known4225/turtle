@@ -103,6 +103,21 @@ list_t *osToolsLoadCSVString(char *filename, ost_csv_t rowOrColumn);
 /* untether the program from the console that spawned it - will close a console if the program is run independently */
 void osToolsCloseConsole();
 
+/* get a list of all com ports (strings) */
+list_t *osToolsGetComPorts();
+
+/* opens a com port */
+int32_t osToolsComInit(char *name);
+
+/* returns number of bytes sent */
+int32_t osToolsComSend(uint8_t *data, int32_t length);
+
+/* returns number of bytes received */
+int32_t osToolsComReceive(uint8_t *buffer, int32_t length);
+
+/* closes a com port */
+int32_t osToolsComClose();
+
 #ifdef OS_WINDOWS
 #include <winsock2.h>
 #include <ws2tcpip.h>
@@ -116,17 +131,8 @@ typedef struct {
 
 extern win32ComPortObject win32com;
 
-/* opens a com port */
-int win32comInit(win32ComPortObject *com, char *name);
-
-/* returns number of bytes sent */
-int win32comSend(win32ComPortObject *com, unsigned char *data, int length);
-
-/* returns number of bytes received */
-int win32comReceive(win32ComPortObject *com, unsigned char *buffer, int length);
-
-/* closes a com port */
-int win32comClose(win32ComPortObject *com);
+/* annoying - it says implicit declaration even though it is definitely in winbase.h */
+WINBASEAPI ULONG WINAPI GetCommPorts(_Out_writes_(uPortNumbersCount) PULONG lpPortNumbers, _In_ ULONG uPortNumbersCount, _Out_ PULONG puPortNumbersFound);
 
 #define WIN32TCP_NUM_SOCKETS 32
 
@@ -139,15 +145,15 @@ typedef struct {
 
 extern win32SocketObject win32Socket;
 
-int win32tcpInit(char *address, char *port);
+int32_t win32tcpInit(char *address, char *port);
 
 SOCKET *win32tcpCreateSocket();
 
-int win32tcpSend(SOCKET *socket, unsigned char *data, int length);
+int32_t win32tcpSend(SOCKET *socket, unsigned char *data, int32_t length);
 
-int win32tcpReceive(SOCKET *socket, unsigned char *buffer, int length);
+int32_t win32tcpReceive(SOCKET *socket, unsigned char *buffer, int32_t length);
 
-int win32tcpReceive2(SOCKET *socket, unsigned char *buffer, int length);
+int32_t win32tcpReceive2(SOCKET *socket, unsigned char *buffer, int32_t length);
 
 void win32tcpDeinit();
 #endif
