@@ -769,19 +769,14 @@ win32ComPortObject win32com;
 
 list_t *osToolsGetComPorts() {
     list_t *output = list_init();
-    ULONG listLength;
-    if (GetCommPorts(NULL, 0, &listLength) == ERROR_FILE_NOT_FOUND) {
-        return output;
-    }
-    ULONG ports[listLength];
-    ULONG numberOfPorts = listLength;
-    if (GetCommPorts(ports, listLength, &listLength) != ERROR_SUCCESS) {
-        return output;
-    }
-    for (int32_t i = 0; i < listLength; i++) {
-        char comport[16];
-        sprintf(comport, "COM%d", ports[i]);
-        list_append(output, (unitype) comport, 's');
+    char comName[24] = "\\\\.\\COM";
+    for (int32_t i = 0; i < 60; i++) {
+        sprintf(comName + 7, "%d", i);
+        HANDLE comHandle = CreateFileA(comName, GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, NULL);
+        if (comHandle != INVALID_HANDLE_VALUE) {
+            CloseHandle(comHandle);
+            list_append(output, (unitype) (comName + 4), 's');
+        }
     }
     return output;
 }

@@ -19801,6 +19801,21 @@ list_t *osToolsLoadCSVString(char *filename, ost_csv_t rowOrColumn);
 /* untether the program from the console that spawned it - will close a console if the program is run independently */
 void osToolsCloseConsole();
 
+/* get a list of all com ports (strings) */
+list_t *osToolsGetComPorts();
+
+/* opens a com port */
+int32_t osToolsComInit(char *name);
+
+/* returns number of bytes sent */
+int32_t osToolsComSend(uint8_t *data, int32_t length);
+
+/* returns number of bytes received */
+int32_t osToolsComReceive(uint8_t *buffer, int32_t length);
+
+/* closes a com port */
+int32_t osToolsComClose();
+
 #ifdef OS_WINDOWS
 #include <winsock2.h>
 #include <ws2tcpip.h>
@@ -19814,17 +19829,8 @@ typedef struct {
 
 extern win32ComPortObject win32com;
 
-/* opens a com port */
-int win32comInit(win32ComPortObject *com, char *name);
-
-/* returns number of bytes sent */
-int win32comSend(win32ComPortObject *com, unsigned char *data, int length);
-
-/* returns number of bytes received */
-int win32comReceive(win32ComPortObject *com, unsigned char *buffer, int length);
-
-/* closes a com port */
-int win32comClose(win32ComPortObject *com);
+/* annoying - it says implicit declaration even though it is definitely in winbase.h */
+WINBASEAPI ULONG WINAPI GetCommPorts(_Out_writes_(uPortNumbersCount) PULONG lpPortNumbers, _In_ ULONG uPortNumbersCount, _Out_ PULONG puPortNumbersFound);
 
 #define WIN32TCP_NUM_SOCKETS 32
 
@@ -19837,15 +19843,15 @@ typedef struct {
 
 extern win32SocketObject win32Socket;
 
-int win32tcpInit(char *address, char *port);
+int32_t win32tcpInit(char *address, char *port);
 
 SOCKET *win32tcpCreateSocket();
 
-int win32tcpSend(SOCKET *socket, unsigned char *data, int length);
+int32_t win32tcpSend(SOCKET *socket, unsigned char *data, int32_t length);
 
-int win32tcpReceive(SOCKET *socket, unsigned char *buffer, int length);
+int32_t win32tcpReceive(SOCKET *socket, unsigned char *buffer, int32_t length);
 
-int win32tcpReceive2(SOCKET *socket, unsigned char *buffer, int length);
+int32_t win32tcpReceive2(SOCKET *socket, unsigned char *buffer, int32_t length);
 
 void win32tcpDeinit();
 #endif
@@ -29086,7 +29092,7 @@ void turtleInit(GLFWwindow* window, int32_t minX, int32_t minY, int32_t maxX, in
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     turtle.textureWidth = 1024;
     turtle.textureHeight = 1024;
-    glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA, turtle.textureWidth, turtle.textureHeight, 100, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL); // 100 textures at 2048x2048
+    glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA, turtle.textureWidth, turtle.textureHeight, 100, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL); // 100 textures at 1024x1024
     #endif /* TURTLE_ENABLE_TEXTURES */
     glfwMakeContextCurrent(window); // various glfw things
     glEnable(GL_ALPHA);
@@ -33532,6 +33538,8 @@ int32_t osToolsFileDialogOpen(ost_file_dialog_multiselect_t multiselect, ost_fil
 
 #ifdef OS_WINDOWS
 
+#pragma comment (lib, "OneCore.lib")
+
 int32_t osToolsInit(char argv0[], GLFWwindow *window) {
     osToolsIndependentInit(window);
     /* get executable filepath */
@@ -33902,9 +33910,26 @@ https://learn.microsoft.com/en-us/windows/win32/devio/configuring-a-communicatio
 
 win32ComPortObject win32com;
 
-/* opens a com port */
-int32_t win32comInit(win32ComPortObject *com, char *name) {
-    strcpy(com -> name, name);
+list_t *osToolsGetComPorts() {
+    list_t *output = list_init();
+    char comName[24] = "\\\\.\\COM";
+    for (int32_t i = 0; i < 60; i++) {
+        sprintf(comName + 7, "%d", i);
+        HANDLE comHandle = CreateFileA(comName, GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, NULL);
+        if (comHandle != INVALID_HANDLE_VALUE) {
+            CloseHandle(comHandle);
+            list_append(output, (unitype) (comName + 4), 's');
+        }
+    }
+    return output;
+}
+
+int32_t osToolsComInit(char *name) {
+    if (strlen(name) < 3 || name[0] != 'C' || name[1] != 'O' || name[2] != 'M') {
+        printf("osToolsComInit: name must start with \"COM\"\n");
+        return -1;
+    }
+    strcpy(win32com.name, name);
     DCB dcb;
     BOOL fSuccess;
     /* https://support.microsoft.com/en-us/topic/howto-specify-serial-ports-larger-than-com9-db9078a5-b7b6-bf00-240f-f749ebfd913e */
@@ -33914,8 +33939,8 @@ int32_t win32comInit(win32ComPortObject *com, char *name) {
     } else {
         strcpy(comName, name);
     }
-    com -> comHandle = CreateFileA(comName, GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, NULL);
-    if (com -> comHandle == INVALID_HANDLE_VALUE) {
+    win32com.comHandle = CreateFileA(comName, GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, NULL);
+    if (win32com.comHandle == INVALID_HANDLE_VALUE) {
         printf("Could not open com port %s, error %ld\n", name, GetLastError());
         return -1;
     } else {
@@ -33926,7 +33951,7 @@ int32_t win32comInit(win32ComPortObject *com, char *name) {
     dcb.DCBlength = sizeof(DCB);
     /* Build on the current configuration by first retrieving all current */
     /* settings. */
-    fSuccess = GetCommState(com -> comHandle, &dcb);
+    fSuccess = GetCommState(win32com.comHandle, &dcb);
     if (!fSuccess) {
         /* Handle the error. */
         printf("GetCommState failed with error %ld.\n", GetLastError());
@@ -33938,14 +33963,14 @@ int32_t win32comInit(win32ComPortObject *com, char *name) {
     dcb.ByteSize = 8;             // data size, xmit and rcv
     dcb.Parity   = NOPARITY;      // parity bit
     dcb.StopBits = ONESTOPBIT;    // stop bit
-    fSuccess = SetCommState(com -> comHandle, &dcb);
+    fSuccess = SetCommState(win32com.comHandle, &dcb);
     if (!fSuccess) {
         /* Handle the error. */
         printf("SetCommState failed with error %ld.\n", GetLastError());
         return -1;
     }
     /* Get the comm config again. */
-    fSuccess = GetCommState(com -> comHandle, &dcb);
+    fSuccess = GetCommState(win32com.comHandle, &dcb);
     if (!fSuccess) {
         /* Handle the error. */
         printf("GetCommState failed with error %ld.\n", GetLastError());
@@ -33954,31 +33979,28 @@ int32_t win32comInit(win32ComPortObject *com, char *name) {
     return 0;
 }
 
-/* returns number of bytes sent */
-int32_t win32comSend(win32ComPortObject *com, uint8_t *data, int32_t length) {
+int32_t osToolsComSend(uint8_t *data, int32_t length) {
     /* https://www.codeproject.com/Articles/3061/Creating-a-Serial-communication-on-Win32#sending */
     DWORD bytes;
-    if (WriteFile(com -> comHandle, data, length, &bytes, NULL) == 0) {
-        printf("win32comSend failed with error %ld\n", GetLastError());
+    if (WriteFile(win32com.comHandle, data, length, &bytes, NULL) == 0) {
+        printf("osToolsComSend failed with error %ld\n", GetLastError());
         return -1;
     }
     return bytes;
 }
 
-/* returns number of bytes received */
-int32_t win32comReceive(win32ComPortObject *com, uint8_t *buffer, int32_t length) {
+int32_t osToolsComReceive(uint8_t *buffer, int32_t length) {
     DWORD bytes;
-    if (ReadFile(com -> comHandle, buffer, length, &bytes, NULL) == 0) {
-        printf("win32comReceive failed with error %ld\n", GetLastError());
+    if (ReadFile(win32com.comHandle, buffer, length, &bytes, NULL) == 0) {
+        printf("osToolsComReceive failed with error %ld\n", GetLastError());
         return -1;
     }
     return bytes;
 }
 
-/* closes a com port */
-int32_t win32comClose(win32ComPortObject *com) {
-    if (CloseHandle(com -> comHandle) == 0) {
-        printf("win32comClosefailed with error %ld\n", GetLastError());
+int32_t osToolsComClose() {
+    if (CloseHandle(win32com.comHandle) == 0) {
+        printf("osToolsComClose failed with error %ld\n", GetLastError());
         return -1;
     }
     return 0;
