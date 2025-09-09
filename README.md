@@ -62,14 +62,13 @@ The example project can be built with `make win` on windows or `make` on linux. 
 The example project has a set of files in the `config/` folder that can be modified to change certain aspects of the project (the font, the ribbon, and the popup). If these files are not found then default versions of these configurations are used (which happen to be identical to the ones in the `config/` folder).
 
 # To Do
-- Cleanup Win32Com and Win32Tcp
+- Cleanup Win32Tcp
+- Fix `text` penshape so it doesn't randomly cut the circles off of some text endpoints
 - Change osTools interface (specify accepted file types per call instead of globally)
     - Use lists instead of reallocing char arrays
-- Using files for popup and ribbon config is weird - at least make an option in the code to default to (for more portability)
 - Figure out a consistent convention for alpha values
 - Write wiki/documentation
 - Fix turtle initialisation with non center 0, 0 coordinates
-- Include textures as optional feature in turtle, rather than a separate unit
 - Linux COM and TCP/IP support
 
 # License (MIT)
