@@ -408,6 +408,7 @@ int32_t osToolsInit(char argv0[], GLFWwindow *window) {
         index--;
     }
     osToolsFileDialog.executableFilepath[index + 1] = '\0';
+    win32com.comList = list_init();
     return 0;
 }
 
@@ -813,7 +814,6 @@ int32_t osToolsComOpen(char *name, osToolsBaud_t baudRate) {
         printf("Could not open com port %s, error %ld\n", name, GetLastError());
         return -1;
     } else {
-        printf("Successfully opened port %s\n", name);
         list_append(win32com.comList, (unitype) name, 's');
         list_append(win32com.comList, (unitype) comHandle, 'l');
     }
@@ -825,7 +825,7 @@ int32_t osToolsComOpen(char *name, osToolsBaud_t baudRate) {
     fSuccess = GetCommState(comHandle, &dcb);
     if (!fSuccess) {
         /* Handle the error. */
-        printf("GetCommState failed with error %ld.\n", GetLastError());
+        printf("GetCommState failed with error %ld\n", GetLastError());
         return -1;
     }
     /* Fill in some DCB values and set the com state: 
@@ -837,14 +837,14 @@ int32_t osToolsComOpen(char *name, osToolsBaud_t baudRate) {
     fSuccess = SetCommState(comHandle, &dcb);
     if (!fSuccess) {
         /* Handle the error. */
-        printf("SetCommState failed with error %ld.\n", GetLastError());
+        printf("SetCommState failed with error %ld\n", GetLastError());
         return -1;
     }
     /* Get the comm config again. */
     fSuccess = GetCommState(comHandle, &dcb);
     if (!fSuccess) {
         /* Handle the error. */
-        printf("GetCommState failed with error %ld.\n", GetLastError());
+        printf("GetCommState failed with error %ld\n", GetLastError());
         return -1;
     }
     return 0;
@@ -1347,6 +1347,22 @@ void osToolsCloseConsole() {
 list_t *osToolsListComPorts() {
     list_t *output = list_init();
     return output;
+}
+
+int32_t osToolsComOpen(char *name, osToolsBaud_t baudRate) {
+    return -1;
+}
+
+int32_t osToolsComSend(char *name, uint8_t *data, int32_t length) {
+    return -1;
+}
+
+int32_t osToolsComReceive(char *name, uint8_t *buffer, int32_t length) {
+    return -1;
+}
+
+int32_t osToolsComClose(char *name) {
+    return -1;
 }
 
 #endif
