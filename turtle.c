@@ -139,6 +139,9 @@ int main(int argc, char *argv[]) {
     list_free(folders);
     list_free(files);
     list_free(filesAndFolders);
+    list_t *comPorts = osToolsListComPorts();
+    list_print(comPorts);
+    list_free(comPorts);
 
     uint32_t tps = 120; // ticks per second (locked to fps in this case)
     uint64_t tick = 0; // count number of ticks since application started

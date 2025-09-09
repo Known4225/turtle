@@ -103,20 +103,38 @@ list_t *osToolsLoadCSVString(char *filename, ost_csv_t rowOrColumn);
 /* untether the program from the console that spawned it - will close a console if the program is run independently */
 void osToolsCloseConsole();
 
+typedef enum {
+    OSTOOLS_BAUD_110 = 110,
+    OSTOOLS_BAUD_300 = 300,
+    OSTOOLS_BAUD_600 = 600,
+    OSTOOLS_BAUD_1200 = 1200,
+    OSTOOLS_BAUD_2400 = 2400,
+    OSTOOLS_BAUD_4800 = 4800,
+    OSTOOLS_BAUD_9600 = 9600,
+    OSTOOLS_BAUD_14400 = 14400,
+    OSTOOLS_BAUD_19200 = 19200,
+    OSTOOLS_BAUD_38400 = 38400,
+    OSTOOLS_BAUD_56000 = 56000,
+    OSTOOLS_BAUD_57600 = 57600,
+    OSTOOLS_BAUD_115200 = 115200,
+    OSTOOLS_BAUD_128000 = 128000,
+    OSTOOLS_BAUD_256000 = 256000,
+} osToolsBaud_t;
+
 /* get a list of all com ports (strings) */
-list_t *osToolsGetComPorts();
+list_t *osToolsListComPorts();
 
 /* opens a com port */
-int32_t osToolsComInit(char *name);
+int32_t osToolsComOpen(char *name, osToolsBaud_t baudRate);
 
 /* returns number of bytes sent */
-int32_t osToolsComSend(uint8_t *data, int32_t length);
+int32_t osToolsComSend(char *name, uint8_t *data, int32_t length);
 
 /* returns number of bytes received */
-int32_t osToolsComReceive(uint8_t *buffer, int32_t length);
+int32_t osToolsComReceive(char *name, uint8_t *buffer, int32_t length);
 
 /* closes a com port */
-int32_t osToolsComClose();
+int32_t osToolsComClose(char *name);
 
 #ifdef OS_WINDOWS
 #include <winsock2.h>
@@ -125,14 +143,10 @@ int32_t osToolsComClose();
 #include <shobjidl.h>
 
 typedef struct {
-    char name[32];
-    HANDLE comHandle;
-} win32ComPortObject;
+    list_t *comList; // format: name, HANDLE
+} win32com_t;
 
-extern win32ComPortObject win32com;
-
-/* annoying - it says implicit declaration even though it is definitely in winbase.h */
-WINBASEAPI ULONG WINAPI GetCommPorts(_Out_writes_(uPortNumbersCount) PULONG lpPortNumbers, _In_ ULONG uPortNumbersCount, _Out_ PULONG puPortNumbersFound);
+extern win32com_t win32com;
 
 #define WIN32TCP_NUM_SOCKETS 32
 
