@@ -128,7 +128,7 @@ typedef struct {
     int8_t subselect[4]; // 0 - select, 1 - mouseHover, 2 - selected, 3 - free
     int8_t output[3]; // 0 - toggle, 1 - mainselect, 2 - subselect
     int8_t mouseDown; // keeps track of previous frame mouse information
-    int32_t bounds[4]; // list of coordinate bounds (minX, minY, maxX, maxY)
+    double bounds[4]; // list of coordinate bounds (minX, minY, maxX, maxY)
     double ribbonSize;
     list_t *options;
     list_t *lengths;
@@ -157,6 +157,7 @@ typedef struct {
     double minY; // bottom of box
     double maxX; // right edge of box
     double maxY; // top of box
+    double size; // size of text
     list_t *options; // list of popup box options
     /*
     style:
@@ -173,13 +174,13 @@ typedef struct {
 extern tt_popup_t popup;
 
 /* initialise popup */
-int32_t popupInit(char *filename, double minX, double minY, double maxX, double maxY);
+int32_t popupInit(char *filename);
 
 /* initialise popup with a list instead of a config file - this function frees the list so you don't have to */
-int32_t popupInitList(list_t *config, double minX, double minY, double maxX, double maxY);
+int32_t popupInitList(list_t *config);
 
 /* internal */
-int32_t popupInitInternal(FILE *configFile, list_t *configList, int8_t fileExists, double minX, double minY, double maxX, double maxY);
+int32_t popupInitInternal(FILE *configFile, list_t *configList, int8_t fileExists);
 
 /* render popup */
 void popupUpdate();

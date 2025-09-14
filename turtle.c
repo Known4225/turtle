@@ -116,7 +116,7 @@ int main(int argc, char *argv[]) {
     turtleToolsSetTheme(TT_THEME_DARK); // dark theme preset
     ribbonInit("config/ribbonConfig.txt");
     /* initialise turtleTools popup */
-    popupInit("config/popupConfig.txt", -70, -20, 70, 20);
+    popupInit("config/popupConfig.txt");
     /* initialise osTools */
     osToolsInit(argv[0], window); // must include argv[0] to get executableFilepath, must include GLFW window
     osToolsFileDialogAddGlobalExtension("txt"); // add txt to extension restrictions

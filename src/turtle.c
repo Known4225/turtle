@@ -53,7 +53,7 @@ const char *turtleFragmentShaderSource =
 #endif /* TURTLE_ENABLE_TEXTURES */
 
 /* initializes the turtletools module */
-void turtleInit(GLFWwindow* window, int32_t minX, int32_t minY, int32_t maxX, int32_t maxY) {
+void turtleInit(GLFWwindow *window, double leftX, double bottomY, double rightX, double topY) {
     #ifndef TURTLE_ENABLE_TEXTURES
     /* fixed pipeline */
     gladLoadGL();
@@ -163,7 +163,7 @@ void turtleInit(GLFWwindow* window, int32_t minX, int32_t minY, int32_t maxX, in
     turtle.cameraDirectionLeftRight = 0;
     turtle.cameraDirectionUpDown = 0;
 
-    turtleSetWorldCoordinates(minX, minY, maxX, maxY);
+    turtleSetWorldCoordinates(leftX, bottomY, rightX, topY);
     turtle.keyCallback = NULL;
     turtle.unicodeCallback = NULL;
     glfwSetCharCallback(window, unicodeSense);
@@ -173,19 +173,19 @@ void turtleInit(GLFWwindow* window, int32_t minX, int32_t minY, int32_t maxX, in
 }
 
 /* run this to set the bounds of the window in coordinates */
-void turtleSetWorldCoordinates(int32_t minX, int32_t minY, int32_t maxX, int32_t maxY) {
+void turtleSetWorldCoordinates(double leftX, double bottomY, double rightX, double topY) {
     glfwGetWindowSize(turtle.window, &turtle.screenbounds[0], &turtle.screenbounds[1]);
-    turtle.centerAndScale[0] = (double) (maxX + minX) / 2;
-    turtle.centerAndScale[1] = (double) (maxY + minY) / 2;
-    turtle.centerAndScale[2] = (double) (maxX - minX) / 2 * turtle.screenbounds[0];
-    turtle.centerAndScale[3] = (double) (maxY - minY) / 2 * turtle.screenbounds[1];
+    turtle.centerAndScale[0] = (rightX + leftX) / 2;
+    turtle.centerAndScale[1] = (topY + bottomY) / 2;
+    turtle.centerAndScale[2] = (rightX - leftX) / 2 * turtle.screenbounds[0];
+    turtle.centerAndScale[3] = (topY - bottomY) / 2 * turtle.screenbounds[1];
     turtle.initscreenbounds[0] = turtle.screenbounds[0];
     turtle.initscreenbounds[1] = turtle.screenbounds[1];
-    turtle.initbounds[0] = minX;
-    turtle.initbounds[1] = minY;
-    turtle.initbounds[2] = maxX;
-    turtle.initbounds[3] = maxY;
-    memcpy(turtle.bounds, turtle.initbounds, 4 * sizeof(int32_t));
+    turtle.initbounds[0] = leftX;
+    turtle.initbounds[1] = bottomY;
+    turtle.initbounds[2] = rightX;
+    turtle.initbounds[3] = topY;
+    memcpy(turtle.bounds, turtle.initbounds, 4 * sizeof(double));
 }
 
 /* detect character */
