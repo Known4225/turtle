@@ -108,7 +108,7 @@ int main(int argc, char *argv[]) {
     glfwSetWindowSizeLimits(window, windowHeight * 16 / 9 * 0.4, windowHeight * 0.4, windowHeight * 16 / 9, windowHeight);
 
     /* initialise turtle */
-    turtleInit(window, -320, -180, 320, 180);
+    turtleInit(window, 0, 0, 320, 180);
     glfwSetWindowSize(window, windowHeight * 16 / 9 * 0.85, monitorSize -> height * 0.85); // doing it this way ensures the window spawns in the top left of the monitor and fixes resizing limits
     /* initialise turtleText */
     turtleTextInit("config/roberto.tgl");

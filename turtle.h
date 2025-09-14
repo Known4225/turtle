@@ -29269,10 +29269,8 @@ int8_t turtleMouseMid() {
 /* gets the mouse coordinates */
 void turtleGetMouseCoords() {
     glfwGetCursorPos(turtle.window, &turtle.mouseAbsX, &turtle.mouseAbsY); // get mouse positions (absolute)
-    turtle.mouseX = turtle.mouseAbsX;
-    turtle.mouseY = turtle.mouseAbsY;
-    turtle.mouseX = (turtle.mouseAbsX - turtle.screenbounds[0] / 2) / turtle.screenbounds[0] * (turtle.initbounds[2] - turtle.initbounds[0]);
-    turtle.mouseY = (turtle.mouseAbsY - turtle.screenbounds[1] / 2) / turtle.screenbounds[1] * (turtle.initbounds[1] - turtle.initbounds[3]);
+    turtle.mouseX = (turtle.mouseAbsX - turtle.screenbounds[0] / 2) / turtle.screenbounds[0] * (turtle.initbounds[2] - turtle.initbounds[0]) + (turtle.bounds[0] + turtle.bounds[2]) / 2;
+    turtle.mouseY = (turtle.mouseAbsY - turtle.screenbounds[1] / 2) / turtle.screenbounds[1] * (turtle.initbounds[1] - turtle.initbounds[3]) + (turtle.bounds[1] + turtle.bounds[3]) / 2;
 }
 
 /* set the background color */
@@ -29964,8 +29962,8 @@ void turtleUpdate() {
         #endif /* TURTLE_ENABLE_TEXTURES */
         double xfact = 1.0 / ((turtle.bounds[2] - turtle.bounds[0]) / 2);
         double yfact = 1.0 / ((turtle.bounds[3] - turtle.bounds[1]) / 2);
-        double xcenter = (double) turtle.screenbounds[0] / turtle.initscreenbounds[0] - 1;
-        double ycenter = (double) turtle.screenbounds[1] / turtle.initscreenbounds[1] - 1;
+        double xcenter = (double) turtle.screenbounds[0] / turtle.initscreenbounds[0] - 1 - (turtle.bounds[0] + turtle.bounds[2]) / 2 * xfact;
+        double ycenter = (double) turtle.screenbounds[1] / turtle.initscreenbounds[1] - 1 - (turtle.bounds[1] + turtle.bounds[3]) / 2 * yfact;
         double lastSize = -1;
         double lastPrez = -1;
         double precomputedLog = 5;
@@ -29973,23 +29971,23 @@ void turtleUpdate() {
         for (int32_t i = 0; i < (int32_t) len; i += 9) {
             if (renType[i] == 'd') {
                 switch (ren[i + 7].h) {
-                case 0:
-                    if (!(lastSize == ren[i + 2].d) || !(lastPrez != ren[i + 8].d)) {
+                case 0: // penshape circle
+                    if (lastSize != ren[i + 2].d || lastPrez == ren[i + 8].d) {
                         precomputedLog = ren[i + 8].d * log(2.71 + ren[i + 2].d);
                     }
                     lastSize = ren[i + 2].d;
                     lastPrez = ren[i + 8].d;
                     turtleCircleRenderInternal(ren[i].d, ren[i + 1].d, ren[i + 2].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xcenter, ycenter, xfact, yfact, precomputedLog);
                 break;
-                case 1:
+                case 1: // penshape square
                     turtleSquareRenderInternal(ren[i].d - ren[i + 2].d, ren[i + 1].d - ren[i + 2].d, ren[i].d + ren[i + 2].d, ren[i + 1].d + ren[i + 2].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xcenter, ycenter, xfact, yfact);
                 break;
-                case 2:
+                case 2: // penshape triangle
                     turtleTriangleRenderInternal(ren[i].d - ren[i + 2].d, ren[i + 1].d - ren[i + 2].d, ren[i].d + ren[i + 2].d, ren[i + 1].d - ren[i + 2].d, ren[i].d, ren[i + 1].d + ren[i + 2].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xcenter, ycenter, xfact, yfact);
                 break;
-                case 5:
-                    if (i - 9 < 0 || renType[i - 9] == 'c') {
-                        if (!(lastSize == ren[i + 2].d) || !(lastPrez != ren[i + 8].d)) {
+                case 5: // penshape text
+                    if (i - 9 < 0 || i + 9 >= len || renType[i - 1] == 'c' || ren[i - 2].h > 5) {
+                        if (lastSize != ren[i + 2].d || lastPrez == ren[i + 8].d) {
                             precomputedLog = ren[i + 8].d * log(2.71 + ren[i + 2].d);
                         }
                         lastSize = ren[i + 2].d;
