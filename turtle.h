@@ -19915,7 +19915,7 @@ extensions: pass in a list of accepted file extensions or pass in NULL to use gl
 int32_t osToolsFileDialogPrompt(ost_file_dialog_save_t openOrSave, ost_file_dialog_multiselect_t multiselect, ost_file_dialog_folder_t folder, char *prename, list_t *extensions);
 
 /* save dialog */
-int32_t osToolsFileDialogSave(ost_file_dialog_multiselect_t multiselect, ost_file_dialog_folder_t folder, char *prename, list_t *extensions);
+int32_t osToolsFileDialogSave(ost_file_dialog_folder_t folder, char *prename, list_t *extensions);
 
 /* open dialog */
 int32_t osToolsFileDialogOpen(ost_file_dialog_multiselect_t multiselect, ost_file_dialog_folder_t folder, char *prename, list_t *extensions);
@@ -33552,8 +33552,8 @@ void osToolsFileDialogSetGlobalExtensions(list_t *extensions) {
     list_copy(osToolsFileDialog.globalExtensions, extensions);
 }
 
-int32_t osToolsFileDialogSave(ost_file_dialog_multiselect_t multiselect, ost_file_dialog_folder_t folder, char *prename, list_t *extensions) {
-    return osToolsFileDialogPrompt(OSTOOLS_FILE_DIALOG_SAVE, multiselect, folder, prename, extensions);
+int32_t osToolsFileDialogSave(ost_file_dialog_folder_t folder, char *prename, list_t *extensions) {
+    return osToolsFileDialogPrompt(OSTOOLS_FILE_DIALOG_SAVE, OSTOOLS_FILE_DIALOG_SINGLE_SELECT, folder, prename, extensions);
 }
 
 int32_t osToolsFileDialogOpen(ost_file_dialog_multiselect_t multiselect, ost_file_dialog_folder_t folder, char *prename, list_t *extensions) {
