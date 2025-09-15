@@ -30308,6 +30308,7 @@ int32_t turtleTextInit(const char *filename) {
 
     if (fileExists) {
         printf("%d characters loaded from %s\n", turtleText.charCount, filename);
+        fclose(tgl);
     } else {
         printf("%d characters loaded from default font\n", turtleText.charCount);
     }
@@ -31569,6 +31570,9 @@ int32_t popupInitInternal(FILE *configFile, list_t *configList, int8_t fileExist
             list_append(popup.options, configList -> data[popup.options -> length + 1], 's');
         }
         buttonWidth += turtleTextGetUnicodeLength(popup.options -> data[popup.options -> length - 1].s, popup.size) + defaultPadding;
+    }
+    if (fileExists) {
+        fclose(configFile);
     }
     list_free(configList);
     double centerY = (turtle.initbounds[1] + turtle.initbounds[3]) / 2;
