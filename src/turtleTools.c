@@ -496,6 +496,9 @@ int32_t popupInitInternal(FILE *configFile, list_t *configList, int8_t fileExist
         }
         buttonWidth += turtleTextGetUnicodeLength(popup.options -> data[popup.options -> length - 1].s, popup.size) + defaultPadding;
     }
+    if (fileExists) {
+        fclose(configFile);
+    }
     list_free(configList);
     double centerY = (turtle.initbounds[1] + turtle.initbounds[3]) / 2;
     double height = (turtle.initbounds[3] - turtle.initbounds[1]) / 9;

@@ -201,6 +201,7 @@ int32_t turtleTextInit(const char *filename) {
 
     if (fileExists) {
         printf("%d characters loaded from %s\n", turtleText.charCount, filename);
+        fclose(tgl);
     } else {
         printf("%d characters loaded from default font\n", turtleText.charCount);
     }
