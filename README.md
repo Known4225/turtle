@@ -35,7 +35,7 @@ list is an implementation of resizable lists, similar to the way lists in python
 
 ## Turtle
 
-turtle allows you to use openGL to draw on an application window like a canvas. Using `turtleGoto()`, `turtlePenDown()`, and `turtlePenUp()`, objects can be drawn on the screen. Turtle can also directly "blit" shapes to the screen using `turtleCircle()` and `turtleQuad()`. Turtle also includes functionality to detect keyboard and mouse clicks, using the `turtleKeyPressed()` and `turtleMouseDown()` functions.
+turtle allows you to use openGL to draw on an application window like a canvas. Using `turtleGoto()`, `turtlePenDown()`, and `turtlePenUp()`, objects can be drawn on the screen. Turtle can also directly "blit" shapes to the screen using `turtleCircle()`, `turtleQuad()`, and `turtleTexture()`. Turtle also includes functionality to detect keyboard and mouse clicks, using the `turtleKeyPressed()` and `turtleMouseDown()` functions.
 
 ## TurtleText
 
@@ -63,6 +63,7 @@ The example project has a set of files in the `config/` folder that can be modif
 
 # To Do
 - Cleanup Win32Tcp
+- Correctly handle UI occlusion
 - Figure out a consistent convention for alpha values
 - Write wiki/documentation
 - Fix flipped world coordinates
