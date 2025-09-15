@@ -31364,7 +31364,7 @@ int32_t ribbonInitInternal(FILE *configFile, list_t *configList, int8_t fileExis
         tt_elements.all = list_init();
     }
     /* set ribbon parameters */
-    ribbonRender.marginSize = 10; // number of pixels between different items in the ribbon (not affected by ribbonSize)
+    ribbonRender.marginSize = (turtle.bounds[3] - turtle.bounds[1]) / 36.0; // number of pixels between different items in the ribbon (not affected by ribbonSize)
     ribbonRender.mainselect[0] = -1;
     ribbonRender.mainselect[1] = -1;
     ribbonRender.mainselect[2] = -1;
@@ -31382,7 +31382,7 @@ int32_t ribbonInitInternal(FILE *configFile, list_t *configList, int8_t fileExis
     ribbonRender.bounds[2] = turtle.bounds[2];
     ribbonRender.bounds[3] = turtle.bounds[3];
 
-    ribbonRender.ribbonSize = 1; // 1 is default, below 1 is smaller, above 1 is larger (scales as a multiplier, 0.1 is 100x smaller than 10)
+    ribbonRender.ribbonSize = (turtle.bounds[3] - turtle.bounds[1]) / 360.0; // 1 is default for 640 by 360 coordiantes, below 1 is smaller, above 1 is larger (scales as a multiplier, 0.1 is 100x smaller than 10)
     ribbonRender.options = list_init();
     ribbonRender.lengths = list_init();
 
@@ -31430,9 +31430,8 @@ void ribbonUpdate() {
     double sizeSave = turtle.pensize;
     turtlePenSize(20);
     turtlePenShape("square");
-    turtleGetMouseCoords(); // get the mouse coordinates (turtle.mouseX, turtle.mouseY)
     tt_setColor(TT_COLOR_RIBBON_TOP);
-    turtleQuad(ribbonRender.bounds[0], ribbonRender.bounds[3] - 10, ribbonRender.bounds[2], ribbonRender.bounds[3] - 10, ribbonRender.bounds[2], ribbonRender.bounds[3], ribbonRender.bounds[0], ribbonRender.bounds[3]); // render ribbon
+    turtleRectangle(ribbonRender.bounds[0], ribbonRender.bounds[3] - ribbonRender.ribbonSize * 10, ribbonRender.bounds[2], ribbonRender.bounds[3]);
     tt_setColor(TT_COLOR_TEXT_ALTERNATE);
     double cutoff = ribbonRender.bounds[0] + ribbonRender.marginSize;
     ribbonRender.mainselect[0] = -1;
@@ -31442,27 +31441,27 @@ void ribbonUpdate() {
         if (i == (uint32_t) ribbonRender.mainselect[2]) {
             double xLeft = prevCutoff - ribbonRender.marginSize / 2.0;
             double xRight = prevCutoff + ribbonRender.lengths -> data[i * 2 + 1].d + ribbonRender.marginSize / 2.0;
-            double yDown = ribbonRender.bounds[3] - 10 - 15 * (ribbonRender.options -> data[i].r -> length - 1) - ribbonRender.marginSize / 2.0;
+            double yDown = ribbonRender.bounds[3] - 10 * ribbonRender.ribbonSize - 15 * ribbonRender.ribbonSize * (ribbonRender.options -> data[i].r -> length - 1) - ribbonRender.marginSize / 2.0;
             tt_setColor(TT_COLOR_RIBBON_DROPDOWN);
-            turtleQuad(xLeft, ribbonRender.bounds[3] - 10, xRight, ribbonRender.bounds[3] - 10, xRight, yDown, xLeft, yDown); // ribbon highlight
+            turtleRectangle(xLeft, ribbonRender.bounds[3] - 10 * ribbonRender.ribbonSize, xRight, yDown); // ribbon highlight
             for (uint32_t j = 1; j < ribbonRender.options -> data[i].r -> length; j++) {
-                if (turtle.mouseY > ribbonRender.bounds[3] - 10 - 15 * j - ribbonRender.marginSize / 4.0 && turtle.mouseY < ribbonRender.bounds[3] - 10 && turtle.mouseX > xLeft && turtle.mouseX < xRight && ribbonRender.subselect[0] == -1) {
+                if (turtle.mouseY > ribbonRender.bounds[3] - 10 * ribbonRender.ribbonSize - 15 * ribbonRender.ribbonSize * j - ribbonRender.marginSize / 4.0 && turtle.mouseY < ribbonRender.bounds[3] - 10 * ribbonRender.ribbonSize && turtle.mouseX > xLeft && turtle.mouseX < xRight && ribbonRender.subselect[0] == -1) {
                     tt_setColor(TT_COLOR_RIBBON_HOVER);
-                    turtleQuad(xLeft, ribbonRender.bounds[3] - 10 - 15 * (j - 1) - ribbonRender.marginSize / 4.0, xRight, ribbonRender.bounds[3] - 10 - 15 * (j - 1) - ribbonRender.marginSize / 4.0, xRight, ribbonRender.bounds[3] - 10 - 15 * j - ribbonRender.marginSize / 3.0, xLeft, ribbonRender.bounds[3] - 10 - 15 * j - ribbonRender.marginSize / 3.0); // dropdown highlight
+                    turtleRectangle(xLeft, ribbonRender.bounds[3] - 10 * ribbonRender.ribbonSize - 15 * ribbonRender.ribbonSize * (j - 1) - ribbonRender.marginSize / 4.0, xRight, ribbonRender.bounds[3] - 10 * ribbonRender.ribbonSize - 15 * ribbonRender.ribbonSize * j - ribbonRender.marginSize / 3.0); // dropdown highlight
                     ribbonRender.subselect[0] = j;
                 }
                 tt_setColor(TT_COLOR_TEXT_ALTERNATE);
-                turtleTextWriteUnicode((unsigned char *) ribbonRender.options -> data[i].r -> data[j].s, prevCutoff, 174.5 - j * 15, 7 * ribbonRender.ribbonSize, 0);
+                turtleTextWriteUnicode((unsigned char *) ribbonRender.options -> data[i].r -> data[j].s, prevCutoff, ribbonRender.bounds[3] - 5.5 * ribbonRender.ribbonSize - j * 15 * ribbonRender.ribbonSize, 7 * ribbonRender.ribbonSize, 0);
             }
         }
         cutoff += ribbonRender.lengths -> data[i * 2].d + ribbonRender.marginSize;
-        if (turtle.mouseY > ribbonRender.bounds[3] - 10 && turtle.mouseY < ribbonRender.bounds[3] && turtle.mouseX > ribbonRender.bounds[0] + ribbonRender.marginSize / 2.0 && turtle.mouseX < cutoff - ribbonRender.marginSize / 2.0 && ribbonRender.mainselect[0] == -1) { // -217, -195, -164
+        if (turtle.mouseY > ribbonRender.bounds[3] - 10 * ribbonRender.ribbonSize && turtle.mouseY < ribbonRender.bounds[3] && turtle.mouseX > ribbonRender.bounds[0] + ribbonRender.marginSize / 2.0 && turtle.mouseX < cutoff - ribbonRender.marginSize / 2.0 && ribbonRender.mainselect[0] == -1) { // -217, -195, -164
             tt_setColor(TT_COLOR_RIBBON_SELECT);
-            turtleQuad(prevCutoff - ribbonRender.marginSize / 2.0, 179, cutoff - ribbonRender.marginSize / 2.0, 179, cutoff - ribbonRender.marginSize / 2.0, 171, prevCutoff - ribbonRender.marginSize / 2.0, 171); // render dropdown
+            turtleRectangle(prevCutoff - ribbonRender.marginSize / 2.0, ribbonRender.bounds[3] - ribbonRender.ribbonSize, cutoff - ribbonRender.marginSize / 2.0, ribbonRender.bounds[3] - 9 * ribbonRender.ribbonSize); // render dropdown
             ribbonRender.mainselect[0] = i;
         }
         tt_setColor(TT_COLOR_TEXT_ALTERNATE);
-        turtleTextWriteUnicode((unsigned char *) ribbonRender.options -> data[i].r -> data[0].s, prevCutoff, 174.5, 7 * ribbonRender.ribbonSize, 0);
+        turtleTextWriteUnicode((unsigned char *) ribbonRender.options -> data[i].r -> data[0].s, prevCutoff, ribbonRender.bounds[3] - 5.5 * ribbonRender.ribbonSize, 7 * ribbonRender.ribbonSize, 0);
     }
     if (turtleMouseDown()) { // this is hideous
         if (ribbonRender.mouseDown == 0) {
@@ -33088,6 +33087,7 @@ void textboxUpdate() {
 }
 
 void turtleToolsUpdate() {
+    turtleGetMouseCoords(); // get the mouse coordinates (turtle.mouseX, turtle.mouseY)
     char shapeSave = turtle.penshape;
     turtlePenShape("circle");
     if (tt_enabled.buttonEnabled) {
@@ -33124,6 +33124,7 @@ void turtleToolsUpdate() {
 }
 
 void turtleToolsUpdateUI() {
+    turtleGetMouseCoords(); // get the mouse coordinates (turtle.mouseX, turtle.mouseY)
     char shapeSave = turtle.penshape;
     turtlePenShape("circle");
     if (tt_enabled.buttonEnabled) {
@@ -33151,6 +33152,7 @@ void turtleToolsUpdateUI() {
 }
 
 void turtleToolsUpdateRibbonPopup() {
+    turtleGetMouseCoords(); // get the mouse coordinates (turtle.mouseX, turtle.mouseY)
     char shapeSave = turtle.penshape;
     turtlePenShape("circle");
     if (tt_enabled.ribbonEnabled) {
