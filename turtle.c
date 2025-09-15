@@ -13,7 +13,7 @@ void parseRibbonOutput() {
         }
         if (ribbonRender.output[2] == 2) { // Save
             if (osToolsFileDialog.selectedFilenames -> length == 0) {
-                if (osToolsFileDialogSave(OSTOOLS_FILE_DIALOG_SINGLE_SELECT, OSTOOLS_FILE_DIALOG_FILE, "", NULL) != -1) {
+                if (osToolsFileDialogSave(OSTOOLS_FILE_DIALOG_FILE, "", NULL) != -1) {
                     printf("Saved to: %s\n", osToolsFileDialog.selectedFilenames -> data[0].s);
                 }
             } else {
@@ -21,7 +21,7 @@ void parseRibbonOutput() {
             }
         }
         if (ribbonRender.output[2] == 3) { // Save As...
-            if (osToolsFileDialogSave(OSTOOLS_FILE_DIALOG_SINGLE_SELECT, OSTOOLS_FILE_DIALOG_FILE, "", NULL) != -1) {
+            if (osToolsFileDialogSave(OSTOOLS_FILE_DIALOG_FILE, "", NULL) != -1) {
                 printf("Saved to: %s\n", osToolsFileDialog.selectedFilenames -> data[0].s);
             }
         }
@@ -115,8 +115,18 @@ int main(int argc, char *argv[]) {
     /* initialise turtleTools ribbon */
     turtleToolsSetTheme(TT_THEME_DARK); // dark theme preset
     ribbonInit("config/ribbonConfig.txt");
+    // list_t *ribbonConfig = list_init();
+    // list_append(ribbonConfig, (unitype) "File, New, Save, Save As..., Open", 's');
+    // list_append(ribbonConfig, (unitype) "Edit, Undo, Redo, Cut, Copy, Paste", 's');
+    // list_append(ribbonConfig, (unitype) "View, Change Theme, GLFW", 's');
+    // ribbonInitList(ribbonConfig);
     /* initialise turtleTools popup */
-    popupInit("config/popupConfig.txt", -70, -20, 70, 20);
+    popupInit("config/popupConfig.txt");
+    // list_t *popupConfig = list_init();
+    // list_append(popupConfig, (unitype) "Are you sure you want to close?", 's');
+    // list_append(popupConfig, (unitype) "Cancel", 's');
+    // list_append(popupConfig, (unitype) "Close", 's');
+    // popupInitList(popupConfig);
     /* initialise osTools */
     osToolsInit(argv[0], window); // must include argv[0] to get executableFilepath, must include GLFW window
     osToolsFileDialogAddGlobalExtension("txt"); // add txt to extension restrictions
