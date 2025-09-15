@@ -63,12 +63,9 @@ The example project has a set of files in the `config/` folder that can be modif
 
 # To Do
 - Cleanup Win32Tcp
-- Fix `text` penshape so it doesn't randomly cut the circles off of some text endpoints
-- Change osTools interface (specify accepted file types per call instead of globally)
-    - Use lists instead of reallocing char arrays
 - Figure out a consistent convention for alpha values
 - Write wiki/documentation
-- Fix turtle initialisation with non center 0, 0 coordinates
+- Fix flipped world coordinates
 - Linux COM and TCP/IP support
 
 # License (MIT)
