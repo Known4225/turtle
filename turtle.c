@@ -128,7 +128,14 @@ int main(int argc, char *argv[]) {
     if (columnLike != NULL) {
         list_print(columnLike);
     }
-    turtle_texture_t empvImage = turtleTextureLoad("images/EMPV.png");
+    // turtle_texture_t empvImage = turtleTextureLoad("images/EMPV.png");
+    uint8_t array[16] = {
+        100, 100, 100, 100,
+        100, 100, 100, 100,
+        100, 100, 100, 100,
+        100, 100, 100, 100,
+    };
+    turtle_texture_t empvImage = turtleTextureLoadList(NULL, array, 4, 4, GL_GREEN);
     turtlePrintTexture(empvImage);
     list_t *folders = osToolsListFolders(".");
     list_t *files = osToolsListFiles(".");
@@ -143,7 +150,7 @@ int main(int argc, char *argv[]) {
     list_print(comPorts);
     for (int32_t i = 0; i < comPorts -> length; i++) {
         osToolsComOpen(comPorts -> data[i].s, OSTOOLS_BAUD_115200);
-        osToolsComSend(comPorts -> data[i].s, "Hello World\r\n", strlen("Hello World\r\n"));
+        osToolsComSend(comPorts -> data[i].s, (uint8_t *) "Hello World\r\n", strlen("Hello World\r\n"));
         osToolsComClose(comPorts -> data[i].s);
     }
     list_free(comPorts);

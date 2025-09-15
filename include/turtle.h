@@ -54,11 +54,10 @@ typedef struct {
     list_t *textureList; // list of texture filenames (set to "" for unloaded)
     int32_t textureWidth;
     int32_t textureHeight;
-    #endif /* TURTLE_ENABLE_TEXTURES */
-    #ifndef TURTLE_ENABLE_TEXTURES
+    #else
     /* this bit exists so that there is no size difference between compiled and linked struct (in case you compile without textures but link library with textures) */
     void *bufferList;
-    void *textureList;
+    list_t *textureList;
     int32_t textureWidth;
     int32_t textureHeight;
     #endif /* TURTLE_ENABLE_TEXTURES */
@@ -172,6 +171,9 @@ void turtleTextureRenderInternal(int32_t textureCode, double x1, double y1, doub
 
 /* load a png, jpg, or bmp to GPU memory as a texture */
 turtle_texture_t turtleTextureLoad(char *filename);
+
+/* load data from a list or array of uint8 (make one NULL) - use GL_RGB or GL_RGBA for encoding */
+turtle_texture_t turtleTextureLoadList(list_t *list, uint8_t *array, uint32_t width, uint32_t height, uint32_t encoding);
 
 /* remove a texture from GPU memory */
 int32_t turtleTextureUnload(turtle_texture_t texture);
