@@ -19036,6 +19036,9 @@ void turtleTextureRenderInternal(int32_t textureCode, double x1, double y1, doub
 /* load a png, jpg, or bmp to GPU memory as a texture */
 turtle_texture_t turtleTextureLoad(char *filename);
 
+/* load data from a list or array of uint8 (make one NULL) - use GL_RGB or GL_RGBA for encoding */
+turtle_texture_t turtleTextureLoadList(list_t *list, uint8_t *array, uint32_t width, uint32_t height, uint32_t encoding);
+
 /* remove a texture from GPU memory */
 int32_t turtleTextureUnload(turtle_texture_t texture);
 
@@ -29516,6 +29519,13 @@ turtle_texture_t turtleTextureLoad(char *filename) {
     return output;
 }
 
+turtle_texture_t turtleTextureLoadList(list_t *list, uint8_t *array, uint32_t width, uint32_t height, uint32_t encoding) {
+    printf("turtleTextureLoad: TURTLE_ENABLE_TEXTURES not enabled - textures will not render\n");
+    turtle_texture_t output;
+    output.id = -1;
+    return output;
+}
+
 int32_t turtleTextureUnload(turtle_texture_t texture) {
     return -1;
 }
@@ -29670,9 +29680,81 @@ turtle_texture_t turtleTextureLoad(char *filename) {
     return texture;
 }
 
+turtle_texture_t turtleTextureLoadList(list_t *list, uint8_t *array, uint32_t width, uint32_t height, uint32_t encoding) {
+    uint8_t stride = 0;
+    uint32_t stb_encoding = 0;
+    if (encoding == GL_RGB) {
+        stride = 3;
+        stb_encoding = STBIR_RGB;
+    } else if (encoding == GL_RGBA) {
+        stride = 4;
+        stb_encoding = STBIR_RGBA;
+    } else if (encoding == GL_GREEN) {
+        stride = 1;
+        stb_encoding = STBIR_1CHANNEL;
+    } else {
+        printf("turtleTextureLoadList only accepts GL_RGB or GL_RGBA encoding\n");
+        turtle_texture_t output;
+        output.id = -1;
+        return output;
+    }
+    uint8_t freeArrayFlag = 0;
+    if (array == NULL) {
+        if (list == NULL) {
+            printf("turtleTextureLoadList: both list and array are NULL\n");
+            turtle_texture_t output;
+            output.id = -1;
+            return output;
+        }
+        array = malloc(list -> length);
+        for (int32_t i = 0; i < list -> length; i++) {
+            array[i] = list -> data[i].b;
+        }
+        freeArrayFlag = 1;
+    }
+    unsigned char *resized = malloc(stride * turtle.textureWidth * turtle.textureHeight);
+    stbir_resize_uint8_linear(array, width, height, stride * width, resized, turtle.textureWidth, turtle.textureHeight, stride * turtle.textureWidth, stb_encoding);
+    if (freeArrayFlag) {
+        free(array);
+    }
+    if (resized == NULL) {
+        printf("turtleTextureLoadList: Could not resize image\n");
+        turtle_texture_t output;
+        output.id = -1;
+    }
+    /* find first available texture */
+    turtle_texture_t texture;
+    texture.id = -1;
+    char pointerValue[20];
+    if (freeArrayFlag) {
+        sprintf(pointerValue, "0x%X", list);
+    } else {
+        sprintf(pointerValue, "0x%X", array);
+    }
+    for (int32_t i = 0; i < turtle.textureList -> length; i++) {
+        if (strcmp(turtle.textureList -> data[i].s, "") == 0) {
+            texture.id = i;
+            free(turtle.textureList -> data[texture.id].s);
+            turtle.textureList -> data[texture.id].s = strdup(pointerValue);
+            break;
+        }
+    }
+    if (texture.id == -1) {
+        texture.id = turtle.textureList -> length;
+        list_append(turtle.textureList, (unitype) pointerValue, 's');
+    }
+    texture.width = width;
+    texture.height = height;
+    /* load to GPU */
+    glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, texture.id, turtle.textureWidth, turtle.textureHeight, 1, encoding, GL_UNSIGNED_BYTE, resized);
+    glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
+    free(resized);
+    return texture;
+}
+
 int32_t turtleTextureUnload(turtle_texture_t texture) {
     /* update list */
-    if (texture.id >= turtle.textureList -> length || texture.id < 0) {
+    if (texture.id >= turtle.textureList -> length || texture.id < 1) {
         return -1;
     }
     free(turtle.textureList -> data[texture.id].s);
