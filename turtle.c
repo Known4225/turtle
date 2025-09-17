@@ -138,14 +138,14 @@ int main(int argc, char *argv[]) {
     if (columnLike != NULL) {
         list_print(columnLike);
     }
-    // turtle_texture_t empvImage = turtleTextureLoad("images/EMPV.png");
-    uint8_t array[16] = {
-        100, 100, 100, 100,
-        100, 100, 100, 100,
-        100, 100, 100, 100,
-        100, 100, 100, 100,
-    };
-    turtle_texture_t empvImage = turtleTextureLoadList(NULL, array, 4, 4, GL_GREEN);
+    turtle_texture_t empvImage = turtleTextureLoad("images/EMPV.png");
+    // uint8_t array[16] = {
+    //     100, 100, 100, 100,
+    //     100, 100, 100, 100,
+    //     100, 100, 100, 100,
+    //     100, 100, 100, 100,
+    // };
+    // turtle_texture_t empvImage = turtleTextureLoadList(NULL, array, 4, 4, GL_GREEN);
     turtlePrintTexture(empvImage);
     list_t *folders = osToolsListFolders(".");
     list_t *files = osToolsListFiles(".");
@@ -170,31 +170,32 @@ int main(int argc, char *argv[]) {
     clock_t start, end;
 
     turtleBgColor(30, 30, 30);
+    turtleBgColor(13, 17, 23);
     int8_t buttonVar, switchVar = 0;
     int32_t dropdownVar = 0;
     double dialVar = 0.0, sliderVar = 0.0, scrollbarVarX = 0.0, scrollbarVarY = 0.0;
     list_t *dropdownOptions = list_init();
-    list_append(dropdownOptions, (unitype) "a", 's');
-    list_append(dropdownOptions, (unitype) "long item", 's');
-    list_append(dropdownOptions, (unitype) "very long item name", 's');
-    list_append(dropdownOptions, (unitype) "b", 's');
-    list_append(dropdownOptions, (unitype) "c", 's');
-    list_append(dropdownOptions, (unitype) "d", 's');
-    list_append(dropdownOptions, (unitype) "e", 's');
+    list_append(dropdownOptions, (unitype) "A", 's');
+    list_append(dropdownOptions, (unitype) "Long Item", 's');
+    list_append(dropdownOptions, (unitype) "Very Long Item Name", 's');
+    list_append(dropdownOptions, (unitype) "B", 's');
+    list_append(dropdownOptions, (unitype) "C", 's');
+    list_append(dropdownOptions, (unitype) "D", 's');
+    list_append(dropdownOptions, (unitype) "E", 's');
     tt_button_t *button = buttonInit("button", &buttonVar, 150, 20, 10);
     button -> shape = TT_BUTTON_SHAPE_ROUNDED_RECTANGLE;
-    switchInit("switch", &switchVar, 150, -20, 10);
-    dialInit("dial", &dialVar, TT_DIAL_EXP, -150, 20, 10, 0, 1000, 1);
-    dialInit("dial", &dialVar, TT_DIAL_LINEAR, -150, -20, 10, 0, 1000, 1);
-    sliderInit("slider", &sliderVar, TT_SLIDER_HORIZONTAL, TT_SLIDER_ALIGN_LEFT, -100, 35, 10, 50, 0, 255, 1);
-    sliderInit("slider", &sliderVar, TT_SLIDER_HORIZONTAL, TT_SLIDER_ALIGN_CENTER, 0, 35, 10, 50, 0, 255, 1);
-    sliderInit("slider", &sliderVar, TT_SLIDER_HORIZONTAL, TT_SLIDER_ALIGN_RIGHT, 100, 35, 10, 50, 0, 255, 1);
-    sliderInit("slider", &sliderVar, TT_SLIDER_VERTICAL, TT_SLIDER_ALIGN_LEFT, -100, -35, 10, 50, 0, 255, 1);
-    sliderInit("slider", &sliderVar, TT_SLIDER_VERTICAL, TT_SLIDER_ALIGN_CENTER, 0, -35, 10, 50, 0, 255, 1);
-    sliderInit("slider", &sliderVar, TT_SLIDER_VERTICAL, TT_SLIDER_ALIGN_RIGHT, 100, -35, 10, 50, 0, 255, 1);
+    switchInit("Switch", &switchVar, 150, -20, 10);
+    dialInit("Dial", &dialVar, TT_DIAL_EXP, -150, 20, 10, 0, 1000, 1);
+    dialInit("Dial", &dialVar, TT_DIAL_LINEAR, -150, -20, 10, 0, 1000, 1);
+    sliderInit("Slider", &sliderVar, TT_SLIDER_HORIZONTAL, TT_SLIDER_ALIGN_LEFT, -100, 35, 10, 50, 0, 255, 1);
+    sliderInit("Slider", &sliderVar, TT_SLIDER_HORIZONTAL, TT_SLIDER_ALIGN_CENTER, 0, 35, 10, 50, 0, 255, 1);
+    sliderInit("Slider", &sliderVar, TT_SLIDER_HORIZONTAL, TT_SLIDER_ALIGN_RIGHT, 100, 35, 10, 50, 0, 255, 1);
+    sliderInit("Slider", &sliderVar, TT_SLIDER_VERTICAL, TT_SLIDER_ALIGN_LEFT, -100, -35, 10, 50, 0, 255, 1);
+    sliderInit("Slider", &sliderVar, TT_SLIDER_VERTICAL, TT_SLIDER_ALIGN_CENTER, 0, -35, 10, 50, 0, 255, 1);
+    sliderInit("Slider", &sliderVar, TT_SLIDER_VERTICAL, TT_SLIDER_ALIGN_RIGHT, 100, -35, 10, 50, 0, 255, 1);
     scrollbarInit(&scrollbarVarX, TT_SCROLLBAR_HORIZONTAL, 20, -170, 10, 550, 50);
     scrollbarInit(&scrollbarVarY, TT_SCROLLBAR_VERTICAL, 310, 0, 10, 320, 33);
-    dropdownInit("dropdown", dropdownOptions, &dropdownVar, TT_DROPDOWN_ALIGN_CENTER, 0, 70, 10);
+    dropdownInit("Dropdown", dropdownOptions, &dropdownVar, TT_DROPDOWN_ALIGN_CENTER, 0, 70, 10);
     textboxInit("Textbox", 128, -50, -110, 10, 100);
 
     double power = 0.0, speed = 0.0, exposure = 0.0, x = 103, y = 95, z = 215;
