@@ -182,7 +182,7 @@ int main(int argc, char *argv[]) {
     list_append(dropdownOptions, (unitype) "C", 's');
     list_append(dropdownOptions, (unitype) "D", 's');
     list_append(dropdownOptions, (unitype) "E", 's');
-    tt_button_t *button = buttonInit("button", &buttonVar, 150, 20, 10);
+    tt_button_t *button = buttonInit("Button", &buttonVar, 150, 20, 10);
     button -> shape = TT_BUTTON_SHAPE_ROUNDED_RECTANGLE;
     switchInit("Switch", &switchVar, 150, -20, 10);
     dialInit("Dial", &dialVar, TT_DIAL_EXP, -150, 20, 10, 0, 1000, 1);
