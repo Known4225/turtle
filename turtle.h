@@ -29655,6 +29655,7 @@ turtle_texture_t turtleTextureLoad(char *filename) {
         printf("turtleTextureLoad: Could not resize image %s\n", filename);
         turtle_texture_t output;
         output.id = -1;
+        return output;
     }
     /* find first available texture */
     turtle_texture_t texture;
@@ -32405,7 +32406,7 @@ void dialUpdate() {
                     dialAngle = 359.99999999;
                 }
                 if (dialp -> type == TT_DIAL_LOG) {
-                    *(dialp -> variable) = round(dialp -> range[0] + (dialp -> range[1] - dialp -> range[0]) * (log(dialAngle) / log(360)));
+                    *(dialp -> variable) = round(dialp -> range[0] + (dialp -> range[1] - dialp -> range[0]) * (log(1 + dialAngle) / log(361)));
                 } else if (dialp -> type == TT_DIAL_LINEAR) {
                     *(dialp -> variable) = round(dialp -> range[0] + ((dialp -> range[1] - dialp -> range[0]) * dialAngle / 360));
                 } else if (dialp -> type == TT_DIAL_EXP) {

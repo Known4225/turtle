@@ -185,8 +185,9 @@ int main(int argc, char *argv[]) {
     tt_button_t *button = buttonInit("Button", &buttonVar, 150, 20, 10);
     button -> shape = TT_BUTTON_SHAPE_ROUNDED_RECTANGLE;
     switchInit("Switch", &switchVar, 150, -20, 10);
-    dialInit("Dial", &dialVar, TT_DIAL_EXP, -150, 20, 10, 0, 1000, 1);
-    dialInit("Dial", &dialVar, TT_DIAL_LINEAR, -150, -20, 10, 0, 1000, 1);
+    dialInit("Exp", &dialVar, TT_DIAL_EXP, -150, 20, 10, 0, 1000, 1);
+    dialInit("Linear", &dialVar, TT_DIAL_LINEAR, -150, -20, 10, 0, 1000, 1);
+    dialInit("Log", &dialVar, TT_DIAL_LOG, -150, -60, 10, 0, 1000, 1);
     sliderInit("Slider", &sliderVar, TT_SLIDER_HORIZONTAL, TT_SLIDER_ALIGN_LEFT, -100, 35, 10, 50, 0, 255, 1);
     sliderInit("Slider", &sliderVar, TT_SLIDER_HORIZONTAL, TT_SLIDER_ALIGN_CENTER, 0, 35, 10, 50, 0, 255, 1);
     sliderInit("Slider", &sliderVar, TT_SLIDER_HORIZONTAL, TT_SLIDER_ALIGN_RIGHT, 100, 35, 10, 50, 0, 255, 1);
