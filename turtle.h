@@ -29648,6 +29648,11 @@ turtle_texture_t turtleTextureLoad(char *filename) {
         stb_encoding = STBIR_RGBA;
         stride = 4;
     }
+    if (nbChannels == 1) {
+        encoding = GL_RED;
+        stb_encoding = STBIR_1CHANNEL;
+        stride = 1;
+    }
     unsigned char *resized = malloc(stride * turtle.textureWidth * turtle.textureHeight);
     stbir_resize_uint8_linear(image, width, height, stride * width, resized, turtle.textureWidth, turtle.textureHeight, stride * turtle.textureWidth, stb_encoding);
     free(image);
