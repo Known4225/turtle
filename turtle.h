@@ -29655,6 +29655,7 @@ turtle_texture_t turtleTextureLoad(char *filename) {
         printf("turtleTextureLoad: Could not resize image %s\n", filename);
         turtle_texture_t output;
         output.id = -1;
+        return output;
     }
     /* find first available texture */
     turtle_texture_t texture;
