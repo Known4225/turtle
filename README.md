@@ -12,6 +12,8 @@ The following build commands are available:
 
 - `make rel` - The release build command, this builds the example project with optimisations turned on (the library is always built with optimisations on)
 
+- - `make reltextures` - The release build command for linux including texture support.
+
 - `make lib` - This command will package and build the `Linux/turtle.a` library.
 
 - `make source` - This command will build the `turtle.c` example project from source, without packaging or building a library. This is useful for faster compilation during the development of turtle libraries.
@@ -22,8 +24,11 @@ The following build commands are available:
 
 - `make winrel` - The release build command for windows.
 
+- `make winreltextures` - The release build command for windows including texture support.
+
 - `make winsource` - The build-from-source command for windows
 
 - `make winsourcerel` - The release build-from-source command for windows
 
 - `make singlefile` - This will package the turtle headers and source files into a single `turtle.h` file.
+
