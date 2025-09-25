@@ -18951,9 +18951,6 @@ typedef struct {
 
 extern turtle_t turtle;
 
-/* initialises the turtle module */
-void turtleInit(GLFWwindow *window, double leftX, double bottomY, double rightX, double topY);
-
 /* run this to set the bounds of the window in coordinates */
 void turtleSetWorldCoordinates(double leftX, double bottomY, double rightX, double topY);
 
@@ -18986,6 +18983,9 @@ int8_t turtleMouseMiddle();
 
 /* alternate duplicate of top level boolean output call to check if the middle mouse button is currently being held down */
 int8_t turtleMouseMid();
+
+/* initialises the turtle module */
+void turtleInit(GLFWwindow *window, double leftX, double bottomY, double rightX, double topY);
 
 /* gets the mouse coordinates */
 void turtleGetMouseCoords();
@@ -19826,7 +19826,7 @@ typedef enum {
 list_t *osToolsListComPorts();
 
 /* opens a com port */
-int32_t osToolsComOpen(char *name, osToolsBaud_t baudRate);
+int32_t osToolsComOpen(char *name, osToolsBaud_t baudRate, int32_t timeoutMilliseconds);
 
 /* returns number of bytes sent */
 int32_t osToolsComSend(char *name, uint8_t *data, int32_t length);
@@ -29635,7 +29635,7 @@ turtle_texture_t turtleTextureLoad(char *filename) {
     int nbChannels;
     unsigned char *image = stbi_load(filename, &width, &height, &nbChannels, 0);
     if (image == NULL) {
-        printf("turtleTextureLoad: Could not load image %s\n", filename);
+        // printf("turtleTextureLoad: Could not load image %s\n", filename);
         turtle_texture_t output;
         output.id = -1;
         return output;
@@ -29695,7 +29695,7 @@ turtle_texture_t turtleTextureLoadList(list_t *list, uint8_t *array, uint32_t wi
     } else if (encoding == GL_RGBA) {
         stride = 4;
         stb_encoding = STBIR_RGBA;
-    } else if (encoding == GL_GREEN) {
+    } else if (encoding == GL_RED || encoding == GL_GREEN || encoding == GL_BLUE || encoding == GL_ALPHA) {
         stride = 1;
         stb_encoding = STBIR_1CHANNEL;
     } else {
@@ -29766,6 +29766,7 @@ int32_t turtleTextureUnload(turtle_texture_t texture) {
     free(turtle.textureList -> data[texture.id].s);
     turtle.textureList -> data[texture.id].s = strdup("");
     /* remove from GPU */
+    // glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, texture.id, turtle.textureWidth, turtle.textureHeight, 1, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
     return 0;
 }
 
@@ -30027,13 +30028,15 @@ void turtleUpdate() {
     int8_t *renType = turtle.penPos -> type;
     uint64_t oldHash = turtle.penHash;
     turtle.penHash = 0; // I don't use this but it's an idea: https://stackoverflow.com/questions/57455444/very-low-collision-non-cryptographic-hashing-function
-    for (uint32_t i = 0; i < len; i++) {
-        turtle.penHash += turtle.penPos -> data[i].l; // simple addition hash. I know not technically safe since i cast all sizes to 8 byte, but it should still work
-    }
-    if (len != turtle.lastLength || oldHash != turtle.penHash) {
-        changed = 1;
-        turtle.lastLength = len;
-    }
+    /* not sure whether to enable this code (saves GPU when no motion but imperfect - sometimes fails to update screen when it should be updated) */
+    // for (uint32_t i = 0; i < len; i++) {
+    //     turtle.penHash += turtle.penPos -> data[i].l; // simple addition hash. I know not technically safe since i cast all sizes to 8 byte, but it should still work
+    // }
+    // if (len != turtle.lastLength || oldHash != turtle.penHash) {
+    //     changed = 1;
+    //     turtle.lastLength = len;
+    // }
+    changed = 1;
     glfwGetWindowSize(turtle.window, &turtle.screenbounds[0], &turtle.screenbounds[1]);
     if (turtle.screenbounds[0] != turtle.lastscreenbounds[0] || turtle.screenbounds[1] != turtle.lastscreenbounds[1]) {
         changed = 1;
@@ -32114,6 +32117,7 @@ void buttonUpdate() {
     for (uint32_t i = 0; i < tt_elements.buttons -> length; i++) {
         tt_button_t *buttonp = (tt_button_t *) (tt_elements.buttons -> data[i].p);
         if (buttonp -> enabled == TT_ELEMENT_HIDE) {
+            buttonp -> status = 0;
             continue;
         }
         double buttonX = buttonp -> x;
@@ -32335,7 +32339,8 @@ void switchUpdate() {
 /* angle between two coordinates (in degrees) */
 double angleBetween(double x1, double y1, double x2, double y2) {
     double output;
-    if (y2 - y1 < 0) {
+    /* TODO - Fix issue with y2 - y1 equal to 0 breaking the angle */
+    if (y2 - y1 <= 0) {
         output = 180 + atan((x2 - x1) / (y2 - y1)) * 57.2958;
     } else {
         output = atan((x2 - x1) / (y2 - y1)) * 57.2958;
@@ -33178,7 +33183,6 @@ void textboxUpdate() {
 }
 
 void turtleToolsUpdate() {
-    turtleGetMouseCoords(); // get the mouse coordinates (turtle.mouseX, turtle.mouseY)
     char shapeSave = turtle.penshape;
     turtlePenShape("circle");
     if (tt_enabled.buttonEnabled) {
@@ -33215,7 +33219,6 @@ void turtleToolsUpdate() {
 }
 
 void turtleToolsUpdateUI() {
-    turtleGetMouseCoords(); // get the mouse coordinates (turtle.mouseX, turtle.mouseY)
     char shapeSave = turtle.penshape;
     turtlePenShape("circle");
     if (tt_enabled.buttonEnabled) {
@@ -33243,7 +33246,6 @@ void turtleToolsUpdateUI() {
 }
 
 void turtleToolsUpdateRibbonPopup() {
-    turtleGetMouseCoords(); // get the mouse coordinates (turtle.mouseX, turtle.mouseY)
     char shapeSave = turtle.penshape;
     turtlePenShape("circle");
     if (tt_enabled.ribbonEnabled) {
@@ -34041,7 +34043,7 @@ list_t *osToolsListComPorts() {
     return output;
 }
 
-int32_t osToolsComOpen(char *name, osToolsBaud_t baudRate) {
+int32_t osToolsComOpen(char *name, osToolsBaud_t baudRate, int32_t timeoutMilliseconds) {
     /* verify COM */
     if (strlen(name) < 3 || name[0] != 'C' || name[1] != 'O' || name[2] != 'M') {
         printf("osToolsComOpen: name must start with \"COM\"\n");
@@ -34105,6 +34107,9 @@ int32_t osToolsComOpen(char *name, osToolsBaud_t baudRate) {
         printf("GetCommState failed with error %ld\n", GetLastError());
         return -1;
     }
+    /* Set comm timeout */
+    COMMTIMEOUTS timeout = {0, 0, timeoutMilliseconds, 0, 0};
+    fSuccess = SetCommTimeouts(comHandle, &timeout);
     return 0;
 }
 
@@ -34607,7 +34612,7 @@ list_t *osToolsListComPorts() {
     return output;
 }
 
-int32_t osToolsComOpen(char *name, osToolsBaud_t baudRate) {
+int32_t osToolsComOpen(char *name, osToolsBaud_t baudRate, int32_t timeoutMilliseconds) {
     return -1;
 }
 

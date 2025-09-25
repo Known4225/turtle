@@ -159,7 +159,7 @@ int main(int argc, char *argv[]) {
     list_t *comPorts = osToolsListComPorts();
     list_print(comPorts);
     for (int32_t i = 0; i < comPorts -> length; i++) {
-        osToolsComOpen(comPorts -> data[i].s, OSTOOLS_BAUD_115200);
+        osToolsComOpen(comPorts -> data[i].s, OSTOOLS_BAUD_115200, 100);
         osToolsComSend(comPorts -> data[i].s, (uint8_t *) "Hello World\r\n", strlen("Hello World\r\n"));
         osToolsComClose(comPorts -> data[i].s);
     }
