@@ -783,7 +783,7 @@ list_t *osToolsListComPorts() {
     return output;
 }
 
-int32_t osToolsComOpen(char *name, osToolsBaud_t baudRate) {
+int32_t osToolsComOpen(char *name, osToolsBaud_t baudRate, int32_t timeoutMilliseconds) {
     /* verify COM */
     if (strlen(name) < 3 || name[0] != 'C' || name[1] != 'O' || name[2] != 'M') {
         printf("osToolsComOpen: name must start with \"COM\"\n");
@@ -847,6 +847,9 @@ int32_t osToolsComOpen(char *name, osToolsBaud_t baudRate) {
         printf("GetCommState failed with error %ld\n", GetLastError());
         return -1;
     }
+    /* Set comm timeout */
+    COMMTIMEOUTS timeout = {0, 0, timeoutMilliseconds, 0, 0};
+    fSuccess = SetCommTimeouts(comHandle, &timeout);
     return 0;
 }
 
@@ -1349,7 +1352,7 @@ list_t *osToolsListComPorts() {
     return output;
 }
 
-int32_t osToolsComOpen(char *name, osToolsBaud_t baudRate) {
+int32_t osToolsComOpen(char *name, osToolsBaud_t baudRate, int32_t timeoutMilliseconds) {
     return -1;
 }
 

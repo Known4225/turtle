@@ -128,7 +128,7 @@ typedef struct {
     int8_t subselect[4]; // 0 - select, 1 - mouseHover, 2 - selected, 3 - free
     int8_t output[3]; // 0 - toggle, 1 - mainselect, 2 - subselect
     int8_t mouseDown; // keeps track of previous frame mouse information
-    double bounds[4]; // list of coordinate bounds (minX, minY, maxX, maxY)
+    int32_t bounds[4]; // list of coordinate bounds (minX, minY, maxX, maxY)
     double ribbonSize;
     list_t *options;
     list_t *lengths;

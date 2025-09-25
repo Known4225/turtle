@@ -125,7 +125,7 @@ typedef enum {
 list_t *osToolsListComPorts();
 
 /* opens a com port */
-int32_t osToolsComOpen(char *name, osToolsBaud_t baudRate);
+int32_t osToolsComOpen(char *name, osToolsBaud_t baudRate, int32_t timeoutMilliseconds);
 
 /* returns number of bytes sent */
 int32_t osToolsComSend(char *name, uint8_t *data, int32_t length);

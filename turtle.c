@@ -13,7 +13,7 @@ void parseRibbonOutput() {
         }
         if (ribbonRender.output[2] == 2) { // Save
             if (osToolsFileDialog.selectedFilenames -> length == 0) {
-                if (osToolsFileDialogSave(OSTOOLS_FILE_DIALOG_FILE, "", NULL) != -1) {
+                if (osToolsFileDialogSave(OSTOOLS_FILE_DIALOG_FILE, "", NULL) != -1) { 
                     printf("Saved to: %s\n", osToolsFileDialog.selectedFilenames -> data[0].s);
                 }
             } else {
@@ -159,7 +159,7 @@ int main(int argc, char *argv[]) {
     list_t *comPorts = osToolsListComPorts();
     list_print(comPorts);
     for (int32_t i = 0; i < comPorts -> length; i++) {
-        osToolsComOpen(comPorts -> data[i].s, OSTOOLS_BAUD_115200);
+        osToolsComOpen(comPorts -> data[i].s, OSTOOLS_BAUD_115200, 100);
         osToolsComSend(comPorts -> data[i].s, (uint8_t *) "Hello World\r\n", strlen("Hello World\r\n"));
         osToolsComClose(comPorts -> data[i].s);
     }

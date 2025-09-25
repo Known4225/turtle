@@ -952,6 +952,7 @@ void buttonUpdate() {
     for (uint32_t i = 0; i < tt_elements.buttons -> length; i++) {
         tt_button_t *buttonp = (tt_button_t *) (tt_elements.buttons -> data[i].p);
         if (buttonp -> enabled == TT_ELEMENT_HIDE) {
+            buttonp -> status = 0;
             continue;
         }
         double buttonX = buttonp -> x;
@@ -1173,7 +1174,7 @@ void switchUpdate() {
 /* angle between two coordinates (in degrees) */
 double angleBetween(double x1, double y1, double x2, double y2) {
     double output;
-    if (y2 - y1 < 0) {
+    if (y2 - y1 <= 0) {
         output = 180 + atan((x2 - x1) / (y2 - y1)) * 57.2958;
     } else {
         output = atan((x2 - x1) / (y2 - y1)) * 57.2958;
@@ -1248,7 +1249,7 @@ void dialUpdate() {
                     dialAngle = 359.99999999;
                 }
                 if (dialp -> type == TT_DIAL_LOG) {
-                    *(dialp -> variable) = round(dialp -> range[0] + (dialp -> range[1] - dialp -> range[0]) * (log(1 + dialAngle) / log(361)));
+                    *(dialp -> variable) = round(dialp -> range[0] + (dialp -> range[1] - dialp -> range[0]) * (log(dialAngle) / log(360)));
                 } else if (dialp -> type == TT_DIAL_LINEAR) {
                     *(dialp -> variable) = round(dialp -> range[0] + ((dialp -> range[1] - dialp -> range[0]) * dialAngle / 360));
                 } else if (dialp -> type == TT_DIAL_EXP) {
@@ -2016,7 +2017,6 @@ void textboxUpdate() {
 }
 
 void turtleToolsUpdate() {
-    turtleGetMouseCoords(); // get the mouse coordinates (turtle.mouseX, turtle.mouseY)
     char shapeSave = turtle.penshape;
     turtlePenShape("circle");
     if (tt_enabled.buttonEnabled) {
@@ -2053,7 +2053,6 @@ void turtleToolsUpdate() {
 }
 
 void turtleToolsUpdateUI() {
-    turtleGetMouseCoords(); // get the mouse coordinates (turtle.mouseX, turtle.mouseY)
     char shapeSave = turtle.penshape;
     turtlePenShape("circle");
     if (tt_enabled.buttonEnabled) {
@@ -2081,7 +2080,6 @@ void turtleToolsUpdateUI() {
 }
 
 void turtleToolsUpdateRibbonPopup() {
-    turtleGetMouseCoords(); // get the mouse coordinates (turtle.mouseX, turtle.mouseY)
     char shapeSave = turtle.penshape;
     turtlePenShape("circle");
     if (tt_enabled.ribbonEnabled) {
