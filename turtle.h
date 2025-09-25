@@ -30396,7 +30396,6 @@ int32_t turtleTextInit(const char *filename) {
 
     if (fileExists) {
         printf("%d characters loaded from %s\n", turtleText.charCount, filename);
-        fclose(tgl);
     } else {
         printf("%d characters loaded from default font\n", turtleText.charCount);
     }
@@ -31086,8 +31085,8 @@ void generateDefaultFont(list_t *generatedFont) {
     list_append(generatedFont, (unitype) "ι, 1, 2, -160, 20, b, -160, -70, -160, -105, -130, -100", 's');
     list_append(generatedFont, (unitype) "κ, 3, 2, -160, -100, -160, 20, 3, -160, -40, -140, -40, -85, 20, 2, -140, -40, -85, -100", 's');
     list_append(generatedFont, (unitype) "λ, 2, 2, b, -150, 50, -140, 50, -135, 40, b, -85, -90, -80, -100, -70, -100, 2, -120, 0, -160, -100", 's');
-    list_append(generatedFont, (unitype) "μ, 3, 2, -70, 20, -70, -100, 3, b, -70, -80, -80, -100, b, -115, -100, -160, -100, -160, -60, -160, 20, 2, -160, -155, -160, 20", 's');
-    list_append(generatedFont, (unitype) "µ, 3, 2, -70, 20, -70, -100, 3, b, -70, -80, -80, -100, b, -115, -100, -160, -100, -160, -60, -160, 20, 2, -160, -155, -160, 20", 's');
+    list_append(generatedFont, (unitype) "μ, 2, 2, -70, 20, -70, -100, 4, b, -70, -80, -80, -100, b, -115, -100, -160, -100, -160, -60, -160, 20, -160, -155", 's');
+    list_append(generatedFont, (unitype) "µ, 2, 2, -70, 20, -70, -100, 4, b, -70, -80, -80, -100, b, -115, -100, -160, -100, -160, -60, -160, 20, -160, -155", 's');
     list_append(generatedFont, (unitype) "ν, 1, 3, -160, 20, -115, -100, -70, 20", 's');
     list_append(generatedFont, (unitype) "ξ, 1, 6, b, -85, 30, -100, 40, b, -120, 40, -160, 40, b, -160, 5, -160, -30, b, -110, -30, -160, -30, b, -160, -65, -160, -100, b, -110, -100, -70, -100, -100, -135", 's');
     list_append(generatedFont, (unitype) "ο, 1, 4, b, -115, -100, -70, -100, b, -70, -40, -70, 20, b, -115, 20, -160, 20, b, -160, -40, -160, -100, -115, -100", 's');
