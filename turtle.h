@@ -18903,8 +18903,8 @@ typedef struct {
     int32_t screenbounds[2]; // list of screen bounds (pixels)
     int32_t lastscreenbounds[2]; // list of screen bounds last frame
     int32_t initscreenbounds[2]; // screenbounds at initialisation
-    int32_t initbounds[4]; // list of coordinate bounds at initialisation (minX, minY, maxX, maxY)
-    int32_t bounds[4]; // list of coordinate bounds (minX, minY, maxX, maxY)
+    double initbounds[4]; // list of coordinate bounds at initialisation (leftX, bottomY, rightX, topY)
+    double bounds[4]; // list of coordinate bounds (leftX, bottomY, rightX, topY)
     double centerAndScale[4]; // centerX, centerY, ratioX, ratioY
     double mouseX; // mouseX and mouseY variables
     double mouseY;
@@ -18952,7 +18952,7 @@ typedef struct {
 extern turtle_t turtle;
 
 /* run this to set the bounds of the window in coordinates */
-void turtleSetWorldCoordinates(int32_t minX, int32_t minY, int32_t maxX, int32_t maxY);
+void turtleSetWorldCoordinates(double leftX, double bottomY, double rightX, double topY);
 
 /* detect character */
 void unicodeSense(GLFWwindow *window, uint32_t codepoint);
@@ -18985,7 +18985,7 @@ int8_t turtleMouseMiddle();
 int8_t turtleMouseMid();
 
 /* initialises the turtle module */
-void turtleInit(GLFWwindow *window, int32_t minX, int32_t minY, int32_t maxX, int32_t maxY);
+void turtleInit(GLFWwindow *window, double leftX, double bottomY, double rightX, double topY);
 
 /* gets the mouse coordinates */
 void turtleGetMouseCoords();
@@ -19325,7 +19325,7 @@ typedef struct {
     int8_t subselect[4]; // 0 - select, 1 - mouseHover, 2 - selected, 3 - free
     int8_t output[3]; // 0 - toggle, 1 - mainselect, 2 - subselect
     int8_t mouseDown; // keeps track of previous frame mouse information
-    int32_t bounds[4]; // list of coordinate bounds (minX, minY, maxX, maxY)
+    double bounds[4]; // list of coordinate bounds (minX, minY, maxX, maxY)
     double ribbonSize;
     list_t *options;
     list_t *lengths;
@@ -29037,7 +29037,7 @@ const char *turtleFragmentShaderSource =
 #endif /* TURTLE_ENABLE_TEXTURES */
 
 /* initializes the turtletools module */
-void turtleInit(GLFWwindow* window, int32_t minX, int32_t minY, int32_t maxX, int32_t maxY) {
+void turtleInit(GLFWwindow *window, double leftX, double bottomY, double rightX, double topY) {
     #ifndef TURTLE_ENABLE_TEXTURES
     /* fixed pipeline */
     gladLoadGL();
@@ -29147,7 +29147,7 @@ void turtleInit(GLFWwindow* window, int32_t minX, int32_t minY, int32_t maxX, in
     turtle.cameraDirectionLeftRight = 0;
     turtle.cameraDirectionUpDown = 0;
 
-    turtleSetWorldCoordinates(minX, minY, maxX, maxY);
+    turtleSetWorldCoordinates(leftX, bottomY, rightX, topY);
     turtle.keyCallback = NULL;
     turtle.unicodeCallback = NULL;
     glfwSetCharCallback(window, unicodeSense);
@@ -29157,19 +29157,19 @@ void turtleInit(GLFWwindow* window, int32_t minX, int32_t minY, int32_t maxX, in
 }
 
 /* run this to set the bounds of the window in coordinates */
-void turtleSetWorldCoordinates(int32_t minX, int32_t minY, int32_t maxX, int32_t maxY) {
+void turtleSetWorldCoordinates(double leftX, double bottomY, double rightX, double topY) {
     glfwGetWindowSize(turtle.window, &turtle.screenbounds[0], &turtle.screenbounds[1]);
-    turtle.centerAndScale[0] = (double) (maxX + minX) / 2;
-    turtle.centerAndScale[1] = (double) (maxY + minY) / 2;
-    turtle.centerAndScale[2] = (double) (maxX - minX) / 2 * turtle.screenbounds[0];
-    turtle.centerAndScale[3] = (double) (maxY - minY) / 2 * turtle.screenbounds[1];
+    turtle.centerAndScale[0] = (rightX + leftX) / 2;
+    turtle.centerAndScale[1] = (topY + bottomY) / 2;
+    turtle.centerAndScale[2] = (rightX - leftX) / 2 * turtle.screenbounds[0];
+    turtle.centerAndScale[3] = (topY - bottomY) / 2 * turtle.screenbounds[1];
     turtle.initscreenbounds[0] = turtle.screenbounds[0];
     turtle.initscreenbounds[1] = turtle.screenbounds[1];
-    turtle.initbounds[0] = minX;
-    turtle.initbounds[1] = minY;
-    turtle.initbounds[2] = maxX;
-    turtle.initbounds[3] = maxY;
-    memcpy(turtle.bounds, turtle.initbounds, 4 * sizeof(int32_t));
+    turtle.initbounds[0] = leftX;
+    turtle.initbounds[1] = bottomY;
+    turtle.initbounds[2] = rightX;
+    turtle.initbounds[3] = topY;
+    memcpy(turtle.bounds, turtle.initbounds, 4 * sizeof(double));
 }
 
 /* detect character */
@@ -29272,10 +29272,8 @@ int8_t turtleMouseMid() {
 /* gets the mouse coordinates */
 void turtleGetMouseCoords() {
     glfwGetCursorPos(turtle.window, &turtle.mouseAbsX, &turtle.mouseAbsY); // get mouse positions (absolute)
-    turtle.mouseX = turtle.mouseAbsX;
-    turtle.mouseY = turtle.mouseAbsY;
-    turtle.mouseX = (turtle.mouseAbsX - turtle.screenbounds[0] / 2) / turtle.screenbounds[0] * (turtle.initbounds[2] - turtle.initbounds[0]);
-    turtle.mouseY = (turtle.mouseAbsY - turtle.screenbounds[1] / 2) / turtle.screenbounds[1] * (turtle.initbounds[1] - turtle.initbounds[3]);
+    turtle.mouseX = (turtle.mouseAbsX - turtle.screenbounds[0] / 2) / turtle.screenbounds[0] * (turtle.initbounds[2] - turtle.initbounds[0]) + (turtle.bounds[0] + turtle.bounds[2]) / 2;
+    turtle.mouseY = (turtle.mouseAbsY - turtle.screenbounds[1] / 2) / turtle.screenbounds[1] * (turtle.initbounds[1] - turtle.initbounds[3]) + (turtle.bounds[1] + turtle.bounds[3]) / 2;
 }
 
 /* set the background color */
@@ -30030,6 +30028,7 @@ void turtleUpdate() {
     int8_t *renType = turtle.penPos -> type;
     uint64_t oldHash = turtle.penHash;
     turtle.penHash = 0; // I don't use this but it's an idea: https://stackoverflow.com/questions/57455444/very-low-collision-non-cryptographic-hashing-function
+    /* not sure whether to enable this code (saves GPU when no motion but imperfect - sometimes fails to update screen when it should be updated) */
     // for (uint32_t i = 0; i < len; i++) {
     //     turtle.penHash += turtle.penPos -> data[i].l; // simple addition hash. I know not technically safe since i cast all sizes to 8 byte, but it should still work
     // }
@@ -30054,8 +30053,8 @@ void turtleUpdate() {
         #endif /* TURTLE_ENABLE_TEXTURES */
         double xfact = 1.0 / ((turtle.bounds[2] - turtle.bounds[0]) / 2);
         double yfact = 1.0 / ((turtle.bounds[3] - turtle.bounds[1]) / 2);
-        double xcenter = (double) turtle.screenbounds[0] / turtle.initscreenbounds[0] - 1;
-        double ycenter = (double) turtle.screenbounds[1] / turtle.initscreenbounds[1] - 1;
+        double xcenter = (double) turtle.screenbounds[0] / turtle.initscreenbounds[0] - 1 - (turtle.bounds[0] + turtle.bounds[2]) / 2 * xfact;
+        double ycenter = (double) turtle.screenbounds[1] / turtle.initscreenbounds[1] - 1 - (turtle.bounds[1] + turtle.bounds[3]) / 2 * yfact;
         double lastSize = -1;
         double lastPrez = -1;
         double precomputedLog = 5;
@@ -30063,22 +30062,22 @@ void turtleUpdate() {
         for (int32_t i = 0; i < (int32_t) len; i += 9) {
             if (renType[i] == 'd') {
                 switch (ren[i + 7].h) {
-                case 0:
-                    if (!(lastSize == ren[i + 2].d) || !(lastPrez != ren[i + 8].d)) {
+                case 0: // penshape circle
+                    if (lastSize != ren[i + 2].d || lastPrez == ren[i + 8].d) {
                         precomputedLog = ren[i + 8].d * log(2.71 + ren[i + 2].d);
                     }
                     lastSize = ren[i + 2].d;
                     lastPrez = ren[i + 8].d;
                     turtleCircleRenderInternal(ren[i].d, ren[i + 1].d, ren[i + 2].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xcenter, ycenter, xfact, yfact, precomputedLog);
                 break;
-                case 1:
+                case 1: // penshape square
                     turtleSquareRenderInternal(ren[i].d - ren[i + 2].d, ren[i + 1].d - ren[i + 2].d, ren[i].d + ren[i + 2].d, ren[i + 1].d + ren[i + 2].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xcenter, ycenter, xfact, yfact);
                 break;
-                case 2:
+                case 2: // penshape triangle
                     turtleTriangleRenderInternal(ren[i].d - ren[i + 2].d, ren[i + 1].d - ren[i + 2].d, ren[i].d + ren[i + 2].d, ren[i + 1].d - ren[i + 2].d, ren[i].d, ren[i + 1].d + ren[i + 2].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xcenter, ycenter, xfact, yfact);
                 break;
-                case 5:
-                     if (i - 9 < 0 || i + 9 >= len || renType[i - 1] == 'c' || ren[i - 2].h > 5) {
+                case 5: // penshape text
+                    if (i - 9 < 0 || i + 9 >= len || renType[i - 1] == 'c' || ren[i - 2].h > 5) {
                         if (lastSize != ren[i + 2].d || lastPrez == ren[i + 8].d) {
                             precomputedLog = ren[i + 8].d * log(2.71 + ren[i + 2].d);
                         }
@@ -32340,6 +32339,7 @@ void switchUpdate() {
 /* angle between two coordinates (in degrees) */
 double angleBetween(double x1, double y1, double x2, double y2) {
     double output;
+    /* TODO - Fix issue with y2 - y1 equal to 0 breaking the angle */
     if (y2 - y1 <= 0) {
         output = 180 + atan((x2 - x1) / (y2 - y1)) * 57.2958;
     } else {
@@ -32415,7 +32415,7 @@ void dialUpdate() {
                     dialAngle = 359.99999999;
                 }
                 if (dialp -> type == TT_DIAL_LOG) {
-                    *(dialp -> variable) = round(dialp -> range[0] + (dialp -> range[1] - dialp -> range[0]) * (log(dialAngle) / log(360)));
+                    *(dialp -> variable) = round(dialp -> range[0] + (dialp -> range[1] - dialp -> range[0]) * (log(1 + dialAngle) / log(361)));
                 } else if (dialp -> type == TT_DIAL_LINEAR) {
                     *(dialp -> variable) = round(dialp -> range[0] + ((dialp -> range[1] - dialp -> range[0]) * dialAngle / 360));
                 } else if (dialp -> type == TT_DIAL_EXP) {

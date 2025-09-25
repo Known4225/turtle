@@ -1174,6 +1174,7 @@ void switchUpdate() {
 /* angle between two coordinates (in degrees) */
 double angleBetween(double x1, double y1, double x2, double y2) {
     double output;
+    /* TODO - Fix issue with y2 - y1 equal to 0 breaking the angle */
     if (y2 - y1 <= 0) {
         output = 180 + atan((x2 - x1) / (y2 - y1)) * 57.2958;
     } else {
@@ -1249,7 +1250,7 @@ void dialUpdate() {
                     dialAngle = 359.99999999;
                 }
                 if (dialp -> type == TT_DIAL_LOG) {
-                    *(dialp -> variable) = round(dialp -> range[0] + (dialp -> range[1] - dialp -> range[0]) * (log(dialAngle) / log(360)));
+                    *(dialp -> variable) = round(dialp -> range[0] + (dialp -> range[1] - dialp -> range[0]) * (log(1 + dialAngle) / log(361)));
                 } else if (dialp -> type == TT_DIAL_LINEAR) {
                     *(dialp -> variable) = round(dialp -> range[0] + ((dialp -> range[1] - dialp -> range[0]) * dialAngle / 360));
                 } else if (dialp -> type == TT_DIAL_EXP) {

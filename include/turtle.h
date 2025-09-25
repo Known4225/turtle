@@ -39,8 +39,8 @@ typedef struct {
     int32_t screenbounds[2]; // list of screen bounds (pixels)
     int32_t lastscreenbounds[2]; // list of screen bounds last frame
     int32_t initscreenbounds[2]; // screenbounds at initialisation
-    int32_t initbounds[4]; // list of coordinate bounds at initialisation (minX, minY, maxX, maxY)
-    int32_t bounds[4]; // list of coordinate bounds (minX, minY, maxX, maxY)
+    double initbounds[4]; // list of coordinate bounds at initialisation (leftX, bottomY, rightX, topY)
+    double bounds[4]; // list of coordinate bounds (leftX, bottomY, rightX, topY)
     double centerAndScale[4]; // centerX, centerY, ratioX, ratioY
     double mouseX; // mouseX and mouseY variables
     double mouseY;
@@ -88,7 +88,7 @@ typedef struct {
 extern turtle_t turtle;
 
 /* run this to set the bounds of the window in coordinates */
-void turtleSetWorldCoordinates(int32_t minX, int32_t minY, int32_t maxX, int32_t maxY);
+void turtleSetWorldCoordinates(double leftX, double bottomY, double rightX, double topY);
 
 /* detect character */
 void unicodeSense(GLFWwindow *window, uint32_t codepoint);
@@ -121,7 +121,7 @@ int8_t turtleMouseMiddle();
 int8_t turtleMouseMid();
 
 /* initialises the turtle module */
-void turtleInit(GLFWwindow *window, int32_t minX, int32_t minY, int32_t maxX, int32_t maxY);
+void turtleInit(GLFWwindow *window, double leftX, double bottomY, double rightX, double topY);
 
 /* gets the mouse coordinates */
 void turtleGetMouseCoords();
