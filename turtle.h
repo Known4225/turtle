@@ -19274,39 +19274,52 @@ typedef struct {
 extern tt_elements_t tt_elements;
 
 typedef enum {
-    TT_COLOR_TEXT = 0,
-    TT_COLOR_TEXT_ALTERNATE = 3,
-    TT_COLOR_RIBBON_TOP = 6,
-    TT_COLOR_RIBBON_DROPDOWN = 9,
-    TT_COLOR_RIBBON_SELECT = 12,
-    TT_COLOR_RIBBON_HOVER = 15,
-    TT_COLOR_POPUP_BOX = 18,
-    TT_COLOR_POPUP_BUTTON = 21,
-    TT_COLOR_POPUP_BUTTON_SELECT = 24,
-    TT_COLOR_BUTTON = 27,
-    TT_COLOR_BUTTON_SELECT = 30,
-    TT_COLOR_BUTTON_CLICKED = 33,
-    TT_COLOR_SWITCH_TEXT_HOVER = 36,
-    TT_COLOR_SWITCH_OFF = 39,
-    TT_COLOR_SWITCH_CIRCLE_OFF = 42,
-    TT_COLOR_SWITCH_ON = 45,
-    TT_COLOR_SWITCH_CIRCLE_ON = 48,
-    TT_COLOR_DIAL = 51,
-    TT_COLOR_DIAL_INNER = 54,
-    TT_COLOR_SLIDER_BAR = 57,
-    TT_COLOR_SLIDER_CIRCLE = 60,
-    TT_COLOR_SCROLLBAR_BASE = 63,
-    TT_COLOR_SCROLLBAR_BAR = 66,
-    TT_COLOR_SCROLLBAR_HOVER = 69,
-    TT_COLOR_SCROLLBAR_CLICKED = 72,
-    TT_COLOR_DROPDOWN = 75,
-    TT_COLOR_DROPDOWN_SELECT = 78,
-    TT_COLOR_DROPDOWN_HOVER = 81,
-    TT_COLOR_DROPDOWN_TRIANGLE = 84,
-    TT_COLOR_TEXTBOX_BOX = 87,
-    TT_COLOR_TEXTBOX_PHANTOM_TEXT = 90,
-    TT_COLOR_TEXTBOX_LINE = 93,
-    TT_COLOR_TEXTBOX_SELECT = 96,
+    TT_COLOR_BACKGROUND = 0,
+    TT_COLOR_BACKGROUND_BASE = 0,
+    TT_COLOR_BACKGROUND_HIGHLIGHT = 3,
+    TT_COLOR_BACKGROUND_ALTERNATE = 6,
+    TT_COLOR_BACKGROUND_COMPLEMENT = 9,
+    TT_COLOR_TEXT = 12,
+    TT_COLOR_TEXT_BASE = 12,
+    TT_COLOR_TEXT_HIGHLIGHT = 15,
+    TT_COLOR_TEXT_ALTERNATE = 18,
+    TT_COLOR_TEXT_COMPLEMENT = 21,
+    TT_COLOR_COMPONENT = 24,
+    TT_COLOR_COMPONENT_BASE = 24,
+    TT_COLOR_COMPONENT_HIGHLIGHT = 27,
+    TT_COLOR_COMPONENT_ALTERNATE = 30,
+    TT_COLOR_COMPONENT_COMPLEMENT = 33,
+    TT_COLOR_TERTIARY = 36,
+    TT_COLOR_TERTIARY_BASE = 36,
+    TT_COLOR_TERTIARY_HIGHLIGHT = 39,
+    TT_COLOR_TERTIARY_ALTERNATE = 42,
+    TT_COLOR_TERTIARY_COMPLEMENT = 45,
+    TT_COLOR_RED = 48,
+    TT_COLOR_RED_ALTERNATE = 51,
+    TT_COLOR_ORANGE = 54,
+    TT_COLOR_ORANGE_ALTERNATE = 57,
+    TT_COLOR_YELLOW = 60,
+    TT_COLOR_YELLOW_ALTERNATE = 63,
+    TT_COLOR_GREEN = 66,
+    TT_COLOR_GREEN_ALTERNATE = 69,
+    TT_COLOR_CYAN = 72,
+    TT_COLOR_CYAN_ALTERNATE = 75,
+    TT_COLOR_BLUE = 78,
+    TT_COLOR_BLUE_ALTERNATE = 81,
+    TT_COLOR_PURPLE = 84,
+    TT_COLOR_PURPLE_ALTERNATE = 87,
+    TT_COLOR_MAGENTA = 90,
+    TT_COLOR_MAGENTA_ALTERNATE = 93,
+    TT_COLOR_PINK = 96,
+    TT_COLOR_PINK_ALTERNATE = 99,
+    TT_COLOR_BLACK = 102,
+    TT_COLOR_BLACK_ALTERNATE = 105,
+    TT_COLOR_WHITE = 108,
+    TT_COLOR_WHITE_ALTERNATE = 111,
+    TT_COLOR_DARK_GREY = 114,
+    TT_COLOR_DARK_GREY_ALTERNATE = 117,
+    TT_COLOR_LIGHT_GREY = 120,
+    TT_COLOR_LIGHT_GREY_ALTERNATE = 123,
 } tt_theme_internal_t;
 
 /* default colours (light theme) */
@@ -19315,6 +19328,63 @@ extern double tt_themeColors[];
 void tt_setColor(int32_t index);
 
 void turtleToolsSetTheme(tt_theme_name_t theme);
+
+extern int32_t tt_color_default[];
+
+typedef enum {
+    /* ribbon and popup (special cases) */
+    TT_COLOR_SLOT_RIBBON_TOP = TT_COLOR_COMPONENT_HIGHLIGHT,
+    TT_COLOR_SLOT_RIBBON_DROPDOWN = TT_COLOR_COMPONENT_HIGHLIGHT,
+    TT_COLOR_SLOT_RIBBON_HOVER = TT_COLOR_COMPONENT,
+    TT_COLOR_SLOT_RIBBON_SELECT = TT_COLOR_COMPONENT,
+    TT_COLOR_SLOT_POPUP_BOX = TT_COLOR_COMPONENT_ALTERNATE,
+    TT_COLOR_SLOT_POPUP_BUTTON_SELECT = TT_COLOR_COMPONENT_HIGHLIGHT,
+    TT_COLOR_SLOT_POPUP_BUTTON = TT_COLOR_COMPONENT,
+    /* button */
+    TT_COLOR_SLOT_BUTTON_TEXT = 0,
+    TT_COLOR_SLOT_BUTTON = 1,
+    TT_COLOR_SLOT_BUTTON_SELECT = 2,
+    TT_COLOR_SLOT_BUTTON_SELECTED_TEXT = 3,
+    TT_COLOR_SLOT_BUTTON_CLICKED = 4,
+    /* switch */
+    TT_COLOR_SLOT_SWITCH_TEXT = 0,
+    TT_COLOR_SLOT_SWITCH_TEXT_HOVER = 1,
+    TT_COLOR_SLOT_SWITCH_ON = 2,
+    TT_COLOR_SLOT_SWITCH_OFF = 3,
+    TT_COLOR_SLOT_CIRCLE_ON = 4,
+    TT_COLOR_SLOT_CIRCLE_OFF = 5,
+    /* dial */
+    TT_COLOR_SLOT_DIAL_TEXT = 0,
+    TT_COLOR_SLOT_DIAL = 1,
+    TT_COLOR_SLOT_DIAL_INNER = 2,
+    /* slider */
+    TT_COLOR_SLOT_SLIDER_TEXT = 0,
+    TT_COLOR_SLOT_SLIDER_BAR = 1,
+    TT_COLOR_SLOT_SLIDER_CIRCLE = 2,
+    /* scrollbar */
+    TT_COLOR_SLOT_SCROLLBAR_BASE = 1,
+    TT_COLOR_SLOT_SCROLLBAR_BAR = 2,
+    TT_COLOR_SLOT_SCROLLBAR_HOVER = 3,
+    TT_COLOR_SLOT_SCROLLBAR_CLICKED = 4,
+    /* context */
+    TT_COLOR_SLOT_CONTEXT_TEXT = 0,
+    TT_COLOR_SLOT_CONTEXT_BASE = 1,
+    TT_COLOR_SLOT_CONTEXT_SELECT = 2,
+    /* dropdown */
+    TT_COLOR_SLOT_DROPDOWN_TEXT = 0,
+    TT_COLOR_SLOT_DROPDOWN_TEXT_HOVER = 1,
+    TT_COLOR_SLOT_DROPDOWN_BASE = 2,
+    TT_COLOR_SLOT_DROPDOWN_SELECT = 3,
+    TT_COLOR_SLOT_DROPDOWN_HOVER = 4,
+    TT_COLOR_SLOT_DROPDOWN_TRIANGLE = 5,
+    /* textbox */
+    TT_COLOR_SLOT_TEXTBOX_TEXT = 0,
+    TT_COLOR_SLOT_TEXTBOX_BOX = 1,
+    TT_COLOR_SLOT_TEXTBOX_PHANTOM_TEXT = 2,
+    TT_COLOR_SLOT_TEXTBOX_LINE = 3,
+} tt_color_slots_t;
+
+void elementResetColor(void *elementp, int32_t elementType);
 
 /* ribbon */
 
@@ -19331,7 +19401,7 @@ typedef struct {
     list_t *lengths;
 } tt_ribbon_t;
 
-extern tt_ribbon_t ribbonRender;
+extern tt_ribbon_t tt_ribbon;
 
 /* initialise ribbon */
 int32_t ribbonInit(const char *filename);
@@ -19368,7 +19438,7 @@ typedef struct {
     int8_t mouseDown;
 } tt_popup_t;
 
-extern tt_popup_t popup;
+extern tt_popup_t tt_popup;
 
 /* initialise popup */
 int32_t popupInit(char *filename);
@@ -19386,11 +19456,6 @@ void popupUpdate();
 void popupFree();
 
 /* UI tools */
-
-typedef struct {
-    int32_t colorOverride;
-    double color[24];
-} tt_color_override_t;
 
 typedef struct {
     double dialAnchorX;
@@ -19420,7 +19485,7 @@ typedef enum {
 typedef struct {
     tt_element_names_t element;
     tt_element_enabled_t enabled;
-    tt_color_override_t color;
+    int32_t color[8];
     double x;
     double y;
     double size;
@@ -19442,7 +19507,7 @@ typedef enum {
 typedef struct {
     tt_element_names_t element;
     tt_element_enabled_t enabled;
-    tt_color_override_t color;
+    int32_t color[8];
     double x;
     double y;
     double size;
@@ -19462,7 +19527,7 @@ typedef enum {
 typedef struct {
     tt_element_names_t element;
     tt_element_enabled_t enabled;
-    tt_color_override_t color;
+    int32_t color[8];
     double x;
     double y;
     double size;
@@ -19490,7 +19555,7 @@ typedef enum {
 typedef struct {
     tt_element_names_t element;
     tt_element_enabled_t enabled;
-    tt_color_override_t color;
+    int32_t color[8];
     double x;
     double y;
     double size;
@@ -19514,7 +19579,7 @@ typedef enum {
 typedef struct {
     tt_element_names_t element;
     tt_element_enabled_t enabled;
-    tt_color_override_t color;
+    int32_t color[8];
     double x;
     double y;
     double size;
@@ -19536,7 +19601,7 @@ typedef enum {
 typedef struct {
     tt_element_names_t element;
     tt_element_enabled_t enabled;
-    tt_color_override_t color;
+    int32_t color[8];
     double x;
     double y;
     double size;
@@ -19558,7 +19623,7 @@ typedef enum {
 typedef struct {
     tt_element_names_t element;
     tt_element_enabled_t enabled;
-    tt_color_override_t color;
+    int32_t color[8];
     double x;
     double y;
     double size;
@@ -19580,7 +19645,7 @@ typedef enum {
 typedef struct {
     tt_element_names_t element;
     tt_element_enabled_t enabled;
-    tt_color_override_t color;
+    int32_t color[8];
     double x;
     double y;
     double size;
@@ -19598,26 +19663,6 @@ typedef struct {
     int32_t renderStartingIndex;
     int32_t renderNumCharacters;
 } tt_textbox_t;
-
-/* override colors with color array */
-void tt_colorOverride(void *element, double *colors, uint32_t length);
-
-typedef enum {
-    TT_COLOR_OVERRIDE_SLOT_0 = 0,
-    TT_COLOR_OVERRIDE_SLOT_1 = 3,
-    TT_COLOR_OVERRIDE_SLOT_2 = 6,
-    TT_COLOR_OVERRIDE_SLOT_3 = 9,
-    TT_COLOR_OVERRIDE_SLOT_4 = 12,
-    TT_COLOR_OVERRIDE_SLOT_5 = 15,
-    TT_COLOR_OVERRIDE_SLOT_6 = 18,
-    TT_COLOR_OVERRIDE_SLOT_7 = 21,
-} tt_color_override_internal_t;
-
-extern int32_t tt_color_override_default[];
-
-void elementResetColor(void *elementp, int32_t elementType);
-
-void tt_internalColor(void *elementp, int32_t colorIndex, int32_t overrideIndex);
 
 /* initialise UI elements */
 
@@ -28428,13 +28473,18 @@ void list_insert(list_t *list, int32_t index, unitype value, char type) {
     }
     while (index < 0) {index += list -> length;}
     index %= list -> length;
-    list_append(list, (unitype) 0, type);
+    list_append(list, (unitype) 0, 'i');
     int32_t i;
     for (i = list -> length - 1; i > index; i--) {
         list -> data[i] = list -> data[i - 1];
         list -> type[i] = list -> type[i - 1];
     }
-    list -> data[i] = value;
+    if (type == 's') {
+        list -> data[i].s = strdup(value.s);
+    } else {
+        list -> data[i] = value;
+    }
+    list -> type[i] = type;
 }
 
 /* clears the list */
@@ -31256,6 +31306,15 @@ double tt_themeColors[] = {
     180.0, 180.0, 180.0, // textbox phantom text color (90)
     0.0, 0.0, 0.0,       // textbox line color (93)
     11.0, 87.0, 208.0,   // textbox select color (96)
+    11.0, 87.0, 208.0,   // textbox select color (96)
+    11.0, 87.0, 208.0,   // textbox select color (96)
+    11.0, 87.0, 208.0,   // textbox select color (96)
+    11.0, 87.0, 208.0,   // textbox select color (96)
+    11.0, 87.0, 208.0,   // textbox select color (96)
+    11.0, 87.0, 208.0,   // textbox select color (96)
+    11.0, 87.0, 208.0,   // textbox select color (96)
+    11.0, 87.0, 208.0,   // textbox select color (96)
+    11.0, 87.0, 208.0,   // textbox select color (96)
 };
 
 void tt_setColor(int32_t index) {
@@ -31416,13 +31475,14 @@ void turtleToolsSetTheme(tt_theme_name_t theme) {
         };
         memcpy(tt_themeColors, tt_themeCopy, sizeof(tt_themeCopy));
     }
+    turtleBgColor(tt_themeColors[TT_COLOR_BACKGROUND], tt_themeColors[TT_COLOR_BACKGROUND + 1], tt_themeColors[TT_COLOR_BACKGROUND + 2]);
 }
 
 /* ribbon */
 
 /* ribbon variables */
 
-tt_ribbon_t ribbonRender;
+tt_ribbon_t tt_ribbon;
 
 /* initialise ribbon */
 int32_t ribbonInit(const char *filename) {
@@ -31455,44 +31515,44 @@ int32_t ribbonInitInternal(FILE *configFile, list_t *configList, int8_t fileExis
         tt_elements.all = list_init();
     }
     /* set ribbon parameters */
-    ribbonRender.marginSize = (turtle.bounds[3] - turtle.bounds[1]) / 36.0; // number of pixels between different items in the ribbon (not affected by ribbonSize)
-    ribbonRender.mainselect[0] = -1;
-    ribbonRender.mainselect[1] = -1;
-    ribbonRender.mainselect[2] = -1;
-    ribbonRender.subselect[0] = -1;
-    ribbonRender.subselect[1] = -1;
-    ribbonRender.subselect[2] = -1;
-    ribbonRender.output[0] = 0;
-    ribbonRender.output[1] = -1;
-    ribbonRender.output[2] = -1;
+    tt_ribbon.marginSize = (turtle.bounds[3] - turtle.bounds[1]) / 36.0; // number of pixels between different items in the ribbon (not affected by ribbonSize)
+    tt_ribbon.mainselect[0] = -1;
+    tt_ribbon.mainselect[1] = -1;
+    tt_ribbon.mainselect[2] = -1;
+    tt_ribbon.subselect[0] = -1;
+    tt_ribbon.subselect[1] = -1;
+    tt_ribbon.subselect[2] = -1;
+    tt_ribbon.output[0] = 0;
+    tt_ribbon.output[1] = -1;
+    tt_ribbon.output[2] = -1;
 
-    ribbonRender.mouseDown = 0;
+    tt_ribbon.mouseDown = 0;
 
-    ribbonRender.bounds[0] = turtle.bounds[0];
-    ribbonRender.bounds[1] = turtle.bounds[1];
-    ribbonRender.bounds[2] = turtle.bounds[2];
-    ribbonRender.bounds[3] = turtle.bounds[3];
+    tt_ribbon.bounds[0] = turtle.bounds[0];
+    tt_ribbon.bounds[1] = turtle.bounds[1];
+    tt_ribbon.bounds[2] = turtle.bounds[2];
+    tt_ribbon.bounds[3] = turtle.bounds[3];
 
-    ribbonRender.ribbonSize = (turtle.bounds[3] - turtle.bounds[1]) / 360.0; // 1 is default for 640 by 360 coordiantes, below 1 is smaller, above 1 is larger (scales as a multiplier, 0.1 is 100x smaller than 10)
-    ribbonRender.options = list_init();
-    ribbonRender.lengths = list_init();
+    tt_ribbon.ribbonSize = (turtle.bounds[3] - turtle.bounds[1]) / 360.0; // 1 is default for 640 by 360 coordiantes, below 1 is smaller, above 1 is larger (scales as a multiplier, 0.1 is 100x smaller than 10)
+    tt_ribbon.options = list_init();
+    tt_ribbon.lengths = list_init();
 
     /* load ribbon options */
     char line[1024]; // maximum size of any list of options
-    while ((fileExists == 0 && ribbonRender.options -> length < configList -> length) || (fileExists == 1 && fgets(line, 1024, configFile) != NULL)) {
+    while ((fileExists == 0 && tt_ribbon.options -> length < configList -> length) || (fileExists == 1 && fgets(line, 1024, configFile) != NULL)) {
         if (fileExists == 0) {
-            memcpy(line, configList -> data[ribbonRender.options -> length].s, strlen(configList -> data[ribbonRender.options -> length].s) + 1);
+            memcpy(line, configList -> data[tt_ribbon.options -> length].s, strlen(configList -> data[tt_ribbon.options -> length].s) + 1);
         }
         if (line[strlen(line) - 1] == '\n') {
             line[strlen(line) - 1] = '\0'; // cull newline
         }
-        list_append(ribbonRender.options, (unitype) list_init(), 'r');
+        list_append(tt_ribbon.options, (unitype) list_init(), 'r');
         char *item = strtok(line, ",");
         while (item != NULL) {
             if (item[0] == ' ') {
                 item++; // cull leading space
             }
-            list_append(ribbonRender.options -> data[ribbonRender.options -> length - 1].r, (unitype) item, 's');
+            list_append(tt_ribbon.options -> data[tt_ribbon.options -> length - 1].r, (unitype) item, 's');
             item = strtok(NULL, ",");
         }
     }
@@ -31500,16 +31560,16 @@ int32_t ribbonInitInternal(FILE *configFile, list_t *configList, int8_t fileExis
         fclose(configFile);
     }
 
-    for (uint32_t i = 0; i < ribbonRender.options -> length; i++) {
-        list_append(ribbonRender.lengths, (unitype) turtleTextGetStringLength(ribbonRender.options -> data[i].r -> data[0].s, 7 * ribbonRender.ribbonSize), 'd');
+    for (uint32_t i = 0; i < tt_ribbon.options -> length; i++) {
+        list_append(tt_ribbon.lengths, (unitype) turtleTextGetStringLength(tt_ribbon.options -> data[i].r -> data[0].s, 7 * tt_ribbon.ribbonSize), 'd');
         double max = 0;
-        for (uint32_t j = 1; j < ribbonRender.options -> data[i].r -> length; j++) {
-            double current = turtleTextGetStringLength(ribbonRender.options -> data[i].r -> data[j].s, 7 * ribbonRender.ribbonSize);
+        for (uint32_t j = 1; j < tt_ribbon.options -> data[i].r -> length; j++) {
+            double current = turtleTextGetStringLength(tt_ribbon.options -> data[i].r -> data[j].s, 7 * tt_ribbon.ribbonSize);
             if (current > max) {
                 max = current;
             }
         }
-        list_append(ribbonRender.lengths, (unitype) max, 'd');
+        list_append(tt_ribbon.lengths, (unitype) max, 'd');
     }
     list_free(configList);
     return 0;
@@ -31521,74 +31581,74 @@ void ribbonUpdate() {
     double sizeSave = turtle.pensize;
     turtlePenSize(20);
     turtlePenShape("square");
-    tt_setColor(TT_COLOR_RIBBON_TOP);
-    turtleRectangle(ribbonRender.bounds[0], ribbonRender.bounds[3] - ribbonRender.ribbonSize * 10, ribbonRender.bounds[2], ribbonRender.bounds[3]);
+    tt_setColor(TT_COLOR_SLOT_RIBBON_TOP);
+    turtleRectangle(tt_ribbon.bounds[0], tt_ribbon.bounds[3] - tt_ribbon.ribbonSize * 10, tt_ribbon.bounds[2], tt_ribbon.bounds[3]);
     tt_setColor(TT_COLOR_TEXT_ALTERNATE);
-    double cutoff = ribbonRender.bounds[0] + ribbonRender.marginSize;
-    ribbonRender.mainselect[0] = -1;
-    ribbonRender.subselect[0] = -1;
-    for (uint32_t i = 0; i < ribbonRender.options -> length; i++) {
+    double cutoff = tt_ribbon.bounds[0] + tt_ribbon.marginSize;
+    tt_ribbon.mainselect[0] = -1;
+    tt_ribbon.subselect[0] = -1;
+    for (uint32_t i = 0; i < tt_ribbon.options -> length; i++) {
         double prevCutoff = cutoff;
-        if (i == (uint32_t) ribbonRender.mainselect[2]) {
-            double xLeft = prevCutoff - ribbonRender.marginSize / 2.0;
-            double xRight = prevCutoff + ribbonRender.lengths -> data[i * 2 + 1].d + ribbonRender.marginSize / 2.0;
-            double yDown = ribbonRender.bounds[3] - 10 * ribbonRender.ribbonSize - 15 * ribbonRender.ribbonSize * (ribbonRender.options -> data[i].r -> length - 1) - ribbonRender.marginSize / 2.0;
-            tt_setColor(TT_COLOR_RIBBON_DROPDOWN);
-            turtleRectangle(xLeft, ribbonRender.bounds[3] - 10 * ribbonRender.ribbonSize, xRight, yDown); // ribbon highlight
-            for (uint32_t j = 1; j < ribbonRender.options -> data[i].r -> length; j++) {
-                if (turtle.mouseY > ribbonRender.bounds[3] - 10 * ribbonRender.ribbonSize - 15 * ribbonRender.ribbonSize * j - ribbonRender.marginSize / 4.0 && turtle.mouseY < ribbonRender.bounds[3] - 10 * ribbonRender.ribbonSize && turtle.mouseX > xLeft && turtle.mouseX < xRight && ribbonRender.subselect[0] == -1) {
-                    tt_setColor(TT_COLOR_RIBBON_HOVER);
-                    turtleRectangle(xLeft, ribbonRender.bounds[3] - 10 * ribbonRender.ribbonSize - 15 * ribbonRender.ribbonSize * (j - 1) - ribbonRender.marginSize / 4.0, xRight, ribbonRender.bounds[3] - 10 * ribbonRender.ribbonSize - 15 * ribbonRender.ribbonSize * j - ribbonRender.marginSize / 3.0); // dropdown highlight
-                    ribbonRender.subselect[0] = j;
+        if (i == (uint32_t) tt_ribbon.mainselect[2]) {
+            double xLeft = prevCutoff - tt_ribbon.marginSize / 2.0;
+            double xRight = prevCutoff + tt_ribbon.lengths -> data[i * 2 + 1].d + tt_ribbon.marginSize / 2.0;
+            double yDown = tt_ribbon.bounds[3] - 10 * tt_ribbon.ribbonSize - 15 * tt_ribbon.ribbonSize * (tt_ribbon.options -> data[i].r -> length - 1) - tt_ribbon.marginSize / 2.0;
+            tt_setColor(TT_COLOR_SLOT_RIBBON_DROPDOWN);
+            turtleRectangle(xLeft, tt_ribbon.bounds[3] - 10 * tt_ribbon.ribbonSize, xRight, yDown); // ribbon highlight
+            for (uint32_t j = 1; j < tt_ribbon.options -> data[i].r -> length; j++) {
+                if (turtle.mouseY > tt_ribbon.bounds[3] - 10 * tt_ribbon.ribbonSize - 15 * tt_ribbon.ribbonSize * j - tt_ribbon.marginSize / 4.0 && turtle.mouseY < tt_ribbon.bounds[3] - 10 * tt_ribbon.ribbonSize && turtle.mouseX > xLeft && turtle.mouseX < xRight && tt_ribbon.subselect[0] == -1) {
+                    tt_setColor(TT_COLOR_SLOT_RIBBON_HOVER);
+                    turtleRectangle(xLeft, tt_ribbon.bounds[3] - 10 * tt_ribbon.ribbonSize - 15 * tt_ribbon.ribbonSize * (j - 1) - tt_ribbon.marginSize / 4.0, xRight, tt_ribbon.bounds[3] - 10 * tt_ribbon.ribbonSize - 15 * tt_ribbon.ribbonSize * j - tt_ribbon.marginSize / 3.0); // dropdown highlight
+                    tt_ribbon.subselect[0] = j;
                 }
                 tt_setColor(TT_COLOR_TEXT_ALTERNATE);
-                turtleTextWriteUnicode((unsigned char *) ribbonRender.options -> data[i].r -> data[j].s, prevCutoff, ribbonRender.bounds[3] - 5.5 * ribbonRender.ribbonSize - j * 15 * ribbonRender.ribbonSize, 7 * ribbonRender.ribbonSize, 0);
+                turtleTextWriteUnicode((unsigned char *) tt_ribbon.options -> data[i].r -> data[j].s, prevCutoff, tt_ribbon.bounds[3] - 5.5 * tt_ribbon.ribbonSize - j * 15 * tt_ribbon.ribbonSize, 7 * tt_ribbon.ribbonSize, 0);
             }
         }
-        cutoff += ribbonRender.lengths -> data[i * 2].d + ribbonRender.marginSize;
-        if (turtle.mouseY > ribbonRender.bounds[3] - 10 * ribbonRender.ribbonSize && turtle.mouseY < ribbonRender.bounds[3] && turtle.mouseX > ribbonRender.bounds[0] + ribbonRender.marginSize / 2.0 && turtle.mouseX < cutoff - ribbonRender.marginSize / 2.0 && ribbonRender.mainselect[0] == -1) { // -217, -195, -164
-            tt_setColor(TT_COLOR_RIBBON_SELECT);
-            turtleRectangle(prevCutoff - ribbonRender.marginSize / 2.0, ribbonRender.bounds[3] - ribbonRender.ribbonSize, cutoff - ribbonRender.marginSize / 2.0, ribbonRender.bounds[3] - 9 * ribbonRender.ribbonSize); // render dropdown
-            ribbonRender.mainselect[0] = i;
+        cutoff += tt_ribbon.lengths -> data[i * 2].d + tt_ribbon.marginSize;
+        if (turtle.mouseY > tt_ribbon.bounds[3] - 10 * tt_ribbon.ribbonSize && turtle.mouseY < tt_ribbon.bounds[3] && turtle.mouseX > tt_ribbon.bounds[0] + tt_ribbon.marginSize / 2.0 && turtle.mouseX < cutoff - tt_ribbon.marginSize / 2.0 && tt_ribbon.mainselect[0] == -1) { // -217, -195, -164
+            tt_setColor(TT_COLOR_SLOT_RIBBON_SELECT);
+            turtleRectangle(prevCutoff - tt_ribbon.marginSize / 2.0, tt_ribbon.bounds[3] - tt_ribbon.ribbonSize, cutoff - tt_ribbon.marginSize / 2.0, tt_ribbon.bounds[3] - 9 * tt_ribbon.ribbonSize); // render dropdown
+            tt_ribbon.mainselect[0] = i;
         }
         tt_setColor(TT_COLOR_TEXT_ALTERNATE);
-        turtleTextWriteUnicode((unsigned char *) ribbonRender.options -> data[i].r -> data[0].s, prevCutoff, ribbonRender.bounds[3] - 5.5 * ribbonRender.ribbonSize, 7 * ribbonRender.ribbonSize, 0);
+        turtleTextWriteUnicode((unsigned char *) tt_ribbon.options -> data[i].r -> data[0].s, prevCutoff, tt_ribbon.bounds[3] - 5.5 * tt_ribbon.ribbonSize, 7 * tt_ribbon.ribbonSize, 0);
     }
     if (turtleMouseDown()) { // this is hideous
-        if (ribbonRender.mouseDown == 0) {
-            ribbonRender.mouseDown = 1;
-            if (ribbonRender.subselect[0] == ribbonRender.subselect[1] && ribbonRender.subselect[0] != -1) {
-                ribbonRender.subselect[2] = ribbonRender.subselect[0];
-                ribbonRender.output[0] = 1;
-                ribbonRender.output[1] = ribbonRender.mainselect[2];
-                ribbonRender.output[2] = ribbonRender.subselect[2];
+        if (tt_ribbon.mouseDown == 0) {
+            tt_ribbon.mouseDown = 1;
+            if (tt_ribbon.subselect[0] == tt_ribbon.subselect[1] && tt_ribbon.subselect[0] != -1) {
+                tt_ribbon.subselect[2] = tt_ribbon.subselect[0];
+                tt_ribbon.output[0] = 1;
+                tt_ribbon.output[1] = tt_ribbon.mainselect[2];
+                tt_ribbon.output[2] = tt_ribbon.subselect[2];
             }
-            if (ribbonRender.mainselect[0] == ribbonRender.mainselect[1]) {
-                if (ribbonRender.mainselect[0] == ribbonRender.mainselect[2]) {
-                    ribbonRender.mainselect[3] = -1;
+            if (tt_ribbon.mainselect[0] == tt_ribbon.mainselect[1]) {
+                if (tt_ribbon.mainselect[0] == tt_ribbon.mainselect[2]) {
+                    tt_ribbon.mainselect[3] = -1;
                 } else {
-                    ribbonRender.mainselect[2] = ribbonRender.mainselect[0];
+                    tt_ribbon.mainselect[2] = tt_ribbon.mainselect[0];
                 }
             }
         }
     } else {
-        if (ribbonRender.mouseDown == 1) {
-            if (ribbonRender.subselect[0] != -1) {
-                ribbonRender.subselect[2] = ribbonRender.subselect[0];
-                ribbonRender.output[0] = 1;
-                ribbonRender.output[1] = ribbonRender.mainselect[2];
-                ribbonRender.output[2] = ribbonRender.subselect[2];
-                ribbonRender.mainselect[2] = -1;
-                ribbonRender.subselect[2] = -1;
+        if (tt_ribbon.mouseDown == 1) {
+            if (tt_ribbon.subselect[0] != -1) {
+                tt_ribbon.subselect[2] = tt_ribbon.subselect[0];
+                tt_ribbon.output[0] = 1;
+                tt_ribbon.output[1] = tt_ribbon.mainselect[2];
+                tt_ribbon.output[2] = tt_ribbon.subselect[2];
+                tt_ribbon.mainselect[2] = -1;
+                tt_ribbon.subselect[2] = -1;
             }
         }
-        if (ribbonRender.mainselect[3] == -1 && ribbonRender.mainselect[0] == ribbonRender.mainselect[2]) {
-            ribbonRender.mainselect[2] = -1;
+        if (tt_ribbon.mainselect[3] == -1 && tt_ribbon.mainselect[0] == tt_ribbon.mainselect[2]) {
+            tt_ribbon.mainselect[2] = -1;
         }
-        ribbonRender.mainselect[3] = 0;
-        ribbonRender.mouseDown = 0;
-        ribbonRender.mainselect[1] = ribbonRender.mainselect[0];
-        ribbonRender.subselect[1] = ribbonRender.subselect[0];
+        tt_ribbon.mainselect[3] = 0;
+        tt_ribbon.mouseDown = 0;
+        tt_ribbon.mainselect[1] = tt_ribbon.mainselect[0];
+        tt_ribbon.subselect[1] = tt_ribbon.subselect[0];
     }
     turtle.penshape = shapeSave;
     turtle.pensize = sizeSave;
@@ -31598,7 +31658,7 @@ void ribbonUpdate() {
 
 /* popup variables */
 
-tt_popup_t popup;
+tt_popup_t tt_popup;
 
 /* initialise popup */
 int32_t popupInit(char *filename) {
@@ -31628,11 +31688,11 @@ int32_t popupInitInternal(FILE *configFile, list_t *configList, int8_t fileExist
         tt_enabled.turtleToolsEnabled = 1;
         tt_elements.all = list_init();
     }
-    popup.output[0] = 0;
-    popup.output[1] = -1;
-    popup.mouseDown = 0;
-    popup.size = (turtle.initbounds[3] - turtle.initbounds[1]) / 72;
-    popup.style = 0;
+    tt_popup.output[0] = 0;
+    tt_popup.output[1] = -1;
+    tt_popup.mouseDown = 0;
+    tt_popup.size = (turtle.initbounds[3] - turtle.initbounds[1]) / 72;
+    tt_popup.style = 0;
 
     char line[256] = {1, 0}; // maximum size of message or option
     /* read popup message */
@@ -31641,25 +31701,25 @@ int32_t popupInitInternal(FILE *configFile, list_t *configList, int8_t fileExist
             if (line[strlen(line) - 1] == '\n') {
                 line[strlen(line) - 1] = '\0'; // cull newline
             }
-            popup.message = strdup(line);
+            tt_popup.message = strdup(line);
         }
     } else {
-        popup.message = strdup(configList -> data[0].s);
+        tt_popup.message = strdup(configList -> data[0].s);
     }
     /* read popup options */
     double defaultPadding = (turtle.initbounds[2] - turtle.initbounds[0]) / 50;
     double buttonWidth = defaultPadding;
-    popup.options = list_init();
-    while ((fileExists == 0 && popup.options -> length < configList -> length - 1) || (fileExists == 1 && fgets(line, 256, configFile) != NULL)) {
+    tt_popup.options = list_init();
+    while ((fileExists == 0 && tt_popup.options -> length < configList -> length - 1) || (fileExists == 1 && fgets(line, 256, configFile) != NULL)) {
         if (fileExists == 1) {
             if (line[strlen(line) - 1] == '\n') {
                 line[strlen(line) - 1] = '\0'; // cull newline
             }
-            list_append(popup.options, (unitype) strdup(line), 's');
+            list_append(tt_popup.options, (unitype) strdup(line), 's');
         } else {
-            list_append(popup.options, configList -> data[popup.options -> length + 1], 's');
+            list_append(tt_popup.options, configList -> data[tt_popup.options -> length + 1], 's');
         }
-        buttonWidth += turtleTextGetUnicodeLength(popup.options -> data[popup.options -> length - 1].s, popup.size) + defaultPadding;
+        buttonWidth += turtleTextGetUnicodeLength(tt_popup.options -> data[tt_popup.options -> length - 1].s, tt_popup.size) + defaultPadding;
     }
     if (fileExists) {
         fclose(configFile);
@@ -31668,114 +31728,98 @@ int32_t popupInitInternal(FILE *configFile, list_t *configList, int8_t fileExist
     double centerY = (turtle.initbounds[1] + turtle.initbounds[3]) / 2;
     double height = (turtle.initbounds[3] - turtle.initbounds[1]) / 9;
     double centerX = (turtle.initbounds[0] + turtle.initbounds[2]) / 2;
-    double messageWidth = turtleTextGetUnicodeLength(popup.message, popup.size) + defaultPadding;
+    double messageWidth = turtleTextGetUnicodeLength(tt_popup.message, tt_popup.size) + defaultPadding;
     double width = messageWidth;
     if (messageWidth < buttonWidth) {
         width = buttonWidth;
     }
-    popup.minX = centerX - width / 2;
-    popup.minY = centerY - height / 2;
-    popup.maxX = centerX + width / 2;
-    popup.maxY = centerY + height / 2;
+    tt_popup.minX = centerX - width / 2;
+    tt_popup.minY = centerY - height / 2;
+    tt_popup.maxX = centerX + width / 2;
+    tt_popup.maxY = centerY + height / 2;
     return 0;
 }
 
 /* render popup */
 void popupUpdate() {
     if (turtle.close == 1) {
-        tt_setColor(TT_COLOR_POPUP_BOX);
-        turtleRectangle(popup.minX, popup.minY, popup.maxX, popup.maxY);
-        double textX = popup.minX + (popup.maxX - popup.minX) / 2;
-        double textY = popup.maxY - popup.size * 2;
+        tt_setColor(TT_COLOR_SLOT_POPUP_BOX);
+        turtleRectangle(tt_popup.minX, tt_popup.minY, tt_popup.maxX, tt_popup.maxY);
+        double textX = tt_popup.minX + (tt_popup.maxX - tt_popup.minX) / 2;
+        double textY = tt_popup.maxY - tt_popup.size * 2;
         tt_setColor(TT_COLOR_TEXT_ALTERNATE);
-        turtleTextWriteUnicode((unsigned char *) popup.message, textX, textY, popup.size, 50);
-        textY -= popup.size * 4;
+        turtleTextWriteUnicode((unsigned char *) tt_popup.message, textX, textY, tt_popup.size, 50);
+        textY -= tt_popup.size * 4;
         double fullLength = 0;
-        for (uint32_t i = 0; i < popup.options -> length; i++) {
-            fullLength += turtleTextGetStringLength(popup.options -> data[i].s, popup.size);
+        for (uint32_t i = 0; i < tt_popup.options -> length; i++) {
+            fullLength += turtleTextGetStringLength(tt_popup.options -> data[i].s, tt_popup.size);
         }
         /* we have the length of the strings, now we pad with n + 1 padding regions */
-        double padding = (popup.maxX - popup.minX - fullLength) / (popup.options -> length + 1);
-        textX = popup.minX + padding;
+        double padding = (tt_popup.maxX - tt_popup.minX - fullLength) / (tt_popup.options -> length + 1);
+        textX = tt_popup.minX + padding;
         char flagged = 0;
-        if (!turtleMouseDown() && popup.mouseDown == 1) {
+        if (!turtleMouseDown() && tt_popup.mouseDown == 1) {
             flagged = 1; // flagged for mouse misbehaviour
         }
-        for (uint32_t i = 0; i < popup.options -> length; i++) {
-            double strLen = turtleTextGetStringLength(popup.options -> data[i].s, popup.size);
-            if (turtle.mouseX > textX - popup.size && turtle.mouseX < textX + strLen + popup.size && turtle.mouseY > textY - popup.size && turtle.mouseY < textY + popup.size) {
-                tt_setColor(TT_COLOR_POPUP_BUTTON_SELECT);
-                turtleRectangle(textX - popup.size, textY - popup.size, textX + popup.size + strLen, textY + popup.size);
+        for (uint32_t i = 0; i < tt_popup.options -> length; i++) {
+            double strLen = turtleTextGetStringLength(tt_popup.options -> data[i].s, tt_popup.size);
+            if (turtle.mouseX > textX - tt_popup.size && turtle.mouseX < textX + strLen + tt_popup.size && turtle.mouseY > textY - tt_popup.size && turtle.mouseY < textY + tt_popup.size) {
+                tt_setColor(TT_COLOR_SLOT_POPUP_BUTTON_SELECT);
+                turtleRectangle(textX - tt_popup.size, textY - tt_popup.size, textX + tt_popup.size + strLen, textY + tt_popup.size);
                 if (turtleMouseDown()) {
-                    if (popup.mouseDown == 0) {
-                        popup.mouseDown = 1;
-                        if (popup.output[0] == 0) {
-                            popup.output[1] = i;
+                    if (tt_popup.mouseDown == 0) {
+                        tt_popup.mouseDown = 1;
+                        if (tt_popup.output[0] == 0) {
+                            tt_popup.output[1] = i;
                         }
                     }
                 } else {
-                    if (popup.mouseDown == 1) {
-                        popup.mouseDown = 0;
-                        if (popup.output[1] == i) {
-                            popup.output[0] = 1;
+                    if (tt_popup.mouseDown == 1) {
+                        tt_popup.mouseDown = 0;
+                        if (tt_popup.output[1] == i) {
+                            tt_popup.output[0] = 1;
                         }
                     }
                 }
             } else {
-                tt_setColor(TT_COLOR_POPUP_BUTTON);
-                turtleRectangle(textX - popup.size, textY - popup.size, textX + popup.size + strLen, textY + popup.size);
+                tt_setColor(TT_COLOR_SLOT_POPUP_BUTTON);
+                turtleRectangle(textX - tt_popup.size, textY - tt_popup.size, textX + tt_popup.size + strLen, textY + tt_popup.size);
             }
             tt_setColor(TT_COLOR_TEXT_ALTERNATE);
-            turtleTextWriteUnicode((unsigned char *) popup.options -> data[i].s, textX, textY, popup.size, 0);
+            turtleTextWriteUnicode((unsigned char *) tt_popup.options -> data[i].s, textX, textY, tt_popup.size, 0);
             textX += strLen + padding;
         }
-        if (!turtleMouseDown() && popup.mouseDown == 1 && flagged == 1) {
-            popup.mouseDown = 0;
-            popup.output[0] = 0;
-            popup.output[1] = -1;
+        if (!turtleMouseDown() && tt_popup.mouseDown == 1 && flagged == 1) {
+            tt_popup.mouseDown = 0;
+            tt_popup.output[0] = 0;
+            tt_popup.output[1] = -1;
         }
     }
 }
 
 void popupFree() {
-    free(popup.message);
+    free(tt_popup.message);
 }
 
 /* UI tools */
 
 tt_globals_t tt_globals;
 
-/* override colors with color array */
-void tt_colorOverride(void *element, double *colors, uint32_t length) {
-    ((tt_button_t *) element) -> color.colorOverride = 1;
-    memcpy(((tt_button_t *) element) -> color.color, colors, length * sizeof(double));
-}
-
-int32_t tt_color_override_default[] = {
-    /*  button                    switch                      dial                  slider                   scrollbar                  context                         dropdown               textbox  */
-    TT_COLOR_TEXT_ALTERNATE, TT_COLOR_TEXT,              TT_COLOR_TEXT,       TT_COLOR_TEXT,          0,                          TT_COLOR_TEXT_ALTERNATE,    TT_COLOR_TEXT,              TT_COLOR_TEXT_ALTERNATE,
-    TT_COLOR_BUTTON,         TT_COLOR_SWITCH_TEXT_HOVER, TT_COLOR_DIAL,       TT_COLOR_SLIDER_BAR,    TT_COLOR_SCROLLBAR_BASE,    0,                          TT_COLOR_TEXT_ALTERNATE,    TT_COLOR_TEXTBOX_BOX,
-    TT_COLOR_BUTTON_SELECT,  TT_COLOR_SWITCH_ON,         TT_COLOR_DIAL_INNER, TT_COLOR_SLIDER_CIRCLE, TT_COLOR_SCROLLBAR_HOVER,   0,                          TT_COLOR_DROPDOWN,          TT_COLOR_TEXTBOX_PHANTOM_TEXT,
-    TT_COLOR_TEXT,           TT_COLOR_SWITCH_OFF,        0,                   0,                      TT_COLOR_SCROLLBAR_CLICKED, 0,                          TT_COLOR_DROPDOWN_SELECT,   TT_COLOR_TEXTBOX_LINE,
-    TT_COLOR_BUTTON_CLICKED, TT_COLOR_SWITCH_CIRCLE_ON,  0,                   0,                      TT_COLOR_SCROLLBAR_BAR,     0,                          TT_COLOR_DROPDOWN_HOVER,    TT_COLOR_TEXTBOX_SELECT,
-    0,                       TT_COLOR_SWITCH_CIRCLE_OFF, 0,                   0,                      0,                          0,                          TT_COLOR_DROPDOWN_TRIANGLE, 0,
-    0,                       0,                          0,                   0,                      0,                          0,                          0,                          0,
-    0,                       0,                          0,                   0,                      0,                          0,                          0,                          0,
+int32_t tt_color_default[] = {
+    /*  button                         switch                               dial                       slider                           scrollbar                      context                         dropdown                       textbox  */
+    TT_COLOR_TEXT_ALTERNATE,      TT_COLOR_TEXT_BASE,             TT_COLOR_TEXT_BASE,            TT_COLOR_TEXT_BASE,             0,                              TT_COLOR_TEXT_ALTERNATE,      TT_COLOR_TEXT_BASE,           TT_COLOR_TEXT_ALTERNATE,
+    TT_COLOR_COMPONENT,           TT_COLOR_TEXT_ALTERNATE,        TT_COLOR_BACKGROUND_ALTERNATE, TT_COLOR_COMPONENT_BASE,        TT_COLOR_COMPONENT_BASE,        TT_COLOR_COMPONENT_BASE,      TT_COLOR_TEXT_ALTERNATE,      TT_COLOR_COMPONENT_BASE,
+    TT_COLOR_COMPONENT_HIGHLIGHT, TT_COLOR_COMPONENT_BASE,        TT_COLOR_BACKGROUND_BASE,      TT_COLOR_BACKGROUND_COMPLEMENT, TT_COLOR_COMPONENT_HIGHLIGHT,   TT_COLOR_COMPONENT_HIGHLIGHT, TT_COLOR_COMPONENT_BASE,      TT_COLOR_BACKGROUND_BASE,
+    TT_COLOR_TEXT_BASE,           TT_COLOR_COMPONENT_HIGHLIGHT,   0,                             0,                              TT_COLOR_COMPONENT_COMPLEMENT,  0,                            TT_COLOR_COMPONENT_HIGHLIGHT, TT_COLOR_COMPONENT_HIGHLIGHT,
+    TT_COLOR_COMPONENT_ALTERNATE, TT_COLOR_BACKGROUND_COMPLEMENT, 0,                             0,                              TT_COLOR_BACKGROUND_COMPLEMENT, 0,                            TT_COLOR_COMPONENT_HIGHLIGHT, TT_COLOR_BLUE,
+    0,                            TT_COLOR_BACKGROUND_COMPLEMENT, 0,                             0,                              0,                              0,                            TT_COLOR_TEXT_ALTERNATE,      0,
+    0,                            0,                              0,                             0,                              0,                              0,                            0,                            0,
+    0,                            0,                              0,                             0,                              0,                              0,                            0,                            0,
 };
 
 void elementResetColor(void *elementp, int32_t elementType) {
-    for (uint32_t i = 0; i < 8; i += 3) {
-        ((tt_button_t *) elementp) -> color.color[i] = tt_themeColors[tt_color_override_default[(i / 3) * TT_NUMBER_OF_ELEMENTS + elementType]];
-        ((tt_button_t *) elementp) -> color.color[i + 1] = tt_themeColors[tt_color_override_default[(i / 3) * TT_NUMBER_OF_ELEMENTS + elementType] + 1];
-        ((tt_button_t *) elementp) -> color.color[i + 2] = tt_themeColors[tt_color_override_default[(i / 3) * TT_NUMBER_OF_ELEMENTS + elementType] + 2];
-    }
-}
-
-void tt_internalColor(void *elementp, int32_t colorIndex, int32_t overrideIndex) {
-    if (((tt_button_t *) elementp) -> color.colorOverride) {
-        turtlePenColor(((tt_button_t *) elementp) -> color.color[overrideIndex], ((tt_button_t *) elementp) -> color.color[overrideIndex + 1], ((tt_button_t *) elementp) -> color.color[overrideIndex + 2]);
-    } else {
-        turtlePenColor(tt_themeColors[colorIndex], tt_themeColors[colorIndex + 1], tt_themeColors[colorIndex + 2]);
+    for (uint32_t i = 0; i < 8; i++) {
+        ((tt_button_t *) elementp) -> color[i] = tt_color_default[i * TT_NUMBER_OF_ELEMENTS + elementType];
     }
 }
 
@@ -31799,7 +31843,6 @@ tt_button_t *buttonInit(char *label, int8_t *variable, double x, double y, doubl
     } else {
         memcpy(buttonp -> label, label, strlen(label) + 1);
     }
-    buttonp -> color.colorOverride = 0;
     elementResetColor(buttonp, TT_ELEMENT_BUTTON);
     buttonp -> status = 0;
     buttonp -> shape = TT_BUTTON_SHAPE_RECTANGLE;
@@ -31836,7 +31879,6 @@ tt_switch_t *switchInit(char *label, int8_t *variable, double x, double y, doubl
     } else {
         memcpy(switchp -> label, label, strlen(label) + 1);
     }
-    switchp -> color.colorOverride = 0;
     elementResetColor(switchp, TT_ELEMENT_SWITCH);
     switchp -> status = 0;
     switchp -> x = x;
@@ -31872,7 +31914,6 @@ tt_dial_t *dialInit(char *label, double *variable, tt_dial_type_t type, double x
     } else {
         memcpy(dialp -> label, label, strlen(label) + 1);
     }
-    dialp -> color.colorOverride = 0;
     elementResetColor(dialp, TT_ELEMENT_DIAL);
     dialp -> status[0] = 0;
     dialp -> type = type;
@@ -31912,7 +31953,6 @@ tt_slider_t *sliderInit(char *label, double *variable, tt_slider_type_t type, tt
     } else {
         memcpy(sliderp -> label, label, strlen(label) + 1);
     }
-    sliderp -> color.colorOverride = 0;
     elementResetColor(sliderp, TT_ELEMENT_SLIDER);
     sliderp -> status = 0;
     sliderp -> type = type;
@@ -31949,7 +31989,6 @@ tt_scrollbar_t *scrollbarInit(double *variable, tt_scrollbar_type_t type, double
     tt_scrollbar_t *scrollbarp = malloc(sizeof(tt_scrollbar_t));
     scrollbarp -> element = TT_ELEMENT_SCROLLBAR;
     scrollbarp -> enabled = TT_ELEMENT_ENABLED;
-    scrollbarp -> color.colorOverride = 0;
     elementResetColor(scrollbarp, TT_ELEMENT_SCROLLBAR);
     scrollbarp -> status = 0;
     scrollbarp -> type = type;
@@ -31991,7 +32030,6 @@ tt_context_t *contextInit(list_t *options, int32_t *variable, double x, double y
     tt_context_t *contextp = malloc(sizeof(tt_context_t));
     contextp -> element = TT_ELEMENT_CONTEXT;
     contextp -> enabled = TT_ELEMENT_ENABLED;
-    contextp -> color.colorOverride = 0;
     elementResetColor(contextp, TT_ELEMENT_CONTEXT);
     contextp -> options = options;
     contextp -> index = -1;
@@ -32042,7 +32080,6 @@ tt_dropdown_t *dropdownInit(char *label, list_t *options, int32_t *variable, tt_
     } else {
         memcpy(dropdownp -> label, label, strlen(label) + 1);
     }
-    dropdownp -> color.colorOverride = 0;
     elementResetColor(dropdownp, TT_ELEMENT_DROPDOWN);
     dropdownp -> options = options;
     dropdownp -> index = *variable;
@@ -32087,7 +32124,6 @@ tt_textbox_t *textboxInit(char *label, uint32_t maxCharacters, double x, double 
     } else {
         memcpy(textboxp -> label, label, strlen(label) + 1);
     }
-    textboxp -> color.colorOverride = 0;
     elementResetColor(textboxp, TT_ELEMENT_TEXTBOX);
     textboxp -> status = 0;
     textboxp -> align = TT_TEXTBOX_ALIGN_LEFT;
@@ -32125,11 +32161,11 @@ void buttonUpdate() {
         double buttonWidth = turtleTextGetUnicodeLength((unsigned char *) buttonp -> label, buttonp -> size - 1) + buttonp -> size * 0.8;
         double buttonHeight = buttonp -> size * 1.75;
         if (buttonp -> status > 0) {
-            tt_internalColor(buttonp, TT_COLOR_BUTTON_CLICKED, TT_COLOR_OVERRIDE_SLOT_4);
+            tt_setColor(buttonp -> color[TT_COLOR_SLOT_BUTTON_CLICKED]);
         } else if (buttonp -> status == 0) {
-            tt_internalColor(buttonp, TT_COLOR_BUTTON, TT_COLOR_OVERRIDE_SLOT_1);
+            tt_setColor(buttonp -> color[TT_COLOR_SLOT_BUTTON]);
         } else {
-            tt_internalColor(buttonp, TT_COLOR_BUTTON_SELECT, TT_COLOR_OVERRIDE_SLOT_2);
+            tt_setColor(buttonp -> color[TT_COLOR_SLOT_BUTTON_SELECT]);
         }
         if (buttonp -> shape == TT_BUTTON_SHAPE_RECTANGLE) {
             turtleRectangle(buttonX - buttonWidth / 2, buttonY - buttonHeight / 2, buttonX + buttonWidth / 2, buttonY + buttonHeight / 2);
@@ -32149,17 +32185,17 @@ void buttonUpdate() {
             turtlePenDown();
             turtlePenUp();
         }
-        tt_internalColor(buttonp, TT_COLOR_TEXT_ALTERNATE, TT_COLOR_OVERRIDE_SLOT_0);
+        tt_setColor(buttonp -> color[TT_COLOR_SLOT_BUTTON_TEXT]);
         if (buttonp -> shape == TT_BUTTON_SHAPE_TEXT) {
             if (buttonp -> status == 0) {
-                tt_internalColor(buttonp, TT_COLOR_TEXT, TT_COLOR_OVERRIDE_SLOT_3);
+                tt_setColor(buttonp -> color[TT_COLOR_SLOT_BUTTON_SELECTED_TEXT]);
             } else {
-                tt_internalColor(buttonp, TT_COLOR_BUTTON_SELECT, TT_COLOR_OVERRIDE_SLOT_2);
+                tt_setColor(buttonp -> color[TT_COLOR_SLOT_BUTTON_SELECT]);
             }
         }
         turtleTextWriteUnicode((unsigned char *) buttonp -> label, buttonX, buttonY, buttonp -> size - 1, 50);
         /* mouse */
-        if (buttonp -> enabled == TT_ELEMENT_ENABLED && ribbonRender.mainselect[2] == -1) {
+        if (buttonp -> enabled == TT_ELEMENT_ENABLED && tt_ribbon.mainselect[2] == -1) {
             if (turtleMouseDown()) {
                 if (buttonp -> status == 2) {
                     buttonp -> status = 1;
@@ -32209,9 +32245,9 @@ void switchUpdate() {
         if (switchp -> style == TT_SWITCH_STYLE_CLASSIC || switchp -> style == TT_SWITCH_STYLE_SIDESWIPE_LEFT || switchp -> style == TT_SWITCH_STYLE_SIDESWIPE_RIGHT) {
             /* render switch */
             if (*(switchp -> variable)) {
-                tt_internalColor(switchp, TT_COLOR_SWITCH_ON, TT_COLOR_OVERRIDE_SLOT_2);
+                tt_setColor(switchp -> color[TT_COLOR_SLOT_SWITCH_ON]);
             } else {
-                tt_internalColor(switchp, TT_COLOR_SWITCH_OFF, TT_COLOR_OVERRIDE_SLOT_3);
+                tt_setColor(switchp -> color[TT_COLOR_SLOT_SWITCH_OFF]);
             }
             turtlePenSize(switchp -> size * 1.2);
             turtleGoto(switchX - switchp -> size * 0.8, switchY);
@@ -32220,10 +32256,10 @@ void switchUpdate() {
             turtlePenUp();
             turtlePenSize(switchp -> size);
             if (*(switchp -> variable)) {
-                tt_internalColor(switchp, TT_COLOR_SWITCH_CIRCLE_ON, TT_COLOR_OVERRIDE_SLOT_4);
+                tt_setColor(switchp -> color[TT_COLOR_SLOT_CIRCLE_ON]);
                 turtleGoto(switchX + switchp -> size * 0.8, switchY);
             } else {
-                tt_internalColor(switchp, TT_COLOR_SWITCH_CIRCLE_OFF, TT_COLOR_OVERRIDE_SLOT_5);
+                tt_setColor(switchp -> color[TT_COLOR_SLOT_CIRCLE_OFF]);
                 turtleGoto(switchX - switchp -> size * 0.8, switchY);
             }
             turtlePenDown();
@@ -32244,29 +32280,29 @@ void switchUpdate() {
             switchClickDown = switchY - switchp -> size * 0.6;
             switchClickUp = switchY + switchp -> size * 0.6;
             /* render text */
-            tt_internalColor(switchp, TT_COLOR_TEXT, TT_COLOR_OVERRIDE_SLOT_0);
+            tt_setColor(switchp -> color[TT_COLOR_SLOT_SWITCH_TEXT]);
             if (switchp -> style == TT_SWITCH_STYLE_CLASSIC) {
                 turtleTextWriteUnicode((unsigned char *) switchp -> label, switchX, switchY + 1.6 * switchp -> size, switchp -> size - 1, 50);
             } else if (switchp -> style == TT_SWITCH_STYLE_SIDESWIPE_LEFT) {
                 if (switchp -> status == -1) {
-                    tt_internalColor(switchp, TT_COLOR_SWITCH_TEXT_HOVER, TT_COLOR_OVERRIDE_SLOT_1);
+                    tt_setColor(switchp -> color[TT_COLOR_SLOT_SWITCH_TEXT_HOVER]);
                 } else {
-                    tt_internalColor(switchp, TT_COLOR_TEXT, TT_COLOR_OVERRIDE_SLOT_0);
+                    tt_setColor(switchp -> color[TT_COLOR_SLOT_SWITCH_TEXT]);
                 }
                 turtleTextWriteUnicode((unsigned char *) switchp -> label, switchX + switchp -> size * 2, switchY, switchp -> size - 1, 0);
             } else {
                 if (switchp -> status == -1) {
-                    tt_internalColor(switchp, TT_COLOR_SWITCH_TEXT_HOVER, TT_COLOR_OVERRIDE_SLOT_1);
+                    tt_setColor(switchp -> color[TT_COLOR_SLOT_SWITCH_TEXT_HOVER]);
                 } else {
-                    tt_internalColor(switchp, TT_COLOR_TEXT, TT_COLOR_OVERRIDE_SLOT_0);
+                    tt_setColor(switchp -> color[TT_COLOR_SLOT_SWITCH_TEXT]);
                 }
                 turtleTextWriteUnicode((unsigned char *) switchp -> label, switchX - switchp -> size * 2, switchY, switchp -> size - 1, 100);
             }
         } else if (switchp -> style == TT_SWITCH_STYLE_CHECKBOX || switchp -> style == TT_SWITCH_STYLE_XBOX) {
             /* render box */
-            tt_internalColor(switchp, TT_COLOR_SWITCH_ON, TT_COLOR_OVERRIDE_SLOT_2);
+            tt_setColor(switchp -> color[TT_COLOR_SLOT_SWITCH_ON]);
             turtleRectangle(switchX - switchp -> size / 2, switchY - switchp -> size / 2, switchX + switchp -> size / 2, switchY + switchp -> size / 2);
-            tt_internalColor(switchp, TT_COLOR_SWITCH_OFF, TT_COLOR_OVERRIDE_SLOT_3);
+            tt_setColor(switchp -> color[TT_COLOR_SLOT_SWITCH_OFF]);
             turtlePenSize(switchp -> size / 6);
             turtleGoto(switchX - switchp -> size / 2, switchY - switchp -> size / 2);
             turtlePenDown();
@@ -32278,7 +32314,7 @@ void switchUpdate() {
             if (*(switchp -> variable)) {
                 if (switchp -> style == TT_SWITCH_STYLE_CHECKBOX) {
                     /* render check */
-                    tt_internalColor(switchp, TT_COLOR_SWITCH_CIRCLE_ON, TT_COLOR_OVERRIDE_SLOT_4);
+                    tt_setColor(switchp -> color[TT_COLOR_SLOT_CIRCLE_ON]);
                     turtleGoto(switchX - switchp -> size / 2.5, switchY);
                     turtlePenDown();
                     turtleGoto(switchX, switchY - switchp -> size / 2.5);
@@ -32286,7 +32322,7 @@ void switchUpdate() {
                     turtlePenUp();
                 } else {
                     /* render X */
-                    tt_internalColor(switchp, TT_COLOR_SWITCH_CIRCLE_ON, TT_COLOR_OVERRIDE_SLOT_4);
+                    tt_setColor(switchp -> color[TT_COLOR_SLOT_CIRCLE_ON]);
                     turtleGoto(switchX + switchp -> size / 2.5, switchY + switchp -> size / 2.5);
                     turtlePenDown();
                     turtleGoto(switchX - switchp -> size / 2.5, switchY - switchp -> size / 2.5);
@@ -32305,14 +32341,14 @@ void switchUpdate() {
             switchClickUp = switchY + switchp -> size * 0.6;
             /* render text */
             if (switchp -> status == -1) {
-                tt_internalColor(switchp, TT_COLOR_SWITCH_TEXT_HOVER, TT_COLOR_OVERRIDE_SLOT_1);
+                tt_setColor(switchp -> color[TT_COLOR_SLOT_SWITCH_TEXT_HOVER]);
             } else {
-                tt_internalColor(switchp, TT_COLOR_TEXT, TT_COLOR_OVERRIDE_SLOT_0);
+                tt_setColor(switchp -> color[TT_COLOR_SLOT_SWITCH_TEXT]);
             }
             turtleTextWriteUnicode((unsigned char *) switchp -> label, switchX + switchp -> size, switchY, switchp -> size - 1, 0);
         }
         /* mouse */
-        if (switchp -> enabled == TT_ELEMENT_ENABLED && ribbonRender.mainselect[2] == -1) {
+        if (switchp -> enabled == TT_ELEMENT_ENABLED && tt_ribbon.mainselect[2] == -1) {
             if (turtleMouseDown()) {
                 if (switchp -> status < 0) {
                     switchp -> status *= -1;
@@ -32357,20 +32393,20 @@ void dialUpdate() {
         if (dialp -> enabled == TT_ELEMENT_HIDE) {
             continue;
         }
-        tt_internalColor(dialp, TT_COLOR_TEXT, TT_COLOR_OVERRIDE_SLOT_0);
+        tt_setColor(dialp -> color[TT_COLOR_SLOT_DIAL_TEXT]);
         turtleTextWriteUnicode((unsigned char *) dialp -> label, dialp -> x, dialp -> y + 1.9 * dialp -> size, dialp -> size - 1, 50);
         turtlePenSize(dialp -> size * 2);
         double dialX = dialp -> x;
         double dialY = dialp -> y;
         turtleGoto(dialX, dialY);
-        tt_internalColor(dialp, TT_COLOR_DIAL, TT_COLOR_OVERRIDE_SLOT_1);
+        tt_setColor(dialp -> color[TT_COLOR_SLOT_DIAL]);
         turtlePenDown();
         turtlePenUp();
         turtlePenSize(dialp -> size * 2 * 0.8);
-        tt_internalColor(dialp, TT_COLOR_DIAL_INNER, TT_COLOR_OVERRIDE_SLOT_2);
+        tt_setColor(dialp -> color[TT_COLOR_SLOT_DIAL_INNER]);
         turtlePenDown();
         turtlePenUp();
-        tt_internalColor(dialp, TT_COLOR_DIAL, TT_COLOR_OVERRIDE_SLOT_1);
+        tt_setColor(dialp -> color[TT_COLOR_SLOT_DIAL]);
         turtlePenSize(1);
         turtlePenDown();
         double dialAngle;
@@ -32384,7 +32420,7 @@ void dialUpdate() {
         turtleGoto(dialX + sin(dialAngle / 57.2958) * dialp -> size, dialY + cos(dialAngle / 57.2958) * dialp -> size);
         turtlePenUp();
         /* mouse */
-        if (dialp -> enabled == TT_ELEMENT_ENABLED && ribbonRender.mainselect[2] == -1) {
+        if (dialp -> enabled == TT_ELEMENT_ENABLED && tt_ribbon.mainselect[2] == -1) {
             if (turtleMouseDown()) {
                 if (dialp -> status[0] < 0) {
                     tt_globals.dialAnchorX = dialX;
@@ -32423,7 +32459,7 @@ void dialUpdate() {
                 }
             }
         }
-        tt_internalColor(dialp, TT_COLOR_TEXT, TT_COLOR_OVERRIDE_SLOT_0);
+        tt_setColor(dialp -> color[TT_COLOR_SLOT_DIAL_TEXT]);
         double rounded = round(*(dialp -> variable) * dialp -> renderNumberFactor);
         turtleTextWriteStringf(dialX + dialp -> size + 3, dialY, 4, 0, "%.0lf", rounded);
     }
@@ -32497,16 +32533,16 @@ void sliderUpdate() {
                 sliderOffsetXFactorSmall = -sliderp -> size * 1;
             }
         }
-        tt_internalColor(sliderp, TT_COLOR_TEXT, TT_COLOR_OVERRIDE_SLOT_0);
+        tt_setColor(sliderp -> color[TT_COLOR_SLOT_SLIDER_TEXT]);
         turtleTextWriteUnicode((unsigned char *) sliderp -> label, sliderp -> x + sliderOffsetXFactor, sliderp -> y + sliderOffsetYFactor, sliderp -> size - 1, sliderAlignFactor);
         turtlePenSize(sliderp -> size * 1.2);
         turtleGoto(sliderXLeft, sliderYLeft);
-        tt_internalColor(sliderp, TT_COLOR_SLIDER_BAR, TT_COLOR_OVERRIDE_SLOT_1);
+        tt_setColor(sliderp -> color[TT_COLOR_SLOT_SLIDER_BAR]);
         turtlePenDown();
         turtleGoto(sliderXRight, sliderYRight);
         turtlePenUp();
         turtlePenSize(sliderp -> size);
-        tt_internalColor(sliderp, TT_COLOR_SLIDER_CIRCLE, TT_COLOR_OVERRIDE_SLOT_2);
+        tt_setColor(sliderp -> color[TT_COLOR_SLOT_SLIDER_CIRCLE]);
         if (sliderp -> type == TT_SLIDER_HORIZONTAL) {
             turtleGoto(sliderXLeft + (sliderXRight - sliderXLeft) * (*(sliderp -> variable) - sliderp -> range[0]) / (sliderp -> range[1] - sliderp -> range[0]), sliderYLeft);
         } else if (sliderp -> type == TT_SLIDER_VERTICAL) {
@@ -32515,7 +32551,7 @@ void sliderUpdate() {
         turtlePenDown();
         turtlePenUp();
         /* mouse */
-        if (sliderp -> enabled == TT_ELEMENT_ENABLED && ribbonRender.mainselect[2] == -1) {
+        if (sliderp -> enabled == TT_ELEMENT_ENABLED && tt_ribbon.mainselect[2] == -1) {
             if (turtleMouseDown()) {
                 if (sliderp -> status < 0) {
                     sliderp -> status *= -1;
@@ -32546,7 +32582,7 @@ void sliderUpdate() {
             }
         }
         if (sliderp -> renderNumberFactor != 0) {
-            tt_internalColor(sliderp, TT_COLOR_TEXT, TT_COLOR_OVERRIDE_SLOT_0);
+            tt_setColor(sliderp -> color[TT_COLOR_SLOT_SLIDER_TEXT]);
             double rounded = round(*(sliderp -> variable) * sliderp -> renderNumberFactor);
             turtleTextWriteStringf(sliderp -> x + sliderOffsetXFactorSmall, sliderp -> y + sliderOffsetYFactorSmall, 4, sliderAlignFactor, "%.0lf", rounded);
         }
@@ -32570,18 +32606,18 @@ void scrollbarUpdate() {
             double dragLeft = scrollbarLeft + (*(scrollbarp -> variable)) / 100 * (scrollbarp -> length * (1 - scrollbarp -> barPercentage / 100));
             double dragRight = dragLeft + (scrollbarp -> length * scrollbarp -> barPercentage / 100);
             turtlePenSize(scrollbarp -> size * 1);
-            tt_internalColor(scrollbarp, TT_COLOR_SCROLLBAR_BASE, TT_COLOR_OVERRIDE_SLOT_1);
+            tt_setColor(scrollbarp -> color[TT_COLOR_SLOT_SCROLLBAR_BASE]);
             turtleGoto(scrollbarLeft, scrollbarp -> y);
             turtlePenDown();
             turtleGoto(scrollbarRight, scrollbarp -> y);
             turtlePenUp();
             turtlePenSize(scrollbarp -> size * 0.8);
             if (scrollbarp -> status == -1 && turtle.mouseX > dragLeft - scrollbarp -> size * 0.4 && turtle.mouseX < dragRight + scrollbarp -> size * 0.4) {
-                tt_internalColor(scrollbarp, TT_COLOR_SCROLLBAR_HOVER, TT_COLOR_OVERRIDE_SLOT_2);
+                tt_setColor(scrollbarp -> color[TT_COLOR_SLOT_SCROLLBAR_HOVER]);
             } else if (scrollbarp -> status > 0) {
-                tt_internalColor(scrollbarp, TT_COLOR_SCROLLBAR_CLICKED, TT_COLOR_OVERRIDE_SLOT_3);
+                tt_setColor(scrollbarp -> color[TT_COLOR_SLOT_SCROLLBAR_CLICKED]);
             } else {
-                tt_internalColor(scrollbarp, TT_COLOR_SCROLLBAR_BAR, TT_COLOR_OVERRIDE_SLOT_4);
+                tt_setColor(scrollbarp -> color[TT_COLOR_SLOT_SCROLLBAR_BAR]);
             }
             turtleGoto(dragLeft, scrollbarp -> y);
             turtlePenDown();
@@ -32625,25 +32661,25 @@ void scrollbarUpdate() {
             double dragTop = scrollbarTop - (*(scrollbarp -> variable)) / 100 * (scrollbarp -> length * (1 - scrollbarp -> barPercentage / 100));
             double dragBottom = dragTop - (scrollbarp -> length * scrollbarp -> barPercentage / 100);
             turtlePenSize(scrollbarp -> size * 1);
-            tt_internalColor(scrollbarp, TT_COLOR_SCROLLBAR_BASE, TT_COLOR_OVERRIDE_SLOT_1);
+            tt_setColor(scrollbarp -> color[TT_COLOR_SLOT_SCROLLBAR_BASE]);
             turtleGoto(scrollbarp -> x, scrollbarTop);
             turtlePenDown();
             turtleGoto(scrollbarp -> x, scrollbarBottom);
             turtlePenUp();
             turtlePenSize(scrollbarp -> size * 0.8);
             if (scrollbarp -> status == -1 && turtle.mouseY > dragBottom - scrollbarp -> size * 0.4 && turtle.mouseY < dragTop + scrollbarp -> size * 0.4) {
-                tt_internalColor(scrollbarp, TT_COLOR_SCROLLBAR_HOVER, TT_COLOR_OVERRIDE_SLOT_2);
+                tt_setColor(scrollbarp -> color[TT_COLOR_SLOT_SCROLLBAR_HOVER]);
             } else if (scrollbarp -> status > 0) {
-                tt_internalColor(scrollbarp, TT_COLOR_SCROLLBAR_CLICKED, TT_COLOR_OVERRIDE_SLOT_3);
+                tt_setColor(scrollbarp -> color[TT_COLOR_SLOT_SCROLLBAR_CLICKED]);
             } else {
-                tt_internalColor(scrollbarp, TT_COLOR_SCROLLBAR_BAR, TT_COLOR_OVERRIDE_SLOT_4);
+                tt_setColor(scrollbarp -> color[TT_COLOR_SLOT_SCROLLBAR_BAR]);
             }
             turtleGoto(scrollbarp -> x, dragTop);
             turtlePenDown();
             turtleGoto(scrollbarp -> x, dragBottom);
             turtlePenUp();
             /* mouse */
-            if (scrollbarp -> enabled == TT_ELEMENT_ENABLED && ribbonRender.mainselect[2] == -1) {
+            if (scrollbarp -> enabled == TT_ELEMENT_ENABLED && tt_ribbon.mainselect[2] == -1) {
                 if (scrollbarp -> status == 2) {
                     tt_globals.barAnchor = dragTop - turtle.mouseY;
                     scrollbarp -> status = 1;
@@ -32688,15 +32724,15 @@ void contextUpdate() {
         double itemHeight = (contextp -> size * 1.5);
         double contextX = contextp -> x;
         double contextY = contextp -> y - itemHeight / 2 - 2;
-        tt_internalColor(contextp, TT_COLOR_DROPDOWN, TT_COLOR_OVERRIDE_SLOT_1);
+        tt_setColor(contextp -> color[TT_COLOR_SLOT_CONTEXT_BASE]);
         turtleRectangle(contextX, contextY - contextp -> size * 0.7 - (contextp -> options -> length - 1) * itemHeight - 2, contextX + contextp -> maxXfactor + contextp -> size / 1.25, contextY + contextp -> size * 0.7 + 2);
-        tt_internalColor(contextp, TT_COLOR_TEXT_ALTERNATE, TT_COLOR_OVERRIDE_SLOT_0);
+        tt_setColor(contextp -> color[TT_COLOR_SLOT_CONTEXT_TEXT]);
         contextp -> index = -1;
         for (int32_t i = 0; i < contextp -> options -> length; i++) {
             if (turtle.mouseX > contextX && turtle.mouseX < contextX + contextp -> maxXfactor + contextp -> size / 1.25 && turtle.mouseY > contextY - i * itemHeight - contextp -> size * 0.75 && turtle.mouseY < contextY - i * itemHeight + contextp -> size * 0.75) {
-                tt_internalColor(contextp, TT_COLOR_DROPDOWN_SELECT, TT_COLOR_OVERRIDE_SLOT_2);
+                tt_setColor(contextp -> color[TT_COLOR_SLOT_CONTEXT_SELECT]);
                 turtleRectangle(contextX, contextY - i * itemHeight - contextp -> size * 0.75, contextX + contextp -> maxXfactor + contextp -> size / 1.25, contextY - i * itemHeight + contextp -> size * 0.75);
-                tt_internalColor(contextp, TT_COLOR_TEXT_ALTERNATE, TT_COLOR_OVERRIDE_SLOT_0);
+                tt_setColor(contextp -> color[TT_COLOR_SLOT_CONTEXT_TEXT]);
                 contextp -> index = i;
             }
             turtleTextWriteUnicode((unsigned char *) contextp -> options -> data[i].s, contextX + contextp -> size / 2.5, contextY - i * itemHeight, contextp -> size - 1, 0);
@@ -32724,7 +32760,7 @@ void dropdownUpdate() {
         double dropdownMaxXFactor[2];
         double dropdownAlignFactor;
         if (strlen(dropdownp -> label) > 0) {
-            tt_internalColor(dropdownp, TT_COLOR_TEXT, TT_COLOR_OVERRIDE_SLOT_0);
+            tt_setColor(dropdownp -> color[TT_COLOR_SLOT_DROPDOWN_TEXT]);
             if (dropdownp -> align == TT_DROPDOWN_ALIGN_LEFT) {
                 dropdownXFactor[0] = dropdownX;
                 dropdownXFactor[1] = dropdownX + xfactor + dropdownp -> size;
@@ -32757,17 +32793,17 @@ void dropdownUpdate() {
         }
         logicIndex = tt_globals.dropdownLogicIndex;
         if ((int32_t) i > logicIndex && dropdownp -> status == -1) {
-            tt_internalColor(dropdownp, TT_COLOR_DROPDOWN_SELECT, TT_COLOR_OVERRIDE_SLOT_3);
+            tt_setColor(dropdownp -> color[TT_COLOR_SLOT_DROPDOWN_SELECT]);
             turtleRectangle(dropdownXFactor[0], dropdownY - dropdownp -> size * 0.7, dropdownXFactor[1] + dropdownp -> size, dropdownY + dropdownp -> size * 0.7);
         } else if (dropdownp -> status >= 1) {
-            tt_internalColor(dropdownp, TT_COLOR_DROPDOWN, TT_COLOR_OVERRIDE_SLOT_2);
+            tt_setColor(dropdownp -> color[TT_COLOR_SLOT_DROPDOWN_BASE]);
             turtleRectangle(dropdownMaxXFactor[0], dropdownY - dropdownp -> size * 0.7 - (dropdownp -> options -> length - 1) * itemHeight, dropdownMaxXFactor[1], dropdownY + dropdownp -> size * 0.7);
         } else {
-            tt_internalColor(dropdownp, TT_COLOR_DROPDOWN, TT_COLOR_OVERRIDE_SLOT_2);
+            tt_setColor(dropdownp -> color[TT_COLOR_SLOT_DROPDOWN_BASE]);
             turtleRectangle(dropdownXFactor[0], dropdownY - dropdownp -> size * 0.7, dropdownXFactor[1] + dropdownp -> size, dropdownY + dropdownp -> size * 0.7);
         }
         /* mouse */
-        if (dropdownp -> enabled == TT_ELEMENT_ENABLED && ribbonRender.mainselect[2] == -1) {
+        if (dropdownp -> enabled == TT_ELEMENT_ENABLED && tt_ribbon.mainselect[2] == -1) {
             if (turtle.mouseX > dropdownXFactor[0] && turtle.mouseX < dropdownXFactor[1] + dropdownp -> size && turtle.mouseY > dropdownY - dropdownp -> size * 0.7 && turtle.mouseY < dropdownY + dropdownp -> size * 0.7) {
                 if (!turtleMouseDown() && dropdownp -> status == 0) {
                     dropdownp -> status = -1;
@@ -32813,7 +32849,7 @@ void dropdownUpdate() {
             if (dropdownp -> status == 2 || dropdownp -> status == 1) {
                 if (turtle.mouseX > dropdownMaxXFactor[0] && turtle.mouseX < dropdownMaxXFactor[1] && turtle.mouseY > dropdownY - dropdownp -> size * 0.7 - (dropdownp -> options -> length - 1) * itemHeight && turtle.mouseY < dropdownY + dropdownp -> size * 0.7) {
                     uint32_t selected = round((dropdownY - turtle.mouseY) / itemHeight);
-                    tt_internalColor(dropdownp, TT_COLOR_DROPDOWN_HOVER, TT_COLOR_OVERRIDE_SLOT_4);
+                    tt_setColor(dropdownp -> color[TT_COLOR_SLOT_DROPDOWN_HOVER]);
                     turtleRectangle(dropdownMaxXFactor[0], dropdownY - dropdownp -> size * 0.7 - selected * itemHeight, dropdownMaxXFactor[1], dropdownY + dropdownp -> size * 0.7 - selected * itemHeight);
                     if (turtleMouseDown() && dropdownp -> status == 2) {
                         if (selected != 0) {
@@ -32831,7 +32867,7 @@ void dropdownUpdate() {
                         dropdownp -> status = 0;
                     }
                 }
-                tt_internalColor(dropdownp, TT_COLOR_TEXT_ALTERNATE, TT_COLOR_OVERRIDE_SLOT_1);
+                tt_setColor(dropdownp -> color[TT_COLOR_SLOT_DROPDOWN_TEXT_HOVER]);
                 int32_t renderIndex = 1;
                 for (uint32_t i = 0; i < dropdownp -> options -> length; i++) {
                     if (i != dropdownp -> index) {
@@ -32851,7 +32887,7 @@ void dropdownUpdate() {
             }
             tt_globals.dropdownLogicIndex = logicIndex;
         }
-        tt_internalColor(dropdownp, TT_COLOR_TEXT_ALTERNATE, TT_COLOR_OVERRIDE_SLOT_1);
+        tt_setColor(dropdownp -> color[TT_COLOR_SLOT_DROPDOWN_TEXT_HOVER]);
         if (dropdownp -> align == TT_DROPDOWN_ALIGN_LEFT) {
             turtleTextWriteUnicode((unsigned char *) dropdownp -> options -> data[dropdownp -> index].s, dropdownXFactor[0] + dropdownp -> size / 5, dropdownY, dropdownp -> size - 1, dropdownAlignFactor);
         } else if (dropdownp -> align == TT_DROPDOWN_ALIGN_CENTER) {
@@ -32859,7 +32895,7 @@ void dropdownUpdate() {
         } else if (dropdownp -> align == TT_DROPDOWN_ALIGN_RIGHT) {
             turtleTextWriteUnicode((unsigned char *) dropdownp -> options -> data[dropdownp -> index].s, dropdownXFactor[1] - dropdownp -> size * 0.6, dropdownY, dropdownp -> size - 1, dropdownAlignFactor);
         }
-        tt_internalColor(dropdownp, TT_COLOR_DROPDOWN_TRIANGLE, TT_COLOR_OVERRIDE_SLOT_5);
+        tt_setColor(dropdownp -> color[TT_COLOR_SLOT_DROPDOWN_TRIANGLE]);
         if (dropdownp -> status >= 1) {
             turtleTriangle(dropdownXFactor[1] + dropdownp -> size * 0.4, dropdownY + dropdownp -> size * 0.4, dropdownXFactor[1] + dropdownp -> size * 0.4, dropdownY - dropdownp -> size * 0.4, dropdownXFactor[1] - dropdownp -> size * 0.2, dropdownY);
         } else {
@@ -33079,7 +33115,7 @@ void textboxUpdate() {
             }
         }
 
-        tt_internalColor(textboxp, TT_COLOR_TEXTBOX_BOX, TT_COLOR_OVERRIDE_SLOT_1);
+        tt_setColor(textboxp -> color[TT_COLOR_SLOT_TEXTBOX_BOX]);
         turtleRectangle(textboxp -> x, textboxp -> y - textboxp -> size, textboxp -> x + textboxp -> length, textboxp -> y + textboxp -> size);
 
         if (textboxp -> status <= 0) {
@@ -33089,7 +33125,7 @@ void textboxUpdate() {
             if (strlen(textboxp -> text) == 0) {
                 /* render label */
                 textboxp -> renderNumCharacters = 0;
-                tt_internalColor(textboxp, TT_COLOR_TEXTBOX_PHANTOM_TEXT, TT_COLOR_OVERRIDE_SLOT_2);
+                tt_setColor(textboxp -> color[TT_COLOR_SLOT_TEXTBOX_PHANTOM_TEXT]);
                 turtleTextWriteUnicode((unsigned char *) textboxp -> label, textboxp -> x + textboxp -> size / 2, textboxp -> y, textboxp -> size - 1, 0);
             } else {
                 /* calculate rendered characters */
@@ -33142,10 +33178,10 @@ void textboxUpdate() {
         char tempHold;
         tempHold = textboxp -> text[textboxp -> renderStartingIndex + textboxp -> renderNumCharacters];
         textboxp -> text[textboxp -> renderStartingIndex + textboxp -> renderNumCharacters] = '\0';
-        tt_internalColor(textboxp, TT_COLOR_TEXT_ALTERNATE, TT_COLOR_OVERRIDE_SLOT_0);
+        tt_setColor(textboxp -> color[TT_COLOR_SLOT_TEXTBOX_TEXT]);
         turtleTextWriteUnicode((unsigned char *) (textboxp -> text + textboxp -> renderStartingIndex), textboxp -> x + textboxp -> renderPixelOffset, textboxp -> y, textboxp -> size - 1, 0);
         textboxp -> text[textboxp -> renderStartingIndex + textboxp -> renderNumCharacters] = tempHold;
-        tt_internalColor(textboxp, TT_COLOR_TEXTBOX_BOX, TT_COLOR_OVERRIDE_SLOT_1);
+        tt_setColor(textboxp -> color[TT_COLOR_SLOT_TEXTBOX_BOX]);
         turtleRectangle(textboxp -> x, textboxp -> y - textboxp -> size, textboxp -> x + textboxp -> size / 4, textboxp -> y + textboxp -> size);
         turtleRectangle(textboxp -> x + textboxp -> length, textboxp -> y - textboxp -> size, textboxp -> x + textboxp -> length - textboxp -> size / 4, textboxp -> y + textboxp -> size);
         if (textboxp -> status > 0 && textboxp -> status < 66) {
@@ -33153,12 +33189,12 @@ void textboxUpdate() {
             textboxp -> text[textboxp -> editIndex] = '\0';
             double textLength = turtleTextGetUnicodeLength((unsigned char *) (textboxp -> text + textboxp -> renderStartingIndex), textboxp -> size - 1);
             textboxp -> text[textboxp -> editIndex] = tempHold;
-            tt_internalColor(textboxp, TT_COLOR_TEXTBOX_LINE, TT_COLOR_OVERRIDE_SLOT_3);
+            tt_setColor(textboxp -> color[TT_COLOR_SLOT_TEXTBOX_LINE]);
             turtleRectangle(textboxp -> x + textboxp -> renderPixelOffset + textLength, textboxp -> y - textboxp -> size * 0.8, textboxp -> x + textboxp -> renderPixelOffset + textLength + 1, textboxp -> y + textboxp -> size * 0.8);
         }
 
         /* mouse */
-        if (textboxp -> enabled == TT_ELEMENT_ENABLED && ribbonRender.mainselect[2] == -1) {
+        if (textboxp -> enabled == TT_ELEMENT_ENABLED && tt_ribbon.mainselect[2] == -1) {
             if (turtleMouseDown()) {
                 if (textboxp -> status < 0) {
                     textboxp -> editIndex = strlen(textboxp -> text);

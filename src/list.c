@@ -79,13 +79,18 @@ void list_insert(list_t *list, int32_t index, unitype value, char type) {
     }
     while (index < 0) {index += list -> length;}
     index %= list -> length;
-    list_append(list, (unitype) 0, type);
+    list_append(list, (unitype) 0, 'i');
     int32_t i;
     for (i = list -> length - 1; i > index; i--) {
         list -> data[i] = list -> data[i - 1];
         list -> type[i] = list -> type[i - 1];
     }
-    list -> data[i] = value;
+    if (type == 's') {
+        list -> data[i].s = strdup(value.s);
+    } else {
+        list -> data[i] = value;
+    }
+    list -> type[i] = type;
 }
 
 /* clears the list */
