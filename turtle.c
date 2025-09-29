@@ -3,15 +3,15 @@
 #include <time.h>
 
 void parseRibbonOutput() {
-    if (ribbonRender.output[0] == 0) {
+    if (tt_ribbon.output[0] == 0) {
         return;
     }
-    ribbonRender.output[0] = 0;
-    if (ribbonRender.output[1] == 0) { // File
-        if (ribbonRender.output[2] == 1) { // New
+    tt_ribbon.output[0] = 0;
+    if (tt_ribbon.output[1] == 0) { // File
+        if (tt_ribbon.output[2] == 1) { // New
             printf("New\n");
         }
-        if (ribbonRender.output[2] == 2) { // Save
+        if (tt_ribbon.output[2] == 2) { // Save
             if (osToolsFileDialog.selectedFilenames -> length == 0) {
                 if (osToolsFileDialogSave(OSTOOLS_FILE_DIALOG_FILE, "", NULL) != -1) {
                     printf("Saved to: %s\n", osToolsFileDialog.selectedFilenames -> data[0].s);
@@ -20,40 +20,40 @@ void parseRibbonOutput() {
                 printf("Saved to: %s\n", osToolsFileDialog.selectedFilenames -> data[0].s);
             }
         }
-        if (ribbonRender.output[2] == 3) { // Save As...
+        if (tt_ribbon.output[2] == 3) { // Save As...
             if (osToolsFileDialogSave(OSTOOLS_FILE_DIALOG_FILE, "", NULL) != -1) {
                 printf("Saved to: %s\n", osToolsFileDialog.selectedFilenames -> data[0].s);
             }
         }
-        if (ribbonRender.output[2] == 4) { // Open
+        if (tt_ribbon.output[2] == 4) { // Open
             if (osToolsFileDialogOpen(OSTOOLS_FILE_DIALOG_MULTIPLE_SELECT, OSTOOLS_FILE_DIALOG_FILE, "", NULL) != -1) {
                 printf("Loaded data from: ");
                 list_print(osToolsFileDialog.selectedFilenames);
             }
         }
     }
-    if (ribbonRender.output[1] == 1) { // Edit
-        if (ribbonRender.output[2] == 1) { // Undo
+    if (tt_ribbon.output[1] == 1) { // Edit
+        if (tt_ribbon.output[2] == 1) { // Undo
             printf("Undo\n");
         }
-        if (ribbonRender.output[2] == 2) { // Redo
+        if (tt_ribbon.output[2] == 2) { // Redo
             printf("Redo\n");
         }
-        if (ribbonRender.output[2] == 3) { // Cut
+        if (tt_ribbon.output[2] == 3) { // Cut
             osToolsClipboardSetText("test123");
             printf("Cut \"test123\" to clipboard!\n");
         }
-        if (ribbonRender.output[2] == 4) { // Copy
+        if (tt_ribbon.output[2] == 4) { // Copy
             osToolsClipboardSetText("test345");
             printf("Copied \"test345\" to clipboard!\n");
         }
-        if (ribbonRender.output[2] == 5) { // Paste
+        if (tt_ribbon.output[2] == 5) { // Paste
             osToolsClipboardGetText();
             printf("Pasted \"%s\" from clipboard!\n", osToolsClipboard.text);
         }
     }
-    if (ribbonRender.output[1] == 2) { // View
-        if (ribbonRender.output[2] == 1) { // Change theme
+    if (tt_ribbon.output[1] == 2) { // View
+        if (tt_ribbon.output[2] == 1) { // Change theme
             printf("Change theme\n");
             if (tt_theme == TT_THEME_DARK) {
                 turtleBgColor(36, 30, 32);
@@ -69,22 +69,22 @@ void parseRibbonOutput() {
                 turtleToolsSetTheme(TT_THEME_DARK);
             }
         } 
-        if (ribbonRender.output[2] == 2) { // GLFW
+        if (tt_ribbon.output[2] == 2) { // GLFW
             printf("GLFW settings\n");
         } 
     }
 }
 
 void parsePopupOutput(GLFWwindow *window) {
-    if (popup.output[0] == 0) {
+    if (tt_popup.output[0] == 0) {
         return;
     }
-    popup.output[0] = 0; // untoggle
-    if (popup.output[1] == 0) { // cancel
+    tt_popup.output[0] = 0; // untoggle
+    if (tt_popup.output[1] == 0) { // cancel
         turtle.close = 0;
         glfwSetWindowShouldClose(window, 0);
     }
-    if (popup.output[1] == 1) { // close
+    if (tt_popup.output[1] == 1) { // close
         turtle.popupClose = 1;
     }
 }
