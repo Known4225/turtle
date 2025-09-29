@@ -77,39 +77,52 @@ typedef struct {
 extern tt_elements_t tt_elements;
 
 typedef enum {
-    TT_COLOR_TEXT = 0,
-    TT_COLOR_TEXT_ALTERNATE = 3,
-    TT_COLOR_RIBBON_TOP = 6,
-    TT_COLOR_RIBBON_DROPDOWN = 9,
-    TT_COLOR_RIBBON_SELECT = 12,
-    TT_COLOR_RIBBON_HOVER = 15,
-    TT_COLOR_POPUP_BOX = 18,
-    TT_COLOR_POPUP_BUTTON = 21,
-    TT_COLOR_POPUP_BUTTON_SELECT = 24,
-    TT_COLOR_BUTTON = 27,
-    TT_COLOR_BUTTON_SELECT = 30,
-    TT_COLOR_BUTTON_CLICKED = 33,
-    TT_COLOR_SWITCH_TEXT_HOVER = 36,
-    TT_COLOR_SWITCH_OFF = 39,
-    TT_COLOR_SWITCH_CIRCLE_OFF = 42,
-    TT_COLOR_SWITCH_ON = 45,
-    TT_COLOR_SWITCH_CIRCLE_ON = 48,
-    TT_COLOR_DIAL = 51,
-    TT_COLOR_DIAL_INNER = 54,
-    TT_COLOR_SLIDER_BAR = 57,
-    TT_COLOR_SLIDER_CIRCLE = 60,
-    TT_COLOR_SCROLLBAR_BASE = 63,
-    TT_COLOR_SCROLLBAR_BAR = 66,
-    TT_COLOR_SCROLLBAR_HOVER = 69,
-    TT_COLOR_SCROLLBAR_CLICKED = 72,
-    TT_COLOR_DROPDOWN = 75,
-    TT_COLOR_DROPDOWN_SELECT = 78,
-    TT_COLOR_DROPDOWN_HOVER = 81,
-    TT_COLOR_DROPDOWN_TRIANGLE = 84,
-    TT_COLOR_TEXTBOX_BOX = 87,
-    TT_COLOR_TEXTBOX_PHANTOM_TEXT = 90,
-    TT_COLOR_TEXTBOX_LINE = 93,
-    TT_COLOR_TEXTBOX_SELECT = 96,
+    TT_COLOR_BACKGROUND = 0,
+    TT_COLOR_BACKGROUND_BASE = 0,
+    TT_COLOR_BACKGROUND_HIGHLIGHT = 3,
+    TT_COLOR_BACKGROUND_ALTERNATE = 6,
+    TT_COLOR_BACKGROUND_COMPLEMENT = 9,
+    TT_COLOR_TEXT = 12,
+    TT_COLOR_TEXT_BASE = 12,
+    TT_COLOR_TEXT_HIGHLIGHT = 15,
+    TT_COLOR_TEXT_ALTERNATE = 18,
+    TT_COLOR_TEXT_COMPLEMENT = 21,
+    TT_COLOR_COMPONENT = 24,
+    TT_COLOR_COMPONENT_BASE = 24,
+    TT_COLOR_COMPONENT_HIGHLIGHT = 27,
+    TT_COLOR_COMPONENT_ALTERNATE = 30,
+    TT_COLOR_COMPONENT_COMPLEMENT = 33,
+    TT_COLOR_TERTIARY = 36,
+    TT_COLOR_TERTIARY_BASE = 36,
+    TT_COLOR_TERTIARY_HIGHLIGHT = 39,
+    TT_COLOR_TERTIARY_ALTERNATE = 42,
+    TT_COLOR_TERTIARY_COMPLEMENT = 45,
+    TT_COLOR_RED = 48,
+    TT_COLOR_RED_ALTERNATE = 51,
+    TT_COLOR_ORANGE = 54,
+    TT_COLOR_ORANGE_ALTERNATE = 57,
+    TT_COLOR_YELLOW = 60,
+    TT_COLOR_YELLOW_ALTERNATE = 63,
+    TT_COLOR_GREEN = 66,
+    TT_COLOR_GREEN_ALTERNATE = 69,
+    TT_COLOR_CYAN = 72,
+    TT_COLOR_CYAN_ALTERNATE = 75,
+    TT_COLOR_BLUE = 78,
+    TT_COLOR_BLUE_ALTERNATE = 81,
+    TT_COLOR_PURPLE = 84,
+    TT_COLOR_PURPLE_ALTERNATE = 87,
+    TT_COLOR_MAGENTA = 90,
+    TT_COLOR_MAGENTA_ALTERNATE = 93,
+    TT_COLOR_PINK = 96,
+    TT_COLOR_PINK_ALTERNATE = 99,
+    TT_COLOR_BLACK = 102,
+    TT_COLOR_BLACK_ALTERNATE = 105,
+    TT_COLOR_WHITE = 108,
+    TT_COLOR_WHITE_ALTERNATE = 111,
+    TT_COLOR_DARK_GREY = 114,
+    TT_COLOR_DARK_GREY_ALTERNATE = 117,
+    TT_COLOR_LIGHT_GREY = 120,
+    TT_COLOR_LIGHT_GREY_ALTERNATE = 123,
 } tt_theme_internal_t;
 
 /* default colours (light theme) */
@@ -118,6 +131,63 @@ extern double tt_themeColors[];
 void tt_setColor(int32_t index);
 
 void turtleToolsSetTheme(tt_theme_name_t theme);
+
+extern int32_t tt_color_default[];
+
+typedef enum {
+    /* ribbon and popup (special cases) */
+    TT_COLOR_SLOT_RIBBON_TOP = TT_COLOR_COMPONENT_HIGHLIGHT,
+    TT_COLOR_SLOT_RIBBON_DROPDOWN = TT_COLOR_COMPONENT_HIGHLIGHT,
+    TT_COLOR_SLOT_RIBBON_HOVER = TT_COLOR_COMPONENT,
+    TT_COLOR_SLOT_RIBBON_SELECT = TT_COLOR_COMPONENT,
+    TT_COLOR_SLOT_POPUP_BOX = TT_COLOR_COMPONENT_ALTERNATE,
+    TT_COLOR_SLOT_POPUP_BUTTON_SELECT = TT_COLOR_COMPONENT_HIGHLIGHT,
+    TT_COLOR_SLOT_POPUP_BUTTON = TT_COLOR_COMPONENT,
+    /* button */
+    TT_COLOR_SLOT_BUTTON_TEXT = 0,
+    TT_COLOR_SLOT_BUTTON = 1,
+    TT_COLOR_SLOT_BUTTON_SELECT = 2,
+    TT_COLOR_SLOT_BUTTON_SELECTED_TEXT = 3,
+    TT_COLOR_SLOT_BUTTON_CLICKED = 4,
+    /* switch */
+    TT_COLOR_SLOT_SWITCH_TEXT = 0,
+    TT_COLOR_SLOT_SWITCH_TEXT_HOVER = 1,
+    TT_COLOR_SLOT_SWITCH_OFF = 2,
+    TT_COLOR_SLOT_SWITCH_ON = 3,
+    TT_COLOR_SLOT_CIRCLE_OFF = 4,
+    TT_COLOR_SLOT_CIRCLE_ON = 5,
+    /* dial */
+    TT_COLOR_SLOT_DIAL_TEXT = 0,
+    TT_COLOR_SLOT_DIAL = 1,
+    TT_COLOR_SLOT_DIAL_INNER = 2,
+    /* slider */
+    TT_COLOR_SLOT_SLIDER_TEXT = 0,
+    TT_COLOR_SLOT_SLIDER_BAR = 1,
+    TT_COLOR_SLOT_SLIDER_CIRCLE = 2,
+    /* scrollbar */
+    TT_COLOR_SLOT_SCROLLBAR_BASE = 1,
+    TT_COLOR_SLOT_SCROLLBAR_BAR = 2,
+    TT_COLOR_SLOT_SCROLLBAR_HOVER = 3,
+    TT_COLOR_SLOT_SCROLLBAR_CLICKED = 4,
+    /* context */
+    TT_COLOR_SLOT_CONTEXT_TEXT = 0,
+    TT_COLOR_SLOT_CONTEXT_BASE = 1,
+    TT_COLOR_SLOT_CONTEXT_SELECT = 2,
+    /* dropdown */
+    TT_COLOR_SLOT_DROPDOWN_TEXT = 0,
+    TT_COLOR_SLOT_DROPDOWN_TEXT_HOVER = 1,
+    TT_COLOR_SLOT_DROPDOWN_BASE = 2,
+    TT_COLOR_SLOT_DROPDOWN_SELECT = 3,
+    TT_COLOR_SLOT_DROPDOWN_HOVER = 4,
+    TT_COLOR_SLOT_DROPDOWN_TRIANGLE = 5,
+    /* textbox */
+    TT_COLOR_SLOT_TEXTBOX_TEXT = 0,
+    TT_COLOR_SLOT_TEXTBOX_BOX = 1,
+    TT_COLOR_SLOT_TEXTBOX_PHANTOM_TEXT = 2,
+    TT_COLOR_SLOT_TEXTBOX_LINE = 3,
+} tt_color_slots_t;
+
+void elementResetColor(void *elementp, int32_t elementType);
 
 /* ribbon */
 
@@ -134,7 +204,7 @@ typedef struct {
     list_t *lengths;
 } tt_ribbon_t;
 
-extern tt_ribbon_t ribbonRender;
+extern tt_ribbon_t tt_ribbon;
 
 /* initialise ribbon */
 int32_t ribbonInit(const char *filename);
@@ -171,7 +241,7 @@ typedef struct {
     int8_t mouseDown;
 } tt_popup_t;
 
-extern tt_popup_t popup;
+extern tt_popup_t tt_popup;
 
 /* initialise popup */
 int32_t popupInit(char *filename);
@@ -189,11 +259,6 @@ void popupUpdate();
 void popupFree();
 
 /* UI tools */
-
-typedef struct {
-    int32_t colorOverride;
-    double color[24];
-} tt_color_override_t;
 
 typedef struct {
     double dialAnchorX;
@@ -223,7 +288,7 @@ typedef enum {
 typedef struct {
     tt_element_names_t element;
     tt_element_enabled_t enabled;
-    tt_color_override_t color;
+    int32_t color[8];
     double x;
     double y;
     double size;
@@ -245,7 +310,7 @@ typedef enum {
 typedef struct {
     tt_element_names_t element;
     tt_element_enabled_t enabled;
-    tt_color_override_t color;
+    int32_t color[8];
     double x;
     double y;
     double size;
@@ -265,7 +330,7 @@ typedef enum {
 typedef struct {
     tt_element_names_t element;
     tt_element_enabled_t enabled;
-    tt_color_override_t color;
+    int32_t color[8];
     double x;
     double y;
     double size;
@@ -293,7 +358,7 @@ typedef enum {
 typedef struct {
     tt_element_names_t element;
     tt_element_enabled_t enabled;
-    tt_color_override_t color;
+    int32_t color[8];
     double x;
     double y;
     double size;
@@ -317,7 +382,7 @@ typedef enum {
 typedef struct {
     tt_element_names_t element;
     tt_element_enabled_t enabled;
-    tt_color_override_t color;
+    int32_t color[8];
     double x;
     double y;
     double size;
@@ -339,7 +404,7 @@ typedef enum {
 typedef struct {
     tt_element_names_t element;
     tt_element_enabled_t enabled;
-    tt_color_override_t color;
+    int32_t color[8];
     double x;
     double y;
     double size;
@@ -361,7 +426,7 @@ typedef enum {
 typedef struct {
     tt_element_names_t element;
     tt_element_enabled_t enabled;
-    tt_color_override_t color;
+    int32_t color[8];
     double x;
     double y;
     double size;
@@ -383,7 +448,7 @@ typedef enum {
 typedef struct {
     tt_element_names_t element;
     tt_element_enabled_t enabled;
-    tt_color_override_t color;
+    int32_t color[8];
     double x;
     double y;
     double size;
@@ -401,26 +466,6 @@ typedef struct {
     int32_t renderStartingIndex;
     int32_t renderNumCharacters;
 } tt_textbox_t;
-
-/* override colors with color array */
-void tt_colorOverride(void *element, double *colors, uint32_t length);
-
-typedef enum {
-    TT_COLOR_OVERRIDE_SLOT_0 = 0,
-    TT_COLOR_OVERRIDE_SLOT_1 = 3,
-    TT_COLOR_OVERRIDE_SLOT_2 = 6,
-    TT_COLOR_OVERRIDE_SLOT_3 = 9,
-    TT_COLOR_OVERRIDE_SLOT_4 = 12,
-    TT_COLOR_OVERRIDE_SLOT_5 = 15,
-    TT_COLOR_OVERRIDE_SLOT_6 = 18,
-    TT_COLOR_OVERRIDE_SLOT_7 = 21,
-} tt_color_override_internal_t;
-
-extern int32_t tt_color_override_default[];
-
-void elementResetColor(void *elementp, int32_t elementType);
-
-void tt_internalColor(void *elementp, int32_t colorIndex, int32_t overrideIndex);
 
 /* initialise UI elements */
 
