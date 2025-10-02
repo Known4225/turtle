@@ -64,8 +64,10 @@ The example project has a set of files in the `config/` folder that can be modif
 # To Do
 - Fix incorrect handling of non-texture rendering with texture-enabled shaders
 - Alignment for buttons and switches
+- Change textbox text color to text highlight or complement
 - Fix misjudged dropdown on certain alignments
 - Fix some letters escaping dropdown
+- Fix dial angle when mouseY = dialY (divide by 0 arctan)
 - List stride sort
 - Cleanup Win32Tcp
 - Correctly handle UI occlusion
