@@ -52,7 +52,7 @@ typedef struct {
 
 extern turtleText_t turtleText;
 
-/* initialise values, must supply a font file (tgl) */
+/* initialise turtleText, must supply a font file (tgl) - if font file is not found then a default font will be substituted */
 int32_t turtleTextInit(const char *filename);
 
 /* render functions */
@@ -60,39 +60,51 @@ int32_t turtleTextInit(const char *filename);
 /* renders a quadratic bezier curve on the screen */
 void renderBezier(double x1, double y1, double x2, double y2, double x3, double y3, int32_t prez);
 
-/* renders a single character */
+/* renders a single character - INTERNAL */
 void renderChar(int32_t index, double x, double y, double size);
 
-/* gets the length of a string in pixels on the screen */
+/* special version of renderChar with rotation - INTERNAL */
+void renderCharRotated(int32_t index, double x, double y, double size, double sinR, double cosR);
+
+/* gets the length of a string in coordinates on the screen */
 double turtleTextGetLength(const uint32_t *text, int32_t textLength, double size);
 
-/* gets the length of a string in pixels on the screen */
+/* gets the length of a formatted string in coordinates on the screen */
 double turtleTextGetStringLength(const char *str, double size);
 
-/* gets the length of a string in pixels on the screen */
+/* gets the length of a string in coordinates on the screen */
 double turtleTextGetStringLengthf(double size, const char *str, ...);
 
-/* gets the length of a u-string in pixels on the screen */
+/* gets the length of a formatted utf8-string in coordinates on the screen */
 double turtleTextGetUnicodeLength(const unsigned char *str, double size);
 
-/* truncates a string to have a width less than width, 0 for left, 1 for right */
+/* gets the length of a utf8-string in coordinates on the screen */
+double turtleTextGetUnicodeLengthf(double size, const unsigned char *str, ...);
+
+/* cut the text of a string such that it will fit in a coordinate size width (0 - left truncate, 1 - right truncate) */
 void turtleTextTruncateString(char *str, double size, double width, int8_t leftRight);
 
-/* writes to the screen */
+/* Writes to the screen - INTERNAL */
 void turtleTextWrite(const uint32_t *text, int32_t textLength, double x, double y, double size, double align);
 
-/* wrapper function for writing strings easier */
+/* Special form of write function which supports rotated text - INTERNAL */
+void turtleTextWriteRotated(const uint32_t *text, int32_t textLength, double x, double y, double size, double align, double rotate);
+
+/* Write a string to the screen */
 void turtleTextWriteString(const char *str, double x, double y, double size, double align);
 
-/* formatted string */
+/* Write a formatted string to the screen */
 void turtleTextWriteStringf(double x, double y, double size, double align, const char *str, ...);
 
-/* wrapper function for unicode strings (UTF-8, u8"Hello World") */
+void turtleTextWriteStringRotated(const char *str, double x, double y, double size, double align, double rotate);
+
+/* Write a utf8-string to the screen */
 void turtleTextWriteUnicode(const unsigned char *str, double x, double y, double size, double align);
 
-/* formatted utf-8 string */
+/* Write a formatted utf8-string to the screen */
 void turtleTextWriteUnicodef(double x, double y, double size, double align, const unsigned char *str, ...);
 
+/* internal function for converting utf8 to uint32_t characters */
 int32_t turtleTextConvertUnicode(const unsigned char *str, uint32_t *converted);
 
 /* if the font file is not found, use the default font (kept here) */
