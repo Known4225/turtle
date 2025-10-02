@@ -65,7 +65,7 @@ The example project has a set of files in the `config/` folder that can be modif
 - Fix incorrect handling of non-texture rendering with texture-enabled shaders
 - Alignment for buttons and switches
 - Fix misjudged dropdown on certain alignments
-- Rotatable Text
+- Fix some letters escaping dropdown
 - List stride sort
 - Cleanup Win32Tcp
 - Correctly handle UI occlusion

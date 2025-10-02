@@ -277,6 +277,8 @@ int main(int argc, char *argv[]) {
         turtleTextWriteUnicode((uint8_t *) u8"αβγδεζηθικλμνξοπρσςτυφχψω", scrollbarVarX * -5 + 260, scrollbarVarY * 3.3 - 330, 10, 0);
         turtleTextWriteUnicode((uint8_t *) u8"1234567890!@#$£€₺₽¥₩₹₣฿%^&*()`~-_=+[", scrollbarVarX * -5 + 260, scrollbarVarY * 3.3 - 345, 10, 0);
         turtleTextWriteUnicode((uint8_t *) u8"{]}\\|;:‘'’“\"”,<.>/?½¨", scrollbarVarX * -5 + 260, scrollbarVarY * 3.3 - 360, 10, 0);
+
+        turtleTextWriteStringRotated("Rotated Text", scrollbarVarX * -5 - 100, scrollbarVarY * 3.3 + 75, 9, 50, -15);
         
         /* draw texture */
         turtleTexture(empvImage, scrollbarVarX * -5 + 400, scrollbarVarY * 3.3 - 145, scrollbarVarX * -5 + 700, scrollbarVarY * 3.3 + 24, 0, 255, 255, 255);
