@@ -552,14 +552,15 @@ void turtleTextWriteString(const char *str, double x, double y, double size, dou
 
 /* Write a formatted string to the screen */
 void turtleTextWriteStringf(double x, double y, double size, double align, const char *str, ...) {
-    char buffer[1024];
+    char buffer[2048];
     va_list args;
     va_start(args, str);
-    vsnprintf(buffer, 1024, str, args);
+    vsnprintf(buffer, 2048, str, args);
     turtleTextWriteString(buffer, x, y, size, align);
     va_end(args);
 }
 
+/* Write a string to the screen (with rotation) */
 void turtleTextWriteStringRotated(const char *str, double x, double y, double size, double align, double rotate) {
     int32_t len = strlen(str);
     uint32_t converted[len];
@@ -567,6 +568,16 @@ void turtleTextWriteStringRotated(const char *str, double x, double y, double si
         converted[i] = (uint32_t) str[i];
     }
     turtleTextWriteRotated(converted, len, x, y, size, align, rotate);
+}
+
+/* Write a formatted string to the screen (with rotation) */
+void turtleTextWriteStringfRotated(double x, double y, double size, double align, double rotate, const char *str, ...) {
+    char buffer[2048];
+    va_list args;
+    va_start(args, str);
+    vsnprintf(buffer, 2048, str, args);
+    turtleTextWriteStringRotated(buffer, x, y, size, align, rotate);
+    va_end(args);
 }
 
 /* Write a utf8-string to the screen */
@@ -605,11 +616,55 @@ void turtleTextWriteUnicode(const unsigned char *str, double x, double y, double
 
 /* Write a formatted utf8-string to the screen */
 void turtleTextWriteUnicodef(double x, double y, double size, double align, const unsigned char *str, ...) {
-    char buffer[1024];
+    char buffer[2048];
     va_list args;
     va_start(args, str);
-    vsnprintf(buffer, 1024, (char *) str, args);
+    vsnprintf(buffer, 2048, (char *) str, args);
     turtleTextWriteUnicode((unsigned char *) buffer, x, y, size, align);
+    va_end(args);
+}
+
+/* Write a utf8-string to the screen (with rotation) */
+void turtleTextWriteUnicodeRotated(const unsigned char *str, double x, double y, double size, double align, double rotate) {
+    int32_t len = strlen((char *) str);
+    uint32_t converted[len];
+    int32_t byteLength;
+    int32_t i = 0;
+    int32_t next = 0;
+    while (i < len) {
+        byteLength = 0;
+        for (uint8_t j = 0; j < 8; j++) {
+            uint8_t mask = 128 >> j;
+            if (str[i] & mask) {
+                byteLength += 1;
+            } else {
+                j = 8; // end loop
+            }
+        }
+        if (byteLength == 0) { // case: ASCII character
+            converted[next] = (uint32_t) str[i];
+            byteLength = 1;
+        } else { // case: multi-byte character
+            uint32_t convert = 0;
+            for (int32_t k = 0; k < byteLength; k++) {
+                convert = convert << 8;
+                convert += (uint32_t) str[i + k];
+            }
+            converted[next] = convert;
+        }
+        i += byteLength;
+        next += 1;
+    }
+    turtleTextWriteRotated(converted, next, x, y, size, align, rotate);
+}
+
+/* Write a formatted utf8-string to the screen (with rotation) */
+void turtleTextWriteUnicodefRotated(double x, double y, double size, double align, double rotate, const unsigned char *str, ...) {
+    char buffer[2048];
+    va_list args;
+    va_start(args, str);
+    vsnprintf(buffer, 2048, (char *) str, args);
+    turtleTextWriteUnicodeRotated((unsigned char *) buffer, x, y, size, align, rotate);
     va_end(args);
 }
 

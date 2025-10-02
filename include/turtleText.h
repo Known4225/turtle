@@ -96,13 +96,23 @@ void turtleTextWriteString(const char *str, double x, double y, double size, dou
 /* Write a formatted string to the screen */
 void turtleTextWriteStringf(double x, double y, double size, double align, const char *str, ...);
 
+/* Write a string to the screen (with rotation) */
 void turtleTextWriteStringRotated(const char *str, double x, double y, double size, double align, double rotate);
+
+/* Write a formatted string to the screen (with rotation) */
+void turtleTextWriteStringfRotated(double x, double y, double size, double align, double rotate, const char *str, ...);
 
 /* Write a utf8-string to the screen */
 void turtleTextWriteUnicode(const unsigned char *str, double x, double y, double size, double align);
 
 /* Write a formatted utf8-string to the screen */
 void turtleTextWriteUnicodef(double x, double y, double size, double align, const unsigned char *str, ...);
+
+/* Write a utf8-string to the screen (with rotation) */
+void turtleTextWriteUnicodeRotated(const unsigned char *str, double x, double y, double size, double align, double rotate);
+
+/* Write a formatted utf8-string to the screen (with rotation) */
+void turtleTextWriteUnicodefRotated(double x, double y, double size, double align, double rotate, const unsigned char *str, ...);
 
 /* internal function for converting utf8 to uint32_t characters */
 int32_t turtleTextConvertUnicode(const unsigned char *str, uint32_t *converted);
