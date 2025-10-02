@@ -29100,7 +29100,7 @@ const char *turtleFragmentShaderSource =
 "in float textureIndex;\n"
 "out vec4 fragColor;\n"
 "void main() {\n"
-"     fragColor = texture(textureImages, vec3(textureCoordFrag, textureIndex)) * shadeColor * (1 - (1 / (1 + pow(16, 20 * textureIndex - 10)))) + shadeColor * (1 / (1 + pow(16, 20 * textureIndex - 10)));\n"
+"     fragColor = texture(textureImages, vec3(textureCoordFrag, textureIndex)) * shadeColor + shadeColor * (1 / (1 + pow(2, 20 * textureIndex - 10)));\n"
 "}\0";
 #endif /* TURTLE_ENABLE_TEXTURES */
 
