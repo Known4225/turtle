@@ -1559,7 +1559,7 @@ void contextUpdate() {
         if (contextp -> enabled == TT_ELEMENT_HIDE) {
             continue;
         }
-        double itemHeight = (contextp -> size * 1.5);
+        double itemHeight = (contextp -> size * 1.8);
         double contextX = contextp -> x;
         double contextY = contextp -> y - itemHeight / 2 - 2;
         tt_setColor(contextp -> color[TT_COLOR_SLOT_CONTEXT_BASE]);
@@ -1567,9 +1567,9 @@ void contextUpdate() {
         tt_setColor(contextp -> color[TT_COLOR_SLOT_CONTEXT_TEXT]);
         contextp -> index = -1;
         for (int32_t i = 0; i < contextp -> options -> length; i++) {
-            if (turtle.mouseX > contextX && turtle.mouseX < contextX + contextp -> maxXfactor + contextp -> size / 1.25 && turtle.mouseY > contextY - i * itemHeight - contextp -> size * 0.75 && turtle.mouseY < contextY - i * itemHeight + contextp -> size * 0.75) {
+            if (turtle.mouseX > contextX && turtle.mouseX < contextX + contextp -> maxXfactor + contextp -> size / 1.25 && turtle.mouseY >= contextY - i * itemHeight - contextp -> size * 0.9 && turtle.mouseY < contextY - i * itemHeight + contextp -> size * 0.9) {
                 tt_setColor(contextp -> color[TT_COLOR_SLOT_CONTEXT_SELECT]);
-                turtleRectangle(contextX, contextY - i * itemHeight - contextp -> size * 0.75, contextX + contextp -> maxXfactor + contextp -> size / 1.25, contextY - i * itemHeight + contextp -> size * 0.75);
+                turtleRectangle(contextX, contextY - i * itemHeight - contextp -> size * 0.9, contextX + contextp -> maxXfactor + contextp -> size / 1.25, contextY - i * itemHeight + contextp -> size * 0.9);
                 tt_setColor(contextp -> color[TT_COLOR_SLOT_CONTEXT_TEXT]);
                 contextp -> index = i;
             }
@@ -1593,7 +1593,7 @@ void dropdownUpdate() {
         double dropdownX = dropdownp -> x;
         double dropdownY = dropdownp -> y;
         double xfactor = turtleTextGetUnicodeLength((unsigned char *) dropdownp -> options -> data[dropdownp -> index].s, dropdownp -> size - 1);
-        double itemHeight = (dropdownp -> size * 1.5);
+        double itemHeight = (dropdownp -> size * 1.8);
         double dropdownXFactor[2];
         double dropdownMaxXFactor[2];
         double dropdownAlignFactor;
@@ -1608,7 +1608,7 @@ void dropdownUpdate() {
                     dropdownMaxXFactor[1] = dropdownXFactor[1] + dropdownp -> size;
                 }
                 dropdownAlignFactor = 0;
-                turtleTextWriteUnicode((unsigned char *) dropdownp -> label, dropdownX + dropdownp -> size / 5, dropdownY + 1.6 * dropdownp -> size, dropdownp -> size - 1, dropdownAlignFactor);
+                turtleTextWriteUnicode((unsigned char *) dropdownp -> label, dropdownX + dropdownp -> size / 5, dropdownY + 2 * dropdownp -> size, dropdownp -> size - 1, dropdownAlignFactor);
             } else if (dropdownp -> align == TT_DROPDOWN_ALIGN_CENTER) {
                 dropdownXFactor[0] = dropdownX - xfactor / 2 - dropdownp -> size;
                 dropdownXFactor[1] = dropdownX + xfactor / 2;
@@ -1619,30 +1619,30 @@ void dropdownUpdate() {
                     dropdownMaxXFactor[1] = dropdownXFactor[1] + dropdownp -> size;
                 }
                 dropdownAlignFactor = 50;
-                turtleTextWriteUnicode((unsigned char *) dropdownp -> label, dropdownX, dropdownY + 1.6 * dropdownp -> size, dropdownp -> size - 1, dropdownAlignFactor);
+                turtleTextWriteUnicode((unsigned char *) dropdownp -> label, dropdownX, dropdownY + 2 * dropdownp -> size, dropdownp -> size - 1, dropdownAlignFactor);
             } else if (dropdownp -> align == TT_DROPDOWN_ALIGN_RIGHT) {
                 dropdownXFactor[0] = dropdownX - xfactor - dropdownp -> size * 2;
                 dropdownXFactor[1] = dropdownX - dropdownp -> size;
                 dropdownMaxXFactor[0] = dropdownX - dropdownp -> maxXfactor - dropdownp -> size * 2;
                 dropdownMaxXFactor[1] = dropdownX;
                 dropdownAlignFactor = 100;
-                turtleTextWriteUnicode((unsigned char *) dropdownp -> label, dropdownX - dropdownp -> size / 5, dropdownY + 1.6 * dropdownp -> size, dropdownp -> size - 1, dropdownAlignFactor);
+                turtleTextWriteUnicode((unsigned char *) dropdownp -> label, dropdownX - dropdownp -> size / 5, dropdownY + 2 * dropdownp -> size, dropdownp -> size - 1, dropdownAlignFactor);
             }
         }
         logicIndex = tt_globals.dropdownLogicIndex;
         if ((int32_t) i > logicIndex && dropdownp -> status == -1) {
             tt_setColor(dropdownp -> color[TT_COLOR_SLOT_DROPDOWN_SELECT]);
-            turtleRectangle(dropdownXFactor[0], dropdownY - dropdownp -> size * 0.7, dropdownXFactor[1] + dropdownp -> size, dropdownY + dropdownp -> size * 0.7);
+            turtleRectangle(dropdownXFactor[0], dropdownY - dropdownp -> size * 0.9, dropdownXFactor[1] + dropdownp -> size, dropdownY + dropdownp -> size * 0.9);
         } else if (dropdownp -> status >= 1) {
             tt_setColor(dropdownp -> color[TT_COLOR_SLOT_DROPDOWN_BASE]);
-            turtleRectangle(dropdownMaxXFactor[0], dropdownY - dropdownp -> size * 0.7 - (dropdownp -> options -> length - 1) * itemHeight, dropdownMaxXFactor[1], dropdownY + dropdownp -> size * 0.7);
+            turtleRectangle(dropdownMaxXFactor[0], dropdownY - dropdownp -> size * 0.9 - (dropdownp -> options -> length - 1) * itemHeight, dropdownMaxXFactor[1], dropdownY + dropdownp -> size * 0.9);
         } else {
             tt_setColor(dropdownp -> color[TT_COLOR_SLOT_DROPDOWN_BASE]);
-            turtleRectangle(dropdownXFactor[0], dropdownY - dropdownp -> size * 0.7, dropdownXFactor[1] + dropdownp -> size, dropdownY + dropdownp -> size * 0.7);
+            turtleRectangle(dropdownXFactor[0], dropdownY - dropdownp -> size * 0.9, dropdownXFactor[1] + dropdownp -> size, dropdownY + dropdownp -> size * 0.9);
         }
         /* mouse */
         if (dropdownp -> enabled == TT_ELEMENT_ENABLED && tt_ribbon.mainselect[2] == -1) {
-            if (turtle.mouseX > dropdownXFactor[0] && turtle.mouseX < dropdownXFactor[1] + dropdownp -> size && turtle.mouseY > dropdownY - dropdownp -> size * 0.7 && turtle.mouseY < dropdownY + dropdownp -> size * 0.7) {
+            if (turtle.mouseX > dropdownXFactor[0] && turtle.mouseX < dropdownXFactor[1] + dropdownp -> size && turtle.mouseY >= dropdownY - dropdownp -> size * 0.9 && turtle.mouseY < dropdownY + dropdownp -> size * 0.9) {
                 if (!turtleMouseDown() && dropdownp -> status == 0) {
                     dropdownp -> status = -1;
                     logicIndex = -1;
@@ -1660,7 +1660,7 @@ void dropdownUpdate() {
             }
             if (dropdownp -> status == 1) {
                 if (!turtleMouseDown()) {
-                    if (turtle.mouseX > dropdownMaxXFactor[0] && turtle.mouseX < dropdownMaxXFactor[1] && turtle.mouseY > dropdownY - dropdownp -> size * 0.7 - (dropdownp -> options -> length - 1) * itemHeight && turtle.mouseY < dropdownY + dropdownp -> size * 0.7 - itemHeight) {
+                    if (turtle.mouseX > dropdownMaxXFactor[0] && turtle.mouseX < dropdownMaxXFactor[1] && turtle.mouseY >= dropdownY - dropdownp -> size * 0.9 - (dropdownp -> options -> length - 1) * itemHeight && turtle.mouseY < dropdownY + dropdownp -> size * 0.9 - itemHeight) {
                         uint32_t selected = round((dropdownY - turtle.mouseY) / itemHeight);
                         if (selected != 0) {
                             if (dropdownp -> index >= selected) {
@@ -1683,12 +1683,11 @@ void dropdownUpdate() {
                     logicIndex = -1;
                 }
             }
-
             if (dropdownp -> status == 2 || dropdownp -> status == 1) {
-                if (turtle.mouseX > dropdownMaxXFactor[0] && turtle.mouseX < dropdownMaxXFactor[1] && turtle.mouseY > dropdownY - dropdownp -> size * 0.7 - (dropdownp -> options -> length - 1) * itemHeight && turtle.mouseY < dropdownY + dropdownp -> size * 0.7) {
+                if (turtle.mouseX > dropdownMaxXFactor[0] && turtle.mouseX < dropdownMaxXFactor[1] && turtle.mouseY >= dropdownY - dropdownp -> size * 0.9 - (dropdownp -> options -> length - 1) * itemHeight && turtle.mouseY < dropdownY + dropdownp -> size * 0.9) {
                     uint32_t selected = round((dropdownY - turtle.mouseY) / itemHeight);
                     tt_setColor(dropdownp -> color[TT_COLOR_SLOT_DROPDOWN_HOVER]);
-                    turtleRectangle(dropdownMaxXFactor[0], dropdownY - dropdownp -> size * 0.7 - selected * itemHeight, dropdownMaxXFactor[1], dropdownY + dropdownp -> size * 0.7 - selected * itemHeight);
+                    turtleRectangle(dropdownMaxXFactor[0], dropdownY - dropdownp -> size * 0.9 - selected * itemHeight, dropdownMaxXFactor[1], dropdownY + dropdownp -> size * 0.9 - selected * itemHeight);
                     if (turtleMouseDown() && dropdownp -> status == 2) {
                         if (selected != 0) {
                             if (dropdownp -> index >= selected) {

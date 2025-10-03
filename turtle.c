@@ -196,6 +196,18 @@ int main(int argc, char *argv[]) {
     scrollbarInit(&scrollbarVarY, TT_SCROLLBAR_VERTICAL, 310, 0, 10, 320, 33);
     dropdownInit("Dropdown", dropdownOptions, &dropdownVar, TT_DROPDOWN_ALIGN_CENTER, 0, 70, 10);
     textboxInit("Textbox", 128, -50, -110, 10, 100);
+    list_t *contextOptions = list_init();
+    list_append(contextOptions, (unitype) "Button", 's');
+    list_append(contextOptions, (unitype) "Switch", 's');
+    list_append(contextOptions, (unitype) "Dial", 's');
+    list_append(contextOptions, (unitype) "Slider", 's');
+    list_append(contextOptions, (unitype) "Scrollbar", 's');
+    list_append(contextOptions, (unitype) "Context", 's');
+    list_append(contextOptions, (unitype) "Dropdown", 's');
+    list_append(contextOptions, (unitype) "Textbox", 's');
+    int32_t contextVar = 0;
+    tt_context_t *context = contextInit(contextOptions, &contextVar, 0, 0, 10);
+    context -> enabled = TT_ELEMENT_HIDE;
 
     double power = 0.0, speed = 0.0, exposure = 0.0, x = 103, y = 95, z = 215;
     int8_t xEnabled = 0, yEnabled = 1, zEnabled = 0;
@@ -240,13 +252,14 @@ int main(int argc, char *argv[]) {
 
     double scroll = 0.0;
     double scrollFactor = 15;
+    char keys[8] = {0};
     while (turtle.popupClose == 0) {
         start = clock();
         turtleGetMouseCoords();
         turtleClear();
         /* update element positions */
         for (uint32_t i = 0; i < tt_elements.all -> length; i++) {
-            if (((tt_button_t *) tt_elements.all -> data[i].p) -> element != TT_ELEMENT_SCROLLBAR) {
+            if (((tt_button_t *) tt_elements.all -> data[i].p) -> element != TT_ELEMENT_SCROLLBAR && ((tt_button_t *) tt_elements.all -> data[i].p) -> element != TT_ELEMENT_CONTEXT) {
                 ((tt_button_t *) tt_elements.all -> data[i].p) -> x = xPositions -> data[i].d - scrollbarVarX * 5;
                 ((tt_button_t *) tt_elements.all -> data[i].p) -> y = yPositions -> data[i].d + scrollbarVarY * 3.3;
             }
@@ -315,6 +328,16 @@ int main(int argc, char *argv[]) {
             } else if (button -> align == TT_BUTTON_ALIGN_RIGHT) {
                 button -> align = TT_BUTTON_ALIGN_CENTER;
             }
+        }
+        if (turtleMouseRight()) {
+            if (keys[1] == 0) {
+                keys[1] = 1;
+                context -> enabled = TT_ELEMENT_ENABLED;
+                context -> x = turtle.mouseX;
+                context -> y = turtle.mouseY;
+            }
+        } else {
+            keys[1] = 0;
         }
         turtleToolsUpdate(); // update turtleTools
         parseRibbonOutput(); // user defined function to use ribbon
