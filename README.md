@@ -62,8 +62,7 @@ The example project can be built with `make win` on windows or `make` on linux. 
 The example project has a set of files in the `config/` folder that can be modified to change certain aspects of the project (the font, the ribbon, and the popup). If these files are not found then default versions of these configurations are used (which happen to be identical to the ones in the `config/` folder).
 
 # To Do
-- Fix incorrect handling of non-texture rendering with texture-enabled shaders
-- Alignment for buttons and switches
+- Alignment options for switches
 - Change textbox text color to text highlight or complement
 - Fix misjudged dropdown on certain alignments
 - Fix some letters escaping dropdown
