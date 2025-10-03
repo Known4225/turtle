@@ -376,8 +376,8 @@ double turtleTextGetUnicodeLengthf(double size, const unsigned char *str, ...) {
     char buffer[2048];
     va_list args;
     va_start(args, str);
-    vsnprintf(buffer, 2048, str, args);
-    double out = turtleTextGetUnicodeLength(buffer, size);
+    vsnprintf(buffer, 2048, (char *) str, args);
+    double out = turtleTextGetUnicodeLength((uint8_t *) buffer, size);
     va_end(args);
     return out;
 }

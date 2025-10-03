@@ -19494,6 +19494,8 @@ typedef enum {
     TT_ELEMENT_HIDE = 2,
 } tt_element_enabled_t;
 
+#define TT_LABEL_LENGTH_LIMIT 128
+
 typedef enum {
     TT_BUTTON_SHAPE_RECTANGLE = 0,
     TT_BUTTON_SHAPE_ROUNDED_RECTANGLE = 1,
@@ -19501,7 +19503,11 @@ typedef enum {
     TT_BUTTON_SHAPE_TEXT = 3,
 } tt_button_shape_t;
 
-#define TT_LABEL_LENGTH_LIMIT 128
+typedef enum {
+    TT_BUTTON_ALIGN_LEFT = 0,
+    TT_BUTTON_ALIGN_CENTER = 1,
+    TT_BUTTON_ALIGN_RIGHT = 2,
+} tt_button_align_t;
 
 /* button */
 typedef struct {
@@ -19515,6 +19521,7 @@ typedef struct {
     char label[TT_LABEL_LENGTH_LIMIT];
     int32_t status;
     tt_button_shape_t shape;
+    tt_button_align_t align;
 } tt_button_t;
 
 typedef enum {
@@ -19524,6 +19531,12 @@ typedef enum {
     TT_SWITCH_STYLE_CHECKBOX = 3,
     TT_SWITCH_STYLE_XBOX = 4,
 } tt_switch_style_t;
+
+typedef enum {
+    TT_SWITCH_ALIGN_LEFT = 0,
+    TT_SWITCH_ALIGN_CENTER = 1,
+    TT_SWITCH_ALIGN_RIGHT = 2,
+} tt_switch_align_t;
 
 /* switch */
 typedef struct {
@@ -19537,6 +19550,7 @@ typedef struct {
     char label[TT_LABEL_LENGTH_LIMIT];
     int32_t status;
     tt_switch_style_t style;
+    tt_switch_align_t align;
 } tt_switch_t;
 
 typedef enum {
@@ -30094,16 +30108,6 @@ void turtleUpdate() {
     uint32_t len = turtle.penPos -> length;
     unitype *ren = turtle.penPos -> data;
     int8_t *renType = turtle.penPos -> type;
-    uint64_t oldHash = turtle.penHash;
-    turtle.penHash = 0; // I don't use this but it's an idea: https://stackoverflow.com/questions/57455444/very-low-collision-non-cryptographic-hashing-function
-    /* not sure whether to enable this code (saves GPU when no motion but imperfect - sometimes fails to update screen when it should be updated) */
-    // for (uint32_t i = 0; i < len; i++) {
-    //     turtle.penHash += turtle.penPos -> data[i].l; // simple addition hash. I know not technically safe since i cast all sizes to 8 byte, but it should still work
-    // }
-    // if (len != turtle.lastLength || oldHash != turtle.penHash) {
-    //     changed = 1;
-    //     turtle.lastLength = len;
-    // }
     changed = 1;
     glfwGetWindowSize(turtle.window, &turtle.screenbounds[0], &turtle.screenbounds[1]);
     if (turtle.screenbounds[0] != turtle.lastscreenbounds[0] || turtle.screenbounds[1] != turtle.lastscreenbounds[1]) {
@@ -30642,8 +30646,8 @@ double turtleTextGetUnicodeLengthf(double size, const unsigned char *str, ...) {
     char buffer[2048];
     va_list args;
     va_start(args, str);
-    vsnprintf(buffer, 2048, str, args);
-    double out = turtleTextGetUnicodeLength(buffer, size);
+    vsnprintf(buffer, 2048, (char *) str, args);
+    double out = turtleTextGetUnicodeLength((uint8_t *) buffer, size);
     va_end(args);
     return out;
 }
@@ -31467,7 +31471,7 @@ double tt_themeColors[] = {
     230.0, 230.0, 230.0, // TT_COLOR_BACKGROUND_ALTERNATE (6)
     60.0, 60.0, 60.0,    // TT_COLOR_BACKGROUND_COMPLEMENT (9)
     0.0, 0.0, 0.0,       // TT_COLOR_TEXT (12)
-    100.0, 100.0, 100.0, // TT_COLOR_TEXT_HIGHLIGHT (15)
+    150.0, 150.0, 150.0, // TT_COLOR_TEXT_HIGHLIGHT (15)
     0.0, 0.0, 0.0,       // TT_COLOR_TEXT_ALTERNATE (18)
     140.0, 140.0, 140.0, // TT_COLOR_TEXT_COMPLEMENT (21)
     180.0, 180.0, 180.0, // TT_COLOR_COMPONENT (24)
@@ -31519,7 +31523,7 @@ void turtleToolsSetTheme(tt_theme_name_t theme) {
             125.0, 125.0, 125.0, // TT_COLOR_BACKGROUND_ALTERNATE (6)
             238.0, 238.0, 238.0, // TT_COLOR_BACKGROUND_COMPLEMENT (9)
             200.0, 200.0, 200.0, // TT_COLOR_TEXT (12)
-            180.0, 180.0, 180.0, // TT_COLOR_TEXT_HIGHLIGHT (15)
+            80.0, 80.0, 80.0,    // TT_COLOR_TEXT_HIGHLIGHT (15)
             160.0, 160.0, 160.0, // TT_COLOR_TEXT_ALTERNATE (18)
             160.0, 160.0, 160.0, // TT_COLOR_TEXT_COMPLEMENT (21)
             60.0, 60.0, 60.0,    // TT_COLOR_COMPONENT (24)
@@ -31566,7 +31570,7 @@ void turtleToolsSetTheme(tt_theme_name_t theme) {
             118.0, 107.0, 104.0, // TT_COLOR_BACKGROUND_ALTERNATE (6)
             189.0, 200.0, 203.0, // TT_COLOR_BACKGROUND_COMPLEMENT (9)
             189.0, 200.0, 203.0, // TT_COLOR_TEXT (12)
-            77.0, 70.0, 70.0,    // TT_COLOR_TEXT_HIGHLIGHT (15)
+            143.0, 134.0, 134.0, // TT_COLOR_TEXT_HIGHLIGHT (15)
             154.0, 160.0, 160.0, // TT_COLOR_TEXT_ALTERNATE (18)
             52.0, 40.0, 40.0,    // TT_COLOR_TEXT_COMPLEMENT (21)
             75.0, 66.0, 66.0,    // TT_COLOR_COMPONENT (24)
@@ -31660,7 +31664,7 @@ void turtleToolsSetTheme(tt_theme_name_t theme) {
             230.0, 230.0, 230.0, // TT_COLOR_BACKGROUND_ALTERNATE (6)
             60.0, 60.0, 60.0,    // TT_COLOR_BACKGROUND_COMPLEMENT (9)
             0.0, 0.0, 0.0,       // TT_COLOR_TEXT (12)
-            100.0, 100.0, 100.0, // TT_COLOR_TEXT_HIGHLIGHT (15)
+            150.0, 150.0, 150.0, // TT_COLOR_TEXT_HIGHLIGHT (15)
             0.0, 0.0, 0.0,       // TT_COLOR_TEXT_ALTERNATE (18)
             140.0, 140.0, 140.0, // TT_COLOR_TEXT_COMPLEMENT (21)
             180.0, 180.0, 180.0, // TT_COLOR_COMPONENT (24)
@@ -31944,7 +31948,7 @@ int32_t popupInitInternal(FILE *configFile, list_t *configList, int8_t fileExist
         } else {
             list_append(tt_popup.options, configList -> data[tt_popup.options -> length + 1], 's');
         }
-        buttonWidth += turtleTextGetUnicodeLength(tt_popup.options -> data[tt_popup.options -> length - 1].s, tt_popup.size) + defaultPadding;
+        buttonWidth += turtleTextGetUnicodeLength((uint8_t *) tt_popup.options -> data[tt_popup.options -> length - 1].s, tt_popup.size) + defaultPadding;
     }
     if (fileExists) {
         fclose(configFile);
@@ -31953,7 +31957,7 @@ int32_t popupInitInternal(FILE *configFile, list_t *configList, int8_t fileExist
     double centerY = (turtle.initbounds[1] + turtle.initbounds[3]) / 2;
     double height = (turtle.initbounds[3] - turtle.initbounds[1]) / 9;
     double centerX = (turtle.initbounds[0] + turtle.initbounds[2]) / 2;
-    double messageWidth = turtleTextGetUnicodeLength(tt_popup.message, tt_popup.size) + defaultPadding;
+    double messageWidth = turtleTextGetUnicodeLength((uint8_t *) tt_popup.message, tt_popup.size) + defaultPadding;
     double width = messageWidth;
     if (messageWidth < buttonWidth) {
         width = buttonWidth;
@@ -32034,7 +32038,7 @@ int32_t tt_color_default[] = {
     /*       button                         switch                            dial                           slider                          scrollbar                      context                       dropdown                     textbox  */
     TT_COLOR_TEXT_ALTERNATE,       TT_COLOR_TEXT_BASE,             TT_COLOR_TEXT_BASE,             TT_COLOR_TEXT_BASE,             0,                              TT_COLOR_TEXT_ALTERNATE,      TT_COLOR_TEXT_BASE,           TT_COLOR_TEXT_ALTERNATE,
     TT_COLOR_COMPONENT,            TT_COLOR_TEXT_ALTERNATE,        TT_COLOR_BACKGROUND_COMPLEMENT, TT_COLOR_COMPONENT_BASE,        TT_COLOR_COMPONENT_BASE,        TT_COLOR_COMPONENT_BASE,      TT_COLOR_TEXT_ALTERNATE,      TT_COLOR_COMPONENT_BASE,
-    TT_COLOR_COMPONENT_HIGHLIGHT,  TT_COLOR_COMPONENT_BASE,        TT_COLOR_BACKGROUND_BASE,       TT_COLOR_BACKGROUND_ALTERNATE,  TT_COLOR_COMPONENT_COMPLEMENT,  TT_COLOR_COMPONENT_HIGHLIGHT, TT_COLOR_COMPONENT_BASE,      TT_COLOR_COMPONENT_HIGHLIGHT,
+    TT_COLOR_COMPONENT_HIGHLIGHT,  TT_COLOR_COMPONENT_BASE,        TT_COLOR_BACKGROUND_BASE,       TT_COLOR_BACKGROUND_ALTERNATE,  TT_COLOR_COMPONENT_COMPLEMENT,  TT_COLOR_COMPONENT_HIGHLIGHT, TT_COLOR_COMPONENT_BASE,      TT_COLOR_TEXT_HIGHLIGHT,
     TT_COLOR_TEXT_BASE,            TT_COLOR_COMPONENT_HIGHLIGHT,   0,                              0,                              TT_COLOR_BACKGROUND_ALTERNATE,  0,                            TT_COLOR_COMPONENT_HIGHLIGHT, TT_COLOR_TEXT_ALTERNATE,
     TT_COLOR_COMPONENT_COMPLEMENT, TT_COLOR_BACKGROUND_ALTERNATE,  0,                              0,                              TT_COLOR_BACKGROUND_HIGHLIGHT,  0,                            TT_COLOR_COMPONENT_HIGHLIGHT, TT_COLOR_BLUE,
     0,                             TT_COLOR_TERTIARY_BASE,         0,                              0,                              0,                              0,                            TT_COLOR_TEXT_ALTERNATE,      0,
@@ -32070,12 +32074,13 @@ tt_button_t *buttonInit(char *label, int8_t *variable, double x, double y, doubl
     }
     elementResetColor(buttonp, TT_ELEMENT_BUTTON);
     buttonp -> status = 0;
-    buttonp -> shape = TT_BUTTON_SHAPE_RECTANGLE;
     buttonp -> x = x;
     buttonp -> y = y;
     buttonp -> size = size;
     *variable = 0; // button starts unpressed
     buttonp -> variable = variable;
+    buttonp -> shape = TT_BUTTON_SHAPE_RECTANGLE;
+    buttonp -> align = TT_BUTTON_ALIGN_CENTER;
     list_append(tt_elements.buttons, (unitype) (void *) buttonp, 'p');
     list_append(tt_elements.all, (unitype) (void *) buttonp, 'l');
     return buttonp;
@@ -32111,6 +32116,7 @@ tt_switch_t *switchInit(char *label, int8_t *variable, double x, double y, doubl
     switchp -> size = size;
     switchp -> variable = variable;
     switchp -> style = TT_SWITCH_STYLE_CLASSIC;
+    switchp -> align = TT_SWITCH_ALIGN_CENTER;
     list_append(tt_elements.switches, (unitype) (void *) switchp, 'p');
     list_append(tt_elements.all, (unitype) (void *) switchp, 'l');
     return switchp;
@@ -32381,9 +32387,18 @@ void buttonUpdate() {
             buttonp -> status = 0;
             continue;
         }
-        double buttonX = buttonp -> x;
+        double buttonLeftX = buttonp -> x;
+        double buttonRightX = buttonp -> x;
         double buttonY = buttonp -> y;
         double buttonWidth = turtleTextGetUnicodeLength((unsigned char *) buttonp -> label, buttonp -> size - 1) + buttonp -> size * 0.8;
+        if (buttonp -> align == TT_BUTTON_ALIGN_CENTER) {
+            buttonLeftX -= buttonWidth / 2;
+            buttonRightX += buttonWidth / 2;
+        } else if (buttonp -> align == TT_BUTTON_ALIGN_LEFT) {
+            buttonRightX += buttonWidth;
+        } else if (buttonp -> align == TT_BUTTON_ALIGN_RIGHT) {
+            buttonLeftX -= buttonWidth;
+        }
         double buttonHeight = buttonp -> size * 1.75;
         if (buttonp -> status > 0) {
             tt_setColor(buttonp -> color[TT_COLOR_SLOT_BUTTON_CLICKED]);
@@ -32393,19 +32408,19 @@ void buttonUpdate() {
             tt_setColor(buttonp -> color[TT_COLOR_SLOT_BUTTON_SELECT]);
         }
         if (buttonp -> shape == TT_BUTTON_SHAPE_RECTANGLE) {
-            turtleRectangle(buttonX - buttonWidth / 2, buttonY - buttonHeight / 2, buttonX + buttonWidth / 2, buttonY + buttonHeight / 2);
+            turtleRectangle(buttonLeftX, buttonY - buttonHeight / 2, buttonRightX, buttonY + buttonHeight / 2);
         } else if (buttonp -> shape == TT_BUTTON_SHAPE_ROUNDED_RECTANGLE) {
             turtlePenSize(buttonp -> size);
-            turtleGoto(buttonX - buttonWidth / 2 + buttonp -> size / 2, buttonY - buttonHeight / 2 + buttonp -> size / 2);
+            turtleGoto(buttonLeftX + buttonp -> size / 2, buttonY - buttonHeight / 2 + buttonp -> size / 2);
             turtlePenDown();
-            turtleGoto(buttonX + buttonWidth / 2 - buttonp -> size / 2, buttonY - buttonHeight / 2 + buttonp -> size / 2);
-            turtleGoto(buttonX + buttonWidth / 2 - buttonp -> size / 2, buttonY + buttonHeight / 2 - buttonp -> size / 2);
-            turtleGoto(buttonX - buttonWidth / 2 + buttonp -> size / 2, buttonY + buttonHeight / 2 - buttonp -> size / 2);
-            turtleGoto(buttonX - buttonWidth / 2 + buttonp -> size / 2, buttonY - buttonHeight / 2 + buttonp -> size / 2);
+            turtleGoto(buttonRightX - buttonp -> size / 2, buttonY - buttonHeight / 2 + buttonp -> size / 2);
+            turtleGoto(buttonRightX - buttonp -> size / 2, buttonY + buttonHeight / 2 - buttonp -> size / 2);
+            turtleGoto(buttonLeftX + buttonp -> size / 2, buttonY + buttonHeight / 2 - buttonp -> size / 2);
+            turtleGoto(buttonLeftX + buttonp -> size / 2, buttonY - buttonHeight / 2 + buttonp -> size / 2);
             turtlePenUp();
-            turtleRectangle(buttonX - buttonWidth / 4, buttonY - buttonHeight / 4, buttonX + buttonWidth / 4, buttonY + buttonHeight / 4);
+            turtleRectangle(buttonLeftX + buttonWidth / 4, buttonY - buttonHeight / 4, buttonRightX - buttonWidth / 4, buttonY + buttonHeight / 4);
         } else if (buttonp -> shape == TT_BUTTON_SHAPE_CIRCLE) {
-            turtleGoto(buttonX, buttonY);
+            turtleGoto((buttonLeftX + buttonRightX) / 2, buttonY);
             turtlePenSize(buttonWidth);
             turtlePenDown();
             turtlePenUp();
@@ -32418,7 +32433,7 @@ void buttonUpdate() {
                 tt_setColor(buttonp -> color[TT_COLOR_SLOT_BUTTON_SELECT]);
             }
         }
-        turtleTextWriteUnicode((unsigned char *) buttonp -> label, buttonX, buttonY, buttonp -> size - 1, 50);
+        turtleTextWriteUnicode((unsigned char *) buttonp -> label, (buttonLeftX + buttonRightX) / 2, buttonY, buttonp -> size - 1, 50);
         /* mouse */
         if (buttonp -> enabled == TT_ELEMENT_ENABLED && tt_ribbon.mainselect[2] == -1) {
             if (turtleMouseDown()) {
@@ -32430,13 +32445,13 @@ void buttonUpdate() {
                 }
             } else {
                 if (buttonp -> shape == TT_BUTTON_SHAPE_CIRCLE) {
-                    if ((turtle.mouseX - buttonX) * (turtle.mouseX - buttonX) + (turtle.mouseY - buttonY) * (turtle.mouseY - buttonY) < buttonWidth * buttonWidth / 4) {
+                    if ((turtle.mouseX - (buttonLeftX + buttonRightX) / 2) * (turtle.mouseX - (buttonLeftX + buttonRightX) / 2) + (turtle.mouseY - buttonY) * (turtle.mouseY - buttonY) < buttonWidth * buttonWidth / 4) {
                         buttonp -> status = -1;
                     } else {
                         buttonp -> status = 0;
                     }
                 } else {
-                    if (turtle.mouseX > buttonX - buttonWidth / 2 && turtle.mouseX < buttonX + buttonWidth / 2 && turtle.mouseY > buttonY - buttonHeight / 2 && turtle.mouseY < buttonY + buttonHeight / 2) {
+                    if (turtle.mouseX > buttonLeftX && turtle.mouseX < buttonRightX && turtle.mouseY > buttonY - buttonHeight / 2 && turtle.mouseY < buttonY + buttonHeight / 2) {
                         buttonp -> status = -1;
                     } else {
                         buttonp -> status = 0;

@@ -306,8 +306,15 @@ int main(int argc, char *argv[]) {
             }
         }
         if (buttonVar) {
-            printf("button clicked\n");
             buttonVar = 0;
+            printf("button clicked\n");
+            if (button -> align == TT_BUTTON_ALIGN_CENTER) {
+                button -> align = TT_BUTTON_ALIGN_LEFT;
+            } else if (button -> align == TT_BUTTON_ALIGN_LEFT) {
+                button -> align = TT_BUTTON_ALIGN_RIGHT;
+            } else if (button -> align == TT_BUTTON_ALIGN_RIGHT) {
+                button -> align = TT_BUTTON_ALIGN_CENTER;
+            }
         }
         turtleToolsUpdate(); // update turtleTools
         parseRibbonOutput(); // user defined function to use ribbon

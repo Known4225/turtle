@@ -63,7 +63,7 @@ double tt_themeColors[] = {
     230.0, 230.0, 230.0, // TT_COLOR_BACKGROUND_ALTERNATE (6)
     60.0, 60.0, 60.0,    // TT_COLOR_BACKGROUND_COMPLEMENT (9)
     0.0, 0.0, 0.0,       // TT_COLOR_TEXT (12)
-    100.0, 100.0, 100.0, // TT_COLOR_TEXT_HIGHLIGHT (15)
+    150.0, 150.0, 150.0, // TT_COLOR_TEXT_HIGHLIGHT (15)
     0.0, 0.0, 0.0,       // TT_COLOR_TEXT_ALTERNATE (18)
     140.0, 140.0, 140.0, // TT_COLOR_TEXT_COMPLEMENT (21)
     180.0, 180.0, 180.0, // TT_COLOR_COMPONENT (24)
@@ -115,7 +115,7 @@ void turtleToolsSetTheme(tt_theme_name_t theme) {
             125.0, 125.0, 125.0, // TT_COLOR_BACKGROUND_ALTERNATE (6)
             238.0, 238.0, 238.0, // TT_COLOR_BACKGROUND_COMPLEMENT (9)
             200.0, 200.0, 200.0, // TT_COLOR_TEXT (12)
-            180.0, 180.0, 180.0, // TT_COLOR_TEXT_HIGHLIGHT (15)
+            80.0, 80.0, 80.0,    // TT_COLOR_TEXT_HIGHLIGHT (15)
             160.0, 160.0, 160.0, // TT_COLOR_TEXT_ALTERNATE (18)
             160.0, 160.0, 160.0, // TT_COLOR_TEXT_COMPLEMENT (21)
             60.0, 60.0, 60.0,    // TT_COLOR_COMPONENT (24)
@@ -162,7 +162,7 @@ void turtleToolsSetTheme(tt_theme_name_t theme) {
             118.0, 107.0, 104.0, // TT_COLOR_BACKGROUND_ALTERNATE (6)
             189.0, 200.0, 203.0, // TT_COLOR_BACKGROUND_COMPLEMENT (9)
             189.0, 200.0, 203.0, // TT_COLOR_TEXT (12)
-            77.0, 70.0, 70.0,    // TT_COLOR_TEXT_HIGHLIGHT (15)
+            143.0, 134.0, 134.0, // TT_COLOR_TEXT_HIGHLIGHT (15)
             154.0, 160.0, 160.0, // TT_COLOR_TEXT_ALTERNATE (18)
             52.0, 40.0, 40.0,    // TT_COLOR_TEXT_COMPLEMENT (21)
             75.0, 66.0, 66.0,    // TT_COLOR_COMPONENT (24)
@@ -256,7 +256,7 @@ void turtleToolsSetTheme(tt_theme_name_t theme) {
             230.0, 230.0, 230.0, // TT_COLOR_BACKGROUND_ALTERNATE (6)
             60.0, 60.0, 60.0,    // TT_COLOR_BACKGROUND_COMPLEMENT (9)
             0.0, 0.0, 0.0,       // TT_COLOR_TEXT (12)
-            100.0, 100.0, 100.0, // TT_COLOR_TEXT_HIGHLIGHT (15)
+            150.0, 150.0, 150.0, // TT_COLOR_TEXT_HIGHLIGHT (15)
             0.0, 0.0, 0.0,       // TT_COLOR_TEXT_ALTERNATE (18)
             140.0, 140.0, 140.0, // TT_COLOR_TEXT_COMPLEMENT (21)
             180.0, 180.0, 180.0, // TT_COLOR_COMPONENT (24)
@@ -540,7 +540,7 @@ int32_t popupInitInternal(FILE *configFile, list_t *configList, int8_t fileExist
         } else {
             list_append(tt_popup.options, configList -> data[tt_popup.options -> length + 1], 's');
         }
-        buttonWidth += turtleTextGetUnicodeLength(tt_popup.options -> data[tt_popup.options -> length - 1].s, tt_popup.size) + defaultPadding;
+        buttonWidth += turtleTextGetUnicodeLength((uint8_t *) tt_popup.options -> data[tt_popup.options -> length - 1].s, tt_popup.size) + defaultPadding;
     }
     if (fileExists) {
         fclose(configFile);
@@ -549,7 +549,7 @@ int32_t popupInitInternal(FILE *configFile, list_t *configList, int8_t fileExist
     double centerY = (turtle.initbounds[1] + turtle.initbounds[3]) / 2;
     double height = (turtle.initbounds[3] - turtle.initbounds[1]) / 9;
     double centerX = (turtle.initbounds[0] + turtle.initbounds[2]) / 2;
-    double messageWidth = turtleTextGetUnicodeLength(tt_popup.message, tt_popup.size) + defaultPadding;
+    double messageWidth = turtleTextGetUnicodeLength((uint8_t *) tt_popup.message, tt_popup.size) + defaultPadding;
     double width = messageWidth;
     if (messageWidth < buttonWidth) {
         width = buttonWidth;
@@ -630,7 +630,7 @@ int32_t tt_color_default[] = {
     /*       button                         switch                            dial                           slider                          scrollbar                      context                       dropdown                     textbox  */
     TT_COLOR_TEXT_ALTERNATE,       TT_COLOR_TEXT_BASE,             TT_COLOR_TEXT_BASE,             TT_COLOR_TEXT_BASE,             0,                              TT_COLOR_TEXT_ALTERNATE,      TT_COLOR_TEXT_BASE,           TT_COLOR_TEXT_ALTERNATE,
     TT_COLOR_COMPONENT,            TT_COLOR_TEXT_ALTERNATE,        TT_COLOR_BACKGROUND_COMPLEMENT, TT_COLOR_COMPONENT_BASE,        TT_COLOR_COMPONENT_BASE,        TT_COLOR_COMPONENT_BASE,      TT_COLOR_TEXT_ALTERNATE,      TT_COLOR_COMPONENT_BASE,
-    TT_COLOR_COMPONENT_HIGHLIGHT,  TT_COLOR_COMPONENT_BASE,        TT_COLOR_BACKGROUND_BASE,       TT_COLOR_BACKGROUND_ALTERNATE,  TT_COLOR_COMPONENT_COMPLEMENT,  TT_COLOR_COMPONENT_HIGHLIGHT, TT_COLOR_COMPONENT_BASE,      TT_COLOR_COMPONENT_HIGHLIGHT,
+    TT_COLOR_COMPONENT_HIGHLIGHT,  TT_COLOR_COMPONENT_BASE,        TT_COLOR_BACKGROUND_BASE,       TT_COLOR_BACKGROUND_ALTERNATE,  TT_COLOR_COMPONENT_COMPLEMENT,  TT_COLOR_COMPONENT_HIGHLIGHT, TT_COLOR_COMPONENT_BASE,      TT_COLOR_TEXT_HIGHLIGHT,
     TT_COLOR_TEXT_BASE,            TT_COLOR_COMPONENT_HIGHLIGHT,   0,                              0,                              TT_COLOR_BACKGROUND_ALTERNATE,  0,                            TT_COLOR_COMPONENT_HIGHLIGHT, TT_COLOR_TEXT_ALTERNATE,
     TT_COLOR_COMPONENT_COMPLEMENT, TT_COLOR_BACKGROUND_ALTERNATE,  0,                              0,                              TT_COLOR_BACKGROUND_HIGHLIGHT,  0,                            TT_COLOR_COMPONENT_HIGHLIGHT, TT_COLOR_BLUE,
     0,                             TT_COLOR_TERTIARY_BASE,         0,                              0,                              0,                              0,                            TT_COLOR_TEXT_ALTERNATE,      0,
@@ -666,12 +666,13 @@ tt_button_t *buttonInit(char *label, int8_t *variable, double x, double y, doubl
     }
     elementResetColor(buttonp, TT_ELEMENT_BUTTON);
     buttonp -> status = 0;
-    buttonp -> shape = TT_BUTTON_SHAPE_RECTANGLE;
     buttonp -> x = x;
     buttonp -> y = y;
     buttonp -> size = size;
     *variable = 0; // button starts unpressed
     buttonp -> variable = variable;
+    buttonp -> shape = TT_BUTTON_SHAPE_RECTANGLE;
+    buttonp -> align = TT_BUTTON_ALIGN_CENTER;
     list_append(tt_elements.buttons, (unitype) (void *) buttonp, 'p');
     list_append(tt_elements.all, (unitype) (void *) buttonp, 'l');
     return buttonp;
@@ -707,6 +708,7 @@ tt_switch_t *switchInit(char *label, int8_t *variable, double x, double y, doubl
     switchp -> size = size;
     switchp -> variable = variable;
     switchp -> style = TT_SWITCH_STYLE_CLASSIC;
+    switchp -> align = TT_SWITCH_ALIGN_CENTER;
     list_append(tt_elements.switches, (unitype) (void *) switchp, 'p');
     list_append(tt_elements.all, (unitype) (void *) switchp, 'l');
     return switchp;
@@ -977,9 +979,18 @@ void buttonUpdate() {
             buttonp -> status = 0;
             continue;
         }
-        double buttonX = buttonp -> x;
+        double buttonLeftX = buttonp -> x;
+        double buttonRightX = buttonp -> x;
         double buttonY = buttonp -> y;
         double buttonWidth = turtleTextGetUnicodeLength((unsigned char *) buttonp -> label, buttonp -> size - 1) + buttonp -> size * 0.8;
+        if (buttonp -> align == TT_BUTTON_ALIGN_CENTER) {
+            buttonLeftX -= buttonWidth / 2;
+            buttonRightX += buttonWidth / 2;
+        } else if (buttonp -> align == TT_BUTTON_ALIGN_LEFT) {
+            buttonRightX += buttonWidth;
+        } else if (buttonp -> align == TT_BUTTON_ALIGN_RIGHT) {
+            buttonLeftX -= buttonWidth;
+        }
         double buttonHeight = buttonp -> size * 1.75;
         if (buttonp -> status > 0) {
             tt_setColor(buttonp -> color[TT_COLOR_SLOT_BUTTON_CLICKED]);
@@ -989,19 +1000,19 @@ void buttonUpdate() {
             tt_setColor(buttonp -> color[TT_COLOR_SLOT_BUTTON_SELECT]);
         }
         if (buttonp -> shape == TT_BUTTON_SHAPE_RECTANGLE) {
-            turtleRectangle(buttonX - buttonWidth / 2, buttonY - buttonHeight / 2, buttonX + buttonWidth / 2, buttonY + buttonHeight / 2);
+            turtleRectangle(buttonLeftX, buttonY - buttonHeight / 2, buttonRightX, buttonY + buttonHeight / 2);
         } else if (buttonp -> shape == TT_BUTTON_SHAPE_ROUNDED_RECTANGLE) {
             turtlePenSize(buttonp -> size);
-            turtleGoto(buttonX - buttonWidth / 2 + buttonp -> size / 2, buttonY - buttonHeight / 2 + buttonp -> size / 2);
+            turtleGoto(buttonLeftX + buttonp -> size / 2, buttonY - buttonHeight / 2 + buttonp -> size / 2);
             turtlePenDown();
-            turtleGoto(buttonX + buttonWidth / 2 - buttonp -> size / 2, buttonY - buttonHeight / 2 + buttonp -> size / 2);
-            turtleGoto(buttonX + buttonWidth / 2 - buttonp -> size / 2, buttonY + buttonHeight / 2 - buttonp -> size / 2);
-            turtleGoto(buttonX - buttonWidth / 2 + buttonp -> size / 2, buttonY + buttonHeight / 2 - buttonp -> size / 2);
-            turtleGoto(buttonX - buttonWidth / 2 + buttonp -> size / 2, buttonY - buttonHeight / 2 + buttonp -> size / 2);
+            turtleGoto(buttonRightX - buttonp -> size / 2, buttonY - buttonHeight / 2 + buttonp -> size / 2);
+            turtleGoto(buttonRightX - buttonp -> size / 2, buttonY + buttonHeight / 2 - buttonp -> size / 2);
+            turtleGoto(buttonLeftX + buttonp -> size / 2, buttonY + buttonHeight / 2 - buttonp -> size / 2);
+            turtleGoto(buttonLeftX + buttonp -> size / 2, buttonY - buttonHeight / 2 + buttonp -> size / 2);
             turtlePenUp();
-            turtleRectangle(buttonX - buttonWidth / 4, buttonY - buttonHeight / 4, buttonX + buttonWidth / 4, buttonY + buttonHeight / 4);
+            turtleRectangle(buttonLeftX + buttonWidth / 4, buttonY - buttonHeight / 4, buttonRightX - buttonWidth / 4, buttonY + buttonHeight / 4);
         } else if (buttonp -> shape == TT_BUTTON_SHAPE_CIRCLE) {
-            turtleGoto(buttonX, buttonY);
+            turtleGoto((buttonLeftX + buttonRightX) / 2, buttonY);
             turtlePenSize(buttonWidth);
             turtlePenDown();
             turtlePenUp();
@@ -1014,7 +1025,7 @@ void buttonUpdate() {
                 tt_setColor(buttonp -> color[TT_COLOR_SLOT_BUTTON_SELECT]);
             }
         }
-        turtleTextWriteUnicode((unsigned char *) buttonp -> label, buttonX, buttonY, buttonp -> size - 1, 50);
+        turtleTextWriteUnicode((unsigned char *) buttonp -> label, (buttonLeftX + buttonRightX) / 2, buttonY, buttonp -> size - 1, 50);
         /* mouse */
         if (buttonp -> enabled == TT_ELEMENT_ENABLED && tt_ribbon.mainselect[2] == -1) {
             if (turtleMouseDown()) {
@@ -1026,13 +1037,13 @@ void buttonUpdate() {
                 }
             } else {
                 if (buttonp -> shape == TT_BUTTON_SHAPE_CIRCLE) {
-                    if ((turtle.mouseX - buttonX) * (turtle.mouseX - buttonX) + (turtle.mouseY - buttonY) * (turtle.mouseY - buttonY) < buttonWidth * buttonWidth / 4) {
+                    if ((turtle.mouseX - (buttonLeftX + buttonRightX) / 2) * (turtle.mouseX - (buttonLeftX + buttonRightX) / 2) + (turtle.mouseY - buttonY) * (turtle.mouseY - buttonY) < buttonWidth * buttonWidth / 4) {
                         buttonp -> status = -1;
                     } else {
                         buttonp -> status = 0;
                     }
                 } else {
-                    if (turtle.mouseX > buttonX - buttonWidth / 2 && turtle.mouseX < buttonX + buttonWidth / 2 && turtle.mouseY > buttonY - buttonHeight / 2 && turtle.mouseY < buttonY + buttonHeight / 2) {
+                    if (turtle.mouseX > buttonLeftX && turtle.mouseX < buttonRightX && turtle.mouseY > buttonY - buttonHeight / 2 && turtle.mouseY < buttonY + buttonHeight / 2) {
                         buttonp -> status = -1;
                     } else {
                         buttonp -> status = 0;

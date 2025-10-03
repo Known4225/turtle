@@ -275,6 +275,8 @@ typedef enum {
     TT_ELEMENT_HIDE = 2,
 } tt_element_enabled_t;
 
+#define TT_LABEL_LENGTH_LIMIT 128
+
 typedef enum {
     TT_BUTTON_SHAPE_RECTANGLE = 0,
     TT_BUTTON_SHAPE_ROUNDED_RECTANGLE = 1,
@@ -282,7 +284,11 @@ typedef enum {
     TT_BUTTON_SHAPE_TEXT = 3,
 } tt_button_shape_t;
 
-#define TT_LABEL_LENGTH_LIMIT 128
+typedef enum {
+    TT_BUTTON_ALIGN_LEFT = 0,
+    TT_BUTTON_ALIGN_CENTER = 1,
+    TT_BUTTON_ALIGN_RIGHT = 2,
+} tt_button_align_t;
 
 /* button */
 typedef struct {
@@ -296,6 +302,7 @@ typedef struct {
     char label[TT_LABEL_LENGTH_LIMIT];
     int32_t status;
     tt_button_shape_t shape;
+    tt_button_align_t align;
 } tt_button_t;
 
 typedef enum {
@@ -305,6 +312,12 @@ typedef enum {
     TT_SWITCH_STYLE_CHECKBOX = 3,
     TT_SWITCH_STYLE_XBOX = 4,
 } tt_switch_style_t;
+
+typedef enum {
+    TT_SWITCH_ALIGN_LEFT = 0,
+    TT_SWITCH_ALIGN_CENTER = 1,
+    TT_SWITCH_ALIGN_RIGHT = 2,
+} tt_switch_align_t;
 
 /* switch */
 typedef struct {
@@ -318,6 +331,7 @@ typedef struct {
     char label[TT_LABEL_LENGTH_LIMIT];
     int32_t status;
     tt_switch_style_t style;
+    tt_switch_align_t align;
 } tt_switch_t;
 
 typedef enum {

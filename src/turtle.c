@@ -1038,16 +1038,6 @@ void turtleUpdate() {
     uint32_t len = turtle.penPos -> length;
     unitype *ren = turtle.penPos -> data;
     int8_t *renType = turtle.penPos -> type;
-    uint64_t oldHash = turtle.penHash;
-    turtle.penHash = 0; // I don't use this but it's an idea: https://stackoverflow.com/questions/57455444/very-low-collision-non-cryptographic-hashing-function
-    /* not sure whether to enable this code (saves GPU when no motion but imperfect - sometimes fails to update screen when it should be updated) */
-    // for (uint32_t i = 0; i < len; i++) {
-    //     turtle.penHash += turtle.penPos -> data[i].l; // simple addition hash. I know not technically safe since i cast all sizes to 8 byte, but it should still work
-    // }
-    // if (len != turtle.lastLength || oldHash != turtle.penHash) {
-    //     changed = 1;
-    //     turtle.lastLength = len;
-    // }
     changed = 1;
     glfwGetWindowSize(turtle.window, &turtle.screenbounds[0], &turtle.screenbounds[1]);
     if (turtle.screenbounds[0] != turtle.lastscreenbounds[0] || turtle.screenbounds[1] != turtle.lastscreenbounds[1]) {
