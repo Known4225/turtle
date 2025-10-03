@@ -62,6 +62,20 @@ typedef enum {
     TT_NUMBER_OF_ELEMENTS = 8,
 } tt_element_names_t;
 
+typedef enum {
+    TT_ELEMENT_PRIORITY_NONE = 0,
+    TT_ELEMENT_PRIORITY_BUTTON = 1,
+    TT_ELEMENT_PRIORITY_SWITCH = 2,
+    TT_ELEMENT_PRIORITY_DIAL = 3,
+    TT_ELEMENT_PRIORITY_SLIDER = 4,
+    TT_ELEMENT_PRIORITY_TEXTBOX = 5,
+    TT_ELEMENT_PRIORITY_DROPDOWN = 6,
+    TT_ELEMENT_PRIORITY_SCROLLBAR = 7,
+    TT_ELEMENT_PRIORITY_CONTEXT = 8,
+    TT_ELEMENT_PRIORITY_RIBBON = 9,
+    TT_ELEMENT_PRIORITY_POPUP = 10,
+} tt_element_priority_t;
+
 typedef struct {
     list_t *all;
     list_t *buttons;
@@ -264,7 +278,10 @@ typedef struct {
     double dialAnchorX;
     double dialAnchorY;
     double barAnchor;
-    int32_t dropdownLogicIndex;
+    tt_element_priority_t elementLogicType;
+    int32_t elementLogicIndex;
+    tt_element_priority_t elementLogicTypeOld;
+    int32_t elementLogicIndexOld;
 } tt_globals_t;
 
 extern tt_globals_t tt_globals;
