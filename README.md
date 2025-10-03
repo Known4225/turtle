@@ -63,7 +63,6 @@ The example project has a set of files in the `config/` folder that can be modif
 
 # To Do
 - Alignment options for switches
-- Fix misjudged dropdown on certain alignments
 - Upward dropdown and context
 - Logarithmic and Exponential sliders
 - List stride sort

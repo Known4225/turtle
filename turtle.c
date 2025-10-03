@@ -169,7 +169,6 @@ int main(int argc, char *argv[]) {
     uint64_t tick = 0; // count number of ticks since application started
     clock_t start, end;
 
-    turtleBgColor(30, 30, 30);
     int8_t buttonVar, switchVar = 0;
     int32_t dropdownVar = 0;
     double dialVar = 0.0, sliderVar = 0.0, scrollbarVarX = 0.0, scrollbarVarY = 0.0;
@@ -197,6 +196,18 @@ int main(int argc, char *argv[]) {
     scrollbarInit(&scrollbarVarY, TT_SCROLLBAR_VERTICAL, 310, 0, 10, 320, 33);
     dropdownInit("Dropdown", dropdownOptions, &dropdownVar, TT_DROPDOWN_ALIGN_CENTER, 0, 70, 10);
     textboxInit("Textbox", 128, -50, -110, 10, 100);
+    list_t *contextOptions = list_init();
+    list_append(contextOptions, (unitype) "Button", 's');
+    list_append(contextOptions, (unitype) "Switch", 's');
+    list_append(contextOptions, (unitype) "Dial", 's');
+    list_append(contextOptions, (unitype) "Slider", 's');
+    list_append(contextOptions, (unitype) "Scrollbar", 's');
+    list_append(contextOptions, (unitype) "Context", 's');
+    list_append(contextOptions, (unitype) "Dropdown", 's');
+    list_append(contextOptions, (unitype) "Textbox", 's');
+    int32_t contextVar = 0;
+    tt_context_t *context = contextInit(contextOptions, &contextVar, 0, 0, 10);
+    context -> enabled = TT_ELEMENT_HIDE;
 
     double power = 0.0, speed = 0.0, exposure = 0.0, x = 103, y = 95, z = 215;
     int8_t xEnabled = 0, yEnabled = 1, zEnabled = 0;
@@ -241,13 +252,14 @@ int main(int argc, char *argv[]) {
 
     double scroll = 0.0;
     double scrollFactor = 15;
+    char keys[8] = {0};
     while (turtle.popupClose == 0) {
         start = clock();
         turtleGetMouseCoords();
         turtleClear();
         /* update element positions */
         for (uint32_t i = 0; i < tt_elements.all -> length; i++) {
-            if (((tt_button_t *) tt_elements.all -> data[i].p) -> element != TT_ELEMENT_SCROLLBAR) {
+            if (((tt_button_t *) tt_elements.all -> data[i].p) -> element != TT_ELEMENT_SCROLLBAR && ((tt_button_t *) tt_elements.all -> data[i].p) -> element != TT_ELEMENT_CONTEXT) {
                 ((tt_button_t *) tt_elements.all -> data[i].p) -> x = xPositions -> data[i].d - scrollbarVarX * 5;
                 ((tt_button_t *) tt_elements.all -> data[i].p) -> y = yPositions -> data[i].d + scrollbarVarY * 3.3;
             }
@@ -277,7 +289,7 @@ int main(int argc, char *argv[]) {
         turtleTextWriteUnicode((uint8_t *) u8"αβγδεζηθικλμνξοπρσςτυφχψω", scrollbarVarX * -5 + 260, scrollbarVarY * 3.3 - 330, 10, 0);
         turtleTextWriteUnicode((uint8_t *) u8"1234567890!@#$£€₺₽¥₩₹₣฿%^&*()`~-_=+[", scrollbarVarX * -5 + 260, scrollbarVarY * 3.3 - 345, 10, 0);
         turtleTextWriteUnicode((uint8_t *) u8"{]}\\|;:‘'’“\"”,<.>/?½¨", scrollbarVarX * -5 + 260, scrollbarVarY * 3.3 - 360, 10, 0);
-
+        
         turtleTextWriteStringRotated("Rotated Text", scrollbarVarX * -5 - 100, scrollbarVarY * 3.3 + 75, 9, 50, -15);
         
         /* draw texture */
@@ -307,8 +319,18 @@ int main(int argc, char *argv[]) {
             }
         }
         if (buttonVar) {
-            printf("button clicked\n");
             buttonVar = 0;
+            printf("button clicked\n");
+        }
+        if (turtleMouseRight()) {
+            if (keys[1] == 0) {
+                keys[1] = 1;
+                context -> enabled = TT_ELEMENT_ENABLED;
+                context -> x = turtle.mouseX;
+                context -> y = turtle.mouseY;
+            }
+        } else {
+            keys[1] = 0;
         }
         turtleToolsUpdate(); // update turtleTools
         parseRibbonOutput(); // user defined function to use ribbon

@@ -33012,7 +33012,7 @@ void dropdownUpdate() {
                 dropdownXFactor[1] = dropdownX + xfactor + dropdownp -> size;
                 dropdownMaxXFactor[0] = dropdownX;
                 dropdownMaxXFactor[1] = dropdownX + dropdownp -> maxXfactor + dropdownp -> size / 2.5;
-                if (dropdownXFactor[1] > dropdownMaxXFactor[1]) {
+                if (dropdownXFactor[1] + dropdownp -> size > dropdownMaxXFactor[1]) {
                     dropdownMaxXFactor[1] = dropdownXFactor[1] + dropdownp -> size;
                 }
                 dropdownAlignFactor = 0;
