@@ -862,7 +862,7 @@ tt_context_t *contextInit(list_t *options, int32_t *variable, double x, double y
     contextp -> size = size;
     contextp -> variable = variable;
     contextCalculateMax(contextp);
-    contextp -> direction = TT_CONTEXT_DIRECTION_DOWN_RIGHT;
+    contextp -> direction = TT_CONTEXT_DIRECTION_AUTO;
     list_append(tt_elements.contexts, (unitype) (void *) contextp, 'p');
     list_append(tt_elements.all, (unitype) (void *) contextp, 'l');
     return contextp;
@@ -1560,20 +1560,36 @@ void contextUpdate() {
             continue;
         }
         double itemHeight = (contextp -> size * 1.8);
-        double contextX = contextp -> x;
-        double contextY = contextp -> y - itemHeight / 2 - 2;
+        double contextTextX = contextp -> x;
+        double contextTextY = contextp -> y - itemHeight / 2 - 2;
+        /* determine direction */
+        if (contextp -> direction == TT_CONTEXT_DIRECTION_AUTO) {
+            if (contextTextX + contextp -> maxXfactor + contextp -> size / 1.25 >= turtle.initbounds[2]) {
+                contextTextX = contextp -> x - contextp -> maxXfactor - contextp -> size / 1.25;
+            }
+            if (contextTextY - contextp -> size * 0.9 - (contextp -> options -> length - 1) * itemHeight - 2 <= turtle.initbounds[1]) {
+                contextTextY = contextp -> y + contextp -> size * 0.9 + (contextp -> options -> length - 1) * itemHeight + 2;
+            }
+        } else {
+            if (contextp -> direction == TT_CONTEXT_DIRECTION_UP_LEFT || contextp -> direction == TT_CONTEXT_DIRECTION_DOWN_LEFT) {
+                contextTextX = contextp -> x - contextp -> maxXfactor - contextp -> size / 1.25;
+            }
+            if (contextp -> direction == TT_CONTEXT_DIRECTION_UP_LEFT || contextp -> direction == TT_CONTEXT_DIRECTION_UP_RIGHT) {
+                contextTextY = contextp -> y + contextp -> size * 0.9 + (contextp -> options -> length - 1) * itemHeight + 2;
+            }
+        }
         tt_setColor(contextp -> color[TT_COLOR_SLOT_CONTEXT_BASE]);
-        turtleRectangle(contextX, contextY - contextp -> size * 0.7 - (contextp -> options -> length - 1) * itemHeight - 2, contextX + contextp -> maxXfactor + contextp -> size / 1.25, contextY + contextp -> size * 0.7 + 2);
+        turtleRectangle(contextTextX, contextTextY - contextp -> size * 0.9 - (contextp -> options -> length - 1) * itemHeight - 2, contextTextX + contextp -> maxXfactor + contextp -> size / 1.25, contextTextY + contextp -> size * 0.9 + 2);
         tt_setColor(contextp -> color[TT_COLOR_SLOT_CONTEXT_TEXT]);
         contextp -> index = -1;
         for (int32_t i = 0; i < contextp -> options -> length; i++) {
-            if (turtle.mouseX > contextX && turtle.mouseX < contextX + contextp -> maxXfactor + contextp -> size / 1.25 && turtle.mouseY >= contextY - i * itemHeight - contextp -> size * 0.9 && turtle.mouseY < contextY - i * itemHeight + contextp -> size * 0.9) {
+            if (turtle.mouseX > contextTextX && turtle.mouseX < contextTextX + contextp -> maxXfactor + contextp -> size / 1.25 && turtle.mouseY >= contextTextY - i * itemHeight - contextp -> size * 0.9 && turtle.mouseY < contextTextY - i * itemHeight + contextp -> size * 0.9) {
                 tt_setColor(contextp -> color[TT_COLOR_SLOT_CONTEXT_SELECT]);
-                turtleRectangle(contextX, contextY - i * itemHeight - contextp -> size * 0.9, contextX + contextp -> maxXfactor + contextp -> size / 1.25, contextY - i * itemHeight + contextp -> size * 0.9);
+                turtleRectangle(contextTextX, contextTextY - i * itemHeight - contextp -> size * 0.9, contextTextX + contextp -> maxXfactor + contextp -> size / 1.25, contextTextY - i * itemHeight + contextp -> size * 0.9);
                 tt_setColor(contextp -> color[TT_COLOR_SLOT_CONTEXT_TEXT]);
                 contextp -> index = i;
             }
-            turtleTextWriteUnicode((unsigned char *) contextp -> options -> data[i].s, contextX + contextp -> size / 2.5, contextY - i * itemHeight, contextp -> size - 1, 0);
+            turtleTextWriteUnicode((unsigned char *) contextp -> options -> data[i].s, contextTextX + contextp -> size / 2.5, contextTextY - i * itemHeight, contextp -> size - 1, 0);
         }
         if (turtleMouseDown()) {
             *(contextp -> variable) = contextp -> index;
