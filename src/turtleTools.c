@@ -1197,7 +1197,13 @@ void switchUpdate() {
 double angleBetween(double x1, double y1, double x2, double y2) {
     double output;
     /* TODO - Fix issue with y2 - y1 equal to 0 breaking the angle */
-    if (y2 - y1 <= 0) {
+    if (y2 == y1) {
+        if (x2 >= x1) {
+            output = 90;
+        } else {
+            output = 270;
+        }
+    } else if (y2 - y1 < 0) {
         output = 180 + atan((x2 - x1) / (y2 - y1)) * 57.2958;
     } else {
         output = atan((x2 - x1) / (y2 - y1)) * 57.2958;
