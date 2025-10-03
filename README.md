@@ -63,9 +63,8 @@ The example project has a set of files in the `config/` folder that can be modif
 
 # To Do
 - Alignment options for switches
-- Change textbox text color to text highlight or complement
 - Fix misjudged dropdown on certain alignments
-- Fix some letters escaping dropdown
+- Upward dropdown and context
 - Logarithmic and Exponential sliders
 - List stride sort
 - Cleanup Win32Tcp
