@@ -31860,12 +31860,16 @@ void ribbonUpdate() {
                 tt_setColor(TT_COLOR_SLOT_RIBBON_SELECT);
                 turtleRectangle(prevCutoff - tt_ribbon.marginSize / 2.0, tt_ribbon.bounds[3] - tt_ribbon.ribbonSize, cutoff - tt_ribbon.marginSize / 2.0, tt_ribbon.bounds[3] - 9 * tt_ribbon.ribbonSize); // render dropdown
                 tt_ribbon.mainselect[0] = i;
+                tt_globals.elementLogicType = TT_ELEMENT_PRIORITY_RIBBON;
             }
         }
         tt_setColor(TT_COLOR_TEXT_ALTERNATE);
         turtleTextWriteUnicode((unsigned char *) tt_ribbon.options -> data[i].r -> data[0].s, prevCutoff, tt_ribbon.bounds[3] - 5.5 * tt_ribbon.ribbonSize, 7 * tt_ribbon.ribbonSize, 0);
     }
     if (tt_globals.elementLogicTypeOld <= TT_ELEMENT_PRIORITY_RIBBON) {
+        if (tt_ribbon.mainselect[2] > -1) {
+            tt_globals.elementLogicType = TT_ELEMENT_PRIORITY_RIBBON;
+        }
         if (turtleMouseDown()) { // this is hideous
             if (tt_ribbon.mouseDown == 0) {
                 tt_ribbon.mouseDown = 1;
@@ -31893,12 +31897,10 @@ void ribbonUpdate() {
                     tt_ribbon.output[2] = tt_ribbon.subselect[2];
                     tt_ribbon.mainselect[2] = -1;
                     tt_ribbon.subselect[2] = -1;
-                    tt_globals.elementLogicType = TT_ELEMENT_PRIORITY_NONE;
                 }
             }
             if (tt_ribbon.mainselect[3] == -1 && tt_ribbon.mainselect[0] == tt_ribbon.mainselect[2]) {
                 tt_ribbon.mainselect[2] = -1;
-                tt_globals.elementLogicType = TT_ELEMENT_PRIORITY_NONE;
             }
             tt_ribbon.mainselect[3] = 0;
             tt_ribbon.mouseDown = 0;
@@ -32066,7 +32068,7 @@ void popupFree() {
 tt_globals_t tt_globals;
 
 int32_t tt_color_default[] = {
-    /*       button                         switch                            dial                           slider                          scrollbar                      context                       dropdown                     textbox  */
+    /*       button                         switch                            dial                           slider                          scrollbar                      context                       dropdown                     textbox       */
     TT_COLOR_TEXT_ALTERNATE,       TT_COLOR_TEXT_BASE,             TT_COLOR_TEXT_BASE,             TT_COLOR_TEXT_BASE,             0,                              TT_COLOR_TEXT_ALTERNATE,      TT_COLOR_TEXT_BASE,           TT_COLOR_TEXT_ALTERNATE,
     TT_COLOR_COMPONENT,            TT_COLOR_TEXT_ALTERNATE,        TT_COLOR_BACKGROUND_COMPLEMENT, TT_COLOR_COMPONENT_BASE,        TT_COLOR_COMPONENT_BASE,        TT_COLOR_COMPONENT_BASE,      TT_COLOR_TEXT_ALTERNATE,      TT_COLOR_COMPONENT_BASE,
     TT_COLOR_COMPONENT_HIGHLIGHT,  TT_COLOR_COMPONENT_BASE,        TT_COLOR_BACKGROUND_BASE,       TT_COLOR_BACKGROUND_ALTERNATE,  TT_COLOR_COMPONENT_COMPLEMENT,  TT_COLOR_COMPONENT_HIGHLIGHT, TT_COLOR_COMPONENT_BASE,      TT_COLOR_TEXT_HIGHLIGHT,
