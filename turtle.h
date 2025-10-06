@@ -19281,6 +19281,20 @@ typedef enum {
     TT_NUMBER_OF_ELEMENTS = 8,
 } tt_element_names_t;
 
+typedef enum {
+    TT_ELEMENT_PRIORITY_NONE = 0,
+    TT_ELEMENT_PRIORITY_BUTTON = 1,
+    TT_ELEMENT_PRIORITY_SWITCH = 2,
+    TT_ELEMENT_PRIORITY_DIAL = 3,
+    TT_ELEMENT_PRIORITY_SLIDER = 4,
+    TT_ELEMENT_PRIORITY_TEXTBOX = 5,
+    TT_ELEMENT_PRIORITY_DROPDOWN = 6,
+    TT_ELEMENT_PRIORITY_SCROLLBAR = 7,
+    TT_ELEMENT_PRIORITY_CONTEXT = 8,
+    TT_ELEMENT_PRIORITY_RIBBON = 9,
+    TT_ELEMENT_PRIORITY_POPUP = 10,
+} tt_element_priority_t;
+
 typedef struct {
     list_t *all;
     list_t *buttons;
@@ -19483,7 +19497,10 @@ typedef struct {
     double dialAnchorX;
     double dialAnchorY;
     double barAnchor;
-    int32_t dropdownLogicIndex;
+    tt_element_priority_t elementLogicType;
+    int32_t elementLogicIndex;
+    tt_element_priority_t elementLogicTypeOld;
+    int32_t elementLogicIndexOld;
 } tt_globals_t;
 
 extern tt_globals_t tt_globals;
@@ -31826,59 +31843,68 @@ void ribbonUpdate() {
             tt_setColor(TT_COLOR_SLOT_RIBBON_DROPDOWN);
             turtleRectangle(xLeft, tt_ribbon.bounds[3] - 10 * tt_ribbon.ribbonSize, xRight, yDown); // ribbon highlight
             for (uint32_t j = 1; j < tt_ribbon.options -> data[i].r -> length; j++) {
-                if (turtle.mouseY > tt_ribbon.bounds[3] - 10 * tt_ribbon.ribbonSize - 15 * tt_ribbon.ribbonSize * j - tt_ribbon.marginSize / 4.0 && turtle.mouseY < tt_ribbon.bounds[3] - 10 * tt_ribbon.ribbonSize && turtle.mouseX > xLeft && turtle.mouseX < xRight && tt_ribbon.subselect[0] == -1) {
-                    tt_setColor(TT_COLOR_SLOT_RIBBON_HOVER);
-                    turtleRectangle(xLeft, tt_ribbon.bounds[3] - 10 * tt_ribbon.ribbonSize - 15 * tt_ribbon.ribbonSize * (j - 1) - tt_ribbon.marginSize / 4.0, xRight, tt_ribbon.bounds[3] - 10 * tt_ribbon.ribbonSize - 15 * tt_ribbon.ribbonSize * j - tt_ribbon.marginSize / 3.0); // dropdown highlight
-                    tt_ribbon.subselect[0] = j;
+                if (tt_globals.elementLogicTypeOld <= TT_ELEMENT_PRIORITY_RIBBON) {
+                    if (turtle.mouseY > tt_ribbon.bounds[3] - 10 * tt_ribbon.ribbonSize - 15 * tt_ribbon.ribbonSize * j - tt_ribbon.marginSize / 4.0 && turtle.mouseY < tt_ribbon.bounds[3] - 10 * tt_ribbon.ribbonSize && turtle.mouseX > xLeft && turtle.mouseX < xRight && tt_ribbon.subselect[0] == -1) {
+                        tt_setColor(TT_COLOR_SLOT_RIBBON_HOVER);
+                        turtleRectangle(xLeft, tt_ribbon.bounds[3] - 10 * tt_ribbon.ribbonSize - 15 * tt_ribbon.ribbonSize * (j - 1) - tt_ribbon.marginSize / 4.0, xRight, tt_ribbon.bounds[3] - 10 * tt_ribbon.ribbonSize - 15 * tt_ribbon.ribbonSize * j - tt_ribbon.marginSize / 3.0); // dropdown highlight
+                        tt_ribbon.subselect[0] = j;
+                    }
                 }
                 tt_setColor(TT_COLOR_TEXT_ALTERNATE);
                 turtleTextWriteUnicode((unsigned char *) tt_ribbon.options -> data[i].r -> data[j].s, prevCutoff, tt_ribbon.bounds[3] - 5.5 * tt_ribbon.ribbonSize - j * 15 * tt_ribbon.ribbonSize, 7 * tt_ribbon.ribbonSize, 0);
             }
         }
         cutoff += tt_ribbon.lengths -> data[i * 2].d + tt_ribbon.marginSize;
-        if (turtle.mouseY > tt_ribbon.bounds[3] - 10 * tt_ribbon.ribbonSize && turtle.mouseY < tt_ribbon.bounds[3] && turtle.mouseX > tt_ribbon.bounds[0] + tt_ribbon.marginSize / 2.0 && turtle.mouseX < cutoff - tt_ribbon.marginSize / 2.0 && tt_ribbon.mainselect[0] == -1) { // -217, -195, -164
-            tt_setColor(TT_COLOR_SLOT_RIBBON_SELECT);
-            turtleRectangle(prevCutoff - tt_ribbon.marginSize / 2.0, tt_ribbon.bounds[3] - tt_ribbon.ribbonSize, cutoff - tt_ribbon.marginSize / 2.0, tt_ribbon.bounds[3] - 9 * tt_ribbon.ribbonSize); // render dropdown
-            tt_ribbon.mainselect[0] = i;
+        if (tt_globals.elementLogicTypeOld <= TT_ELEMENT_PRIORITY_RIBBON) {
+            if (turtle.mouseY > tt_ribbon.bounds[3] - 10 * tt_ribbon.ribbonSize && turtle.mouseY < tt_ribbon.bounds[3] && turtle.mouseX > tt_ribbon.bounds[0] + tt_ribbon.marginSize / 2.0 && turtle.mouseX < cutoff - tt_ribbon.marginSize / 2.0 && tt_ribbon.mainselect[0] == -1) { // -217, -195, -164
+                tt_setColor(TT_COLOR_SLOT_RIBBON_SELECT);
+                turtleRectangle(prevCutoff - tt_ribbon.marginSize / 2.0, tt_ribbon.bounds[3] - tt_ribbon.ribbonSize, cutoff - tt_ribbon.marginSize / 2.0, tt_ribbon.bounds[3] - 9 * tt_ribbon.ribbonSize); // render dropdown
+                tt_ribbon.mainselect[0] = i;
+            }
         }
         tt_setColor(TT_COLOR_TEXT_ALTERNATE);
         turtleTextWriteUnicode((unsigned char *) tt_ribbon.options -> data[i].r -> data[0].s, prevCutoff, tt_ribbon.bounds[3] - 5.5 * tt_ribbon.ribbonSize, 7 * tt_ribbon.ribbonSize, 0);
     }
-    if (turtleMouseDown()) { // this is hideous
-        if (tt_ribbon.mouseDown == 0) {
-            tt_ribbon.mouseDown = 1;
-            if (tt_ribbon.subselect[0] == tt_ribbon.subselect[1] && tt_ribbon.subselect[0] != -1) {
-                tt_ribbon.subselect[2] = tt_ribbon.subselect[0];
-                tt_ribbon.output[0] = 1;
-                tt_ribbon.output[1] = tt_ribbon.mainselect[2];
-                tt_ribbon.output[2] = tt_ribbon.subselect[2];
-            }
-            if (tt_ribbon.mainselect[0] == tt_ribbon.mainselect[1]) {
-                if (tt_ribbon.mainselect[0] == tt_ribbon.mainselect[2]) {
-                    tt_ribbon.mainselect[3] = -1;
-                } else {
-                    tt_ribbon.mainselect[2] = tt_ribbon.mainselect[0];
+    if (tt_globals.elementLogicTypeOld <= TT_ELEMENT_PRIORITY_RIBBON) {
+        if (turtleMouseDown()) { // this is hideous
+            if (tt_ribbon.mouseDown == 0) {
+                tt_ribbon.mouseDown = 1;
+                if (tt_ribbon.subselect[0] == tt_ribbon.subselect[1] && tt_ribbon.subselect[0] != -1) {
+                    tt_ribbon.subselect[2] = tt_ribbon.subselect[0];
+                    tt_ribbon.output[0] = 1;
+                    tt_ribbon.output[1] = tt_ribbon.mainselect[2];
+                    tt_ribbon.output[2] = tt_ribbon.subselect[2];
+                }
+                if (tt_ribbon.mainselect[0] == tt_ribbon.mainselect[1]) {
+                    if (tt_ribbon.mainselect[0] == tt_ribbon.mainselect[2]) {
+                        tt_ribbon.mainselect[3] = -1;
+                    } else {
+                        tt_ribbon.mainselect[2] = tt_ribbon.mainselect[0];
+                        tt_globals.elementLogicType = TT_ELEMENT_PRIORITY_RIBBON;
+                    }
                 }
             }
-        }
-    } else {
-        if (tt_ribbon.mouseDown == 1) {
-            if (tt_ribbon.subselect[0] != -1) {
-                tt_ribbon.subselect[2] = tt_ribbon.subselect[0];
-                tt_ribbon.output[0] = 1;
-                tt_ribbon.output[1] = tt_ribbon.mainselect[2];
-                tt_ribbon.output[2] = tt_ribbon.subselect[2];
-                tt_ribbon.mainselect[2] = -1;
-                tt_ribbon.subselect[2] = -1;
+        } else {
+            if (tt_ribbon.mouseDown == 1) {
+                if (tt_ribbon.subselect[0] != -1) {
+                    tt_ribbon.subselect[2] = tt_ribbon.subselect[0];
+                    tt_ribbon.output[0] = 1;
+                    tt_ribbon.output[1] = tt_ribbon.mainselect[2];
+                    tt_ribbon.output[2] = tt_ribbon.subselect[2];
+                    tt_ribbon.mainselect[2] = -1;
+                    tt_ribbon.subselect[2] = -1;
+                    tt_globals.elementLogicType = TT_ELEMENT_PRIORITY_NONE;
+                }
             }
+            if (tt_ribbon.mainselect[3] == -1 && tt_ribbon.mainselect[0] == tt_ribbon.mainselect[2]) {
+                tt_ribbon.mainselect[2] = -1;
+                tt_globals.elementLogicType = TT_ELEMENT_PRIORITY_NONE;
+            }
+            tt_ribbon.mainselect[3] = 0;
+            tt_ribbon.mouseDown = 0;
+            tt_ribbon.mainselect[1] = tt_ribbon.mainselect[0];
+            tt_ribbon.subselect[1] = tt_ribbon.subselect[0];
         }
-        if (tt_ribbon.mainselect[3] == -1 && tt_ribbon.mainselect[0] == tt_ribbon.mainselect[2]) {
-            tt_ribbon.mainselect[2] = -1;
-        }
-        tt_ribbon.mainselect[3] = 0;
-        tt_ribbon.mouseDown = 0;
-        tt_ribbon.mainselect[1] = tt_ribbon.mainselect[0];
-        tt_ribbon.subselect[1] = tt_ribbon.subselect[0];
     }
     turtle.penshape = shapeSave;
     turtle.pensize = sizeSave;
@@ -31973,6 +31999,7 @@ int32_t popupInitInternal(FILE *configFile, list_t *configList, int8_t fileExist
 /* render popup */
 void popupUpdate() {
     if (turtle.close == 1) {
+        tt_globals.elementLogicType = TT_ELEMENT_PRIORITY_POPUP;
         tt_setColor(TT_COLOR_SLOT_POPUP_BOX);
         turtleRectangle(tt_popup.minX, tt_popup.minY, tt_popup.maxX, tt_popup.maxY);
         double textX = tt_popup.minX + (tt_popup.maxX - tt_popup.minX) / 2;
@@ -32002,6 +32029,7 @@ void popupUpdate() {
                         if (tt_popup.output[0] == 0) {
                             tt_popup.output[1] = i;
                         }
+                        tt_globals.elementLogicType = TT_ELEMENT_PRIORITY_NONE;
                     }
                 } else {
                     if (tt_popup.mouseDown == 1) {
@@ -32009,6 +32037,7 @@ void popupUpdate() {
                         if (tt_popup.output[1] == i) {
                             tt_popup.output[0] = 1;
                         }
+                        tt_globals.elementLogicType = TT_ELEMENT_PRIORITY_NONE;
                     }
                 }
             } else {
@@ -32023,6 +32052,7 @@ void popupUpdate() {
             tt_popup.mouseDown = 0;
             tt_popup.output[0] = 0;
             tt_popup.output[1] = -1;
+            tt_globals.elementLogicType = TT_ELEMENT_PRIORITY_NONE;
         }
     }
 }
@@ -32063,6 +32093,8 @@ tt_button_t *buttonInit(char *label, int8_t *variable, double x, double y, doubl
     }
     if (tt_enabled.turtleToolsEnabled == 0) {
         tt_enabled.turtleToolsEnabled = 1;
+        tt_globals.elementLogicType = TT_ELEMENT_PRIORITY_NONE;
+        tt_globals.elementLogicIndex = -1;
         tt_elements.all = list_init();
     }
     tt_button_t *buttonp = malloc(sizeof(tt_button_t));
@@ -32100,6 +32132,8 @@ tt_switch_t *switchInit(char *label, int8_t *variable, double x, double y, doubl
     }
     if (tt_enabled.turtleToolsEnabled == 0) {
         tt_enabled.turtleToolsEnabled = 1;
+        tt_globals.elementLogicType = TT_ELEMENT_PRIORITY_NONE;
+        tt_globals.elementLogicIndex = -1;
         tt_elements.all = list_init();
     }
     tt_switch_t *switchp = malloc(sizeof(tt_switch_t));
@@ -32136,6 +32170,8 @@ tt_dial_t *dialInit(char *label, double *variable, tt_dial_type_t type, double x
     }
     if (tt_enabled.turtleToolsEnabled == 0) {
         tt_enabled.turtleToolsEnabled = 1;
+        tt_globals.elementLogicType = TT_ELEMENT_PRIORITY_NONE;
+        tt_globals.elementLogicIndex = -1;
         tt_elements.all = list_init();
     }
     tt_dial_t *dialp = malloc(sizeof(tt_dial_t));
@@ -32175,6 +32211,8 @@ tt_slider_t *sliderInit(char *label, double *variable, tt_slider_type_t type, tt
     }
     if (tt_enabled.turtleToolsEnabled == 0) {
         tt_enabled.turtleToolsEnabled = 1;
+        tt_globals.elementLogicType = TT_ELEMENT_PRIORITY_NONE;
+        tt_globals.elementLogicIndex = -1;
         tt_elements.all = list_init();
     }
     tt_slider_t *sliderp = malloc(sizeof(tt_slider_t));
@@ -32216,6 +32254,8 @@ tt_scrollbar_t *scrollbarInit(double *variable, tt_scrollbar_type_t type, double
     }
     if (tt_enabled.turtleToolsEnabled == 0) {
         tt_enabled.turtleToolsEnabled = 1;
+        tt_globals.elementLogicType = TT_ELEMENT_PRIORITY_NONE;
+        tt_globals.elementLogicIndex = -1;
         tt_elements.all = list_init();
     }
     tt_scrollbar_t *scrollbarp = malloc(sizeof(tt_scrollbar_t));
@@ -32257,6 +32297,8 @@ tt_context_t *contextInit(list_t *options, int32_t *variable, double x, double y
     }
     if (tt_enabled.turtleToolsEnabled == 0) {
         tt_enabled.turtleToolsEnabled = 1;
+        tt_globals.elementLogicType = TT_ELEMENT_PRIORITY_NONE;
+        tt_globals.elementLogicIndex = -1;
         tt_elements.all = list_init();
     }
     tt_context_t *contextp = malloc(sizeof(tt_context_t));
@@ -32296,12 +32338,13 @@ void dropdownCalculateMax(tt_dropdown_t *dropdownp) {
 /* create a dropdown - use a list of strings for options */
 tt_dropdown_t *dropdownInit(char *label, list_t *options, int32_t *variable, tt_dropdown_align_t align, double x, double y, double size) {
     if (tt_enabled.dropdownEnabled == 0) {
-        tt_globals.dropdownLogicIndex = -1;
         tt_enabled.dropdownEnabled = 1;
         tt_elements.dropdowns = list_init();
     }
     if (tt_enabled.turtleToolsEnabled == 0) {
         tt_enabled.turtleToolsEnabled = 1;
+        tt_globals.elementLogicType = TT_ELEMENT_PRIORITY_NONE;
+        tt_globals.elementLogicIndex = -1;
         tt_elements.all = list_init();
     }
     tt_dropdown_t *dropdownp = malloc(sizeof(tt_dropdown_t));
@@ -32346,6 +32389,8 @@ tt_textbox_t *textboxInit(char *label, uint32_t maxCharacters, double x, double 
     }
     if (tt_enabled.turtleToolsEnabled == 0) {
         tt_enabled.turtleToolsEnabled = 1;
+        tt_globals.elementLogicType = TT_ELEMENT_PRIORITY_NONE;
+        tt_globals.elementLogicIndex = -1;
         tt_elements.all = list_init();
     }
     tt_textbox_t *textboxp = malloc(sizeof(tt_textbox_t));
@@ -32436,7 +32481,7 @@ void buttonUpdate() {
         }
         turtleTextWriteUnicode((unsigned char *) buttonp -> label, (buttonLeftX + buttonRightX) / 2, buttonY, buttonp -> size - 1, 50);
         /* mouse */
-        if (buttonp -> enabled == TT_ELEMENT_ENABLED && tt_ribbon.mainselect[2] == -1) {
+        if (buttonp -> enabled == TT_ELEMENT_ENABLED && (tt_globals.elementLogicTypeOld < TT_ELEMENT_PRIORITY_BUTTON || (tt_globals.elementLogicTypeOld == TT_ELEMENT_PRIORITY_BUTTON && tt_globals.elementLogicIndexOld <= (int32_t ) i))) {
             if (turtleMouseDown()) {
                 if (buttonp -> status == 2) {
                     buttonp -> status = 1;
@@ -32448,12 +32493,16 @@ void buttonUpdate() {
                 if (buttonp -> shape == TT_BUTTON_SHAPE_CIRCLE) {
                     if ((turtle.mouseX - (buttonLeftX + buttonRightX) / 2) * (turtle.mouseX - (buttonLeftX + buttonRightX) / 2) + (turtle.mouseY - buttonY) * (turtle.mouseY - buttonY) < buttonWidth * buttonWidth / 4) {
                         buttonp -> status = -1;
+                        tt_globals.elementLogicType = TT_ELEMENT_PRIORITY_BUTTON;
+                        tt_globals.elementLogicIndex = i;
                     } else {
                         buttonp -> status = 0;
                     }
                 } else {
                     if (turtle.mouseX > buttonLeftX && turtle.mouseX < buttonRightX && turtle.mouseY > buttonY - buttonHeight / 2 && turtle.mouseY < buttonY + buttonHeight / 2) {
                         buttonp -> status = -1;
+                        tt_globals.elementLogicType = TT_ELEMENT_PRIORITY_BUTTON;
+                        tt_globals.elementLogicIndex = i;
                     } else {
                         buttonp -> status = 0;
                     }
@@ -32467,6 +32516,8 @@ void buttonUpdate() {
                     *(buttonp -> variable) = 0;
                 }
             }
+        } else {
+            buttonp -> status = 0;
         }
     }
 }
@@ -32589,7 +32640,7 @@ void switchUpdate() {
             turtleTextWriteUnicode((unsigned char *) switchp -> label, switchX + switchp -> size, switchY, switchp -> size - 1, 0);
         }
         /* mouse */
-        if (switchp -> enabled == TT_ELEMENT_ENABLED && tt_ribbon.mainselect[2] == -1) {
+        if (switchp -> enabled == TT_ELEMENT_ENABLED && (tt_globals.elementLogicTypeOld < TT_ELEMENT_PRIORITY_SWITCH || (tt_globals.elementLogicTypeOld == TT_ELEMENT_PRIORITY_SWITCH && tt_globals.elementLogicIndexOld <= (int32_t ) i))) {
             if (turtleMouseDown()) {
                 if (switchp -> status < 0) {
                     switchp -> status *= -1;
@@ -32597,6 +32648,8 @@ void switchUpdate() {
             } else {
                 if (turtle.mouseX > switchClickLeft && turtle.mouseX < switchClickRight && turtle.mouseY > switchClickDown && turtle.mouseY < switchClickUp) {
                     switchp -> status = -1;
+                    tt_globals.elementLogicType = TT_ELEMENT_PRIORITY_SWITCH;
+                    tt_globals.elementLogicIndex = i;
                 } else {
                     switchp -> status = 0;
                 }
@@ -32609,6 +32662,8 @@ void switchUpdate() {
                 }
                 switchp -> status = 0;
             }
+        } else {
+            switchp -> status = 0;
         }
     }
 }
@@ -32667,7 +32722,7 @@ void dialUpdate() {
         turtleGoto(dialX + sin(dialAngle / 57.2958) * dialp -> size, dialY + cos(dialAngle / 57.2958) * dialp -> size);
         turtlePenUp();
         /* mouse */
-        if (dialp -> enabled == TT_ELEMENT_ENABLED && tt_ribbon.mainselect[2] == -1) {
+        if (dialp -> enabled == TT_ELEMENT_ENABLED && (tt_globals.elementLogicTypeOld < TT_ELEMENT_PRIORITY_DIAL || (tt_globals.elementLogicTypeOld == TT_ELEMENT_PRIORITY_DIAL && tt_globals.elementLogicIndexOld <= (int32_t ) i))) {
             if (turtleMouseDown()) {
                 if (dialp -> status[0] < 0) {
                     tt_globals.dialAnchorX = dialX;
@@ -32682,6 +32737,8 @@ void dialUpdate() {
             } else {
                 if (turtle.mouseX > dialX - dialp -> size && turtle.mouseX < dialX + dialp -> size && turtle.mouseY > dialY - dialp -> size && turtle.mouseY < dialY + dialp -> size) {
                     dialp -> status[0] = -1;
+                    tt_globals.elementLogicType = TT_ELEMENT_PRIORITY_DIAL;
+                    tt_globals.elementLogicIndex = i;
                 } else {
                     dialp -> status[0] = 0;
                 }
@@ -32705,6 +32762,8 @@ void dialUpdate() {
                     *(dialp -> variable) = round(dialp -> range[0] + (dialp -> range[1] - dialp -> range[0]) * ((pow(361, dialAngle / 360) - 1) / 360));
                 }
             }
+        } else {
+            dialp -> status[0] = 0;
         }
         tt_setColor(dialp -> color[TT_COLOR_SLOT_DIAL_TEXT]);
         double rounded = round(*(dialp -> variable) * dialp -> renderNumberFactor);
@@ -32798,7 +32857,7 @@ void sliderUpdate() {
         turtlePenDown();
         turtlePenUp();
         /* mouse */
-        if (sliderp -> enabled == TT_ELEMENT_ENABLED && tt_ribbon.mainselect[2] == -1) {
+        if (sliderp -> enabled == TT_ELEMENT_ENABLED && (tt_globals.elementLogicTypeOld < TT_ELEMENT_PRIORITY_SLIDER || (tt_globals.elementLogicTypeOld == TT_ELEMENT_PRIORITY_SLIDER && tt_globals.elementLogicIndexOld <= (int32_t ) i))) {
             if (turtleMouseDown()) {
                 if (sliderp -> status < 0) {
                     sliderp -> status *= -1;
@@ -32810,6 +32869,8 @@ void sliderUpdate() {
             } else {
                 if (turtle.mouseX > sliderXLeft - sliderp -> size * 0.6 && turtle.mouseX < sliderXRight + sliderp -> size * 0.6 && turtle.mouseY > sliderYLeft - sliderp -> size * 0.6 && turtle.mouseY < sliderYRight + sliderp -> size * 0.6) {
                     sliderp -> status = -1;
+                    tt_globals.elementLogicType = TT_ELEMENT_PRIORITY_SLIDER;
+                    tt_globals.elementLogicIndex = i;
                 } else {
                     sliderp -> status = 0;
                 }
@@ -32827,6 +32888,8 @@ void sliderUpdate() {
                     *(sliderp -> variable) = sliderp -> range[0];
                 }
             }
+        } else {
+            sliderp -> status = 0;
         }
         if (sliderp -> renderNumberFactor != 0) {
             tt_setColor(sliderp -> color[TT_COLOR_SLOT_SLIDER_TEXT]);
@@ -32870,7 +32933,7 @@ void scrollbarUpdate() {
             turtlePenDown();
             turtleGoto(dragRight, scrollbarp -> y);
             turtlePenUp();
-            if (scrollbarp -> enabled == TT_ELEMENT_ENABLED) {
+            if (scrollbarp -> enabled == TT_ELEMENT_ENABLED && (tt_globals.elementLogicTypeOld < TT_ELEMENT_PRIORITY_SCROLLBAR || (tt_globals.elementLogicTypeOld == TT_ELEMENT_PRIORITY_SCROLLBAR && tt_globals.elementLogicIndexOld <= (int32_t ) i))) {
                 if (scrollbarp -> status == 2) {
                     tt_globals.barAnchor = turtle.mouseX - dragLeft;
                     scrollbarp -> status = 1;
@@ -32888,6 +32951,8 @@ void scrollbarUpdate() {
                 } else {
                     if (turtle.mouseY > scrollbarp -> y - scrollbarp -> size * 0.5 && turtle.mouseY < scrollbarp -> y + scrollbarp -> size * 0.5 && turtle.mouseX < scrollbarRight && turtle.mouseX > scrollbarLeft) {
                         scrollbarp -> status = -1;
+                        tt_globals.elementLogicType = TT_ELEMENT_PRIORITY_SCROLLBAR;
+                        tt_globals.elementLogicIndex = i;
                     } else {
                         scrollbarp -> status = 0;
                     }
@@ -32901,6 +32966,8 @@ void scrollbarUpdate() {
                         *(scrollbarp -> variable) = 100;
                     }
                 }
+            } else {
+                scrollbarp -> status = 0;
             }
         } else if (scrollbarp -> type == TT_SCROLLBAR_VERTICAL) {
             double scrollbarTop = scrollbarp -> y + scrollbarp -> length / 2;
@@ -32926,7 +32993,7 @@ void scrollbarUpdate() {
             turtleGoto(scrollbarp -> x, dragBottom);
             turtlePenUp();
             /* mouse */
-            if (scrollbarp -> enabled == TT_ELEMENT_ENABLED && tt_ribbon.mainselect[2] == -1) {
+            if (scrollbarp -> enabled == TT_ELEMENT_ENABLED && (tt_globals.elementLogicTypeOld < TT_ELEMENT_PRIORITY_SCROLLBAR || (tt_globals.elementLogicTypeOld == TT_ELEMENT_PRIORITY_SCROLLBAR && tt_globals.elementLogicIndexOld <= (int32_t ) i))) {
                 if (scrollbarp -> status == 2) {
                     tt_globals.barAnchor = dragTop - turtle.mouseY;
                     scrollbarp -> status = 1;
@@ -32944,6 +33011,8 @@ void scrollbarUpdate() {
                 } else {
                     if (turtle.mouseX > scrollbarp -> x - scrollbarp -> size * 0.5 && turtle.mouseX < scrollbarp -> x + scrollbarp -> size * 0.5 && turtle.mouseY > scrollbarBottom && turtle.mouseY < scrollbarTop) {
                         scrollbarp -> status = -1;
+                        tt_globals.elementLogicType = TT_ELEMENT_PRIORITY_SCROLLBAR;
+                        tt_globals.elementLogicIndex = i;
                     } else {
                         scrollbarp -> status = 0;
                     }
@@ -32957,6 +33026,8 @@ void scrollbarUpdate() {
                         *(scrollbarp -> variable) = 100;
                     }
                 }
+            } else {
+                scrollbarp -> status = 0;
             }
         }
     }
@@ -33000,15 +33071,18 @@ void contextUpdate() {
             }
             turtleTextWriteUnicode((unsigned char *) contextp -> options -> data[i].s, contextTextX + contextp -> size / 2.5, contextTextY - i * itemHeight, contextp -> size - 1, 0);
         }
-        if (turtleMouseDown()) {
-            *(contextp -> variable) = contextp -> index;
-            contextp -> enabled = TT_ELEMENT_HIDE;
+        if (contextp -> enabled == TT_ELEMENT_ENABLED && (tt_globals.elementLogicTypeOld < TT_ELEMENT_PRIORITY_CONTEXT || (tt_globals.elementLogicTypeOld == TT_ELEMENT_PRIORITY_CONTEXT && tt_globals.elementLogicIndexOld <= (int32_t ) i))) {
+            tt_globals.elementLogicType = TT_ELEMENT_PRIORITY_CONTEXT;
+            tt_globals.elementLogicIndex = i;
+            if (turtleMouseDown()) {
+                *(contextp -> variable) = contextp -> index;
+                contextp -> enabled = TT_ELEMENT_HIDE;
+            }
         }
     }
 }
 
 void dropdownUpdate() {
-    int32_t logicIndex = -1;
     for (uint32_t i = 0; i < tt_elements.dropdowns -> length; i++) {
         tt_dropdown_t *dropdownp = (tt_dropdown_t *) (tt_elements.dropdowns -> data[i].p);
         if (dropdownp -> enabled == TT_ELEMENT_HIDE) {
@@ -33054,8 +33128,7 @@ void dropdownUpdate() {
                 turtleTextWriteUnicode((unsigned char *) dropdownp -> label, dropdownX - dropdownp -> size / 5, dropdownY + 2 * dropdownp -> size, dropdownp -> size - 1, dropdownAlignFactor);
             }
         }
-        logicIndex = tt_globals.dropdownLogicIndex;
-        if ((int32_t) i > logicIndex && dropdownp -> status == -1) {
+        if (dropdownp -> status == -1) {
             tt_setColor(dropdownp -> color[TT_COLOR_SLOT_DROPDOWN_SELECT]);
             turtleRectangle(dropdownXFactor[0], dropdownY - dropdownp -> size * 0.9, dropdownXFactor[1] + dropdownp -> size, dropdownY + dropdownp -> size * 0.9);
         } else if (dropdownp -> status >= 1) {
@@ -33065,89 +33138,89 @@ void dropdownUpdate() {
             tt_setColor(dropdownp -> color[TT_COLOR_SLOT_DROPDOWN_BASE]);
             turtleRectangle(dropdownXFactor[0], dropdownY - dropdownp -> size * 0.9, dropdownXFactor[1] + dropdownp -> size, dropdownY + dropdownp -> size * 0.9);
         }
-        /* mouse */
-        if (dropdownp -> enabled == TT_ELEMENT_ENABLED && tt_ribbon.mainselect[2] == -1) {
-            if (turtle.mouseX > dropdownXFactor[0] && turtle.mouseX < dropdownXFactor[1] + dropdownp -> size && turtle.mouseY >= dropdownY - dropdownp -> size * 0.9 && turtle.mouseY < dropdownY + dropdownp -> size * 0.9) {
-                if (!turtleMouseDown() && dropdownp -> status == 0) {
-                    dropdownp -> status = -1;
-                    logicIndex = -1;
-                }
-            } else {
-                if (dropdownp -> status == -1) {
-                    dropdownp -> status = 0;
-                    logicIndex = -1;
-                }
-            }
-            if (dropdownp -> status == -1) {
-                if ((int32_t) i > logicIndex && turtleMouseDown()) {
-                    dropdownp -> status = 1;
-                }
-            }
-            if (dropdownp -> status == 1) {
-                if (!turtleMouseDown()) {
-                    if (turtle.mouseX > dropdownMaxXFactor[0] && turtle.mouseX < dropdownMaxXFactor[1] && turtle.mouseY >= dropdownY - dropdownp -> size * 0.9 - (dropdownp -> options -> length - 1) * itemHeight && turtle.mouseY < dropdownY + dropdownp -> size * 0.9 - itemHeight) {
-                        uint32_t selected = round((dropdownY - turtle.mouseY) / itemHeight);
-                        if (selected != 0) {
-                            if (dropdownp -> index >= selected) {
-                                dropdownp -> index = selected - 1;
-                            } else {
-                                dropdownp -> index = selected;
-                            }
-                            *dropdownp -> variable = dropdownp -> index;
-                        }
-                        dropdownp -> status = -2;
-                    } else {
-                        dropdownp -> status = 2;
-                        logicIndex = -1;
-                    }
-                }
-            }
-            if (dropdownp -> status == -2) {
-                if (!turtleMouseDown()) {
-                    dropdownp -> status = 0;
-                    logicIndex = -1;
-                }
-            }
-            if (dropdownp -> status == 2 || dropdownp -> status == 1) {
-                if (turtle.mouseX > dropdownMaxXFactor[0] && turtle.mouseX < dropdownMaxXFactor[1] && turtle.mouseY >= dropdownY - dropdownp -> size * 0.9 - (dropdownp -> options -> length - 1) * itemHeight && turtle.mouseY < dropdownY + dropdownp -> size * 0.9) {
-                    uint32_t selected = round((dropdownY - turtle.mouseY) / itemHeight);
-                    tt_setColor(dropdownp -> color[TT_COLOR_SLOT_DROPDOWN_HOVER]);
-                    turtleRectangle(dropdownMaxXFactor[0], dropdownY - dropdownp -> size * 0.9 - selected * itemHeight, dropdownMaxXFactor[1], dropdownY + dropdownp -> size * 0.9 - selected * itemHeight);
-                    if (turtleMouseDown() && dropdownp -> status == 2) {
-                        if (selected != 0) {
-                            if (dropdownp -> index >= selected) {
-                                dropdownp -> index = selected - 1;
-                            } else {
-                                dropdownp -> index = selected;
-                            }
-                            *dropdownp -> variable = dropdownp -> index;
-                        }
-                        dropdownp -> status = -2;
+            /* mouse */
+        if (dropdownp -> enabled == TT_ELEMENT_ENABLED && (tt_globals.elementLogicTypeOld < TT_ELEMENT_PRIORITY_DROPDOWN || (tt_globals.elementLogicTypeOld == TT_ELEMENT_PRIORITY_DROPDOWN && tt_globals.elementLogicIndexOld <= (int32_t ) i))) {
+            if (dropdownp -> enabled == TT_ELEMENT_ENABLED && tt_ribbon.mainselect[2] == -1) {
+                if (turtle.mouseX > dropdownXFactor[0] && turtle.mouseX < dropdownXFactor[1] + dropdownp -> size && turtle.mouseY >= dropdownY - dropdownp -> size * 0.9 && turtle.mouseY < dropdownY + dropdownp -> size * 0.9) {
+                    if (!turtleMouseDown() && dropdownp -> status == 0) {
+                        dropdownp -> status = -1;
+                        tt_globals.elementLogicType = TT_ELEMENT_PRIORITY_DROPDOWN;
+                        tt_globals.elementLogicIndex = i;
                     }
                 } else {
-                    if (turtleMouseDown() && dropdownp -> status == 2) {
+                    if (dropdownp -> status == -1) {
                         dropdownp -> status = 0;
                     }
                 }
-                tt_setColor(dropdownp -> color[TT_COLOR_SLOT_DROPDOWN_TEXT_HOVER]);
-                int32_t renderIndex = 1;
-                for (uint32_t i = 0; i < dropdownp -> options -> length; i++) {
-                    if (i != dropdownp -> index) {
-                        if (dropdownp -> align == TT_DROPDOWN_ALIGN_LEFT) {
-                            turtleTextWriteUnicode((unsigned char *) dropdownp -> options -> data[i].s, dropdownMaxXFactor[0] + dropdownp -> size / 5, dropdownY - renderIndex * itemHeight, dropdownp -> size - 1, dropdownAlignFactor);
-                        } else if (dropdownp -> align == TT_DROPDOWN_ALIGN_CENTER) {
-                            turtleTextWriteUnicode((unsigned char *) dropdownp -> options -> data[i].s, (dropdownMaxXFactor[0] + dropdownMaxXFactor[1]) / 2, dropdownY - renderIndex * itemHeight, dropdownp -> size - 1, dropdownAlignFactor);
-                        } else if (dropdownp -> align == TT_DROPDOWN_ALIGN_RIGHT) {
-                            turtleTextWriteUnicode((unsigned char *) dropdownp -> options -> data[i].s, dropdownMaxXFactor[1] - dropdownp -> size * 1.6, dropdownY - renderIndex * itemHeight, dropdownp -> size - 1, dropdownAlignFactor);
+                if (dropdownp -> status == -1) {
+                    if (turtleMouseDown()) {
+                        dropdownp -> status = 1;
+                    }
+                }
+                if (dropdownp -> status == 1) {
+                    if (!turtleMouseDown()) {
+                        if (turtle.mouseX > dropdownMaxXFactor[0] && turtle.mouseX < dropdownMaxXFactor[1] && turtle.mouseY >= dropdownY - dropdownp -> size * 0.9 - (dropdownp -> options -> length - 1) * itemHeight && turtle.mouseY < dropdownY + dropdownp -> size * 0.9 - itemHeight) {
+                            uint32_t selected = round((dropdownY - turtle.mouseY) / itemHeight);
+                            if (selected != 0) {
+                                if (dropdownp -> index >= selected) {
+                                    dropdownp -> index = selected - 1;
+                                } else {
+                                    dropdownp -> index = selected;
+                                }
+                                *dropdownp -> variable = dropdownp -> index;
+                            }
+                            dropdownp -> status = -2;
+                        } else {
+                            dropdownp -> status = 2;
                         }
-                        renderIndex++;
+                    }
+                }
+                if (dropdownp -> status == -2) {
+                    if (!turtleMouseDown()) {
+                        dropdownp -> status = 0;
+                    }
+                }
+                if (dropdownp -> status == 2 || dropdownp -> status == 1) {
+                    tt_globals.elementLogicType = TT_ELEMENT_PRIORITY_DROPDOWN;
+                    tt_globals.elementLogicIndex = i;
+                    if (turtle.mouseX > dropdownMaxXFactor[0] && turtle.mouseX < dropdownMaxXFactor[1] && turtle.mouseY >= dropdownY - dropdownp -> size * 0.9 - (dropdownp -> options -> length - 1) * itemHeight && turtle.mouseY < dropdownY + dropdownp -> size * 0.9) {
+                        uint32_t selected = round((dropdownY - turtle.mouseY) / itemHeight);
+                        tt_setColor(dropdownp -> color[TT_COLOR_SLOT_DROPDOWN_HOVER]);
+                        turtleRectangle(dropdownMaxXFactor[0], dropdownY - dropdownp -> size * 0.9 - selected * itemHeight, dropdownMaxXFactor[1], dropdownY + dropdownp -> size * 0.9 - selected * itemHeight);
+                        if (turtleMouseDown() && dropdownp -> status == 2) {
+                            if (selected != 0) {
+                                if (dropdownp -> index >= selected) {
+                                    dropdownp -> index = selected - 1;
+                                } else {
+                                    dropdownp -> index = selected;
+                                }
+                                *dropdownp -> variable = dropdownp -> index;
+                            }
+                            dropdownp -> status = -2;
+                        }
+                    } else {
+                        if (turtleMouseDown() && dropdownp -> status == 2) {
+                            dropdownp -> status = 0;
+                        }
+                    }
+                    tt_setColor(dropdownp -> color[TT_COLOR_SLOT_DROPDOWN_TEXT_HOVER]);
+                    int32_t renderIndex = 1;
+                    for (uint32_t i = 0; i < dropdownp -> options -> length; i++) {
+                        if (i != dropdownp -> index) {
+                            if (dropdownp -> align == TT_DROPDOWN_ALIGN_LEFT) {
+                                turtleTextWriteUnicode((unsigned char *) dropdownp -> options -> data[i].s, dropdownMaxXFactor[0] + dropdownp -> size / 5, dropdownY - renderIndex * itemHeight, dropdownp -> size - 1, dropdownAlignFactor);
+                            } else if (dropdownp -> align == TT_DROPDOWN_ALIGN_CENTER) {
+                                turtleTextWriteUnicode((unsigned char *) dropdownp -> options -> data[i].s, (dropdownMaxXFactor[0] + dropdownMaxXFactor[1]) / 2, dropdownY - renderIndex * itemHeight, dropdownp -> size - 1, dropdownAlignFactor);
+                            } else if (dropdownp -> align == TT_DROPDOWN_ALIGN_RIGHT) {
+                                turtleTextWriteUnicode((unsigned char *) dropdownp -> options -> data[i].s, dropdownMaxXFactor[1] - dropdownp -> size * 1.6, dropdownY - renderIndex * itemHeight, dropdownp -> size - 1, dropdownAlignFactor);
+                            }
+                            renderIndex++;
+                        }
                     }
                 }
             }
-            if (dropdownp -> status >= 1) {
-                logicIndex = i;
-            }
-            tt_globals.dropdownLogicIndex = logicIndex;
+        } else {
+            dropdownp -> status = 0;
         }
         tt_setColor(dropdownp -> color[TT_COLOR_SLOT_DROPDOWN_TEXT_HOVER]);
         if (dropdownp -> align == TT_DROPDOWN_ALIGN_LEFT) {
@@ -33456,7 +33529,7 @@ void textboxUpdate() {
         }
 
         /* mouse */
-        if (textboxp -> enabled == TT_ELEMENT_ENABLED && tt_ribbon.mainselect[2] == -1) {
+        if (textboxp -> enabled == TT_ELEMENT_ENABLED && (tt_globals.elementLogicTypeOld < TT_ELEMENT_PRIORITY_TEXTBOX || (tt_globals.elementLogicTypeOld == TT_ELEMENT_PRIORITY_TEXTBOX && tt_globals.elementLogicIndexOld <= (int32_t ) i))) {
             if (turtleMouseDown()) {
                 if (textboxp -> status < 0) {
                     textboxp -> editIndex = strlen(textboxp -> text);
@@ -33471,16 +33544,22 @@ void textboxUpdate() {
                 } else if (textboxp -> status < 2) {
                     if (turtle.mouseX > textboxp -> x && turtle.mouseX < textboxp -> x + textboxp -> length && turtle.mouseY > textboxp -> y - textboxp -> size && turtle.mouseY < textboxp -> y + textboxp -> size) {
                         textboxp -> status = -1;
+                        tt_globals.elementLogicType = TT_ELEMENT_PRIORITY_TEXTBOX;
+                        tt_globals.elementLogicIndex = i;
                     } else {
                         textboxp -> status = 0;
                     }
                 }
             }
+        } else {
+            textboxp -> status = 0;
         }
     }
 }
 
 void turtleToolsUpdate() {
+    tt_globals.elementLogicType = TT_ELEMENT_PRIORITY_NONE;
+    tt_globals.elementLogicIndex = -1;
     char shapeSave = turtle.penshape;
     turtlePenShape("circle");
     if (tt_enabled.buttonEnabled) {
@@ -33514,9 +33593,13 @@ void turtleToolsUpdate() {
         popupUpdate();
     }
     turtle.penshape = shapeSave;
+    tt_globals.elementLogicTypeOld = tt_globals.elementLogicType;
+    tt_globals.elementLogicIndexOld = tt_globals.elementLogicIndex;
 }
 
 void turtleToolsUpdateUI() {
+    tt_globals.elementLogicType = TT_ELEMENT_PRIORITY_NONE;
+    tt_globals.elementLogicIndex = -1;
     char shapeSave = turtle.penshape;
     turtlePenShape("circle");
     if (tt_enabled.buttonEnabled) {
@@ -33544,6 +33627,8 @@ void turtleToolsUpdateUI() {
         contextUpdate();
     }
     turtle.penshape = shapeSave;
+    tt_globals.elementLogicTypeOld = tt_globals.elementLogicType;
+    tt_globals.elementLogicIndexOld = tt_globals.elementLogicIndex;
 }
 
 void turtleToolsUpdateRibbonPopup() {
@@ -33556,6 +33641,8 @@ void turtleToolsUpdateRibbonPopup() {
         popupUpdate();
     }
     turtle.penshape = shapeSave;
+    tt_globals.elementLogicTypeOld = tt_globals.elementLogicType;
+    tt_globals.elementLogicIndexOld = tt_globals.elementLogicIndex;
 }
 
 #endif /* TURTLE_TOOLS_IMPLEMENTATION */

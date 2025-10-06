@@ -62,12 +62,12 @@ The example project can be built with `make win` on windows or `make` on linux. 
 The example project has a set of files in the `config/` folder that can be modified to change certain aspects of the project (the font, the ribbon, and the popup). If these files are not found then default versions of these configurations are used (which happen to be identical to the ones in the `config/` folder).
 
 # To Do
+- Fix annoying bug with scrollbar hover cancelling and closing dropdown (make it so you have to click on scrollbar)
 - Alignment options for switches
-- Upward dropdown and context
+- Upward dropdown
 - Logarithmic and Exponential sliders
 - List stride sort
 - Cleanup Win32Tcp
-- Correctly handle UI occlusion
 - Write wiki/documentation
 - Fix flipped world coordinates
 - Linux COM and TCP/IP support
