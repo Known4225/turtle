@@ -63,6 +63,7 @@ The example project has a set of files in the `config/` folder that can be modif
 
 # To Do
 - Fix annoying bug with scrollbar hover cancelling and closing dropdown (make it so you have to click on scrollbar)
+- Ribbon occlusion is not working
 - Alignment options for switches
 - Upward dropdown
 - Logarithmic and Exponential sliders
