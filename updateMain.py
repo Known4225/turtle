@@ -18,6 +18,9 @@ if outWindows != 0 or outLinux != 0:
     quit()
 
 # Check if file exists
+if not os.path.isfile("turtle.c"):
+    print("Could not find file turtle.c")
+    quit()
 if not os.path.isfile("turtle.h"):
     print("Could not find file turtle.h")
     quit()
@@ -39,6 +42,7 @@ print("\
    ██║   ╚██████╔╝██║  ██║   ██║   ███████╗███████╗    ██║ ╚═╝ ██║██║  ██║██║██║ ╚████║\n\
    ╚═╝    ╚═════╝ ╚═╝  ╚═╝   ╚═╝   ╚══════╝╚══════╝    ╚═╝     ╚═╝╚═╝  ╚═╝╚═╝╚═╝  ╚═══╝")
 # Move files to turtle-main
+shutil.copy("turtle.c", "../turtle-main/turtle.c")
 shutil.copy("turtle.h", "../turtle-main/turtle.h")
 shutil.copy("Windows/turtle.lib", "../turtle-main/Windows/turtle.lib")
 shutil.copy("Windows/turtletextures.lib", "../turtle-main/Windows/turtletextures.lib")

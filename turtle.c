@@ -1,5 +1,5 @@
-#include "include/turtleTools.h"
-#include "include/osTools.h"
+// #define TURTLE_IMPLEMENTATION
+#include "turtle.h"
 #include <time.h>
 
 void parseRibbonOutput() {
