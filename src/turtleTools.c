@@ -885,6 +885,7 @@ tt_context_t *contextInit(list_t *options, int32_t *variable, double x, double y
     contextp -> x = x;
     contextp -> y = y;
     contextp -> size = size;
+    *variable = -1;
     contextp -> variable = variable;
     contextCalculateMax(contextp);
     contextp -> direction = TT_CONTEXT_DIRECTION_AUTO;

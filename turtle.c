@@ -170,7 +170,7 @@ int main(int argc, char *argv[]) {
     clock_t start, end;
 
     int8_t buttonVar, switchVar = 0;
-    int32_t dropdownVar = 0;
+    int32_t dropdownVar = -1;
     double dialVar = 0.0, sliderVar = 0.0, scrollbarVarX = 0.0, scrollbarVarY = 0.0;
     list_t *dropdownOptions = list_init();
     list_append(dropdownOptions, (unitype) "A", 's');
@@ -205,14 +205,14 @@ int main(int argc, char *argv[]) {
     list_append(contextOptions, (unitype) "Context", 's');
     list_append(contextOptions, (unitype) "Dropdown", 's');
     list_append(contextOptions, (unitype) "Textbox", 's');
-    int32_t contextVar = 0;
+    int32_t contextVar = -1;
     tt_context_t *context = contextInit(contextOptions, &contextVar, 0, 0, 10);
     context -> enabled = TT_ELEMENT_HIDE;
 
     double power = 0.0, speed = 0.0, exposure = 0.0, x = 103, y = 95, z = 215;
     int8_t xEnabled = 0, yEnabled = 1, zEnabled = 0;
     list_t *sources = list_init();
-    int sourceIndex = 0;
+    int sourceIndex = -1;
     list_append(sources, (unitype) "None", 's');
     list_append(sources, (unitype) "SP932", 's');
     list_append(sources, (unitype) "SP932U", 's');
@@ -321,13 +321,6 @@ int main(int argc, char *argv[]) {
         if (buttonVar) {
             buttonVar = 0;
             printf("button clicked\n");
-            if (button -> align == TT_BUTTON_ALIGN_CENTER) {
-                button -> align = TT_BUTTON_ALIGN_LEFT;
-            } else if (button -> align == TT_BUTTON_ALIGN_LEFT) {
-                button -> align = TT_BUTTON_ALIGN_RIGHT;
-            } else if (button -> align == TT_BUTTON_ALIGN_RIGHT) {
-                button -> align = TT_BUTTON_ALIGN_CENTER;
-            }
         }
         if (turtleMouseRight()) {
             if (keys[1] == 0) {
