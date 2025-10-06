@@ -10,10 +10,10 @@ import shutil
 import subprocess
 
 # Build on development
-outWindows = subprocess.run("make winrel").returncode
-outWindows = subprocess.run("make winreltextures").returncode or outWindows
-outLinux = subprocess.run("wsl -e make rel").returncode
-outLinux = subprocess.run("wsl -e make reltextures").returncode or outLinux
+# outWindows = subprocess.run("make winrel").returncode
+outWindows = subprocess.run("make winreltextures").returncode
+# outLinux = subprocess.run("wsl -e make rel").returncode
+outLinux = subprocess.run("wsl -e make reltextures").returncode
 if outWindows != 0 or outLinux != 0:
     quit()
 

@@ -9080,7 +9080,7 @@ STBIRDEF void stbir_resize_split_profile_info( STBIR_PROFILE_INFO * out_info, ST
 
 
 #ifndef STBIR__HEADER_FILENAME
-#define STBIR__HEADER_FILENAME "include/stb_image_resize2.h"
+#define STBIR__HEADER_FILENAME "turtle.h"
 #endif
 
 // the internal pixel layout enums are in a different order, so we can easily do range comparisons of types
