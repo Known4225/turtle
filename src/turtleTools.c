@@ -417,25 +417,29 @@ void ribbonUpdate() {
             tt_setColor(TT_COLOR_SLOT_RIBBON_DROPDOWN);
             turtleRectangle(xLeft, tt_ribbon.bounds[3] - 10 * tt_ribbon.ribbonSize, xRight, yDown); // ribbon highlight
             for (uint32_t j = 1; j < tt_ribbon.options -> data[i].r -> length; j++) {
-                if (turtle.mouseY > tt_ribbon.bounds[3] - 10 * tt_ribbon.ribbonSize - 15 * tt_ribbon.ribbonSize * j - tt_ribbon.marginSize / 4.0 && turtle.mouseY < tt_ribbon.bounds[3] - 10 * tt_ribbon.ribbonSize && turtle.mouseX > xLeft && turtle.mouseX < xRight && tt_ribbon.subselect[0] == -1) {
-                    tt_setColor(TT_COLOR_SLOT_RIBBON_HOVER);
-                    turtleRectangle(xLeft, tt_ribbon.bounds[3] - 10 * tt_ribbon.ribbonSize - 15 * tt_ribbon.ribbonSize * (j - 1) - tt_ribbon.marginSize / 4.0, xRight, tt_ribbon.bounds[3] - 10 * tt_ribbon.ribbonSize - 15 * tt_ribbon.ribbonSize * j - tt_ribbon.marginSize / 3.0); // dropdown highlight
-                    tt_ribbon.subselect[0] = j;
+                if (tt_globals.elementLogicTypeOld <= TT_ELEMENT_PRIORITY_RIBBON) {
+                    if (turtle.mouseY > tt_ribbon.bounds[3] - 10 * tt_ribbon.ribbonSize - 15 * tt_ribbon.ribbonSize * j - tt_ribbon.marginSize / 4.0 && turtle.mouseY < tt_ribbon.bounds[3] - 10 * tt_ribbon.ribbonSize && turtle.mouseX > xLeft && turtle.mouseX < xRight && tt_ribbon.subselect[0] == -1) {
+                        tt_setColor(TT_COLOR_SLOT_RIBBON_HOVER);
+                        turtleRectangle(xLeft, tt_ribbon.bounds[3] - 10 * tt_ribbon.ribbonSize - 15 * tt_ribbon.ribbonSize * (j - 1) - tt_ribbon.marginSize / 4.0, xRight, tt_ribbon.bounds[3] - 10 * tt_ribbon.ribbonSize - 15 * tt_ribbon.ribbonSize * j - tt_ribbon.marginSize / 3.0); // dropdown highlight
+                        tt_ribbon.subselect[0] = j;
+                    }
                 }
                 tt_setColor(TT_COLOR_TEXT_ALTERNATE);
                 turtleTextWriteUnicode((unsigned char *) tt_ribbon.options -> data[i].r -> data[j].s, prevCutoff, tt_ribbon.bounds[3] - 5.5 * tt_ribbon.ribbonSize - j * 15 * tt_ribbon.ribbonSize, 7 * tt_ribbon.ribbonSize, 0);
             }
         }
         cutoff += tt_ribbon.lengths -> data[i * 2].d + tt_ribbon.marginSize;
-        if (turtle.mouseY > tt_ribbon.bounds[3] - 10 * tt_ribbon.ribbonSize && turtle.mouseY < tt_ribbon.bounds[3] && turtle.mouseX > tt_ribbon.bounds[0] + tt_ribbon.marginSize / 2.0 && turtle.mouseX < cutoff - tt_ribbon.marginSize / 2.0 && tt_ribbon.mainselect[0] == -1) { // -217, -195, -164
-            tt_setColor(TT_COLOR_SLOT_RIBBON_SELECT);
-            turtleRectangle(prevCutoff - tt_ribbon.marginSize / 2.0, tt_ribbon.bounds[3] - tt_ribbon.ribbonSize, cutoff - tt_ribbon.marginSize / 2.0, tt_ribbon.bounds[3] - 9 * tt_ribbon.ribbonSize); // render dropdown
-            tt_ribbon.mainselect[0] = i;
+        if (tt_globals.elementLogicTypeOld <= TT_ELEMENT_PRIORITY_RIBBON) {
+            if (turtle.mouseY > tt_ribbon.bounds[3] - 10 * tt_ribbon.ribbonSize && turtle.mouseY < tt_ribbon.bounds[3] && turtle.mouseX > tt_ribbon.bounds[0] + tt_ribbon.marginSize / 2.0 && turtle.mouseX < cutoff - tt_ribbon.marginSize / 2.0 && tt_ribbon.mainselect[0] == -1) { // -217, -195, -164
+                tt_setColor(TT_COLOR_SLOT_RIBBON_SELECT);
+                turtleRectangle(prevCutoff - tt_ribbon.marginSize / 2.0, tt_ribbon.bounds[3] - tt_ribbon.ribbonSize, cutoff - tt_ribbon.marginSize / 2.0, tt_ribbon.bounds[3] - 9 * tt_ribbon.ribbonSize); // render dropdown
+                tt_ribbon.mainselect[0] = i;
+            }
         }
         tt_setColor(TT_COLOR_TEXT_ALTERNATE);
         turtleTextWriteUnicode((unsigned char *) tt_ribbon.options -> data[i].r -> data[0].s, prevCutoff, tt_ribbon.bounds[3] - 5.5 * tt_ribbon.ribbonSize, 7 * tt_ribbon.ribbonSize, 0);
     }
-    if (tt_enabled.ribbonEnabled == TT_ELEMENT_ENABLED && tt_globals.elementLogicTypeOld <= TT_ELEMENT_PRIORITY_RIBBON) {
+    if (tt_globals.elementLogicTypeOld <= TT_ELEMENT_PRIORITY_RIBBON) {
         if (turtleMouseDown()) { // this is hideous
             if (tt_ribbon.mouseDown == 0) {
                 tt_ribbon.mouseDown = 1;
@@ -1086,6 +1090,8 @@ void buttonUpdate() {
                     *(buttonp -> variable) = 0;
                 }
             }
+        } else {
+            buttonp -> status = 0;
         }
     }
 }
@@ -1230,6 +1236,8 @@ void switchUpdate() {
                 }
                 switchp -> status = 0;
             }
+        } else {
+            switchp -> status = 0;
         }
     }
 }
@@ -1328,6 +1336,8 @@ void dialUpdate() {
                     *(dialp -> variable) = round(dialp -> range[0] + (dialp -> range[1] - dialp -> range[0]) * ((pow(361, dialAngle / 360) - 1) / 360));
                 }
             }
+        } else {
+            dialp -> status[0] = 0;
         }
         tt_setColor(dialp -> color[TT_COLOR_SLOT_DIAL_TEXT]);
         double rounded = round(*(dialp -> variable) * dialp -> renderNumberFactor);
@@ -1452,6 +1462,8 @@ void sliderUpdate() {
                     *(sliderp -> variable) = sliderp -> range[0];
                 }
             }
+        } else {
+            sliderp -> status = 0;
         }
         if (sliderp -> renderNumberFactor != 0) {
             tt_setColor(sliderp -> color[TT_COLOR_SLOT_SLIDER_TEXT]);
@@ -1528,6 +1540,8 @@ void scrollbarUpdate() {
                         *(scrollbarp -> variable) = 100;
                     }
                 }
+            } else {
+                scrollbarp -> status = 0;
             }
         } else if (scrollbarp -> type == TT_SCROLLBAR_VERTICAL) {
             double scrollbarTop = scrollbarp -> y + scrollbarp -> length / 2;
@@ -1586,6 +1600,8 @@ void scrollbarUpdate() {
                         *(scrollbarp -> variable) = 100;
                     }
                 }
+            } else {
+                scrollbarp -> status = 0;
             }
         }
     }
@@ -1777,6 +1793,8 @@ void dropdownUpdate() {
                     }
                 }
             }
+        } else {
+            dropdownp -> status = 0;
         }
         tt_setColor(dropdownp -> color[TT_COLOR_SLOT_DROPDOWN_TEXT_HOVER]);
         if (dropdownp -> align == TT_DROPDOWN_ALIGN_LEFT) {
@@ -2107,6 +2125,8 @@ void textboxUpdate() {
                     }
                 }
             }
+        } else {
+            textboxp -> status = 0;
         }
     }
 }

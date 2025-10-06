@@ -194,7 +194,7 @@ int main(int argc, char *argv[]) {
     sliderInit("Slider", &sliderVar, TT_SLIDER_VERTICAL, TT_SLIDER_ALIGN_RIGHT, 100, -35, 10, 50, 0, 255, 1);
     scrollbarInit(&scrollbarVarX, TT_SCROLLBAR_HORIZONTAL, 20, -170, 10, 550, 50);
     scrollbarInit(&scrollbarVarY, TT_SCROLLBAR_VERTICAL, 310, 0, 10, 320, 33);
-    tt_dropdown_t *dropdown = dropdownInit("Dropdown", dropdownOptions, &dropdownVar, TT_DROPDOWN_ALIGN_CENTER, 0, 70, 10);
+    dropdownInit("Dropdown", dropdownOptions, &dropdownVar, TT_DROPDOWN_ALIGN_CENTER, 0, 70, 10);
     textboxInit("Textbox", 128, -50, -110, 10, 100);
     list_t *contextOptions = list_init();
     list_append(contextOptions, (unitype) "Button", 's');
@@ -339,7 +339,7 @@ int main(int argc, char *argv[]) {
         } else {
             keys[1] = 0;
         }
-        printf("%d %d %d\n", dropdown -> status, tt_globals.elementLogicType, tt_globals.elementLogicTypeOld);
+        // printf("%d %d\n", tt_globals.elementLogicType, tt_globals.elementLogicTypeOld);
         turtleToolsUpdate(); // update turtleTools
         parseRibbonOutput(); // user defined function to use ribbon
         parsePopupOutput(window); // user defined function to use popup
