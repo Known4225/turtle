@@ -170,7 +170,7 @@ int main(int argc, char *argv[]) {
     clock_t start, end;
 
     int8_t buttonVar, switchVar = 0;
-    int32_t dropdownVar = -1;
+    int32_t dropdownVar = 0;
     double dialVar = 0.0, sliderVar = 0.0, scrollbarVarX = 0.0, scrollbarVarY = 0.0;
     list_t *dropdownOptions = list_init();
     list_append(dropdownOptions, (unitype) "A", 's');
@@ -212,7 +212,7 @@ int main(int argc, char *argv[]) {
     double power = 0.0, speed = 0.0, exposure = 0.0, x = 103, y = 95, z = 215;
     int8_t xEnabled = 0, yEnabled = 1, zEnabled = 0;
     list_t *sources = list_init();
-    int sourceIndex = -1;
+    int sourceIndex = 0;
     list_append(sources, (unitype) "None", 's');
     list_append(sources, (unitype) "SP932", 's');
     list_append(sources, (unitype) "SP932U", 's');
