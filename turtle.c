@@ -205,7 +205,7 @@ int main(int argc, char *argv[]) {
     list_append(contextOptions, (unitype) "Context", 's');
     list_append(contextOptions, (unitype) "Dropdown", 's');
     list_append(contextOptions, (unitype) "Textbox", 's');
-    int32_t contextVar = 0;
+    int32_t contextVar = -1;
     tt_context_t *context = contextInit(contextOptions, &contextVar, 0, 0, 10);
     context -> enabled = TT_ELEMENT_HIDE;
 
@@ -332,6 +332,7 @@ int main(int argc, char *argv[]) {
         } else {
             keys[1] = 0;
         }
+        // printf("%d %d\n", tt_globals.elementLogicType, tt_globals.elementLogicTypeOld);
         turtleToolsUpdate(); // update turtleTools
         parseRibbonOutput(); // user defined function to use ribbon
         parsePopupOutput(window); // user defined function to use popup
