@@ -352,10 +352,10 @@ typedef struct {
 } tt_switch_t;
 
 typedef enum {
-    TT_DIAL_LINEAR = 0,
-    TT_DIAL_LOG = 1,
-    TT_DIAL_EXP = 2,
-} tt_dial_type_t;
+    TT_DIAL_SCALE_LINEAR = 0,
+    TT_DIAL_SCALE_LOG = 1,
+    TT_DIAL_SCALE_EXP = 2,
+} tt_dial_scale_t;
 
 /* dial */
 typedef struct {
@@ -368,15 +368,15 @@ typedef struct {
     double *variable; // value of dial
     char label[TT_LABEL_LENGTH_LIMIT];
     int32_t status[2];
-    tt_dial_type_t type;
+    tt_dial_scale_t scale;
     double range[2];
     double renderNumberFactor; // multiply rendered variable by this amount
     double defaultValue;
 } tt_dial_t;
 
 typedef enum {
-    TT_SLIDER_HORIZONTAL = 0,
-    TT_SLIDER_VERTICAL = 1,
+    TT_SLIDER_TYPE_HORIZONTAL = 0,
+    TT_SLIDER_TYPE_VERTICAL = 1,
 } tt_slider_type_t;
 
 typedef enum {
@@ -384,6 +384,12 @@ typedef enum {
     TT_SLIDER_ALIGN_CENTER = 1,
     TT_SLIDER_ALIGN_RIGHT = 2,
 } tt_slider_align_t;
+
+typedef enum {
+    TT_SLIDER_SCALE_LINEAR = 0,
+    TT_SLIDER_SCALE_LOG = 1,
+    TT_SLIDER_SCALE_EXP = 2,
+} tt_slider_scale_t;
 
 /* slider */
 typedef struct {
@@ -398,6 +404,7 @@ typedef struct {
     int32_t status;
     tt_slider_type_t type;
     tt_slider_align_t align;
+    tt_slider_scale_t scale;
     double length;
     double range[2];
     double renderNumberFactor; // multiply rendered variable by this amount
@@ -510,7 +517,7 @@ void buttonFree(tt_button_t *buttonp);
 tt_switch_t *switchInit(char *label, int8_t *variable, double x, double y, double size);
 
 /* create a dial - make renderNumberFactor 0 to hide dial number */
-tt_dial_t *dialInit(char *label, double *variable, tt_dial_type_t type, double x, double y, double size, double bottom, double top, double renderNumberFactor);
+tt_dial_t *dialInit(char *label, double *variable, tt_dial_scale_t scale, double x, double y, double size, double bottom, double top, double renderNumberFactor);
 
 void dialFree(tt_dial_t *dialp);
 

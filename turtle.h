@@ -19571,10 +19571,10 @@ typedef struct {
 } tt_switch_t;
 
 typedef enum {
-    TT_DIAL_LINEAR = 0,
-    TT_DIAL_LOG = 1,
-    TT_DIAL_EXP = 2,
-} tt_dial_type_t;
+    TT_DIAL_SCALE_LINEAR = 0,
+    TT_DIAL_SCALE_LOG = 1,
+    TT_DIAL_SCALE_EXP = 2,
+} tt_dial_scale_t;
 
 /* dial */
 typedef struct {
@@ -19587,15 +19587,15 @@ typedef struct {
     double *variable; // value of dial
     char label[TT_LABEL_LENGTH_LIMIT];
     int32_t status[2];
-    tt_dial_type_t type;
+    tt_dial_scale_t scale;
     double range[2];
     double renderNumberFactor; // multiply rendered variable by this amount
     double defaultValue;
 } tt_dial_t;
 
 typedef enum {
-    TT_SLIDER_HORIZONTAL = 0,
-    TT_SLIDER_VERTICAL = 1,
+    TT_SLIDER_TYPE_HORIZONTAL = 0,
+    TT_SLIDER_TYPE_VERTICAL = 1,
 } tt_slider_type_t;
 
 typedef enum {
@@ -19603,6 +19603,12 @@ typedef enum {
     TT_SLIDER_ALIGN_CENTER = 1,
     TT_SLIDER_ALIGN_RIGHT = 2,
 } tt_slider_align_t;
+
+typedef enum {
+    TT_SLIDER_SCALE_LINEAR = 0,
+    TT_SLIDER_SCALE_LOG = 1,
+    TT_SLIDER_SCALE_EXP = 2,
+} tt_slider_scale_t;
 
 /* slider */
 typedef struct {
@@ -19617,6 +19623,7 @@ typedef struct {
     int32_t status;
     tt_slider_type_t type;
     tt_slider_align_t align;
+    tt_slider_scale_t scale;
     double length;
     double range[2];
     double renderNumberFactor; // multiply rendered variable by this amount
@@ -19729,7 +19736,7 @@ void buttonFree(tt_button_t *buttonp);
 tt_switch_t *switchInit(char *label, int8_t *variable, double x, double y, double size);
 
 /* create a dial - make renderNumberFactor 0 to hide dial number */
-tt_dial_t *dialInit(char *label, double *variable, tt_dial_type_t type, double x, double y, double size, double bottom, double top, double renderNumberFactor);
+tt_dial_t *dialInit(char *label, double *variable, tt_dial_scale_t scale, double x, double y, double size, double bottom, double top, double renderNumberFactor);
 
 void dialFree(tt_dial_t *dialp);
 
@@ -32165,7 +32172,7 @@ void switchFree(tt_switch_t *switchp) {
 }
 
 /* create a dial - make renderNumberFactor 0 to hide dial number */
-tt_dial_t *dialInit(char *label, double *variable, tt_dial_type_t type, double x, double y, double size, double bottom, double top, double renderNumberFactor) {
+tt_dial_t *dialInit(char *label, double *variable, tt_dial_scale_t scale, double x, double y, double size, double bottom, double top, double renderNumberFactor) {
     if (tt_enabled.dialEnabled == 0) {
         tt_enabled.dialEnabled = 1;
         tt_elements.dials = list_init();
@@ -32186,7 +32193,7 @@ tt_dial_t *dialInit(char *label, double *variable, tt_dial_type_t type, double x
     }
     elementResetColor(dialp, TT_ELEMENT_DIAL);
     dialp -> status[0] = 0;
-    dialp -> type = type;
+    dialp -> scale = scale;
     dialp -> x = x;
     dialp -> y = y;
     dialp -> size = size;
@@ -32229,6 +32236,7 @@ tt_slider_t *sliderInit(char *label, double *variable, tt_slider_type_t type, tt
     sliderp -> status = 0;
     sliderp -> type = type;
     sliderp -> align = align;
+    sliderp -> scale = TT_SLIDER_SCALE_LINEAR;
     sliderp -> x = x;
     sliderp -> y = y;
     sliderp -> size = size;
@@ -32715,11 +32723,11 @@ void dialUpdate() {
         turtlePenSize(1);
         turtlePenDown();
         double dialAngle;
-        if (dialp -> type == TT_DIAL_LOG) {
-            dialAngle = pow(360, (*(dialp -> variable) - dialp -> range[0]) / (dialp -> range[1] - dialp -> range[0]));
-        } else if (dialp -> type == TT_DIAL_LINEAR) {
+        if (dialp -> scale == TT_DIAL_SCALE_LOG) {
+            dialAngle = pow(361, (*(dialp -> variable) - dialp -> range[0]) / (dialp -> range[1] - dialp -> range[0])) - 1;
+        } else if (dialp -> scale == TT_DIAL_SCALE_LINEAR) {
             dialAngle = (*(dialp -> variable) - dialp -> range[0]) / (dialp -> range[1] - dialp -> range[0]) * 360;
-        } else if (dialp -> type == TT_DIAL_EXP) {
+        } else if (dialp -> scale == TT_DIAL_SCALE_EXP) {
             dialAngle = 360 * (log(((*(dialp -> variable) - dialp -> range[0]) / (dialp -> range[1] - dialp -> range[0])) * 360 + 1) / log(361));
         }
         turtleGoto(dialX + sin(dialAngle / 57.2958) * dialp -> size, dialY + cos(dialAngle / 57.2958) * dialp -> size);
@@ -32757,11 +32765,11 @@ void dialUpdate() {
                 if ((dialAngle > 359.99999999 || dialAngle < 180) && turtle.mouseY > tt_globals.dialAnchorY && dialp -> status[1] < 0) {
                     dialAngle = 359.99999999;
                 }
-                if (dialp -> type == TT_DIAL_LOG) {
+                if (dialp -> scale == TT_DIAL_SCALE_LOG) {
                     *(dialp -> variable) = round(dialp -> range[0] + (dialp -> range[1] - dialp -> range[0]) * (log(1 + dialAngle) / log(361)));
-                } else if (dialp -> type == TT_DIAL_LINEAR) {
+                } else if (dialp -> scale == TT_DIAL_SCALE_LINEAR) {
                     *(dialp -> variable) = round(dialp -> range[0] + ((dialp -> range[1] - dialp -> range[0]) * dialAngle / 360));
-                } else if (dialp -> type == TT_DIAL_EXP) {
+                } else if (dialp -> scale == TT_DIAL_SCALE_EXP) {
                     *(dialp -> variable) = round(dialp -> range[0] + (dialp -> range[1] - dialp -> range[0]) * ((pow(361, dialAngle / 360) - 1) / 360));
                 }
             }
@@ -32789,7 +32797,7 @@ void sliderUpdate() {
         double sliderOffsetYFactor = 0;
         double sliderOffsetXFactorSmall = 0;
         double sliderOffsetYFactorSmall = 0;
-        if (sliderp -> type == TT_SLIDER_HORIZONTAL) {
+        if (sliderp -> type == TT_SLIDER_TYPE_HORIZONTAL) {
             sliderOffsetYFactor = 1.4 * sliderp -> size;
             sliderOffsetYFactorSmall = -sliderp -> size * 1.2;
             if (sliderp -> align == TT_SLIDER_ALIGN_LEFT) {
@@ -32815,7 +32823,7 @@ void sliderUpdate() {
                 sliderOffsetXFactor = sliderp -> size * 0.4;
                 sliderOffsetXFactorSmall = sliderp -> size * 0.25;
             }
-        } else if (sliderp -> type == TT_SLIDER_VERTICAL) {
+        } else if (sliderp -> type == TT_SLIDER_TYPE_VERTICAL) {
             sliderOffsetYFactor = 1.4 * sliderp -> size + sliderp -> length / 2;
             if (sliderp -> align == TT_SLIDER_ALIGN_LEFT) {
                 sliderXLeft = sliderp -> x;
@@ -32852,10 +32860,22 @@ void sliderUpdate() {
         turtlePenUp();
         turtlePenSize(sliderp -> size);
         tt_setColor(sliderp -> color[TT_COLOR_SLOT_SLIDER_CIRCLE]);
-        if (sliderp -> type == TT_SLIDER_HORIZONTAL) {
-            turtleGoto(sliderXLeft + (sliderXRight - sliderXLeft) * (*(sliderp -> variable) - sliderp -> range[0]) / (sliderp -> range[1] - sliderp -> range[0]), sliderYLeft);
-        } else if (sliderp -> type == TT_SLIDER_VERTICAL) {
-            turtleGoto(sliderXLeft, sliderYLeft + (sliderYRight - sliderYLeft) * (*(sliderp -> variable) - sliderp -> range[0]) / (sliderp -> range[1] - sliderp -> range[0]));
+        if (sliderp -> type == TT_SLIDER_TYPE_HORIZONTAL) {
+            if (sliderp -> scale == TT_SLIDER_SCALE_LINEAR) {
+                turtleGoto(sliderXLeft + (sliderXRight - sliderXLeft) * (*(sliderp -> variable) - sliderp -> range[0]) / (sliderp -> range[1] - sliderp -> range[0]), sliderYLeft);
+            } else if (sliderp -> scale == TT_SLIDER_SCALE_LOG) {
+                turtleGoto(sliderXLeft + pow(sliderXRight - sliderXLeft + 1, (*(sliderp -> variable) - sliderp -> range[0]) / (sliderp -> range[1] - sliderp -> range[0])) - 1, sliderYLeft);
+            } else if (sliderp -> scale == TT_SLIDER_SCALE_EXP) {
+                turtleGoto(sliderXLeft + (sliderXRight - sliderXLeft) * (log(((*(sliderp -> variable) - sliderp -> range[0]) / (sliderp -> range[1] - sliderp -> range[0])) * (sliderXRight - sliderXLeft) + 1) / log((sliderXRight - sliderXLeft) + 1)), sliderYLeft);
+            }
+        } else if (sliderp -> type == TT_SLIDER_TYPE_VERTICAL) {
+            if (sliderp -> scale == TT_SLIDER_SCALE_LINEAR) {
+                turtleGoto(sliderXLeft, sliderYLeft + (sliderYRight - sliderYLeft) * (*(sliderp -> variable) - sliderp -> range[0]) / (sliderp -> range[1] - sliderp -> range[0]));
+            } else if (sliderp -> scale == TT_SLIDER_SCALE_LOG) {
+                turtleGoto(sliderXLeft, sliderYLeft + pow(sliderYRight - sliderYLeft + 1, (*(sliderp -> variable) - sliderp -> range[0]) / (sliderp -> range[1] - sliderp -> range[0])) - 1);
+            } else if (sliderp -> scale == TT_SLIDER_SCALE_EXP) {
+                turtleGoto(sliderXLeft, sliderYLeft + (sliderYRight - sliderYLeft) * (log(((*(sliderp -> variable) - sliderp -> range[0]) / (sliderp -> range[1] - sliderp -> range[0])) * (sliderYRight - sliderYLeft) + 1) / log((sliderYRight - sliderYLeft) + 1)));
+            }
         }
         turtlePenDown();
         turtlePenUp();
@@ -32879,10 +32899,30 @@ void sliderUpdate() {
                 }
             }
             if (sliderp -> status > 0) {
-                if (sliderp -> type == TT_SLIDER_HORIZONTAL) {
-                    *(sliderp -> variable) = round(sliderp -> range[0] + (turtle.mouseX - sliderXLeft) / sliderp -> length * (sliderp -> range[1] - sliderp -> range[0]));
-                } else if (sliderp -> type == TT_SLIDER_VERTICAL) {
-                    *(sliderp -> variable) = round(sliderp -> range[0] + (turtle.mouseY - sliderYLeft) / sliderp -> length * (sliderp -> range[1] - sliderp -> range[0]));
+                if (sliderp -> type == TT_SLIDER_TYPE_HORIZONTAL) {
+                    if (sliderp -> scale == TT_SLIDER_SCALE_LINEAR) {
+                        *(sliderp -> variable) = round(sliderp -> range[0] + (turtle.mouseX - sliderXLeft) / sliderp -> length * (sliderp -> range[1] - sliderp -> range[0]));
+                    } else if (sliderp -> scale == TT_SLIDER_SCALE_LOG) {
+                        if (turtle.mouseX - sliderXLeft < 0) {
+                            *(sliderp -> variable) = sliderp -> range[0];
+                        } else {
+                            *(sliderp -> variable) = round(sliderp -> range[0] + (log(1 + turtle.mouseX - sliderXLeft) / log(sliderp -> length + 1)) * (sliderp -> range[1] - sliderp -> range[0]));
+                        }
+                    } else if (sliderp -> scale == TT_SLIDER_SCALE_EXP) {
+                        *(sliderp -> variable) = round(sliderp -> range[0] + ((pow(sliderp -> length + 1, (turtle.mouseX - sliderXLeft) / sliderp -> length) - 1) / sliderp -> length) * (sliderp -> range[1] - sliderp -> range[0]));
+                    }
+                } else if (sliderp -> type == TT_SLIDER_TYPE_VERTICAL) {
+                    if (sliderp -> scale == TT_SLIDER_SCALE_LINEAR) {
+                        *(sliderp -> variable) = round(sliderp -> range[0] + (turtle.mouseY - sliderYLeft) / sliderp -> length * (sliderp -> range[1] - sliderp -> range[0]));
+                    } else if (sliderp -> scale == TT_SLIDER_SCALE_LOG) {
+                        if (turtle.mouseY - sliderYLeft < 0) {
+                            *(sliderp -> variable) = sliderp -> range[0];
+                        } else {
+                            *(sliderp -> variable) = round(sliderp -> range[0] + (log(1 + turtle.mouseY - sliderYLeft) / log(sliderp -> length + 1)) * (sliderp -> range[1] - sliderp -> range[0]));
+                        }
+                    } else if (sliderp -> scale == TT_SLIDER_SCALE_EXP) {
+                        *(sliderp -> variable) = round(sliderp -> range[0] + ((pow(sliderp -> length + 1, (turtle.mouseY - sliderYLeft) / sliderp -> length) - 1) / sliderp -> length) * (sliderp -> range[1] - sliderp -> range[0]));
+                    }
                 }
                 if (*(sliderp -> variable) >= sliderp -> range[1]) {
                     *(sliderp -> variable) = sliderp -> range[1];
