@@ -21,11 +21,13 @@ void parseRibbonOutput() {
             }
         }
         if (tt_ribbon.output[2] == 3) { // Save As...
+            list_clear(osToolsFileDialog.selectedFilenames);
             if (osToolsFileDialogSave(OSTOOLS_FILE_DIALOG_FILE, "", NULL) != -1) {
                 printf("Saved to: %s\n", osToolsFileDialog.selectedFilenames -> data[0].s);
             }
         }
         if (tt_ribbon.output[2] == 4) { // Open
+            list_clear(osToolsFileDialog.selectedFilenames);
             if (osToolsFileDialogOpen(OSTOOLS_FILE_DIALOG_MULTIPLE_SELECT, OSTOOLS_FILE_DIALOG_FILE, "", NULL) != -1) {
                 printf("Loaded data from: ");
                 list_print(osToolsFileDialog.selectedFilenames);
