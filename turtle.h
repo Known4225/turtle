@@ -19968,7 +19968,7 @@ extern win32SocketObject win32Socket;
 
 int32_t win32tcpInit(char *address, char *port);
 
-SOCKET *win32tcpCreateSocket();
+SOCKET *win32tcpCreateSocket(int32_t timeoutMilliseconds);
 
 int32_t win32tcpSend(SOCKET *socket, unsigned char *data, int32_t length);
 
@@ -29799,14 +29799,20 @@ turtle_texture_t turtleTextureLoadList(list_t *list, uint8_t *array, uint32_t wi
     if (encoding == GL_RGB) {
         stride = 3;
         stb_encoding = STBIR_RGB;
+    } else if (encoding == GL_BGR) {
+        stride = 3;
+        stb_encoding = STBIR_BGR;
     } else if (encoding == GL_RGBA) {
         stride = 4;
         stb_encoding = STBIR_RGBA;
+    } else if (encoding == GL_BGRA) {
+        stride = 4;
+        stb_encoding = STBIR_BGRA;
     } else if (encoding == GL_RED || encoding == GL_GREEN || encoding == GL_BLUE || encoding == GL_ALPHA) {
         stride = 1;
         stb_encoding = STBIR_1CHANNEL;
     } else {
-        printf("turtleTextureLoadList only accepts GL_RGB or GL_RGBA encoding\n");
+        printf("turtleTextureLoadList: Unsupported encoding %d\n", encoding);
         turtle_texture_t output;
         output.id = -1;
         return output;
@@ -33179,7 +33185,7 @@ void dropdownUpdate() {
             tt_setColor(dropdownp -> color[TT_COLOR_SLOT_DROPDOWN_BASE]);
             turtleRectangle(dropdownXFactor[0], dropdownY - dropdownp -> size * 0.9, dropdownXFactor[1] + dropdownp -> size, dropdownY + dropdownp -> size * 0.9);
         }
-            /* mouse */
+        /* mouse */
         if (dropdownp -> enabled == TT_ELEMENT_ENABLED && (tt_globals.elementLogicTypeOld < TT_ELEMENT_PRIORITY_DROPDOWN || (tt_globals.elementLogicTypeOld == TT_ELEMENT_PRIORITY_DROPDOWN && tt_globals.elementLogicIndexOld <= (int32_t ) i))) {
             if (dropdownp -> enabled == TT_ELEMENT_ENABLED && tt_ribbon.mainselect[2] == -1) {
                 if (turtle.mouseX > dropdownXFactor[0] && turtle.mouseX < dropdownXFactor[1] + dropdownp -> size && turtle.mouseY >= dropdownY - dropdownp -> size * 0.9 && turtle.mouseY < dropdownY + dropdownp -> size * 0.9) {
@@ -33253,7 +33259,7 @@ void dropdownUpdate() {
                             } else if (dropdownp -> align == TT_DROPDOWN_ALIGN_CENTER) {
                                 turtleTextWriteUnicode((unsigned char *) dropdownp -> options -> data[i].s, (dropdownMaxXFactor[0] + dropdownMaxXFactor[1]) / 2, dropdownY - renderIndex * itemHeight, dropdownp -> size - 1, dropdownAlignFactor);
                             } else if (dropdownp -> align == TT_DROPDOWN_ALIGN_RIGHT) {
-                                turtleTextWriteUnicode((unsigned char *) dropdownp -> options -> data[i].s, dropdownMaxXFactor[1] - dropdownp -> size * 1.6, dropdownY - renderIndex * itemHeight, dropdownp -> size - 1, dropdownAlignFactor);
+                                turtleTextWriteUnicode((unsigned char *) dropdownp -> options -> data[i].s, dropdownMaxXFactor[1] - dropdownp -> size * 1.4, dropdownY - renderIndex * itemHeight, dropdownp -> size - 1, dropdownAlignFactor);
                             }
                             renderIndex++;
                         }
@@ -34709,7 +34715,7 @@ int32_t win32tcpInit(char *address, char *port) {
     return 0;
 }
 
-SOCKET *win32tcpCreateSocket() {
+SOCKET *win32tcpCreateSocket(int32_t timeoutMilliseconds) {
     /* define socket index */
     int32_t socketIndex = 0;
     for (int32_t i = 0; i < WIN32TCP_NUM_SOCKETS; i++) {
@@ -34748,6 +34754,7 @@ SOCKET *win32tcpCreateSocket() {
             return NULL;
         }
         /* Connect to server */
+        setsockopt(win32Socket.connectSocket[socketIndex], SOL_SOCKET, SO_RCVTIMEO, (const char *) &timeoutMilliseconds, sizeof(timeoutMilliseconds));
         status = connect(win32Socket.connectSocket[socketIndex], ptr -> ai_addr, (int) ptr -> ai_addrlen);
         if (status == SOCKET_ERROR) {
             closesocket(win32Socket.connectSocket[socketIndex]);
