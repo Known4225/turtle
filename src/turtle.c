@@ -704,14 +704,20 @@ turtle_texture_t turtleTextureLoadList(list_t *list, uint8_t *array, uint32_t wi
     if (encoding == GL_RGB) {
         stride = 3;
         stb_encoding = STBIR_RGB;
+    } else if (encoding == GL_BGR) {
+        stride = 3;
+        stb_encoding = STBIR_BGR;
     } else if (encoding == GL_RGBA) {
         stride = 4;
         stb_encoding = STBIR_RGBA;
+    } else if (encoding == GL_BGRA) {
+        stride = 4;
+        stb_encoding = STBIR_BGRA;
     } else if (encoding == GL_RED || encoding == GL_GREEN || encoding == GL_BLUE || encoding == GL_ALPHA) {
         stride = 1;
         stb_encoding = STBIR_1CHANNEL;
     } else {
-        printf("turtleTextureLoadList only accepts GL_RGB or GL_RGBA encoding\n");
+        printf("turtleTextureLoadList: Unsupported encoding %d\n", encoding);
         turtle_texture_t output;
         output.id = -1;
         return output;

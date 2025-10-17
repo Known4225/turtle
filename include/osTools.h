@@ -161,7 +161,7 @@ extern win32SocketObject win32Socket;
 
 int32_t win32tcpInit(char *address, char *port);
 
-SOCKET *win32tcpCreateSocket();
+SOCKET *win32tcpCreateSocket(int32_t timeoutMilliseconds);
 
 int32_t win32tcpSend(SOCKET *socket, unsigned char *data, int32_t length);
 

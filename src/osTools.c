@@ -1020,7 +1020,7 @@ int32_t win32tcpInit(char *address, char *port) {
     return 0;
 }
 
-SOCKET *win32tcpCreateSocket() {
+SOCKET *win32tcpCreateSocket(int32_t timeoutMilliseconds) {
     /* define socket index */
     int32_t socketIndex = 0;
     for (int32_t i = 0; i < WIN32TCP_NUM_SOCKETS; i++) {
@@ -1059,6 +1059,7 @@ SOCKET *win32tcpCreateSocket() {
             return NULL;
         }
         /* Connect to server */
+        setsockopt(win32Socket.connectSocket[socketIndex], SOL_SOCKET, SO_RCVTIMEO, (const char *) &timeoutMilliseconds, sizeof(timeoutMilliseconds));
         status = connect(win32Socket.connectSocket[socketIndex], ptr -> ai_addr, (int) ptr -> ai_addrlen);
         if (status == SOCKET_ERROR) {
             closesocket(win32Socket.connectSocket[socketIndex]);
