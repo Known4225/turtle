@@ -101,7 +101,7 @@ int main(int argc, char *argv[]) {
     /* Create a windowed mode window and its OpenGL context */
     const GLFWvidmode *monitorSize = glfwGetVideoMode(glfwGetPrimaryMonitor());
     int32_t windowHeight = monitorSize -> height;
-    double optimizedScalingFactor = 0.9; // Set this number to 1 on windows and 0.9 on Ubuntu for maximum compatibility (fixes issue with incorrect stretching)
+    double optimizedScalingFactor = 0.8; // Set this number to 1 on windows and 0.8 on Ubuntu for maximum compatibility (fixes issue with incorrect stretching)
     GLFWwindow *window = glfwCreateWindow(windowHeight * 16 / 9 * optimizedScalingFactor, windowHeight * optimizedScalingFactor, "turtle demo", NULL, NULL);
     if (!window) {
         glfwTerminate();

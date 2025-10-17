@@ -34859,7 +34859,7 @@ int32_t osToolsFileDialogPrompt(ost_file_dialog_save_t openOrSave, ost_file_dial
     char fullCommand[totalMemory];
     strcpy(fullCommand, "zenity --file-selection");
     /* configure autofill filename */
-    if (prename != NULL, strcmp(prename, "null") != 0 && strcmp(prename, "") != 0) {
+    if (prename != NULL && strcmp(prename, "null") != 0 && strcmp(prename, "") != 0) {
         strcat(fullCommand, " --filename=\"");
         strcat(fullCommand, prename);
         strcat(fullCommand, "\"");
