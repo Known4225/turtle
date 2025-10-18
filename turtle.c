@@ -114,6 +114,9 @@ int main(int argc, char *argv[]) {
     turtleInit(window, -320, -180, 320, 180);
     glfwSetWindowPos(window, 0, 36);
     glfwSetWindowSize(window, windowHeight * 16 / 9 * 0.85, windowHeight * 0.85); // doing it this way ensures the window spawns in the top left of the monitor and fixes resizing limits
+    /* initialise osTools */
+    osToolsInit(argv[0], window); // must include argv[0] to get executableFilepath, must include GLFW window
+    osToolsFileDialogAddGlobalExtension("txt"); // add txt to extension restrictions
     /* initialise turtleText */
     char constructedFilepath[5120];
     strcpy(constructedFilepath, osToolsFileDialog.executableFilepath);
@@ -138,9 +141,6 @@ int main(int argc, char *argv[]) {
     // list_append(popupConfig, (unitype) "Cancel", 's');
     // list_append(popupConfig, (unitype) "Close", 's');
     // popupInitList(popupConfig);
-    /* initialise osTools */
-    osToolsInit(argv[0], window); // must include argv[0] to get executableFilepath, must include GLFW window
-    osToolsFileDialogAddGlobalExtension("txt"); // add txt to extension restrictions
     strcpy(constructedFilepath, osToolsFileDialog.executableFilepath);
     strcat(constructedFilepath, "config/test.csv");
     list_t *rowLike = osToolsLoadCSVString(constructedFilepath, OSTOOLS_CSV_ROW);
