@@ -30664,13 +30664,13 @@ double turtleTextGetUnicodeLength(const char *str, double size) {
             }
         }
         if (byteLength == 0) { // case: ASCII character
-            converted[next] = (uint32_t) str[i];
+            converted[next] = (uint32_t) (uint8_t) str[i];
             byteLength = 1;
         } else { // case: multi-byte character
             uint32_t convert = 0;
             for (int32_t k = 0; k < byteLength; k++) {
                 convert = convert << 8;
-                convert += (uint32_t) str[i + k];
+                convert += (uint32_t) (uint8_t) str[i + k];
             }
             converted[next] = convert;
         }
@@ -30951,13 +30951,13 @@ void turtleTextWriteUnicodeRotated(const char *str, double x, double y, double s
             }
         }
         if (byteLength == 0) { // case: ASCII character
-            converted[next] = (uint32_t) str[i];
+            converted[next] = (uint32_t) (uint8_t) str[i];
             byteLength = 1;
         } else { // case: multi-byte character
             uint32_t convert = 0;
             for (int32_t k = 0; k < byteLength; k++) {
                 convert = convert << 8;
-                convert += (uint32_t) str[i + k];
+                convert += (uint32_t) (uint8_t) str[i + k];
             }
             converted[next] = convert;
         }
@@ -30994,13 +30994,13 @@ int32_t turtleTextConvertUnicode(const char *str, uint32_t *converted) {
             }
         }
         if (byteLength == 0) { // case: ASCII character
-            converted[next] = (uint32_t) str[i];
+            converted[next] = (uint32_t) (uint8_t) str[i];
             byteLength = 1;
         } else { // case: multi-byte character
             uint32_t convert = 0;
             for (int32_t k = 0; k < byteLength; k++) {
                 convert = convert << 8;
-                convert += (uint32_t) str[i + k];
+                convert += (uint32_t) (uint8_t) str[i + k];
             }
             converted[next] = convert;
         }
