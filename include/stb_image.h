@@ -1,3 +1,6 @@
+/* load an image file to bytes (result is malloc'd) */
+unsigned char *stbi_load(char const *filename, int *width, int *height, int *channels_in_file, int desired_channels);
+
 #ifdef TURTLE_ENABLE_TEXTURES
 #define STB_IMAGE_IMPLEMENTATION
 

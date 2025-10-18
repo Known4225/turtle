@@ -549,6 +549,11 @@ void turtleTexture(turtle_texture_t texture, double x1, double y1, double x2, do
 void turtlePrintTexture(turtle_texture_t texture) {
     printf("turtlePrintTexture: TURTLE_ENABLE_TEXTURES not enabled\n");
 }
+
+unsigned char *stbi_load(char const *filename, int *width, int *height, int *channels_in_file, int desired_channels) {
+    printf("stbi_load: TURTLE_ENABLE_TEXTURES not enabled, stbi_load not enabled\n");
+    return NULL;
+}
 #endif /* TURTLE_ENABLE_TEXTURES */
 
 #ifdef TURTLE_ENABLE_TEXTURES
