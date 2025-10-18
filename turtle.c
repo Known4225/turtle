@@ -102,6 +102,12 @@ int main(int argc, char *argv[]) {
     const GLFWvidmode *monitorSize = glfwGetVideoMode(glfwGetPrimaryMonitor());
     int32_t windowHeight = monitorSize -> height;
     double optimizedScalingFactor = 0.8; // Set this number to 1 on windows and 0.8 on Ubuntu for maximum compatibility (fixes issue with incorrect stretching)
+    #ifdef OS_WINDOWS
+    optimizedScalingFactor = 1;
+    #endif
+    #ifdef OS_LINUX
+    optimizedScalingFactor = 0.8;
+    #endif
     GLFWwindow *window = glfwCreateWindow(windowHeight * 16 / 9 * optimizedScalingFactor, windowHeight * optimizedScalingFactor, "turtle demo", NULL, NULL);
     if (!window) {
         glfwTerminate();
@@ -112,7 +118,9 @@ int main(int argc, char *argv[]) {
 
     /* initialise turtle */
     turtleInit(window, -320, -180, 320, 180);
+    #ifdef OS_LINUX
     glfwSetWindowPos(window, 0, 36);
+    #endif
     glfwSetWindowSize(window, windowHeight * 16 / 9 * 0.85, windowHeight * 0.85); // doing it this way ensures the window spawns in the top left of the monitor and fixes resizing limits
     /* initialise osTools */
     osToolsInit(argv[0], window); // must include argv[0] to get executableFilepath, must include GLFW window for copy paste and cursor functionality
