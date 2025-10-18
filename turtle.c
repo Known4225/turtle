@@ -115,7 +115,7 @@ int main(int argc, char *argv[]) {
     glfwSetWindowPos(window, 0, 36);
     glfwSetWindowSize(window, windowHeight * 16 / 9 * 0.85, windowHeight * 0.85); // doing it this way ensures the window spawns in the top left of the monitor and fixes resizing limits
     /* initialise osTools */
-    osToolsInit(argv[0], window); // must include argv[0] to get executableFilepath, must include GLFW window
+    osToolsInit(argv[0], window); // must include argv[0] to get executableFilepath, must include GLFW window for copy paste and cursor functionality
     osToolsFileDialogAddGlobalExtension("txt"); // add txt to extension restrictions
     /* initialise turtleText */
     char constructedFilepath[5120];
@@ -160,6 +160,8 @@ int main(int argc, char *argv[]) {
     if (iconPixels != NULL) {
         icon.pixels = iconPixels;
         glfwSetWindowIcon(window, 1, &icon);
+    } else {
+        printf("Could not load thumbnail %s\n", constructedFilepath);
     }
     /* textures */
     turtle_texture_t empvImage = turtleTextureLoad("images/EMPV.png");
