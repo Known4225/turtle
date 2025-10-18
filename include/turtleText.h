@@ -76,10 +76,10 @@ double turtleTextGetStringLength(const char *str, double size);
 double turtleTextGetStringLengthf(double size, const char *str, ...);
 
 /* gets the length of a formatted utf8-string in coordinates on the screen */
-double turtleTextGetUnicodeLength(const unsigned char *str, double size);
+double turtleTextGetUnicodeLength(const char *str, double size);
 
 /* gets the length of a utf8-string in coordinates on the screen */
-double turtleTextGetUnicodeLengthf(double size, const unsigned char *str, ...);
+double turtleTextGetUnicodeLengthf(double size, const char *str, ...);
 
 /* cut the text of a string such that it will fit in a coordinate size width (0 - left truncate, 1 - right truncate) */
 void turtleTextTruncateString(char *str, double size, double width, int8_t leftRight);
@@ -103,19 +103,19 @@ void turtleTextWriteStringRotated(const char *str, double x, double y, double si
 void turtleTextWriteStringfRotated(double x, double y, double size, double align, double rotate, const char *str, ...);
 
 /* Write a utf8-string to the screen */
-void turtleTextWriteUnicode(const unsigned char *str, double x, double y, double size, double align);
+void turtleTextWriteUnicode(const char *str, double x, double y, double size, double align);
 
 /* Write a formatted utf8-string to the screen */
-void turtleTextWriteUnicodef(double x, double y, double size, double align, const unsigned char *str, ...);
+void turtleTextWriteUnicodef(double x, double y, double size, double align, const char *str, ...);
 
 /* Write a utf8-string to the screen (with rotation) */
-void turtleTextWriteUnicodeRotated(const unsigned char *str, double x, double y, double size, double align, double rotate);
+void turtleTextWriteUnicodeRotated(const char *str, double x, double y, double size, double align, double rotate);
 
 /* Write a formatted utf8-string to the screen (with rotation) */
-void turtleTextWriteUnicodefRotated(double x, double y, double size, double align, double rotate, const unsigned char *str, ...);
+void turtleTextWriteUnicodefRotated(double x, double y, double size, double align, double rotate, const char *str, ...);
 
 /* internal function for converting utf8 to uint32_t characters */
-int32_t turtleTextConvertUnicode(const unsigned char *str, uint32_t *converted);
+int32_t turtleTextConvertUnicode(const char *str, uint32_t *converted);
 
 /* if the font file is not found, use the default font (kept here) */
 void generateDefaultFont(list_t *generatedFont);

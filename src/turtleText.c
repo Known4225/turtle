@@ -338,8 +338,8 @@ double turtleTextGetStringLengthf(double size, const char *str, ...) {
 }
 
 /* gets the length of a formatted utf8-string in coordinates on the screen */
-double turtleTextGetUnicodeLength(const unsigned char *str, double size) {
-    int32_t len = strlen((char *) str);
+double turtleTextGetUnicodeLength(const char *str, double size) {
+    int32_t len = strlen(str);
     uint32_t converted[len];
     int32_t byteLength;
     int32_t i = 0;
@@ -355,13 +355,13 @@ double turtleTextGetUnicodeLength(const unsigned char *str, double size) {
             }
         }
         if (byteLength == 0) { // case: ASCII character
-            converted[next] = (uint32_t) str[i];
+            converted[next] = (uint32_t) (uint8_t) str[i];
             byteLength = 1;
         } else { // case: multi-byte character
             uint32_t convert = 0;
             for (int32_t k = 0; k < byteLength; k++) {
                 convert = convert << 8;
-                convert += (uint32_t) str[i + k];
+                convert += (uint32_t) (uint8_t) str[i + k];
             }
             converted[next] = convert;
         }
@@ -372,12 +372,12 @@ double turtleTextGetUnicodeLength(const unsigned char *str, double size) {
 }
 
 /* gets the length of a utf8-string in coordinates on the screen */
-double turtleTextGetUnicodeLengthf(double size, const unsigned char *str, ...) {
+double turtleTextGetUnicodeLengthf(double size, const char *str, ...) {
     char buffer[2048];
     va_list args;
     va_start(args, str);
-    vsnprintf(buffer, 2048, (char *) str, args);
-    double out = turtleTextGetUnicodeLength((uint8_t *) buffer, size);
+    vsnprintf(buffer, 2048, str, args);
+    double out = turtleTextGetUnicodeLength(buffer, size);
     va_end(args);
     return out;
 }
@@ -581,8 +581,8 @@ void turtleTextWriteStringfRotated(double x, double y, double size, double align
 }
 
 /* Write a utf8-string to the screen */
-void turtleTextWriteUnicode(const unsigned char *str, double x, double y, double size, double align) {
-    int32_t len = strlen((char *) str);
+void turtleTextWriteUnicode(const char *str, double x, double y, double size, double align) {
+    int32_t len = strlen(str);
     uint32_t converted[len];
     int32_t byteLength;
     int32_t i = 0;
@@ -598,13 +598,13 @@ void turtleTextWriteUnicode(const unsigned char *str, double x, double y, double
             }
         }
         if (byteLength == 0) { // case: ASCII character
-            converted[next] = (uint32_t) str[i];
+            converted[next] = (uint32_t) (uint8_t) str[i];
             byteLength = 1;
         } else { // case: multi-byte character
             uint32_t convert = 0;
             for (int32_t k = 0; k < byteLength; k++) {
                 convert = convert << 8;
-                convert += (uint32_t) str[i + k];
+                convert += (uint32_t) (uint8_t) str[i + k];
             }
             converted[next] = convert;
         }
@@ -615,18 +615,18 @@ void turtleTextWriteUnicode(const unsigned char *str, double x, double y, double
 }
 
 /* Write a formatted utf8-string to the screen */
-void turtleTextWriteUnicodef(double x, double y, double size, double align, const unsigned char *str, ...) {
+void turtleTextWriteUnicodef(double x, double y, double size, double align, const char *str, ...) {
     char buffer[2048];
     va_list args;
     va_start(args, str);
-    vsnprintf(buffer, 2048, (char *) str, args);
-    turtleTextWriteUnicode((unsigned char *) buffer, x, y, size, align);
+    vsnprintf(buffer, 2048, str, args);
+    turtleTextWriteUnicode(buffer, x, y, size, align);
     va_end(args);
 }
 
 /* Write a utf8-string to the screen (with rotation) */
-void turtleTextWriteUnicodeRotated(const unsigned char *str, double x, double y, double size, double align, double rotate) {
-    int32_t len = strlen((char *) str);
+void turtleTextWriteUnicodeRotated(const char *str, double x, double y, double size, double align, double rotate) {
+    int32_t len = strlen(str);
     uint32_t converted[len];
     int32_t byteLength;
     int32_t i = 0;
@@ -642,13 +642,13 @@ void turtleTextWriteUnicodeRotated(const unsigned char *str, double x, double y,
             }
         }
         if (byteLength == 0) { // case: ASCII character
-            converted[next] = (uint32_t) str[i];
+            converted[next] = (uint32_t) (uint8_t) str[i];
             byteLength = 1;
         } else { // case: multi-byte character
             uint32_t convert = 0;
             for (int32_t k = 0; k < byteLength; k++) {
                 convert = convert << 8;
-                convert += (uint32_t) str[i + k];
+                convert += (uint32_t) (uint8_t) str[i + k];
             }
             converted[next] = convert;
         }
@@ -659,18 +659,18 @@ void turtleTextWriteUnicodeRotated(const unsigned char *str, double x, double y,
 }
 
 /* Write a formatted utf8-string to the screen (with rotation) */
-void turtleTextWriteUnicodefRotated(double x, double y, double size, double align, double rotate, const unsigned char *str, ...) {
+void turtleTextWriteUnicodefRotated(double x, double y, double size, double align, double rotate, const char *str, ...) {
     char buffer[2048];
     va_list args;
     va_start(args, str);
-    vsnprintf(buffer, 2048, (char *) str, args);
-    turtleTextWriteUnicodeRotated((unsigned char *) buffer, x, y, size, align, rotate);
+    vsnprintf(buffer, 2048, str, args);
+    turtleTextWriteUnicodeRotated(buffer, x, y, size, align, rotate);
     va_end(args);
 }
 
 /* internal function for converting utf8 to uint32_t characters */
-int32_t turtleTextConvertUnicode(const unsigned char *str, uint32_t *converted) {
-    int32_t len = strlen((char *) str);
+int32_t turtleTextConvertUnicode(const char *str, uint32_t *converted) {
+    int32_t len = strlen(str);
     int32_t byteLength;
     int32_t i = 0;
     int32_t next = 0;
@@ -685,13 +685,13 @@ int32_t turtleTextConvertUnicode(const unsigned char *str, uint32_t *converted) 
             }
         }
         if (byteLength == 0) { // case: ASCII character
-            converted[next] = (uint32_t) str[i];
+            converted[next] = (uint32_t) (uint8_t) str[i];
             byteLength = 1;
         } else { // case: multi-byte character
             uint32_t convert = 0;
             for (int32_t k = 0; k < byteLength; k++) {
                 convert = convert << 8;
-                convert += (uint32_t) str[i + k];
+                convert += (uint32_t) (uint8_t) str[i + k];
             }
             converted[next] = convert;
         }
