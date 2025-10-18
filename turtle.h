@@ -241,6 +241,9 @@ void bufferList_free(bufferList_t *list);
 
 #endif /* FLOAT_LIST_H */
 #endif /* TURTLE_ENABLE_TEXTURES */
+/* load an image file to bytes (result is malloc'd) */
+unsigned char *stbi_load(char const *filename, int *width, int *height, int *channels_in_file, int desired_channels);
+
 #ifdef TURTLE_ENABLE_TEXTURES
 #define STB_IMAGE_IMPLEMENTATION
 
@@ -18932,7 +18935,7 @@ typedef struct {
     uint8_t pen; // pen status (1 for down, 0 for up)
     uint8_t close; // close changes to 1 when the user clicks the x on the window
     uint8_t popupClose; // controls whether the window terminates on turtle.close
-    double circleprez; // how precise circles are (specifically, the number of sides of a circle with diameter e)
+    double circleprez; // how precise circles are (specifically, the number of sides of a circle with diameter e, default: 9)
     double pensize; // turtle pen size
     double penr; // pen red (0 to 1)
     double peng; // pen green (0 to 1)
@@ -29644,6 +29647,11 @@ void turtleTexture(turtle_texture_t texture, double x1, double y1, double x2, do
 void turtlePrintTexture(turtle_texture_t texture) {
     printf("turtlePrintTexture: TURTLE_ENABLE_TEXTURES not enabled\n");
 }
+
+unsigned char *stbi_load(char const *filename, int *width, int *height, int *channels_in_file, int desired_channels) {
+    printf("stbi_load: TURTLE_ENABLE_TEXTURES not enabled, stbi_load not enabled\n");
+    return NULL;
+}
 #endif /* TURTLE_ENABLE_TEXTURES */
 
 #ifdef TURTLE_ENABLE_TEXTURES
@@ -32083,8 +32091,8 @@ tt_globals_t tt_globals;
 int32_t tt_color_default[] = {
     /*       button                         switch                            dial                           slider                          scrollbar                      context                       dropdown                     textbox       */
     TT_COLOR_TEXT_ALTERNATE,       TT_COLOR_TEXT_BASE,             TT_COLOR_TEXT_BASE,             TT_COLOR_TEXT_BASE,             0,                              TT_COLOR_TEXT_ALTERNATE,      TT_COLOR_TEXT_BASE,           TT_COLOR_TEXT_ALTERNATE,
-    TT_COLOR_COMPONENT,            TT_COLOR_TEXT_ALTERNATE,        TT_COLOR_BACKGROUND_COMPLEMENT, TT_COLOR_COMPONENT_BASE,        TT_COLOR_COMPONENT_BASE,        TT_COLOR_COMPONENT_BASE,      TT_COLOR_TEXT_ALTERNATE,      TT_COLOR_COMPONENT_BASE,
-    TT_COLOR_COMPONENT_HIGHLIGHT,  TT_COLOR_COMPONENT_BASE,        TT_COLOR_BACKGROUND_BASE,       TT_COLOR_BACKGROUND_ALTERNATE,  TT_COLOR_COMPONENT_COMPLEMENT,  TT_COLOR_COMPONENT_HIGHLIGHT, TT_COLOR_COMPONENT_BASE,      TT_COLOR_TEXT_HIGHLIGHT,
+    TT_COLOR_COMPONENT,            TT_COLOR_TEXT_ALTERNATE,        TT_COLOR_BACKGROUND_COMPLEMENT, TT_COLOR_COMPONENT_ALTERNATE,   TT_COLOR_COMPONENT_BASE,        TT_COLOR_COMPONENT_BASE,      TT_COLOR_TEXT_ALTERNATE,      TT_COLOR_COMPONENT_BASE,
+    TT_COLOR_COMPONENT_HIGHLIGHT,  TT_COLOR_COMPONENT_BASE,        TT_COLOR_BACKGROUND_BASE,       TT_COLOR_BACKGROUND_HIGHLIGHT,  TT_COLOR_COMPONENT_COMPLEMENT,  TT_COLOR_COMPONENT_HIGHLIGHT, TT_COLOR_COMPONENT_BASE,      TT_COLOR_TEXT_HIGHLIGHT,
     TT_COLOR_TEXT_BASE,            TT_COLOR_COMPONENT_HIGHLIGHT,   0,                              0,                              TT_COLOR_BACKGROUND_ALTERNATE,  0,                            TT_COLOR_COMPONENT_HIGHLIGHT, TT_COLOR_TEXT_ALTERNATE,
     TT_COLOR_COMPONENT_COMPLEMENT, TT_COLOR_BACKGROUND_ALTERNATE,  0,                              0,                              TT_COLOR_BACKGROUND_HIGHLIGHT,  0,                            TT_COLOR_COMPONENT_HIGHLIGHT, TT_COLOR_BLUE,
     0,                             TT_COLOR_TERTIARY_BASE,         0,                              0,                              0,                              0,                            TT_COLOR_TEXT_ALTERNATE,      0,

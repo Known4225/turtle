@@ -115,17 +115,24 @@ int main(int argc, char *argv[]) {
     glfwSetWindowPos(window, 0, 36);
     glfwSetWindowSize(window, windowHeight * 16 / 9 * 0.85, windowHeight * 0.85); // doing it this way ensures the window spawns in the top left of the monitor and fixes resizing limits
     /* initialise turtleText */
-    turtleTextInit("config/roberto.tgl");
+    char constructedFilepath[5120];
+    strcpy(constructedFilepath, osToolsFileDialog.executableFilepath);
+    strcat(constructedFilepath, "config/roberto.tgl");
+    turtleTextInit(constructedFilepath);
     /* initialise turtleTools ribbon */
     turtleToolsSetTheme(TT_THEME_DARK); // dark theme preset
-    ribbonInit("config/ribbonConfig.txt");
+    strcpy(constructedFilepath, osToolsFileDialog.executableFilepath);
+    strcat(constructedFilepath, "config/ribbonConfig.txt");
+    ribbonInit(constructedFilepath);
     // list_t *ribbonConfig = list_init();
     // list_append(ribbonConfig, (unitype) "File, New, Save, Save As..., Open", 's');
     // list_append(ribbonConfig, (unitype) "Edit, Undo, Redo, Cut, Copy, Paste", 's');
     // list_append(ribbonConfig, (unitype) "View, Change Theme, GLFW", 's');
     // ribbonInitList(ribbonConfig);
     /* initialise turtleTools popup */
-    popupInit("config/popupConfig.txt");
+    strcpy(constructedFilepath, osToolsFileDialog.executableFilepath);
+    strcat(constructedFilepath, "config/popupConfig.txt");
+    popupInit(constructedFilepath);
     // list_t *popupConfig = list_init();
     // list_append(popupConfig, (unitype) "Are you sure you want to close?", 's');
     // list_append(popupConfig, (unitype) "Cancel", 's');
@@ -134,14 +141,27 @@ int main(int argc, char *argv[]) {
     /* initialise osTools */
     osToolsInit(argv[0], window); // must include argv[0] to get executableFilepath, must include GLFW window
     osToolsFileDialogAddGlobalExtension("txt"); // add txt to extension restrictions
-    list_t *rowLike = osToolsLoadCSVString("config/test.csv", OSTOOLS_CSV_ROW);
-    list_t *columnLike = osToolsLoadCSVString("config/test.csv", OSTOOLS_CSV_COLUMN);
+    strcpy(constructedFilepath, osToolsFileDialog.executableFilepath);
+    strcat(constructedFilepath, "config/test.csv");
+    list_t *rowLike = osToolsLoadCSVString(constructedFilepath, OSTOOLS_CSV_ROW);
+    list_t *columnLike = osToolsLoadCSVString(constructedFilepath, OSTOOLS_CSV_COLUMN);
     if (rowLike != NULL) {
         list_print(rowLike);
     }
     if (columnLike != NULL) {
         list_print(columnLike);
     }
+    /* initialise logo */
+    GLFWimage icon;
+    int32_t iconChannels;
+    strcpy(constructedFilepath, osToolsFileDialog.executableFilepath);
+    strcat(constructedFilepath, "images/thumbnail.png");
+    uint8_t *iconPixels = stbi_load(constructedFilepath, &icon.width, &icon.height, &iconChannels, 4); // 4 color channels for RGBA
+    if (iconPixels != NULL) {
+        icon.pixels = iconPixels;
+        glfwSetWindowIcon(window, 1, &icon);
+    }
+    /* textures */
     turtle_texture_t empvImage = turtleTextureLoad("images/EMPV.png");
     // uint8_t array[16] = {
     //     100, 100, 100, 100,
