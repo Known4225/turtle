@@ -19044,6 +19044,9 @@ unsigned char *stbi_load_wrapper(char const *filename, int *width, int *height, 
 /* resize an image */
 unsigned char *stbir_resize_uint8_linear_wrapper(const unsigned char *input_pixels, int input_w, int input_h, int input_stride_in_bytes, unsigned char *output_pixels, int output_w, int output_h, int output_stride_in_bytes, int pixel_type);
 
+/* set maximum number of textures (default 64) */
+void turtleSetMaxTextures(int32_t maxTextures);
+
 /* load a png, jpg, or bmp to GPU memory as a texture */
 turtle_texture_t turtleTextureLoad(char *filename);
 
@@ -29230,12 +29233,9 @@ void turtleInit(GLFWwindow *window, double leftX, double bottomY, double rightX,
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     turtle.textureWidth = 1024;
     turtle.textureHeight = 1024;
-    #ifndef TURTLE_MAX_TEXTURES
-    turtle.maxTextures = 64;
-    #endif
-    #ifdef TURTLE_MAX_TEXTURES
-    turtle.maxTextures = TURTLE_MAX_TEXTURES;
-    #endif
+    if (turtle.maxTextures == 0) {
+        turtle.maxTextures = 64;
+    }
     glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA, turtle.textureWidth, turtle.textureHeight, turtle.maxTextures, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL); // textures at 1024x1024
     #endif /* TURTLE_ENABLE_TEXTURES */
     glfwMakeContextCurrent(window); // various glfw things
@@ -29678,6 +29678,11 @@ unsigned char *stbir_resize_uint8_linear_wrapper(const unsigned char *input_pixe
     printf("stbir_resize_uint8_linear_wrapper: TURTLE_ENABLE_TEXTURES not enabled, stbir_resize_uint8_linear_wrapper not enabled\n");
     return NULL;
 }
+
+void turtleSetMaxTextures(int32_t maxTextures) {
+    turtle.maxTextures = maxTextures;
+    printf("turtleSetMaxTextures: TURTLE_ENABLE_TEXTURES not enabled\n");
+}
 #endif /* TURTLE_ENABLE_TEXTURES */
 
 #ifdef TURTLE_ENABLE_TEXTURES
@@ -29963,6 +29968,10 @@ unsigned char *stbi_load_wrapper(char const *filename, int *width, int *height, 
 
 unsigned char *stbir_resize_uint8_linear_wrapper(const unsigned char *input_pixels, int input_w, int input_h, int input_stride_in_bytes, unsigned char *output_pixels, int output_w, int output_h, int output_stride_in_bytes, int pixel_type) {
     return stbir_resize_uint8_linear(input_pixels, input_w, input_h, input_stride_in_bytes, output_pixels, output_w, output_h, output_stride_in_bytes, pixel_type);
+}
+
+void turtleSetMaxTextures(int32_t maxTextures) {
+    turtle.maxTextures = maxTextures;
 }
 #endif /* TURTLE_ENABLE_TEXTURES */
 
