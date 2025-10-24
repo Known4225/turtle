@@ -54,12 +54,14 @@ typedef struct {
     list_t *textureList; // list of texture filenames (set to "" for unloaded)
     int32_t textureWidth;
     int32_t textureHeight;
+    int32_t maxTextures;
     #else
     /* this bit exists so that there is no size difference between compiled and linked struct (in case you compile without textures but link library with textures) */
     void *bufferList;
     list_t *textureList;
     int32_t textureWidth;
     int32_t textureHeight;
+    int32_t maxTextures;
     #endif /* TURTLE_ENABLE_TEXTURES */
     list_t *penPos; // a list of where to draw
     uint64_t penHash; // the penPos list is hashed and this hash is used to determine if any changes occured between frames
@@ -169,6 +171,12 @@ void addVertex(double x, double y, double r, double g, double b, double a, doubl
 void turtleTextureRenderInternal(int32_t textureCode, double x1, double y1, double x2, double y2, double r, double g, double b, double rot, double xcenter, double ycenter, double xfact, double yfact);
 #endif /* TURTLE_ENABLE_TEXTURES */
 
+/* load an image to pixels */
+unsigned char *stbi_load_wrapper(char const *filename, int *width, int *height, int *channels_in_file, int desired_channels);
+
+/* resize an image */
+unsigned char *stbir_resize_uint8_linear_wrapper(const unsigned char *input_pixels, int input_w, int input_h, int input_stride_in_bytes, unsigned char *output_pixels, int output_w, int output_h, int output_stride_in_bytes, int pixel_type);
+
 /* load a png, jpg, or bmp to GPU memory as a texture */
 turtle_texture_t turtleTextureLoad(char *filename);
 
@@ -177,6 +185,9 @@ turtle_texture_t turtleTextureLoadList(list_t *list, uint8_t *array, uint32_t wi
 
 /* remove a texture from GPU memory */
 int32_t turtleTextureUnload(turtle_texture_t texture);
+
+/* remove all textures from GPU memory */
+int32_t turtleTextureUnloadAll();
 
 /* adds a (blit) rectangular texture */
 void turtleTexture(turtle_texture_t texture, double x1, double y1, double x2, double y2, double rot, double r, double g, double b);
