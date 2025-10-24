@@ -57,6 +57,7 @@ outLinux = subprocess.run("wsl -e make rel").returncode
 outLinux = subprocess.run("wsl -e make reltextures").returncode or outLinux
 # Push to git if checks passed
 if outWindows == 0 and outLinux == 0:
+    subprocess.run("git pull")
     subprocess.run("git add .")
     commitMessage = input("Enter commit message: ")
     subprocess.run(f"git commit -m\"{commitMessage}\"")
