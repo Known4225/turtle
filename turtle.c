@@ -164,7 +164,7 @@ int main(int argc, char *argv[]) {
     int32_t iconChannels;
     strcpy(constructedFilepath, osToolsFileDialog.executableFilepath);
     strcat(constructedFilepath, "images/thumbnail.png");
-    uint8_t *iconPixels = stbi_load(constructedFilepath, &icon.width, &icon.height, &iconChannels, 4); // 4 color channels for RGBA
+    uint8_t *iconPixels = stbi_load_wrapper(constructedFilepath, &icon.width, &icon.height, &iconChannels, 4); // 4 color channels for RGBA
     if (iconPixels != NULL) {
         icon.pixels = iconPixels;
         glfwSetWindowIcon(window, 1, &icon);
