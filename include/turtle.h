@@ -177,6 +177,9 @@ unsigned char *stbi_load_wrapper(char const *filename, int *width, int *height, 
 /* resize an image */
 unsigned char *stbir_resize_uint8_linear_wrapper(const unsigned char *input_pixels, int input_w, int input_h, int input_stride_in_bytes, unsigned char *output_pixels, int output_w, int output_h, int output_stride_in_bytes, int pixel_type);
 
+/* set maximum number of textures (default 64) */
+void turtleSetMaxTextures(int32_t maxTextures);
+
 /* load a png, jpg, or bmp to GPU memory as a texture */
 turtle_texture_t turtleTextureLoad(char *filename);
 
