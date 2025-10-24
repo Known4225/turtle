@@ -19041,8 +19041,38 @@ void turtleTextureRenderInternal(int32_t textureCode, double x1, double y1, doub
 /* load an image to pixels */
 unsigned char *stbi_load_wrapper(char const *filename, int *width, int *height, int *channels_in_file, int desired_channels);
 
+typedef enum {
+  STBIRW_1CHANNEL = 1,
+  STBIRW_2CHANNEL = 2,
+  STBIRW_RGB      = 3,               // 3-chan, with order specified (for channel flipping)
+  STBIRW_BGR      = 0,               // 3-chan, with order specified (for channel flipping)
+  STBIRW_4CHANNEL = 5,
+
+  STBIRW_RGBA = 4,                   // alpha formats, where alpha is NOT premultiplied into color channels
+  STBIRW_BGRA = 6,
+  STBIRW_ARGB = 7,
+  STBIRW_ABGR = 8,
+  STBIRW_RA   = 9,
+  STBIRW_AR   = 10,
+
+  STBIRW_RGBA_PM = 11,               // alpha formats, where alpha is premultiplied into color channels
+  STBIRW_BGRA_PM = 12,
+  STBIRW_ARGB_PM = 13,
+  STBIRW_ABGR_PM = 14,
+  STBIRW_RA_PM   = 15,
+  STBIRW_AR_PM   = 16,
+
+  STBIRW_RGBA_NO_AW = 11,            // alpha formats, where NO alpha weighting is applied at all!
+  STBIRW_BGRA_NO_AW = 12,            //   these are just synonyms for the _PM flags (which also do
+  STBIRW_ARGB_NO_AW = 13,            //   no alpha weighting). These names just make it more clear
+  STBIRW_ABGR_NO_AW = 14,            //   for some folks).
+  STBIRW_RA_NO_AW   = 15,
+  STBIRW_AR_NO_AW   = 16,
+
+} stbirw_pixel_layout;
+
 /* resize an image */
-unsigned char *stbir_resize_uint8_linear_wrapper(const unsigned char *input_pixels, int input_w, int input_h, int input_stride_in_bytes, unsigned char *output_pixels, int output_w, int output_h, int output_stride_in_bytes, int pixel_type);
+unsigned char *stbir_resize_uint8_linear_wrapper(const unsigned char *input_pixels, int input_w, int input_h, int input_stride_in_bytes, unsigned char *output_pixels, int output_w, int output_h, int output_stride_in_bytes, stbirw_pixel_layout pixel_type);
 
 /* set maximum number of textures (default 64) */
 void turtleSetMaxTextures(int32_t maxTextures);
@@ -29674,7 +29704,7 @@ unsigned char *stbi_load_wrapper(char const *filename, int *width, int *height, 
     return NULL;
 }
 
-unsigned char *stbir_resize_uint8_linear_wrapper(const unsigned char *input_pixels, int input_w, int input_h, int input_stride_in_bytes, unsigned char *output_pixels, int output_w, int output_h, int output_stride_in_bytes, int pixel_type) {
+unsigned char *stbir_resize_uint8_linear_wrapper(const unsigned char *input_pixels, int input_w, int input_h, int input_stride_in_bytes, unsigned char *output_pixels, int output_w, int output_h, int output_stride_in_bytes, stbirw_pixel_layout pixel_type) {
     printf("stbir_resize_uint8_linear_wrapper: TURTLE_ENABLE_TEXTURES not enabled, stbir_resize_uint8_linear_wrapper not enabled\n");
     return NULL;
 }
@@ -29966,7 +29996,7 @@ unsigned char *stbi_load_wrapper(char const *filename, int *width, int *height, 
     return stbi_load(filename, width, height, channels_in_file, desired_channels);
 }
 
-unsigned char *stbir_resize_uint8_linear_wrapper(const unsigned char *input_pixels, int input_w, int input_h, int input_stride_in_bytes, unsigned char *output_pixels, int output_w, int output_h, int output_stride_in_bytes, int pixel_type) {
+unsigned char *stbir_resize_uint8_linear_wrapper(const unsigned char *input_pixels, int input_w, int input_h, int input_stride_in_bytes, unsigned char *output_pixels, int output_w, int output_h, int output_stride_in_bytes, stbirw_pixel_layout pixel_type) {
     return stbir_resize_uint8_linear(input_pixels, input_w, input_h, input_stride_in_bytes, output_pixels, output_w, output_h, output_stride_in_bytes, pixel_type);
 }
 
