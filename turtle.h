@@ -29265,8 +29265,12 @@ void turtleInit(GLFWwindow *window, double leftX, double bottomY, double rightX,
     /* setup texture parameters */
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    turtle.textureWidth = 1024;
-    turtle.textureHeight = 1024;
+    if (turtle.textureWidth == 0) {
+        turtle.textureWidth = 1024;
+    }
+    if (turtle.textureHeight == 0) {
+        turtle.textureHeight = 1024;
+    }
     if (turtle.maxTextures == 0) {
         turtle.maxTextures = 64;
     }
