@@ -117,6 +117,8 @@ int main(int argc, char *argv[]) {
     glfwSetWindowSizeLimits(window, windowHeight * 16 / 9 * 0.4, windowHeight * 0.4, windowHeight * 16 / 9 * optimizedScalingFactor, windowHeight * optimizedScalingFactor);
 
     /* initialise turtle */
+    turtleSetTextureSize(1024, 1024);
+    turtleSetMaxTextures(64);
     turtleInit(window, -320, -180, 320, 180);
     #ifdef OS_LINUX
     glfwSetWindowPos(window, 0, 36);
