@@ -51,18 +51,14 @@ typedef struct {
     double y;
     #ifdef TURTLE_ENABLE_TEXTURES
     bufferList_t *bufferList; // resizable list to donate to GPU
-    list_t *textureList; // list of texture filenames (set to "" for unloaded)
-    int32_t textureWidth;
-    int32_t textureHeight;
-    int32_t maxTextures;
     #else
     /* this bit exists so that there is no size difference between compiled and linked struct (in case you compile without textures but link library with textures) */
     void *bufferList;
-    list_t *textureList;
+    #endif /* TURTLE_ENABLE_TEXTURES */ 
+    list_t *textureList; // list of texture filenames (set to "" for unloaded)
     int32_t textureWidth;
     int32_t textureHeight;
-    int32_t maxTextures;
-    #endif /* TURTLE_ENABLE_TEXTURES */
+    int32_t textureBuffer; // size of GPU glTex 2D Array
     list_t *penPos; // a list of where to draw
     uint64_t penHash; // the penPos list is hashed and this hash is used to determine if any changes occured between frames
     uint32_t lastLength; // the penPos list's length is saved and if it is different from last frame we know we have to redraw
@@ -85,7 +81,7 @@ typedef struct {
     double cameraFOV;
     double cameraDirectionLeftRight;
     double cameraDirectionUpDown;
-} turtle_t; // all globals are conSTRUCTed here
+} turtle_t;
 
 extern turtle_t turtle;
 
@@ -170,46 +166,6 @@ void addVertex(double x, double y, double r, double g, double b, double a, doubl
 
 void turtleTextureRenderInternal(int32_t textureCode, double x1, double y1, double x2, double y2, double r, double g, double b, double rot, double xcenter, double ycenter, double xfact, double yfact);
 #endif /* TURTLE_ENABLE_TEXTURES */
-
-/* load an image to pixels */
-unsigned char *stbi_load_wrapper(char const *filename, int *width, int *height, int *channels_in_file, int desired_channels);
-
-#ifndef STBIRDEF
-typedef enum {
-    STBIRW_1CHANNEL = 1,
-    STBIRW_2CHANNEL = 2,
-    STBIRW_RGB = 3,
-    STBIRW_BGR = 0,
-    STBIRW_4CHANNEL = 5,
-
-    STBIRW_RGBA = 4,
-    STBIRW_BGRA = 6,
-    STBIRW_ARGB = 7,
-    STBIRW_ABGR = 8,
-    STBIRW_RA = 9,
-    STBIRW_AR = 10,
-
-    STBIRW_RGBA_PM = 11,
-    STBIRW_BGRA_PM = 12,
-    STBIRW_ARGB_PM = 13,
-    STBIRW_ABGR_PM = 14,
-    STBIRW_RA_PM = 15,
-    STBIRW_AR_PM = 16,
-
-    STBIRW_RGBA_NO_AW = 11,
-    STBIRW_BGRA_NO_AW = 12,
-    STBIRW_ARGB_NO_AW = 13,
-    STBIRW_ABGR_NO_AW = 14,
-    STBIRW_RA_NO_AW = 15,
-    STBIRW_AR_NO_AW = 16,
-} stbir_pixel_layout;
-#endif
-
-/* resize an image */
-unsigned char *stbir_resize_uint8_linear_wrapper(const unsigned char *input_pixels, int input_w, int input_h, int input_stride_in_bytes, unsigned char *output_pixels, int output_w, int output_h, int output_stride_in_bytes, stbir_pixel_layout pixel_type);
-
-/* set maximum number of textures (default 64) - must be done BEFORE turtleInit */
-void turtleSetMaxTextures(int32_t maxTextures);
 
 /* set pixel width and height of textures (determines how blurry pictures are, default 1024, 1024) - must be done BEFORE turtleInit */
 void turtleSetTextureSize(int32_t width, int32_t height);

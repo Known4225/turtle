@@ -1,3 +1,12 @@
+/* resize an image - use stbir_pixel_layout enum values for pixel_layout argument */
+unsigned char *stbir_resize_uint8_srgb(const unsigned char *input_pixels, int input_w, int input_h, int input_stride_in_bytes, unsigned char *output_pixels, int output_w, int output_h, int output_stride_in_bytes, int pixel_type);
+
+/* resize an image - use stbir_pixel_layout enum values for pixel_layout argument */
+unsigned char *stbir_resize_uint8_linear(const unsigned char *input_pixels, int input_w, int input_h, int input_stride_in_bytes, unsigned char *output_pixels, int output_w, int output_h, int output_stride_in_bytes, int pixel_type);
+
+/* resize an image (float) - use stbir_pixel_layout enum values for pixel_layout argument */
+float *stbir_resize_float_linear(const float *input_pixels, int input_w, int input_h, int input_stride_in_bytes, float *output_pixels, int output_w, int output_h, int output_stride_in_bytes, int pixel_type);
+
 #ifdef TURTLE_ENABLE_TEXTURES
 #define STB_IMAGE_RESIZE_IMPLEMENTATION
 
@@ -459,18 +468,6 @@ typedef enum
 //
 //    If output_pixels is NULL (0), then we will allocate the buffer and return it to you.
 //--------------------------------
-
-STBIRDEF unsigned char * stbir_resize_uint8_srgb( const unsigned char *input_pixels , int input_w , int input_h, int input_stride_in_bytes,
-                                                        unsigned char *output_pixels, int output_w, int output_h, int output_stride_in_bytes,
-                                                        stbir_pixel_layout pixel_type );
-
-STBIRDEF unsigned char * stbir_resize_uint8_linear( const unsigned char *input_pixels , int input_w , int input_h, int input_stride_in_bytes,
-                                                          unsigned char *output_pixels, int output_w, int output_h, int output_stride_in_bytes,
-                                                          stbir_pixel_layout pixel_type );
-
-STBIRDEF float * stbir_resize_float_linear( const float *input_pixels , int input_w , int input_h, int input_stride_in_bytes,
-                                                  float *output_pixels, int output_w, int output_h, int output_stride_in_bytes,
-                                                  stbir_pixel_layout pixel_type );
 //===============================================================
 
 //===============================================================
@@ -7997,7 +7994,7 @@ static int stbir__check_output_stuff( void ** ret_ptr, int * ret_pitch, void * o
 
 STBIRDEF unsigned char * stbir_resize_uint8_linear( const unsigned char *input_pixels , int input_w , int input_h, int input_stride_in_bytes,
                                                           unsigned char *output_pixels, int output_w, int output_h, int output_stride_in_bytes,
-                                                          stbir_pixel_layout pixel_layout )
+                                                          int pixel_layout )
 {
   STBIR_RESIZE resize;
   unsigned char * optr;
@@ -8023,7 +8020,7 @@ STBIRDEF unsigned char * stbir_resize_uint8_linear( const unsigned char *input_p
 
 STBIRDEF unsigned char * stbir_resize_uint8_srgb( const unsigned char *input_pixels , int input_w , int input_h, int input_stride_in_bytes,
                                                         unsigned char *output_pixels, int output_w, int output_h, int output_stride_in_bytes,
-                                                        stbir_pixel_layout pixel_layout )
+                                                        int pixel_layout )
 {
   STBIR_RESIZE resize;
   unsigned char * optr;
@@ -8050,7 +8047,7 @@ STBIRDEF unsigned char * stbir_resize_uint8_srgb( const unsigned char *input_pix
 
 STBIRDEF float * stbir_resize_float_linear( const float *input_pixels , int input_w , int input_h, int input_stride_in_bytes,
                                                   float *output_pixels, int output_w, int output_h, int output_stride_in_bytes,
-                                                  stbir_pixel_layout pixel_layout )
+                                                  int pixel_layout )
 {
   STBIR_RESIZE resize;
   float * optr;

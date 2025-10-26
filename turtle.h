@@ -8237,6 +8237,15 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 #endif /* TURTLE_ENABLE_TEXTURES */
+/* resize an image - use stbir_pixel_layout enum values for pixel_layout argument */
+unsigned char *stbir_resize_uint8_srgb(const unsigned char *input_pixels, int input_w, int input_h, int input_stride_in_bytes, unsigned char *output_pixels, int output_w, int output_h, int output_stride_in_bytes, int pixel_type);
+
+/* resize an image - use stbir_pixel_layout enum values for pixel_layout argument */
+unsigned char *stbir_resize_uint8_linear(const unsigned char *input_pixels, int input_w, int input_h, int input_stride_in_bytes, unsigned char *output_pixels, int output_w, int output_h, int output_stride_in_bytes, int pixel_type);
+
+/* resize an image (float) - use stbir_pixel_layout enum values for pixel_layout argument */
+float *stbir_resize_float_linear(const float *input_pixels, int input_w, int input_h, int input_stride_in_bytes, float *output_pixels, int output_w, int output_h, int output_stride_in_bytes, int pixel_type);
+
 #ifdef TURTLE_ENABLE_TEXTURES
 #define STB_IMAGE_RESIZE_IMPLEMENTATION
 
@@ -8698,18 +8707,6 @@ typedef enum
 //
 //    If output_pixels is NULL (0), then we will allocate the buffer and return it to you.
 //--------------------------------
-
-STBIRDEF unsigned char * stbir_resize_uint8_srgb( const unsigned char *input_pixels , int input_w , int input_h, int input_stride_in_bytes,
-                                                        unsigned char *output_pixels, int output_w, int output_h, int output_stride_in_bytes,
-                                                        stbir_pixel_layout pixel_type );
-
-STBIRDEF unsigned char * stbir_resize_uint8_linear( const unsigned char *input_pixels , int input_w , int input_h, int input_stride_in_bytes,
-                                                          unsigned char *output_pixels, int output_w, int output_h, int output_stride_in_bytes,
-                                                          stbir_pixel_layout pixel_type );
-
-STBIRDEF float * stbir_resize_float_linear( const float *input_pixels , int input_w , int input_h, int input_stride_in_bytes,
-                                                  float *output_pixels, int output_w, int output_h, int output_stride_in_bytes,
-                                                  stbir_pixel_layout pixel_type );
 //===============================================================
 
 //===============================================================
@@ -16236,7 +16233,7 @@ static int stbir__check_output_stuff( void ** ret_ptr, int * ret_pitch, void * o
 
 STBIRDEF unsigned char * stbir_resize_uint8_linear( const unsigned char *input_pixels , int input_w , int input_h, int input_stride_in_bytes,
                                                           unsigned char *output_pixels, int output_w, int output_h, int output_stride_in_bytes,
-                                                          stbir_pixel_layout pixel_layout )
+                                                          int pixel_layout )
 {
   STBIR_RESIZE resize;
   unsigned char * optr;
@@ -16262,7 +16259,7 @@ STBIRDEF unsigned char * stbir_resize_uint8_linear( const unsigned char *input_p
 
 STBIRDEF unsigned char * stbir_resize_uint8_srgb( const unsigned char *input_pixels , int input_w , int input_h, int input_stride_in_bytes,
                                                         unsigned char *output_pixels, int output_w, int output_h, int output_stride_in_bytes,
-                                                        stbir_pixel_layout pixel_layout )
+                                                        int pixel_layout )
 {
   STBIR_RESIZE resize;
   unsigned char * optr;
@@ -16289,7 +16286,7 @@ STBIRDEF unsigned char * stbir_resize_uint8_srgb( const unsigned char *input_pix
 
 STBIRDEF float * stbir_resize_float_linear( const float *input_pixels , int input_w , int input_h, int input_stride_in_bytes,
                                                   float *output_pixels, int output_w, int output_h, int output_stride_in_bytes,
-                                                  stbir_pixel_layout pixel_layout )
+                                                  int pixel_layout )
 {
   STBIR_RESIZE resize;
   float * optr;
@@ -18918,18 +18915,14 @@ typedef struct {
     double y;
     #ifdef TURTLE_ENABLE_TEXTURES
     bufferList_t *bufferList; // resizable list to donate to GPU
-    list_t *textureList; // list of texture filenames (set to "" for unloaded)
-    int32_t textureWidth;
-    int32_t textureHeight;
-    int32_t maxTextures;
     #else
     /* this bit exists so that there is no size difference between compiled and linked struct (in case you compile without textures but link library with textures) */
     void *bufferList;
-    list_t *textureList;
+    #endif /* TURTLE_ENABLE_TEXTURES */ 
+    list_t *textureList; // list of texture filenames (set to "" for unloaded)
     int32_t textureWidth;
     int32_t textureHeight;
-    int32_t maxTextures;
-    #endif /* TURTLE_ENABLE_TEXTURES */
+    int32_t textureBuffer; // size of GPU glTex 2D Array
     list_t *penPos; // a list of where to draw
     uint64_t penHash; // the penPos list is hashed and this hash is used to determine if any changes occured between frames
     uint32_t lastLength; // the penPos list's length is saved and if it is different from last frame we know we have to redraw
@@ -18952,7 +18945,7 @@ typedef struct {
     double cameraFOV;
     double cameraDirectionLeftRight;
     double cameraDirectionUpDown;
-} turtle_t; // all globals are conSTRUCTed here
+} turtle_t;
 
 extern turtle_t turtle;
 
@@ -19037,46 +19030,6 @@ void addVertex(double x, double y, double r, double g, double b, double a, doubl
 
 void turtleTextureRenderInternal(int32_t textureCode, double x1, double y1, double x2, double y2, double r, double g, double b, double rot, double xcenter, double ycenter, double xfact, double yfact);
 #endif /* TURTLE_ENABLE_TEXTURES */
-
-/* load an image to pixels */
-unsigned char *stbi_load_wrapper(char const *filename, int *width, int *height, int *channels_in_file, int desired_channels);
-
-#ifndef STBIRDEF
-typedef enum {
-    STBIRW_1CHANNEL = 1,
-    STBIRW_2CHANNEL = 2,
-    STBIRW_RGB = 3,
-    STBIRW_BGR = 0,
-    STBIRW_4CHANNEL = 5,
-
-    STBIRW_RGBA = 4,
-    STBIRW_BGRA = 6,
-    STBIRW_ARGB = 7,
-    STBIRW_ABGR = 8,
-    STBIRW_RA = 9,
-    STBIRW_AR = 10,
-
-    STBIRW_RGBA_PM = 11,
-    STBIRW_BGRA_PM = 12,
-    STBIRW_ARGB_PM = 13,
-    STBIRW_ABGR_PM = 14,
-    STBIRW_RA_PM = 15,
-    STBIRW_AR_PM = 16,
-
-    STBIRW_RGBA_NO_AW = 11,
-    STBIRW_BGRA_NO_AW = 12,
-    STBIRW_ARGB_NO_AW = 13,
-    STBIRW_ABGR_NO_AW = 14,
-    STBIRW_RA_NO_AW = 15,
-    STBIRW_AR_NO_AW = 16,
-} stbir_pixel_layout;
-#endif
-
-/* resize an image */
-unsigned char *stbir_resize_uint8_linear_wrapper(const unsigned char *input_pixels, int input_w, int input_h, int input_stride_in_bytes, unsigned char *output_pixels, int output_w, int output_h, int output_stride_in_bytes, stbir_pixel_layout pixel_type);
-
-/* set maximum number of textures (default 64) - must be done BEFORE turtleInit */
-void turtleSetMaxTextures(int32_t maxTextures);
 
 /* set pixel width and height of textures (determines how blurry pictures are, default 1024, 1024) - must be done BEFORE turtleInit */
 void turtleSetTextureSize(int32_t width, int32_t height);
@@ -29271,10 +29224,9 @@ void turtleInit(GLFWwindow *window, double leftX, double bottomY, double rightX,
     if (turtle.textureHeight == 0) {
         turtle.textureHeight = 1024;
     }
-    if (turtle.maxTextures == 0) {
-        turtle.maxTextures = 64;
-    }
-    glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA, turtle.textureWidth, turtle.textureHeight, turtle.maxTextures, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL); // textures at 1024x1024
+    turtle.textureBuffer = 2;
+    // glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
+    glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA, turtle.textureWidth, turtle.textureHeight, turtle.textureBuffer, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL); // textures at 1024x1024
     #endif /* TURTLE_ENABLE_TEXTURES */
     glfwMakeContextCurrent(window); // various glfw things
     glEnable(GL_ALPHA);
@@ -29707,19 +29659,24 @@ void turtlePrintTexture(turtle_texture_t texture) {
     printf("turtlePrintTexture: TURTLE_ENABLE_TEXTURES not enabled\n");
 }
 
-unsigned char *stbi_load_wrapper(char const *filename, int *width, int *height, int *channels_in_file, int desired_channels) {
-    printf("stbi_load_wrapper: TURTLE_ENABLE_TEXTURES not enabled, stbi_load_wrapper not enabled\n");
+unsigned char *stbi_load(char const *filename, int *width, int *height, int *channels_in_file, int desired_channels) {
+    printf("stbi_load: TURTLE_ENABLE_TEXTURES not enabled, stbi_load not enabled\n");
     return NULL;
 }
 
-unsigned char *stbir_resize_uint8_linear_wrapper(const unsigned char *input_pixels, int input_w, int input_h, int input_stride_in_bytes, unsigned char *output_pixels, int output_w, int output_h, int output_stride_in_bytes, stbir_pixel_layout pixel_type) {
-    printf("stbir_resize_uint8_linear_wrapper: TURTLE_ENABLE_TEXTURES not enabled, stbir_resize_uint8_linear_wrapper not enabled\n");
+unsigned char *stbir_resize_uint8_srgb(const unsigned char *input_pixels, int input_w, int input_h, int input_stride_in_bytes, unsigned char *output_pixels, int output_w, int output_h, int output_stride_in_bytes, int pixel_type) {
+    printf("stbir_resize_uint8_srgb: TURTLE_ENABLE_TEXTURES not enabled, stbir_resize_uint8_srgb not enabled\n");
     return NULL;
 }
 
-void turtleSetMaxTextures(int32_t maxTextures) {
-    turtle.maxTextures = maxTextures;
-    printf("turtleSetMaxTextures: TURTLE_ENABLE_TEXTURES not enabled\n");
+unsigned char *stbir_resize_uint8_linear(const unsigned char *input_pixels, int input_w, int input_h, int input_stride_in_bytes, unsigned char *output_pixels, int output_w, int output_h, int output_stride_in_bytes, int pixel_type) {
+    printf("stbir_resize_uint8_linear: TURTLE_ENABLE_TEXTURES not enabled, stbir_resize_uint8_linear not enabled\n");
+    return NULL;
+}
+
+float *stbir_resize_float_linear(const float *input_pixels, int input_w, int input_h, int input_stride_in_bytes, float *output_pixels, int output_w, int output_h, int output_stride_in_bytes, int pixel_type) {
+    printf("stbir_resize_float_linear: TURTLE_ENABLE_TEXTURES not enabled, stbir_resize_float_linear not enabled\n");
+    return NULL;
 }
 
 void turtleSetTextureSize(int32_t width, int32_t height) {
@@ -29865,17 +29822,15 @@ turtle_texture_t turtleTextureLoad(char *filename) {
     }
     if (texture.id == -1) {
         texture.id = turtle.textureList -> length;
-        if (texture.id >= turtle.maxTextures) {
-            free(resized);
-            turtle_texture_t output;
-            output.id = -1;
-            return output;
-        }
         list_append(turtle.textureList, (unitype) filename, 's');
     }
     texture.width = width;
     texture.height = height;
     /* load to GPU */
+    if (turtle.textureList -> length > turtle.textureBuffer - 1) {
+        turtle.textureBuffer *= 2; // https://stackoverflow.com/questions/34239049/how-to-grow-a-gl-texture-2d-array
+        glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA, turtle.textureWidth, turtle.textureHeight, turtle.textureBuffer, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+    }
     glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, texture.id, turtle.textureWidth, turtle.textureHeight, 1, encoding, GL_UNSIGNED_BYTE, resized);
     glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
     free(resized);
@@ -29949,17 +29904,15 @@ turtle_texture_t turtleTextureLoadList(list_t *list, uint8_t *array, uint32_t wi
     }
     if (texture.id == -1) {
         texture.id = turtle.textureList -> length;
-        if (texture.id >= turtle.maxTextures) {
-            free(resized);
-            turtle_texture_t output;
-            output.id = -1;
-            return output;
-        }
         list_append(turtle.textureList, (unitype) pointerValue, 's');
     }
     texture.width = width;
     texture.height = height;
     /* load to GPU */
+    if (turtle.textureList -> length > turtle.textureBuffer - 1) {
+        turtle.textureBuffer *= 2; // https://stackoverflow.com/questions/34239049/how-to-grow-a-gl-texture-2d-array
+        glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA, turtle.textureWidth, turtle.textureHeight, turtle.textureBuffer, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+    }
     glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, texture.id, turtle.textureWidth, turtle.textureHeight, 1, encoding, GL_UNSIGNED_BYTE, resized);
     glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
     free(resized);
@@ -29973,13 +29926,26 @@ int32_t turtleTextureUnload(turtle_texture_t texture) {
     }
     free(turtle.textureList -> data[texture.id].s);
     turtle.textureList -> data[texture.id].s = strdup("");
+    for (int32_t i = turtle.textureList -> length - 1; i > -1; i--) {
+        if (strcmp(turtle.textureList -> data[i].s, "") == 0) {
+            list_pop(turtle.textureList);
+        }
+    }
     /* remove from GPU */
-    // glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, texture.id, turtle.textureWidth, turtle.textureHeight, 1, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+    if (turtle.textureList -> length <= turtle.textureBuffer / 2) {
+        turtle.textureBuffer /= 2;
+        if (turtle.textureBuffer < 2) {
+            turtle.textureBuffer = 2;
+        }
+        glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA, turtle.textureWidth, turtle.textureHeight, turtle.textureBuffer, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+    }
     return 0;
 }
 
 int32_t turtleTextureUnloadAll() {
     list_free(turtle.textureList);
+    turtle.textureBuffer = 2;
+    glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA, turtle.textureWidth, turtle.textureHeight, turtle.textureBuffer, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL); // textures at 1024x1024
     return 0;
 }
 
@@ -30006,17 +29972,6 @@ void turtlePrintTexture(turtle_texture_t texture) {
     printf("- Texture Height: %d\n", texture.height);
 }
 
-unsigned char *stbi_load_wrapper(char const *filename, int *width, int *height, int *channels_in_file, int desired_channels) {
-    return stbi_load(filename, width, height, channels_in_file, desired_channels);
-}
-
-unsigned char *stbir_resize_uint8_linear_wrapper(const unsigned char *input_pixels, int input_w, int input_h, int input_stride_in_bytes, unsigned char *output_pixels, int output_w, int output_h, int output_stride_in_bytes, stbir_pixel_layout pixel_type) {
-    return stbir_resize_uint8_linear(input_pixels, input_w, input_h, input_stride_in_bytes, output_pixels, output_w, output_h, output_stride_in_bytes, pixel_type);
-}
-
-void turtleSetMaxTextures(int32_t maxTextures) {
-    turtle.maxTextures = maxTextures;
-}
 void turtleSetTextureSize(int32_t width, int32_t height) {
     turtle.textureWidth = width;
     turtle.textureHeight = height;

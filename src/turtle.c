@@ -125,10 +125,9 @@ void turtleInit(GLFWwindow *window, double leftX, double bottomY, double rightX,
     if (turtle.textureHeight == 0) {
         turtle.textureHeight = 1024;
     }
-    if (turtle.maxTextures == 0) {
-        turtle.maxTextures = 64;
-    }
-    glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA, turtle.textureWidth, turtle.textureHeight, turtle.maxTextures, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL); // textures at 1024x1024
+    turtle.textureBuffer = 2;
+    // glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
+    glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA, turtle.textureWidth, turtle.textureHeight, turtle.textureBuffer, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL); // textures at 1024x1024
     #endif /* TURTLE_ENABLE_TEXTURES */
     glfwMakeContextCurrent(window); // various glfw things
     glEnable(GL_ALPHA);
@@ -561,19 +560,24 @@ void turtlePrintTexture(turtle_texture_t texture) {
     printf("turtlePrintTexture: TURTLE_ENABLE_TEXTURES not enabled\n");
 }
 
-unsigned char *stbi_load_wrapper(char const *filename, int *width, int *height, int *channels_in_file, int desired_channels) {
-    printf("stbi_load_wrapper: TURTLE_ENABLE_TEXTURES not enabled, stbi_load_wrapper not enabled\n");
+unsigned char *stbi_load(char const *filename, int *width, int *height, int *channels_in_file, int desired_channels) {
+    printf("stbi_load: TURTLE_ENABLE_TEXTURES not enabled, stbi_load not enabled\n");
     return NULL;
 }
 
-unsigned char *stbir_resize_uint8_linear_wrapper(const unsigned char *input_pixels, int input_w, int input_h, int input_stride_in_bytes, unsigned char *output_pixels, int output_w, int output_h, int output_stride_in_bytes, stbir_pixel_layout pixel_type) {
-    printf("stbir_resize_uint8_linear_wrapper: TURTLE_ENABLE_TEXTURES not enabled, stbir_resize_uint8_linear_wrapper not enabled\n");
+unsigned char *stbir_resize_uint8_srgb(const unsigned char *input_pixels, int input_w, int input_h, int input_stride_in_bytes, unsigned char *output_pixels, int output_w, int output_h, int output_stride_in_bytes, int pixel_type) {
+    printf("stbir_resize_uint8_srgb: TURTLE_ENABLE_TEXTURES not enabled, stbir_resize_uint8_srgb not enabled\n");
     return NULL;
 }
 
-void turtleSetMaxTextures(int32_t maxTextures) {
-    turtle.maxTextures = maxTextures;
-    printf("turtleSetMaxTextures: TURTLE_ENABLE_TEXTURES not enabled\n");
+unsigned char *stbir_resize_uint8_linear(const unsigned char *input_pixels, int input_w, int input_h, int input_stride_in_bytes, unsigned char *output_pixels, int output_w, int output_h, int output_stride_in_bytes, int pixel_type) {
+    printf("stbir_resize_uint8_linear: TURTLE_ENABLE_TEXTURES not enabled, stbir_resize_uint8_linear not enabled\n");
+    return NULL;
+}
+
+float *stbir_resize_float_linear(const float *input_pixels, int input_w, int input_h, int input_stride_in_bytes, float *output_pixels, int output_w, int output_h, int output_stride_in_bytes, int pixel_type) {
+    printf("stbir_resize_float_linear: TURTLE_ENABLE_TEXTURES not enabled, stbir_resize_float_linear not enabled\n");
+    return NULL;
 }
 
 void turtleSetTextureSize(int32_t width, int32_t height) {
@@ -719,17 +723,15 @@ turtle_texture_t turtleTextureLoad(char *filename) {
     }
     if (texture.id == -1) {
         texture.id = turtle.textureList -> length;
-        if (texture.id >= turtle.maxTextures) {
-            free(resized);
-            turtle_texture_t output;
-            output.id = -1;
-            return output;
-        }
         list_append(turtle.textureList, (unitype) filename, 's');
     }
     texture.width = width;
     texture.height = height;
     /* load to GPU */
+    if (turtle.textureList -> length > turtle.textureBuffer - 1) {
+        turtle.textureBuffer *= 2; // https://stackoverflow.com/questions/34239049/how-to-grow-a-gl-texture-2d-array
+        glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA, turtle.textureWidth, turtle.textureHeight, turtle.textureBuffer, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+    }
     glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, texture.id, turtle.textureWidth, turtle.textureHeight, 1, encoding, GL_UNSIGNED_BYTE, resized);
     glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
     free(resized);
@@ -803,17 +805,15 @@ turtle_texture_t turtleTextureLoadList(list_t *list, uint8_t *array, uint32_t wi
     }
     if (texture.id == -1) {
         texture.id = turtle.textureList -> length;
-        if (texture.id >= turtle.maxTextures) {
-            free(resized);
-            turtle_texture_t output;
-            output.id = -1;
-            return output;
-        }
         list_append(turtle.textureList, (unitype) pointerValue, 's');
     }
     texture.width = width;
     texture.height = height;
     /* load to GPU */
+    if (turtle.textureList -> length > turtle.textureBuffer - 1) {
+        turtle.textureBuffer *= 2; // https://stackoverflow.com/questions/34239049/how-to-grow-a-gl-texture-2d-array
+        glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA, turtle.textureWidth, turtle.textureHeight, turtle.textureBuffer, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+    }
     glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, texture.id, turtle.textureWidth, turtle.textureHeight, 1, encoding, GL_UNSIGNED_BYTE, resized);
     glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
     free(resized);
@@ -827,13 +827,26 @@ int32_t turtleTextureUnload(turtle_texture_t texture) {
     }
     free(turtle.textureList -> data[texture.id].s);
     turtle.textureList -> data[texture.id].s = strdup("");
+    for (int32_t i = turtle.textureList -> length - 1; i > -1; i--) {
+        if (strcmp(turtle.textureList -> data[i].s, "") == 0) {
+            list_pop(turtle.textureList);
+        }
+    }
     /* remove from GPU */
-    // glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, texture.id, turtle.textureWidth, turtle.textureHeight, 1, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+    if (turtle.textureList -> length <= turtle.textureBuffer / 2) {
+        turtle.textureBuffer /= 2;
+        if (turtle.textureBuffer < 2) {
+            turtle.textureBuffer = 2;
+        }
+        glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA, turtle.textureWidth, turtle.textureHeight, turtle.textureBuffer, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+    }
     return 0;
 }
 
 int32_t turtleTextureUnloadAll() {
     list_free(turtle.textureList);
+    turtle.textureBuffer = 2;
+    glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA, turtle.textureWidth, turtle.textureHeight, turtle.textureBuffer, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL); // textures at 1024x1024
     return 0;
 }
 
@@ -860,17 +873,6 @@ void turtlePrintTexture(turtle_texture_t texture) {
     printf("- Texture Height: %d\n", texture.height);
 }
 
-unsigned char *stbi_load_wrapper(char const *filename, int *width, int *height, int *channels_in_file, int desired_channels) {
-    return stbi_load(filename, width, height, channels_in_file, desired_channels);
-}
-
-unsigned char *stbir_resize_uint8_linear_wrapper(const unsigned char *input_pixels, int input_w, int input_h, int input_stride_in_bytes, unsigned char *output_pixels, int output_w, int output_h, int output_stride_in_bytes, stbir_pixel_layout pixel_type) {
-    return stbir_resize_uint8_linear(input_pixels, input_w, input_h, input_stride_in_bytes, output_pixels, output_w, output_h, output_stride_in_bytes, pixel_type);
-}
-
-void turtleSetMaxTextures(int32_t maxTextures) {
-    turtle.maxTextures = maxTextures;
-}
 void turtleSetTextureSize(int32_t width, int32_t height) {
     turtle.textureWidth = width;
     turtle.textureHeight = height;
