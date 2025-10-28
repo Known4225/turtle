@@ -841,14 +841,6 @@ int32_t turtleTextureUnload(turtle_texture_t texture) {
     }
     free(turtle.textureList -> data[texture].s);
     turtle.textureList -> data[texture].s = strdup("");
-    for (int32_t i = turtle.textureList -> length - 4; i > 3; i -= 4) {
-        if (strcmp(turtle.textureList -> data[i].s, "") == 0) {
-            list_pop(turtle.textureList);
-            list_pop(turtle.textureList);
-            list_pop(turtle.textureList);
-            list_pop(turtle.textureList);
-        }
-    }
     return 0;
 }
 
