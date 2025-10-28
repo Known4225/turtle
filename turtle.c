@@ -9,6 +9,7 @@ void parseRibbonOutput() {
     tt_ribbon.output[0] = 0;
     if (tt_ribbon.output[1] == 0) { // File
         if (tt_ribbon.output[2] == 1) { // New
+            list_clear(osToolsFileDialog.selectedFilenames);
             printf("New\n");
         }
         if (tt_ribbon.output[2] == 2) { // Save
@@ -121,7 +122,11 @@ int main(int argc, char *argv[]) {
     #ifdef OS_LINUX
     glfwSetWindowPos(window, 0, 36);
     #endif
-    glfwSetWindowSize(window, windowHeight * 16 / 9 * 0.85, windowHeight * 0.85); // doing it this way ensures the window spawns in the top left of the monitor and fixes resizing limits
+    if (optimizedScalingFactor > 0.85) {
+        glfwSetWindowSize(window, windowHeight * 16 / 9 * 0.85, windowHeight * 0.85); // doing it this way ensures the window spawns in the top left of the monitor and fixes resizing limits
+    } else {
+        glfwSetWindowSize(window, windowHeight * 16 / 9 * optimizedScalingFactor, windowHeight * optimizedScalingFactor);
+    }
     /* initialise osTools */
     osToolsInit(argv[0], window); // must include argv[0] to get executableFilepath, must include GLFW window for copy paste and cursor functionality
     osToolsFileDialogAddGlobalExtension("txt"); // add txt to extension restrictions
@@ -179,8 +184,8 @@ int main(int argc, char *argv[]) {
     //     100, 100, 100, 100,
     //     100, 100, 100, 100,
     // };
-    // turtle_texture_t empvImage = turtleTextureLoadList(NULL, array, 4, 4, GL_GREEN);
-    turtlePrintTexture(empvImage);
+    // turtle_texture_t empvImage = turtleTextureLoadArray(array, 4, 4, GL_GREEN);
+    turtleTexturePrint(empvImage);
     list_t *folders = osToolsListFolders(".");
     list_t *files = osToolsListFiles(".");
     list_t *filesAndFolders = osToolsListFilesAndFolders(".");
