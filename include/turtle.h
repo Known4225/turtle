@@ -54,11 +54,13 @@ typedef struct {
     #else
     /* this bit exists so that there is no size difference between compiled and linked struct (in case you compile without textures but link library with textures) */
     void *bufferList;
-    #endif /* TURTLE_ENABLE_TEXTURES */ 
-    list_t *textureList; // list of texture filenames (set to "" for unloaded)
-    int32_t textureWidth;
-    int32_t textureHeight;
-    int32_t textureBuffer; // size of GPU glTex 2D Array
+    #endif /* TURTLE_ENABLE_TEXTURES */
+    list_t *textureList; // filename, original width, original height, channels
+    int32_t textureWidth; // turtle texture width (default 1024)
+    int32_t textureHeight; // turtle texture height (default 1024)
+    int32_t textureBuffer; // size of GPU glTex 2D Array (default 64)
+    int32_t maxTextures; // size of GPU glTex 2D Array (default 64)
+    uint32_t textureID; // openGL texture handle
     list_t *penPos; // a list of where to draw
     uint64_t penHash; // the penPos list is hashed and this hash is used to determine if any changes occured between frames
     uint32_t lastLength; // the penPos list's length is saved and if it is different from last frame we know we have to redraw
@@ -154,11 +156,8 @@ void turtlePenPrez(double prez);
 /* moves the turtle to a coordinate */
 void turtleGoto(double x, double y);
 
-typedef struct {
-    int32_t id;
-    int16_t width;
-    int16_t height;
-} turtle_texture_t;
+/* texture handle */
+typedef int32_t turtle_texture_t;
 
 #ifdef TURTLE_ENABLE_TEXTURES
 /* function to add a vertex to the turtle.bufferList */
@@ -170,11 +169,20 @@ void turtleTextureRenderInternal(int32_t textureCode, double x1, double y1, doub
 /* set pixel width and height of textures (determines how blurry pictures are, default 1024, 1024) - must be done BEFORE turtleInit */
 void turtleSetTextureSize(int32_t width, int32_t height);
 
+/* set maximum number of textures (default 64) - must be done BEFORE turtleInit */
+void turtleSetMaxTextures(int32_t maxTextures);
+
 /* load a png, jpg, or bmp to GPU memory as a texture */
 turtle_texture_t turtleTextureLoad(char *filename);
 
+/* load data from an array of uint8 - use GL_RGB or GL_RGBA for encoding */
+turtle_texture_t turtleTextureLoadArray(uint8_t *array, uint32_t width, uint32_t height, uint32_t encoding);
+
+/* load data from a list - use GL_RGB or GL_RGBA for encoding */
+turtle_texture_t turtleTextureLoadList(list_t *list, uint32_t width, uint32_t height, uint32_t encoding);
+
 /* load data from a list or array of uint8 (make one NULL) - use GL_RGB or GL_RGBA for encoding */
-turtle_texture_t turtleTextureLoadList(list_t *list, uint8_t *array, uint32_t width, uint32_t height, uint32_t encoding);
+turtle_texture_t turtleTextureLoadListArrayInternal(list_t *list, uint8_t *array, uint32_t width, uint32_t height, uint32_t encoding);
 
 /* remove a texture from GPU memory */
 int32_t turtleTextureUnload(turtle_texture_t texture);
@@ -186,7 +194,7 @@ int32_t turtleTextureUnloadAll();
 void turtleTexture(turtle_texture_t texture, double x1, double y1, double x2, double y2, double rot, double r, double g, double b);
 
 /* print texture information */
-void turtlePrintTexture(turtle_texture_t texture);
+void turtleTexturePrint(turtle_texture_t texture);
 
 /* draws a circle at the specified x and y (coordinates) */
 void turtleCircleRenderInternal(double x, double y, double rad, double r, double g, double b, double a, double xcenter, double ycenter, double xfact, double yfact, double prez);

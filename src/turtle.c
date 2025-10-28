@@ -116,18 +116,25 @@ void turtleInit(GLFWwindow *window, double leftX, double bottomY, double rightX,
     turtle.bufferList = bufferList_init();
     turtle.textureList = list_init();
     list_append(turtle.textureList, (unitype) "null", 's'); // cannot have texture code of 0 because of shader using 0 as the non-texture code
+    list_append(turtle.textureList, (unitype) 0, 'i');
+    list_append(turtle.textureList, (unitype) 0, 'i');
+    list_append(turtle.textureList, (unitype) 0, 'i');
     /* setup texture parameters */
+    glGenTextures(1, &turtle.textureID);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D_ARRAY, turtle.textureID);
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     if (turtle.textureWidth == 0) {
-        turtle.textureWidth = 1024;
+        turtle.textureWidth = 1024; // default
     }
     if (turtle.textureHeight == 0) {
-        turtle.textureHeight = 1024;
+        turtle.textureHeight = 1024; // default
     }
-    turtle.textureBuffer = 2;
-    // glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
-    glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA, turtle.textureWidth, turtle.textureHeight, turtle.textureBuffer, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL); // textures at 1024x1024
+    if (turtle.maxTextures == 0) {
+        turtle.maxTextures = 64; // default
+    }
+    glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA, turtle.textureWidth, turtle.textureHeight, turtle.maxTextures, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL); // textures at 1024x1024
     #endif /* TURTLE_ENABLE_TEXTURES */
     glfwMakeContextCurrent(window); // various glfw things
     glEnable(GL_ALPHA);
@@ -532,16 +539,22 @@ void turtleQuadRenderInternal(double x1, double y1, double x2, double y2, double
 
 turtle_texture_t turtleTextureLoad(char *filename) {
     printf("turtleTextureLoad: TURTLE_ENABLE_TEXTURES not enabled - textures will not render\n");
-    turtle_texture_t output;
-    output.id = -1;
-    return output;
+    return -1;
 }
 
-turtle_texture_t turtleTextureLoadList(list_t *list, uint8_t *array, uint32_t width, uint32_t height, uint32_t encoding) {
-    printf("turtleTextureLoad: TURTLE_ENABLE_TEXTURES not enabled - textures will not render\n");
-    turtle_texture_t output;
-    output.id = -1;
-    return output;
+turtle_texture_t turtleTextureLoadArray(uint8_t *array, uint32_t width, uint32_t height, uint32_t encoding) {
+    printf("turtleTextureLoadArray: TURTLE_ENABLE_TEXTURES not enabled - textures will not render\n");
+    return -1;
+}
+
+turtle_texture_t turtleTextureLoadList(list_t *list, uint32_t width, uint32_t height, uint32_t encoding) {
+    printf("turtleTextureLoadList: TURTLE_ENABLE_TEXTURES not enabled - textures will not render\n");
+    return -1;
+}
+
+turtle_texture_t turtleTextureLoadListArrayInternal(list_t *list, uint8_t *array, uint32_t width, uint32_t height, uint32_t encoding) {
+    printf("turtleTextureLoadListArrayInternal: TURTLE_ENABLE_TEXTURES not enabled - textures will not render\n");
+    return -1;
 }
 
 int32_t turtleTextureUnload(turtle_texture_t texture) {
@@ -556,8 +569,8 @@ void turtleTexture(turtle_texture_t texture, double x1, double y1, double x2, do
     return;
 }
 
-void turtlePrintTexture(turtle_texture_t texture) {
-    printf("turtlePrintTexture: TURTLE_ENABLE_TEXTURES not enabled\n");
+void turtleTexturePrint(turtle_texture_t texture) {
+    printf("turtleTexturePrint: TURTLE_ENABLE_TEXTURES not enabled\n");
 }
 
 unsigned char *stbi_load(char const *filename, int *width, int *height, int *channels_in_file, int desired_channels) {
@@ -584,6 +597,11 @@ void turtleSetTextureSize(int32_t width, int32_t height) {
     turtle.textureWidth = width;
     turtle.textureHeight = height;
     printf("turtleSetTextureSize: TURTLE_ENABLE_TEXTURES not enabled\n");
+}
+
+void turtleSetMaxTextures(int32_t maxTextures) {
+    turtle.maxTextures = maxTextures;
+    printf("turtleSetMaxTextures: TURTLE_ENABLE_TEXTURES not enabled\n");
 }
 #endif /* TURTLE_ENABLE_TEXTURES */
 
@@ -622,7 +640,6 @@ void turtleCircleRenderInternal(double x, double y, double rad, double r, double
 
 /* draws a square */
 void turtleSquareRenderInternal(double x1, double y1, double x2, double y2, double r, double g, double b, double a, double xcenter, double ycenter, double xfact, double yfact) {
-    // float square[24] = {x1 * xfact, y1 * yfact, r, g, b, a, x2 * xfact, y1 * yfact, r, g, b, a, x2 * xfact, y2 * yfact, r, g, b, a, x1 * xfact, y2 * yfact, r, g, b, a};
     addVertex(x1 * xfact + xcenter, y1 * yfact + ycenter, r, g, b, a, 0, 0, 0);
     addVertex(x2 * xfact + xcenter, y1 * yfact + ycenter, r, g, b, a, 0, 0, 0);
     addVertex(x2 * xfact + xcenter, y2 * yfact + ycenter, r, g, b, a, 0, 0, 0);
@@ -633,7 +650,6 @@ void turtleSquareRenderInternal(double x1, double y1, double x2, double y2, doub
 
 /* draws a triangle */
 void turtleTriangleRenderInternal(double x1, double y1, double x2, double y2, double x3, double y3, double r, double g, double b, double a, double xcenter, double ycenter, double xfact, double yfact) {
-    // float triangle[18] = {x1 * xfact, y1 * yfact, r, g, b, a, x2 * xfact, y2 * yfact, r, g, b, a, x3 * xfact, y3 * yfact, r, g, b, a};
     addVertex(x1 * xfact + xcenter, y1 * yfact + ycenter, r, g, b, a, 0, 0, 0);
     addVertex(x2 * xfact + xcenter, y2 * yfact + ycenter, r, g, b, a, 0, 0, 0);
     addVertex(x3 * xfact + xcenter, y3 * yfact + ycenter, r, g, b, a, 0, 0, 0);
@@ -680,23 +696,21 @@ turtle_texture_t turtleTextureLoad(char *filename) {
     /* load image */
     int width;
     int height;
-    int nbChannels;
-    unsigned char *image = stbi_load(filename, &width, &height, &nbChannels, 0);
+    int channels;
+    unsigned char *image = stbi_load(filename, &width, &height, &channels, 0);
     if (image == NULL) {
         printf("turtleTextureLoad: Could not load image %s\n", filename);
-        turtle_texture_t output;
-        output.id = -1;
-        return output;
+        return -1;
     }
     uint32_t encoding = GL_RGB;
     uint32_t stb_encoding = STBIR_RGB;
     uint8_t stride = 3;
-    if (nbChannels == 4) {
+    if (channels == 4) {
         encoding = GL_RGBA;
         stb_encoding = STBIR_RGBA;
         stride = 4;
     }
-    if (nbChannels == 1) {
+    if (channels == 1) {
         encoding = GL_RED;
         stb_encoding = STBIR_1CHANNEL;
         stride = 1;
@@ -706,39 +720,46 @@ turtle_texture_t turtleTextureLoad(char *filename) {
     free(image);
     if (resized == NULL) {
         printf("turtleTextureLoad: Could not resize image %s\n", filename);
-        turtle_texture_t output;
-        output.id = -1;
-        return output;
+        return -1;
     }
     /* find first available texture */
-    turtle_texture_t texture;
-    texture.id = -1;
-    for (int32_t i = 0; i < turtle.textureList -> length; i++) {
+    turtle_texture_t texture = -1;
+    for (int32_t i = 4; i < turtle.textureList -> length; i += 4) {
         if (strcmp(turtle.textureList -> data[i].s, "") == 0) {
-            texture.id = i;
-            free(turtle.textureList -> data[texture.id].s);
-            turtle.textureList -> data[texture.id].s = strdup(filename);
+            free(turtle.textureList -> data[i].s);
+            turtle.textureList -> data[i].s = strdup(filename);
+            turtle.textureList -> data[i + 1].i = width;
+            turtle.textureList -> data[i + 2].i = height;
+            turtle.textureList -> data[i + 3].i = stride;
+            texture = i;
             break;
         }
     }
-    if (texture.id == -1) {
-        texture.id = turtle.textureList -> length;
+    if (texture == -1) {
+        texture = turtle.textureList -> length;
         list_append(turtle.textureList, (unitype) filename, 's');
+        list_append(turtle.textureList, (unitype) width, 'i');
+        list_append(turtle.textureList, (unitype) height, 'i');
+        list_append(turtle.textureList, (unitype) channels, 'i');
     }
-    texture.width = width;
-    texture.height = height;
     /* load to GPU */
-    if (turtle.textureList -> length > turtle.textureBuffer - 1) {
-        turtle.textureBuffer *= 2; // https://stackoverflow.com/questions/34239049/how-to-grow-a-gl-texture-2d-array
-        glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA, turtle.textureWidth, turtle.textureHeight, turtle.textureBuffer, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-    }
-    glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, texture.id, turtle.textureWidth, turtle.textureHeight, 1, encoding, GL_UNSIGNED_BYTE, resized);
+    glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, texture / 4, turtle.textureWidth, turtle.textureHeight, 1, encoding, GL_UNSIGNED_BYTE, resized);
+    printf("glTexSubImage3D gl error code: 0x%X\n", glGetError());
     glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
+    printf("mipmap gl error code: 0x%X\n", glGetError());
     free(resized);
     return texture;
 }
 
-turtle_texture_t turtleTextureLoadList(list_t *list, uint8_t *array, uint32_t width, uint32_t height, uint32_t encoding) {
+turtle_texture_t turtleTextureLoadArray(uint8_t *array, uint32_t width, uint32_t height, uint32_t encoding) {
+    return turtleTextureLoadListArrayInternal(NULL, array, width, height, encoding);
+}
+
+turtle_texture_t turtleTextureLoadList(list_t *list, uint32_t width, uint32_t height, uint32_t encoding) {
+    return turtleTextureLoadListArrayInternal(list, NULL, width, height, encoding);
+}
+
+turtle_texture_t turtleTextureLoadListArrayInternal(list_t *list, uint8_t *array, uint32_t width, uint32_t height, uint32_t encoding) {
     uint8_t stride = 0;
     uint32_t stb_encoding = 0;
     if (encoding == GL_RGB) {
@@ -757,18 +778,14 @@ turtle_texture_t turtleTextureLoadList(list_t *list, uint8_t *array, uint32_t wi
         stride = 1;
         stb_encoding = STBIR_1CHANNEL;
     } else {
-        printf("turtleTextureLoadList: Unsupported encoding %d\n", encoding);
-        turtle_texture_t output;
-        output.id = -1;
-        return output;
+        printf("turtleTextureLoadListArrayInternal: Unsupported encoding %d\n", encoding);
+        return -1;
     }
     uint8_t freeArrayFlag = 0;
     if (array == NULL) {
         if (list == NULL) {
-            printf("turtleTextureLoadList: both list and array are NULL\n");
-            turtle_texture_t output;
-            output.id = -1;
-            return output;
+            printf("turtleTextureLoadListArrayInternal: both list and array are NULL\n");
+            return -1;
         }
         array = malloc(list -> length);
         for (int32_t i = 0; i < list -> length; i++) {
@@ -782,39 +799,36 @@ turtle_texture_t turtleTextureLoadList(list_t *list, uint8_t *array, uint32_t wi
         free(array);
     }
     if (resized == NULL) {
-        printf("turtleTextureLoadList: Could not resize image\n");
-        turtle_texture_t output;
-        output.id = -1;
+        printf("turtleTextureLoadListArrayInternal: Could not resize image\n");
+        return -1;
     }
     /* find first available texture */
-    turtle_texture_t texture;
-    texture.id = -1;
+    turtle_texture_t texture = -1;
     char pointerValue[20];
     if (freeArrayFlag) {
         sprintf(pointerValue, "0x%X", list);
     } else {
         sprintf(pointerValue, "0x%X", array);
     }
-    for (int32_t i = 0; i < turtle.textureList -> length; i++) {
+    for (int32_t i = 4; i < turtle.textureList -> length; i += 4) {
         if (strcmp(turtle.textureList -> data[i].s, "") == 0) {
-            texture.id = i;
-            free(turtle.textureList -> data[texture.id].s);
-            turtle.textureList -> data[texture.id].s = strdup(pointerValue);
+            free(turtle.textureList -> data[i].s);
+            turtle.textureList -> data[i].s = strdup(pointerValue);
+            turtle.textureList -> data[i + 1].i = width;
+            turtle.textureList -> data[i + 2].i = height;
+            turtle.textureList -> data[i + 3].i = stride;
+            texture = i;
             break;
         }
     }
-    if (texture.id == -1) {
-        texture.id = turtle.textureList -> length;
+    if (texture == -1) {
+        texture = turtle.textureList -> length;
         list_append(turtle.textureList, (unitype) pointerValue, 's');
+        list_append(turtle.textureList, (unitype) width, 'i');
+        list_append(turtle.textureList, (unitype) height, 'i');
+        list_append(turtle.textureList, (unitype) stride, 'i');
     }
-    texture.width = width;
-    texture.height = height;
-    /* load to GPU */
-    if (turtle.textureList -> length > turtle.textureBuffer - 1) {
-        turtle.textureBuffer *= 2; // https://stackoverflow.com/questions/34239049/how-to-grow-a-gl-texture-2d-array
-        glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA, turtle.textureWidth, turtle.textureHeight, turtle.textureBuffer, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-    }
-    glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, texture.id, turtle.textureWidth, turtle.textureHeight, 1, encoding, GL_UNSIGNED_BYTE, resized);
+    glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, texture / 4, turtle.textureWidth, turtle.textureHeight, 1, encoding, GL_UNSIGNED_BYTE, resized);
     glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
     free(resized);
     return texture;
@@ -822,31 +836,28 @@ turtle_texture_t turtleTextureLoadList(list_t *list, uint8_t *array, uint32_t wi
 
 int32_t turtleTextureUnload(turtle_texture_t texture) {
     /* update list */
-    if (texture.id >= turtle.textureList -> length || texture.id < 1) {
+    if (texture >= turtle.textureList -> length || texture < 1) {
         return -1;
     }
-    free(turtle.textureList -> data[texture.id].s);
-    turtle.textureList -> data[texture.id].s = strdup("");
-    for (int32_t i = turtle.textureList -> length - 1; i > -1; i--) {
+    free(turtle.textureList -> data[texture].s);
+    turtle.textureList -> data[texture].s = strdup("");
+    for (int32_t i = turtle.textureList -> length - 4; i > 3; i -= 4) {
         if (strcmp(turtle.textureList -> data[i].s, "") == 0) {
             list_pop(turtle.textureList);
+            list_pop(turtle.textureList);
+            list_pop(turtle.textureList);
+            list_pop(turtle.textureList);
         }
-    }
-    /* remove from GPU */
-    if (turtle.textureList -> length <= turtle.textureBuffer / 2) {
-        turtle.textureBuffer /= 2;
-        if (turtle.textureBuffer < 2) {
-            turtle.textureBuffer = 2;
-        }
-        glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA, turtle.textureWidth, turtle.textureHeight, turtle.textureBuffer, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
     }
     return 0;
 }
 
 int32_t turtleTextureUnloadAll() {
     list_free(turtle.textureList);
-    turtle.textureBuffer = 2;
-    glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA, turtle.textureWidth, turtle.textureHeight, turtle.textureBuffer, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL); // textures at 1024x1024
+    list_append(turtle.textureList, (unitype) "null", 's'); // filename, cannot have texture code of 0 because of shader using 0 as the non-texture code
+    list_append(turtle.textureList, (unitype) 0, 'i'); // width
+    list_append(turtle.textureList, (unitype) 0, 'i'); // height
+    list_append(turtle.textureList, (unitype) 0, 'i'); // channels
     return 0;
 }
 
@@ -858,24 +869,29 @@ void turtleTexture(turtle_texture_t texture, double x1, double y1, double x2, do
     list_append(turtle.penPos, (unitype) rot, 'd'); // rotation (degrees, bearing)
     list_append(turtle.penPos, (unitype) (r / 255), 'd');
     list_append(turtle.penPos, (unitype) (g / 255), 'd');
-    list_append(turtle.penPos, (unitype) (128 + texture.id), 'h'); // blit texture signifier + texture code - limited to 32639 textures
+    list_append(turtle.penPos, (unitype) (128 + texture / 4), 'h'); // blit texture signifier + texture code - limited to 32639 textures
     list_append(turtle.penPos, (unitype) (b / 255), 'd');
 }
 
-void turtlePrintTexture(turtle_texture_t texture) {
-    printf("Texture ID: %d\n", texture.id);
-    if (texture.id >= 0 && texture.id < turtle.textureList -> length) {
-        printf("- Texture Name: %s\n", turtle.textureList -> data[texture.id].s);
+void turtleTexturePrint(turtle_texture_t texture) {
+    printf("Texture ID: %d\n", texture);
+    if (texture >= 0 && texture < turtle.textureList -> length) {
+        printf("- Texture Name: %s\n", turtle.textureList -> data[texture].s);
     } else {
         printf("- Texture Name: NULL\n");
     }
-    printf("- Texture Width: %d\n", texture.width);
-    printf("- Texture Height: %d\n", texture.height);
+    printf("- Texture Width: %d\n", turtle.textureList -> data[texture + 1].i);
+    printf("- Texture Height: %d\n", turtle.textureList -> data[texture + 2].i);
+    printf("- Texture Channel: %d\n", turtle.textureList -> data[texture + 3].i);
 }
 
 void turtleSetTextureSize(int32_t width, int32_t height) {
     turtle.textureWidth = width;
     turtle.textureHeight = height;
+}
+
+void turtleSetMaxTextures(int32_t maxTextures) {
+    turtle.maxTextures = maxTextures;
 }
 #endif /* TURTLE_ENABLE_TEXTURES */
 
