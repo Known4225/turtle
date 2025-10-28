@@ -18949,6 +18949,39 @@ typedef struct {
     double cameraDirectionUpDown;
 } turtle_t;
 
+/* stb_image_resize2 pixel_layout enum */
+#ifndef STBIRDEF
+typedef enum {
+  STBIR_1CHANNEL = 1,
+  STBIR_2CHANNEL = 2,
+  STBIR_RGB      = 3,               // 3-chan, with order specified (for channel flipping)
+  STBIR_BGR      = 0,               // 3-chan, with order specified (for channel flipping)
+  STBIR_4CHANNEL = 5,
+
+  STBIR_RGBA = 4,                   // alpha formats, where alpha is NOT premultiplied into color channels
+  STBIR_BGRA = 6,
+  STBIR_ARGB = 7,
+  STBIR_ABGR = 8,
+  STBIR_RA   = 9,
+  STBIR_AR   = 10,
+
+  STBIR_RGBA_PM = 11,               // alpha formats, where alpha is premultiplied into color channels
+  STBIR_BGRA_PM = 12,
+  STBIR_ARGB_PM = 13,
+  STBIR_ABGR_PM = 14,
+  STBIR_RA_PM   = 15,
+  STBIR_AR_PM   = 16,
+
+  STBIR_RGBA_NO_AW = 11,            // alpha formats, where NO alpha weighting is applied at all!
+  STBIR_BGRA_NO_AW = 12,            //   these are just synonyms for the _PM flags (which also do
+  STBIR_ARGB_NO_AW = 13,            //   no alpha weighting). These names just make it more clear
+  STBIR_ABGR_NO_AW = 14,            //   for some folks).
+  STBIR_RA_NO_AW   = 15,
+  STBIR_AR_NO_AW   = 16,
+
+} stbir_pixel_layout;
+#endif
+
 extern turtle_t turtle;
 
 /* run this to set the bounds of the window in coordinates */
@@ -29948,14 +29981,6 @@ int32_t turtleTextureUnload(turtle_texture_t texture) {
     }
     free(turtle.textureList -> data[texture].s);
     turtle.textureList -> data[texture].s = strdup("");
-    for (int32_t i = turtle.textureList -> length - 4; i > 3; i -= 4) {
-        if (strcmp(turtle.textureList -> data[i].s, "") == 0) {
-            list_pop(turtle.textureList);
-            list_pop(turtle.textureList);
-            list_pop(turtle.textureList);
-            list_pop(turtle.textureList);
-        }
-    }
     return 0;
 }
 
