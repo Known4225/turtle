@@ -66,7 +66,6 @@ The example project has a set of files in the `config/` folder that can be modif
 - Alignment options for switches
 - Upward dropdown
 - Text-only textbox
-- List stride sort
 - Cleanup Win32Tcp
 - Write wiki/documentation
 - Fix flipped world coordinates

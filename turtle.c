@@ -321,19 +321,19 @@ int main(int argc, char *argv[]) {
         }
 
         /* write all characters supported */
-        turtleTextWriteUnicode(u8"AÀÁĂÄÃÅĀĄÆBCĆČĊÇDĎĐÐEÈÉĚÊËĒĖĘƏFGĞĠHĦ", scrollbarVarX * -5 + 260, scrollbarVarY * 3.3 - 180, 10, 0);
-        turtleTextWriteUnicode(u8"IÌÍÎÏĪİĮJKĶLĹĽĻŁĿMNŃŇÑŅOÒÓÔÖÕŐØŒPQRŔ", scrollbarVarX * -5 + 260, scrollbarVarY * 3.3 - 195, 10, 0);
-        turtleTextWriteUnicode(u8"ŘSŚŠŞȘẞTŤȚÞUÙÚÛÜŮŰŪŲVWXYÝZŹŽŻaàáâăäã", scrollbarVarX * -5 + 260, scrollbarVarY * 3.3 - 210, 10, 0);
-        turtleTextWriteUnicode(u8"åāąæbcćčċçdďđðeèéěêëēėęəfgğġhħiìíîïī", scrollbarVarX * -5 + 260, scrollbarVarY * 3.3 - 225, 10, 0);
-        turtleTextWriteUnicode(u8"ıįjkķlĺľļłŀmnńňñņoòóôöõőøœpqrŕřsśšşș", scrollbarVarX * -5 + 260, scrollbarVarY * 3.3 - 240, 10, 0);
-        turtleTextWriteUnicode(u8"ßtťțþuùúûüůűūųvwxyýzźžżАБВГҐҒДЂЕЁЄӘЖ", scrollbarVarX * -5 + 260, scrollbarVarY * 3.3 - 255, 10, 0);
-        turtleTextWriteUnicode(u8"ӁЗИӢЙІЇЈКҚҜЛЉМНҢЊОӨПРСТЋУӮҮҰЎФХҲҺЦЧҶ", scrollbarVarX * -5 + 260, scrollbarVarY * 3.3 - 270, 10, 0);
-        turtleTextWriteUnicode(u8"ҸЏШЩЪЫЬЭЮЯабвгґғдђеёєәжӂзиӣйіїјкқҝлљ", scrollbarVarX * -5 + 260, scrollbarVarY * 3.3 - 285, 10, 0);
-        turtleTextWriteUnicode(u8"мнңњоөпрстћуӯүұўфхҳһцчҷҹџшщъыьэюя", scrollbarVarX * -5 + 260, scrollbarVarY * 3.3 - 300, 10, 0);
-        turtleTextWriteUnicode(u8"ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩ", scrollbarVarX * -5 + 260, scrollbarVarY * 3.3 - 315, 10, 0);
-        turtleTextWriteUnicode(u8"αβγδεζηθικλμνξοπρσςτυφχψω", scrollbarVarX * -5 + 260, scrollbarVarY * 3.3 - 330, 10, 0);
-        turtleTextWriteUnicode(u8"1234567890!@#$£€₺₽¥₩₹₣฿%^&*()`~-_=+[", scrollbarVarX * -5 + 260, scrollbarVarY * 3.3 - 345, 10, 0);
-        turtleTextWriteUnicode(u8"{]}\\|;:‘'’“\"”,<.>/?½¨", scrollbarVarX * -5 + 260, scrollbarVarY * 3.3 - 360, 10, 0);
+        turtleTextWriteUnicode("AÀÁĂÄÃÅĀĄÆBCĆČĊÇDĎĐÐEÈÉĚÊËĒĖĘƏFGĞĠHĦ", scrollbarVarX * -5 + 260, scrollbarVarY * 3.3 - 180, 10, 0);
+        turtleTextWriteUnicode("IÌÍÎÏĪİĮJKĶLĹĽĻŁĿMNŃŇÑŅOÒÓÔÖÕŐØŒPQRŔ", scrollbarVarX * -5 + 260, scrollbarVarY * 3.3 - 195, 10, 0);
+        turtleTextWriteUnicode("ŘSŚŠŞȘẞTŤȚÞUÙÚÛÜŮŰŪŲVWXYÝZŹŽŻaàáâăäã", scrollbarVarX * -5 + 260, scrollbarVarY * 3.3 - 210, 10, 0);
+        turtleTextWriteUnicode("åāąæbcćčċçdďđðeèéěêëēėęəfgğġhħiìíîïī", scrollbarVarX * -5 + 260, scrollbarVarY * 3.3 - 225, 10, 0);
+        turtleTextWriteUnicode("ıįjkķlĺľļłŀmnńňñņoòóôöõőøœpqrŕřsśšşș", scrollbarVarX * -5 + 260, scrollbarVarY * 3.3 - 240, 10, 0);
+        turtleTextWriteUnicode("ßtťțþuùúûüůűūųvwxyýzźžżАБВГҐҒДЂЕЁЄӘЖ", scrollbarVarX * -5 + 260, scrollbarVarY * 3.3 - 255, 10, 0);
+        turtleTextWriteUnicode("ӁЗИӢЙІЇЈКҚҜЛЉМНҢЊОӨПРСТЋУӮҮҰЎФХҲҺЦЧҶ", scrollbarVarX * -5 + 260, scrollbarVarY * 3.3 - 270, 10, 0);
+        turtleTextWriteUnicode("ҸЏШЩЪЫЬЭЮЯабвгґғдђеёєәжӂзиӣйіїјкқҝлљ", scrollbarVarX * -5 + 260, scrollbarVarY * 3.3 - 285, 10, 0);
+        turtleTextWriteUnicode("мнңњоөпрстћуӯүұўфхҳһцчҷҹџшщъыьэюя", scrollbarVarX * -5 + 260, scrollbarVarY * 3.3 - 300, 10, 0);
+        turtleTextWriteUnicode("ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩ", scrollbarVarX * -5 + 260, scrollbarVarY * 3.3 - 315, 10, 0);
+        turtleTextWriteUnicode("αβγδεζηθικλμνξοπρσςτυφχψω", scrollbarVarX * -5 + 260, scrollbarVarY * 3.3 - 330, 10, 0);
+        turtleTextWriteUnicode("1234567890!@#$£€₺₽¥₩₹₣฿%^&*()`~-_=+[", scrollbarVarX * -5 + 260, scrollbarVarY * 3.3 - 345, 10, 0);
+        turtleTextWriteUnicode("{]}\\|;:‘'’“\"”,<.>/?½¨", scrollbarVarX * -5 + 260, scrollbarVarY * 3.3 - 360, 10, 0);
         
         turtleTextWriteStringRotated("Rotated Text", scrollbarVarX * -5 - 100, scrollbarVarY * 3.3 + 75, 9, 50, -15);
         

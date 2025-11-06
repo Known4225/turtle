@@ -134,8 +134,17 @@ int32_t list_index(list_t *list, unitype item, char type);
 /* counts how many instances of an item is found in the list */
 uint32_t list_count(list_t *list, unitype item, char type);
 
-/* sort list */
+/* sort list (biggest to smallest) */
 void list_sort(list_t *list);
+
+/* return a list of indices that would sort the list (biggest to smallest) */
+list_t *list_sort_index(list_t *list);
+
+/* sort list (stride) (biggest to smallest) */
+void list_sort_stride(list_t *list, int32_t stride, int32_t offset);
+
+/* return a list of indices that would sort the list (stride) (biggest to smallest) */
+list_t *list_sort_stride_index(list_t *list, int32_t stride, int32_t offset);
 
 /* deletes the first instance of the item from the list, returns the index the item was at, returns -1 and doesn't modify the list if not found */
 int32_t list_remove(list_t *list, unitype item, char type);
@@ -28782,36 +28791,149 @@ uint32_t list_count(list_t *list, unitype item, char type) {
 /* sort list */
 void list_sort(list_t *list) {
     /* create min heap */
-    int32_t temp;
+    int64_t temp;
+    int8_t tempType;
     for (uint32_t i = 2; i < list -> length + 1; i++) {
         int32_t j = i;
-        while (j > 1 && list -> data[j / 2 - 1].i > list -> data[j - 1].i) {
-            temp = list -> data[j / 2 - 1].i;
-            list -> data[j / 2 - 1].i = list -> data[j - 1].i;
-            list -> data[j - 1].i = temp;
+        while (j > 1 && list -> data[j / 2 - 1].l > list -> data[j - 1].l) {
+            temp = list -> data[j / 2 - 1].l;
+            tempType = list -> type[j / 2 - 1];
+            list -> data[j / 2 - 1].l = list -> data[j - 1].l;
+            list -> type[j / 2 - 1] = list -> type[j - 1];
+            list -> data[j - 1].l = temp;
+            list -> type[j - 1] = tempType;
             j /= 2;
         }
     }
+    list_print(list);
     /* heapsort */
     for (int32_t i = list -> length - 1; i > 0; i--) {
-        temp = list -> data[0].i;
-        list -> data[0].i = list -> data[i].i;
-        list -> data[i].i = temp;
+        temp = list -> data[0].l;
+        tempType = list -> type[0];
+        list -> data[0].l = list -> data[i].l;
+        list -> type[0] = list -> type[i];
+        list -> data[i].l = temp;
+        list -> type[i] = tempType;
         int32_t j = 1;
         while ((j * 2 - 1 < i && list -> data[j - 1].i > list -> data[j * 2 - 1].i) || (j * 2 < i && list -> data[j - 1].i > list -> data[j * 2].i)) {
+            temp = list -> data[j - 1].l;
+            tempType = list -> type[j - 1];
             if (list -> data[j * 2 - 1].i < list -> data[j * 2].i || j * 2 == i) {
-                temp = list -> data[j - 1].i;
                 list -> data[j - 1] = list -> data[j * 2 - 1];
-                list -> data[j * 2 - 1].i = temp;
+                list -> type[j - 1] = list -> type[j * 2 - 1];
+                list -> data[j * 2 - 1].l = temp;
+                list -> type[j * 2 - 1] = tempType;
                 j = j * 2;
             } else {
-                temp = list -> data[j - 1].i;
-                list -> data[j - 1].i = list -> data[j * 2].i;
-                list -> data[j * 2].i = temp;
+                list -> data[j - 1].l = list -> data[j * 2].l;
+                list -> type[j - 1] = list -> type[j * 2];
+                list -> data[j * 2].l = temp;
+                list -> type[j * 2] = tempType;
                 j *= 2 + 1;
             }
         }
     }
+}
+
+/* return a list of indices that would sort the list */
+list_t *list_sort_index(list_t *list) {
+    list_t *output = list_init();
+    for (int32_t i = 0; i < list -> length; i++) {
+        list_append(output, (unitype) -1, 'i');
+    }
+    for (int32_t j = 0; j < list -> length; j++) {
+        int32_t max = -2147483648;
+        int64_t maxIndex = -1;
+        for (int32_t i = 0; i < list -> length; i++) {
+            if (list -> data[i].i > max && output -> data[i].i == -1) {
+                max = list -> data[i].i;
+                maxIndex = i;
+            }
+        }
+        if (maxIndex > -1) {
+            output -> data[maxIndex].i = j;
+        }
+    }
+    return output;
+}
+
+/* sort list (stride) */
+void list_sort_stride(list_t *list, int32_t stride, int32_t offset) {
+    offset %= stride;
+    /* create min heap */
+    int64_t temp;
+    int8_t tempType;
+    for (uint32_t i = 2; i < list -> length / stride + 1; i++) {
+        int32_t j = i;
+        while (j > 1 && list -> data[(j / 2 - 1) * stride + offset].i > list -> data[(j - 1) * stride + offset].i) {
+            for (int32_t k = 0; k < stride; k++) {
+                temp = list -> data[(j / 2 - 1) * stride + k].li;
+                tempType = list -> type[(j / 2 - 1) * stride + k];
+                list -> data[(j / 2 - 1) * stride + k].li = list -> data[(j - 1) * stride + k].li;
+                list -> type[(j / 2 - 1) * stride + k] = list -> type[(j - 1) * stride + k];
+                list -> data[(j - 1) * stride + k].li = temp;
+                list -> type[(j - 1) * stride + k] = tempType;
+            }
+            j /= 2;
+        }
+    }
+    /* heapsort */
+    for (int32_t i = list -> length / stride - 1; i > 0; i--) {
+        for (int32_t k = 0; k < stride; k++) {
+            temp = list -> data[k].l;
+            tempType = list -> type[k];
+            list -> data[k].l = list -> data[i * stride + k].l;
+            list -> type[k] = list -> type[i * stride + k];
+            list -> data[i * stride + k].l = temp;
+            list -> type[i * stride + k] = tempType;
+        }
+        int32_t j = 1;
+        while ((j * 2 - 1 < i && list -> data[(j - 1) * stride + offset].i > list -> data[(j * 2 - 1) * stride + offset].i) || (j * 2 < i && list -> data[(j - 1) * stride + offset].i > list -> data[(j * 2) * stride + offset].i)) {
+            if (list -> data[(j * 2 - 1) * stride + offset].i < list -> data[(j * 2) * stride + offset].i || j * 2 == i) {
+                for (int32_t k = 0; k < stride; k++) {
+                    temp = list -> data[(j - 1) * stride + k].l;
+                    tempType = list -> type[(j - 1) * stride + k];
+                    list -> data[(j - 1) * stride + k] = list -> data[(j * 2 - 1) * stride + k];
+                    list -> type[(j - 1) * stride + k] = list -> type[(j * 2 - 1) * stride + k];
+                    list -> data[(j * 2 - 1) * stride + k].l = temp;
+                    list -> type[(j * 2 - 1) * stride + k] = tempType;
+                }
+                j = j * 2;
+            } else {
+                for (int32_t k = 0; k < stride; k++) {
+                    temp = list -> data[(j - 1) * stride + k].l;
+                    tempType = list -> type[(j - 1) * stride + k];
+                    list -> data[(j - 1) * stride + k].l = list -> data[(j * 2) * stride + k].l;
+                    list -> type[(j - 1) * stride + k] = list -> type[(j * 2) * stride + k];
+                    list -> data[(j * 2) * stride + k].l = temp;
+                    list -> type[(j * 2) * stride + k] = tempType;
+                }
+                j *= 2 + 1;
+            }
+        }
+    }
+}
+
+/* return a list of indices that would sort the list (stride) */
+list_t *list_sort_stride_index(list_t *list, int32_t stride, int32_t offset) {
+    list_t *output = list_init();
+    for (int32_t i = 0; i < list -> length / stride; i++) {
+        list_append(output, (unitype) -1, 'i');
+    }
+    for (int32_t j = 0; j < list -> length / stride; j++) {
+        int32_t max = -2147483648;
+        int64_t maxIndex = -1;
+        for (int32_t i = 0; i < list -> length / stride; i++) {
+            if (list -> data[i * stride + offset].i > max && output -> data[i].i == -1) {
+                max = list -> data[i * stride + offset].i;
+                maxIndex = i;
+            }
+        }
+        if (maxIndex > -1) {
+            output -> data[maxIndex].i = j * stride + offset;
+        }
+    }
+    return output;
 }
 
 /* deletes the first instance of the item from the list, returns the index the item was at, returns -1 and doesn't modify the list if not found */
