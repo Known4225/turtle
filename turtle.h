@@ -31497,7 +31497,7 @@ void generateDefaultFont(list_t *generatedFont) {
     list_append(generatedFont, (unitype) "ψ, 2, 2, -100, -160, -100, 20, 4, -160, 20, b, -160, -40, -160, -100, b, -100, -100, -40, -100, b, -40, -40, -40, 0, -50, 20", 's');
     list_append(generatedFont, (unitype) "ω, 1, 6, b, -145, 20, -160, -5, b, -160, -40, -160, -100, b, -120, -100, -80, -100, b, -80, -30, -80, -100, b, -40, -100, 0, -100, b, 0, -40, 0, -5, -15, 20", 's');
     list_append(generatedFont, (unitype) "ς, 1, 4, b, -70, -10, -80, 20, b, -115, 20, -160, 20, b, -160, -40, -160, -100, b, -110, -100, -70, -100, -100, -135", 's');
-    list_append(generatedFont, (unitype) "1, 1, 3, -160, 35, -120, 60, -120, -100", 's');
+    list_append(generatedFont, (unitype) "1, 1, 3, -160, 35, -120, 60, -120, -100, w, 55", 's');
     list_append(generatedFont, (unitype) "2, 1, 4, -65, -100, b, -160, -100, -70, -15, b, -70, 25, -70, 60, b, -110, 60, -150, 60, -160, 25", 's');
     list_append(generatedFont, (unitype) "3, 1, 6, b, -160, 30, -150, 60, b, -115, 60, -70, 60, b, -70, 20, -70, -20, b, -120, -20, -70, -20, b, -70, -60, -70, -100, b, -115, -100, -150, -100, -160, -70", 's');
     list_append(generatedFont, (unitype) "4, 1, 4, -85, -100, -85, 60, -160, -60, -65, -60", 's');
@@ -33379,7 +33379,7 @@ void dropdownUpdate() {
                             } else if (dropdownp -> align == TT_DROPDOWN_ALIGN_CENTER) {
                                 turtleTextWriteUnicode(dropdownp -> options -> data[i].s, (dropdownMaxXFactor[0] + dropdownMaxXFactor[1]) / 2, dropdownY - renderIndex * itemHeight, dropdownp -> size - 1, dropdownAlignFactor);
                             } else if (dropdownp -> align == TT_DROPDOWN_ALIGN_RIGHT) {
-                                turtleTextWriteUnicode(dropdownp -> options -> data[i].s, dropdownMaxXFactor[1] - dropdownp -> size * 1.4, dropdownY - renderIndex * itemHeight, dropdownp -> size - 1, dropdownAlignFactor);
+                                turtleTextWriteUnicode(dropdownp -> options -> data[i].s, dropdownMaxXFactor[1] - dropdownp -> size * 1.58, dropdownY - renderIndex * itemHeight, dropdownp -> size - 1, dropdownAlignFactor);
                             }
                             renderIndex++;
                         }
