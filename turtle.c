@@ -14,7 +14,7 @@ void parseRibbonOutput() {
         }
         if (tt_ribbon.output[2] == 2) { // Save
             if (osToolsFileDialog.selectedFilenames -> length == 0) {
-                if (osToolsFileDialogSave(OSTOOLS_FILE_DIALOG_FILE, "", NULL) != -1) {
+                if (osToolsFileDialogSave(OSTOOLS_FILE_DIALOG_FILE, "Save.txt", NULL) != -1) {
                     printf("Saved to: %s\n", osToolsFileDialog.selectedFilenames -> data[0].s);
                 }
             } else {
@@ -377,7 +377,6 @@ int main(int argc, char *argv[]) {
         } else {
             keys[1] = 0;
         }
-        // printf("%d %d\n", tt_globals.elementLogicType, tt_globals.elementLogicTypeOld);
         turtleToolsUpdate(); // update turtleTools
         parseRibbonOutput(); // user defined function to use ribbon
         parsePopupOutput(window); // user defined function to use popup
