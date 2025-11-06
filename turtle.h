@@ -19579,11 +19579,13 @@ typedef struct {
     double x;
     double y;
     double size;
-    int8_t *variable; // 1 if button is being pressed, 0 otherwise
+    int8_t *variable; // bound variable (can be NULL)
     char label[TT_LABEL_LENGTH_LIMIT];
     int32_t status;
     tt_button_shape_t shape;
     tt_button_align_t align;
+    /* value */
+    int8_t value; // 1 if button is being pressed, 0 otherwise
 } tt_button_t;
 
 typedef enum {
@@ -19608,11 +19610,13 @@ typedef struct {
     double x;
     double y;
     double size;
-    int8_t *variable; // 1 if switch is flipped, 0 otherwise
+    int8_t *variable; // bound variable (can be NULL)
     char label[TT_LABEL_LENGTH_LIMIT];
     int32_t status;
     tt_switch_style_t style;
     tt_switch_align_t align;
+    /* value */
+    int8_t value; // 1 if switch is flipped, 0 otherwise
 } tt_switch_t;
 
 typedef enum {
@@ -19629,13 +19633,15 @@ typedef struct {
     double x;
     double y;
     double size;
-    double *variable; // value of dial
+    double *variable; // bound variable (can be NULL)
     char label[TT_LABEL_LENGTH_LIMIT];
     int32_t status[2];
     tt_dial_scale_t scale;
     double range[2];
     double renderNumberFactor; // multiply rendered variable by this amount
     double defaultValue;
+    /* value */
+    double value; // value of dial
 } tt_dial_t;
 
 typedef enum {
@@ -19663,7 +19669,7 @@ typedef struct {
     double x;
     double y;
     double size;
-    double *variable; // value of slider
+    double *variable; // bound variable (can be NULL)
     char label[TT_LABEL_LENGTH_LIMIT];
     int32_t status;
     tt_slider_type_t type;
@@ -19673,6 +19679,8 @@ typedef struct {
     double range[2];
     double renderNumberFactor; // multiply rendered variable by this amount
     double defaultValue;
+    /* value */
+    double value; // value of slider
 } tt_slider_t;
 
 typedef enum {
@@ -19688,11 +19696,13 @@ typedef struct {
     double x;
     double y;
     double size;
-    double *variable; // value of slider
+    double *variable; // bound variable (can be NULL)
     int32_t status;
     tt_scrollbar_type_t type;
     double length;
     double barPercentage; // percentage of scrollbar occupied by bar
+    /* value */
+    double value; // value of scrollbar
 } tt_scrollbar_t;
 
 typedef enum {
@@ -19711,12 +19721,14 @@ typedef struct {
     double x;
     double y;
     double size;
-    int32_t *variable; // index of selected option
+    int32_t *variable; // bound variable (can be NULL)
     list_t *options;
-    int32_t index;
     int32_t status;
     tt_context_direction_t direction;
     double maxXfactor;
+    /* value */
+    int32_t index; // index of selected option
+    int32_t value; // index of selected option (duplicate name - always equal to index)
 } tt_context_t;
 
 typedef enum {
@@ -19733,13 +19745,15 @@ typedef struct {
     double x;
     double y;
     double size;
-    int32_t *variable; // index of dropdown selected
+    int32_t *variable; // bound variable (can be NULL)
     char label[TT_LABEL_LENGTH_LIMIT];
     list_t *options;
-    uint32_t index;
     int32_t status;
     tt_dropdown_align_t align;
     double maxXfactor;
+    /* value */
+    int32_t index; // index of selected option
+    int32_t value; // index of selected option (duplicate name - always equal to index)
 } tt_dropdown_t;
 
 typedef enum {
@@ -19755,7 +19769,6 @@ typedef struct {
     double x;
     double y;
     double size;
-    char *text;
     char label[TT_LABEL_LENGTH_LIMIT];
     int32_t status;
     int8_t mouseOver;
@@ -19769,6 +19782,9 @@ typedef struct {
     double renderPixelOffset;
     int32_t renderStartingIndex;
     int32_t renderNumCharacters;
+    /* value */
+    char *text; // text of textbox
+    char *value; // text of textbox (duplicate name - always equal to text)
 } tt_textbox_t;
 
 /* initialise UI elements */
@@ -19810,7 +19826,7 @@ tt_dropdown_t *dropdownInit(char *label, list_t *options, int32_t *variable, tt_
 void dropdownFree(tt_dropdown_t *dropdownp);
 
 /* create a textbox */
-tt_textbox_t *textboxInit(char *label, uint32_t maxCharacters, double x, double y, double size, double length);
+tt_textbox_t *textboxInit(char *label, char *variable, uint32_t maxCharacters, double x, double y, double size, double length);
 
 void textboxFree(tt_textbox_t *textboxp);
 
@@ -32246,7 +32262,9 @@ tt_button_t *buttonInit(char *label, int8_t *variable, double x, double y, doubl
     buttonp -> x = x;
     buttonp -> y = y;
     buttonp -> size = size;
-    *variable = 0; // button starts unpressed
+    if (variable != NULL) {
+        *variable = 0; // button starts unpressed
+    }
     buttonp -> variable = variable;
     buttonp -> shape = TT_BUTTON_SHAPE_RECTANGLE;
     buttonp -> align = TT_BUTTON_ALIGN_CENTER;
@@ -32328,7 +32346,11 @@ tt_dial_t *dialInit(char *label, double *variable, tt_dial_scale_t scale, double
     dialp -> range[1] = top;
     dialp -> variable = variable;
     dialp -> renderNumberFactor = renderNumberFactor;
-    dialp -> defaultValue = *variable;
+    if (variable == NULL) {
+        dialp -> defaultValue = bottom;
+    } else {
+        dialp -> defaultValue = *variable;
+    }
     list_append(tt_elements.dials, (unitype) (void *) dialp, 'p');
     list_append(tt_elements.all, (unitype) (void *) dialp, 'l');
     return dialp;
@@ -32372,7 +32394,11 @@ tt_slider_t *sliderInit(char *label, double *variable, tt_slider_type_t type, tt
     sliderp -> range[1] = top;
     sliderp -> variable = variable;
     sliderp -> renderNumberFactor = renderNumberFactor;
-    sliderp -> defaultValue = *variable;
+    if (variable == NULL) {
+        sliderp -> defaultValue = bottom;
+    } else {
+        sliderp -> defaultValue = *variable;
+    }
     list_append(tt_elements.sliders, (unitype) (void *) sliderp, 'p');
     list_append(tt_elements.all, (unitype) (void *) sliderp, 'l');
     return sliderp;
@@ -32444,11 +32470,14 @@ tt_context_t *contextInit(list_t *options, int32_t *variable, double x, double y
     elementResetColor(contextp, TT_ELEMENT_CONTEXT);
     contextp -> options = options;
     contextp -> index = -1;
+    contextp -> value = -1;
     contextp -> status = 0;
     contextp -> x = x;
     contextp -> y = y;
     contextp -> size = size;
-    *variable = -1;
+    if (variable != NULL) {
+        *variable = -1;
+    }
     contextp -> variable = variable;
     contextCalculateMax(contextp);
     contextp -> direction = TT_CONTEXT_DIRECTION_AUTO;
@@ -32495,7 +32524,12 @@ tt_dropdown_t *dropdownInit(char *label, list_t *options, int32_t *variable, tt_
     }
     elementResetColor(dropdownp, TT_ELEMENT_DROPDOWN);
     dropdownp -> options = options;
-    dropdownp -> index = *variable;
+    if (variable == NULL) {
+        dropdownp -> index = 0;
+    } else {
+        dropdownp -> index = *variable;
+    }
+    dropdownp -> value = dropdownp -> index;
     dropdownp -> status = 0;
     dropdownp -> align = align;
     dropdownp -> x = x;
@@ -32518,7 +32552,7 @@ void textboxUnicodeCallback(uint32_t codepoint);
 void textboxKeyCallback(int32_t key, int32_t scancode, int32_t action);
 
 /* create a textbox */
-tt_textbox_t *textboxInit(char *label, uint32_t maxCharacters, double x, double y, double size, double length) {
+tt_textbox_t *textboxInit(char *label, char *variable, uint32_t maxCharacters, double x, double y, double size, double length) {
     if (tt_enabled.textboxEnabled == 0) {
         turtle.unicodeCallback = textboxUnicodeCallback;
         turtle.keyCallback = textboxKeyCallback;
@@ -32546,7 +32580,11 @@ tt_textbox_t *textboxInit(char *label, uint32_t maxCharacters, double x, double 
     textboxp -> y = y;
     textboxp -> size = size;
     textboxp -> length = length;
-    textboxp -> text = calloc(maxCharacters + 5, 1);
+    if (variable == NULL) {
+        textboxp -> text = calloc(maxCharacters + 5, 1);
+    } else {
+        textboxp -> text = variable;
+    }
     textboxp -> maxCharacters = maxCharacters;
     textboxp -> editIndex = 0;
     textboxp -> lastKey = 0;
@@ -32567,6 +32605,9 @@ void textboxFree(tt_textbox_t *textboxp) {
 void buttonUpdate() {
     for (uint32_t i = 0; i < tt_elements.buttons -> length; i++) {
         tt_button_t *buttonp = (tt_button_t *) (tt_elements.buttons -> data[i].p);
+        if (buttonp -> variable != NULL) {
+            buttonp -> value = *buttonp -> variable;
+        }
         if (buttonp -> enabled == TT_ELEMENT_HIDE) {
             buttonp -> status = 0;
             continue;
@@ -32647,15 +32688,18 @@ void buttonUpdate() {
                 }
             }
             if (buttonp -> status > 1) {
-                *(buttonp -> variable) = 1;
+                buttonp -> value = 1;
                 // buttonp -> status = 0;
             } else {
                 if (buttonp -> status < 1) {
-                    *(buttonp -> variable) = 0;
+                    buttonp -> value = 0;
                 }
             }
         } else {
             buttonp -> status = 0;
+        }
+        if (buttonp -> variable != NULL) {
+            *buttonp -> variable = buttonp -> value;
         }
     }
 }
@@ -32663,6 +32707,9 @@ void buttonUpdate() {
 void switchUpdate() {
     for (uint32_t i = 0; i < tt_elements.switches -> length; i++) {
         tt_switch_t *switchp = (tt_switch_t *) (tt_elements.switches -> data[i].p);
+        if (switchp -> variable != NULL) {
+            switchp -> value = *switchp -> variable;
+        }
         if (switchp -> enabled == TT_ELEMENT_HIDE) {
             continue;
         }
@@ -32674,7 +32721,7 @@ void switchUpdate() {
         double switchClickUp = switchY;
         if (switchp -> style == TT_SWITCH_STYLE_CLASSIC || switchp -> style == TT_SWITCH_STYLE_SIDESWIPE_LEFT || switchp -> style == TT_SWITCH_STYLE_SIDESWIPE_RIGHT) {
             /* render switch */
-            if (*(switchp -> variable)) {
+            if (switchp -> value) {
                 tt_setColor(switchp -> color[TT_COLOR_SLOT_SWITCH_ON]);
             } else {
                 tt_setColor(switchp -> color[TT_COLOR_SLOT_SWITCH_OFF]);
@@ -32685,7 +32732,7 @@ void switchUpdate() {
             turtleGoto(switchX + switchp -> size * 0.8, switchY);
             turtlePenUp();
             turtlePenSize(switchp -> size);
-            if (*(switchp -> variable)) {
+            if (switchp -> value) {
                 tt_setColor(switchp -> color[TT_COLOR_SLOT_CIRCLE_ON]);
                 turtleGoto(switchX + switchp -> size * 0.8, switchY);
             } else {
@@ -32741,7 +32788,7 @@ void switchUpdate() {
             turtleGoto(switchX - switchp -> size / 2, switchY + switchp -> size / 2);
             turtleGoto(switchX - switchp -> size / 2, switchY - switchp -> size / 2);
             turtlePenUp();
-            if (*(switchp -> variable)) {
+            if (switchp -> value) {
                 if (switchp -> style == TT_SWITCH_STYLE_CHECKBOX) {
                     /* render check */
                     tt_setColor(switchp -> color[TT_COLOR_SLOT_CIRCLE_ON]);
@@ -32793,15 +32840,14 @@ void switchUpdate() {
                 }
             }
             if (switchp -> status > 0) {
-                if (*(switchp -> variable)) {
-                    *(switchp -> variable) = 0;
-                } else {
-                    *(switchp -> variable) = 1;
-                }
+                switchp -> value = !switchp -> value;
                 switchp -> status = 0;
             }
         } else {
             switchp -> status = 0;
+        }
+        if (switchp -> variable != NULL) {
+            *switchp -> variable = switchp -> value;
         }
     }
 }
@@ -32830,6 +32876,9 @@ double angleBetween(double x1, double y1, double x2, double y2) {
 void dialUpdate() {
     for (uint32_t i = 0; i < tt_elements.dials -> length; i++) {
         tt_dial_t *dialp = (tt_dial_t *) (tt_elements.dials -> data[i].p);
+        if (dialp -> variable != NULL) {
+            dialp -> value = *dialp -> variable;
+        }
         if (dialp -> enabled == TT_ELEMENT_HIDE) {
             continue;
         }
@@ -32851,11 +32900,11 @@ void dialUpdate() {
         turtlePenDown();
         double dialAngle;
         if (dialp -> scale == TT_DIAL_SCALE_LOG) {
-            dialAngle = pow(361, (*(dialp -> variable) - dialp -> range[0]) / (dialp -> range[1] - dialp -> range[0])) - 1;
+            dialAngle = pow(361, (dialp -> value - dialp -> range[0]) / (dialp -> range[1] - dialp -> range[0])) - 1;
         } else if (dialp -> scale == TT_DIAL_SCALE_LINEAR) {
-            dialAngle = (*(dialp -> variable) - dialp -> range[0]) / (dialp -> range[1] - dialp -> range[0]) * 360;
+            dialAngle = (dialp -> value - dialp -> range[0]) / (dialp -> range[1] - dialp -> range[0]) * 360;
         } else if (dialp -> scale == TT_DIAL_SCALE_EXP) {
-            dialAngle = 360 * (log(((*(dialp -> variable) - dialp -> range[0]) / (dialp -> range[1] - dialp -> range[0])) * 360 + 1) / log(361));
+            dialAngle = 360 * (log(((dialp -> value - dialp -> range[0]) / (dialp -> range[1] - dialp -> range[0])) * 360 + 1) / log(361));
         }
         turtleGoto(dialX + sin(dialAngle / 57.2958) * dialp -> size, dialY + cos(dialAngle / 57.2958) * dialp -> size);
         turtlePenUp();
@@ -32870,7 +32919,7 @@ void dialUpdate() {
                 }
             } else if (turtleMouseRight()) {
                 if (dialp -> status[0] < 0) {
-                    *(dialp -> variable) = dialp -> defaultValue;
+                    dialp -> value = dialp -> defaultValue;
                 }
             } else {
                 if (turtle.mouseX > dialX - dialp -> size && turtle.mouseX < dialX + dialp -> size && turtle.mouseY > dialY - dialp -> size && turtle.mouseY < dialY + dialp -> size) {
@@ -32893,25 +32942,31 @@ void dialUpdate() {
                     dialAngle = 359.99999999;
                 }
                 if (dialp -> scale == TT_DIAL_SCALE_LOG) {
-                    *(dialp -> variable) = round(dialp -> range[0] + (dialp -> range[1] - dialp -> range[0]) * (log(1 + dialAngle) / log(361)));
+                    dialp -> value = round(dialp -> range[0] + (dialp -> range[1] - dialp -> range[0]) * (log(1 + dialAngle) / log(361)));
                 } else if (dialp -> scale == TT_DIAL_SCALE_LINEAR) {
-                    *(dialp -> variable) = round(dialp -> range[0] + ((dialp -> range[1] - dialp -> range[0]) * dialAngle / 360));
+                    dialp -> value = round(dialp -> range[0] + ((dialp -> range[1] - dialp -> range[0]) * dialAngle / 360));
                 } else if (dialp -> scale == TT_DIAL_SCALE_EXP) {
-                    *(dialp -> variable) = round(dialp -> range[0] + (dialp -> range[1] - dialp -> range[0]) * ((pow(361, dialAngle / 360) - 1) / 360));
+                    dialp -> value = round(dialp -> range[0] + (dialp -> range[1] - dialp -> range[0]) * ((pow(361, dialAngle / 360) - 1) / 360));
                 }
             }
         } else {
             dialp -> status[0] = 0;
         }
         tt_setColor(dialp -> color[TT_COLOR_SLOT_DIAL_TEXT]);
-        double rounded = round(*(dialp -> variable) * dialp -> renderNumberFactor);
+        double rounded = round(dialp -> value * dialp -> renderNumberFactor);
         turtleTextWriteStringf(dialX + dialp -> size + 3, dialY, 4, 0, "%.0lf", rounded);
+        if (dialp -> variable != NULL) {
+            *dialp -> variable = dialp -> value;
+        }
     }
 }
 
 void sliderUpdate() {
     for (uint32_t i = 0; i < tt_elements.sliders -> length; i++) {
         tt_slider_t *sliderp = (tt_slider_t *) (tt_elements.sliders -> data[i].p);
+        if (sliderp -> variable != NULL) {
+            sliderp -> value = *sliderp -> variable;
+        }
         if (sliderp -> enabled == TT_ELEMENT_HIDE) {
             continue;
         }
@@ -32989,19 +33044,19 @@ void sliderUpdate() {
         tt_setColor(sliderp -> color[TT_COLOR_SLOT_SLIDER_CIRCLE]);
         if (sliderp -> type == TT_SLIDER_TYPE_HORIZONTAL) {
             if (sliderp -> scale == TT_SLIDER_SCALE_LINEAR) {
-                turtleGoto(sliderXLeft + (sliderXRight - sliderXLeft) * (*(sliderp -> variable) - sliderp -> range[0]) / (sliderp -> range[1] - sliderp -> range[0]), sliderYLeft);
+                turtleGoto(sliderXLeft + (sliderXRight - sliderXLeft) * (sliderp -> value - sliderp -> range[0]) / (sliderp -> range[1] - sliderp -> range[0]), sliderYLeft);
             } else if (sliderp -> scale == TT_SLIDER_SCALE_LOG) {
-                turtleGoto(sliderXLeft + pow(sliderXRight - sliderXLeft + 1, (*(sliderp -> variable) - sliderp -> range[0]) / (sliderp -> range[1] - sliderp -> range[0])) - 1, sliderYLeft);
+                turtleGoto(sliderXLeft + pow(sliderXRight - sliderXLeft + 1, (sliderp -> value - sliderp -> range[0]) / (sliderp -> range[1] - sliderp -> range[0])) - 1, sliderYLeft);
             } else if (sliderp -> scale == TT_SLIDER_SCALE_EXP) {
-                turtleGoto(sliderXLeft + (sliderXRight - sliderXLeft) * (log(((*(sliderp -> variable) - sliderp -> range[0]) / (sliderp -> range[1] - sliderp -> range[0])) * (sliderXRight - sliderXLeft) + 1) / log((sliderXRight - sliderXLeft) + 1)), sliderYLeft);
+                turtleGoto(sliderXLeft + (sliderXRight - sliderXLeft) * (log(((sliderp -> value - sliderp -> range[0]) / (sliderp -> range[1] - sliderp -> range[0])) * (sliderXRight - sliderXLeft) + 1) / log((sliderXRight - sliderXLeft) + 1)), sliderYLeft);
             }
         } else if (sliderp -> type == TT_SLIDER_TYPE_VERTICAL) {
             if (sliderp -> scale == TT_SLIDER_SCALE_LINEAR) {
-                turtleGoto(sliderXLeft, sliderYLeft + (sliderYRight - sliderYLeft) * (*(sliderp -> variable) - sliderp -> range[0]) / (sliderp -> range[1] - sliderp -> range[0]));
+                turtleGoto(sliderXLeft, sliderYLeft + (sliderYRight - sliderYLeft) * (sliderp -> value - sliderp -> range[0]) / (sliderp -> range[1] - sliderp -> range[0]));
             } else if (sliderp -> scale == TT_SLIDER_SCALE_LOG) {
-                turtleGoto(sliderXLeft, sliderYLeft + pow(sliderYRight - sliderYLeft + 1, (*(sliderp -> variable) - sliderp -> range[0]) / (sliderp -> range[1] - sliderp -> range[0])) - 1);
+                turtleGoto(sliderXLeft, sliderYLeft + pow(sliderYRight - sliderYLeft + 1, (sliderp -> value - sliderp -> range[0]) / (sliderp -> range[1] - sliderp -> range[0])) - 1);
             } else if (sliderp -> scale == TT_SLIDER_SCALE_EXP) {
-                turtleGoto(sliderXLeft, sliderYLeft + (sliderYRight - sliderYLeft) * (log(((*(sliderp -> variable) - sliderp -> range[0]) / (sliderp -> range[1] - sliderp -> range[0])) * (sliderYRight - sliderYLeft) + 1) / log((sliderYRight - sliderYLeft) + 1)));
+                turtleGoto(sliderXLeft, sliderYLeft + (sliderYRight - sliderYLeft) * (log(((sliderp -> value - sliderp -> range[0]) / (sliderp -> range[1] - sliderp -> range[0])) * (sliderYRight - sliderYLeft) + 1) / log((sliderYRight - sliderYLeft) + 1)));
             }
         }
         turtlePenDown();
@@ -33014,7 +33069,7 @@ void sliderUpdate() {
                 }
             } else if (turtleMouseRight()) {
                 if (sliderp -> status < 0) {
-                    *(sliderp -> variable) = sliderp -> defaultValue;
+                    sliderp -> value = sliderp -> defaultValue;
                 }
             } else {
                 if (turtle.mouseX > sliderXLeft - sliderp -> size * 0.6 && turtle.mouseX < sliderXRight + sliderp -> size * 0.6 && turtle.mouseY > sliderYLeft - sliderp -> size * 0.6 && turtle.mouseY < sliderYRight + sliderp -> size * 0.6) {
@@ -33028,34 +33083,34 @@ void sliderUpdate() {
             if (sliderp -> status > 0) {
                 if (sliderp -> type == TT_SLIDER_TYPE_HORIZONTAL) {
                     if (sliderp -> scale == TT_SLIDER_SCALE_LINEAR) {
-                        *(sliderp -> variable) = round(sliderp -> range[0] + (turtle.mouseX - sliderXLeft) / sliderp -> length * (sliderp -> range[1] - sliderp -> range[0]));
+                        sliderp -> value = round(sliderp -> range[0] + (turtle.mouseX - sliderXLeft) / sliderp -> length * (sliderp -> range[1] - sliderp -> range[0]));
                     } else if (sliderp -> scale == TT_SLIDER_SCALE_LOG) {
                         if (turtle.mouseX - sliderXLeft < 0) {
-                            *(sliderp -> variable) = sliderp -> range[0];
+                            sliderp -> value = sliderp -> range[0];
                         } else {
-                            *(sliderp -> variable) = round(sliderp -> range[0] + (log(1 + turtle.mouseX - sliderXLeft) / log(sliderp -> length + 1)) * (sliderp -> range[1] - sliderp -> range[0]));
+                            sliderp -> value = round(sliderp -> range[0] + (log(1 + turtle.mouseX - sliderXLeft) / log(sliderp -> length + 1)) * (sliderp -> range[1] - sliderp -> range[0]));
                         }
                     } else if (sliderp -> scale == TT_SLIDER_SCALE_EXP) {
-                        *(sliderp -> variable) = round(sliderp -> range[0] + ((pow(sliderp -> length + 1, (turtle.mouseX - sliderXLeft) / sliderp -> length) - 1) / sliderp -> length) * (sliderp -> range[1] - sliderp -> range[0]));
+                        sliderp -> value = round(sliderp -> range[0] + ((pow(sliderp -> length + 1, (turtle.mouseX - sliderXLeft) / sliderp -> length) - 1) / sliderp -> length) * (sliderp -> range[1] - sliderp -> range[0]));
                     }
                 } else if (sliderp -> type == TT_SLIDER_TYPE_VERTICAL) {
                     if (sliderp -> scale == TT_SLIDER_SCALE_LINEAR) {
-                        *(sliderp -> variable) = round(sliderp -> range[0] + (turtle.mouseY - sliderYLeft) / sliderp -> length * (sliderp -> range[1] - sliderp -> range[0]));
+                        sliderp -> value = round(sliderp -> range[0] + (turtle.mouseY - sliderYLeft) / sliderp -> length * (sliderp -> range[1] - sliderp -> range[0]));
                     } else if (sliderp -> scale == TT_SLIDER_SCALE_LOG) {
                         if (turtle.mouseY - sliderYLeft < 0) {
-                            *(sliderp -> variable) = sliderp -> range[0];
+                            sliderp -> value = sliderp -> range[0];
                         } else {
-                            *(sliderp -> variable) = round(sliderp -> range[0] + (log(1 + turtle.mouseY - sliderYLeft) / log(sliderp -> length + 1)) * (sliderp -> range[1] - sliderp -> range[0]));
+                            sliderp -> value = round(sliderp -> range[0] + (log(1 + turtle.mouseY - sliderYLeft) / log(sliderp -> length + 1)) * (sliderp -> range[1] - sliderp -> range[0]));
                         }
                     } else if (sliderp -> scale == TT_SLIDER_SCALE_EXP) {
-                        *(sliderp -> variable) = round(sliderp -> range[0] + ((pow(sliderp -> length + 1, (turtle.mouseY - sliderYLeft) / sliderp -> length) - 1) / sliderp -> length) * (sliderp -> range[1] - sliderp -> range[0]));
+                        sliderp -> value = round(sliderp -> range[0] + ((pow(sliderp -> length + 1, (turtle.mouseY - sliderYLeft) / sliderp -> length) - 1) / sliderp -> length) * (sliderp -> range[1] - sliderp -> range[0]));
                     }
                 }
-                if (*(sliderp -> variable) >= sliderp -> range[1]) {
-                    *(sliderp -> variable) = sliderp -> range[1];
+                if (sliderp -> value >= sliderp -> range[1]) {
+                    sliderp -> value = sliderp -> range[1];
                 }
-                if (*(sliderp -> variable) <= sliderp -> range[0]) {
-                    *(sliderp -> variable) = sliderp -> range[0];
+                if (sliderp -> value <= sliderp -> range[0]) {
+                    sliderp -> value = sliderp -> range[0];
                 }
             }
         } else {
@@ -33063,8 +33118,11 @@ void sliderUpdate() {
         }
         if (sliderp -> renderNumberFactor != 0) {
             tt_setColor(sliderp -> color[TT_COLOR_SLOT_SLIDER_TEXT]);
-            double rounded = round(*(sliderp -> variable) * sliderp -> renderNumberFactor);
+            double rounded = round(sliderp -> value * sliderp -> renderNumberFactor);
             turtleTextWriteStringf(sliderp -> x + sliderOffsetXFactorSmall, sliderp -> y + sliderOffsetYFactorSmall, 4, sliderAlignFactor, "%.0lf", rounded);
+        }
+        if (sliderp -> variable != NULL) {
+            *sliderp -> variable = sliderp -> value;
         }
     }
 }
@@ -33077,13 +33135,16 @@ tip: try to match the ratio of visible content to the scrollbar's barPercentage 
 void scrollbarUpdate() {
     for (uint32_t i = 0; i < tt_elements.scrollbars -> length; i++) {
         tt_scrollbar_t *scrollbarp = (tt_scrollbar_t *) (tt_elements.scrollbars -> data[i].p);
+        if (scrollbarp -> variable != NULL) {
+            scrollbarp -> value = *scrollbarp -> variable;
+        }
         if (scrollbarp -> enabled == TT_ELEMENT_HIDE) {
             continue;
         }
         if (scrollbarp -> type == TT_SCROLLBAR_HORIZONTAL) {
             double scrollbarLeft = scrollbarp -> x - scrollbarp -> length / 2;
             double scrollbarRight = scrollbarp -> x + scrollbarp -> length / 2;
-            double dragLeft = scrollbarLeft + (*(scrollbarp -> variable)) / 100 * (scrollbarp -> length * (1 - scrollbarp -> barPercentage / 100));
+            double dragLeft = scrollbarLeft + scrollbarp -> value / 100 * (scrollbarp -> length * (1 - scrollbarp -> barPercentage / 100));
             double dragRight = dragLeft + (scrollbarp -> length * scrollbarp -> barPercentage / 100);
             turtlePenSize(scrollbarp -> size * 1);
             tt_setColor(scrollbarp -> color[TT_COLOR_SLOT_SCROLLBAR_BASE]);
@@ -33128,12 +33189,12 @@ void scrollbarUpdate() {
                     }
                 }
                 if (scrollbarp -> status > 0) {
-                    *(scrollbarp -> variable) = (turtle.mouseX - scrollbarLeft - tt_globals.barAnchor) / (scrollbarp -> length * (1 - scrollbarp -> barPercentage / 100)) * 100;
-                    if (*(scrollbarp -> variable) < 0) {
-                        *(scrollbarp -> variable) = 0;
+                    scrollbarp -> value = (turtle.mouseX - scrollbarLeft - tt_globals.barAnchor) / (scrollbarp -> length * (1 - scrollbarp -> barPercentage / 100)) * 100;
+                    if (scrollbarp -> value < 0) {
+                        scrollbarp -> value = 0;
                     }
-                    if (*(scrollbarp -> variable) > 100) {
-                        *(scrollbarp -> variable) = 100;
+                    if (scrollbarp -> value > 100) {
+                        scrollbarp -> value = 100;
                     }
                 }
             } else {
@@ -33142,7 +33203,7 @@ void scrollbarUpdate() {
         } else if (scrollbarp -> type == TT_SCROLLBAR_VERTICAL) {
             double scrollbarTop = scrollbarp -> y + scrollbarp -> length / 2;
             double scrollbarBottom = scrollbarp -> y - scrollbarp -> length / 2;
-            double dragTop = scrollbarTop - (*(scrollbarp -> variable)) / 100 * (scrollbarp -> length * (1 - scrollbarp -> barPercentage / 100));
+            double dragTop = scrollbarTop - scrollbarp -> value / 100 * (scrollbarp -> length * (1 - scrollbarp -> barPercentage / 100));
             double dragBottom = dragTop - (scrollbarp -> length * scrollbarp -> barPercentage / 100);
             turtlePenSize(scrollbarp -> size * 1);
             tt_setColor(scrollbarp -> color[TT_COLOR_SLOT_SCROLLBAR_BASE]);
@@ -33188,17 +33249,20 @@ void scrollbarUpdate() {
                     }
                 }
                 if (scrollbarp -> status > 0) {
-                    *(scrollbarp -> variable) = (scrollbarTop - turtle.mouseY - tt_globals.barAnchor) / (scrollbarp -> length * (1 - scrollbarp -> barPercentage / 100)) * 100;
-                    if (*(scrollbarp -> variable) < 0) {
-                        *(scrollbarp -> variable) = 0;
+                    scrollbarp -> value = (scrollbarTop - turtle.mouseY - tt_globals.barAnchor) / (scrollbarp -> length * (1 - scrollbarp -> barPercentage / 100)) * 100;
+                    if (scrollbarp -> value < 0) {
+                        scrollbarp -> value = 0;
                     }
-                    if (*(scrollbarp -> variable) > 100) {
-                        *(scrollbarp -> variable) = 100;
+                    if (scrollbarp -> value > 100) {
+                        scrollbarp -> value = 100;
                     }
                 }
             } else {
                 scrollbarp -> status = 0;
             }
+        }
+        if (scrollbarp -> variable != NULL) {
+            *scrollbarp -> variable = scrollbarp -> value;
         }
     }
 }
@@ -33206,6 +33270,10 @@ void scrollbarUpdate() {
 void contextUpdate() {
     for (uint32_t i = 0; i < tt_elements.contexts -> length; i++) {
         tt_context_t *contextp = (tt_context_t *) (tt_elements.contexts -> data[i].p);
+        if (contextp -> variable != NULL) {
+            contextp -> index = *contextp -> variable;
+            contextp -> value = *contextp -> variable;
+        }
         if (contextp -> enabled == TT_ELEMENT_HIDE) {
             continue;
         }
@@ -33232,12 +33300,14 @@ void contextUpdate() {
         turtleRectangle(contextTextX, contextTextY - contextp -> size * 0.9 - (contextp -> options -> length - 1) * itemHeight - 2, contextTextX + contextp -> maxXfactor + contextp -> size / 1.25, contextTextY + contextp -> size * 0.9 + 2);
         tt_setColor(contextp -> color[TT_COLOR_SLOT_CONTEXT_TEXT]);
         contextp -> index = -1;
+        contextp -> value = -1;
         for (int32_t i = 0; i < contextp -> options -> length; i++) {
             if (turtle.mouseX > contextTextX && turtle.mouseX < contextTextX + contextp -> maxXfactor + contextp -> size / 1.25 && turtle.mouseY >= contextTextY - i * itemHeight - contextp -> size * 0.9 && turtle.mouseY < contextTextY - i * itemHeight + contextp -> size * 0.9) {
                 tt_setColor(contextp -> color[TT_COLOR_SLOT_CONTEXT_SELECT]);
                 turtleRectangle(contextTextX, contextTextY - i * itemHeight - contextp -> size * 0.9, contextTextX + contextp -> maxXfactor + contextp -> size / 1.25, contextTextY - i * itemHeight + contextp -> size * 0.9);
                 tt_setColor(contextp -> color[TT_COLOR_SLOT_CONTEXT_TEXT]);
                 contextp -> index = i;
+                contextp -> value = i;
             }
             turtleTextWriteUnicode(contextp -> options -> data[i].s, contextTextX + contextp -> size / 2.5, contextTextY - i * itemHeight, contextp -> size - 1, 0);
         }
@@ -33245,9 +33315,11 @@ void contextUpdate() {
             tt_globals.elementLogicType = TT_ELEMENT_PRIORITY_CONTEXT;
             tt_globals.elementLogicIndex = i;
             if (turtleMouseDown()) {
-                *(contextp -> variable) = contextp -> index;
                 contextp -> enabled = TT_ELEMENT_HIDE;
             }
+        }
+        if (contextp -> variable != NULL) {
+            *contextp -> variable = contextp -> index;
         }
     }
 }
@@ -33255,6 +33327,10 @@ void contextUpdate() {
 void dropdownUpdate() {
     for (uint32_t i = 0; i < tt_elements.dropdowns -> length; i++) {
         tt_dropdown_t *dropdownp = (tt_dropdown_t *) (tt_elements.dropdowns -> data[i].p);
+        if (dropdownp -> variable != NULL) {
+            dropdownp -> index = *dropdownp -> variable;
+            dropdownp -> value = *dropdownp -> variable;
+        }
         if (dropdownp -> enabled == TT_ELEMENT_HIDE) {
             continue;
         }
@@ -33332,10 +33408,11 @@ void dropdownUpdate() {
                             if (selected != 0) {
                                 if (dropdownp -> index >= selected) {
                                     dropdownp -> index = selected - 1;
+                                    dropdownp -> value = selected - 1;
                                 } else {
                                     dropdownp -> index = selected;
+                                    dropdownp -> value = selected;
                                 }
-                                *dropdownp -> variable = dropdownp -> index;
                             }
                             dropdownp -> status = -2;
                         } else {
@@ -33359,10 +33436,11 @@ void dropdownUpdate() {
                             if (selected != 0) {
                                 if (dropdownp -> index >= selected) {
                                     dropdownp -> index = selected - 1;
+                                    dropdownp -> value = selected - 1;
                                 } else {
                                     dropdownp -> index = selected;
+                                    dropdownp -> value = selected;
                                 }
-                                *dropdownp -> variable = dropdownp -> index;
                             }
                             dropdownp -> status = -2;
                         }
@@ -33403,6 +33481,9 @@ void dropdownUpdate() {
             turtleTriangle(dropdownXFactor[1] + dropdownp -> size * 0.4, dropdownY + dropdownp -> size * 0.4, dropdownXFactor[1] + dropdownp -> size * 0.4, dropdownY - dropdownp -> size * 0.4, dropdownXFactor[1] - dropdownp -> size * 0.2, dropdownY);
         } else {
             turtleTriangle(dropdownXFactor[1] + dropdownp -> size * 0.6, dropdownY + dropdownp -> size * 0.3, dropdownXFactor[1] - dropdownp -> size * 0.2, dropdownY + dropdownp -> size * 0.3, dropdownXFactor[1] + dropdownp -> size * 0.2, dropdownY - dropdownp -> size * 0.3);
+        }
+        if (dropdownp -> variable != NULL) {
+            *dropdownp -> variable = dropdownp -> index;
         }
     }
 }
@@ -33596,7 +33677,6 @@ void textboxUpdate() {
         if (textboxp -> enabled == TT_ELEMENT_HIDE) {
             continue;
         }
-
         /* handle keys */
         if (textboxp -> keyTimeout > 0) {
             textboxp -> keyTimeout--;
@@ -33617,10 +33697,8 @@ void textboxUpdate() {
                 textboxp -> status = 2;
             }
         }
-
         tt_setColor(textboxp -> color[TT_COLOR_SLOT_TEXTBOX_BOX]);
         turtleRectangle(textboxp -> x, textboxp -> y - textboxp -> size, textboxp -> x + textboxp -> length, textboxp -> y + textboxp -> size);
-
         if (textboxp -> status <= 0) {
             textboxp -> renderPixelOffset = textboxp -> size / 3;
             textboxp -> renderStartingIndex = 0;
@@ -33676,7 +33754,6 @@ void textboxUpdate() {
                 }
             }
         }
-
         /* draw text and occluding boxes */
         char tempHold;
         tempHold = textboxp -> text[textboxp -> renderStartingIndex + textboxp -> renderNumCharacters];
@@ -33695,7 +33772,6 @@ void textboxUpdate() {
             tt_setColor(textboxp -> color[TT_COLOR_SLOT_TEXTBOX_LINE]);
             turtleRectangle(textboxp -> x + textboxp -> renderPixelOffset + textLength, textboxp -> y - textboxp -> size * 0.8, textboxp -> x + textboxp -> renderPixelOffset + textLength + 1, textboxp -> y + textboxp -> size * 0.8);
         }
-        
         /* mouse */
         if (textboxp -> enabled == TT_ELEMENT_ENABLED && (tt_globals.elementLogicTypeOld < TT_ELEMENT_PRIORITY_TEXTBOX || (tt_globals.elementLogicTypeOld == TT_ELEMENT_PRIORITY_TEXTBOX && tt_globals.elementLogicIndexOld <= (int32_t ) i))) {
             if (turtle.mouseX > textboxp -> x && turtle.mouseX < textboxp -> x + textboxp -> length && turtle.mouseY > textboxp -> y - textboxp -> size && turtle.mouseY < textboxp -> y + textboxp -> size) {
