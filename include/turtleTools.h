@@ -494,6 +494,7 @@ typedef struct {
     char *text;
     char label[TT_LABEL_LENGTH_LIMIT];
     int32_t status;
+    int8_t mouseOver;
     tt_textbox_align_t align;
     double length;
     int32_t maxCharacters;

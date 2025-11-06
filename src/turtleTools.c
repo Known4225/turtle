@@ -1820,7 +1820,7 @@ void dropdownUpdate() {
                             } else if (dropdownp -> align == TT_DROPDOWN_ALIGN_CENTER) {
                                 turtleTextWriteUnicode(dropdownp -> options -> data[i].s, (dropdownMaxXFactor[0] + dropdownMaxXFactor[1]) / 2, dropdownY - renderIndex * itemHeight, dropdownp -> size - 1, dropdownAlignFactor);
                             } else if (dropdownp -> align == TT_DROPDOWN_ALIGN_RIGHT) {
-                                turtleTextWriteUnicode(dropdownp -> options -> data[i].s, dropdownMaxXFactor[1] - dropdownp -> size * 1.4, dropdownY - renderIndex * itemHeight, dropdownp -> size - 1, dropdownAlignFactor);
+                                turtleTextWriteUnicode(dropdownp -> options -> data[i].s, dropdownMaxXFactor[1] - dropdownp -> size * 1.58, dropdownY - renderIndex * itemHeight, dropdownp -> size - 1, dropdownAlignFactor);
                             }
                             renderIndex++;
                         }
@@ -2135,9 +2135,14 @@ void textboxUpdate() {
             tt_setColor(textboxp -> color[TT_COLOR_SLOT_TEXTBOX_LINE]);
             turtleRectangle(textboxp -> x + textboxp -> renderPixelOffset + textLength, textboxp -> y - textboxp -> size * 0.8, textboxp -> x + textboxp -> renderPixelOffset + textLength + 1, textboxp -> y + textboxp -> size * 0.8);
         }
-
+        
         /* mouse */
         if (textboxp -> enabled == TT_ELEMENT_ENABLED && (tt_globals.elementLogicTypeOld < TT_ELEMENT_PRIORITY_TEXTBOX || (tt_globals.elementLogicTypeOld == TT_ELEMENT_PRIORITY_TEXTBOX && tt_globals.elementLogicIndexOld <= (int32_t ) i))) {
+            if (turtle.mouseX > textboxp -> x && turtle.mouseX < textboxp -> x + textboxp -> length && turtle.mouseY > textboxp -> y - textboxp -> size && turtle.mouseY < textboxp -> y + textboxp -> size) {
+                textboxp -> mouseOver = 1;
+            } else {
+                textboxp -> mouseOver = 0;
+            }
             if (turtleMouseDown()) {
                 if (textboxp -> status < 0) {
                     textboxp -> editIndex = strlen(textboxp -> text);
@@ -2150,7 +2155,7 @@ void textboxUpdate() {
                 if (textboxp -> status == 1) {
                     textboxp -> status = 2;
                 } else if (textboxp -> status < 2) {
-                    if (turtle.mouseX > textboxp -> x && turtle.mouseX < textboxp -> x + textboxp -> length && turtle.mouseY > textboxp -> y - textboxp -> size && turtle.mouseY < textboxp -> y + textboxp -> size) {
+                    if (textboxp -> mouseOver) {
                         textboxp -> status = -1;
                         tt_globals.elementLogicType = TT_ELEMENT_PRIORITY_TEXTBOX;
                         tt_globals.elementLogicIndex = i;
@@ -2161,6 +2166,7 @@ void textboxUpdate() {
             }
         } else {
             textboxp -> status = 0;
+            textboxp -> mouseOver = 0;
         }
     }
 }

@@ -23,7 +23,7 @@ void parseRibbonOutput() {
         }
         if (tt_ribbon.output[2] == 3) { // Save As...
             list_clear(osToolsFileDialog.selectedFilenames);
-            if (osToolsFileDialogSave(OSTOOLS_FILE_DIALOG_FILE, "", NULL) != -1) {
+            if (osToolsFileDialogSave(OSTOOLS_FILE_DIALOG_FILE, "Save.txt", NULL) != -1) {
                 printf("Saved to: %s\n", osToolsFileDialog.selectedFilenames -> data[0].s);
             }
         }
@@ -130,6 +130,7 @@ int main(int argc, char *argv[]) {
     /* initialise osTools */
     osToolsInit(argv[0], window); // must include argv[0] to get executableFilepath, must include GLFW window for copy paste and cursor functionality
     osToolsFileDialogAddGlobalExtension("txt"); // add txt to extension restrictions
+    osToolsFileDialogAddGlobalExtension("csv"); // add csv to extension restrictions
     /* initialise turtleText */
     char constructedFilepath[5120];
     strcpy(constructedFilepath, osToolsFileDialog.executableFilepath);
@@ -234,7 +235,7 @@ int main(int argc, char *argv[]) {
     scrollbarInit(&scrollbarVarX, TT_SCROLLBAR_HORIZONTAL, 20, -170, 10, 550, 50);
     scrollbarInit(&scrollbarVarY, TT_SCROLLBAR_VERTICAL, 310, 0, 10, 320, 33);
     dropdownInit("Dropdown", dropdownOptions, &dropdownVar, TT_DROPDOWN_ALIGN_CENTER, 0, 70, 10);
-    textboxInit("Textbox", 128, -50, -110, 10, 100);
+    tt_textbox_t *textbox = textboxInit("Textbox", 128, -50, -110, 10, 100);
     list_t *contextOptions = list_init();
     list_append(contextOptions, (unitype) "Button", 's');
     list_append(contextOptions, (unitype) "Switch", 's');
@@ -313,6 +314,11 @@ int main(int argc, char *argv[]) {
         turtleTextWriteStringf(ySlider -> x + ySlider -> length / 2 + xSlider -> size, ySlider -> y, 4, 0, "%.01lf", round(y) / 10);
         turtleTextWriteString("Z", zSlider -> x - zSlider -> length / 2 - xSlider -> size, zSlider -> y, xSlider -> size - 1, 100);
         turtleTextWriteStringf(zSlider -> x + zSlider -> length / 2 + xSlider -> size, zSlider -> y, 4, 0, "%.01lf", round(z) / 10);
+        if (textbox -> mouseOver) {
+            osToolsSetCursor(GLFW_IBEAM_CURSOR);
+        } else {
+            osToolsSetCursor(GLFW_ARROW_CURSOR);
+        }
 
         /* write all characters supported */
         turtleTextWriteUnicode(u8"AÀÁĂÄÃÅĀĄÆBCĆČĊÇDĎĐÐEÈÉĚÊËĒĖĘƏFGĞĠHĦ", scrollbarVarX * -5 + 260, scrollbarVarY * 3.3 - 180, 10, 0);
