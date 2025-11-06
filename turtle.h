@@ -137,6 +137,15 @@ uint32_t list_count(list_t *list, unitype item, char type);
 /* sort list */
 void list_sort(list_t *list);
 
+/* return a list of indices that would sort the list */
+list_t *list_sort_index(list_t *list);
+
+/* sort list (stride) */
+void list_stride_sort(list_t *list, int32_t stride, int32_t offset);
+
+/* return a list of indices that would sort the list (stride) */
+list_t *list_stride_sort_index(list_t *list, int32_t stride, int32_t offset);
+
 /* deletes the first instance of the item from the list, returns the index the item was at, returns -1 and doesn't modify the list if not found */
 int32_t list_remove(list_t *list, unitype item, char type);
 
@@ -28812,6 +28821,26 @@ void list_sort(list_t *list) {
             }
         }
     }
+}
+
+/* return a list of indices that would sort the list */
+list_t *list_sort_index(list_t *list) {
+    // list_t *output = list_init();
+    // for (int32_t i = 0; i < list -> length; i++) {
+    //     list_append(output, (unitype) -1, 'i');
+    // }
+    // int32_t max = 
+    // return output;
+}
+
+/* sort list (stride) */
+void list_stride_sort(list_t *list, int32_t stride, int32_t offset) {
+
+}
+
+/* return a list of indices that would sort the list (stride) */
+list_t *list_stride_sort_index(list_t *list, int32_t stride, int32_t offset) {
+
 }
 
 /* deletes the first instance of the item from the list, returns the index the item was at, returns -1 and doesn't modify the list if not found */
