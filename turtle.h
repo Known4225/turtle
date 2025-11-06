@@ -19758,6 +19758,7 @@ typedef struct {
     char *text;
     char label[TT_LABEL_LENGTH_LIMIT];
     int32_t status;
+    int8_t mouseOver;
     tt_textbox_align_t align;
     double length;
     int32_t maxCharacters;
@@ -33694,9 +33695,14 @@ void textboxUpdate() {
             tt_setColor(textboxp -> color[TT_COLOR_SLOT_TEXTBOX_LINE]);
             turtleRectangle(textboxp -> x + textboxp -> renderPixelOffset + textLength, textboxp -> y - textboxp -> size * 0.8, textboxp -> x + textboxp -> renderPixelOffset + textLength + 1, textboxp -> y + textboxp -> size * 0.8);
         }
-
+        
         /* mouse */
         if (textboxp -> enabled == TT_ELEMENT_ENABLED && (tt_globals.elementLogicTypeOld < TT_ELEMENT_PRIORITY_TEXTBOX || (tt_globals.elementLogicTypeOld == TT_ELEMENT_PRIORITY_TEXTBOX && tt_globals.elementLogicIndexOld <= (int32_t ) i))) {
+            if (turtle.mouseX > textboxp -> x && turtle.mouseX < textboxp -> x + textboxp -> length && turtle.mouseY > textboxp -> y - textboxp -> size && turtle.mouseY < textboxp -> y + textboxp -> size) {
+                textboxp -> mouseOver = 1;
+            } else {
+                textboxp -> mouseOver = 0;
+            }
             if (turtleMouseDown()) {
                 if (textboxp -> status < 0) {
                     textboxp -> editIndex = strlen(textboxp -> text);
@@ -33709,7 +33715,7 @@ void textboxUpdate() {
                 if (textboxp -> status == 1) {
                     textboxp -> status = 2;
                 } else if (textboxp -> status < 2) {
-                    if (turtle.mouseX > textboxp -> x && turtle.mouseX < textboxp -> x + textboxp -> length && turtle.mouseY > textboxp -> y - textboxp -> size && turtle.mouseY < textboxp -> y + textboxp -> size) {
+                    if (textboxp -> mouseOver) {
                         textboxp -> status = -1;
                         tt_globals.elementLogicType = TT_ELEMENT_PRIORITY_TEXTBOX;
                         tt_globals.elementLogicIndex = i;
@@ -33720,6 +33726,7 @@ void textboxUpdate() {
             }
         } else {
             textboxp -> status = 0;
+            textboxp -> mouseOver = 0;
         }
     }
 }
@@ -34237,12 +34244,12 @@ int32_t osToolsFileDialogPrompt(ost_file_dialog_save_t openOrSave, ost_file_dial
     IFileSaveDialog *saveDialog;
     IFileDialog *fileDialog;
     PWSTR pszFilePath = NULL;
-    if (openOrSave == OSTOOLS_FILE_DIALOG_SAVE) {
-        hr = CoCreateInstance(&CLSID_FileSaveDialog, NULL, CLSCTX_ALL, &IID_IFileSaveDialog, (void **) &saveDialog);
-        fileDialog = (IFileDialog *) saveDialog;
-    } else if (openOrSave == OSTOOLS_FILE_DIALOG_OPEN) {
+    if (openOrSave == OSTOOLS_FILE_DIALOG_OPEN || folder == OSTOOLS_FILE_DIALOG_FOLDER) {
         hr = CoCreateInstance(&CLSID_FileOpenDialog, NULL, CLSCTX_ALL, &IID_IFileOpenDialog, (void **) &openDialog);
         fileDialog = (IFileDialog *) openDialog;
+    } else if (openOrSave == OSTOOLS_FILE_DIALOG_SAVE) {
+        hr = CoCreateInstance(&CLSID_FileSaveDialog, NULL, CLSCTX_ALL, &IID_IFileSaveDialog, (void **) &saveDialog);
+        fileDialog = (IFileDialog *) saveDialog;
     }
     if (FAILED(hr)) {
         CoUninitialize();
@@ -34257,7 +34264,7 @@ int32_t osToolsFileDialogPrompt(ost_file_dialog_save_t openOrSave, ost_file_dial
         /* enable multiselect */
         options |= FOS_ALLOWMULTISELECT;
     }
-    if (folder) {
+    if (folder == OSTOOLS_FILE_DIALOG_FOLDER) {
         /* switch to folder-only prompt */
         options |= FOS_PICKFOLDERS;
     }
@@ -34265,13 +34272,13 @@ int32_t osToolsFileDialogPrompt(ost_file_dialog_save_t openOrSave, ost_file_dial
     /* configure autofill filename */
     if (prename != NULL && strcmp(prename, "null") != 0 && strcmp(prename, "") != 0) {
         int32_t i = 0;
-        WCHAR prename[MAX_PATH + 1];
+        WCHAR wprename[MAX_PATH + 1];
         while (prename[i] != '\0' && i < MAX_PATH + 1) {
-            prename[i] = prename[i]; // convert from char to WCHAR
+            wprename[i] = prename[i]; // convert from char to WCHAR
             i++;
         }
-        prename[i] = '\0';
-        fileDialog -> lpVtbl -> SetFileName(fileDialog, prename);
+        wprename[i] = '\0';
+        fileDialog -> lpVtbl -> SetFileName(fileDialog, wprename);
     }
 
     /* load file restrictions
