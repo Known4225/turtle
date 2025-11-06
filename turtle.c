@@ -235,7 +235,7 @@ int main(int argc, char *argv[]) {
     scrollbarInit(&scrollbarVarX, TT_SCROLLBAR_HORIZONTAL, 20, -170, 10, 550, 50);
     scrollbarInit(&scrollbarVarY, TT_SCROLLBAR_VERTICAL, 310, 0, 10, 320, 33);
     dropdownInit("Dropdown", dropdownOptions, &dropdownVar, TT_DROPDOWN_ALIGN_CENTER, 0, 70, 10);
-    tt_textbox_t *textbox = textboxInit("Textbox", 128, -50, -110, 10, 100);
+    tt_textbox_t *textbox = textboxInit("Textbox", NULL, 128, -50, -110, 10, 100);
     list_t *contextOptions = list_init();
     list_append(contextOptions, (unitype) "Button", 's');
     list_append(contextOptions, (unitype) "Switch", 's');

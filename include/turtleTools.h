@@ -315,11 +315,13 @@ typedef struct {
     double x;
     double y;
     double size;
-    int8_t *variable; // 1 if button is being pressed, 0 otherwise
+    int8_t *variable; // bound variable (can be NULL)
     char label[TT_LABEL_LENGTH_LIMIT];
     int32_t status;
     tt_button_shape_t shape;
     tt_button_align_t align;
+    /* value */
+    int8_t value; // 1 if button is being pressed, 0 otherwise
 } tt_button_t;
 
 typedef enum {
@@ -344,11 +346,13 @@ typedef struct {
     double x;
     double y;
     double size;
-    int8_t *variable; // 1 if switch is flipped, 0 otherwise
+    int8_t *variable; // bound variable (can be NULL)
     char label[TT_LABEL_LENGTH_LIMIT];
     int32_t status;
     tt_switch_style_t style;
     tt_switch_align_t align;
+    /* value */
+    int8_t value; // 1 if switch is flipped, 0 otherwise
 } tt_switch_t;
 
 typedef enum {
@@ -365,13 +369,15 @@ typedef struct {
     double x;
     double y;
     double size;
-    double *variable; // value of dial
+    double *variable; // bound variable (can be NULL)
     char label[TT_LABEL_LENGTH_LIMIT];
     int32_t status[2];
     tt_dial_scale_t scale;
     double range[2];
     double renderNumberFactor; // multiply rendered variable by this amount
     double defaultValue;
+    /* value */
+    double value; // value of dial
 } tt_dial_t;
 
 typedef enum {
@@ -399,7 +405,7 @@ typedef struct {
     double x;
     double y;
     double size;
-    double *variable; // value of slider
+    double *variable; // bound variable (can be NULL)
     char label[TT_LABEL_LENGTH_LIMIT];
     int32_t status;
     tt_slider_type_t type;
@@ -409,6 +415,8 @@ typedef struct {
     double range[2];
     double renderNumberFactor; // multiply rendered variable by this amount
     double defaultValue;
+    /* value */
+    double value; // value of slider
 } tt_slider_t;
 
 typedef enum {
@@ -424,11 +432,13 @@ typedef struct {
     double x;
     double y;
     double size;
-    double *variable; // value of slider
+    double *variable; // bound variable (can be NULL)
     int32_t status;
     tt_scrollbar_type_t type;
     double length;
     double barPercentage; // percentage of scrollbar occupied by bar
+    /* value */
+    double value; // value of scrollbar
 } tt_scrollbar_t;
 
 typedef enum {
@@ -447,12 +457,14 @@ typedef struct {
     double x;
     double y;
     double size;
-    int32_t *variable; // index of selected option
+    int32_t *variable; // bound variable (can be NULL)
     list_t *options;
-    int32_t index;
     int32_t status;
     tt_context_direction_t direction;
     double maxXfactor;
+    /* value */
+    int32_t index; // index of selected option
+    int32_t value; // index of selected option (duplicate name - always equal to index)
 } tt_context_t;
 
 typedef enum {
@@ -469,13 +481,15 @@ typedef struct {
     double x;
     double y;
     double size;
-    int32_t *variable; // index of dropdown selected
+    int32_t *variable; // bound variable (can be NULL)
     char label[TT_LABEL_LENGTH_LIMIT];
     list_t *options;
-    uint32_t index;
     int32_t status;
     tt_dropdown_align_t align;
     double maxXfactor;
+    /* value */
+    int32_t index; // index of selected option
+    int32_t value; // index of selected option (duplicate name - always equal to index)
 } tt_dropdown_t;
 
 typedef enum {
@@ -491,7 +505,6 @@ typedef struct {
     double x;
     double y;
     double size;
-    char *text;
     char label[TT_LABEL_LENGTH_LIMIT];
     int32_t status;
     int8_t mouseOver;
@@ -505,6 +518,9 @@ typedef struct {
     double renderPixelOffset;
     int32_t renderStartingIndex;
     int32_t renderNumCharacters;
+    /* value */
+    char *text; // text of textbox
+    char *value; // text of textbox (duplicate name - always equal to text)
 } tt_textbox_t;
 
 /* initialise UI elements */
@@ -546,7 +562,7 @@ tt_dropdown_t *dropdownInit(char *label, list_t *options, int32_t *variable, tt_
 void dropdownFree(tt_dropdown_t *dropdownp);
 
 /* create a textbox */
-tt_textbox_t *textboxInit(char *label, uint32_t maxCharacters, double x, double y, double size, double length);
+tt_textbox_t *textboxInit(char *label, char *variable, uint32_t maxCharacters, double x, double y, double size, double length);
 
 void textboxFree(tt_textbox_t *textboxp);
 
