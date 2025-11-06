@@ -94,20 +94,6 @@ void parsePopupOutput(GLFWwindow *window) {
 
 int main(int argc, char *argv[]) {
     /* Initialise glfw */
-    srand(time(NULL));
-    list_t *testSort = list_init();
-    list_t *testCopy = list_init();
-    for (int32_t i = 0; i < 32; i++) {
-        list_append(testSort, (unitype) "(", 's');
-        list_append(testSort, (unitype) randomInt(0, 100), 'i');
-        list_append(testSort, (unitype) ")", 's');
-    }
-    list_copy(testCopy, testSort);
-    list_print(testSort);
-    list_stride_sort(testSort, 3, 1);
-    // list_sort(testCopy);
-    list_print(testSort);
-    return 0;
     if (!glfwInit()) {
         return -1;
     }

@@ -131,17 +131,17 @@ int32_t list_index(list_t *list, unitype item, char type);
 /* counts how many instances of an item is found in the list */
 uint32_t list_count(list_t *list, unitype item, char type);
 
-/* sort list */
+/* sort list (biggest to smallest) */
 void list_sort(list_t *list);
 
-/* return a list of indices that would sort the list */
+/* return a list of indices that would sort the list (biggest to smallest) */
 list_t *list_sort_index(list_t *list);
 
-/* sort list (stride) */
-void list_stride_sort(list_t *list, int32_t stride, int32_t offset);
+/* sort list (stride) (biggest to smallest) */
+void list_sort_stride(list_t *list, int32_t stride, int32_t offset);
 
-/* return a list of indices that would sort the list (stride) */
-list_t *list_stride_sort_index(list_t *list, int32_t stride, int32_t offset);
+/* return a list of indices that would sort the list (stride) (biggest to smallest) */
+list_t *list_sort_stride_index(list_t *list, int32_t stride, int32_t offset);
 
 /* deletes the first instance of the item from the list, returns the index the item was at, returns -1 and doesn't modify the list if not found */
 int32_t list_remove(list_t *list, unitype item, char type);
