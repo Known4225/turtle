@@ -33291,7 +33291,7 @@ void dropdownUpdate() {
         } else if (dropdownp -> align == TT_DROPDOWN_ALIGN_RIGHT) {
             dropdownXFactor[0] = dropdownX - xfactor - dropdownp -> size * 2;
             dropdownXFactor[1] = dropdownX - dropdownp -> size;
-            dropdownMaxXFactor[0] = dropdownX - dropdownp -> maxXfactor - dropdownp -> size * 2;
+            dropdownMaxXFactor[0] = dropdownX - dropdownp -> maxXfactor - dropdownp -> size * 2.2;
             dropdownMaxXFactor[1] = dropdownX;
             dropdownAlignFactor = 100;
             turtleTextWriteUnicode(dropdownp -> label, dropdownX - dropdownp -> size / 5, dropdownY + 2 * dropdownp -> size, dropdownp -> size - 1, dropdownAlignFactor);
