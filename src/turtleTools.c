@@ -673,7 +673,7 @@ tt_button_t *buttonInit(char *label, int8_t *variable, double x, double y, doubl
         tt_globals.elementLogicIndex = -1;
         tt_elements.all = list_init();
     }
-    tt_button_t *buttonp = malloc(sizeof(tt_button_t));
+    tt_button_t *buttonp = calloc(1, sizeof(tt_button_t));
     buttonp -> element = TT_ELEMENT_BUTTON;
     buttonp -> enabled = TT_ELEMENT_ENABLED;
     if (label == NULL) {
@@ -714,7 +714,7 @@ tt_switch_t *switchInit(char *label, int8_t *variable, double x, double y, doubl
         tt_globals.elementLogicIndex = -1;
         tt_elements.all = list_init();
     }
-    tt_switch_t *switchp = malloc(sizeof(tt_switch_t));
+    tt_switch_t *switchp = calloc(1, sizeof(tt_switch_t));
     switchp -> element = TT_ELEMENT_SWITCH;
     switchp -> enabled = TT_ELEMENT_ENABLED;
     if (label == NULL) {
@@ -752,7 +752,7 @@ tt_dial_t *dialInit(char *label, double *variable, tt_dial_scale_t scale, double
         tt_globals.elementLogicIndex = -1;
         tt_elements.all = list_init();
     }
-    tt_dial_t *dialp = malloc(sizeof(tt_dial_t));
+    tt_dial_t *dialp = calloc(1, sizeof(tt_dial_t));
     dialp -> element = TT_ELEMENT_DIAL;
     dialp -> enabled = TT_ELEMENT_ENABLED;
     if (label == NULL) {
@@ -797,7 +797,7 @@ tt_slider_t *sliderInit(char *label, double *variable, tt_slider_type_t type, tt
         tt_globals.elementLogicIndex = -1;
         tt_elements.all = list_init();
     }
-    tt_slider_t *sliderp = malloc(sizeof(tt_slider_t));
+    tt_slider_t *sliderp = calloc(1, sizeof(tt_slider_t));
     sliderp -> element = TT_ELEMENT_SLIDER;
     sliderp -> enabled = TT_ELEMENT_ENABLED;
     if (label == NULL) {
@@ -845,7 +845,7 @@ tt_scrollbar_t *scrollbarInit(double *variable, tt_scrollbar_type_t type, double
         tt_globals.elementLogicIndex = -1;
         tt_elements.all = list_init();
     }
-    tt_scrollbar_t *scrollbarp = malloc(sizeof(tt_scrollbar_t));
+    tt_scrollbar_t *scrollbarp = calloc(1, sizeof(tt_scrollbar_t));
     scrollbarp -> element = TT_ELEMENT_SCROLLBAR;
     scrollbarp -> enabled = TT_ELEMENT_ENABLED;
     elementResetColor(scrollbarp, TT_ELEMENT_SCROLLBAR);
@@ -888,7 +888,7 @@ tt_context_t *contextInit(list_t *options, int32_t *variable, double x, double y
         tt_globals.elementLogicIndex = -1;
         tt_elements.all = list_init();
     }
-    tt_context_t *contextp = malloc(sizeof(tt_context_t));
+    tt_context_t *contextp = calloc(1, sizeof(tt_context_t));
     contextp -> element = TT_ELEMENT_CONTEXT;
     contextp -> enabled = TT_ELEMENT_ENABLED;
     elementResetColor(contextp, TT_ELEMENT_CONTEXT);
@@ -938,7 +938,7 @@ tt_dropdown_t *dropdownInit(char *label, list_t *options, int32_t *variable, tt_
         tt_globals.elementLogicIndex = -1;
         tt_elements.all = list_init();
     }
-    tt_dropdown_t *dropdownp = malloc(sizeof(tt_dropdown_t));
+    tt_dropdown_t *dropdownp = calloc(1, sizeof(tt_dropdown_t));
     dropdownp -> element = TT_ELEMENT_DROPDOWN;
     dropdownp -> enabled = TT_ELEMENT_ENABLED;
     if (label == NULL) {
@@ -989,7 +989,7 @@ tt_textbox_t *textboxInit(char *label, char *variable, uint32_t maxCharacters, d
         tt_globals.elementLogicIndex = -1;
         tt_elements.all = list_init();
     }
-    tt_textbox_t *textboxp = malloc(sizeof(tt_textbox_t));
+    tt_textbox_t *textboxp = calloc(1, sizeof(tt_textbox_t));
     textboxp -> element = TT_ELEMENT_TEXTBOX;
     textboxp -> enabled = TT_ELEMENT_ENABLED;
     if (label == NULL) {
