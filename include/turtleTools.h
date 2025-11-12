@@ -533,6 +533,8 @@ void buttonFree(tt_button_t *buttonp);
 /* create a switch */
 tt_switch_t *switchInit(char *label, int8_t *variable, double x, double y, double size);
 
+void switchFree(tt_switch_t *switchp);
+
 /* create a dial - make renderNumberFactor 0 to hide dial number */
 tt_dial_t *dialInit(char *label, double *variable, tt_dial_scale_t scale, double x, double y, double size, double bottom, double top, double renderNumberFactor);
 
