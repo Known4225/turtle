@@ -659,6 +659,41 @@ void elementResetColor(void *elementp, int32_t elementType) {
     }
 }
 
+int32_t elementFree(void *elementp) {
+    if (elementp == NULL) {
+        return -1;
+    }
+    switch (((tt_button_t *) elementp) -> element) {
+    case TT_ELEMENT_BUTTON:
+        buttonFree((tt_button_t *) elementp);
+    break;
+    case TT_ELEMENT_SWITCH:
+        switchFree((tt_switch_t *) elementp);
+    break;
+    case TT_ELEMENT_DIAL:
+        dialFree((tt_dial_t *) elementp);
+    break;
+    case TT_ELEMENT_SLIDER:
+        sliderFree((tt_slider_t *) elementp);
+    break;
+    case TT_ELEMENT_SCROLLBAR:
+        scrollbarFree((tt_scrollbar_t *) elementp);
+    break;
+    case TT_ELEMENT_CONTEXT:
+        contextFree((tt_context_t *) elementp);
+    break;
+    case TT_ELEMENT_DROPDOWN:
+        dropdownFree((tt_dropdown_t *) elementp);
+    break;
+    case TT_ELEMENT_TEXTBOX:
+        textboxFree((tt_textbox_t *) elementp);
+    break;
+    default:
+        return -1;
+    break;
+    }
+}
+
 /* initialise UI elements */
 
 /* create a button */

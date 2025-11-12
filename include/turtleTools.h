@@ -203,6 +203,8 @@ typedef enum {
 
 void elementResetColor(void *elementp, int32_t elementType);
 
+int32_t elementFree(void *elementp);
+
 /* ribbon */
 
 /* ribbon variables */
