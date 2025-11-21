@@ -20018,11 +20018,25 @@ int32_t osToolsComReceive(char *name, uint8_t *buffer, int32_t length);
 /* closes a com port */
 int32_t osToolsComClose(char *name);
 
+/* get a list [camera name, width, height, channels] */
+list_t *osToolsListCameras();
+
+/* opens a camera */
+int32_t osToolsCameraOpen(char *name);
+
+/* get buffer from the camera - buffer must be at least width * height * channels big */
+int32_t osToolsCameraReceive(char *name, uint8_t *data);
+
+/* closes a camera */
+int32_t osToolsCameraClose(char *name);
+
 #ifdef OS_WINDOWS
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #include <windows.h>
 #include <shobjidl.h>
+#include <mfidl.h>
+#include <mfapi.h>
 
 typedef struct {
     list_t *comList; // format: name, HANDLE
@@ -32394,6 +32408,7 @@ int32_t elementFree(void *elementp) {
         return -1;
     break;
     }
+    return 0;
 }
 
 /* initialise UI elements */
@@ -34958,6 +34973,81 @@ int32_t osToolsComClose(char *name) {
     return 0;
 }
 
+list_t *osToolsListCameras() {
+    HRESULT hr = CoInitializeEx(NULL, 0);
+    list_t *output = list_init();
+    /* https://learn.microsoft.com/en-us/windows/win32/medfound/enumerating-video-capture-devices */
+
+    IMFMediaSource *pSource = NULL;
+    IMFAttributes *pAttributes = NULL;
+    IMFActivate **ppDevices = NULL;
+
+    /* Create an attribute store to specify the enumeration parameters. */
+    hr = MFCreateAttributes(&pAttributes, 1);
+    if (FAILED(hr)) {
+        printf("osToolsListCameras MFCreateAttributes Error: 0x%lX\n", hr);
+        goto osToolsListCameras_done;
+    }
+
+    /* Source type: video capture devices */
+    hr = pAttributes -> lpVtbl -> SetGUID(pAttributes, &MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE, &MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_GUID);
+    if (FAILED(hr)) {
+        printf("osToolsListCameras SetGUID Error: 0x%lX\n", hr);
+        goto osToolsListCameras_done;
+    }
+
+    /* Enumerate devices. */
+    UINT32 count;
+    hr = MFEnumDeviceSources(pAttributes, &ppDevices, &count);
+    if (FAILED(hr)) {
+        printf("osToolsListCameras MFEnumDeviceSources Error: 0x%lX\n", hr);
+        goto osToolsListCameras_done;
+    }
+
+    if (count == 0) {
+        hr = E_FAIL;
+        printf("osToolsListCameras: Error no cameras found\n");
+        goto osToolsListCameras_done;
+    }
+    printf("osToolsListCameras: Found %d cameras\n", count);
+
+    /* Create the media source object. */
+    hr = ppDevices[0] -> lpVtbl -> ActivateObject(ppDevices[0], &IID_IMFMediaSource, (void **) &pSource);
+    if (FAILED(hr)) {
+        printf("osToolsListCameras ActivateObject Error: 0x%lX\n", hr);
+        goto osToolsListCameras_done;
+    }
+
+    list_append(output, (unitype) (void *) pSource, 'p');
+    pSource -> lpVtbl -> AddRef(pSource);
+
+osToolsListCameras_done:
+    if (pAttributes) {
+        pAttributes -> lpVtbl -> Release(pAttributes);
+        pAttributes = NULL;
+    }
+    for (DWORD i = 0; i < count; i++) {
+        if (ppDevices[i]) {
+            ppDevices[i] -> lpVtbl -> Release(ppDevices[i]);
+            ppDevices[i] = NULL;
+        }
+    }
+    CoTaskMemFree(ppDevices);
+    return output;
+}
+
+int32_t osToolsCameraOpen(char *name) {
+    return -1;
+}
+
+int32_t osToolsCameraReceive(char *name, uint8_t *data) {
+    return -1;
+}
+
+int32_t osToolsCameraClose(char *name) {
+    return -1;
+}
+
 /*
 https://gist.github.com/mmozeiko/c0dfcc8fec527a90a02145d2cc0bfb6d
 https://learn.microsoft.com/en-us/windows/win32/winsock/complete-server-code
@@ -35425,6 +35515,23 @@ int32_t osToolsComReceive(char *name, uint8_t *buffer, int32_t length) {
 }
 
 int32_t osToolsComClose(char *name) {
+    return -1;
+}
+
+list_t *osToolsListCameras() {
+    list_t *output = list_init();
+    return output;
+}
+
+int32_t osToolsCameraOpen(char *name) {
+    return -1;
+}
+
+int32_t osToolsCameraReceive(char *name, uint8_t *data) {
+    return -1;
+}
+
+int32_t osToolsCameraClose(char *name) {
     return -1;
 }
 

@@ -899,6 +899,105 @@ int32_t osToolsComClose(char *name) {
     return 0;
 }
 
+/* symbol IID_IMFMediaSource not present in any existing library (???) */
+const GUID DECLSPEC_SELECTANY IID_IMFMediaSource = {0x279a808d, 0xaec7, 0x40c8, {0x9c,0x6b, 0xa6, 0xb4, 0x92, 0xc7, 0x8a, 0x66}};
+
+list_t *osToolsListCameras() {
+    HRESULT hr = CoInitializeEx(NULL, 0);
+    list_t *output = list_init();
+    /* https://learn.microsoft.com/en-us/windows/win32/medfound/enumerating-video-capture-devices */
+
+    IMFMediaSource *pSource = NULL;
+    IMFAttributes *pAttributes = NULL;
+    IMFActivate **ppDevices = NULL;
+
+    /* Create an attribute store to specify the enumeration parameters. */
+    hr = MFCreateAttributes(&pAttributes, 1);
+    if (FAILED(hr)) {
+        printf("osToolsListCameras MFCreateAttributes Error: 0x%lX\n", hr);
+        goto osToolsListCameras_done;
+    }
+
+    /* Source type: video capture devices */
+    hr = pAttributes -> lpVtbl -> SetGUID(pAttributes, &MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE, &MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_GUID);
+    if (FAILED(hr)) {
+        printf("osToolsListCameras SetGUID Error: 0x%lX\n", hr);
+        goto osToolsListCameras_done;
+    }
+
+    /* Enumerate devices. */
+    UINT32 count;
+    hr = MFEnumDeviceSources(pAttributes, &ppDevices, &count);
+    if (FAILED(hr)) {
+        printf("osToolsListCameras MFEnumDeviceSources Error: 0x%lX\n", hr);
+        goto osToolsListCameras_done;
+    }
+
+    if (count == 0) {
+        hr = E_FAIL;
+        printf("osToolsListCameras: Error no cameras found\n");
+        goto osToolsListCameras_done;
+    }
+    printf("osToolsListCameras: Found %d cameras\n", count);
+
+    /* Create the media source object. */
+    hr = ppDevices[0] -> lpVtbl -> ActivateObject(ppDevices[0], &IID_IMFMediaSource, (void **) &pSource);
+    if (FAILED(hr)) {
+        printf("osToolsListCameras ActivateObject Error: 0x%lX\n", hr);
+        goto osToolsListCameras_done;
+    }
+    DWORD characteristics;
+    pSource -> lpVtbl -> GetCharacteristics(pSource, &characteristics);
+    printf("- Source characteristics: %lX\n", characteristics);
+    /* check stream type */
+    IMFPresentationDescriptor *presentationDescriptor;
+    pSource -> lpVtbl -> CreatePresentationDescriptor(pSource, &presentationDescriptor);
+    DWORD streamCount;
+    presentationDescriptor -> lpVtbl -> GetStreamDescriptorCount(presentationDescriptor, &streamCount);
+    printf("- Source streams: %ld\n", streamCount);
+    if (streamCount > 0) {
+        int32_t selected;
+        IMFStreamDescriptor *streamDescriptor;
+        presentationDescriptor -> lpVtbl -> GetStreamDescriptorByIndex(presentationDescriptor, 0, &selected, &streamDescriptor);
+        IMFMediaTypeHandler *mediaTypeHandler;
+        streamDescriptor -> lpVtbl -> GetMediaTypeHandler(streamDescriptor, &mediaTypeHandler);
+        IMFMediaType *mediaType;
+        mediaTypeHandler -> lpVtbl -> GetCurrentMediaType(mediaTypeHandler, &mediaType);
+        GUID pguidMajorType;
+        mediaType -> lpVtbl -> GetMajorType(mediaType, &pguidMajorType);
+        printf("- Major type: %lX, %hX, %hX, %X, %X, %X, %X, %X, %X, %X, %X\n", pguidMajorType.Data1, pguidMajorType.Data2, pguidMajorType.Data3,
+        pguidMajorType.Data4[0], pguidMajorType.Data4[1], pguidMajorType.Data4[2], pguidMajorType.Data4[3], pguidMajorType.Data4[4], pguidMajorType.Data4[5], pguidMajorType.Data4[6], pguidMajorType.Data4[7]);
+    }
+    list_append(output, (unitype) (void *) pSource, 'p');
+    pSource -> lpVtbl -> AddRef(pSource);
+
+osToolsListCameras_done:
+    if (pAttributes) {
+        pAttributes -> lpVtbl -> Release(pAttributes);
+        pAttributes = NULL;
+    }
+    for (DWORD i = 0; i < count; i++) {
+        if (ppDevices[i]) {
+            ppDevices[i] -> lpVtbl -> Release(ppDevices[i]);
+            ppDevices[i] = NULL;
+        }
+    }
+    CoTaskMemFree(ppDevices);
+    return output;
+}
+
+int32_t osToolsCameraOpen(char *name) {
+    return -1;
+}
+
+int32_t osToolsCameraReceive(char *name, uint8_t *data) {
+    return -1;
+}
+
+int32_t osToolsCameraClose(char *name) {
+    return -1;
+}
+
 /*
 https://gist.github.com/mmozeiko/c0dfcc8fec527a90a02145d2cc0bfb6d
 https://learn.microsoft.com/en-us/windows/win32/winsock/complete-server-code
@@ -1366,6 +1465,23 @@ int32_t osToolsComReceive(char *name, uint8_t *buffer, int32_t length) {
 }
 
 int32_t osToolsComClose(char *name) {
+    return -1;
+}
+
+list_t *osToolsListCameras() {
+    list_t *output = list_init();
+    return output;
+}
+
+int32_t osToolsCameraOpen(char *name) {
+    return -1;
+}
+
+int32_t osToolsCameraReceive(char *name, uint8_t *data) {
+    return -1;
+}
+
+int32_t osToolsCameraClose(char *name) {
     return -1;
 }
 

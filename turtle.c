@@ -197,6 +197,7 @@ int main(int argc, char *argv[]) {
     list_free(files);
     list_free(filesAndFolders);
     list_t *comPorts = osToolsListComPorts();
+    printf("COM Ports: ");
     list_print(comPorts);
     for (int32_t i = 0; i < comPorts -> length; i++) {
         osToolsComOpen(comPorts -> data[i].s, OSTOOLS_BAUD_115200, 100);
@@ -204,6 +205,10 @@ int main(int argc, char *argv[]) {
         osToolsComClose(comPorts -> data[i].s);
     }
     list_free(comPorts);
+
+    list_t *cameras = osToolsListCameras();
+    printf("cameras: ");
+    list_print(cameras);
 
     uint32_t tps = 120; // ticks per second (locked to fps in this case)
     uint64_t tick = 0; // count number of ticks since application started

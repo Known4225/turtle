@@ -136,11 +136,25 @@ int32_t osToolsComReceive(char *name, uint8_t *buffer, int32_t length);
 /* closes a com port */
 int32_t osToolsComClose(char *name);
 
+/* get a list [camera name, width, height, channels] */
+list_t *osToolsListCameras();
+
+/* opens a camera */
+int32_t osToolsCameraOpen(char *name);
+
+/* get buffer from the camera - buffer must be at least width * height * channels big */
+int32_t osToolsCameraReceive(char *name, uint8_t *data);
+
+/* closes a camera */
+int32_t osToolsCameraClose(char *name);
+
 #ifdef OS_WINDOWS
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #include <windows.h>
 #include <shobjidl.h>
+#include <mfidl.h>
+#include <mfapi.h>
 
 typedef struct {
     list_t *comList; // format: name, HANDLE

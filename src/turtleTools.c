@@ -692,6 +692,7 @@ int32_t elementFree(void *elementp) {
         return -1;
     break;
     }
+    return 0;
 }
 
 /* initialise UI elements */
