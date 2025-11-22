@@ -71,7 +71,8 @@ typedef enum {
 struct list_f; // so basically im a good programmer
 typedef struct list_f list_t;
 
-typedef union { // supported types
+/* unitype - a union of many supported types to the list */
+typedef union {
     signed char ch;
     bool bo;
     int8_t c;
@@ -97,6 +98,13 @@ struct list_f {
     int8_t *type;
     unitype *data;
 };
+
+typedef struct {
+    uint32_t length;
+    uint32_t dummy;
+    int8_t *type;
+    unitype *data;
+} sublist_t;
 
 /* create a list */
 list_t *list_init();
@@ -166,5 +174,11 @@ void list_free_lite(list_t *list);
 
 /* frees the data used by the list */
 void list_free(list_t *list);
+
+/* creates a sublist (from bottom to top - 1) out of an existing list, do not modify a parent list while a sublist exist */
+sublist_t *sublist_init(list_t *list, uint32_t bottom, uint32_t top);
+
+/* delete a sublist */
+void sublist_free(sublist_t *sublist);
 
 #endif /* UNITYPE_LIST_H */

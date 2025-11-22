@@ -74,7 +74,8 @@ typedef enum {
 struct list_f; // so basically im a good programmer
 typedef struct list_f list_t;
 
-typedef union { // supported types
+/* unitype - a union of many supported types to the list */
+typedef union {
     signed char ch;
     bool bo;
     int8_t c;
@@ -100,6 +101,13 @@ struct list_f {
     int8_t *type;
     unitype *data;
 };
+
+typedef struct {
+    uint32_t length;
+    uint32_t dummy;
+    int8_t *type;
+    unitype *data;
+} sublist_t;
 
 /* create a list */
 list_t *list_init();
@@ -169,6 +177,12 @@ void list_free_lite(list_t *list);
 
 /* frees the data used by the list */
 void list_free(list_t *list);
+
+/* creates a sublist (from bottom to top - 1) out of an existing list, do not modify a parent list while a sublist exist */
+sublist_t *sublist_init(list_t *list, uint32_t bottom, uint32_t top);
+
+/* delete a sublist */
+void sublist_free(sublist_t *sublist);
 
 #endif /* UNITYPE_LIST_H */
 
@@ -29103,6 +29117,21 @@ void list_free(list_t *list) {
     free(list);
 }
 
+/* creates a sublist (from bottom to top - 1) out of an existing list, do not modify a parent list while a sublist exist */
+sublist_t *sublist_init(list_t *list, uint32_t bottom, uint32_t top) {
+    sublist_t *sublist = malloc(sizeof(sublist_t));
+    sublist -> length = top - bottom;
+    sublist -> dummy = top - bottom;
+    sublist -> type = list -> type + bottom;
+    sublist -> data = list -> data + bottom;
+    return sublist;
+}
+
+/* delete a sublist */
+void sublist_free(sublist_t *sublist) {
+    free(sublist);
+}
+
 #endif /* UNITYPE_LIST_IMPLEMENTATION */
 #ifdef FLOAT_LIST_IMPLEMENTATION
 #include <stdio.h>
@@ -34973,6 +35002,9 @@ int32_t osToolsComClose(char *name) {
     return 0;
 }
 
+/* symbol IID_IMFMediaSource not present in any existing library (???) */
+const GUID DECLSPEC_SELECTANY IID_IMFMediaSource = {0x279a808d, 0xaec7, 0x40c8, {0x9c,0x6b, 0xa6, 0xb4, 0x92, 0xc7, 0x8a, 0x66}};
+
 list_t *osToolsListCameras() {
     HRESULT hr = CoInitializeEx(NULL, 0);
     list_t *output = list_init();
@@ -35017,7 +35049,28 @@ list_t *osToolsListCameras() {
         printf("osToolsListCameras ActivateObject Error: 0x%lX\n", hr);
         goto osToolsListCameras_done;
     }
-
+    DWORD characteristics;
+    pSource -> lpVtbl -> GetCharacteristics(pSource, &characteristics);
+    printf("- Source characteristics: %lX\n", characteristics);
+    /* check stream type */
+    IMFPresentationDescriptor *presentationDescriptor;
+    pSource -> lpVtbl -> CreatePresentationDescriptor(pSource, &presentationDescriptor);
+    DWORD streamCount;
+    presentationDescriptor -> lpVtbl -> GetStreamDescriptorCount(presentationDescriptor, &streamCount);
+    printf("- Source streams: %ld\n", streamCount);
+    if (streamCount > 0) {
+        int32_t selected;
+        IMFStreamDescriptor *streamDescriptor;
+        presentationDescriptor -> lpVtbl -> GetStreamDescriptorByIndex(presentationDescriptor, 0, &selected, &streamDescriptor);
+        IMFMediaTypeHandler *mediaTypeHandler;
+        streamDescriptor -> lpVtbl -> GetMediaTypeHandler(streamDescriptor, &mediaTypeHandler);
+        IMFMediaType *mediaType;
+        mediaTypeHandler -> lpVtbl -> GetCurrentMediaType(mediaTypeHandler, &mediaType);
+        GUID pguidMajorType;
+        mediaType -> lpVtbl -> GetMajorType(mediaType, &pguidMajorType);
+        printf("- Major type: %lX, %hX, %hX, %X, %X, %X, %X, %X, %X, %X, %X\n", pguidMajorType.Data1, pguidMajorType.Data2, pguidMajorType.Data3,
+        pguidMajorType.Data4[0], pguidMajorType.Data4[1], pguidMajorType.Data4[2], pguidMajorType.Data4[3], pguidMajorType.Data4[4], pguidMajorType.Data4[5], pguidMajorType.Data4[6], pguidMajorType.Data4[7]);
+    }
     list_append(output, (unitype) (void *) pSource, 'p');
     pSource -> lpVtbl -> AddRef(pSource);
 

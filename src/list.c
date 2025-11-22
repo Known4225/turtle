@@ -558,3 +558,18 @@ void list_free(list_t *list) {
     list_free_lite(list);
     free(list);
 }
+
+/* creates a sublist (from bottom to top - 1) out of an existing list, do not modify a parent list while a sublist exist */
+sublist_t *sublist_init(list_t *list, uint32_t bottom, uint32_t top) {
+    sublist_t *sublist = malloc(sizeof(sublist_t));
+    sublist -> length = top - bottom;
+    sublist -> dummy = top - bottom;
+    sublist -> type = list -> type + bottom;
+    sublist -> data = list -> data + bottom;
+    return sublist;
+}
+
+/* delete a sublist */
+void sublist_free(sublist_t *sublist) {
+    free(sublist);
+}
