@@ -899,13 +899,16 @@ int32_t osToolsComClose(char *name) {
     return 0;
 }
 
-/* symbol IID_IMFMediaSource not present in any existing library (???) */
+/* symbol IID_IMFMediaSource and MF_MT_FRAME_SIZE not linked despite their existence in mfapi.h and mfidl.h */
 const GUID DECLSPEC_SELECTANY IID_IMFMediaSource = {0x279a808d, 0xaec7, 0x40c8, {0x9c,0x6b, 0xa6, 0xb4, 0x92, 0xc7, 0x8a, 0x66}};
+const GUID DECLSPEC_SELECTANY MF_MT_FRAME_SIZE = {0x1652c33d, 0xd6b2, 0x4012, {0xb8, 0x34, 0x72, 0x03, 0x08, 0x49, 0xa3, 0x7d}};
 
 list_t *osToolsListCameras() {
     HRESULT hr = CoInitializeEx(NULL, 0);
     list_t *output = list_init();
-    /* https://learn.microsoft.com/en-us/windows/win32/medfound/enumerating-video-capture-devices */
+    /* https://learn.microsoft.com/en-us/windows/win32/medfound/enumerating-video-capture-devices
+       https://gist.github.com/mmozeiko/a5adab1ad11ea6d0643ceb67bb8e3e19
+    */
 
     IMFMediaSource *pSource = NULL;
     IMFAttributes *pAttributes = NULL;
@@ -965,8 +968,29 @@ list_t *osToolsListCameras() {
         mediaTypeHandler -> lpVtbl -> GetCurrentMediaType(mediaTypeHandler, &mediaType);
         GUID pguidMajorType;
         mediaType -> lpVtbl -> GetMajorType(mediaType, &pguidMajorType);
-        printf("- Major type: %lX, %hX, %hX, %X, %X, %X, %X, %X, %X, %X, %X\n", pguidMajorType.Data1, pguidMajorType.Data2, pguidMajorType.Data3,
-        pguidMajorType.Data4[0], pguidMajorType.Data4[1], pguidMajorType.Data4[2], pguidMajorType.Data4[3], pguidMajorType.Data4[4], pguidMajorType.Data4[5], pguidMajorType.Data4[6], pguidMajorType.Data4[7]);
+        
+        /* see mfapi.h for DEFINE_GUID (MFMediaType_Video, 0x73646976, 0x0000, 0x0010, 0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71); */
+        if (pguidMajorType.Data1 == 0x73646976 && pguidMajorType.Data2 == 0x0000 && pguidMajorType.Data3 == 0x0010 && pguidMajorType.Data4[0] == 0x80 && pguidMajorType.Data4[1] == 0x00 && pguidMajorType.Data4[2] == 0x00 && pguidMajorType.Data4[3] == 0xaa && pguidMajorType.Data4[4] == 0x00 && pguidMajorType.Data4[5] == 0x38 && pguidMajorType.Data4[6] == 0x9b && pguidMajorType.Data4[7] == 0x71) {
+            /* MFMediaType_Video */
+            printf("- Major type: MFMediaType_Video\n");
+            uint64_t sizePacked;
+            mediaType -> lpVtbl -> GetUINT64(mediaType, &MF_MT_FRAME_SIZE, &sizePacked);
+            uint32_t width = (uint32_t) (sizePacked >> 32);
+            uint32_t height = (uint32_t) sizePacked;
+            printf("- Width: %d\n", width);
+            printf("- Height: %d\n", height);
+        } else {
+            /* Not MFMediaType_Video */
+            printf("- Major type: %lX, %hX, %hX, %X, %X, %X, %X, %X, %X, %X, %X\n", pguidMajorType.Data1, pguidMajorType.Data2, pguidMajorType.Data3,
+            pguidMajorType.Data4[0], pguidMajorType.Data4[1], pguidMajorType.Data4[2], pguidMajorType.Data4[3], pguidMajorType.Data4[4], pguidMajorType.Data4[5], pguidMajorType.Data4[6], pguidMajorType.Data4[7]);
+            goto osToolsListCameras_done;
+        }
+    }
+    IMFSourceReader *pReader;
+    hr = MFCreateSourceReaderFromMediaSource(pSource, pAttributes, &pReader);
+    if (FAILED(hr)) {
+        printf("osToolsListCameras MFCreateSourceReaderFromMediaSource Error: 0x%lX\n", hr);
+        goto osToolsListCameras_done;
     }
     list_append(output, (unitype) (void *) pSource, 'p');
     pSource -> lpVtbl -> AddRef(pSource);

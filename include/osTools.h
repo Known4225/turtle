@@ -155,6 +155,7 @@ int32_t osToolsCameraClose(char *name);
 #include <shobjidl.h>
 #include <mfidl.h>
 #include <mfapi.h>
+#include <mfreadwrite.h>
 
 typedef struct {
     list_t *comList; // format: name, HANDLE
