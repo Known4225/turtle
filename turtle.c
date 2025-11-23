@@ -209,6 +209,19 @@ int main(int argc, char *argv[]) {
     list_t *cameras = osToolsListCameras();
     printf("cameras: ");
     list_print(cameras);
+    char *cameraName = NULL;
+    uint8_t *cameraFrame = NULL;
+    if (cameras -> length > 0) {
+        cameraName = cameras -> data[0].s;
+    }
+    if (cameraName) {
+        cameraFrame = malloc(cameras -> data[1].i * cameras -> data[2].i * cameras -> data[3].i);
+        osToolsCameraOpen(cameraName);
+        osToolsCameraReceive(cameraName, cameraFrame);
+        turtleTextureUnload(empvImage);
+        empvImage = turtleTextureLoadArray(cameraFrame, cameras -> data[1].i, cameras -> data[2].i, GL_RGBA);
+        // osToolsCameraClose(cameraName);
+    }
 
     uint32_t tps = 120; // ticks per second (locked to fps in this case)
     uint64_t tick = 0; // count number of ticks since application started
@@ -343,6 +356,11 @@ int main(int argc, char *argv[]) {
         turtleTextWriteStringRotated("Rotated Text", scrollbarVarX * -5 - 100, scrollbarVarY * 3.3 + 75, 9, 50, -15);
         
         /* draw texture */
+        if (cameraName) {
+            osToolsCameraReceive(cameraName, cameraFrame);
+            turtleTextureUnload(empvImage);
+            empvImage = turtleTextureLoadArray(cameraFrame, cameras -> data[1].i, cameras -> data[2].i, GL_RGBA);
+        }
         turtleTexture(empvImage, scrollbarVarX * -5 + 400, scrollbarVarY * 3.3 - 145, scrollbarVarX * -5 + 700, scrollbarVarY * 3.3 + 24, 0, 255, 255, 255);
 
         // turtlePenColor(0, 0, 0);

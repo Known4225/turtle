@@ -40,7 +40,7 @@ typedef struct {
 } ost_file_dialog_t;
 
 typedef struct {
-    list_t *mappedFiles;
+    list_t *mappedFiles; // Format Windows: name, handle, mapping handle, address. Format Linux: name, size
 } ost_memmap_t;
 
 /* global objects */
@@ -170,9 +170,15 @@ typedef struct {
     char *port;
     SOCKET connectSocket[WIN32TCP_NUM_SOCKETS];
     char socketOpen[WIN32TCP_NUM_SOCKETS];
-} win32SocketObject;
+} win32socket_t;
 
-extern win32SocketObject win32Socket;
+extern win32socket_t win32socket;
+
+typedef struct {
+    list_t *cameraList; // format: camera name, width, height, channels, pointer to source reader
+} win32camera_t;
+
+extern win32camera_t win32camera;
 
 int32_t win32tcpInit(char *address, char *port);
 

@@ -19936,7 +19936,7 @@ typedef struct {
 } ost_file_dialog_t;
 
 typedef struct {
-    list_t *mappedFiles;
+    list_t *mappedFiles; // Format Windows: name, handle, mapping handle, address. Format Linux: name, size
 } ost_memmap_t;
 
 /* global objects */
@@ -20066,9 +20066,15 @@ typedef struct {
     char *port;
     SOCKET connectSocket[WIN32TCP_NUM_SOCKETS];
     char socketOpen[WIN32TCP_NUM_SOCKETS];
-} win32SocketObject;
+} win32socket_t;
 
-extern win32SocketObject win32Socket;
+extern win32socket_t win32socket;
+
+typedef struct {
+    list_t *cameraList; // format: camera name, width, height, channels, pointer to source reader
+} win32camera_t;
+
+extern win32camera_t win32camera;
 
 int32_t win32tcpInit(char *address, char *port);
 
@@ -34513,6 +34519,7 @@ int32_t osToolsInit(char argv0[], GLFWwindow *window) {
     }
     osToolsFileDialog.executableFilepath[index + 1] = '\0';
     win32com.comList = list_init();
+    win32camera.cameraList = list_init();
     return 0;
 }
 
@@ -35007,6 +35014,8 @@ int32_t osToolsComClose(char *name) {
 const GUID DECLSPEC_SELECTANY IID_IMFMediaSource = {0x279a808d, 0xaec7, 0x40c8, {0x9c,0x6b, 0xa6, 0xb4, 0x92, 0xc7, 0x8a, 0x66}};
 const GUID DECLSPEC_SELECTANY MF_MT_FRAME_SIZE = {0x1652c33d, 0xd6b2, 0x4012, {0xb8, 0x34, 0x72, 0x03, 0x08, 0x49, 0xa3, 0x7d}};
 
+win32camera_t win32camera;
+
 list_t *osToolsListCameras() {
     HRESULT hr = CoInitializeEx(NULL, 0);
     list_t *output = list_init();
@@ -35048,57 +35057,69 @@ list_t *osToolsListCameras() {
     printf("osToolsListCameras: Found %d cameras\n", count);
 
     /* Create the media source object. */
-    hr = ppDevices[0] -> lpVtbl -> ActivateObject(ppDevices[0], &IID_IMFMediaSource, (void **) &pSource);
-    if (FAILED(hr)) {
-        printf("osToolsListCameras ActivateObject Error: 0x%lX\n", hr);
-        goto osToolsListCameras_done;
-    }
-    DWORD characteristics;
-    pSource -> lpVtbl -> GetCharacteristics(pSource, &characteristics);
-    printf("- Source characteristics: %lX\n", characteristics);
-    /* check stream type */
-    IMFPresentationDescriptor *presentationDescriptor;
-    pSource -> lpVtbl -> CreatePresentationDescriptor(pSource, &presentationDescriptor);
-    DWORD streamCount;
-    presentationDescriptor -> lpVtbl -> GetStreamDescriptorCount(presentationDescriptor, &streamCount);
-    printf("- Source streams: %ld\n", streamCount);
-    if (streamCount > 0) {
-        int32_t selected;
-        IMFStreamDescriptor *streamDescriptor;
-        presentationDescriptor -> lpVtbl -> GetStreamDescriptorByIndex(presentationDescriptor, 0, &selected, &streamDescriptor);
-        IMFMediaTypeHandler *mediaTypeHandler;
-        streamDescriptor -> lpVtbl -> GetMediaTypeHandler(streamDescriptor, &mediaTypeHandler);
-        IMFMediaType *mediaType;
-        mediaTypeHandler -> lpVtbl -> GetCurrentMediaType(mediaTypeHandler, &mediaType);
-        GUID pguidMajorType;
-        mediaType -> lpVtbl -> GetMajorType(mediaType, &pguidMajorType);
-        
-        /* see mfapi.h for DEFINE_GUID (MFMediaType_Video, 0x73646976, 0x0000, 0x0010, 0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71); */
-        if (pguidMajorType.Data1 == 0x73646976 && pguidMajorType.Data2 == 0x0000 && pguidMajorType.Data3 == 0x0010 && pguidMajorType.Data4[0] == 0x80 && pguidMajorType.Data4[1] == 0x00 && pguidMajorType.Data4[2] == 0x00 && pguidMajorType.Data4[3] == 0xaa && pguidMajorType.Data4[4] == 0x00 && pguidMajorType.Data4[5] == 0x38 && pguidMajorType.Data4[6] == 0x9b && pguidMajorType.Data4[7] == 0x71) {
-            /* MFMediaType_Video */
-            printf("- Major type: MFMediaType_Video\n");
-            uint64_t sizePacked;
-            mediaType -> lpVtbl -> GetUINT64(mediaType, &MF_MT_FRAME_SIZE, &sizePacked);
-            uint32_t width = (uint32_t) (sizePacked >> 32);
-            uint32_t height = (uint32_t) sizePacked;
-            printf("- Width: %d\n", width);
-            printf("- Height: %d\n", height);
-        } else {
-            /* Not MFMediaType_Video */
-            printf("- Major type: %lX, %hX, %hX, %X, %X, %X, %X, %X, %X, %X, %X\n", pguidMajorType.Data1, pguidMajorType.Data2, pguidMajorType.Data3,
-            pguidMajorType.Data4[0], pguidMajorType.Data4[1], pguidMajorType.Data4[2], pguidMajorType.Data4[3], pguidMajorType.Data4[4], pguidMajorType.Data4[5], pguidMajorType.Data4[6], pguidMajorType.Data4[7]);
+    for (int32_t i = 0; i < count; i++) {
+        hr = ppDevices[i] -> lpVtbl -> ActivateObject(ppDevices[i], &IID_IMFMediaSource, (void **) &pSource);
+        if (FAILED(hr)) {
+            printf("osToolsListCameras ActivateObject Error: 0x%lX\n", hr);
             goto osToolsListCameras_done;
         }
-    }
-    IMFSourceReader *pReader;
-    hr = MFCreateSourceReaderFromMediaSource(pSource, pAttributes, &pReader);
-    if (FAILED(hr)) {
-        printf("osToolsListCameras MFCreateSourceReaderFromMediaSource Error: 0x%lX\n", hr);
-        goto osToolsListCameras_done;
-    }
-    list_append(output, (unitype) (void *) pSource, 'p');
-    pSource -> lpVtbl -> AddRef(pSource);
+        DWORD characteristics;
+        pSource -> lpVtbl -> GetCharacteristics(pSource, &characteristics);
+        printf("- Source characteristics: %lX\n", characteristics);
+        /* check stream type */
+        IMFPresentationDescriptor *presentationDescriptor;
+        pSource -> lpVtbl -> CreatePresentationDescriptor(pSource, &presentationDescriptor);
+        DWORD streamCount;
+        presentationDescriptor -> lpVtbl -> GetStreamDescriptorCount(presentationDescriptor, &streamCount);
+        printf("- Source streams: %ld\n", streamCount);
+        uint32_t width;
+        uint32_t height;
+        if (streamCount > 0) {
+            int32_t selected;
+            IMFStreamDescriptor *streamDescriptor;
+            presentationDescriptor -> lpVtbl -> GetStreamDescriptorByIndex(presentationDescriptor, 0, &selected, &streamDescriptor);
+            IMFMediaTypeHandler *mediaTypeHandler;
+            streamDescriptor -> lpVtbl -> GetMediaTypeHandler(streamDescriptor, &mediaTypeHandler);
+            IMFMediaType *mediaType;
+            mediaTypeHandler -> lpVtbl -> GetCurrentMediaType(mediaTypeHandler, &mediaType);
+            GUID pguidMajorType;
+            mediaType -> lpVtbl -> GetMajorType(mediaType, &pguidMajorType);
+            /* see mfapi.h for DEFINE_GUID (MFMediaType_Video, 0x73646976, 0x0000, 0x0010, 0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71); */
+            if (pguidMajorType.Data1 == 0x73646976 && pguidMajorType.Data2 == 0x0000 && pguidMajorType.Data3 == 0x0010 && pguidMajorType.Data4[0] == 0x80 && pguidMajorType.Data4[1] == 0x00 && pguidMajorType.Data4[2] == 0x00 && pguidMajorType.Data4[3] == 0xaa && pguidMajorType.Data4[4] == 0x00 && pguidMajorType.Data4[5] == 0x38 && pguidMajorType.Data4[6] == 0x9b && pguidMajorType.Data4[7] == 0x71) {
+                /* MFMediaType_Video */
+                printf("- Major type: MFMediaType_Video\n");
+                uint64_t sizePacked;
+                mediaType -> lpVtbl -> GetUINT64(mediaType, &MF_MT_FRAME_SIZE, &sizePacked);
+                width = (uint32_t) (sizePacked >> 32);
+                height = (uint32_t) sizePacked;
+                printf("- Width: %d\n", width);
+                printf("- Height: %d\n", height);
+            } else {
+                /* Not MFMediaType_Video */
+                printf("- Major type: %lX, %hX, %hX, %X, %X, %X, %X, %X, %X, %X, %X\n", pguidMajorType.Data1, pguidMajorType.Data2, pguidMajorType.Data3,
+                pguidMajorType.Data4[0], pguidMajorType.Data4[1], pguidMajorType.Data4[2], pguidMajorType.Data4[3], pguidMajorType.Data4[4], pguidMajorType.Data4[5], pguidMajorType.Data4[6], pguidMajorType.Data4[7]);
+                goto osToolsListCameras_done;
+            }
+        }
+        IMFSourceReader *pReader;
+        hr = MFCreateSourceReaderFromMediaSource(pSource, pAttributes, &pReader);
+        if (FAILED(hr)) {
+            printf("osToolsListCameras MFCreateSourceReaderFromMediaSource Error: 0x%lX\n", hr);
+            goto osToolsListCameras_done;
+        }
+        char cameraString[32];
+        sprintf(cameraString, "camera%d", i);
+        list_append(output, (unitype) cameraString, 's');
+        list_append(output, (unitype) width, 'i');
+        list_append(output, (unitype) height, 'i');
+        list_append(output, (unitype) 4, 'i'); // TODO
+        list_append(win32camera.cameraList, (unitype) cameraString, 's');
+        list_append(win32camera.cameraList, (unitype) width, 'i');
+        list_append(win32camera.cameraList, (unitype) height, 'i');
+        list_append(win32camera.cameraList, (unitype) 4, 'i'); // TODO
+        list_append(win32camera.cameraList, (unitype) (void *) pReader, 'l');
 
+    }
 osToolsListCameras_done:
     if (pAttributes) {
         pAttributes -> lpVtbl -> Release(pAttributes);
@@ -35111,6 +35132,10 @@ osToolsListCameras_done:
         }
     }
     CoTaskMemFree(ppDevices);
+    if (pSource) {
+        pSource -> lpVtbl -> Release(pSource);
+        pSource = NULL;
+    }
     return output;
 }
 
@@ -35119,6 +35144,51 @@ int32_t osToolsCameraOpen(char *name) {
 }
 
 int32_t osToolsCameraReceive(char *name, uint8_t *data) {
+    int32_t index = list_find(win32camera.cameraList, (unitype) name, 's');
+    if (index == -1) {
+        return -1;
+    }
+    IMFSourceReader *pReader = (IMFSourceReader *) win32camera.cameraList -> data[index + 4].p;
+    /* https://gist.github.com/mmozeiko/a5adab1ad11ea6d0643ceb67bb8e3e19 */
+    IMFSample *pSample;
+    DWORD stream;
+    DWORD flags;
+    LONGLONG timestamp;
+    HRESULT hr;
+
+    while (1) {
+        // this is reading in syncronous blocking mode, MF supports also async calls
+        hr = pReader -> lpVtbl -> ReadSample(pReader, MF_SOURCE_READER_FIRST_VIDEO_STREAM, 0, &stream, &flags, &timestamp, &pSample);
+        if (FAILED(hr)) {
+            return -1;
+        }
+
+        if (flags & MF_SOURCE_READERF_STREAMTICK) {
+            continue;
+        }
+        break;
+    }
+
+    IMFMediaBuffer *pBuffer;
+
+    hr = pSample -> lpVtbl -> ConvertToContiguousBuffer(pSample, &pBuffer);
+    if (FAILED(hr)) {
+        return -1;
+    }
+    BYTE *rawBuffer;
+    DWORD size;
+    hr = pBuffer -> lpVtbl -> Lock(pBuffer, &rawBuffer, NULL, &size);
+    if (FAILED(hr)) {
+        return -1;
+    }
+    if (size > win32camera.cameraList -> data[index + 1].i * win32camera.cameraList -> data[index + 2].i * win32camera.cameraList -> data[index + 3].i) {
+        size = win32camera.cameraList -> data[index + 1].i * win32camera.cameraList -> data[index + 2].i * win32camera.cameraList -> data[index + 3].i;
+    }
+    memcpy(data, rawBuffer, size);
+
+    pBuffer -> lpVtbl -> Unlock(pBuffer);
+    pBuffer -> lpVtbl -> Release(pBuffer);
+    pSample -> lpVtbl -> Release(pSample);
     return -1;
 }
 
@@ -35132,15 +35202,15 @@ https://learn.microsoft.com/en-us/windows/win32/winsock/complete-server-code
 https://learn.microsoft.com/en-us/windows/win32/winsock/complete-client-code
 */
 
-win32SocketObject win32Socket;
+win32socket_t win32socket;
 
 int32_t win32tcpInit(char *address, char *port) {
     for (int32_t i = 0; i < WIN32TCP_NUM_SOCKETS; i++) {
-        win32Socket.connectSocket[i] = 0;
-        win32Socket.socketOpen[i] = 0;
+        win32socket.connectSocket[i] = 0;
+        win32socket.socketOpen[i] = 0;
     }
-    win32Socket.address = address;
-    win32Socket.port = port;
+    win32socket.address = address;
+    win32socket.port = port;
     char modifiable[strlen(address) + 1];
     strcpy(modifiable, address);
     char *check = strtok(modifiable, ".");
@@ -35191,17 +35261,17 @@ int32_t win32tcpInit(char *address, char *port) {
     /* Attempt to connect to an address until one succeeds */
     for (ptr = result; ptr != NULL; ptr = ptr -> ai_next) {
         /* Create a SOCKET for connecting to server */
-        win32Socket.connectSocket[0] = socket(ptr -> ai_family, ptr -> ai_socktype, ptr -> ai_protocol);
-        if (win32Socket.connectSocket[0] == INVALID_SOCKET) {
+        win32socket.connectSocket[0] = socket(ptr -> ai_family, ptr -> ai_socktype, ptr -> ai_protocol);
+        if (win32socket.connectSocket[0] == INVALID_SOCKET) {
             WSACleanup();
             return 1;
         }
 
         /* Connect to server */
-        status = connect(win32Socket.connectSocket[0], ptr -> ai_addr, (int) ptr -> ai_addrlen);
+        status = connect(win32socket.connectSocket[0], ptr -> ai_addr, (int) ptr -> ai_addrlen);
         if (status == SOCKET_ERROR) {
-            closesocket(win32Socket.connectSocket[0]);
-            win32Socket.connectSocket[0] = INVALID_SOCKET;
+            closesocket(win32socket.connectSocket[0]);
+            win32socket.connectSocket[0] = INVALID_SOCKET;
             continue;
         }
         break;
@@ -35209,9 +35279,9 @@ int32_t win32tcpInit(char *address, char *port) {
 
     // /* Send an initial buffer */
     // char sendbuf[2] = {12, 34};
-    // status = send(win32Socket.connectSocket[0], sendbuf, 2, 0);
+    // status = send(win32socket.connectSocket[0], sendbuf, 2, 0);
     // if (status == SOCKET_ERROR) {
-    //     closesocket(win32Socket.connectSocket[0]);
+    //     closesocket(win32socket.connectSocket[0]);
     //     WSACleanup();
     //     return 1;
     // }
@@ -35219,9 +35289,9 @@ int32_t win32tcpInit(char *address, char *port) {
     // printf("Bytes Sent: %ld\n", status);
 
     /* shutdown the connection since no more data will be sent */
-    status = shutdown(win32Socket.connectSocket[0], SD_SEND);
+    status = shutdown(win32socket.connectSocket[0], SD_SEND);
     if (status == SOCKET_ERROR) {
-        closesocket(win32Socket.connectSocket[0]);
+        closesocket(win32socket.connectSocket[0]);
         WSACleanup();
         return 1;
     }
@@ -35231,7 +35301,7 @@ int32_t win32tcpInit(char *address, char *port) {
     char recvbuf[recvbuflen];
     status = 1;
     while (status > 0) {
-        status = recv(win32Socket.connectSocket[0], recvbuf, recvbuflen, 0);
+        status = recv(win32socket.connectSocket[0], recvbuf, recvbuflen, 0);
         if (status > 0) {
             // printf("Bytes received: %d\n", status);
         } else if (status == 0) {
@@ -35242,7 +35312,7 @@ int32_t win32tcpInit(char *address, char *port) {
     }
 
     /* cleanup */
-    closesocket(win32Socket.connectSocket[0]);
+    closesocket(win32socket.connectSocket[0]);
     printf("Successfully connected to %d.%d.%d.%d\n", ipAddress[0], ipAddress[1], ipAddress[2], ipAddress[3]);
     return 0;
 }
@@ -35251,8 +35321,8 @@ SOCKET *win32tcpCreateSocket(int32_t timeoutMilliseconds) {
     /* define socket index */
     int32_t socketIndex = 0;
     for (int32_t i = 0; i < WIN32TCP_NUM_SOCKETS; i++) {
-        if (win32Socket.socketOpen[i] == 0) {
-            win32Socket.socketOpen[i] = 1;
+        if (win32socket.socketOpen[i] == 0) {
+            win32socket.socketOpen[i] = 1;
             socketIndex = i;
             break;
         }
@@ -35271,7 +35341,7 @@ SOCKET *win32tcpCreateSocket(int32_t timeoutMilliseconds) {
     hints.ai_protocol = IPPROTO_TCP;
 
     /* Resolve the server address and port */
-    int32_t status = getaddrinfo(win32Socket.address, win32Socket.port, &hints, &result);
+    int32_t status = getaddrinfo(win32socket.address, win32socket.port, &hints, &result);
     if (status != 0) {
         WSACleanup();
         return NULL;
@@ -35280,24 +35350,24 @@ SOCKET *win32tcpCreateSocket(int32_t timeoutMilliseconds) {
     /* Attempt to connect to an address until one succeeds */
     for (ptr = result; ptr != NULL; ptr = ptr -> ai_next) {
         /* Create a SOCKET for connecting to server */
-        win32Socket.connectSocket[socketIndex] = socket(ptr -> ai_family, ptr -> ai_socktype, ptr -> ai_protocol);
-        if (win32Socket.connectSocket[socketIndex] == INVALID_SOCKET) {
+        win32socket.connectSocket[socketIndex] = socket(ptr -> ai_family, ptr -> ai_socktype, ptr -> ai_protocol);
+        if (win32socket.connectSocket[socketIndex] == INVALID_SOCKET) {
             WSACleanup();
             return NULL;
         }
         /* Connect to server */
-        setsockopt(win32Socket.connectSocket[socketIndex], SOL_SOCKET, SO_RCVTIMEO, (const char *) &timeoutMilliseconds, sizeof(timeoutMilliseconds));
-        status = connect(win32Socket.connectSocket[socketIndex], ptr -> ai_addr, (int) ptr -> ai_addrlen);
+        setsockopt(win32socket.connectSocket[socketIndex], SOL_SOCKET, SO_RCVTIMEO, (const char *) &timeoutMilliseconds, sizeof(timeoutMilliseconds));
+        status = connect(win32socket.connectSocket[socketIndex], ptr -> ai_addr, (int) ptr -> ai_addrlen);
         if (status == SOCKET_ERROR) {
-            closesocket(win32Socket.connectSocket[socketIndex]);
-            win32Socket.connectSocket[socketIndex] = INVALID_SOCKET;
+            closesocket(win32socket.connectSocket[socketIndex]);
+            win32socket.connectSocket[socketIndex] = INVALID_SOCKET;
             continue;
         }
         break;
     }
     // uint32_t mode;
-    // printf("ioctlsocket %d\n", ioctlsocket(win32Socket.connectSocket[socketIndex], FIONBIO, &mode));
-    return &win32Socket.connectSocket[socketIndex];
+    // printf("ioctlsocket %d\n", ioctlsocket(win32socket.connectSocket[socketIndex], FIONBIO, &mode));
+    return &win32socket.connectSocket[socketIndex];
 }
 
 int32_t win32tcpSend(SOCKET *socket, uint8_t *data, int32_t length) {
@@ -35310,26 +35380,6 @@ int32_t win32tcpSend(SOCKET *socket, uint8_t *data, int32_t length) {
 }
 
 int32_t win32tcpReceive(SOCKET *socket, uint8_t *buffer, int32_t length) {
-    int32_t status = 1;
-    int32_t bytes = 0;
-    while (status > 0) {
-        status = recv(*socket, (char *) buffer, length, 0);
-        if (status > 0) {
-            // printf("Bytes received: %d\n", status);
-        } else if (status == 0) {
-            // printf("Connection closed\n");
-        } else {
-            // printf("recv failed with error: %d\n", WSAGetLastError());
-        }
-        bytes += status;
-        if (bytes >= length) {
-            return bytes;
-        }
-    }
-    return bytes;
-}
-
-int32_t win32tcpReceive2(SOCKET *socket, uint8_t *buffer, int32_t length) {
     int32_t status = 1;
     status = recv(*socket, (char *) buffer, length, 0);
     if (status > 0) {
