@@ -909,6 +909,7 @@ const GUID MF_MT_SUBTYPE = {0xf7e34c9a, 0x42e8, 0x4714, {0xb7, 0x4b, 0xcb, 0x29,
 const GUID MFMediaType_Video = {0x73646976, 0x0000, 0x0010, {0x80, 0x00, 0x00, 0xAA, 0x00, 0x38, 0x9B, 0x71}};
 const GUID MFVideoFormat_MJPG = {0x47504a4d, 0x0000, 0x0010, {0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71}}; // MJPG
 const GUID MFVideoFormat_NV12 = {0x3231564e, 0x0000, 0x0010, {0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71}}; // NV12
+const GUID MFVideoFormat_NV21 = {0x3132564e, 0x0000, 0x0010, {0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71}}; // NV21
 const GUID MFVideoFormat_YV12 = {0x32315659, 0x0000, 0x0010, {0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71}}; // YV12
 const GUID MFVideoFormat_H264 = {0x34363248, 0x0000, 0x0010, {0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71}}; // H264
 const GUID MFVideoFormat_RGB8 = {41 /* D3DFMT_P8 */, 0x0000, 0x0010, {0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71}}; // See D3D definitions
@@ -1127,6 +1128,8 @@ list_t *osToolsListCameras() {
             /*
             https://learn.microsoft.com/en-us/windows/win32/medfound/media-type-attributes
             https://learn.microsoft.com/en-us/windows/win32/medfound/video-subtype-guids#yuv-formats-8-bit-and-palettized
+            https://stackoverflow.com/questions/10244657/nv12-to-rgb24-conversion-code-in-c
+            https://stackoverflow.com/questions/50751767/nv12-to-rgb32-with-microsoft-media-foundation
             */
             /* https://learn.microsoft.com/en-us/windows/win32/medfound/processing-media-data-with-the-source-reader#setting-output-formats */
             IMFMediaType *readerType;
@@ -1137,7 +1140,7 @@ list_t *osToolsListCameras() {
                 printf("osToolsListCameras SetGUID Error: 0x%lX\n", hr);
                 goto osToolsListCameras_done;
             }
-            hr = readerType -> lpVtbl -> SetGUID(readerType, &MF_MT_SUBTYPE, &MFVideoFormat_RGB8);
+            hr = readerType -> lpVtbl -> SetGUID(readerType, &MF_MT_SUBTYPE, &MFVideoFormat_NV21);
             if (FAILED(hr)) {
                 printf("osToolsListCameras SetGUID Error: 0x%lX\n", hr);
                 goto osToolsListCameras_done;
@@ -1151,7 +1154,7 @@ list_t *osToolsListCameras() {
             // printf("  - Frames/s: %.02lf\n", (double) frameRateNum / frameRateDen);
             hr = pReader -> lpVtbl -> SetCurrentMediaType(pReader, MF_SOURCE_READER_FIRST_VIDEO_STREAM, NULL, readerType);
             if (FAILED(hr)) {
-                printf("osToolsListCameras SetCurrentMediaType Error: 0x%lX\n", hr); // getting 0xC00D5212 -> MF_E_TOPO_CODEC_NOT_FOUND: Could not find a decoder for the native stream type.
+                printf("osToolsListCameras SetCurrentMediaType Error: 0x%lX\n", hr); // getting 0xC00D5212 -> MF_E_TOPO_CODEC_NOT_FOUND: Could not find a decoder for the native stream type
                 exit(-1);
                 // goto osToolsListCameras_done;
             }
@@ -1229,6 +1232,40 @@ int32_t osToolsCameraReceive(char *name, uint8_t *data) {
         return -1;
     }
     printf("camera buffersize: %ld\n", size);
+    /* convert from NV12 (12bit) to RGB - https://fourcc.org/fccyvrgb.php */
+    // int32_t infillIndex = 0;
+    // for (int32_t i = 0; i < size; i++) {
+    //     int32_t Y = 0;
+    //     int32_t U = 0;
+    //     int32_t V = 0;
+    //     int32_t red = 1.164 * (Y - 16) + 1.596 * (V - 128);
+    //     int32_t green = 1.164 * (Y - 16) + 0.813 * (V - 128) - 0.391 * (U - 128);
+    //     int32_t blue = 1.164 * (Y - 16) + 2.018 * (U - 128);
+    //     if (red < 0) {
+    //         red = 0;
+    //     }
+    //     if (red > 255) {
+    //         red = 255;
+    //     }
+    //     if (green < 0) {
+    //         green = 0;
+    //     }
+    //     if (green > 255) {
+    //         green = 255;
+    //     }
+    //     if (blue < 0) {
+    //         blue = 0;
+    //     }
+    //     if (blue > 255) {
+    //         blue = 255;
+    //     }
+    //     data[infillIndex] = red;
+    //     infillIndex++;
+    //     data[infillIndex] = green;
+    //     infillIndex++;
+    //     data[infillIndex] = blue;
+    //     infillIndex++;
+    // }
     if (size > win32camera.cameraList -> data[index + 1].i * win32camera.cameraList -> data[index + 2].i * win32camera.cameraList -> data[index + 3].i) {
         size = win32camera.cameraList -> data[index + 1].i * win32camera.cameraList -> data[index + 2].i * win32camera.cameraList -> data[index + 3].i;
     }
