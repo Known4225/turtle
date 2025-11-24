@@ -1014,8 +1014,12 @@ list_t *osToolsListCameras() {
         DWORD streamCount;
         presentationDescriptor -> lpVtbl -> GetStreamDescriptorCount(presentationDescriptor, &streamCount);
         printf("- Source streams: %ld\n", streamCount);
-        uint32_t width = 0;
-        uint32_t height = 0;
+        uint32_t setWidth = 0;
+        uint32_t setHeight = 0;
+        double setFramerate = 0.0;
+        int32_t maxFramerate = -1;
+        double minDifference = 100000000000.0;
+        /* goal: Closest resolution to 1024x1024, Fastest framerate */
         if (streamCount > 0) {
             int32_t selected;
             IMFStreamDescriptor *streamDescriptor;
@@ -1070,8 +1074,8 @@ list_t *osToolsListCameras() {
                         printf("osToolsListCameras GetUINT64 Error: 0x%lX\n", hr);
                         goto osToolsListCameras_done;
                     }
-                    width = (uint32_t) (sizePacked >> 32);
-                    height = (uint32_t) sizePacked;
+                    uint32_t width = (uint32_t) (sizePacked >> 32);
+                    uint32_t height = (uint32_t) sizePacked;
                     uint64_t frameRatePacked;
                     mediaType -> lpVtbl -> GetUINT64(mediaType, &MF_MT_FRAME_RATE, &frameRatePacked);
                     uint32_t frameRateNum = (uint32_t) (frameRatePacked >> 32);
@@ -1081,19 +1085,34 @@ list_t *osToolsListCameras() {
                     printf("  - Width: %d\n", width);
                     printf("  - Height: %d\n", height);
                     printf("  - Frames/s: %.02lf\n", (double) frameRateNum / frameRateDen);
-                    // printf("  - Compressed: %d\n", compressed);
-                    // mediaType -> lpVtbl -> SetUINT32(mediaType, &MF_SOURCE_READER_ENABLE_VIDEO_PROCESSING, 1);
-                    // mediaType -> lpVtbl -> SetGUID(mediaType, &MF_MT_SUBTYPE, &MFVideoFormat_NV12);
-                    hr = mediaTypeHandler -> lpVtbl -> SetCurrentMediaType(mediaTypeHandler, mediaType);
-                    if (FAILED(hr)) {
-                        printf("osToolsListCameras SetCurrentMediaType Error: 0x%lX\n", hr);
-                        goto osToolsListCameras_done;
+                    double difference = (width - 1024) * (width - 1024) + (height - 1024) * (height - 1024);
+                    if (frameRateDen != 0 && (int32_t) (frameRateNum / frameRateDen) > maxFramerate) {
+                        minDifference = difference;
+                        maxFramerate = frameRateNum / frameRateDen;
+                        setWidth = width;
+                        setHeight = height;
+                        setFramerate = (double) frameRateNum / frameRateDen;
+                        hr = mediaTypeHandler -> lpVtbl -> SetCurrentMediaType(mediaTypeHandler, mediaType);
+                        if (FAILED(hr)) {
+                            printf("osToolsListCameras SetCurrentMediaType Error: 0x%lX\n", hr);
+                            goto osToolsListCameras_done;
+                        }
+                    } else if (frameRateDen != 0 && (int32_t) (frameRateNum / frameRateDen) == maxFramerate && difference < minDifference) {
+                        minDifference = difference;
+                        maxFramerate = frameRateNum / frameRateDen;
+                        setWidth = width;
+                        setHeight = height;
+                        setFramerate = (double) frameRateNum / frameRateDen;
+                        hr = mediaTypeHandler -> lpVtbl -> SetCurrentMediaType(mediaTypeHandler, mediaType);
+                        if (FAILED(hr)) {
+                            printf("osToolsListCameras SetCurrentMediaType Error: 0x%lX\n", hr);
+                            goto osToolsListCameras_done;
+                        }
                     }
                 } else {
                     /* Not MFMediaType_Video */
                     printf("  - Major type: %08lx-%02hx%02hx-%02x%02x-%02x%02x%02x%02x%02x%02x\n", majorType.Data1, majorType.Data2, majorType.Data3,
                     majorType.Data4[0], majorType.Data4[1], majorType.Data4[2], majorType.Data4[3], majorType.Data4[4], majorType.Data4[5], majorType.Data4[6], majorType.Data4[7]);
-                    goto osToolsListCameras_done;
                 }
             }
             /* https://stackoverflow.com/questions/43507393/media-foundation-set-video-interlacing-and-decode */
@@ -1116,22 +1135,13 @@ list_t *osToolsListCameras() {
                 nativeSubtype.Data4[0], nativeSubtype.Data4[1], nativeSubtype.Data4[2], nativeSubtype.Data4[3], nativeSubtype.Data4[4], nativeSubtype.Data4[5], nativeSubtype.Data4[6], nativeSubtype.Data4[7]);
                 dwStreamIndex++;
             }
-            // IMFMediaType *readerType;
-            // pReader -> lpVtbl -> GetCurrentMediaType(pReader, MF_SOURCE_READER_FIRST_VIDEO_STREAM, &readerType);
-            // uint32_t readerTypeVideoProcessing = 0;
-            // readerType -> lpVtbl -> GetUINT32(readerType, &MF_SOURCE_READER_ENABLE_VIDEO_PROCESSING, &readerTypeVideoProcessing);
-            // uint32_t readerTypeD3D = 0;
-            // readerType -> lpVtbl -> GetUINT32(readerType, &MF_SOURCE_READER_D3D_MANAGER, &readerTypeD3D);
-            // uint32_t readerTypeDisableConverters = 0;
-            // readerType -> lpVtbl -> GetUINT32(readerType, &MF_READWRITE_DISABLE_CONVERTERS, &readerTypeDisableConverters);
-            // printf("readerTypeVideoProcessing: %d %d %d\n", readerTypeVideoProcessing, readerTypeD3D, readerTypeDisableConverters);
             /*
             https://learn.microsoft.com/en-us/windows/win32/medfound/media-type-attributes
             https://learn.microsoft.com/en-us/windows/win32/medfound/video-subtype-guids#yuv-formats-8-bit-and-palettized
             https://stackoverflow.com/questions/10244657/nv12-to-rgb24-conversion-code-in-c
             https://stackoverflow.com/questions/50751767/nv12-to-rgb32-with-microsoft-media-foundation
+            https://learn.microsoft.com/en-us/windows/win32/medfound/processing-media-data-with-the-source-reader#setting-output-formats
             */
-            /* https://learn.microsoft.com/en-us/windows/win32/medfound/processing-media-data-with-the-source-reader#setting-output-formats */
             IMFMediaType *readerType;
             MFCreateMediaType(&readerType);
             readerType -> lpVtbl -> SetUINT32(readerType, &MF_SOURCE_READER_ENABLE_VIDEO_PROCESSING, 1);
@@ -1145,29 +1155,21 @@ list_t *osToolsListCameras() {
                 printf("osToolsListCameras SetGUID Error: 0x%lX\n", hr);
                 goto osToolsListCameras_done;
             }
-            // uint64_t frameRatePacked;
-            // readerType -> lpVtbl -> GetUINT64(readerType, &MF_MT_FRAME_RATE, &frameRatePacked);
-            // uint32_t frameRateNum = (uint32_t) (frameRatePacked >> 32);
-            // uint32_t frameRateDen = (uint32_t) frameRatePacked;
-            // printf("  - Width: %d\n", width);
-            // printf("  - Height: %d\n", height);
-            // printf("  - Frames/s: %.02lf\n", (double) frameRateNum / frameRateDen);
             hr = pReader -> lpVtbl -> SetCurrentMediaType(pReader, MF_SOURCE_READER_FIRST_VIDEO_STREAM, NULL, readerType);
             if (FAILED(hr)) {
                 printf("osToolsListCameras SetCurrentMediaType Error: 0x%lX\n", hr); // getting 0xC00D5212 -> MF_E_TOPO_CODEC_NOT_FOUND: Could not find a decoder for the native stream type
-                // exit(-1);
-                // goto osToolsListCameras_done;
+                goto osToolsListCameras_done;
             }
             char cameraString[32];
             sprintf(cameraString, "camera%d", i);
             list_append(output, (unitype) cameraString, 's');
-            list_append(output, (unitype) width, 'i');
-            list_append(output, (unitype) height, 'i');
-            list_append(output, (unitype) 3, 'i'); // TODO
+            list_append(output, (unitype) setWidth, 'i');
+            list_append(output, (unitype) setHeight, 'i');
+            list_append(output, (unitype) setFramerate, 'd');
             list_append(win32camera.cameraList, (unitype) cameraString, 's');
-            list_append(win32camera.cameraList, (unitype) width, 'i');
-            list_append(win32camera.cameraList, (unitype) height, 'i');
-            list_append(win32camera.cameraList, (unitype) 3, 'i'); // TODO
+            list_append(win32camera.cameraList, (unitype) setWidth, 'i');
+            list_append(win32camera.cameraList, (unitype) setHeight, 'i');
+            list_append(win32camera.cameraList, (unitype) setFramerate, 'd');
             list_append(win32camera.cameraList, (unitype) (void *) pReader, 'l');
         }
     }
@@ -1234,9 +1236,9 @@ int32_t osToolsCameraReceive(char *name, uint8_t *data) {
     /* drop the alpha character */
     int32_t iterData = 0;
     for (int32_t i = 0; i < size; i += 4) {
-        data[iterData++] = rawBuffer[i];
-        data[iterData++] = rawBuffer[i + 1];
         data[iterData++] = rawBuffer[i + 2];
+        data[iterData++] = rawBuffer[i + 1];
+        data[iterData++] = rawBuffer[i];
     }
 
     pBuffer -> lpVtbl -> Unlock(pBuffer);

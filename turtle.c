@@ -218,7 +218,7 @@ int main(int argc, char *argv[]) {
     }
     printf("cameraName: %s\n", cameraName);
     if (cameraName) {
-        cameraFrame = malloc(cameras -> data[cameraIndex + 1].i * cameras -> data[cameraIndex + 2].i * cameras -> data[3].i);
+        cameraFrame = malloc(cameras -> data[cameraIndex + 1].i * cameras -> data[cameraIndex + 2].i * 3);
         osToolsCameraOpen(cameraName);
         osToolsCameraReceive(cameraName, cameraFrame);
         turtleTextureUnload(empvImage);

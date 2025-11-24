@@ -136,13 +136,13 @@ int32_t osToolsComReceive(char *name, uint8_t *buffer, int32_t length);
 /* closes a com port */
 int32_t osToolsComClose(char *name);
 
-/* get a list [camera name, width, height, channels] */
+/* get a list [camera name, width, height, framerate] */
 list_t *osToolsListCameras();
 
 /* opens a camera */
 int32_t osToolsCameraOpen(char *name);
 
-/* get buffer from the camera - buffer must be at least width * height * channels big */
+/* get RGB buffer from the camera - buffer must be at least width * height * 3 big */
 int32_t osToolsCameraReceive(char *name, uint8_t *data);
 
 /* closes a camera */
@@ -175,7 +175,7 @@ typedef struct {
 extern win32socket_t win32socket;
 
 typedef struct {
-    list_t *cameraList; // format: camera name, width, height, channels, pointer to source reader
+    list_t *cameraList; // format: camera name, width, height, framerate, pointer to source reader
 } win32camera_t;
 
 extern win32camera_t win32camera;
