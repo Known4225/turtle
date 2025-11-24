@@ -209,17 +209,20 @@ int main(int argc, char *argv[]) {
     list_t *cameras = osToolsListCameras();
     printf("cameras: ");
     list_print(cameras);
+    int32_t cameraIndex = -1;
     char *cameraName = NULL;
     uint8_t *cameraFrame = NULL;
-    if (cameras -> length > 0) {
-        cameraName = cameras -> data[0].s;
+    for (int32_t i = 0; i < cameras -> length; i+= 4) {
+        cameraName = cameras -> data[i].s;
+        cameraIndex = i;
     }
+    printf("cameraName: %s\n", cameraName);
     if (cameraName) {
-        cameraFrame = malloc(cameras -> data[1].i * cameras -> data[2].i * cameras -> data[3].i);
+        cameraFrame = malloc(cameras -> data[cameraIndex + 1].i * cameras -> data[cameraIndex + 2].i * cameras -> data[3].i);
         osToolsCameraOpen(cameraName);
         osToolsCameraReceive(cameraName, cameraFrame);
         turtleTextureUnload(empvImage);
-        empvImage = turtleTextureLoadArray(cameraFrame, cameras -> data[1].i, cameras -> data[2].i, GL_RGBA);
+        empvImage = turtleTextureLoadArray(cameraFrame, cameras -> data[cameraIndex + 1].i, cameras -> data[cameraIndex + 2].i, GL_RGB);
         // osToolsCameraClose(cameraName);
     }
 
@@ -359,7 +362,7 @@ int main(int argc, char *argv[]) {
         if (cameraName) {
             osToolsCameraReceive(cameraName, cameraFrame);
             turtleTextureUnload(empvImage);
-            empvImage = turtleTextureLoadArray(cameraFrame, cameras -> data[1].i, cameras -> data[2].i, GL_RGBA);
+            empvImage = turtleTextureLoadArray(cameraFrame, cameras -> data[cameraIndex + 1].i, cameras -> data[cameraIndex + 2].i, GL_RGB);
         }
         turtleTexture(empvImage, scrollbarVarX * -5 + 400, scrollbarVarY * 3.3 - 145, scrollbarVarX * -5 + 700, scrollbarVarY * 3.3 + 24, 0, 255, 255, 255);
 
