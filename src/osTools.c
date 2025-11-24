@@ -1140,7 +1140,7 @@ list_t *osToolsListCameras() {
                 printf("osToolsListCameras SetGUID Error: 0x%lX\n", hr);
                 goto osToolsListCameras_done;
             }
-            hr = readerType -> lpVtbl -> SetGUID(readerType, &MF_MT_SUBTYPE, &MFVideoFormat_NV21);
+            hr = readerType -> lpVtbl -> SetGUID(readerType, &MF_MT_SUBTYPE, &MFVideoFormat_RGB32);
             if (FAILED(hr)) {
                 printf("osToolsListCameras SetGUID Error: 0x%lX\n", hr);
                 goto osToolsListCameras_done;
@@ -1155,7 +1155,7 @@ list_t *osToolsListCameras() {
             hr = pReader -> lpVtbl -> SetCurrentMediaType(pReader, MF_SOURCE_READER_FIRST_VIDEO_STREAM, NULL, readerType);
             if (FAILED(hr)) {
                 printf("osToolsListCameras SetCurrentMediaType Error: 0x%lX\n", hr); // getting 0xC00D5212 -> MF_E_TOPO_CODEC_NOT_FOUND: Could not find a decoder for the native stream type
-                exit(-1);
+                // exit(-1);
                 // goto osToolsListCameras_done;
             }
             char cameraString[32];
@@ -1231,45 +1231,13 @@ int32_t osToolsCameraReceive(char *name, uint8_t *data) {
     if (FAILED(hr)) {
         return -1;
     }
-    printf("camera buffersize: %ld\n", size);
-    /* convert from NV12 (12bit) to RGB - https://fourcc.org/fccyvrgb.php */
-    // int32_t infillIndex = 0;
-    // for (int32_t i = 0; i < size; i++) {
-    //     int32_t Y = 0;
-    //     int32_t U = 0;
-    //     int32_t V = 0;
-    //     int32_t red = 1.164 * (Y - 16) + 1.596 * (V - 128);
-    //     int32_t green = 1.164 * (Y - 16) + 0.813 * (V - 128) - 0.391 * (U - 128);
-    //     int32_t blue = 1.164 * (Y - 16) + 2.018 * (U - 128);
-    //     if (red < 0) {
-    //         red = 0;
-    //     }
-    //     if (red > 255) {
-    //         red = 255;
-    //     }
-    //     if (green < 0) {
-    //         green = 0;
-    //     }
-    //     if (green > 255) {
-    //         green = 255;
-    //     }
-    //     if (blue < 0) {
-    //         blue = 0;
-    //     }
-    //     if (blue > 255) {
-    //         blue = 255;
-    //     }
-    //     data[infillIndex] = red;
-    //     infillIndex++;
-    //     data[infillIndex] = green;
-    //     infillIndex++;
-    //     data[infillIndex] = blue;
-    //     infillIndex++;
-    // }
-    if (size > win32camera.cameraList -> data[index + 1].i * win32camera.cameraList -> data[index + 2].i * win32camera.cameraList -> data[index + 3].i) {
-        size = win32camera.cameraList -> data[index + 1].i * win32camera.cameraList -> data[index + 2].i * win32camera.cameraList -> data[index + 3].i;
+    /* drop the alpha character */
+    int32_t iterData = 0;
+    for (int32_t i = 0; i < size; i += 4) {
+        data[iterData++] = rawBuffer[i];
+        data[iterData++] = rawBuffer[i + 1];
+        data[iterData++] = rawBuffer[i + 2];
     }
-    memcpy(data, rawBuffer, size);
 
     pBuffer -> lpVtbl -> Unlock(pBuffer);
     pBuffer -> lpVtbl -> Release(pBuffer);

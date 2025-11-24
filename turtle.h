@@ -35011,14 +35011,19 @@ int32_t osToolsComClose(char *name) {
 }
 
 /* symbol IID_IMFMediaSource and MF_MT_FRAME_SIZE not linked despite their existence in mfapi.h and mfidl.h */
-const GUID DECLSPEC_SELECTANY IID_IMFMediaSource = {0x279a808d, 0xaec7, 0x40c8, {0x9c,0x6b, 0xa6, 0xb4, 0x92, 0xc7, 0x8a, 0x66}};
-const GUID DECLSPEC_SELECTANY MF_MT_FRAME_SIZE = {0x1652c33d, 0xd6b2, 0x4012, {0xb8, 0x34, 0x72, 0x03, 0x08, 0x49, 0xa3, 0x7d}};
+const GUID IID_IMFMediaSource = {0x279a808d, 0xaec7, 0x40c8, {0x9c,0x6b, 0xa6, 0xb4, 0x92, 0xc7, 0x8a, 0x66}};
+const GUID MF_MT_FRAME_SIZE = {0x1652c33d, 0xd6b2, 0x4012, {0xb8, 0x34, 0x72, 0x03, 0x08, 0x49, 0xa3, 0x7d}};
+const GUID MF_MT_FRAME_RATE = {0xc459a2e8, 0x3d2c, 0x4e44, {0xb1, 0x32, 0xfe, 0xe5, 0x15, 0x6c, 0x7b, 0xb0}};
 const GUID MF_MT_MAJOR_TYPE = {0x48eba18e, 0xf8c9, 0x4687, {0xbf, 0x11, 0x0a, 0x74, 0xc9, 0xf9, 0x6a, 0x8f}};
 const GUID MF_MT_SUBTYPE = {0xf7e34c9a, 0x42e8, 0x4714, {0xb7, 0x4b, 0xcb, 0x29, 0xd7, 0x2c, 0x35, 0xe5}};
 const GUID MFMediaType_Video = {0x73646976, 0x0000, 0x0010, {0x80, 0x00, 0x00, 0xAA, 0x00, 0x38, 0x9B, 0x71}};
 const GUID MFVideoFormat_MJPG = {0x47504a4d, 0x0000, 0x0010, {0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71}}; // MJPG
 const GUID MFVideoFormat_NV12 = {0x3231564e, 0x0000, 0x0010, {0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71}}; // NV12
+const GUID MFVideoFormat_NV21 = {0x3132564e, 0x0000, 0x0010, {0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71}}; // NV21
+const GUID MFVideoFormat_YV12 = {0x32315659, 0x0000, 0x0010, {0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71}}; // YV12
 const GUID MFVideoFormat_H264 = {0x34363248, 0x0000, 0x0010, {0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71}}; // H264
+const GUID MFVideoFormat_RGB8 = {41 /* D3DFMT_P8 */, 0x0000, 0x0010, {0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71}}; // See D3D definitions
+const GUID MFVideoFormat_RGB24 = {20 /* D3DFMT_R8G8B8 */, 0x0000, 0x0010, {0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71}}; // See D3D definitions
 const GUID MFImageFormat_RGB32 = {0x00000016, 0x0000, 0x0010, {0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71}};
 const GUID MFVideoFormat_RGB32 = {0x00000016, 0x0000, 0x0010, {0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71}};
 
@@ -35177,12 +35182,18 @@ list_t *osToolsListCameras() {
                     }
                     width = (uint32_t) (sizePacked >> 32);
                     height = (uint32_t) sizePacked;
+                    uint64_t frameRatePacked;
+                    mediaType -> lpVtbl -> GetUINT64(mediaType, &MF_MT_FRAME_RATE, &frameRatePacked);
+                    uint32_t frameRateNum = (uint32_t) (frameRatePacked >> 32);
+                    uint32_t frameRateDen = (uint32_t) frameRatePacked;
                     BOOL compressed;
                     mediaType -> lpVtbl -> IsCompressedFormat(mediaType, &compressed);
                     printf("  - Width: %d\n", width);
                     printf("  - Height: %d\n", height);
-                    printf("  - Compressed: %d\n", compressed);
+                    printf("  - Frames/s: %.02lf\n", (double) frameRateNum / frameRateDen);
+                    // printf("  - Compressed: %d\n", compressed);
                     // mediaType -> lpVtbl -> SetUINT32(mediaType, &MF_SOURCE_READER_ENABLE_VIDEO_PROCESSING, 1);
+                    // mediaType -> lpVtbl -> SetGUID(mediaType, &MF_MT_SUBTYPE, &MFVideoFormat_NV12);
                     hr = mediaTypeHandler -> lpVtbl -> SetCurrentMediaType(mediaTypeHandler, mediaType);
                     if (FAILED(hr)) {
                         printf("osToolsListCameras SetCurrentMediaType Error: 0x%lX\n", hr);
@@ -35195,40 +35206,68 @@ list_t *osToolsListCameras() {
                     goto osToolsListCameras_done;
                 }
             }
+            /* https://stackoverflow.com/questions/43507393/media-foundation-set-video-interlacing-and-decode */
+            MFCreateAttributes(&pAttributes, 1);
+            pAttributes -> lpVtbl -> SetUINT32(pAttributes, &MF_READWRITE_ENABLE_HARDWARE_TRANSFORMS, TRUE);
+            pAttributes -> lpVtbl -> SetUINT32(pAttributes, &MF_SOURCE_READER_ENABLE_VIDEO_PROCESSING, TRUE);
             IMFSourceReader *pReader;
             hr = MFCreateSourceReaderFromMediaSource(pSource, pAttributes, &pReader);
             if (FAILED(hr)) {
                 printf("osToolsListCameras MFCreateSourceReaderFromMediaSource Error: 0x%lX\n", hr);
                 goto osToolsListCameras_done;
             }
-            IMFMediaType *readerType;
-            pReader -> lpVtbl -> GetCurrentMediaType(pReader, MF_SOURCE_READER_FIRST_VIDEO_STREAM, &readerType);
-            uint32_t readerTypeVideoProcessing = 0;
-            readerType -> lpVtbl -> GetUINT32(readerType, &MF_SOURCE_READER_ENABLE_VIDEO_PROCESSING, &readerTypeVideoProcessing);
-            uint32_t readerTypeD3D = 0;
-            readerType -> lpVtbl -> GetUINT32(readerType, &MF_SOURCE_READER_D3D_MANAGER, &readerTypeD3D);
-            uint32_t readerTypeDisableConverters = 0;
-            readerType -> lpVtbl -> GetUINT32(readerType, &MF_READWRITE_DISABLE_CONVERTERS, &readerTypeDisableConverters);
-            printf("readerTypeVideoProcessing: %d %d %d\n", readerTypeVideoProcessing, readerTypeD3D, readerTypeDisableConverters);
-            /* https://learn.microsoft.com/en-us/windows/win32/medfound/processing-media-data-with-the-source-reader#setting-output-formats */
+            pReader -> lpVtbl -> SetStreamSelection(pReader, MF_SOURCE_READER_FIRST_VIDEO_STREAM, TRUE);
+            IMFMediaType *readerNativeType;
+            int32_t dwStreamIndex = 0;
+            while (pReader -> lpVtbl -> GetNativeMediaType(pReader, MF_SOURCE_READER_FIRST_VIDEO_STREAM, dwStreamIndex, &readerNativeType) == S_OK) {
+                GUID nativeSubtype;
+                readerNativeType -> lpVtbl -> GetGUID(readerNativeType, &MF_MT_SUBTYPE, &nativeSubtype);
+                printf("- Native Subtype %d: %08lx-%02hx%02hx-%02x%02x-%02x%02x%02x%02x%02x%02x\n", dwStreamIndex, nativeSubtype.Data1, nativeSubtype.Data2, nativeSubtype.Data3,
+                nativeSubtype.Data4[0], nativeSubtype.Data4[1], nativeSubtype.Data4[2], nativeSubtype.Data4[3], nativeSubtype.Data4[4], nativeSubtype.Data4[5], nativeSubtype.Data4[6], nativeSubtype.Data4[7]);
+                dwStreamIndex++;
+            }
             // IMFMediaType *readerType;
-            // MFCreateMediaType(&readerType);
-            // hr = readerType -> lpVtbl -> SetGUID(readerType, &MF_MT_MAJOR_TYPE, &MFMediaType_Video);
-            // if (FAILED(hr)) {
-            //     printf("osToolsListCameras SetGUID Error: 0x%lX\n", hr);
-            //     goto osToolsListCameras_done;
-            // }
-            // hr = readerType -> lpVtbl -> SetGUID(readerType, &MF_MT_SUBTYPE, &MFVideoFormat_RGB32);
-            // if (FAILED(hr)) {
-            //     printf("osToolsListCameras SetGUID Error: 0x%lX\n", hr);
-            //     goto osToolsListCameras_done;
-            // }
-            // // readerType -> lpVtbl -> SetUINT32(readerType, &MF_SOURCE_READER_ENABLE_VIDEO_PROCESSING, 1);
-            // hr = pReader -> lpVtbl -> SetCurrentMediaType(pReader, MF_SOURCE_READER_FIRST_VIDEO_STREAM, NULL, readerType);
-            // if (FAILED(hr)) {
-            //     printf("osToolsListCameras SetCurrentMediaType Error: 0x%lX\n", hr);
-            //     // goto osToolsListCameras_done;
-            // }
+            // pReader -> lpVtbl -> GetCurrentMediaType(pReader, MF_SOURCE_READER_FIRST_VIDEO_STREAM, &readerType);
+            // uint32_t readerTypeVideoProcessing = 0;
+            // readerType -> lpVtbl -> GetUINT32(readerType, &MF_SOURCE_READER_ENABLE_VIDEO_PROCESSING, &readerTypeVideoProcessing);
+            // uint32_t readerTypeD3D = 0;
+            // readerType -> lpVtbl -> GetUINT32(readerType, &MF_SOURCE_READER_D3D_MANAGER, &readerTypeD3D);
+            // uint32_t readerTypeDisableConverters = 0;
+            // readerType -> lpVtbl -> GetUINT32(readerType, &MF_READWRITE_DISABLE_CONVERTERS, &readerTypeDisableConverters);
+            // printf("readerTypeVideoProcessing: %d %d %d\n", readerTypeVideoProcessing, readerTypeD3D, readerTypeDisableConverters);
+            /*
+            https://learn.microsoft.com/en-us/windows/win32/medfound/media-type-attributes
+            https://learn.microsoft.com/en-us/windows/win32/medfound/video-subtype-guids#yuv-formats-8-bit-and-palettized
+            https://stackoverflow.com/questions/10244657/nv12-to-rgb24-conversion-code-in-c
+            https://stackoverflow.com/questions/50751767/nv12-to-rgb32-with-microsoft-media-foundation
+            */
+            /* https://learn.microsoft.com/en-us/windows/win32/medfound/processing-media-data-with-the-source-reader#setting-output-formats */
+            IMFMediaType *readerType;
+            MFCreateMediaType(&readerType);
+            readerType -> lpVtbl -> SetUINT32(readerType, &MF_SOURCE_READER_ENABLE_VIDEO_PROCESSING, 1);
+            hr = readerType -> lpVtbl -> SetGUID(readerType, &MF_MT_MAJOR_TYPE, &MFMediaType_Video);
+            if (FAILED(hr)) {
+                printf("osToolsListCameras SetGUID Error: 0x%lX\n", hr);
+                goto osToolsListCameras_done;
+            }
+            hr = readerType -> lpVtbl -> SetGUID(readerType, &MF_MT_SUBTYPE, &MFVideoFormat_RGB32);
+            if (FAILED(hr)) {
+                printf("osToolsListCameras SetGUID Error: 0x%lX\n", hr);
+                goto osToolsListCameras_done;
+            }
+            // uint64_t frameRatePacked;
+            // readerType -> lpVtbl -> GetUINT64(readerType, &MF_MT_FRAME_RATE, &frameRatePacked);
+            // uint32_t frameRateNum = (uint32_t) (frameRatePacked >> 32);
+            // uint32_t frameRateDen = (uint32_t) frameRatePacked;
+            // printf("  - Width: %d\n", width);
+            // printf("  - Height: %d\n", height);
+            // printf("  - Frames/s: %.02lf\n", (double) frameRateNum / frameRateDen);
+            hr = pReader -> lpVtbl -> SetCurrentMediaType(pReader, MF_SOURCE_READER_FIRST_VIDEO_STREAM, NULL, readerType);
+            if (FAILED(hr)) {
+                printf("osToolsListCameras SetCurrentMediaType Error: 0x%lX\n", hr); // getting 0xC00D5212 -> MF_E_TOPO_CODEC_NOT_FOUND: Could not find a decoder for the native stream type
+                // exit(-1);
+                // goto osToolsListCameras_done;
+            }
             char cameraString[32];
             sprintf(cameraString, "camera%d", i);
             list_append(output, (unitype) cameraString, 's');
@@ -35279,7 +35318,7 @@ int32_t osToolsCameraReceive(char *name, uint8_t *data) {
     HRESULT hr;
 
     while (1) {
-        // this is reading in syncronous blocking mode, MF supports also async calls
+        /* this is reading in syncronous blocking mode, MF supports also async calls */
         hr = pReader -> lpVtbl -> ReadSample(pReader, MF_SOURCE_READER_FIRST_VIDEO_STREAM, 0, &stream, &flags, &timestamp, &pSample);
         if (FAILED(hr)) {
             return -1;
@@ -35303,10 +35342,13 @@ int32_t osToolsCameraReceive(char *name, uint8_t *data) {
         return -1;
     }
     printf("camera buffersize: %ld\n", size);
-    if (size > win32camera.cameraList -> data[index + 1].i * win32camera.cameraList -> data[index + 2].i * win32camera.cameraList -> data[index + 3].i) {
-        size = win32camera.cameraList -> data[index + 1].i * win32camera.cameraList -> data[index + 2].i * win32camera.cameraList -> data[index + 3].i;
+    /* drop the alpha character */
+    int32_t iterData = 0;
+    for (int32_t i = 0; i < size; i += 4) {
+        data[iterData++] = rawBuffer[i];
+        data[iterData++] = rawBuffer[i + 1];
+        data[iterData++] = rawBuffer[i + 2];
     }
-    memcpy(data, rawBuffer, size);
 
     pBuffer -> lpVtbl -> Unlock(pBuffer);
     pBuffer -> lpVtbl -> Release(pBuffer);
