@@ -216,8 +216,8 @@ int main(int argc, char *argv[]) {
         cameraName = cameras -> data[i].s;
         cameraIndex = i;
     }
-    printf("cameraName: %s\n", cameraName);
     if (cameraName) {
+        printf("cameraName: %s\n", cameraName);
         cameraFrame = malloc(cameras -> data[cameraIndex + 1].i * cameras -> data[cameraIndex + 2].i * 3);
         osToolsCameraOpen(cameraName);
         osToolsCameraReceive(cameraName, cameraFrame);
