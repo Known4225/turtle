@@ -1161,7 +1161,7 @@ list_t *osToolsListCameras() {
                 goto osToolsListCameras_done;
             }
             char cameraString[32];
-            sprintf(cameraString, "camera%d", i);
+            sprintf(cameraString, "USB Camera %d", i);
             list_append(output, (unitype) cameraString, 's');
             list_append(output, (unitype) setWidth, 'i');
             list_append(output, (unitype) setHeight, 'i');
