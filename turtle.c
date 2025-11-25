@@ -212,18 +212,18 @@ int main(int argc, char *argv[]) {
     int32_t cameraIndex = -1;
     char *cameraName = NULL;
     uint8_t *cameraFrame = NULL;
-    for (int32_t i = 0; i < cameras -> length; i+= 4) {
-        cameraName = cameras -> data[i].s;
-        cameraIndex = i;
+    for (int32_t i = 0; i < cameras -> length; i += 4) {
+        if (osToolsCameraOpen(cameras -> data[i].s) == 0) {
+            cameraName = cameras -> data[i].s;
+            cameraIndex = i;
+            break;
+        }
     }
     if (cameraName) {
-        printf("cameraName: %s\n", cameraName);
         cameraFrame = malloc(cameras -> data[cameraIndex + 1].i * cameras -> data[cameraIndex + 2].i * 3);
-        osToolsCameraOpen(cameraName);
         osToolsCameraReceive(cameraName, cameraFrame);
         turtleTextureUnload(empvImage);
         empvImage = turtleTextureLoadArray(cameraFrame, cameras -> data[cameraIndex + 1].i, cameras -> data[cameraIndex + 2].i, GL_RGB);
-        // osToolsCameraClose(cameraName);
     }
 
     uint32_t tps = 120; // ticks per second (locked to fps in this case)
@@ -412,6 +412,9 @@ int main(int argc, char *argv[]) {
             end = clock();
         }
         tick++;
+    }
+    if (cameraName) {
+        osToolsCameraClose(cameraName);
     }
     turtleFree();
     glfwTerminate();
