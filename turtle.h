@@ -35085,36 +35085,6 @@ list_t *osToolsListCameras() {
             printf("osToolsListCameras ActivateObject Error: 0x%lX\n", hr);
             goto osToolsListCameras_done;
         }
-        
-        // IMFMediaType *readerType;
-        // hr = MFCreateMediaType(&readerType);
-        // if (FAILED(hr)) {
-        //     printf("osToolsListCameras MFCreateMediaType Error: 0x%lX\n", hr);
-        //     goto osToolsListCameras_done;
-        // }
-        // readerType -> lpVtbl -> SetUINT32(readerType, &MF_SOURCE_READER_ENABLE_VIDEO_PROCESSING, 1);
-        // hr = pReader -> lpVtbl -> SetCurrentMediaType(pReader, MF_SOURCE_READER_FIRST_VIDEO_STREAM, NULL, readerType);
-        // if (FAILED(hr)) {
-        //     printf("osToolsListCameras SetCurrentMediaType Error: 0x%lX\n", hr);
-        //     goto osToolsListCameras_done;
-        // }
-        // hr = readerType -> lpVtbl -> SetGUID(readerType, &MF_MT_MAJOR_TYPE, &MFMediaType_Video);
-        // if (FAILED(hr)) {
-        //     printf("osToolsListCameras SetGUID Error: 0x%lX\n", hr);
-        //     goto osToolsListCameras_done;
-        // }
-        // hr = readerType -> lpVtbl -> SetGUID(readerType, &MF_MT_SUBTYPE, &MFVideoFormat_MJPG);
-        // if (FAILED(hr)) {
-        //     printf("osToolsListCameras SetGUID Error: 0x%lX\n", hr);
-        //     goto osToolsListCameras_done;
-        // }
-        // // you can also set desired width/height here
-        // hr = pReader -> lpVtbl -> SetCurrentMediaType(pReader, MF_SOURCE_READER_FIRST_VIDEO_STREAM, NULL, readerType);
-        // if (FAILED(hr)) {
-        //     printf("osToolsListCameras SetCurrentMediaType Error: 0x%lX\n", hr);
-        //     goto osToolsListCameras_done;
-        // }
-        // readerType -> lpVtbl -> Release(readerType);
         DWORD characteristics;
         pSource -> lpVtbl -> GetCharacteristics(pSource, &characteristics);
         printf("- Source characteristics: %lX\n", characteristics);
@@ -35225,53 +35195,8 @@ list_t *osToolsListCameras() {
                     majorType.Data4[0], majorType.Data4[1], majorType.Data4[2], majorType.Data4[3], majorType.Data4[4], majorType.Data4[5], majorType.Data4[6], majorType.Data4[7]);
                 }
             }
-            /* https://stackoverflow.com/questions/43507393/media-foundation-set-video-interlacing-and-decode */
-            MFCreateAttributes(&pAttributes, 1);
-            pAttributes -> lpVtbl -> SetUINT32(pAttributes, &MF_READWRITE_ENABLE_HARDWARE_TRANSFORMS, TRUE);
-            pAttributes -> lpVtbl -> SetUINT32(pAttributes, &MF_SOURCE_READER_ENABLE_VIDEO_PROCESSING, TRUE);
-            IMFSourceReader *pReader;
-            hr = MFCreateSourceReaderFromMediaSource(pSource, pAttributes, &pReader);
-            if (FAILED(hr)) {
-                printf("osToolsListCameras MFCreateSourceReaderFromMediaSource Error: 0x%lX\n", hr);
-                goto osToolsListCameras_done;
-            }
-            pReader -> lpVtbl -> SetStreamSelection(pReader, MF_SOURCE_READER_FIRST_VIDEO_STREAM, TRUE);
-            IMFMediaType *readerNativeType;
-            int32_t dwStreamIndex = 0;
-            while (pReader -> lpVtbl -> GetNativeMediaType(pReader, MF_SOURCE_READER_FIRST_VIDEO_STREAM, dwStreamIndex, &readerNativeType) == S_OK) {
-                GUID nativeSubtype;
-                readerNativeType -> lpVtbl -> GetGUID(readerNativeType, &MF_MT_SUBTYPE, &nativeSubtype);
-                printf("- Native Subtype %d: %08lx-%02hx%02hx-%02x%02x-%02x%02x%02x%02x%02x%02x\n", dwStreamIndex, nativeSubtype.Data1, nativeSubtype.Data2, nativeSubtype.Data3,
-                nativeSubtype.Data4[0], nativeSubtype.Data4[1], nativeSubtype.Data4[2], nativeSubtype.Data4[3], nativeSubtype.Data4[4], nativeSubtype.Data4[5], nativeSubtype.Data4[6], nativeSubtype.Data4[7]);
-                dwStreamIndex++;
-            }
-            /*
-            https://learn.microsoft.com/en-us/windows/win32/medfound/media-type-attributes
-            https://learn.microsoft.com/en-us/windows/win32/medfound/video-subtype-guids#yuv-formats-8-bit-and-palettized
-            https://stackoverflow.com/questions/10244657/nv12-to-rgb24-conversion-code-in-c
-            https://stackoverflow.com/questions/50751767/nv12-to-rgb32-with-microsoft-media-foundation
-            https://learn.microsoft.com/en-us/windows/win32/medfound/processing-media-data-with-the-source-reader#setting-output-formats
-            */
-            IMFMediaType *readerType;
-            MFCreateMediaType(&readerType);
-            readerType -> lpVtbl -> SetUINT32(readerType, &MF_SOURCE_READER_ENABLE_VIDEO_PROCESSING, 1);
-            hr = readerType -> lpVtbl -> SetGUID(readerType, &MF_MT_MAJOR_TYPE, &MFMediaType_Video);
-            if (FAILED(hr)) {
-                printf("osToolsListCameras SetGUID Error: 0x%lX\n", hr);
-                goto osToolsListCameras_done;
-            }
-            hr = readerType -> lpVtbl -> SetGUID(readerType, &MF_MT_SUBTYPE, &MFVideoFormat_RGB32);
-            if (FAILED(hr)) {
-                printf("osToolsListCameras SetGUID Error: 0x%lX\n", hr);
-                goto osToolsListCameras_done;
-            }
-            hr = pReader -> lpVtbl -> SetCurrentMediaType(pReader, MF_SOURCE_READER_FIRST_VIDEO_STREAM, NULL, readerType);
-            if (FAILED(hr)) {
-                printf("osToolsListCameras SetCurrentMediaType Error: 0x%lX\n", hr); // getting 0xC00D5212 -> MF_E_TOPO_CODEC_NOT_FOUND: Could not find a decoder for the native stream type
-                goto osToolsListCameras_done;
-            }
             char cameraString[32];
-            sprintf(cameraString, "camera%d", i);
+            sprintf(cameraString, "USB Camera %d", i);
             list_append(output, (unitype) cameraString, 's');
             list_append(output, (unitype) setWidth, 'i');
             list_append(output, (unitype) setHeight, 'i');
@@ -35280,7 +35205,8 @@ list_t *osToolsListCameras() {
             list_append(win32camera.cameraList, (unitype) setWidth, 'i');
             list_append(win32camera.cameraList, (unitype) setHeight, 'i');
             list_append(win32camera.cameraList, (unitype) setFramerate, 'd');
-            list_append(win32camera.cameraList, (unitype) (void *) pReader, 'l');
+            list_append(win32camera.cameraList, (unitype) (void *) pSource, 'l');
+            list_append(win32camera.cameraList, (unitype) (void *) NULL, 'l');
         }
     }
 osToolsListCameras_done:
@@ -35295,23 +35221,74 @@ osToolsListCameras_done:
         }
     }
     CoTaskMemFree(ppDevices);
-    if (pSource) {
-        pSource -> lpVtbl -> Release(pSource);
-        pSource = NULL;
-    }
     return output;
 }
 
 int32_t osToolsCameraOpen(char *name) {
-    return -1;
+    int32_t cameraIndex = list_find(win32camera.cameraList, (unitype) name, 's');
+    if (cameraIndex == -1) {
+        return -1;
+    }
+    IMFMediaSource *pSource = (IMFMediaSource *) win32camera.cameraList -> data[cameraIndex + 4].p;
+    IMFAttributes *pAttributes;
+    /* https://stackoverflow.com/questions/43507393/media-foundation-set-video-interlacing-and-decode */
+    MFCreateAttributes(&pAttributes, 1);
+    pAttributes -> lpVtbl -> SetUINT32(pAttributes, &MF_READWRITE_ENABLE_HARDWARE_TRANSFORMS, TRUE);
+    pAttributes -> lpVtbl -> SetUINT32(pAttributes, &MF_SOURCE_READER_ENABLE_VIDEO_PROCESSING, TRUE);
+    IMFSourceReader *pReader;
+    HRESULT hr = MFCreateSourceReaderFromMediaSource(pSource, pAttributes, &pReader);
+    if (FAILED(hr)) {
+        printf("osToolsListCameras MFCreateSourceReaderFromMediaSource Error: 0x%lX\n", hr);
+        return -1;
+    }
+    pReader -> lpVtbl -> SetStreamSelection(pReader, MF_SOURCE_READER_FIRST_VIDEO_STREAM, TRUE);
+    IMFMediaType *readerNativeType;
+    int32_t dwStreamIndex = 0;
+    while (pReader -> lpVtbl -> GetNativeMediaType(pReader, MF_SOURCE_READER_FIRST_VIDEO_STREAM, dwStreamIndex, &readerNativeType) == S_OK) {
+        GUID nativeSubtype;
+        readerNativeType -> lpVtbl -> GetGUID(readerNativeType, &MF_MT_SUBTYPE, &nativeSubtype);
+        printf("- Native Subtype %d: %08lx-%02hx%02hx-%02x%02x-%02x%02x%02x%02x%02x%02x\n", dwStreamIndex, nativeSubtype.Data1, nativeSubtype.Data2, nativeSubtype.Data3,
+        nativeSubtype.Data4[0], nativeSubtype.Data4[1], nativeSubtype.Data4[2], nativeSubtype.Data4[3], nativeSubtype.Data4[4], nativeSubtype.Data4[5], nativeSubtype.Data4[6], nativeSubtype.Data4[7]);
+        dwStreamIndex++;
+    }
+    /*
+    https://learn.microsoft.com/en-us/windows/win32/medfound/media-type-attributes
+    https://learn.microsoft.com/en-us/windows/win32/medfound/video-subtype-guids#yuv-formats-8-bit-and-palettized
+    https://stackoverflow.com/questions/10244657/nv12-to-rgb24-conversion-code-in-c
+    https://stackoverflow.com/questions/50751767/nv12-to-rgb32-with-microsoft-media-foundation
+    https://learn.microsoft.com/en-us/windows/win32/medfound/processing-media-data-with-the-source-reader#setting-output-formats
+    */
+    IMFMediaType *readerType;
+    MFCreateMediaType(&readerType);
+    readerType -> lpVtbl -> SetUINT32(readerType, &MF_SOURCE_READER_ENABLE_VIDEO_PROCESSING, 1);
+    hr = readerType -> lpVtbl -> SetGUID(readerType, &MF_MT_MAJOR_TYPE, &MFMediaType_Video);
+    if (FAILED(hr)) {
+        printf("osToolsListCameras SetGUID Error: 0x%lX\n", hr);
+        return -1;
+    }
+    hr = readerType -> lpVtbl -> SetGUID(readerType, &MF_MT_SUBTYPE, &MFVideoFormat_RGB32);
+    if (FAILED(hr)) {
+        printf("osToolsListCameras SetGUID Error: 0x%lX\n", hr);
+        return -1;
+    }
+    hr = pReader -> lpVtbl -> SetCurrentMediaType(pReader, MF_SOURCE_READER_FIRST_VIDEO_STREAM, NULL, readerType);
+    if (FAILED(hr)) {
+        printf("osToolsListCameras SetCurrentMediaType Error: 0x%lX\n", hr); // getting 0xC00D5212 -> MF_E_TOPO_CODEC_NOT_FOUND: Could not find a decoder for the native stream type
+        return -1;
+    }
+    win32camera.cameraList -> data[cameraIndex + 5].p = (void *) pReader;
+    return 0;
 }
 
 int32_t osToolsCameraReceive(char *name, uint8_t *data) {
-    int32_t index = list_find(win32camera.cameraList, (unitype) name, 's');
-    if (index == -1) {
-        return -1;
+    int32_t cameraIndex = list_find(win32camera.cameraList, (unitype) name, 's');
+    if (cameraIndex == -1) {
+        return 0;
     }
-    IMFSourceReader *pReader = (IMFSourceReader *) win32camera.cameraList -> data[index + 4].p;
+    IMFSourceReader *pReader = (IMFSourceReader *) win32camera.cameraList -> data[cameraIndex + 5].p;
+    if (pReader == NULL) {
+        return 0;
+    }
     /* https://gist.github.com/mmozeiko/a5adab1ad11ea6d0643ceb67bb8e3e19 */
     IMFSample *pSample;
     DWORD stream;
@@ -35323,7 +35300,7 @@ int32_t osToolsCameraReceive(char *name, uint8_t *data) {
         /* this is reading in syncronous blocking mode, MF supports also async calls */
         hr = pReader -> lpVtbl -> ReadSample(pReader, MF_SOURCE_READER_FIRST_VIDEO_STREAM, 0, &stream, &flags, &timestamp, &pSample);
         if (FAILED(hr)) {
-            return -1;
+            return 0;
         }
         if (flags & MF_SOURCE_READERF_STREAMTICK) {
             continue;
@@ -35335,13 +35312,13 @@ int32_t osToolsCameraReceive(char *name, uint8_t *data) {
 
     hr = pSample -> lpVtbl -> ConvertToContiguousBuffer(pSample, &pBuffer);
     if (FAILED(hr)) {
-        return -1;
+        return 0;
     }
     BYTE *rawBuffer;
     DWORD size;
     hr = pBuffer -> lpVtbl -> Lock(pBuffer, &rawBuffer, NULL, &size);
     if (FAILED(hr)) {
-        return -1;
+        return 0;
     }
     /* drop the alpha character */
     int32_t iterData = 0;
@@ -35354,11 +35331,23 @@ int32_t osToolsCameraReceive(char *name, uint8_t *data) {
     pBuffer -> lpVtbl -> Unlock(pBuffer);
     pBuffer -> lpVtbl -> Release(pBuffer);
     pSample -> lpVtbl -> Release(pSample);
-    return -1;
+    return iterData;
 }
 
 int32_t osToolsCameraClose(char *name) {
-    return -1;
+    int32_t cameraIndex = list_find(win32camera.cameraList, (unitype) name, 's');
+    if (cameraIndex == -1) {
+        return -1;
+    }
+    IMFMediaSource *pSource = (IMFMediaSource *) win32camera.cameraList -> data[cameraIndex + 4].p;
+    IMFSourceReader *pReader = (IMFSourceReader *) win32camera.cameraList -> data[cameraIndex + 5].p;
+    if (pSource) {
+        pSource -> lpVtbl -> Release(pSource);
+    }
+    if (pReader) {
+        pReader -> lpVtbl -> Release(pReader);
+    }
+    return 0;
 }
 
 /*
