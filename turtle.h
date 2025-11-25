@@ -74,7 +74,8 @@ typedef enum {
 struct list_f; // so basically im a good programmer
 typedef struct list_f list_t;
 
-typedef union { // supported types
+/* unitype - a union of many supported types to the list */
+typedef union {
     signed char ch;
     bool bo;
     int8_t c;
@@ -100,6 +101,13 @@ struct list_f {
     int8_t *type;
     unitype *data;
 };
+
+typedef struct {
+    uint32_t length;
+    uint32_t dummy;
+    int8_t *type;
+    unitype *data;
+} sublist_t;
 
 /* create a list */
 list_t *list_init();
@@ -169,6 +177,12 @@ void list_free_lite(list_t *list);
 
 /* frees the data used by the list */
 void list_free(list_t *list);
+
+/* creates a sublist (from bottom to top - 1) out of an existing list, do not modify a parent list while a sublist exist */
+sublist_t *sublist_init(list_t *list, uint32_t bottom, uint32_t top);
+
+/* delete a sublist */
+void sublist_free(sublist_t *sublist);
 
 #endif /* UNITYPE_LIST_H */
 
@@ -19922,7 +19936,7 @@ typedef struct {
 } ost_file_dialog_t;
 
 typedef struct {
-    list_t *mappedFiles;
+    list_t *mappedFiles; // Format Windows: name, handle, mapping handle, address. Format Linux: name, size
 } ost_memmap_t;
 
 /* global objects */
@@ -20018,11 +20032,26 @@ int32_t osToolsComReceive(char *name, uint8_t *buffer, int32_t length);
 /* closes a com port */
 int32_t osToolsComClose(char *name);
 
+/* get a list [camera name, width, height, framerate] */
+list_t *osToolsListCameras();
+
+/* opens a camera */
+int32_t osToolsCameraOpen(char *name);
+
+/* get RGB buffer from the camera - buffer must be at least width * height * 3 big */
+int32_t osToolsCameraReceive(char *name, uint8_t *data);
+
+/* closes a camera */
+int32_t osToolsCameraClose(char *name);
+
 #ifdef OS_WINDOWS
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #include <windows.h>
 #include <shobjidl.h>
+#include <mfidl.h>
+#include <mfapi.h>
+#include <mfreadwrite.h>
 
 typedef struct {
     list_t *comList; // format: name, HANDLE
@@ -20037,9 +20066,15 @@ typedef struct {
     char *port;
     SOCKET connectSocket[WIN32TCP_NUM_SOCKETS];
     char socketOpen[WIN32TCP_NUM_SOCKETS];
-} win32SocketObject;
+} win32socket_t;
 
-extern win32SocketObject win32Socket;
+extern win32socket_t win32socket;
+
+typedef struct {
+    list_t *cameraList; // format: camera name, width, height, framerate, pointer to source reader
+} win32camera_t;
+
+extern win32camera_t win32camera;
 
 int32_t win32tcpInit(char *address, char *port);
 
@@ -29089,6 +29124,21 @@ void list_free(list_t *list) {
     free(list);
 }
 
+/* creates a sublist (from bottom to top - 1) out of an existing list, do not modify a parent list while a sublist exist */
+sublist_t *sublist_init(list_t *list, uint32_t bottom, uint32_t top) {
+    sublist_t *sublist = malloc(sizeof(sublist_t));
+    sublist -> length = top - bottom;
+    sublist -> dummy = top - bottom;
+    sublist -> type = list -> type + bottom;
+    sublist -> data = list -> data + bottom;
+    return sublist;
+}
+
+/* delete a sublist */
+void sublist_free(sublist_t *sublist) {
+    free(sublist);
+}
+
 #endif /* UNITYPE_LIST_IMPLEMENTATION */
 #ifdef FLOAT_LIST_IMPLEMENTATION
 #include <stdio.h>
@@ -32394,6 +32444,7 @@ int32_t elementFree(void *elementp) {
         return -1;
     break;
     }
+    return 0;
 }
 
 /* initialise UI elements */
@@ -34468,6 +34519,7 @@ int32_t osToolsInit(char argv0[], GLFWwindow *window) {
     }
     osToolsFileDialog.executableFilepath[index + 1] = '\0';
     win32com.comList = list_init();
+    win32camera.cameraList = list_init();
     return 0;
 }
 
@@ -34958,21 +35010,361 @@ int32_t osToolsComClose(char *name) {
     return 0;
 }
 
+/* symbol IID_IMFMediaSource and MF_MT_FRAME_SIZE not linked despite their existence in mfapi.h and mfidl.h */
+const GUID IID_IMFMediaSource = {0x279a808d, 0xaec7, 0x40c8, {0x9c,0x6b, 0xa6, 0xb4, 0x92, 0xc7, 0x8a, 0x66}};
+const GUID MF_MT_FRAME_SIZE = {0x1652c33d, 0xd6b2, 0x4012, {0xb8, 0x34, 0x72, 0x03, 0x08, 0x49, 0xa3, 0x7d}};
+const GUID MF_MT_FRAME_RATE = {0xc459a2e8, 0x3d2c, 0x4e44, {0xb1, 0x32, 0xfe, 0xe5, 0x15, 0x6c, 0x7b, 0xb0}};
+const GUID MF_MT_MAJOR_TYPE = {0x48eba18e, 0xf8c9, 0x4687, {0xbf, 0x11, 0x0a, 0x74, 0xc9, 0xf9, 0x6a, 0x8f}};
+const GUID MF_MT_SUBTYPE = {0xf7e34c9a, 0x42e8, 0x4714, {0xb7, 0x4b, 0xcb, 0x29, 0xd7, 0x2c, 0x35, 0xe5}};
+const GUID MFMediaType_Video = {0x73646976, 0x0000, 0x0010, {0x80, 0x00, 0x00, 0xAA, 0x00, 0x38, 0x9B, 0x71}};
+const GUID MFVideoFormat_MJPG = {0x47504a4d, 0x0000, 0x0010, {0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71}}; // MJPG
+const GUID MFVideoFormat_NV12 = {0x3231564e, 0x0000, 0x0010, {0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71}}; // NV12
+const GUID MFVideoFormat_NV21 = {0x3132564e, 0x0000, 0x0010, {0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71}}; // NV21
+const GUID MFVideoFormat_YV12 = {0x32315659, 0x0000, 0x0010, {0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71}}; // YV12
+const GUID MFVideoFormat_H264 = {0x34363248, 0x0000, 0x0010, {0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71}}; // H264
+const GUID MFVideoFormat_RGB8 = {41 /* D3DFMT_P8 */, 0x0000, 0x0010, {0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71}}; // See D3D definitions
+const GUID MFVideoFormat_RGB24 = {20 /* D3DFMT_R8G8B8 */, 0x0000, 0x0010, {0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71}}; // See D3D definitions
+const GUID MFImageFormat_RGB32 = {0x00000016, 0x0000, 0x0010, {0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71}};
+const GUID MFVideoFormat_RGB32 = {0x00000016, 0x0000, 0x0010, {0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71}};
+
+win32camera_t win32camera;
+
+list_t *osToolsListCameras() {
+    list_t *output = list_init();
+    HRESULT hr = CoInitializeEx(NULL, 0);
+    if (FAILED(hr)) {
+        printf("osToolsListCameras CoInitializeEx Error: 0x%lX\n", hr);
+        return output;
+    }
+    hr = MFStartup(MF_VERSION, MFSTARTUP_NOSOCKET);
+    if (FAILED(hr)) {
+        printf("osToolsListCameras MFStartup Error: 0x%lX\n", hr);
+        return output;
+    }
+    /* https://learn.microsoft.com/en-us/windows/win32/medfound/enumerating-video-capture-devices
+       https://gist.github.com/mmozeiko/a5adab1ad11ea6d0643ceb67bb8e3e19
+    */
+
+    IMFMediaSource *pSource = NULL;
+    IMFAttributes *pAttributes = NULL;
+    IMFActivate **ppDevices = NULL;
+
+    /* Create an attribute store to specify the enumeration parameters. */
+    hr = MFCreateAttributes(&pAttributes, 1);
+    if (FAILED(hr)) {
+        printf("osToolsListCameras MFCreateAttributes Error: 0x%lX\n", hr);
+        goto osToolsListCameras_done;
+    }
+
+    /* Source type: video capture devices */
+    hr = pAttributes -> lpVtbl -> SetGUID(pAttributes, &MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE, &MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_GUID);
+    if (FAILED(hr)) {
+        printf("osToolsListCameras SetGUID Error: 0x%lX\n", hr);
+        goto osToolsListCameras_done;
+    }
+
+    /* Enumerate devices. */
+    UINT32 count;
+    hr = MFEnumDeviceSources(pAttributes, &ppDevices, &count);
+    if (FAILED(hr)) {
+        printf("osToolsListCameras MFEnumDeviceSources Error: 0x%lX\n", hr);
+        goto osToolsListCameras_done;
+    }
+
+    if (count == 0) {
+        hr = E_FAIL;
+        printf("osToolsListCameras: Error no cameras found\n");
+        goto osToolsListCameras_done;
+    }
+    printf("osToolsListCameras: Found %d cameras\n", count);
+
+    /* Create the media source object. */
+    for (int32_t i = 0; i < count; i++) {
+        hr = ppDevices[i] -> lpVtbl -> ActivateObject(ppDevices[i], &IID_IMFMediaSource, (void **) &pSource);
+        if (FAILED(hr)) {
+            printf("osToolsListCameras ActivateObject Error: 0x%lX\n", hr);
+            goto osToolsListCameras_done;
+        }
+        DWORD characteristics;
+        pSource -> lpVtbl -> GetCharacteristics(pSource, &characteristics);
+        printf("- Source characteristics: %lX\n", characteristics);
+        /* check stream type */
+        IMFPresentationDescriptor *presentationDescriptor;
+        pSource -> lpVtbl -> CreatePresentationDescriptor(pSource, &presentationDescriptor);
+        DWORD streamCount;
+        presentationDescriptor -> lpVtbl -> GetStreamDescriptorCount(presentationDescriptor, &streamCount);
+        printf("- Source streams: %ld\n", streamCount);
+        uint32_t setWidth = 0;
+        uint32_t setHeight = 0;
+        double setFramerate = 0.0;
+        int32_t maxFramerate = -1;
+        double minDifference = 100000000000.0;
+        /* goal: Closest resolution to 1024x1024, Fastest framerate */
+        if (streamCount > 0) {
+            int32_t selected;
+            IMFStreamDescriptor *streamDescriptor;
+            hr = presentationDescriptor -> lpVtbl -> GetStreamDescriptorByIndex(presentationDescriptor, 0, &selected, &streamDescriptor);
+            if (FAILED(hr)) {
+                printf("osToolsListCameras GetStreamDescriptorByIndex Error: 0x%lX\n", hr);
+                goto osToolsListCameras_done;
+            }
+            IMFMediaTypeHandler *mediaTypeHandler;
+            hr = streamDescriptor -> lpVtbl -> GetMediaTypeHandler(streamDescriptor, &mediaTypeHandler);
+            if (FAILED(hr)) {
+                printf("osToolsListCameras GetMediaTypeHandler Error: 0x%lX\n", hr);
+                goto osToolsListCameras_done;
+            }
+            DWORD mediaTypeCount;
+            mediaTypeHandler -> lpVtbl -> GetMediaTypeCount(mediaTypeHandler, &mediaTypeCount);
+            printf("- Media Type Count: %ld\n", mediaTypeCount);
+            for (int32_t j = 0; j < mediaTypeCount; j++) {
+                printf("- Media Type %d\n", j);
+                IMFMediaType *mediaType;
+                hr = mediaTypeHandler -> lpVtbl -> GetMediaTypeByIndex(mediaTypeHandler, j, &mediaType);
+                if (FAILED(hr)) {
+                    printf("osToolsListCameras GetMediaTypeByIndex Error: 0x%lX\n", hr);
+                    goto osToolsListCameras_done;
+                }
+                hr = mediaType -> lpVtbl -> SetUINT32(mediaType, &MF_SOURCE_READER_ENABLE_VIDEO_PROCESSING, 1);
+                if (FAILED(hr)) {
+                    printf("osToolsListCameras SetUINT32 Error: 0x%lX\n", hr);
+                    goto osToolsListCameras_done;
+                }
+                GUID majorType;
+                hr = mediaType -> lpVtbl -> GetMajorType(mediaType, &majorType);
+                if (FAILED(hr)) {
+                    printf("osToolsListCameras GetMajorType Error: 0x%lX\n", hr);
+                    goto osToolsListCameras_done;
+                }
+                /* see mfapi.h for DEFINE_GUID (MFMediaType_Video, 0x73646976, 0x0000, 0x0010, 0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71); */
+                if (majorType.Data1 == 0x73646976 && majorType.Data2 == 0x0000 && majorType.Data3 == 0x0010 && majorType.Data4[0] == 0x80 && majorType.Data4[1] == 0x00 && majorType.Data4[2] == 0x00 && majorType.Data4[3] == 0xaa && majorType.Data4[4] == 0x00 && majorType.Data4[5] == 0x38 && majorType.Data4[6] == 0x9b && majorType.Data4[7] == 0x71) {
+                    /* MFMediaType_Video */
+                    printf("  - Major type: MFMediaType_Video\n");
+                    GUID subtype;
+                    hr = mediaType -> lpVtbl -> GetGUID(mediaType, &MF_MT_SUBTYPE, &subtype);
+                    if (FAILED(hr)) {
+                        printf("osToolsListCameras GetGUID Error: 0x%lX\n", hr);
+                        goto osToolsListCameras_done;
+                    }
+                    printf("  - Subtype: %08lx-%02hx%02hx-%02x%02x-%02x%02x%02x%02x%02x%02x\n", subtype.Data1, subtype.Data2, subtype.Data3, // 3231564E-0010-8000-00AA00389B71
+                    subtype.Data4[0], subtype.Data4[1], subtype.Data4[2], subtype.Data4[3], subtype.Data4[4], subtype.Data4[5], subtype.Data4[6], subtype.Data4[7]);
+                    uint64_t sizePacked;
+                    hr = mediaType -> lpVtbl -> GetUINT64(mediaType, &MF_MT_FRAME_SIZE, &sizePacked);
+                    if (FAILED(hr)) {
+                        printf("osToolsListCameras GetUINT64 Error: 0x%lX\n", hr);
+                        goto osToolsListCameras_done;
+                    }
+                    uint32_t width = (uint32_t) (sizePacked >> 32);
+                    uint32_t height = (uint32_t) sizePacked;
+                    uint64_t frameRatePacked;
+                    mediaType -> lpVtbl -> GetUINT64(mediaType, &MF_MT_FRAME_RATE, &frameRatePacked);
+                    uint32_t frameRateNum = (uint32_t) (frameRatePacked >> 32);
+                    uint32_t frameRateDen = (uint32_t) frameRatePacked;
+                    BOOL compressed;
+                    mediaType -> lpVtbl -> IsCompressedFormat(mediaType, &compressed);
+                    printf("  - Width: %d\n", width);
+                    printf("  - Height: %d\n", height);
+                    printf("  - Frames/s: %.02lf\n", (double) frameRateNum / frameRateDen);
+                    double difference = (width - 1024) * (width - 1024) + (height - 1024) * (height - 1024);
+                    if (frameRateDen != 0 && (int32_t) (frameRateNum / frameRateDen) > maxFramerate) {
+                        minDifference = difference;
+                        maxFramerate = frameRateNum / frameRateDen;
+                        setWidth = width;
+                        setHeight = height;
+                        setFramerate = (double) frameRateNum / frameRateDen;
+                        hr = mediaTypeHandler -> lpVtbl -> SetCurrentMediaType(mediaTypeHandler, mediaType);
+                        if (FAILED(hr)) {
+                            printf("osToolsListCameras SetCurrentMediaType Error: 0x%lX\n", hr);
+                            goto osToolsListCameras_done;
+                        }
+                    } else if (frameRateDen != 0 && (int32_t) (frameRateNum / frameRateDen) == maxFramerate && difference < minDifference) {
+                        minDifference = difference;
+                        maxFramerate = frameRateNum / frameRateDen;
+                        setWidth = width;
+                        setHeight = height;
+                        setFramerate = (double) frameRateNum / frameRateDen;
+                        hr = mediaTypeHandler -> lpVtbl -> SetCurrentMediaType(mediaTypeHandler, mediaType);
+                        if (FAILED(hr)) {
+                            printf("osToolsListCameras SetCurrentMediaType Error: 0x%lX\n", hr);
+                            goto osToolsListCameras_done;
+                        }
+                    }
+                } else {
+                    /* Not MFMediaType_Video */
+                    printf("  - Major type: %08lx-%02hx%02hx-%02x%02x-%02x%02x%02x%02x%02x%02x\n", majorType.Data1, majorType.Data2, majorType.Data3,
+                    majorType.Data4[0], majorType.Data4[1], majorType.Data4[2], majorType.Data4[3], majorType.Data4[4], majorType.Data4[5], majorType.Data4[6], majorType.Data4[7]);
+                }
+            }
+            char cameraString[32];
+            sprintf(cameraString, "USB Camera %d", i);
+            list_append(output, (unitype) cameraString, 's');
+            list_append(output, (unitype) setWidth, 'i');
+            list_append(output, (unitype) setHeight, 'i');
+            list_append(output, (unitype) setFramerate, 'd');
+            list_append(win32camera.cameraList, (unitype) cameraString, 's');
+            list_append(win32camera.cameraList, (unitype) setWidth, 'i');
+            list_append(win32camera.cameraList, (unitype) setHeight, 'i');
+            list_append(win32camera.cameraList, (unitype) setFramerate, 'd');
+            list_append(win32camera.cameraList, (unitype) (void *) pSource, 'l');
+            list_append(win32camera.cameraList, (unitype) (void *) NULL, 'l');
+        }
+    }
+osToolsListCameras_done:
+    if (pAttributes) {
+        pAttributes -> lpVtbl -> Release(pAttributes);
+        pAttributes = NULL;
+    }
+    for (DWORD i = 0; i < count; i++) {
+        if (ppDevices[i]) {
+            ppDevices[i] -> lpVtbl -> Release(ppDevices[i]);
+            ppDevices[i] = NULL;
+        }
+    }
+    CoTaskMemFree(ppDevices);
+    return output;
+}
+
+int32_t osToolsCameraOpen(char *name) {
+    int32_t cameraIndex = list_find(win32camera.cameraList, (unitype) name, 's');
+    if (cameraIndex == -1) {
+        return -1;
+    }
+    IMFMediaSource *pSource = (IMFMediaSource *) win32camera.cameraList -> data[cameraIndex + 4].p;
+    IMFAttributes *pAttributes;
+    /* https://stackoverflow.com/questions/43507393/media-foundation-set-video-interlacing-and-decode */
+    MFCreateAttributes(&pAttributes, 1);
+    pAttributes -> lpVtbl -> SetUINT32(pAttributes, &MF_READWRITE_ENABLE_HARDWARE_TRANSFORMS, TRUE);
+    pAttributes -> lpVtbl -> SetUINT32(pAttributes, &MF_SOURCE_READER_ENABLE_VIDEO_PROCESSING, TRUE);
+    IMFSourceReader *pReader;
+    HRESULT hr = MFCreateSourceReaderFromMediaSource(pSource, pAttributes, &pReader);
+    if (FAILED(hr)) {
+        printf("osToolsListCameras MFCreateSourceReaderFromMediaSource Error: 0x%lX\n", hr);
+        return -1;
+    }
+    pReader -> lpVtbl -> SetStreamSelection(pReader, MF_SOURCE_READER_FIRST_VIDEO_STREAM, TRUE);
+    IMFMediaType *readerNativeType;
+    int32_t dwStreamIndex = 0;
+    while (pReader -> lpVtbl -> GetNativeMediaType(pReader, MF_SOURCE_READER_FIRST_VIDEO_STREAM, dwStreamIndex, &readerNativeType) == S_OK) {
+        GUID nativeSubtype;
+        readerNativeType -> lpVtbl -> GetGUID(readerNativeType, &MF_MT_SUBTYPE, &nativeSubtype);
+        printf("- Native Subtype %d: %08lx-%02hx%02hx-%02x%02x-%02x%02x%02x%02x%02x%02x\n", dwStreamIndex, nativeSubtype.Data1, nativeSubtype.Data2, nativeSubtype.Data3,
+        nativeSubtype.Data4[0], nativeSubtype.Data4[1], nativeSubtype.Data4[2], nativeSubtype.Data4[3], nativeSubtype.Data4[4], nativeSubtype.Data4[5], nativeSubtype.Data4[6], nativeSubtype.Data4[7]);
+        dwStreamIndex++;
+    }
+    /*
+    https://learn.microsoft.com/en-us/windows/win32/medfound/media-type-attributes
+    https://learn.microsoft.com/en-us/windows/win32/medfound/video-subtype-guids#yuv-formats-8-bit-and-palettized
+    https://stackoverflow.com/questions/10244657/nv12-to-rgb24-conversion-code-in-c
+    https://stackoverflow.com/questions/50751767/nv12-to-rgb32-with-microsoft-media-foundation
+    https://learn.microsoft.com/en-us/windows/win32/medfound/processing-media-data-with-the-source-reader#setting-output-formats
+    */
+    IMFMediaType *readerType;
+    MFCreateMediaType(&readerType);
+    readerType -> lpVtbl -> SetUINT32(readerType, &MF_SOURCE_READER_ENABLE_VIDEO_PROCESSING, 1);
+    hr = readerType -> lpVtbl -> SetGUID(readerType, &MF_MT_MAJOR_TYPE, &MFMediaType_Video);
+    if (FAILED(hr)) {
+        printf("osToolsListCameras SetGUID Error: 0x%lX\n", hr);
+        return -1;
+    }
+    hr = readerType -> lpVtbl -> SetGUID(readerType, &MF_MT_SUBTYPE, &MFVideoFormat_RGB32);
+    if (FAILED(hr)) {
+        printf("osToolsListCameras SetGUID Error: 0x%lX\n", hr);
+        return -1;
+    }
+    hr = pReader -> lpVtbl -> SetCurrentMediaType(pReader, MF_SOURCE_READER_FIRST_VIDEO_STREAM, NULL, readerType);
+    if (FAILED(hr)) {
+        printf("osToolsListCameras SetCurrentMediaType Error: 0x%lX\n", hr); // getting 0xC00D5212 -> MF_E_TOPO_CODEC_NOT_FOUND: Could not find a decoder for the native stream type
+        return -1;
+    }
+    win32camera.cameraList -> data[cameraIndex + 5].p = (void *) pReader;
+    return 0;
+}
+
+int32_t osToolsCameraReceive(char *name, uint8_t *data) {
+    int32_t cameraIndex = list_find(win32camera.cameraList, (unitype) name, 's');
+    if (cameraIndex == -1) {
+        return 0;
+    }
+    IMFSourceReader *pReader = (IMFSourceReader *) win32camera.cameraList -> data[cameraIndex + 5].p;
+    if (pReader == NULL) {
+        return 0;
+    }
+    /* https://gist.github.com/mmozeiko/a5adab1ad11ea6d0643ceb67bb8e3e19 */
+    IMFSample *pSample;
+    DWORD stream;
+    DWORD flags;
+    LONGLONG timestamp;
+    HRESULT hr;
+
+    while (1) {
+        /* this is reading in syncronous blocking mode, MF supports also async calls */
+        hr = pReader -> lpVtbl -> ReadSample(pReader, MF_SOURCE_READER_FIRST_VIDEO_STREAM, 0, &stream, &flags, &timestamp, &pSample);
+        if (FAILED(hr)) {
+            return 0;
+        }
+        if (flags & MF_SOURCE_READERF_STREAMTICK) {
+            continue;
+        }
+        break;
+    }
+
+    IMFMediaBuffer *pBuffer;
+
+    hr = pSample -> lpVtbl -> ConvertToContiguousBuffer(pSample, &pBuffer);
+    if (FAILED(hr)) {
+        return 0;
+    }
+    BYTE *rawBuffer;
+    DWORD size;
+    hr = pBuffer -> lpVtbl -> Lock(pBuffer, &rawBuffer, NULL, &size);
+    if (FAILED(hr)) {
+        return 0;
+    }
+    /* drop the alpha character */
+    int32_t iterData = 0;
+    for (int32_t i = 0; i < size; i += 4) {
+        data[iterData++] = rawBuffer[i + 2];
+        data[iterData++] = rawBuffer[i + 1];
+        data[iterData++] = rawBuffer[i];
+    }
+
+    pBuffer -> lpVtbl -> Unlock(pBuffer);
+    pBuffer -> lpVtbl -> Release(pBuffer);
+    pSample -> lpVtbl -> Release(pSample);
+    return iterData;
+}
+
+int32_t osToolsCameraClose(char *name) {
+    int32_t cameraIndex = list_find(win32camera.cameraList, (unitype) name, 's');
+    if (cameraIndex == -1) {
+        return -1;
+    }
+    IMFMediaSource *pSource = (IMFMediaSource *) win32camera.cameraList -> data[cameraIndex + 4].p;
+    IMFSourceReader *pReader = (IMFSourceReader *) win32camera.cameraList -> data[cameraIndex + 5].p;
+    if (pSource) {
+        pSource -> lpVtbl -> Release(pSource);
+    }
+    if (pReader) {
+        pReader -> lpVtbl -> Release(pReader);
+    }
+    return 0;
+}
+
 /*
 https://gist.github.com/mmozeiko/c0dfcc8fec527a90a02145d2cc0bfb6d
 https://learn.microsoft.com/en-us/windows/win32/winsock/complete-server-code
 https://learn.microsoft.com/en-us/windows/win32/winsock/complete-client-code
 */
 
-win32SocketObject win32Socket;
+win32socket_t win32socket;
 
 int32_t win32tcpInit(char *address, char *port) {
     for (int32_t i = 0; i < WIN32TCP_NUM_SOCKETS; i++) {
-        win32Socket.connectSocket[i] = 0;
-        win32Socket.socketOpen[i] = 0;
+        win32socket.connectSocket[i] = 0;
+        win32socket.socketOpen[i] = 0;
     }
-    win32Socket.address = address;
-    win32Socket.port = port;
+    win32socket.address = address;
+    win32socket.port = port;
     char modifiable[strlen(address) + 1];
     strcpy(modifiable, address);
     char *check = strtok(modifiable, ".");
@@ -35023,17 +35415,17 @@ int32_t win32tcpInit(char *address, char *port) {
     /* Attempt to connect to an address until one succeeds */
     for (ptr = result; ptr != NULL; ptr = ptr -> ai_next) {
         /* Create a SOCKET for connecting to server */
-        win32Socket.connectSocket[0] = socket(ptr -> ai_family, ptr -> ai_socktype, ptr -> ai_protocol);
-        if (win32Socket.connectSocket[0] == INVALID_SOCKET) {
+        win32socket.connectSocket[0] = socket(ptr -> ai_family, ptr -> ai_socktype, ptr -> ai_protocol);
+        if (win32socket.connectSocket[0] == INVALID_SOCKET) {
             WSACleanup();
             return 1;
         }
 
         /* Connect to server */
-        status = connect(win32Socket.connectSocket[0], ptr -> ai_addr, (int) ptr -> ai_addrlen);
+        status = connect(win32socket.connectSocket[0], ptr -> ai_addr, (int) ptr -> ai_addrlen);
         if (status == SOCKET_ERROR) {
-            closesocket(win32Socket.connectSocket[0]);
-            win32Socket.connectSocket[0] = INVALID_SOCKET;
+            closesocket(win32socket.connectSocket[0]);
+            win32socket.connectSocket[0] = INVALID_SOCKET;
             continue;
         }
         break;
@@ -35041,9 +35433,9 @@ int32_t win32tcpInit(char *address, char *port) {
 
     // /* Send an initial buffer */
     // char sendbuf[2] = {12, 34};
-    // status = send(win32Socket.connectSocket[0], sendbuf, 2, 0);
+    // status = send(win32socket.connectSocket[0], sendbuf, 2, 0);
     // if (status == SOCKET_ERROR) {
-    //     closesocket(win32Socket.connectSocket[0]);
+    //     closesocket(win32socket.connectSocket[0]);
     //     WSACleanup();
     //     return 1;
     // }
@@ -35051,9 +35443,9 @@ int32_t win32tcpInit(char *address, char *port) {
     // printf("Bytes Sent: %ld\n", status);
 
     /* shutdown the connection since no more data will be sent */
-    status = shutdown(win32Socket.connectSocket[0], SD_SEND);
+    status = shutdown(win32socket.connectSocket[0], SD_SEND);
     if (status == SOCKET_ERROR) {
-        closesocket(win32Socket.connectSocket[0]);
+        closesocket(win32socket.connectSocket[0]);
         WSACleanup();
         return 1;
     }
@@ -35063,7 +35455,7 @@ int32_t win32tcpInit(char *address, char *port) {
     char recvbuf[recvbuflen];
     status = 1;
     while (status > 0) {
-        status = recv(win32Socket.connectSocket[0], recvbuf, recvbuflen, 0);
+        status = recv(win32socket.connectSocket[0], recvbuf, recvbuflen, 0);
         if (status > 0) {
             // printf("Bytes received: %d\n", status);
         } else if (status == 0) {
@@ -35074,7 +35466,7 @@ int32_t win32tcpInit(char *address, char *port) {
     }
 
     /* cleanup */
-    closesocket(win32Socket.connectSocket[0]);
+    closesocket(win32socket.connectSocket[0]);
     printf("Successfully connected to %d.%d.%d.%d\n", ipAddress[0], ipAddress[1], ipAddress[2], ipAddress[3]);
     return 0;
 }
@@ -35083,8 +35475,8 @@ SOCKET *win32tcpCreateSocket(int32_t timeoutMilliseconds) {
     /* define socket index */
     int32_t socketIndex = 0;
     for (int32_t i = 0; i < WIN32TCP_NUM_SOCKETS; i++) {
-        if (win32Socket.socketOpen[i] == 0) {
-            win32Socket.socketOpen[i] = 1;
+        if (win32socket.socketOpen[i] == 0) {
+            win32socket.socketOpen[i] = 1;
             socketIndex = i;
             break;
         }
@@ -35103,7 +35495,7 @@ SOCKET *win32tcpCreateSocket(int32_t timeoutMilliseconds) {
     hints.ai_protocol = IPPROTO_TCP;
 
     /* Resolve the server address and port */
-    int32_t status = getaddrinfo(win32Socket.address, win32Socket.port, &hints, &result);
+    int32_t status = getaddrinfo(win32socket.address, win32socket.port, &hints, &result);
     if (status != 0) {
         WSACleanup();
         return NULL;
@@ -35112,24 +35504,24 @@ SOCKET *win32tcpCreateSocket(int32_t timeoutMilliseconds) {
     /* Attempt to connect to an address until one succeeds */
     for (ptr = result; ptr != NULL; ptr = ptr -> ai_next) {
         /* Create a SOCKET for connecting to server */
-        win32Socket.connectSocket[socketIndex] = socket(ptr -> ai_family, ptr -> ai_socktype, ptr -> ai_protocol);
-        if (win32Socket.connectSocket[socketIndex] == INVALID_SOCKET) {
+        win32socket.connectSocket[socketIndex] = socket(ptr -> ai_family, ptr -> ai_socktype, ptr -> ai_protocol);
+        if (win32socket.connectSocket[socketIndex] == INVALID_SOCKET) {
             WSACleanup();
             return NULL;
         }
         /* Connect to server */
-        setsockopt(win32Socket.connectSocket[socketIndex], SOL_SOCKET, SO_RCVTIMEO, (const char *) &timeoutMilliseconds, sizeof(timeoutMilliseconds));
-        status = connect(win32Socket.connectSocket[socketIndex], ptr -> ai_addr, (int) ptr -> ai_addrlen);
+        setsockopt(win32socket.connectSocket[socketIndex], SOL_SOCKET, SO_RCVTIMEO, (const char *) &timeoutMilliseconds, sizeof(timeoutMilliseconds));
+        status = connect(win32socket.connectSocket[socketIndex], ptr -> ai_addr, (int) ptr -> ai_addrlen);
         if (status == SOCKET_ERROR) {
-            closesocket(win32Socket.connectSocket[socketIndex]);
-            win32Socket.connectSocket[socketIndex] = INVALID_SOCKET;
+            closesocket(win32socket.connectSocket[socketIndex]);
+            win32socket.connectSocket[socketIndex] = INVALID_SOCKET;
             continue;
         }
         break;
     }
     // uint32_t mode;
-    // printf("ioctlsocket %d\n", ioctlsocket(win32Socket.connectSocket[socketIndex], FIONBIO, &mode));
-    return &win32Socket.connectSocket[socketIndex];
+    // printf("ioctlsocket %d\n", ioctlsocket(win32socket.connectSocket[socketIndex], FIONBIO, &mode));
+    return &win32socket.connectSocket[socketIndex];
 }
 
 int32_t win32tcpSend(SOCKET *socket, uint8_t *data, int32_t length) {
@@ -35142,26 +35534,6 @@ int32_t win32tcpSend(SOCKET *socket, uint8_t *data, int32_t length) {
 }
 
 int32_t win32tcpReceive(SOCKET *socket, uint8_t *buffer, int32_t length) {
-    int32_t status = 1;
-    int32_t bytes = 0;
-    while (status > 0) {
-        status = recv(*socket, (char *) buffer, length, 0);
-        if (status > 0) {
-            // printf("Bytes received: %d\n", status);
-        } else if (status == 0) {
-            // printf("Connection closed\n");
-        } else {
-            // printf("recv failed with error: %d\n", WSAGetLastError());
-        }
-        bytes += status;
-        if (bytes >= length) {
-            return bytes;
-        }
-    }
-    return bytes;
-}
-
-int32_t win32tcpReceive2(SOCKET *socket, uint8_t *buffer, int32_t length) {
     int32_t status = 1;
     status = recv(*socket, (char *) buffer, length, 0);
     if (status > 0) {
@@ -35425,6 +35797,23 @@ int32_t osToolsComReceive(char *name, uint8_t *buffer, int32_t length) {
 }
 
 int32_t osToolsComClose(char *name) {
+    return -1;
+}
+
+list_t *osToolsListCameras() {
+    list_t *output = list_init();
+    return output;
+}
+
+int32_t osToolsCameraOpen(char *name) {
+    return -1;
+}
+
+int32_t osToolsCameraReceive(char *name, uint8_t *data) {
+    return -1;
+}
+
+int32_t osToolsCameraClose(char *name) {
     return -1;
 }
 

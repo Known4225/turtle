@@ -197,6 +197,7 @@ int main(int argc, char *argv[]) {
     list_free(files);
     list_free(filesAndFolders);
     list_t *comPorts = osToolsListComPorts();
+    printf("COM Ports: ");
     list_print(comPorts);
     for (int32_t i = 0; i < comPorts -> length; i++) {
         osToolsComOpen(comPorts -> data[i].s, OSTOOLS_BAUD_115200, 100);
@@ -204,6 +205,26 @@ int main(int argc, char *argv[]) {
         osToolsComClose(comPorts -> data[i].s);
     }
     list_free(comPorts);
+
+    list_t *cameras = osToolsListCameras();
+    printf("cameras: ");
+    list_print(cameras);
+    int32_t cameraIndex = -1;
+    char *cameraName = NULL;
+    uint8_t *cameraFrame = NULL;
+    for (int32_t i = 0; i < cameras -> length; i += 4) {
+        if (osToolsCameraOpen(cameras -> data[i].s) == 0) {
+            cameraName = cameras -> data[i].s;
+            cameraIndex = i;
+            break;
+        }
+    }
+    if (cameraName) {
+        cameraFrame = malloc(cameras -> data[cameraIndex + 1].i * cameras -> data[cameraIndex + 2].i * 3);
+        osToolsCameraReceive(cameraName, cameraFrame);
+        turtleTextureUnload(empvImage);
+        empvImage = turtleTextureLoadArray(cameraFrame, cameras -> data[cameraIndex + 1].i, cameras -> data[cameraIndex + 2].i, GL_RGB);
+    }
 
     uint32_t tps = 120; // ticks per second (locked to fps in this case)
     uint64_t tick = 0; // count number of ticks since application started
@@ -338,6 +359,11 @@ int main(int argc, char *argv[]) {
         turtleTextWriteStringRotated("Rotated Text", scrollbarVarX * -5 - 100, scrollbarVarY * 3.3 + 75, 9, 50, -15);
         
         /* draw texture */
+        if (cameraName) {
+            osToolsCameraReceive(cameraName, cameraFrame);
+            turtleTextureUnload(empvImage);
+            empvImage = turtleTextureLoadArray(cameraFrame, cameras -> data[cameraIndex + 1].i, cameras -> data[cameraIndex + 2].i, GL_RGB);
+        }
         turtleTexture(empvImage, scrollbarVarX * -5 + 400, scrollbarVarY * 3.3 - 145, scrollbarVarX * -5 + 700, scrollbarVarY * 3.3 + 24, 0, 255, 255, 255);
 
         // turtlePenColor(0, 0, 0);
@@ -386,6 +412,9 @@ int main(int argc, char *argv[]) {
             end = clock();
         }
         tick++;
+    }
+    if (cameraName) {
+        osToolsCameraClose(cameraName);
     }
     turtleFree();
     glfwTerminate();
