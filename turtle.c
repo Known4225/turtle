@@ -316,7 +316,6 @@ int main(int argc, char *argv[]) {
 
         /* write element annotations */
         tt_setColor(TT_COLOR_TEXT);
-        turtleTextWriteStringf(-310, -170, 5, 0, "%.2lf, %.2lf", turtle.mouseX, turtle.mouseY);
         turtleTextWriteString("X", xSlider -> x - xSlider -> length / 2 - xSlider -> size, xSlider -> y, xSlider -> size - 1, 100);
         turtleTextWriteStringf(ySlider -> x + xSlider -> length / 2 + xSlider -> size, xSlider -> y, 4, 0, "%.01lf", round(x) / 10);
         turtleTextWriteString("Y", xSlider -> x - ySlider -> length / 2 - xSlider -> size, ySlider -> y, xSlider -> size - 1, 100);
@@ -419,6 +418,10 @@ int main(int argc, char *argv[]) {
             circleButton -> value = 0;
             printf("circle button clicked\n");
         }
+        if (textButton -> value) {
+            textButton -> value = 0;
+            printf("text button clicked\n");
+        }
         if (turtleMouseRight()) {
             if (keys[1] == 0) {
                 keys[1] = 1;
@@ -430,6 +433,8 @@ int main(int argc, char *argv[]) {
             keys[1] = 0;
         }
         turtleToolsUpdate(); // update turtleTools
+        tt_setColor(TT_COLOR_TEXT);
+        turtleTextWriteStringf(-310, -170, 5, 0, "%.2lf, %.2lf", turtle.mouseX, turtle.mouseY);
         parseRibbonOutput(); // user defined function to use ribbon
         parsePopupOutput(window); // user defined function to use popup
         turtleUpdate(); // update the screen
