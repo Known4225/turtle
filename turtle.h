@@ -35125,7 +35125,7 @@ list_t *osToolsListCameras() {
                     printf("osToolsListCameras GetMediaTypeByIndex Error: 0x%lX\n", hr);
                     goto osToolsListCameras_done;
                 }
-                hr = mediaType -> lpVtbl -> SetUINT32(mediaType, &MF_SOURCE_READER_ENABLE_VIDEO_PROCESSING, 1);
+                hr = mediaType -> lpVtbl -> SetUINT32(mediaType, &MF_SOURCE_READER_ENABLE_VIDEO_PROCESSING, TRUE);
                 if (FAILED(hr)) {
                     printf("osToolsListCameras SetUINT32 Error: 0x%lX\n", hr);
                     goto osToolsListCameras_done;
@@ -35235,10 +35235,11 @@ int32_t osToolsCameraOpen(char *name) {
     MFCreateAttributes(&pAttributes, 1);
     pAttributes -> lpVtbl -> SetUINT32(pAttributes, &MF_READWRITE_ENABLE_HARDWARE_TRANSFORMS, TRUE);
     pAttributes -> lpVtbl -> SetUINT32(pAttributes, &MF_SOURCE_READER_ENABLE_VIDEO_PROCESSING, TRUE);
+    pAttributes -> lpVtbl -> SetUINT32(pAttributes, &MF_SOURCE_READER_DISCONNECT_MEDIASOURCE_ON_SHUTDOWN, TRUE);
     IMFSourceReader *pReader;
     HRESULT hr = MFCreateSourceReaderFromMediaSource(pSource, pAttributes, &pReader);
     if (FAILED(hr)) {
-        printf("osToolsListCameras MFCreateSourceReaderFromMediaSource Error: 0x%lX\n", hr);
+        printf("osToolsCameraOpen MFCreateSourceReaderFromMediaSource Error: 0x%lX\n", hr);
         return -1;
     }
     pReader -> lpVtbl -> SetStreamSelection(pReader, MF_SOURCE_READER_FIRST_VIDEO_STREAM, TRUE);
@@ -35260,20 +35261,20 @@ int32_t osToolsCameraOpen(char *name) {
     */
     IMFMediaType *readerType;
     MFCreateMediaType(&readerType);
-    readerType -> lpVtbl -> SetUINT32(readerType, &MF_SOURCE_READER_ENABLE_VIDEO_PROCESSING, 1);
+    readerType -> lpVtbl -> SetUINT32(readerType, &MF_SOURCE_READER_ENABLE_VIDEO_PROCESSING, TRUE);
     hr = readerType -> lpVtbl -> SetGUID(readerType, &MF_MT_MAJOR_TYPE, &MFMediaType_Video);
     if (FAILED(hr)) {
-        printf("osToolsListCameras SetGUID Error: 0x%lX\n", hr);
+        printf("osToolsCameraOpen SetGUID Error: 0x%lX\n", hr);
         return -1;
     }
     hr = readerType -> lpVtbl -> SetGUID(readerType, &MF_MT_SUBTYPE, &MFVideoFormat_RGB32);
     if (FAILED(hr)) {
-        printf("osToolsListCameras SetGUID Error: 0x%lX\n", hr);
+        printf("osToolsCameraOpen SetGUID Error: 0x%lX\n", hr);
         return -1;
     }
     hr = pReader -> lpVtbl -> SetCurrentMediaType(pReader, MF_SOURCE_READER_FIRST_VIDEO_STREAM, NULL, readerType);
     if (FAILED(hr)) {
-        printf("osToolsListCameras SetCurrentMediaType Error: 0x%lX\n", hr); // getting 0xC00D5212 -> MF_E_TOPO_CODEC_NOT_FOUND: Could not find a decoder for the native stream type
+        printf("osToolsCameraOpen SetCurrentMediaType Error: 0x%lX\n", hr); // getting 0xC00D5212 -> MF_E_TOPO_CODEC_NOT_FOUND: Could not find a decoder for the native stream type
         return -1;
     }
     win32camera.cameraList -> data[cameraIndex + 5].p = (void *) pReader;
@@ -35339,11 +35340,7 @@ int32_t osToolsCameraClose(char *name) {
     if (cameraIndex == -1) {
         return -1;
     }
-    IMFMediaSource *pSource = (IMFMediaSource *) win32camera.cameraList -> data[cameraIndex + 4].p;
     IMFSourceReader *pReader = (IMFSourceReader *) win32camera.cameraList -> data[cameraIndex + 5].p;
-    if (pSource) {
-        pSource -> lpVtbl -> Release(pSource);
-    }
     if (pReader) {
         pReader -> lpVtbl -> Release(pReader);
     }
