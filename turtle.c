@@ -358,6 +358,7 @@ int main(int argc, char *argv[]) {
                     free(cameraFrame);
                     cameraFrame = NULL;
                 }
+                turtleTextureUnload(empvImage);
                 empvImage = turtleTextureLoad("images/EMPV.png");
             } else {
                 cameraName = cameras -> data[(imageDropdown -> value - 1) * 4].s;
