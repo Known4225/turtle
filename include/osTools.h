@@ -103,6 +103,7 @@ list_t *osToolsLoadCSVString(char *filename, ost_csv_t rowOrColumn);
 /* untether the program from the console that spawned it - will close a console if the program is run independently */
 void osToolsCloseConsole();
 
+/* COM support */
 typedef enum {
     OSTOOLS_BAUD_110 = 110,
     OSTOOLS_BAUD_300 = 300,
@@ -110,39 +111,91 @@ typedef enum {
     OSTOOLS_BAUD_1200 = 1200,
     OSTOOLS_BAUD_2400 = 2400,
     OSTOOLS_BAUD_4800 = 4800,
-    OSTOOLS_BAUD_9600 = 9600,
+    OSTOOLS_BAUD_9600 = 9600, // common low baud rate
     OSTOOLS_BAUD_14400 = 14400,
     OSTOOLS_BAUD_19200 = 19200,
     OSTOOLS_BAUD_38400 = 38400,
-    OSTOOLS_BAUD_56000 = 56000,
+    OSTOOLS_BAUD_56000 = 56000, // common medium baud rate
     OSTOOLS_BAUD_57600 = 57600,
-    OSTOOLS_BAUD_115200 = 115200,
+    OSTOOLS_BAUD_115200 = 115200, // common high speed baud rate
     OSTOOLS_BAUD_128000 = 128000,
     OSTOOLS_BAUD_256000 = 256000,
-} osToolsBaud_t;
+} osToolsComBaud_t;
+
+typedef struct {
+    list_t *com; // Format Windows: name, HANDLE
+} ost_com_t;
+
+extern ost_com_t osToolsCom;
 
 /* get a list of all com ports (strings) */
-list_t *osToolsListComPorts();
+list_t *osToolsComList();
 
 /* opens a com port */
-int32_t osToolsComOpen(char *name, osToolsBaud_t baudRate, int32_t timeoutMilliseconds);
+int32_t osToolsComOpen(char *name, osToolsComBaud_t baudRate);
 
-/* returns number of bytes sent */
+/* returns number of bytes sent. This function blocks until all data has been sent (or error) */
 int32_t osToolsComSend(char *name, uint8_t *data, int32_t length);
 
-/* returns number of bytes received */
-int32_t osToolsComReceive(char *name, uint8_t *buffer, int32_t length);
+/* returns number of bytes received. This function blocks until length bytes are received or timeoutMilliseconds is exceeded */
+int32_t osToolsComReceive(char *name, uint8_t *buffer, int32_t length, int32_t timeoutMilliseconds);
 
 /* closes a com port */
 int32_t osToolsComClose(char *name);
 
-/* get a list [camera name, width, height, framerate] */
-list_t *osToolsListCameras();
+/* Socket (IPv4) support */
+typedef enum {
+    OSTOOLS_PROTOCOL_TCP = 0,
+    OSTOOLS_PROTOCOL_UDP = 1,
+} osToolsSocketProtocol_t;
 
-/* opens a camera */
+typedef struct {
+    list_t *socket; // Format Windows: name, client/server, reserved, protocol, address, port (if client), reserved, reserved, reserved, reserved
+} ost_socket_t;
+
+extern ost_socket_t osToolsSocket;
+
+/* create the name for the server (used to access it), as well as a protocol (either OSTOOLS_PROTOCOL_TCP or OSTOOLS_PROTOCOL_UDP) and a binding address */
+int32_t osToolsServerSocketOpen(char *serverName, osToolsSocketProtocol_t protocol, char *serverAddress);
+
+/* listens for connections on a server socket. This function blocks until a connection is received then it will return a list [address (string), port (string)] of the incoming connection */
+list_t *osToolsServerSocketListen(char *serverName);
+
+/* sends data over a server socket to a client address and port. This function blocks until all data has been sent (or error) */
+int32_t osToolsServerSocketSend(char *serverName, char *clientAddress, char *clientPort, uint8_t *data, int32_t length);
+
+/* receives up to length bytes from a client address and port - returns number of bytes received. This function blocks until length bytes are received or timeoutMilliseconds is exceeded */
+int32_t osToolsServerSocketReceive(char *serverName, char *clientAddress, char *clientPort, uint8_t *data, int32_t length, int32_t timeoutMilliseconds);
+
+/* close a server socket */
+void osToolsServerSocketClose(char *serverName);
+
+/* create the name for the client (used to access it), as well as a protocol (either OSTOOLS_PROTOCOL_TCP or OSTOOLS_PROTOCOL_UDP), address, and port */
+int32_t osToolsClientSocketOpen(char *clientName, osToolsSocketProtocol_t protocol, char *clientAddress, char *clientPort);
+
+/* sends data over a client socket to a server address (the port is specified by the client socket). This function blocks until all data has been sent (or error) */
+int32_t osToolsClientSocketSend(char *clientName, char *serverAddress, uint8_t *data, int32_t length);
+
+/* receives up to length bytes from a server address - returns number of bytes received. This function blocks until length bytes are received or timeoutMilliseconds is exceeded */
+int32_t osToolsClientSocketReceive(char *clientName, char *serverAddress, uint8_t *data, int32_t length, int32_t timeoutMilliseconds);
+
+/* close a client socket */
+void osToolsClientSocketClose(char *clientName);
+
+/* Camera support */
+typedef struct {
+    list_t *camera; // Format Windows: camera name, width, height, framerate, pointer to source reader
+} ost_camera_t;
+
+extern ost_camera_t osToolsCamera;
+
+/* gets a list [camera name (string), width (int), height (int), framerate (double), ...] of camera devices on the system */
+list_t *osToolsCameraList();
+
+/* opens a camera given camera name from osToolsCameraList */
 int32_t osToolsCameraOpen(char *name);
 
-/* get RGB buffer from the camera - buffer must be at least width * height * 3 big */
+/* gets an RGB buffer from the camera - buffer must be at least width * height * 3 bytes */
 int32_t osToolsCameraReceive(char *name, uint8_t *data);
 
 /* closes a camera */
@@ -156,41 +209,6 @@ int32_t osToolsCameraClose(char *name);
 #include <mfidl.h>
 #include <mfapi.h>
 #include <mfreadwrite.h>
-
-typedef struct {
-    list_t *comList; // format: name, HANDLE
-} win32com_t;
-
-extern win32com_t win32com;
-
-#define WIN32TCP_NUM_SOCKETS 32
-
-typedef struct {
-    char *address;
-    char *port;
-    SOCKET connectSocket[WIN32TCP_NUM_SOCKETS];
-    char socketOpen[WIN32TCP_NUM_SOCKETS];
-} win32socket_t;
-
-extern win32socket_t win32socket;
-
-typedef struct {
-    list_t *cameraList; // format: camera name, width, height, framerate, pointer to source reader
-} win32camera_t;
-
-extern win32camera_t win32camera;
-
-int32_t win32tcpInit(char *address, char *port);
-
-SOCKET *win32tcpCreateSocket(int32_t timeoutMilliseconds);
-
-int32_t win32tcpSend(SOCKET *socket, unsigned char *data, int32_t length);
-
-int32_t win32tcpReceive(SOCKET *socket, unsigned char *buffer, int32_t length);
-
-int32_t win32tcpReceive2(SOCKET *socket, unsigned char *buffer, int32_t length);
-
-void win32tcpDeinit();
 #endif
 
 #ifdef OS_LINUX
@@ -200,6 +218,7 @@ void win32tcpDeinit();
 #include <dirent.h>
 #endif
 
+/* initialise osTools, pass in argv[0] from main function as well as GLFW window object */
 int32_t osToolsInit(char argv0[], GLFWwindow *window);
 
 /* clear the list of global extensions */

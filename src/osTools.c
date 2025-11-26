@@ -47,6 +47,9 @@ ost_glfw_t osToolsGLFW;
 ost_clipboard_t osToolsClipboard;
 ost_file_dialog_t osToolsFileDialog;
 ost_memmap_t osToolsMemmap;
+ost_com_t osToolsCom;
+ost_socket_t osToolsSocket;
+ost_camera_t osToolsCamera;
 
 /* OS independent functions */
 void osToolsIndependentInit(GLFWwindow *window) {
@@ -79,9 +82,14 @@ void osToolsIndependentInit(GLFWwindow *window) {
     moveCursor.height = 32;
     moveCursor.pixels = (unsigned char *) moveCursorData;
     osToolsGLFW.standardCursors[8] = glfwCreateCursor(&moveCursor, 12, 12);
-
     /* initialise memmap module */
     osToolsMemmap.mappedFiles = list_init();
+    /* initialise COM module */
+    osToolsCom.com = list_init();
+    /* initialise sockets module */
+    osToolsSocket.socket = list_init();
+    /* initialise camera module */
+    osToolsCamera.camera = list_init();
 }
 
 /* returns clipboard text */
@@ -408,8 +416,6 @@ int32_t osToolsInit(char argv0[], GLFWwindow *window) {
         index--;
     }
     osToolsFileDialog.executableFilepath[index + 1] = '\0';
-    win32com.comList = list_init();
-    win32camera.cameraList = list_init();
     return 0;
 }
 
@@ -765,9 +771,7 @@ windows COM port support
 https://learn.microsoft.com/en-us/windows/win32/devio/configuring-a-communications-resource
 */
 
-win32com_t win32com;
-
-list_t *osToolsListComPorts() {
+list_t *osToolsComList() {
     list_t *output = list_init();
     char comName[8] = "COM";
     char pathInfo[128];
@@ -778,27 +782,27 @@ list_t *osToolsListComPorts() {
             list_append(output, (unitype) comName, 's');
         }
         if (GetLastError() == ERROR_INSUFFICIENT_BUFFER) {
-            printf("osToolsListComPorts: Unusual COM device detected on %s\n", comName);
+            printf("osToolsComList: Unusual COM device detected on %s\n", comName);
         }
     }
     return output;
 }
 
-int32_t osToolsComOpen(char *name, osToolsBaud_t baudRate, int32_t timeoutMilliseconds) {
+int32_t osToolsComOpen(char *name, osToolsComBaud_t baudRate) {
     /* verify COM */
     if (strlen(name) < 3 || name[0] != 'C' || name[1] != 'O' || name[2] != 'M') {
-        printf("osToolsComOpen: name must start with \"COM\"\n");
+        // printf("osToolsComOpen: name must start with \"COM\"\n");
         return -1;
     }
     /* check if this port is already open */
-    int32_t index = list_find(win32com.comList, (unitype) name, 's');
+    int32_t index = list_find(osToolsCom.com, (unitype) name, 's');
     if (index != -1) {
-        if (CloseHandle((HANDLE) (win32com.comList -> data[index + 1].l)) == 0) {
+        if (CloseHandle((HANDLE) (osToolsCom.com -> data[index + 1].l)) == 0) {
             printf("osToolsComClose failed with error %ld\n", GetLastError());
             return -1;
         }
-        list_delete(win32com.comList, index);
-        list_delete(win32com.comList, index);
+        list_delete(osToolsCom.com, index);
+        list_delete(osToolsCom.com, index);
     }
     /* open COM port */
     DCB dcb;
@@ -815,8 +819,8 @@ int32_t osToolsComOpen(char *name, osToolsBaud_t baudRate, int32_t timeoutMillis
         printf("Could not open com port %s, error %ld\n", name, GetLastError());
         return -1;
     } else {
-        list_append(win32com.comList, (unitype) name, 's');
-        list_append(win32com.comList, (unitype) comHandle, 'l');
+        list_append(osToolsCom.com, (unitype) name, 's');
+        list_append(osToolsCom.com, (unitype) comHandle, 'l');
     }
     /* Initialize the DCB structure. */
     SecureZeroMemory(&dcb, sizeof(DCB));
@@ -831,7 +835,7 @@ int32_t osToolsComOpen(char *name, osToolsBaud_t baudRate, int32_t timeoutMillis
     }
     /* Fill in some DCB values and set the com state: 
        115200 bps, 8 data bits, no parity, and 1 stop bit. */
-    dcb.BaudRate = baudRate;    // baud rate
+    dcb.BaudRate = baudRate;      // baud rate
     dcb.ByteSize = 8;             // data size, xmit and rcv
     dcb.Parity   = NOPARITY;      // parity bit
     dcb.StopBits = ONESTOPBIT;    // stop bit
@@ -848,38 +852,38 @@ int32_t osToolsComOpen(char *name, osToolsBaud_t baudRate, int32_t timeoutMillis
         printf("GetCommState failed with error %ld\n", GetLastError());
         return -1;
     }
-    /* Set comm timeout */
-    COMMTIMEOUTS timeout = {0, 0, timeoutMilliseconds, 0, 0};
-    fSuccess = SetCommTimeouts(comHandle, &timeout);
     return 0;
 }
 
 int32_t osToolsComSend(char *name, uint8_t *data, int32_t length) {
     /* check if this port is open */
-    int32_t index = list_find(win32com.comList, (unitype) name, 's');
+    int32_t index = list_find(osToolsCom.com, (unitype) name, 's');
     if (index == -1) {
         printf("osToolsComSend: %s not open\n", name);
         return 0;
     }
     /* https://www.codeproject.com/Articles/3061/Creating-a-Serial-communication-on-Win32#sending */
     DWORD bytes;
-    if (WriteFile((HANDLE) (win32com.comList -> data[index + 1].l), data, length, &bytes, NULL) == 0) {
+    if (WriteFile((HANDLE) (osToolsCom.com -> data[index + 1].l), data, length, &bytes, NULL) == 0) {
         printf("osToolsComSend failed with error %ld\n", GetLastError());
         return -1;
     }
     return bytes;
 }
 
-int32_t osToolsComReceive(char *name, uint8_t *buffer, int32_t length) {
+int32_t osToolsComReceive(char *name, uint8_t *buffer, int32_t length, int32_t timeoutMilliseconds) {
     /* check if this port is open */
-    int32_t index = list_find(win32com.comList, (unitype) name, 's');
+    int32_t index = list_find(osToolsCom.com, (unitype) name, 's');
     if (index == -1) {
         printf("osToolsComReceive: %s not open\n", name);
         return 0;
     }
+    /* Set comm timeout */
+    COMMTIMEOUTS timeout = {0, 0, timeoutMilliseconds, 0, 0};
+    fSuccess = SetCommTimeouts((HANDLE) (osToolsCom.com -> data[index + 1].l), &timeout);
     /* read from COM */
     DWORD bytes;
-    if (ReadFile((HANDLE) (win32com.comList -> data[index + 1].l), buffer, length, &bytes, NULL) == 0) {
+    if (ReadFile((HANDLE) (osToolsCom.com -> data[index + 1].l), buffer, length, &bytes, NULL) == 0) {
         printf("osToolsComReceive failed with error %ld\n", GetLastError());
         return -1;
     }
@@ -888,14 +892,14 @@ int32_t osToolsComReceive(char *name, uint8_t *buffer, int32_t length) {
 
 int32_t osToolsComClose(char *name) {
     /* check if this port is already open */
-    int32_t index = list_find(win32com.comList, (unitype) name, 's');
+    int32_t index = list_find(osToolsCom.com, (unitype) name, 's');
     if (index != -1) {
-        if (CloseHandle((HANDLE) (win32com.comList -> data[index + 1].l)) == 0) {
+        if (CloseHandle((HANDLE) (osToolsCom.com -> data[index + 1].l)) == 0) {
             printf("osToolsComClose failed with error %ld\n", GetLastError());
             return -1;
         }
-        list_delete(win32com.comList, index);
-        list_delete(win32com.comList, index);
+        list_delete(osToolsCom.com, index);
+        list_delete(osToolsCom.com, index);
     }
     return 0;
 }
@@ -917,18 +921,16 @@ const GUID MFVideoFormat_RGB24 = {20 /* D3DFMT_R8G8B8 */, 0x0000, 0x0010, {0x80,
 const GUID MFImageFormat_RGB32 = {0x00000016, 0x0000, 0x0010, {0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71}};
 const GUID MFVideoFormat_RGB32 = {0x00000016, 0x0000, 0x0010, {0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71}};
 
-win32camera_t win32camera;
-
-list_t *osToolsListCameras() {
+list_t *osToolsCameraList() {
     list_t *output = list_init();
     HRESULT hr = CoInitializeEx(NULL, 0);
     if (FAILED(hr)) {
-        printf("osToolsListCameras CoInitializeEx Error: 0x%lX\n", hr);
+        printf("osToolsCameraList CoInitializeEx Error: 0x%lX\n", hr);
         return output;
     }
     hr = MFStartup(MF_VERSION, MFSTARTUP_NOSOCKET);
     if (FAILED(hr)) {
-        printf("osToolsListCameras MFStartup Error: 0x%lX\n", hr);
+        printf("osToolsCameraList MFStartup Error: 0x%lX\n", hr);
         return output;
     }
     /* https://learn.microsoft.com/en-us/windows/win32/medfound/enumerating-video-capture-devices
@@ -942,38 +944,38 @@ list_t *osToolsListCameras() {
     /* Create an attribute store to specify the enumeration parameters. */
     hr = MFCreateAttributes(&pAttributes, 1);
     if (FAILED(hr)) {
-        printf("osToolsListCameras MFCreateAttributes Error: 0x%lX\n", hr);
-        goto osToolsListCameras_done;
+        printf("osToolsCameraList MFCreateAttributes Error: 0x%lX\n", hr);
+        goto osToolsCameraList_done;
     }
 
     /* Source type: video capture devices */
     hr = pAttributes -> lpVtbl -> SetGUID(pAttributes, &MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE, &MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_GUID);
     if (FAILED(hr)) {
-        printf("osToolsListCameras SetGUID Error: 0x%lX\n", hr);
-        goto osToolsListCameras_done;
+        printf("osToolsCameraList SetGUID Error: 0x%lX\n", hr);
+        goto osToolsCameraList_done;
     }
 
     /* Enumerate devices. */
     UINT32 count;
     hr = MFEnumDeviceSources(pAttributes, &ppDevices, &count);
     if (FAILED(hr)) {
-        printf("osToolsListCameras MFEnumDeviceSources Error: 0x%lX\n", hr);
-        goto osToolsListCameras_done;
+        printf("osToolsCameraList MFEnumDeviceSources Error: 0x%lX\n", hr);
+        goto osToolsCameraList_done;
     }
 
     if (count == 0) {
         hr = E_FAIL;
-        printf("osToolsListCameras: Error no cameras found\n");
-        goto osToolsListCameras_done;
+        printf("osToolsCameraList: Error no cameras found\n");
+        goto osToolsCameraList_done;
     }
-    printf("osToolsListCameras: Found %d cameras\n", count);
+    printf("osToolsCameraList: Found %d cameras\n", count);
 
     /* Create the media source object. */
     for (int32_t i = 0; i < count; i++) {
         hr = ppDevices[i] -> lpVtbl -> ActivateObject(ppDevices[i], &IID_IMFMediaSource, (void **) &pSource);
         if (FAILED(hr)) {
-            printf("osToolsListCameras ActivateObject Error: 0x%lX\n", hr);
-            goto osToolsListCameras_done;
+            printf("osToolsCameraList ActivateObject Error: 0x%lX\n", hr);
+            goto osToolsCameraList_done;
         }
         DWORD characteristics;
         pSource -> lpVtbl -> GetCharacteristics(pSource, &characteristics);
@@ -996,14 +998,14 @@ list_t *osToolsListCameras() {
             IMFStreamDescriptor *streamDescriptor;
             hr = presentationDescriptor -> lpVtbl -> GetStreamDescriptorByIndex(presentationDescriptor, 0, &selected, &streamDescriptor);
             if (FAILED(hr)) {
-                printf("osToolsListCameras GetStreamDescriptorByIndex Error: 0x%lX\n", hr);
-                goto osToolsListCameras_done;
+                printf("osToolsCameraList GetStreamDescriptorByIndex Error: 0x%lX\n", hr);
+                goto osToolsCameraList_done;
             }
             IMFMediaTypeHandler *mediaTypeHandler;
             hr = streamDescriptor -> lpVtbl -> GetMediaTypeHandler(streamDescriptor, &mediaTypeHandler);
             if (FAILED(hr)) {
-                printf("osToolsListCameras GetMediaTypeHandler Error: 0x%lX\n", hr);
-                goto osToolsListCameras_done;
+                printf("osToolsCameraList GetMediaTypeHandler Error: 0x%lX\n", hr);
+                goto osToolsCameraList_done;
             }
             DWORD mediaTypeCount;
             mediaTypeHandler -> lpVtbl -> GetMediaTypeCount(mediaTypeHandler, &mediaTypeCount);
@@ -1013,19 +1015,19 @@ list_t *osToolsListCameras() {
                 IMFMediaType *mediaType;
                 hr = mediaTypeHandler -> lpVtbl -> GetMediaTypeByIndex(mediaTypeHandler, j, &mediaType);
                 if (FAILED(hr)) {
-                    printf("osToolsListCameras GetMediaTypeByIndex Error: 0x%lX\n", hr);
-                    goto osToolsListCameras_done;
+                    printf("osToolsCameraList GetMediaTypeByIndex Error: 0x%lX\n", hr);
+                    goto osToolsCameraList_done;
                 }
                 hr = mediaType -> lpVtbl -> SetUINT32(mediaType, &MF_SOURCE_READER_ENABLE_VIDEO_PROCESSING, TRUE);
                 if (FAILED(hr)) {
-                    printf("osToolsListCameras SetUINT32 Error: 0x%lX\n", hr);
-                    goto osToolsListCameras_done;
+                    printf("osToolsCameraList SetUINT32 Error: 0x%lX\n", hr);
+                    goto osToolsCameraList_done;
                 }
                 GUID majorType;
                 hr = mediaType -> lpVtbl -> GetMajorType(mediaType, &majorType);
                 if (FAILED(hr)) {
-                    printf("osToolsListCameras GetMajorType Error: 0x%lX\n", hr);
-                    goto osToolsListCameras_done;
+                    printf("osToolsCameraList GetMajorType Error: 0x%lX\n", hr);
+                    goto osToolsCameraList_done;
                 }
                 /* see mfapi.h for DEFINE_GUID (MFMediaType_Video, 0x73646976, 0x0000, 0x0010, 0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71); */
                 if (majorType.Data1 == 0x73646976 && majorType.Data2 == 0x0000 && majorType.Data3 == 0x0010 && majorType.Data4[0] == 0x80 && majorType.Data4[1] == 0x00 && majorType.Data4[2] == 0x00 && majorType.Data4[3] == 0xaa && majorType.Data4[4] == 0x00 && majorType.Data4[5] == 0x38 && majorType.Data4[6] == 0x9b && majorType.Data4[7] == 0x71) {
@@ -1034,16 +1036,16 @@ list_t *osToolsListCameras() {
                     GUID subtype;
                     hr = mediaType -> lpVtbl -> GetGUID(mediaType, &MF_MT_SUBTYPE, &subtype);
                     if (FAILED(hr)) {
-                        printf("osToolsListCameras GetGUID Error: 0x%lX\n", hr);
-                        goto osToolsListCameras_done;
+                        printf("osToolsCameraList GetGUID Error: 0x%lX\n", hr);
+                        goto osToolsCameraList_done;
                     }
                     // printf("  - Subtype: %08lx-%02hx%02hx-%02x%02x-%02x%02x%02x%02x%02x%02x\n", subtype.Data1, subtype.Data2, subtype.Data3, // 3231564E-0010-8000-00AA00389B71
                     // subtype.Data4[0], subtype.Data4[1], subtype.Data4[2], subtype.Data4[3], subtype.Data4[4], subtype.Data4[5], subtype.Data4[6], subtype.Data4[7]);
                     uint64_t sizePacked;
                     hr = mediaType -> lpVtbl -> GetUINT64(mediaType, &MF_MT_FRAME_SIZE, &sizePacked);
                     if (FAILED(hr)) {
-                        printf("osToolsListCameras GetUINT64 Error: 0x%lX\n", hr);
-                        goto osToolsListCameras_done;
+                        printf("osToolsCameraList GetUINT64 Error: 0x%lX\n", hr);
+                        goto osToolsCameraList_done;
                     }
                     uint32_t width = (uint32_t) (sizePacked >> 32);
                     uint32_t height = (uint32_t) sizePacked;
@@ -1064,8 +1066,8 @@ list_t *osToolsListCameras() {
                         savedSubtype = subtype;
                         hr = mediaTypeHandler -> lpVtbl -> SetCurrentMediaType(mediaTypeHandler, mediaType);
                         if (FAILED(hr)) {
-                            printf("osToolsListCameras SetCurrentMediaType Error: 0x%lX\n", hr);
-                            goto osToolsListCameras_done;
+                            printf("osToolsCameraList SetCurrentMediaType Error: 0x%lX\n", hr);
+                            goto osToolsCameraList_done;
                         }
                     } else if (frameRateDen != 0 && (int32_t) (frameRateNum / frameRateDen) == maxFramerate && difference < minDifference) {
                         minDifference = difference;
@@ -1076,8 +1078,8 @@ list_t *osToolsListCameras() {
                         savedSubtype = subtype;
                         hr = mediaTypeHandler -> lpVtbl -> SetCurrentMediaType(mediaTypeHandler, mediaType);
                         if (FAILED(hr)) {
-                            printf("osToolsListCameras SetCurrentMediaType Error: 0x%lX\n", hr);
-                            goto osToolsListCameras_done;
+                            printf("osToolsCameraList SetCurrentMediaType Error: 0x%lX\n", hr);
+                            goto osToolsCameraList_done;
                         }
                     }
                 } else {
@@ -1094,15 +1096,15 @@ list_t *osToolsListCameras() {
             list_append(output, (unitype) setWidth, 'i');
             list_append(output, (unitype) setHeight, 'i');
             list_append(output, (unitype) setFramerate, 'd');
-            list_append(win32camera.cameraList, (unitype) cameraString, 's');
-            list_append(win32camera.cameraList, (unitype) setWidth, 'i');
-            list_append(win32camera.cameraList, (unitype) setHeight, 'i');
-            list_append(win32camera.cameraList, (unitype) setFramerate, 'd');
-            list_append(win32camera.cameraList, (unitype) (void *) pSource, 'l');
-            list_append(win32camera.cameraList, (unitype) (void *) NULL, 'l');
+            list_append(osToolsCamera.camera, (unitype) cameraString, 's');
+            list_append(osToolsCamera.camera, (unitype) setWidth, 'i');
+            list_append(osToolsCamera.camera, (unitype) setHeight, 'i');
+            list_append(osToolsCamera.camera, (unitype) setFramerate, 'd');
+            list_append(osToolsCamera.camera, (unitype) (void *) pSource, 'l');
+            list_append(osToolsCamera.camera, (unitype) (void *) NULL, 'l');
         }
     }
-osToolsListCameras_done:
+osToolsCameraList_done:
     if (pAttributes) {
         pAttributes -> lpVtbl -> Release(pAttributes);
         pAttributes = NULL;
@@ -1118,11 +1120,11 @@ osToolsListCameras_done:
 }
 
 int32_t osToolsCameraOpen(char *name) {
-    int32_t cameraIndex = list_find(win32camera.cameraList, (unitype) name, 's');
+    int32_t cameraIndex = list_find(osToolsCamera.camera, (unitype) name, 's');
     if (cameraIndex == -1) {
         return -1;
     }
-    IMFMediaSource *pSource = (IMFMediaSource *) win32camera.cameraList -> data[cameraIndex + 4].p;
+    IMFMediaSource *pSource = (IMFMediaSource *)osToolsCamera.camera -> data[cameraIndex + 4].p;
     IMFAttributes *pAttributes;
     /* https://stackoverflow.com/questions/43507393/media-foundation-set-video-interlacing-and-decode */
     MFCreateAttributes(&pAttributes, 1);
@@ -1170,16 +1172,16 @@ int32_t osToolsCameraOpen(char *name) {
         printf("osToolsCameraOpen SetCurrentMediaType Error: 0x%lX\n", hr); // getting 0xC00D5212 -> MF_E_TOPO_CODEC_NOT_FOUND: Could not find a decoder for the native stream type
         return -1;
     }
-    win32camera.cameraList -> data[cameraIndex + 5].p = (void *) pReader;
+    osToolsCamera.camera -> data[cameraIndex + 5].p = (void *) pReader;
     return 0;
 }
 
 int32_t osToolsCameraReceive(char *name, uint8_t *data) {
-    int32_t cameraIndex = list_find(win32camera.cameraList, (unitype) name, 's');
+    int32_t cameraIndex = list_find(osToolsCamera.camera, (unitype) name, 's');
     if (cameraIndex == -1) {
         return 0;
     }
-    IMFSourceReader *pReader = (IMFSourceReader *) win32camera.cameraList -> data[cameraIndex + 5].p;
+    IMFSourceReader *pReader = (IMFSourceReader *) osToolsCamera.camera -> data[cameraIndex + 5].p;
     if (pReader == NULL) {
         return 0;
     }
@@ -1229,11 +1231,11 @@ int32_t osToolsCameraReceive(char *name, uint8_t *data) {
 }
 
 int32_t osToolsCameraClose(char *name) {
-    int32_t cameraIndex = list_find(win32camera.cameraList, (unitype) name, 's');
+    int32_t cameraIndex = list_find(osToolsCamera.camera, (unitype) name, 's');
     if (cameraIndex == -1) {
         return -1;
     }
-    IMFSourceReader *pReader = (IMFSourceReader *) win32camera.cameraList -> data[cameraIndex + 5].p;
+    IMFSourceReader *pReader = (IMFSourceReader *) osToolsCamera.camera -> data[cameraIndex + 5].p;
     if (pReader) {
         pReader -> lpVtbl -> Release(pReader);
     }
@@ -1244,9 +1246,8 @@ int32_t osToolsCameraClose(char *name) {
 https://gist.github.com/mmozeiko/c0dfcc8fec527a90a02145d2cc0bfb6d
 https://learn.microsoft.com/en-us/windows/win32/winsock/complete-server-code
 https://learn.microsoft.com/en-us/windows/win32/winsock/complete-client-code
+https://csperkins.org/teaching/2007-2008/networked-systems/lecture04.pdf
 */
-
-win32socket_t win32socket;
 
 int32_t win32tcpInit(char *address, char *port) {
     for (int32_t i = 0; i < WIN32TCP_NUM_SOCKETS; i++) {
@@ -1320,17 +1321,6 @@ int32_t win32tcpInit(char *address, char *port) {
         }
         break;
     }
-
-    // /* Send an initial buffer */
-    // char sendbuf[2] = {12, 34};
-    // status = send(win32socket.connectSocket[0], sendbuf, 2, 0);
-    // if (status == SOCKET_ERROR) {
-    //     closesocket(win32socket.connectSocket[0]);
-    //     WSACleanup();
-    //     return 1;
-    // }
-
-    // printf("Bytes Sent: %ld\n", status);
 
     /* shutdown the connection since no more data will be sent */
     status = shutdown(win32socket.connectSocket[0], SD_SEND);
@@ -1445,7 +1435,7 @@ void win32tcpDeinit() {
 
 /* This is the zenity version of osToolsFileDialog.h, it's for linux */
 
-/* 
+/*
 a note on zenity:
 FILE* filenameStream = popen("zenity --file-selection", "r"); (popen runs the first argument in the shell as a bash script)
 this function returns a pointer to a stream of data that contains only the filepath
@@ -1669,12 +1659,12 @@ void osToolsCloseConsole() {
     return;
 }
 
-list_t *osToolsListComPorts() {
+list_t *osToolsComList() {
     list_t *output = list_init();
     return output;
 }
 
-int32_t osToolsComOpen(char *name, osToolsBaud_t baudRate, int32_t timeoutMilliseconds) {
+int32_t osToolsComOpen(char *name, osToolsComBaud_t baudRate) {
     return -1;
 }
 
@@ -1682,7 +1672,7 @@ int32_t osToolsComSend(char *name, uint8_t *data, int32_t length) {
     return -1;
 }
 
-int32_t osToolsComReceive(char *name, uint8_t *buffer, int32_t length) {
+int32_t osToolsComReceive(char *name, uint8_t *buffer, int32_t length, int32_t timeoutMilliseconds) {
     return -1;
 }
 
@@ -1690,7 +1680,7 @@ int32_t osToolsComClose(char *name) {
     return -1;
 }
 
-list_t *osToolsListCameras() {
+list_t *osToolsCameraList() {
     list_t *output = list_init();
     return output;
 }
