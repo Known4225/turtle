@@ -196,17 +196,19 @@ int main(int argc, char *argv[]) {
     list_free(folders);
     list_free(files);
     list_free(filesAndFolders);
-    list_t *comPorts = osToolsListComPorts();
+    list_t *comPorts = osToolsComList();
     printf("COM Ports: ");
     list_print(comPorts);
     for (int32_t i = 0; i < comPorts -> length; i++) {
-        osToolsComOpen(comPorts -> data[i].s, OSTOOLS_BAUD_115200, 100);
+        osToolsComOpen(comPorts -> data[i].s, OSTOOLS_BAUD_115200);
         osToolsComSend(comPorts -> data[i].s, (uint8_t *) "Hello World\r\n", strlen("Hello World\r\n"));
         osToolsComClose(comPorts -> data[i].s);
     }
     list_free(comPorts);
+    osToolsServerSocketCreate("Server1", OSTOOLS_PROTOCOL_TCP, "192.168.0.100");
+    osToolsServerSocketListen("Server1");
 
-    list_t *cameras = osToolsListCameras();
+    list_t *cameras = osToolsCameraList();
     printf("Cameras: ");
     list_print(cameras);
     char *cameraName = NULL;
