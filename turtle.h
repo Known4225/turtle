@@ -32862,10 +32862,12 @@ void buttonUpdate() {
         }
         tt_setColor(buttonp -> color[TT_COLOR_SLOT_BUTTON_TEXT]);
         if (buttonp -> shape == TT_BUTTON_SHAPE_TEXT) {
-            if (buttonp -> status == 0) {
-                tt_setColor(buttonp -> color[TT_COLOR_SLOT_BUTTON_SELECTED_TEXT]);
-            } else {
+            if (buttonp -> status == 1) {
                 tt_setColor(buttonp -> color[TT_COLOR_SLOT_BUTTON_SELECT]);
+            } else if (buttonp -> status == -1) {
+                tt_setColor(buttonp -> color[TT_COLOR_SLOT_BUTTON_TEXT]);
+            } else {
+                tt_setColor(buttonp -> color[TT_COLOR_SLOT_BUTTON_SELECTED_TEXT]);
             }
         }
         turtleTextWriteUnicode(buttonp -> label, (buttonLeftX + buttonRightX) / 2, buttonY, buttonp -> size - 1, 50);
@@ -32959,7 +32961,7 @@ void switchUpdate() {
                 double textLength = turtleTextGetUnicodeLength(switchp -> label, switchp -> size - 1);
                 switchClickLeft = switchX - switchp -> size * 1.35;
                 switchClickRight = switchX + switchp -> size * 2.2 + textLength;
-            } else {
+            } else if (switchp -> style == TT_SWITCH_STYLE_SIDESWIPE_RIGHT) {
                 double textLength = turtleTextGetUnicodeLength(switchp -> label, switchp -> size - 1);
                 switchClickLeft = switchX - switchp -> size * 2 - textLength;
                 switchClickRight = switchX + switchp -> size * 1.35;
@@ -32971,17 +32973,17 @@ void switchUpdate() {
             if (switchp -> style == TT_SWITCH_STYLE_CLASSIC) {
                 turtleTextWriteUnicode(switchp -> label, switchX, switchY + 1.6 * switchp -> size, switchp -> size - 1, 50);
             } else if (switchp -> style == TT_SWITCH_STYLE_SIDESWIPE_LEFT) {
-                if (switchp -> status == -1) {
-                    tt_setColor(switchp -> color[TT_COLOR_SLOT_SWITCH_TEXT_HOVER]);
-                } else {
+                if (switchp -> status == 0) {
                     tt_setColor(switchp -> color[TT_COLOR_SLOT_SWITCH_TEXT]);
+                } else {
+                    tt_setColor(switchp -> color[TT_COLOR_SLOT_SWITCH_TEXT_HOVER]);
                 }
                 turtleTextWriteUnicode(switchp -> label, switchX + switchp -> size * 2, switchY, switchp -> size - 1, 0);
-            } else {
-                if (switchp -> status == -1) {
-                    tt_setColor(switchp -> color[TT_COLOR_SLOT_SWITCH_TEXT_HOVER]);
-                } else {
+            } else if (switchp -> style == TT_SWITCH_STYLE_SIDESWIPE_RIGHT) {
+                if (switchp -> status == 0) {
                     tt_setColor(switchp -> color[TT_COLOR_SLOT_SWITCH_TEXT]);
+                } else {
+                    tt_setColor(switchp -> color[TT_COLOR_SLOT_SWITCH_TEXT_HOVER]);
                 }
                 turtleTextWriteUnicode(switchp -> label, switchX - switchp -> size * 2, switchY, switchp -> size - 1, 100);
             }
@@ -33027,10 +33029,10 @@ void switchUpdate() {
             switchClickDown = switchY - switchp -> size * 0.6;
             switchClickUp = switchY + switchp -> size * 0.6;
             /* render text */
-            if (switchp -> status == -1) {
-                tt_setColor(switchp -> color[TT_COLOR_SLOT_SWITCH_TEXT_HOVER]);
-            } else {
+            if (switchp -> status == 0) {
                 tt_setColor(switchp -> color[TT_COLOR_SLOT_SWITCH_TEXT]);
+            } else {
+                tt_setColor(switchp -> color[TT_COLOR_SLOT_SWITCH_TEXT_HOVER]);
             }
             turtleTextWriteUnicode(switchp -> label, switchX + switchp -> size, switchY, switchp -> size - 1, 0);
         }
@@ -33049,9 +33051,9 @@ void switchUpdate() {
                     switchp -> status = 0;
                 }
             }
-            if (switchp -> status > 0) {
+            if (switchp -> status == 1) {
                 switchp -> value = !switchp -> value;
-                switchp -> status = 0;
+                switchp -> status = 2;
             }
         } else {
             switchp -> status = 0;
