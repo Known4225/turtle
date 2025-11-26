@@ -35101,6 +35101,7 @@ list_t *osToolsListCameras() {
         double minDifference = 100000000000.0;
         /* goal: Closest resolution to 1024x1024, Fastest framerate */
         if (streamCount > 0) {
+            GUID savedSubtype;
             int32_t selected;
             IMFStreamDescriptor *streamDescriptor;
             hr = presentationDescriptor -> lpVtbl -> GetStreamDescriptorByIndex(presentationDescriptor, 0, &selected, &streamDescriptor);
@@ -35118,7 +35119,7 @@ list_t *osToolsListCameras() {
             mediaTypeHandler -> lpVtbl -> GetMediaTypeCount(mediaTypeHandler, &mediaTypeCount);
             printf("- Media Type Count: %ld\n", mediaTypeCount);
             for (int32_t j = 0; j < mediaTypeCount; j++) {
-                printf("- Media Type %d\n", j);
+                // printf("- Media Type %d\n", j);
                 IMFMediaType *mediaType;
                 hr = mediaTypeHandler -> lpVtbl -> GetMediaTypeByIndex(mediaTypeHandler, j, &mediaType);
                 if (FAILED(hr)) {
@@ -35139,15 +35140,15 @@ list_t *osToolsListCameras() {
                 /* see mfapi.h for DEFINE_GUID (MFMediaType_Video, 0x73646976, 0x0000, 0x0010, 0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71); */
                 if (majorType.Data1 == 0x73646976 && majorType.Data2 == 0x0000 && majorType.Data3 == 0x0010 && majorType.Data4[0] == 0x80 && majorType.Data4[1] == 0x00 && majorType.Data4[2] == 0x00 && majorType.Data4[3] == 0xaa && majorType.Data4[4] == 0x00 && majorType.Data4[5] == 0x38 && majorType.Data4[6] == 0x9b && majorType.Data4[7] == 0x71) {
                     /* MFMediaType_Video */
-                    printf("  - Major type: MFMediaType_Video\n");
+                    // printf("  - Major type: MFMediaType_Video\n");
                     GUID subtype;
                     hr = mediaType -> lpVtbl -> GetGUID(mediaType, &MF_MT_SUBTYPE, &subtype);
                     if (FAILED(hr)) {
                         printf("osToolsListCameras GetGUID Error: 0x%lX\n", hr);
                         goto osToolsListCameras_done;
                     }
-                    printf("  - Subtype: %08lx-%02hx%02hx-%02x%02x-%02x%02x%02x%02x%02x%02x\n", subtype.Data1, subtype.Data2, subtype.Data3, // 3231564E-0010-8000-00AA00389B71
-                    subtype.Data4[0], subtype.Data4[1], subtype.Data4[2], subtype.Data4[3], subtype.Data4[4], subtype.Data4[5], subtype.Data4[6], subtype.Data4[7]);
+                    // printf("  - Subtype: %08lx-%02hx%02hx-%02x%02x-%02x%02x%02x%02x%02x%02x\n", subtype.Data1, subtype.Data2, subtype.Data3, // 3231564E-0010-8000-00AA00389B71
+                    // subtype.Data4[0], subtype.Data4[1], subtype.Data4[2], subtype.Data4[3], subtype.Data4[4], subtype.Data4[5], subtype.Data4[6], subtype.Data4[7]);
                     uint64_t sizePacked;
                     hr = mediaType -> lpVtbl -> GetUINT64(mediaType, &MF_MT_FRAME_SIZE, &sizePacked);
                     if (FAILED(hr)) {
@@ -35160,11 +35161,9 @@ list_t *osToolsListCameras() {
                     mediaType -> lpVtbl -> GetUINT64(mediaType, &MF_MT_FRAME_RATE, &frameRatePacked);
                     uint32_t frameRateNum = (uint32_t) (frameRatePacked >> 32);
                     uint32_t frameRateDen = (uint32_t) frameRatePacked;
-                    BOOL compressed;
-                    mediaType -> lpVtbl -> IsCompressedFormat(mediaType, &compressed);
-                    printf("  - Width: %d\n", width);
-                    printf("  - Height: %d\n", height);
-                    printf("  - Frames/s: %.02lf\n", (double) frameRateNum / frameRateDen);
+                    // printf("  - Width: %d\n", width);
+                    // printf("  - Height: %d\n", height);
+                    // printf("  - Frames/s: %.02lf\n", (double) frameRateNum / frameRateDen);
                     double difference = (width - 1024) * (width - 1024) + (height - 1024) * (height - 1024);
                     if (frameRateDen != 0 && (int32_t) (frameRateNum / frameRateDen) > maxFramerate) {
                         minDifference = difference;
@@ -35172,6 +35171,7 @@ list_t *osToolsListCameras() {
                         setWidth = width;
                         setHeight = height;
                         setFramerate = (double) frameRateNum / frameRateDen;
+                        savedSubtype = subtype;
                         hr = mediaTypeHandler -> lpVtbl -> SetCurrentMediaType(mediaTypeHandler, mediaType);
                         if (FAILED(hr)) {
                             printf("osToolsListCameras SetCurrentMediaType Error: 0x%lX\n", hr);
@@ -35183,6 +35183,7 @@ list_t *osToolsListCameras() {
                         setWidth = width;
                         setHeight = height;
                         setFramerate = (double) frameRateNum / frameRateDen;
+                        savedSubtype = subtype;
                         hr = mediaTypeHandler -> lpVtbl -> SetCurrentMediaType(mediaTypeHandler, mediaType);
                         if (FAILED(hr)) {
                             printf("osToolsListCameras SetCurrentMediaType Error: 0x%lX\n", hr);
@@ -35191,10 +35192,12 @@ list_t *osToolsListCameras() {
                     }
                 } else {
                     /* Not MFMediaType_Video */
-                    printf("  - Major type: %08lx-%02hx%02hx-%02x%02x-%02x%02x%02x%02x%02x%02x\n", majorType.Data1, majorType.Data2, majorType.Data3,
-                    majorType.Data4[0], majorType.Data4[1], majorType.Data4[2], majorType.Data4[3], majorType.Data4[4], majorType.Data4[5], majorType.Data4[6], majorType.Data4[7]);
+                    // printf("  - Major type: %08lx-%02hx%02hx-%02x%02x-%02x%02x%02x%02x%02x%02x\n", majorType.Data1, majorType.Data2, majorType.Data3,
+                    // majorType.Data4[0], majorType.Data4[1], majorType.Data4[2], majorType.Data4[3], majorType.Data4[4], majorType.Data4[5], majorType.Data4[6], majorType.Data4[7]);
                 }
             }
+            printf("- Saved Subtype: %08lx-%02hx%02hx-%02x%02x-%02x%02x%02x%02x%02x%02x\n", savedSubtype.Data1, savedSubtype.Data2, savedSubtype.Data3,
+            savedSubtype.Data4[0], savedSubtype.Data4[1], savedSubtype.Data4[2], savedSubtype.Data4[3], savedSubtype.Data4[4], savedSubtype.Data4[5], savedSubtype.Data4[6], savedSubtype.Data4[7]);
             char cameraString[32];
             sprintf(cameraString, "USB Camera %d", i);
             list_append(output, (unitype) cameraString, 's');
@@ -35248,8 +35251,8 @@ int32_t osToolsCameraOpen(char *name) {
     while (pReader -> lpVtbl -> GetNativeMediaType(pReader, MF_SOURCE_READER_FIRST_VIDEO_STREAM, dwStreamIndex, &readerNativeType) == S_OK) {
         GUID nativeSubtype;
         readerNativeType -> lpVtbl -> GetGUID(readerNativeType, &MF_MT_SUBTYPE, &nativeSubtype);
-        printf("- Native Subtype %d: %08lx-%02hx%02hx-%02x%02x-%02x%02x%02x%02x%02x%02x\n", dwStreamIndex, nativeSubtype.Data1, nativeSubtype.Data2, nativeSubtype.Data3,
-        nativeSubtype.Data4[0], nativeSubtype.Data4[1], nativeSubtype.Data4[2], nativeSubtype.Data4[3], nativeSubtype.Data4[4], nativeSubtype.Data4[5], nativeSubtype.Data4[6], nativeSubtype.Data4[7]);
+        // printf("- Native Subtype %d: %08lx-%02hx%02hx-%02x%02x-%02x%02x%02x%02x%02x%02x\n", dwStreamIndex, nativeSubtype.Data1, nativeSubtype.Data2, nativeSubtype.Data3,
+        // nativeSubtype.Data4[0], nativeSubtype.Data4[1], nativeSubtype.Data4[2], nativeSubtype.Data4[3], nativeSubtype.Data4[4], nativeSubtype.Data4[5], nativeSubtype.Data4[6], nativeSubtype.Data4[7]);
         dwStreamIndex++;
     }
     /*

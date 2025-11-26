@@ -207,7 +207,7 @@ int main(int argc, char *argv[]) {
     list_free(comPorts);
 
     list_t *cameras = osToolsListCameras();
-    printf("cameras: ");
+    printf("Cameras: ");
     list_print(cameras);
     char *cameraName = NULL;
     uint8_t *cameraFrame = NULL;
@@ -223,18 +223,19 @@ int main(int argc, char *argv[]) {
     uint64_t tick = 0; // count number of ticks since application started
     clock_t start, end;
 
+    double sliderVar, dialVar;
     tt_button_t *button = buttonInit("Button", NULL, 150, 20, 10);
     button -> shape = TT_BUTTON_SHAPE_ROUNDED_RECTANGLE;
     switchInit("Switch", NULL, 150, -20, 10);
-    dialInit("Exp", NULL, TT_DIAL_SCALE_EXP, -150, 20, 10, 0, 1000, 1);
-    dialInit("Linear", NULL, TT_DIAL_SCALE_LINEAR, -150, -20, 10, 0, 1000, 1);
-    dialInit("Log", NULL, TT_DIAL_SCALE_LOG, -150, -60, 10, 0, 1000, 1);
+    dialInit("Exp", &dialVar, TT_DIAL_SCALE_EXP, -150, 20, 10, 0, 1000, 1);
+    dialInit("Linear", &dialVar, TT_DIAL_SCALE_LINEAR, -150, -20, 10, 0, 1000, 1);
+    dialInit("Log", &dialVar, TT_DIAL_SCALE_LOG, -150, -60, 10, 0, 1000, 1);
     sliderInit("Slider", NULL, TT_SLIDER_TYPE_HORIZONTAL, TT_SLIDER_ALIGN_LEFT, -100, 35, 10, 50, 0, 255, 1);
     sliderInit("Slider", NULL, TT_SLIDER_TYPE_HORIZONTAL, TT_SLIDER_ALIGN_CENTER, 0, 35, 10, 50, 0, 255, 1);
     sliderInit("Slider", NULL, TT_SLIDER_TYPE_HORIZONTAL, TT_SLIDER_ALIGN_RIGHT, 100, 35, 10, 50, 0, 255, 1);
-    sliderInit("Log", NULL, TT_SLIDER_TYPE_VERTICAL, TT_SLIDER_ALIGN_LEFT, -100, -35, 10, 50, 0, 255, 1) -> scale = TT_SLIDER_SCALE_LOG;
-    sliderInit("Linear", NULL, TT_SLIDER_TYPE_VERTICAL, TT_SLIDER_ALIGN_CENTER, 0, -35, 10, 50, 0, 255, 1) -> scale = TT_SLIDER_SCALE_LINEAR;
-    sliderInit("Exp", NULL, TT_SLIDER_TYPE_VERTICAL, TT_SLIDER_ALIGN_RIGHT, 100, -35, 10, 50, 0, 255, 1) -> scale = TT_SLIDER_SCALE_EXP;
+    sliderInit("Log", &sliderVar, TT_SLIDER_TYPE_VERTICAL, TT_SLIDER_ALIGN_LEFT, -100, -35, 10, 50, 0, 255, 1) -> scale = TT_SLIDER_SCALE_LOG;
+    sliderInit("Linear", &sliderVar, TT_SLIDER_TYPE_VERTICAL, TT_SLIDER_ALIGN_CENTER, 0, -35, 10, 50, 0, 255, 1) -> scale = TT_SLIDER_SCALE_LINEAR;
+    sliderInit("Exp", &sliderVar, TT_SLIDER_TYPE_VERTICAL, TT_SLIDER_ALIGN_RIGHT, 100, -35, 10, 50, 0, 255, 1) -> scale = TT_SLIDER_SCALE_EXP;
     tt_scrollbar_t *scrollbarX = scrollbarInit(NULL, TT_SCROLLBAR_HORIZONTAL, 20, -170, 10, 550, 50);
     tt_scrollbar_t *scrollbarY = scrollbarInit(NULL, TT_SCROLLBAR_VERTICAL, 310, 0, 10, 320, 33);
     list_t *dropdownOptions = list_init();
