@@ -744,9 +744,7 @@ turtle_texture_t turtleTextureLoad(char *filename) {
     }
     /* load to GPU */
     glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, texture / 4, turtle.textureWidth, turtle.textureHeight, 1, encoding, GL_UNSIGNED_BYTE, resized);
-    printf("glTexSubImage3D gl error code: 0x%X\n", glGetError());
     glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
-    printf("mipmap gl error code: 0x%X\n", glGetError());
     free(resized);
     return texture;
 }
