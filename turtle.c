@@ -207,29 +207,37 @@ int main(int argc, char *argv[]) {
     list_free(comPorts);
 
     list_t *cameras = osToolsListCameras();
-    printf("cameras: ");
+    printf("Cameras: ");
     list_print(cameras);
-    int32_t cameraIndex = -1;
     char *cameraName = NULL;
     uint8_t *cameraFrame = NULL;
+    list_t *imageDropdownOptions = list_init();
+    list_append(imageDropdownOptions, (unitype) "Image", 's');
     for (int32_t i = 0; i < cameras -> length; i += 4) {
-        if (osToolsCameraOpen(cameras -> data[i].s) == 0) {
-            cameraName = cameras -> data[i].s;
-            cameraIndex = i;
-            break;
-        }
+        list_append(imageDropdownOptions, cameras -> data[i], 's');
     }
-    if (cameraName) {
-        cameraFrame = malloc(cameras -> data[cameraIndex + 1].i * cameras -> data[cameraIndex + 2].i * 3);
-        osToolsCameraReceive(cameraName, cameraFrame);
-        turtleTextureUnload(empvImage);
-        empvImage = turtleTextureLoadArray(cameraFrame, cameras -> data[cameraIndex + 1].i, cameras -> data[cameraIndex + 2].i, GL_RGB);
-    }
+    tt_dropdown_t *imageDropdown = dropdownInit("Source", imageDropdownOptions, NULL, TT_DROPDOWN_ALIGN_RIGHT, 700, 36, 8);
+    int32_t oldImageDropdown = imageDropdown -> value;
 
     uint32_t tps = 120; // ticks per second (locked to fps in this case)
     uint64_t tick = 0; // count number of ticks since application started
     clock_t start, end;
 
+    double sliderVar, dialVar;
+    tt_button_t *button = buttonInit("Button", NULL, 150, 20, 10);
+    button -> shape = TT_BUTTON_SHAPE_ROUNDED_RECTANGLE;
+    switchInit("Switch", NULL, 150, -20, 10);
+    dialInit("Exp", &dialVar, TT_DIAL_SCALE_EXP, -150, 20, 10, 0, 1000, 1);
+    dialInit("Linear", &dialVar, TT_DIAL_SCALE_LINEAR, -150, -20, 10, 0, 1000, 1);
+    dialInit("Log", &dialVar, TT_DIAL_SCALE_LOG, -150, -60, 10, 0, 1000, 1);
+    sliderInit("Slider", NULL, TT_SLIDER_TYPE_HORIZONTAL, TT_SLIDER_ALIGN_LEFT, -100, 35, 10, 50, 0, 255, 1);
+    sliderInit("Slider", NULL, TT_SLIDER_TYPE_HORIZONTAL, TT_SLIDER_ALIGN_CENTER, 0, 35, 10, 50, 0, 255, 1);
+    sliderInit("Slider", NULL, TT_SLIDER_TYPE_HORIZONTAL, TT_SLIDER_ALIGN_RIGHT, 100, 35, 10, 50, 0, 255, 1);
+    sliderInit("Log", &sliderVar, TT_SLIDER_TYPE_VERTICAL, TT_SLIDER_ALIGN_LEFT, -100, -35, 10, 50, 0, 255, 1) -> scale = TT_SLIDER_SCALE_LOG;
+    sliderInit("Linear", &sliderVar, TT_SLIDER_TYPE_VERTICAL, TT_SLIDER_ALIGN_CENTER, 0, -35, 10, 50, 0, 255, 1) -> scale = TT_SLIDER_SCALE_LINEAR;
+    sliderInit("Exp", &sliderVar, TT_SLIDER_TYPE_VERTICAL, TT_SLIDER_ALIGN_RIGHT, 100, -35, 10, 50, 0, 255, 1) -> scale = TT_SLIDER_SCALE_EXP;
+    tt_scrollbar_t *scrollbarX = scrollbarInit(NULL, TT_SCROLLBAR_HORIZONTAL, 20, -170, 10, 550, 50);
+    tt_scrollbar_t *scrollbarY = scrollbarInit(NULL, TT_SCROLLBAR_VERTICAL, 310, 0, 10, 320, 33);
     list_t *dropdownOptions = list_init();
     list_append(dropdownOptions, (unitype) "A", 's');
     list_append(dropdownOptions, (unitype) "Long Item", 's');
@@ -238,20 +246,6 @@ int main(int argc, char *argv[]) {
     list_append(dropdownOptions, (unitype) "C", 's');
     list_append(dropdownOptions, (unitype) "D", 's');
     list_append(dropdownOptions, (unitype) "E", 's');
-    tt_button_t *button = buttonInit("Button", NULL, 150, 20, 10);
-    button -> shape = TT_BUTTON_SHAPE_ROUNDED_RECTANGLE;
-    switchInit("Switch", NULL, 150, -20, 10);
-    dialInit("Exp", NULL, TT_DIAL_SCALE_EXP, -150, 20, 10, 0, 1000, 1);
-    dialInit("Linear", NULL, TT_DIAL_SCALE_LINEAR, -150, -20, 10, 0, 1000, 1);
-    dialInit("Log", NULL, TT_DIAL_SCALE_LOG, -150, -60, 10, 0, 1000, 1);
-    sliderInit("Slider", NULL, TT_SLIDER_TYPE_HORIZONTAL, TT_SLIDER_ALIGN_LEFT, -100, 35, 10, 50, 0, 255, 1);
-    sliderInit("Slider", NULL, TT_SLIDER_TYPE_HORIZONTAL, TT_SLIDER_ALIGN_CENTER, 0, 35, 10, 50, 0, 255, 1);
-    sliderInit("Slider", NULL, TT_SLIDER_TYPE_HORIZONTAL, TT_SLIDER_ALIGN_RIGHT, 100, 35, 10, 50, 0, 255, 1);
-    sliderInit("Log", NULL, TT_SLIDER_TYPE_VERTICAL, TT_SLIDER_ALIGN_LEFT, -100, -35, 10, 50, 0, 255, 1) -> scale = TT_SLIDER_SCALE_LOG;
-    sliderInit("Linear", NULL, TT_SLIDER_TYPE_VERTICAL, TT_SLIDER_ALIGN_CENTER, 0, -35, 10, 50, 0, 255, 1) -> scale = TT_SLIDER_SCALE_LINEAR;
-    sliderInit("Exp", NULL, TT_SLIDER_TYPE_VERTICAL, TT_SLIDER_ALIGN_RIGHT, 100, -35, 10, 50, 0, 255, 1) -> scale = TT_SLIDER_SCALE_EXP;
-    tt_scrollbar_t *scrollbarX = scrollbarInit(NULL, TT_SCROLLBAR_HORIZONTAL, 20, -170, 10, 550, 50);
-    tt_scrollbar_t *scrollbarY = scrollbarInit(NULL, TT_SCROLLBAR_VERTICAL, 310, 0, 10, 320, 33);
     dropdownInit("Dropdown", dropdownOptions, NULL, TT_DROPDOWN_ALIGN_CENTER, 0, 70, 10);
     tt_textbox_t *textbox = textboxInit("Textbox", NULL, 128, -50, -110, 10, 100);
     list_t *contextOptions = list_init();
@@ -353,12 +347,45 @@ int main(int argc, char *argv[]) {
         turtleTextWriteStringRotated("Rotated Text", scrollbarX -> value * -5 - 100, scrollbarY -> value * 3.3 + 75, 9, 50, -15);
         
         /* draw texture */
+        if (oldImageDropdown != imageDropdown -> value) {
+            if (cameraName) {
+                osToolsCameraClose(cameraName);
+            }
+            oldImageDropdown = imageDropdown -> value;
+            if (imageDropdown -> value == 0) {
+                cameraName = NULL;
+                if (cameraFrame) {
+                    free(cameraFrame);
+                    cameraFrame = NULL;
+                }
+                empvImage = turtleTextureLoad("images/EMPV.png");
+            } else {
+                cameraName = cameras -> data[(imageDropdown -> value - 1) * 4].s;
+                osToolsCameraOpen(cameraName);
+                if (cameraFrame) {
+                    free(cameraFrame);
+                }
+                cameraFrame = malloc(cameras -> data[(imageDropdown -> value - 1) * 4 + 1].i * cameras -> data[(imageDropdown -> value - 1) * 4 + 2].i * 3);
+            }
+        }
         if (cameraName) {
             osToolsCameraReceive(cameraName, cameraFrame);
             turtleTextureUnload(empvImage);
-            empvImage = turtleTextureLoadArray(cameraFrame, cameras -> data[cameraIndex + 1].i, cameras -> data[cameraIndex + 2].i, GL_RGB);
+            empvImage = turtleTextureLoadArray(cameraFrame, cameras -> data[(imageDropdown -> value - 1) * 4 + 1].i, cameras -> data[(imageDropdown -> value - 1) * 4 + 2].i, GL_RGB);
+            double textureCenterX = 550;
+            double textureCenterY = -60.5;
+            double textureWidth = 300.0 / ((16.0 / 9) * ((double) cameras -> data[(imageDropdown -> value - 1) * 4 + 2].i / cameras -> data[(imageDropdown -> value - 1) * 4 + 1].i));
+            if (textureWidth > 300) {
+                textureWidth = 300;
+            }
+            double textureHeight = (16.0 / 9) * ((double) cameras -> data[(imageDropdown -> value - 1) * 4 + 2].i / cameras -> data[(imageDropdown -> value - 1) * 4 + 1].i) * 169.0;
+            if (textureHeight > 169) {
+                textureHeight = 169;
+            }
+            turtleTexture(empvImage, scrollbarX -> value * -5 + textureCenterX - textureWidth / 2, scrollbarY -> value * 3.3 + textureCenterY - textureHeight / 2, scrollbarX -> value * -5 + textureCenterX + textureWidth / 2, scrollbarY -> value * 3.3 + textureCenterY + textureHeight / 2, 0, 255, 255, 255);
+        } else {
+            turtleTexture(empvImage, scrollbarX -> value * -5 + 400, scrollbarY -> value * 3.3 - 145, scrollbarX -> value * -5 + 700, scrollbarY -> value * 3.3 + 24, 0, 255, 255, 255);
         }
-        turtleTexture(empvImage, scrollbarX -> value * -5 + 400, scrollbarY -> value * 3.3 - 145, scrollbarX -> value * -5 + 700, scrollbarY -> value * 3.3 + 24, 0, 255, 255, 255);
 
         // turtlePenColor(0, 0, 0);
         // turtle3DTriangle(-5, 0, 10, 5, 0, 10, 0, 5, 10);
