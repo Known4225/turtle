@@ -159,38 +159,35 @@ typedef enum {
 } os_socket_index_t;
 
 typedef struct {
-    list_t *socket; // Format Windows: name, SOCKET, client/server, reserved, protocol, address[0], address[1], address[2], address[4], reserved * 12, port (int) (if client), reserved * 10
+    list_t *socket; // Format Windows: name, SOCKET, client/server, reserved, protocol, address[0], address[1], address[2], address[4], reserved * 12, port (int), reserved * 10
     int8_t win32wsaActive;
 } ost_socket_t;
 
 extern ost_socket_t osToolsSocket;
 
+/* gets the address of a socket as a string (populated in address argument) */
+int32_t osToolsGetSocketAddress(char *socketName, char *address, int32_t length);
+
+/* gets the port of a socket as a string (populated in port argument) */
+int32_t osToolsGetPort(char *socketName, char *port, int32_t length);
+
 /* create the name for the server (used to access it), as well as a protocol (either OSTOOLS_PROTOCOL_TCP or OSTOOLS_PROTOCOL_UDP) and a binding address */
 int32_t osToolsServerSocketCreate(char *serverName, osToolsSocketProtocol_t protocol, char *serverAddress);
 
-/* listens for connections on a server socket. This function blocks until a connection is received then it will return a list [address (string), port (string)] of the incoming connection */
-list_t *osToolsServerSocketListen(char *serverName);
+/* listens for connections on a server socket, when a connection comes in it will create a new socket and assign it the name clientName. This function blocks until a connection is received then it will return a list [address (string), port (string)] of the incoming connection */
+int32_t osToolsServerSocketListen(char *serverName, char *clientName);
 
-/* sends data over a server socket to a client address and port. This function blocks until all data has been sent (or error) */
-int32_t osToolsServerSocketSend(char *serverName, char *clientAddress, char *clientPort, uint8_t *data, int32_t length);
+/* create the name for the client (used to access it), as well as a protocol (either OSTOOLS_PROTOCOL_TCP or OSTOOLS_PROTOCOL_UDP) and specify the server's address, and port (the server that this client socket will connect to) */
+int32_t osToolsClientSocketCreate(char *clientName, osToolsSocketProtocol_t protocol, char *serverAddress, char *serverPort, int32_t timeoutMilliseconds);
 
-/* receives up to length bytes from a client address and port - returns number of bytes received. This function blocks until length bytes are received or timeoutMilliseconds is exceeded */
-int32_t osToolsServerSocketReceive(char *serverName, char *clientAddress, char *clientPort, uint8_t *data, int32_t length, int32_t timeoutMilliseconds);
+/* sends data over a socket. This function blocks until all data has been sent (or error) */
+int32_t osToolsSocketSend(char *socketName, uint8_t *data, int32_t length);
 
-/* close and destroy a server socket */
-int32_t osToolsServerSocketDestroy(char *serverName);
+/* receives up to length bytes from a socket - returns number of bytes received. This function blocks until length bytes are received or timeoutMilliseconds is exceeded */
+int32_t osToolsSocketReceive(char *socketName, uint8_t *data, int32_t length, int32_t timeoutMilliseconds);
 
-/* create the name for the client (used to access it), as well as a protocol (either OSTOOLS_PROTOCOL_TCP or OSTOOLS_PROTOCOL_UDP), address, and port */
-int32_t osToolsClientSocketCreate(char *clientName, osToolsSocketProtocol_t protocol, char *clientAddress, char *clientPort);
-
-/* sends data over a client socket to a server address (the port is specified by the client socket). This function blocks until all data has been sent (or error) */
-int32_t osToolsClientSocketSend(char *clientName, char *serverAddress, uint8_t *data, int32_t length);
-
-/* receives up to length bytes from a server address - returns number of bytes received. This function blocks until length bytes are received or timeoutMilliseconds is exceeded */
-int32_t osToolsClientSocketReceive(char *clientName, char *serverAddress, uint8_t *data, int32_t length, int32_t timeoutMilliseconds);
-
-/* close and destroy a client socket */
-int32_t osToolsClientSocketDestroy(char *clientName);
+/* close and destroy a socket */
+int32_t osToolsSocketDestroy(char *socketName);
 
 /* Camera support */
 typedef struct {
@@ -211,7 +208,6 @@ int32_t osToolsCameraReceive(char *name, uint8_t *data);
 /* closes a camera */
 int32_t osToolsCameraClose(char *name);
 
-#define OS_WINDOWS
 #ifdef OS_WINDOWS
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
