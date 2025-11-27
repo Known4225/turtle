@@ -36232,6 +36232,42 @@ int32_t osToolsComClose(char *name) {
     return -1;
 }
 
+int32_t osToolsGetIP(char *address, uint8_t *buffer, int32_t maxSegments) {
+    return 0;
+}
+
+int32_t osToolsGetSocketAddress(char *socketName, char *address, int32_t length) {
+    return 0;
+}
+
+int32_t osToolsGetPort(char *socketName, char *port, int32_t length) {
+    return 0;
+}
+
+int32_t osToolsServerSocketCreate(char *serverName, osToolsSocketProtocol_t protocol, char *serverPort) {
+    return 0;
+}
+
+int32_t osToolsServerSocketListen(char *serverName, char *clientName) {
+    return 0;
+}
+
+int32_t osToolsClientSocketCreate(char *clientName, osToolsSocketProtocol_t protocol, char *serverAddress, char *serverPort, int32_t timeoutMilliseconds) {
+    return 0;
+}
+
+int32_t osToolsSocketSend(char *socketName, uint8_t *data, int32_t length) {
+    return 0;
+}
+
+int32_t osToolsSocketReceive(char *socketName, uint8_t *data, int32_t length, int32_t timeoutMilliseconds) {
+    return 0;
+}
+
+int32_t osToolsSocketDestroy(char *socketName) {
+    return 0;
+}
+
 list_t *osToolsCameraList() {
     list_t *output = list_init();
     return output;
