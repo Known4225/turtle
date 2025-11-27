@@ -1210,9 +1210,37 @@ int32_t osToolsClientSocketCreate(char *clientName, osToolsSocketProtocol_t prot
         printf("osToolsClientSocketCreate ERROR: Could not create socket\n");
         return -1;
     }
+    /* set socket to non blocking mode while connecting */
+    u_long nonblocking = 1;
+    status = ioctlsocket(winsocket, FIONBIO, &nonblocking);
+    if (status != NO_ERROR) {
+        printf("osToolsClientSocketCreate ERROR: Could not set socket to non-blocking mode\n");
+        return -1;
+    }
     status = connect(winsocket, result -> ai_addr, (int32_t) result -> ai_addrlen);
     if (status == SOCKET_ERROR) {
-        printf("osToolsClientSocketCreate ERROR: Could not connect socket\n");
+        if (WSAGetLastError() != WSAEWOULDBLOCK) {
+            printf("osToolsClientSocketCreate ERROR: Could not connect socket %d\n", WSAGetLastError());
+            return -1;
+        }
+        struct timeval timeout;
+        timeout.tv_sec = timeoutMilliseconds / 1000;
+        timeoutMilliseconds -= (timeoutMilliseconds / 1000) * 1000;
+        timeout.tv_usec = timeoutMilliseconds * 1000;
+        fd_set winsockArray;
+        winsockArray.fd_count = 1;
+        winsockArray.fd_array[0] = winsocket;
+        status = select(0, NULL, &winsockArray, NULL, &timeout);
+        if (status != 1) {
+            printf("osToolsClientSocketCreate ERROR: Could not connect socket (timeout)\n");
+            return -1;
+        }
+    }
+    /* set socket back to blocking mode */
+    u_long blocking = 0;
+    status = ioctlsocket(winsocket, FIONBIO, &blocking);
+    if (status != NO_ERROR) {
+        printf("osToolsClientSocketCreate ERROR: Could not set socket to blocking mode\n");
         return -1;
     }
     printf("Connected to %s:%s\n", serverAddress, serverPort);
@@ -1265,13 +1293,14 @@ int32_t osToolsSocketReceive(char *socketName, uint8_t *data, int32_t length, in
         printf("osToolsSocketReceive ERROR: Could not find socket %s\n", socketName);
         return -1;
     }
-    struct timeval timeout;
-    timeout.tv_sec = timeoutMilliseconds / 1000;
-    timeoutMilliseconds -= (timeoutMilliseconds / 1000) * 1000;
-    timeout.tv_usec = timeoutMilliseconds * 1000;
-    setsockopt((SOCKET) osToolsSocket.socket -> data[socketIndex + OSI_SOCKET].p, SOL_SOCKET, SO_RCVTIMEO, (char *) &timeout, sizeof(timeout));
+    setsockopt((SOCKET) osToolsSocket.socket -> data[socketIndex + OSI_SOCKET].p, SOL_SOCKET, SO_RCVTIMEO, (char *) &timeoutMilliseconds, sizeof(timeoutMilliseconds)); // https://stackoverflow.com/questions/2876024/linux-is-there-a-read-or-recv-from-socket-with-timeout
     int32_t status = recv((SOCKET) osToolsSocket.socket -> data[socketIndex + OSI_SOCKET].p, (char *) data, length, 0);
     if (status == SOCKET_ERROR) {
+        if (WSAGetLastError() == WSAETIMEDOUT) {
+            /* timeout */
+            printf("osToolsSocketReceive ERROR: Failed to receive (timeout)\n");
+            return 0;
+        }
         printf("osToolsSocketReceive ERROR: Failed to receive\n");
         return -1;
     }

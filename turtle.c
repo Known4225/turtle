@@ -209,17 +209,19 @@ int main(int argc, char *argv[]) {
     // osToolsServerSocketCreate("Server1", OSTOOLS_PROTOCOL_TCP, "6000");
     // osToolsServerSocketListen("Server1", "Client1");
     // osToolsSocketSend("Client1", (uint8_t *) "Hello World\r\n", strlen("Hello World\r\n"));
-    // uint8_t *buffer = malloc(128);
+    // uint8_t *buffer = calloc(128, 1);
     // osToolsSocketReceive("Client1", buffer, 128, 10000);
+    // printf("Received: %s\n", buffer);
     // free(buffer);
     // osToolsSocketDestroy("Client1");
     /* Client testing */
-    osToolsClientSocketCreate("Client1", OSTOOLS_PROTOCOL_TCP, "127.0.0.1", "6000", 2000);
-    osToolsSocketSend("Client1", (uint8_t *) "Hello World\r\n", strlen("Hello World\r\n"));
-    uint8_t *buffer = malloc(128);
-    osToolsSocketReceive("Client1", buffer, 128, 10000);
-    free(buffer);
-    osToolsSocketDestroy("Client1");
+    // osToolsClientSocketCreate("Client1", OSTOOLS_PROTOCOL_TCP, "127.0.0.1", "6000", 2000);
+    // osToolsSocketSend("Client1", (uint8_t *) "Hello World\r\n", strlen("Hello World\r\n"));
+    // uint8_t *buffer = calloc(128, 1);
+    // osToolsSocketReceive("Client1", buffer, 128, 10000);
+    // printf("Received: %s\n", buffer);
+    // free(buffer);
+    // osToolsSocketDestroy("Client1");
 
     list_t *cameras = osToolsCameraList();
     printf("Cameras: ");
