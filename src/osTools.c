@@ -1345,6 +1345,7 @@ const GUID MFImageFormat_RGB32 = {0x00000016, 0x0000, 0x0010, {0x80, 0x00, 0x00,
 const GUID MFVideoFormat_RGB32 = {0x00000016, 0x0000, 0x0010, {0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71}};
 
 list_t *osToolsCameraList() {
+    list_clear(osToolsCamera.camera);
     list_t *output = list_init();
     HRESULT hr = CoInitializeEx(NULL, 0);
     if (FAILED(hr)) {
