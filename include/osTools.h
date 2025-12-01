@@ -192,7 +192,7 @@ int32_t osToolsSocketDestroy(char *socketName);
 
 /* Camera support */
 typedef struct {
-    list_t *camera; // Format Windows: camera name, width, height, framerate, pointer to source reader
+    list_t *camera; // Format Windows: camera name, width, height, framerate, pointer to source reader, pointer to IMFTransform decoder
 } ost_camera_t;
 
 extern ost_camera_t osToolsCamera;
@@ -209,6 +209,7 @@ int32_t osToolsCameraReceive(char *name, uint8_t *data);
 /* closes a camera */
 int32_t osToolsCameraClose(char *name);
 
+#define OS_WINDOWS
 #ifdef OS_WINDOWS
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
@@ -218,6 +219,7 @@ int32_t osToolsCameraClose(char *name);
 #include <mfidl.h>
 #include <mfapi.h>
 #include <mfreadwrite.h>
+#include <wmcodecdsp.h>
 #endif
 
 #ifdef OS_LINUX

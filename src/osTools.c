@@ -1327,22 +1327,23 @@ int32_t osToolsSocketDestroy(char *socketName) {
     return 0;
 }
 
-/* symbol IID_IMFMediaSource and MF_MT_FRAME_SIZE not linked despite their existence in mfapi.h and mfidl.h */
-const GUID IID_IMFMediaSource = {0x279a808d, 0xaec7, 0x40c8, {0x9c,0x6b, 0xa6, 0xb4, 0x92, 0xc7, 0x8a, 0x66}};
-const GUID MF_MT_FRAME_SIZE = {0x1652c33d, 0xd6b2, 0x4012, {0xb8, 0x34, 0x72, 0x03, 0x08, 0x49, 0xa3, 0x7d}};
-const GUID MF_MT_FRAME_RATE = {0xc459a2e8, 0x3d2c, 0x4e44, {0xb1, 0x32, 0xfe, 0xe5, 0x15, 0x6c, 0x7b, 0xb0}};
-const GUID MF_MT_MAJOR_TYPE = {0x48eba18e, 0xf8c9, 0x4687, {0xbf, 0x11, 0x0a, 0x74, 0xc9, 0xf9, 0x6a, 0x8f}};
-const GUID MF_MT_SUBTYPE = {0xf7e34c9a, 0x42e8, 0x4714, {0xb7, 0x4b, 0xcb, 0x29, 0xd7, 0x2c, 0x35, 0xe5}};
-const GUID MFMediaType_Video = {0x73646976, 0x0000, 0x0010, {0x80, 0x00, 0x00, 0xAA, 0x00, 0x38, 0x9B, 0x71}};
-const GUID MFVideoFormat_MJPG = {0x47504a4d, 0x0000, 0x0010, {0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71}}; // MJPG
-const GUID MFVideoFormat_NV12 = {0x3231564e, 0x0000, 0x0010, {0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71}}; // NV12
-const GUID MFVideoFormat_NV21 = {0x3132564e, 0x0000, 0x0010, {0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71}}; // NV21
-const GUID MFVideoFormat_YV12 = {0x32315659, 0x0000, 0x0010, {0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71}}; // YV12
-const GUID MFVideoFormat_H264 = {0x34363248, 0x0000, 0x0010, {0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71}}; // H264
-const GUID MFVideoFormat_RGB8 = {41 /* D3DFMT_P8 */, 0x0000, 0x0010, {0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71}}; // See D3D definitions
-const GUID MFVideoFormat_RGB24 = {20 /* D3DFMT_R8G8B8 */, 0x0000, 0x0010, {0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71}}; // See D3D definitions
-const GUID MFImageFormat_RGB32 = {0x00000016, 0x0000, 0x0010, {0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71}};
-const GUID MFVideoFormat_RGB32 = {0x00000016, 0x0000, 0x0010, {0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71}};
+/* symbol IID_IMFMediaSource and MF_MT_FRAME_SIZE not linked despite their existence in mfapi.h and mfidl.h. Found in mfuuid.lib */
+// const GUID IID_IMFMediaSource = {0x279a808d, 0xaec7, 0x40c8, {0x9c,0x6b, 0xa6, 0xb4, 0x92, 0xc7, 0x8a, 0x66}};
+// const GUID MF_MT_FRAME_SIZE = {0x1652c33d, 0xd6b2, 0x4012, {0xb8, 0x34, 0x72, 0x03, 0x08, 0x49, 0xa3, 0x7d}};
+// const GUID MF_MT_FRAME_RATE = {0xc459a2e8, 0x3d2c, 0x4e44, {0xb1, 0x32, 0xfe, 0xe5, 0x15, 0x6c, 0x7b, 0xb0}};
+// const GUID MF_MT_MAJOR_TYPE = {0x48eba18e, 0xf8c9, 0x4687, {0xbf, 0x11, 0x0a, 0x74, 0xc9, 0xf9, 0x6a, 0x8f}};
+// const GUID MF_MT_SUBTYPE = {0xf7e34c9a, 0x42e8, 0x4714, {0xb7, 0x4b, 0xcb, 0x29, 0xd7, 0x2c, 0x35, 0xe5}};
+// const GUID MFMediaType_Video = {0x73646976, 0x0000, 0x0010, {0x80, 0x00, 0x00, 0xAA, 0x00, 0x38, 0x9B, 0x71}};
+// const GUID MFVideoFormat_MJPG = {0x47504a4d, 0x0000, 0x0010, {0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71}}; // MJPG
+// const GUID MFVideoFormat_NV12 = {0x3231564e, 0x0000, 0x0010, {0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71}}; // NV12
+// const GUID MFVideoFormat_NV21 = {0x3132564e, 0x0000, 0x0010, {0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71}}; // NV21
+// const GUID MFVideoFormat_YV12 = {0x32315659, 0x0000, 0x0010, {0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71}}; // YV12
+// const GUID MFVideoFormat_H264 = {0x34363248, 0x0000, 0x0010, {0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71}}; // H264
+// const GUID MFVideoFormat_RGB8 = {41 /* D3DFMT_P8 */, 0x0000, 0x0010, {0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71}}; // See D3D definitions
+// const GUID MFVideoFormat_RGB24 = {20 /* D3DFMT_R8G8B8 */, 0x0000, 0x0010, {0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71}}; // See D3D definitions
+// const GUID MFImageFormat_RGB32 = {0x00000016, 0x0000, 0x0010, {0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71}};
+// const GUID MFVideoFormat_RGB32 = {0x00000016, 0x0000, 0x0010, {0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71}};
+const GUID CLSID_CMSH264DecoderMFT = {0x62CE7E72, 0x4C71, 0x4d20, {0xB1, 0x5D, 0x45, 0x28, 0x31, 0xA8, 0x7D, 0x9D}};
 
 list_t *osToolsCameraList() {
     list_clear(osToolsCamera.camera);
@@ -1434,6 +1435,7 @@ list_t *osToolsCameraList() {
             DWORD mediaTypeCount;
             mediaTypeHandler -> lpVtbl -> GetMediaTypeCount(mediaTypeHandler, &mediaTypeCount);
             printf("- Media Type Count: %ld\n", mediaTypeCount);
+            IMFTransform *h264decoder = NULL;
             for (int32_t j = 0; j < mediaTypeCount; j++) {
                 // printf("- Media Type %d\n", j);
                 IMFMediaType *mediaType;
@@ -1481,29 +1483,64 @@ list_t *osToolsCameraList() {
                     // printf("  - Height: %d\n", height);
                     // printf("  - Frames/s: %.02lf\n", (double) frameRateNum / frameRateDen);
                     double difference = (width - 1024) * (width - 1024) + (height - 1024) * (height - 1024);
-                    if (frameRateDen != 0 && (int32_t) (frameRateNum / frameRateDen) > maxFramerate) {
+                    if ((frameRateDen != 0 && (int32_t) (frameRateNum / frameRateDen) > maxFramerate) || (frameRateDen != 0 && (int32_t) (frameRateNum / frameRateDen) == maxFramerate && difference < minDifference)) {
                         minDifference = difference;
                         maxFramerate = frameRateNum / frameRateDen;
                         setWidth = width;
                         setHeight = height;
                         setFramerate = (double) frameRateNum / frameRateDen;
                         savedSubtype = subtype;
-                        hr = mediaTypeHandler -> lpVtbl -> SetCurrentMediaType(mediaTypeHandler, mediaType);
-                        if (FAILED(hr)) {
-                            printf("osToolsCameraList SetCurrentMediaType Error: 0x%lX\n", hr);
-                            goto osToolsCameraList_done;
-                        }
-                    } else if (frameRateDen != 0 && (int32_t) (frameRateNum / frameRateDen) == maxFramerate && difference < minDifference) {
-                        minDifference = difference;
-                        maxFramerate = frameRateNum / frameRateDen;
-                        setWidth = width;
-                        setHeight = height;
-                        setFramerate = (double) frameRateNum / frameRateDen;
-                        savedSubtype = subtype;
-                        hr = mediaTypeHandler -> lpVtbl -> SetCurrentMediaType(mediaTypeHandler, mediaType);
-                        if (FAILED(hr)) {
-                            printf("osToolsCameraList SetCurrentMediaType Error: 0x%lX\n", hr);
-                            goto osToolsCameraList_done;
+                        if (savedSubtype.Data1 == 0x34363248) {
+                            /* H264 decoder required */
+                            CoCreateInstance(&CLSID_CMSH264DecoderMFT, NULL, CLSCTX_ALL, &IID_IMFTransform, (void **) &h264decoder);
+                            DWORD numInputStreams;
+                            DWORD numOutputStreams;
+                            h264decoder -> lpVtbl -> GetStreamCount(h264decoder, &numInputStreams, &numOutputStreams);
+                            printf("numStreams: %ld %ld\n", numInputStreams, numOutputStreams);
+                            DWORD inputIDs[numInputStreams];
+                            DWORD outputIDs[numOutputStreams];
+                            h264decoder -> lpVtbl -> GetStreamIDs(h264decoder, numInputStreams, inputIDs, numOutputStreams, outputIDs);
+                            printf("StreamIDs: %ld %ld\n", inputIDs[0], outputIDs[0]);
+                            IMFMediaType *inputNativeType;
+                            MFCreateMediaType(&inputNativeType);
+                            inputNativeType -> lpVtbl -> SetGUID(inputNativeType, &MF_MT_MAJOR_TYPE, &MFMediaType_Video);
+                            if (FAILED(hr)) {
+                                printf("osToolsCameraList SetGUID Error: 0x%lX\n", hr);
+                                goto osToolsCameraList_done;
+                            }
+                            inputNativeType -> lpVtbl -> SetGUID(inputNativeType, &MF_MT_SUBTYPE, &subtype);
+                            if (FAILED(hr)) {
+                                printf("osToolsCameraList SetGUID Error: 0x%lX\n", hr);
+                                goto osToolsCameraList_done;
+                            }
+                            IMFMediaType *NV12MediaType;
+                            MFCreateMediaType(&NV12MediaType);
+                            hr = NV12MediaType -> lpVtbl -> SetGUID(NV12MediaType, &MF_MT_MAJOR_TYPE, &MFMediaType_Video);
+                            if (FAILED(hr)) {
+                                printf("osToolsCameraList SetGUID Error: 0x%lX\n", hr);
+                                goto osToolsCameraList_done;
+                            }
+                            hr = NV12MediaType -> lpVtbl -> SetGUID(NV12MediaType, &MF_MT_SUBTYPE, &MFVideoFormat_NV12);
+                            if (FAILED(hr)) {
+                                printf("osToolsCameraList SetGUID Error: 0x%lX\n", hr);
+                                goto osToolsCameraList_done;
+                            }
+                            hr = h264decoder -> lpVtbl -> SetInputType(h264decoder, inputIDs[0], inputNativeType, 0);
+                            if (FAILED(hr)) {
+                                printf("osToolsCameraList SetInputType Error: 0x%lX\n", hr);
+                                goto osToolsCameraList_done;
+                            }
+                            // hr = h264decoder -> lpVtbl -> SetOutputType(h264decoder, outputIDs[0], NV12MediaType, 0);
+                            // if (FAILED(hr)) {
+                            //     printf("osToolsCameraList SetOutputType Error: 0x%lX\n", hr);
+                            //     goto osToolsCameraList_done;
+                            // }
+                        } else {
+                            hr = mediaTypeHandler -> lpVtbl -> SetCurrentMediaType(mediaTypeHandler, mediaType);
+                            if (FAILED(hr)) {
+                                printf("osToolsCameraList SetCurrentMediaType Error: 0x%lX\n", hr);
+                                goto osToolsCameraList_done;
+                            }
                         }
                     }
                 } else {
@@ -1526,6 +1563,7 @@ list_t *osToolsCameraList() {
             list_append(osToolsCamera.camera, (unitype) setFramerate, 'd');
             list_append(osToolsCamera.camera, (unitype) (void *) pSource, 'l');
             list_append(osToolsCamera.camera, (unitype) (void *) NULL, 'l');
+            list_append(osToolsCamera.camera, (unitype) (void *) h264decoder, 'l');
         }
     }
 osToolsCameraList_done:
@@ -1548,7 +1586,7 @@ int32_t osToolsCameraOpen(char *name) {
     if (cameraIndex == -1) {
         return -1;
     }
-    IMFMediaSource *pSource = (IMFMediaSource *)osToolsCamera.camera -> data[cameraIndex + 4].p;
+    IMFMediaSource *pSource = (IMFMediaSource *) osToolsCamera.camera -> data[cameraIndex + 4].p;
     IMFAttributes *pAttributes;
     /* https://stackoverflow.com/questions/43507393/media-foundation-set-video-interlacing-and-decode */
     MFCreateAttributes(&pAttributes, 1);
@@ -1586,10 +1624,20 @@ int32_t osToolsCameraOpen(char *name) {
         printf("osToolsCameraOpen SetGUID Error: 0x%lX\n", hr);
         return -1;
     }
-    hr = readerType -> lpVtbl -> SetGUID(readerType, &MF_MT_SUBTYPE, &MFVideoFormat_RGB32);
-    if (FAILED(hr)) {
-        printf("osToolsCameraOpen SetGUID Error: 0x%lX\n", hr);
-        return -1;
+    if (osToolsCamera.camera -> data[cameraIndex + 6].p) {
+        /* H264 decoder exists */
+        hr = readerType -> lpVtbl -> SetGUID(readerType, &MF_MT_SUBTYPE, &MFVideoFormat_H264);
+        if (FAILED(hr)) {
+            printf("osToolsCameraOpen SetGUID Error: 0x%lX\n", hr);
+            return -1;
+        }
+    } else {
+        /* no decoder */
+        hr = readerType -> lpVtbl -> SetGUID(readerType, &MF_MT_SUBTYPE, &MFVideoFormat_RGB32);
+        if (FAILED(hr)) {
+            printf("osToolsCameraOpen SetGUID Error: 0x%lX\n", hr);
+            return -1;
+        }
     }
     hr = pReader -> lpVtbl -> SetCurrentMediaType(pReader, MF_SOURCE_READER_FIRST_VIDEO_STREAM, NULL, readerType);
     if (FAILED(hr)) {
@@ -1620,12 +1668,38 @@ int32_t osToolsCameraReceive(char *name, uint8_t *data) {
         /* this is reading in syncronous blocking mode, MF supports also async calls */
         hr = pReader -> lpVtbl -> ReadSample(pReader, MF_SOURCE_READER_FIRST_VIDEO_STREAM, 0, &stream, &flags, &timestamp, &pSample);
         if (FAILED(hr)) {
+            printf("osToolsCameraReceive ERROR: ReadSample failed with %lX\n", hr);
             return 0;
         }
         if (flags & MF_SOURCE_READERF_STREAMTICK) {
             continue;
         }
         break;
+    }
+
+    if (osToolsCamera.camera -> data[cameraIndex + 6].p) {
+        /* decode through transform */
+        IMFTransform *transform = (IMFTransform *) osToolsCamera.camera -> data[cameraIndex + 6].p;
+        hr = transform -> lpVtbl -> ProcessInput(transform, 0, pSample, 0);
+        if (FAILED(hr)) {
+            printf("osToolsCameraReceive ERROR: ProcessInput failed with 0x%lX\n", hr);
+            pSample -> lpVtbl -> Release(pSample);
+            return 0;
+        }
+        DWORD transformStatus = 0;
+        MFT_OUTPUT_DATA_BUFFER transformBuffer;
+        transformBuffer.dwStreamID = 0;
+        transformBuffer.pSample = NULL;
+        transformBuffer.dwStatus = 0;
+        transformBuffer.pEvents = NULL;
+        hr = transform -> lpVtbl -> ProcessOutput(transform, 0, 1, &transformBuffer, &transformStatus);
+        if (FAILED(hr) || transformBuffer.pSample == NULL) {
+            printf("osToolsCameraReceive ERROR: ProcessOutput failed with 0x%lX\n", hr);
+            pSample -> lpVtbl -> Release(pSample);
+            return 0;
+        }
+        pSample -> lpVtbl -> Release(pSample);
+        pSample = transformBuffer.pSample;
     }
 
     IMFMediaBuffer *pBuffer;
@@ -1662,6 +1736,7 @@ int32_t osToolsCameraClose(char *name) {
     IMFSourceReader *pReader = (IMFSourceReader *) osToolsCamera.camera -> data[cameraIndex + 5].p;
     if (pReader) {
         pReader -> lpVtbl -> Release(pReader);
+        osToolsCamera.camera -> data[cameraIndex + 5].p = NULL;
     }
     return 0;
 }
