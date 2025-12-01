@@ -1130,7 +1130,7 @@ int32_t osToolsServerSocketListen(char *serverName, char *clientName) {
     printf("Incoming connection from %s:%d\n", inet_ntoa(address.sin_addr), address.sin_port);
     list_append(osToolsSocket.socket, (unitype) clientName, 's');
     list_append(osToolsSocket.socket, (unitype) (void *) connection, 'l'); // socket
-    list_append(osToolsSocket.socket, (unitype) 0, 'i'); // server specifier
+    list_append(osToolsSocket.socket, (unitype) 1, 'i'); // client specifier
     list_append(osToolsSocket.socket, (unitype) 0, 'i'); // reserved
     list_append(osToolsSocket.socket, osToolsSocket.socket -> data[socketIndex + OSI_PROTOCOL], 'i'); // protocol
     list_append(osToolsSocket.socket, (unitype) ipAddress[0], 'i'); // address[0]
@@ -1246,7 +1246,7 @@ int32_t osToolsClientSocketCreate(char *clientName, osToolsSocketProtocol_t prot
     printf("Connected to %s:%s\n", serverAddress, serverPort);
     list_append(osToolsSocket.socket, (unitype) clientName, 's');
     list_append(osToolsSocket.socket, (unitype) (void *) winsocket, 'l'); // socket
-    list_append(osToolsSocket.socket, (unitype) 0, 'i'); // server specifier
+    list_append(osToolsSocket.socket, (unitype) 1, 'i'); // client specifier
     list_append(osToolsSocket.socket, (unitype) 0, 'i'); // reserved
     list_append(osToolsSocket.socket, (unitype) protocol, 'i'); // protocol
     list_append(osToolsSocket.socket, (unitype) ipAddress[0], 'i'); // address[0]
@@ -1304,7 +1304,7 @@ int32_t osToolsSocketReceive(char *socketName, uint8_t *data, int32_t length, in
         printf("osToolsSocketReceive ERROR: Failed to receive\n");
         return -1;
     }
-    return 0;
+    return status;
 }
 
 int32_t osToolsSocketDestroy(char *socketName) {
@@ -1323,6 +1323,7 @@ int32_t osToolsSocketDestroy(char *socketName) {
         printf("osToolsSocketDestroy WARN: Shutdown not successful\n");
     }
     closesocket((SOCKET) osToolsSocket.socket -> data[socketIndex + OSI_SOCKET].p);
+    list_delete_range(osToolsSocket.socket, socketIndex, socketIndex + OSI_NUMBER_OF_FIELDS);
     return 0;
 }
 

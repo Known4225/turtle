@@ -8,8 +8,8 @@ reltextures: lib
 	gcc turtle.c -L./Linux -lturtletextures -lglfw3 -ldl -lm -lX11 -lglad -lGL -lGLU -lpthread -DOS_LINUX -O3 -o turtle.o
 lib: singlefile
 	cp turtle.h turtlelib.c
-	gcc turtlelib.c -c -L./Linux -DTURTLE_IMPLEMENTATION -DOS_LINUX -DSTBIR__HEADER_FILENAME="\"include/stb_image_resize2.h\"" -O3 -o Linux/libturtle.a
-	gcc turtlelib.c -c -L./Linux -DTURTLE_IMPLEMENTATION -DTURTLE_ENABLE_TEXTURES -DOS_LINUX -DSTBIR__HEADER_FILENAME="\"include/stb_image_resize2.h\"" -O3 -o Linux/libturtletextures.a
+	gcc turtlelib.c -c -DTURTLE_IMPLEMENTATION -DOS_LINUX -DSTBIR__HEADER_FILENAME="\"include/stb_image_resize2.h\"" -O3 -o Linux/libturtle.a
+	gcc turtlelib.c -c -DTURTLE_IMPLEMENTATION -DTURTLE_ENABLE_TEXTURES -DOS_LINUX -DSTBIR__HEADER_FILENAME="\"include/stb_image_resize2.h\"" -O3 -o Linux/libturtletextures.a
 	rm turtlelib.c
 source:
 	gcc turtle.c src/*.c -L./Linux -lglfw3 -ldl -lm -lX11 -lglad -lGL -lGLU -lpthread -DOS_LINUX -DDEBUGGING_FLAG -Wall -o turtle.o

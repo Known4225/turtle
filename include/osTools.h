@@ -156,6 +156,7 @@ typedef enum {
     OSI_PROTOCOL = 4,
     OSI_ADDRESS = 5,
     OSI_PORT = 21,
+    OSI_NUMBER_OF_FIELDS = 32,
 } os_socket_index_t;
 
 typedef struct {
