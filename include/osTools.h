@@ -192,7 +192,7 @@ int32_t osToolsSocketDestroy(char *socketName);
 
 /* Camera support */
 typedef struct {
-    list_t *camera; // Format Windows: camera name, width, height, framerate, pointer to source reader, pointer to IMFTransform decoder
+    list_t *camera; // Format Windows: camera name, width, height, framerate, pointer to source reader, pointer to IMFTransform decoder, pointer to buffer, pointer to IMFTransform decoder, pointer to buffer
 } ost_camera_t;
 
 extern ost_camera_t osToolsCamera;
