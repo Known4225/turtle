@@ -3,6 +3,10 @@
 - Fix delay on H264 decoder
 - Fix green bar on bottom of image from H264 camera (and redshift)
 - Fix upside down image (height-wise) on H264 image
+
+https://community.nxp.com/t5/i-MX-Processors/1080p-h264-encoding-error/m-p/931107
+
+Perhaps because the camera has 800x600 resolution and 600 is not divisible by 16 is why this issue is caused.
 */
 
 
