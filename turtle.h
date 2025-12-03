@@ -34172,7 +34172,7 @@ Under the hood, the pointer to the struct is also a pointer to an array of funct
 The struct is therefore the size of the number of elements of the lbVtbl array * 8 plus the data in the struct which succeeds it
 
 Whenever we call one of these methods, we have to pass in the object (which implicitly happens in OOP languages)
-Actually, we pass in a pointer to the object, obviously i'm quite familiar with this
+Actually, we pass in a pointer to the object
 
 One more nuance is that whenever we pass a COM object in a function as an argument, it must always be &object
 This is because in order to call methods we use object -> lpVtbl -> method, I mean we could use object.lpVtbl -> method but it's easier and allocates less stack memory to just use pointers
