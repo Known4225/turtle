@@ -1881,187 +1881,6 @@ int32_t osToolsCameraClose(char *name) {
     return 0;
 }
 
-// int32_t win32tcpInit(char *address, char *port) {
-//     for (int32_t i = 0; i < WIN32TCP_NUM_SOCKETS; i++) {
-//         win32socket.connectSocket[i] = 0;
-//         win32socket.socketOpen[i] = 0;
-//     }
-//     win32socket.address = address;
-//     win32socket.port = port;
-//     char modifiable[strlen(address) + 1];
-//     strcpy(modifiable, address);
-//     char *check = strtok(modifiable, ".");
-//     int32_t segments = 0;
-//     uint8_t ipAddress[4] = {0};
-//     while (check != NULL) {
-//         if (segments > 3) {
-//             printf("Could not initialise win32tcp - invalid ip address\n");
-//             return 1;
-//         }
-//         int32_t segmentValue = atoi(check);
-//         if (segmentValue > 255 || segmentValue < 0) {
-//             printf("Could not initialise win32tcp - invalid ip address\n");
-//             return 1;
-//         }
-//         ipAddress[segments] = segmentValue;
-//         check = strtok(NULL, ".");
-//         segments++;
-//     }
-//     if (segments != 4) {
-//         printf("Could not initialise win32tcp - invalid ip address\n");
-//         return 1;
-//     }
-//     /* Initialize Winsock */
-//     WSADATA wsaData;
-//     int32_t status;
-//     status = WSAStartup(MAKEWORD(2,2), &wsaData);
-//     if (status != 0) {
-//         return 1;
-//     }
-    
-//     /* hints */
-//     struct addrinfo hints;
-//     struct addrinfo *result;
-//     struct addrinfo *ptr;
-//     ZeroMemory(&hints, sizeof(hints));
-//     hints.ai_family = AF_INET; // IPv4
-//     hints.ai_socktype = SOCK_STREAM;
-//     hints.ai_protocol = IPPROTO_TCP;
-
-//     /* Resolve the server address and port */
-//     status = getaddrinfo(address, port, &hints, &result);
-//     if (status != 0) {
-//         WSACleanup();
-//         return 1;
-//     }
-
-//     /* Attempt to connect to an address until one succeeds */
-//     for (ptr = result; ptr != NULL; ptr = ptr -> ai_next) {
-//         /* Create a SOCKET for connecting to server */
-//         win32socket.connectSocket[0] = socket(ptr -> ai_family, ptr -> ai_socktype, ptr -> ai_protocol);
-//         if (win32socket.connectSocket[0] == INVALID_SOCKET) {
-//             WSACleanup();
-//             return 1;
-//         }
-
-//         /* Connect to server */
-//         status = connect(win32socket.connectSocket[0], ptr -> ai_addr, (int) ptr -> ai_addrlen);
-//         if (status == SOCKET_ERROR) {
-//             closesocket(win32socket.connectSocket[0]);
-//             win32socket.connectSocket[0] = INVALID_SOCKET;
-//             continue;
-//         }
-//         break;
-//     }
-
-//     /* shutdown the connection since no more data will be sent */
-//     status = shutdown(win32socket.connectSocket[0], SD_SEND);
-//     if (status == SOCKET_ERROR) {
-//         closesocket(win32socket.connectSocket[0]);
-//         WSACleanup();
-//         return 1;
-//     }
-
-//     /* Receive until the peer closes the connection */
-//     int32_t recvbuflen = 512;
-//     char recvbuf[recvbuflen];
-//     status = 1;
-//     while (status > 0) {
-//         status = recv(win32socket.connectSocket[0], recvbuf, recvbuflen, 0);
-//         if (status > 0) {
-//             // printf("Bytes received: %d\n", status);
-//         } else if (status == 0) {
-//             // printf("Connection closed\n");
-//         } else {
-//             // printf("recv failed with error: %d\n", WSAGetLastError());
-//         }
-//     }
-
-//     /* cleanup */
-//     closesocket(win32socket.connectSocket[0]);
-//     printf("Successfully connected to %d.%d.%d.%d\n", ipAddress[0], ipAddress[1], ipAddress[2], ipAddress[3]);
-//     return 0;
-// }
-
-// SOCKET *win32tcpCreateSocket(int32_t timeoutMilliseconds) {
-//     /* define socket index */
-//     int32_t socketIndex = 0;
-//     for (int32_t i = 0; i < WIN32TCP_NUM_SOCKETS; i++) {
-//         if (win32socket.socketOpen[i] == 0) {
-//             win32socket.socketOpen[i] = 1;
-//             socketIndex = i;
-//             break;
-//         }
-//     }
-//     if (socketIndex == WIN32TCP_NUM_SOCKETS) {
-//         /* no sockets left */
-//         return NULL;
-//     }
-//     /* hints */
-//     struct addrinfo hints;
-//     struct addrinfo *result;
-//     struct addrinfo *ptr;
-//     ZeroMemory(&hints, sizeof(hints));
-//     hints.ai_family = AF_INET; // IPv4
-//     hints.ai_socktype = SOCK_STREAM;
-//     hints.ai_protocol = IPPROTO_TCP;
-
-//     /* Resolve the server address and port */
-//     int32_t status = getaddrinfo(win32socket.address, win32socket.port, &hints, &result);
-//     if (status != 0) {
-//         WSACleanup();
-//         return NULL;
-//     }
-
-//     /* Attempt to connect to an address until one succeeds */
-//     for (ptr = result; ptr != NULL; ptr = ptr -> ai_next) {
-//         /* Create a SOCKET for connecting to server */
-//         win32socket.connectSocket[socketIndex] = socket(ptr -> ai_family, ptr -> ai_socktype, ptr -> ai_protocol);
-//         if (win32socket.connectSocket[socketIndex] == INVALID_SOCKET) {
-//             WSACleanup();
-//             return NULL;
-//         }
-//         /* Connect to server */
-//         setsockopt(win32socket.connectSocket[socketIndex], SOL_SOCKET, SO_RCVTIMEO, (const char *) &timeoutMilliseconds, sizeof(timeoutMilliseconds));
-//         status = connect(win32socket.connectSocket[socketIndex], ptr -> ai_addr, (int) ptr -> ai_addrlen);
-//         if (status == SOCKET_ERROR) {
-//             closesocket(win32socket.connectSocket[socketIndex]);
-//             win32socket.connectSocket[socketIndex] = INVALID_SOCKET;
-//             continue;
-//         }
-//         break;
-//     }
-//     // uint32_t mode;
-//     // printf("ioctlsocket %d\n", ioctlsocket(win32socket.connectSocket[socketIndex], FIONBIO, &mode));
-//     return &win32socket.connectSocket[socketIndex];
-// }
-
-// int32_t win32tcpSend(SOCKET *socket, uint8_t *data, int32_t length) {
-//     int32_t status = send(*socket, (const char *) data, length, 0 );
-//     if (status == SOCKET_ERROR) {
-//         closesocket(*socket);
-//         return 1;
-//     }
-//     return 0;
-// }
-
-// int32_t win32tcpReceive(SOCKET *socket, uint8_t *buffer, int32_t length) {
-//     int32_t status = 1;
-//     status = recv(*socket, (char *) buffer, length, 0);
-//     if (status > 0) {
-//         // printf("Bytes received: %d\n", status);
-//     } else if (status == 0) {
-//         // printf("Connection closed\n");
-//     } else {
-//         // printf("recv failed with error: %d\n", WSAGetLastError());
-//     }
-//     return status;
-// }
-
-// void win32tcpDeinit() {
-//     WSACleanup();
-// }
-
 #endif
 #ifdef OS_LINUX
 
@@ -2313,10 +2132,45 @@ int32_t osToolsComClose(char *name) {
 }
 
 int32_t osToolsGetIP(char *address, uint8_t *buffer, int32_t maxSegments) {
-    return 0;
+    char modifiable[strlen(address) + 1];
+    strcpy(modifiable, address);
+    char *check = strtok(modifiable, ".");
+    int32_t segments = 0;
+    while (check != NULL) {
+        if (segments > maxSegments - 1) {
+            printf("osToolsGetIP ERROR: invalid ip address\n");
+            return -1;
+        }
+        int32_t segmentValue = atoi(check);
+        if (segmentValue > 255 || segmentValue < 0) {
+            printf("osToolsGetIP ERROR: invalid ip address\n");
+            return -1;
+        }
+        buffer[segments] = segmentValue;
+        check = strtok(NULL, ".");
+        segments++;
+    }
+    return segments;
 }
 
 int32_t osToolsGetSocketAddress(char *socketName, char *address, int32_t length) {
+    if (!socketName) {
+        printf("osToolsGetSocketAddress ERROR: socketName is NULL\n");
+        return -1;
+    }
+    if (!address) {
+        printf("osToolsGetSocketAddress ERROR: address is NULL\n");
+        return -1;
+    }
+    int32_t socketIndex = list_find(osToolsSocket.socket, (unitype) socketName, 's');
+    if (socketIndex == -1) {
+        printf("osToolsServerSocketListen ERROR: Could not find socket %s\n", socketName);
+        return -1;
+    }
+    /* only IPv4 */
+    char addressA[32];
+    sprintf(addressA, "%hhu.%hhu.%hhu.%hhu", osToolsSocket.socket -> data[socketIndex + OSI_ADDRESS].i, osToolsSocket.socket -> data[socketIndex + OSI_ADDRESS + 1].i, osToolsSocket.socket -> data[socketIndex + OSI_ADDRESS + 2].i, osToolsSocket.socket -> data[socketIndex + OSI_ADDRESS + 3].i);
+    strcpy_s(address, length, addressA);
     return 0;
 }
 
