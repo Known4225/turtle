@@ -20105,7 +20105,6 @@ int32_t osToolsCameraReceive(char *name, uint8_t *data);
 /* closes a camera */
 int32_t osToolsCameraClose(char *name);
 
-#define OS_WINDOWS
 #ifdef OS_WINDOWS
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
