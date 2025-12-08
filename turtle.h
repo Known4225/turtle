@@ -20056,7 +20056,7 @@ typedef enum {
 } os_socket_index_t;
 
 typedef struct {
-    list_t *socket; // Format Windows: name, SOCKET, client/server, reserved, protocol, address[0], address[1], address[2], address[4], reserved * 12, port (int), reserved * 10
+    list_t *socket; // Format: name, SOCKET (Windows) sockfd (Linux), client/server, reserved, protocol, address[0], address[1], address[2], address[4], reserved * 12, port (int), reserved * 10
     int8_t win32wsaActive;
 } ost_socket_t;
 
@@ -20088,7 +20088,7 @@ int32_t osToolsSocketDestroy(char *socketName);
 
 /* Camera support */
 typedef struct {
-    list_t *camera; // Format Windows: camera name, width, height, framerate, pointer to source reader
+    list_t *camera; // Format Windows: camera name, width, height, framerate, pointer to source reader, pointer to IMFTransform decoder, pointer to buffer, pointer to IMFTransform decoder, pointer to buffer
 } ost_camera_t;
 
 extern ost_camera_t osToolsCamera;
@@ -20114,6 +20114,7 @@ int32_t osToolsCameraClose(char *name);
 #include <mfidl.h>
 #include <mfapi.h>
 #include <mfreadwrite.h>
+#include <wmcodecdsp.h>
 #endif
 
 #ifdef OS_LINUX
@@ -20121,6 +20122,13 @@ int32_t osToolsCameraClose(char *name);
 #include <sys/stat.h>
 #include <sys/mman.h>
 #include <dirent.h>
+#include <errno.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netdb.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <arpa/inet.h>
 #endif
 
 /* initialise osTools, pass in argv[0] from main function as well as GLFW window object */
@@ -30165,9 +30173,9 @@ turtle_texture_t turtleTextureLoadListArrayInternal(list_t *list, uint8_t *array
     turtle_texture_t texture = -1;
     char pointerValue[20];
     if (freeArrayFlag) {
-        sprintf(pointerValue, "0x%X", list);
+        sprintf(pointerValue, "0x%lX", (int64_t) list);
     } else {
-        sprintf(pointerValue, "0x%X", array);
+        sprintf(pointerValue, "0x%lX", (int64_t) array);
     }
     for (int32_t i = 4; i < turtle.textureList -> length; i += 4) {
         if (strcmp(turtle.textureList -> data[i].s, "") == 0) {
@@ -34137,6 +34145,18 @@ void turtleToolsUpdateRibbonPopup() {
 
 #endif /* TURTLE_TOOLS_IMPLEMENTATION */
 #ifdef OS_TOOLS_IMPLEMENTATION
+/* TEMP TODO
+- Figure out why readyFlag never says ready
+- Fix delay on H264 decoder
+- Fix green bar on bottom of image from H264 camera (and redshift)
+- Fix upside down image (height-wise) on H264 image
+
+https://community.nxp.com/t5/i-MX-Processors/1080p-h264-encoding-error/m-p/931107
+
+Perhaps because the camera has 800x600 resolution and 600 is not divisible by 16 is why this issue is caused.
+*/
+
+
 /*
  ██████╗ ███████╗████████╗ ██████╗  ██████╗ ██╗     ███████╗    ██████╗
 ██╔═══██╗██╔════╝╚══██╔══╝██╔═══██╗██╔═══██╗██║     ██╔════╝   ██╔════╝
@@ -34159,7 +34179,7 @@ Under the hood, the pointer to the struct is also a pointer to an array of funct
 The struct is therefore the size of the number of elements of the lbVtbl array * 8 plus the data in the struct which succeeds it
 
 Whenever we call one of these methods, we have to pass in the object (which implicitly happens in OOP languages)
-Actually, we pass in a pointer to the object, obviously i'm quite familiar with this
+Actually, we pass in a pointer to the object
 
 One more nuance is that whenever we pass a COM object in a function as an argument, it must always be &object
 This is because in order to call methods we use object -> lpVtbl -> method, I mean we could use object.lpVtbl -> method but it's easier and allocates less stack memory to just use pointers
@@ -35084,13 +35104,14 @@ int32_t osToolsGetSocketAddress(char *socketName, char *address, int32_t length)
     }
     int32_t socketIndex = list_find(osToolsSocket.socket, (unitype) socketName, 's');
     if (socketIndex == -1) {
-        printf("osToolsServerSocketListen ERROR: Could not find socket %s\n", socketName);
+        printf("osToolsGetSocketAddress ERROR: Could not find socket %s\n", socketName);
         return -1;
     }
     /* only IPv4 */
     char addressA[32];
     sprintf(addressA, "%hhu.%hhu.%hhu.%hhu", osToolsSocket.socket -> data[socketIndex + OSI_ADDRESS].i, osToolsSocket.socket -> data[socketIndex + OSI_ADDRESS + 1].i, osToolsSocket.socket -> data[socketIndex + OSI_ADDRESS + 2].i, osToolsSocket.socket -> data[socketIndex + OSI_ADDRESS + 3].i);
-    strcpy_s(address, length, addressA);
+    strncpy(address, addressA, length);
+    address[length - 1] = '\0';
     return 0;
 }
 
@@ -35105,12 +35126,13 @@ int32_t osToolsGetPort(char *socketName, char *port, int32_t length) {
     }
     int32_t socketIndex = list_find(osToolsSocket.socket, (unitype) socketName, 's');
     if (socketIndex == -1) {
-        printf("osToolsServerSocketListen ERROR: Could not find socket %s\n", socketName);
+        printf("osToolsGetPort ERROR: Could not find socket %s\n", socketName);
         return -1;
     }
     char portA[8];
     sprintf(portA, "%d", osToolsSocket.socket -> data[socketIndex + OSI_PORT].i);
-    strcpy_s(port, length, portA);
+    strncpy(port, portA, length);
+    port[length - 1] = '\0';
     return 0;
 }
 
@@ -35206,7 +35228,7 @@ int32_t osToolsServerSocketCreate(char *serverName, osToolsSocketProtocol_t prot
     status = bind(winsocket, result -> ai_addr, result -> ai_addrlen);
     if (status == SOCKET_ERROR) {
         freeaddrinfo(result);
-        printf("osToolsServerSocketListen ERROR: Could not bind socket %s to address %s\n", serverName, serverAddress);
+        printf("osToolsServerSocketCreate ERROR: Could not bind socket %s to address %s\n", serverName, serverAddress);
         return -1;
     }
     freeaddrinfo(result);
@@ -35255,7 +35277,7 @@ int32_t osToolsServerSocketListen(char *serverName, char *clientName) {
         return -1;
     }
     struct sockaddr_in address;
-    int32_t addressLen = sizeof(address);
+    uint32_t addressLen = sizeof(address);
     SOCKET connection = accept(winsocket, (struct sockaddr *) &address, &addressLen);
     if (connection == INVALID_SOCKET) {
         printf("osToolsServerSocketListen ERROR: Accept failed\n");
@@ -35465,22 +35487,25 @@ int32_t osToolsSocketDestroy(char *socketName) {
     return 0;
 }
 
-/* symbol IID_IMFMediaSource and MF_MT_FRAME_SIZE not linked despite their existence in mfapi.h and mfidl.h */
-const GUID IID_IMFMediaSource = {0x279a808d, 0xaec7, 0x40c8, {0x9c,0x6b, 0xa6, 0xb4, 0x92, 0xc7, 0x8a, 0x66}};
-const GUID MF_MT_FRAME_SIZE = {0x1652c33d, 0xd6b2, 0x4012, {0xb8, 0x34, 0x72, 0x03, 0x08, 0x49, 0xa3, 0x7d}};
-const GUID MF_MT_FRAME_RATE = {0xc459a2e8, 0x3d2c, 0x4e44, {0xb1, 0x32, 0xfe, 0xe5, 0x15, 0x6c, 0x7b, 0xb0}};
-const GUID MF_MT_MAJOR_TYPE = {0x48eba18e, 0xf8c9, 0x4687, {0xbf, 0x11, 0x0a, 0x74, 0xc9, 0xf9, 0x6a, 0x8f}};
-const GUID MF_MT_SUBTYPE = {0xf7e34c9a, 0x42e8, 0x4714, {0xb7, 0x4b, 0xcb, 0x29, 0xd7, 0x2c, 0x35, 0xe5}};
-const GUID MFMediaType_Video = {0x73646976, 0x0000, 0x0010, {0x80, 0x00, 0x00, 0xAA, 0x00, 0x38, 0x9B, 0x71}};
-const GUID MFVideoFormat_MJPG = {0x47504a4d, 0x0000, 0x0010, {0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71}}; // MJPG
-const GUID MFVideoFormat_NV12 = {0x3231564e, 0x0000, 0x0010, {0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71}}; // NV12
-const GUID MFVideoFormat_NV21 = {0x3132564e, 0x0000, 0x0010, {0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71}}; // NV21
-const GUID MFVideoFormat_YV12 = {0x32315659, 0x0000, 0x0010, {0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71}}; // YV12
-const GUID MFVideoFormat_H264 = {0x34363248, 0x0000, 0x0010, {0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71}}; // H264
-const GUID MFVideoFormat_RGB8 = {41 /* D3DFMT_P8 */, 0x0000, 0x0010, {0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71}}; // See D3D definitions
-const GUID MFVideoFormat_RGB24 = {20 /* D3DFMT_R8G8B8 */, 0x0000, 0x0010, {0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71}}; // See D3D definitions
-const GUID MFImageFormat_RGB32 = {0x00000016, 0x0000, 0x0010, {0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71}};
-const GUID MFVideoFormat_RGB32 = {0x00000016, 0x0000, 0x0010, {0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71}};
+/* symbol IID_IMFMediaSource and MF_MT_FRAME_SIZE not linked despite their existence in mfapi.h and mfidl.h. Found in mfuuid.lib */
+// const GUID IID_IMFMediaSource = {0x279a808d, 0xaec7, 0x40c8, {0x9c,0x6b, 0xa6, 0xb4, 0x92, 0xc7, 0x8a, 0x66}};
+// const GUID MF_MT_FRAME_SIZE = {0x1652c33d, 0xd6b2, 0x4012, {0xb8, 0x34, 0x72, 0x03, 0x08, 0x49, 0xa3, 0x7d}};
+// const GUID MF_MT_FRAME_RATE = {0xc459a2e8, 0x3d2c, 0x4e44, {0xb1, 0x32, 0xfe, 0xe5, 0x15, 0x6c, 0x7b, 0xb0}};
+// const GUID MF_MT_MAJOR_TYPE = {0x48eba18e, 0xf8c9, 0x4687, {0xbf, 0x11, 0x0a, 0x74, 0xc9, 0xf9, 0x6a, 0x8f}};
+// const GUID MF_MT_SUBTYPE = {0xf7e34c9a, 0x42e8, 0x4714, {0xb7, 0x4b, 0xcb, 0x29, 0xd7, 0x2c, 0x35, 0xe5}};
+// const GUID MFMediaType_Video = {0x73646976, 0x0000, 0x0010, {0x80, 0x00, 0x00, 0xAA, 0x00, 0x38, 0x9B, 0x71}};
+// const GUID MFVideoFormat_MJPG = {0x47504a4d, 0x0000, 0x0010, {0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71}}; // MJPG
+// const GUID MFVideoFormat_NV12 = {0x3231564e, 0x0000, 0x0010, {0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71}}; // NV12
+// const GUID MFVideoFormat_NV21 = {0x3132564e, 0x0000, 0x0010, {0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71}}; // NV21
+// const GUID MFVideoFormat_YV12 = {0x32315659, 0x0000, 0x0010, {0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71}}; // YV12
+// const GUID MFVideoFormat_H264 = {0x34363248, 0x0000, 0x0010, {0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71}}; // H264
+// const GUID MFVideoFormat_RGB8 = {41 /* D3DFMT_P8 */, 0x0000, 0x0010, {0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71}}; // See D3D definitions
+// const GUID MFVideoFormat_RGB24 = {20 /* D3DFMT_R8G8B8 */, 0x0000, 0x0010, {0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71}}; // See D3D definitions
+// const GUID MFImageFormat_RGB32 = {0x00000016, 0x0000, 0x0010, {0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71}};
+// const GUID MFVideoFormat_RGB32 = {0x00000016, 0x0000, 0x0010, {0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71}};
+const GUID CLSID_CMSH264DecoderMFT = {0x62CE7E72, 0x4C71, 0x4d20, {0xB1, 0x5D, 0x45, 0x28, 0x31, 0xA8, 0x7D, 0x9D}};
+const GUID CLSID_CWMADecMediaObject = {0x2eeb4adf, 0x4578, 0x4d10, {0xbc, 0xa7, 0xbb, 0x95, 0x5f, 0x56, 0x32, 0x0a}};
+const GUID CLSID_CWMAEncMediaObject = {0x70f598e9, 0xf4ab, 0x495a, {0x99, 0xe2, 0xa7, 0xc4, 0xd3, 0xd8, 0x9a, 0xbf}};
 
 list_t *osToolsCameraList() {
     list_clear(osToolsCamera.camera);
@@ -35572,6 +35597,8 @@ list_t *osToolsCameraList() {
             DWORD mediaTypeCount;
             mediaTypeHandler -> lpVtbl -> GetMediaTypeCount(mediaTypeHandler, &mediaTypeCount);
             printf("- Media Type Count: %ld\n", mediaTypeCount);
+            IMFTransform *h264decoder = NULL;
+            IMFTransform *nv12decoder = NULL;
             for (int32_t j = 0; j < mediaTypeCount; j++) {
                 // printf("- Media Type %d\n", j);
                 IMFMediaType *mediaType;
@@ -35619,29 +35646,93 @@ list_t *osToolsCameraList() {
                     // printf("  - Height: %d\n", height);
                     // printf("  - Frames/s: %.02lf\n", (double) frameRateNum / frameRateDen);
                     double difference = (width - 1024) * (width - 1024) + (height - 1024) * (height - 1024);
-                    if (frameRateDen != 0 && (int32_t) (frameRateNum / frameRateDen) > maxFramerate) {
+                    if ((frameRateDen != 0 && (int32_t) (frameRateNum / frameRateDen) > maxFramerate) || (frameRateDen != 0 && (int32_t) (frameRateNum / frameRateDen) == maxFramerate && difference < minDifference)) {
                         minDifference = difference;
                         maxFramerate = frameRateNum / frameRateDen;
                         setWidth = width;
                         setHeight = height;
                         setFramerate = (double) frameRateNum / frameRateDen;
                         savedSubtype = subtype;
-                        hr = mediaTypeHandler -> lpVtbl -> SetCurrentMediaType(mediaTypeHandler, mediaType);
-                        if (FAILED(hr)) {
-                            printf("osToolsCameraList SetCurrentMediaType Error: 0x%lX\n", hr);
-                            goto osToolsCameraList_done;
-                        }
-                    } else if (frameRateDen != 0 && (int32_t) (frameRateNum / frameRateDen) == maxFramerate && difference < minDifference) {
-                        minDifference = difference;
-                        maxFramerate = frameRateNum / frameRateDen;
-                        setWidth = width;
-                        setHeight = height;
-                        setFramerate = (double) frameRateNum / frameRateDen;
-                        savedSubtype = subtype;
-                        hr = mediaTypeHandler -> lpVtbl -> SetCurrentMediaType(mediaTypeHandler, mediaType);
-                        if (FAILED(hr)) {
-                            printf("osToolsCameraList SetCurrentMediaType Error: 0x%lX\n", hr);
-                            goto osToolsCameraList_done;
+                        if (savedSubtype.Data1 == 0x34363248) {
+                            /* H264 decoder required */
+                            hr = CoCreateInstance(&CLSID_CMSH264DecoderMFT, NULL, CLSCTX_ALL, &IID_IMFTransform, (void **) &h264decoder);
+                            if (FAILED(hr)) {
+                                printf("osToolsCameraList ERROR: CoCreateInstance failed on H264 decoder 0x%lX\n", hr);
+                                goto osToolsCameraList_done;
+                            }
+                            DWORD numInputStreams;
+                            DWORD numOutputStreams;
+                            h264decoder -> lpVtbl -> GetStreamCount(h264decoder, &numInputStreams, &numOutputStreams);
+                            if (numInputStreams < 1 || numOutputStreams < 1) {
+                                printf("osToolsCameraList ERROR: Not enough streams on H264 decoder\n");
+                                goto osToolsCameraList_done;
+                            }
+                            IMFMediaType *inputNativeType;
+                            MFCreateMediaType(&inputNativeType);
+                            mediaType -> lpVtbl -> CopyAllItems(mediaType, (IMFAttributes *) inputNativeType);
+                            inputNativeType -> lpVtbl -> SetUINT32(inputNativeType, &MF_MT_INTERLACE_MODE, MFVideoInterlace_MixedInterlaceOrProgressive);
+                            IMFMediaType *NV12MediaType;
+                            MFCreateMediaType(&NV12MediaType);
+                            inputNativeType -> lpVtbl -> CopyAllItems(inputNativeType, (IMFAttributes *) NV12MediaType);
+                            hr = NV12MediaType -> lpVtbl -> SetGUID(NV12MediaType, &MF_MT_SUBTYPE, &MFVideoFormat_NV12);
+                            if (FAILED(hr)) {
+                                printf("osToolsCameraList SetGUID Error: 0x%lX\n", hr);
+                                goto osToolsCameraList_done;
+                            }
+                            hr = h264decoder -> lpVtbl -> SetInputType(h264decoder, 0, inputNativeType, 0);
+                            if (FAILED(hr)) {
+                                printf("osToolsCameraList H264 SetInputType Error: 0x%lX\n", hr);
+                                goto osToolsCameraList_done;
+                            }
+                            hr = h264decoder -> lpVtbl -> SetOutputType(h264decoder, 0, NV12MediaType, 0);
+                            if (FAILED(hr)) {
+                                printf("osToolsCameraList H264 SetOutputType Error: 0x%lX\n", hr);
+                                goto osToolsCameraList_done;
+                            }
+                            /* NV12 to RGB32 decoder - https://learn.microsoft.com/en-us/windows/win32/medfound/registering-and-enumerating-mfts#enumerating-mfts */
+                            IMFActivate **ppActivate = NULL;
+                            MFT_REGISTER_TYPE_INFO inputInfo = {MFMediaType_Video, MFVideoFormat_NV12};
+                            MFT_REGISTER_TYPE_INFO outputInfo = {MFMediaType_Video, MFVideoFormat_RGB32};
+                            uint32_t unFlags = MFT_ENUM_FLAG_SYNCMFT  | MFT_ENUM_FLAG_LOCALMFT | MFT_ENUM_FLAG_SORTANDFILTER;
+                            uint32_t codecs = 0;
+                            hr = MFTEnumEx(MFT_CATEGORY_VIDEO_PROCESSOR, unFlags, &inputInfo, &outputInfo, &ppActivate, &codecs); // it's a video processor not an encoder/decoder
+                            if (FAILED(hr)) {
+                                printf("osToolsCameraList ERROR: MFTEnumEx failed with 0x%lX\n", hr);
+                                goto osToolsCameraList_done;
+                            }
+                            if (SUCCEEDED(hr) && codecs == 0) {
+                                printf("osToolsCameraList ERROR: No codecs for NV12 to RGB32\n");
+                                goto osToolsCameraList_done;
+                            }
+                            hr = ppActivate[0] -> lpVtbl -> ActivateObject(ppActivate[0], &IID_IMFTransform, (void **) &nv12decoder);
+                            for (int32_t i = 0; i < codecs; i++) {
+                                ppActivate[i] -> lpVtbl -> Release(ppActivate[i]);
+                            }
+                            CoTaskMemFree(ppActivate);
+                            if (FAILED(hr)) {
+                                printf("osToolsCameraList ActivateObject Error: 0x%lX\n", hr);
+                                goto osToolsCameraList_done;
+                            }
+                            IMFMediaType *RGB32MediaType;
+                            MFCreateMediaType(&RGB32MediaType);
+                            NV12MediaType -> lpVtbl -> CopyAllItems(NV12MediaType, (IMFAttributes *) RGB32MediaType);
+                            hr = RGB32MediaType -> lpVtbl -> SetGUID(RGB32MediaType, &MF_MT_SUBTYPE, &MFVideoFormat_RGB32);
+                            hr = nv12decoder -> lpVtbl -> SetInputType(nv12decoder, 0, NV12MediaType, 0);
+                            if (FAILED(hr)) {
+                                printf("osToolsCameraList NV12 SetInputType Error: 0x%lX\n", hr);
+                                goto osToolsCameraList_done;
+                            }
+                            hr = nv12decoder -> lpVtbl -> SetOutputType(nv12decoder, 0, RGB32MediaType, 0);
+                            if (FAILED(hr)) {
+                                printf("osToolsCameraList NV12 SetOutputType Error: 0x%lX\n", hr);
+                                goto osToolsCameraList_done;
+                            }
+                        } else {
+                            hr = mediaTypeHandler -> lpVtbl -> SetCurrentMediaType(mediaTypeHandler, mediaType);
+                            if (FAILED(hr)) {
+                                printf("osToolsCameraList SetCurrentMediaType Error: 0x%lX\n", hr);
+                                goto osToolsCameraList_done;
+                            }
                         }
                     }
                 } else {
@@ -35663,7 +35754,11 @@ list_t *osToolsCameraList() {
             list_append(osToolsCamera.camera, (unitype) setHeight, 'i');
             list_append(osToolsCamera.camera, (unitype) setFramerate, 'd');
             list_append(osToolsCamera.camera, (unitype) (void *) pSource, 'l');
-            list_append(osToolsCamera.camera, (unitype) (void *) NULL, 'l');
+            list_append(osToolsCamera.camera, (unitype) NULL, 'l');
+            list_append(osToolsCamera.camera, (unitype) (void *) h264decoder, 'l');
+            list_append(osToolsCamera.camera, (unitype) NULL, 'l');
+            list_append(osToolsCamera.camera, (unitype) (void *) nv12decoder, 'l');
+            list_append(osToolsCamera.camera, (unitype) NULL, 'l');
         }
     }
 osToolsCameraList_done:
@@ -35686,7 +35781,7 @@ int32_t osToolsCameraOpen(char *name) {
     if (cameraIndex == -1) {
         return -1;
     }
-    IMFMediaSource *pSource = (IMFMediaSource *)osToolsCamera.camera -> data[cameraIndex + 4].p;
+    IMFMediaSource *pSource = (IMFMediaSource *) osToolsCamera.camera -> data[cameraIndex + 4].p;
     IMFAttributes *pAttributes;
     /* https://stackoverflow.com/questions/43507393/media-foundation-set-video-interlacing-and-decode */
     MFCreateAttributes(&pAttributes, 1);
@@ -35724,10 +35819,41 @@ int32_t osToolsCameraOpen(char *name) {
         printf("osToolsCameraOpen SetGUID Error: 0x%lX\n", hr);
         return -1;
     }
-    hr = readerType -> lpVtbl -> SetGUID(readerType, &MF_MT_SUBTYPE, &MFVideoFormat_RGB32);
-    if (FAILED(hr)) {
-        printf("osToolsCameraOpen SetGUID Error: 0x%lX\n", hr);
-        return -1;
+    if (osToolsCamera.camera -> data[cameraIndex + 6].p) {
+        /* H264 decoder exists */
+        hr = readerType -> lpVtbl -> SetGUID(readerType, &MF_MT_SUBTYPE, &MFVideoFormat_H264);
+        if (FAILED(hr)) {
+            printf("osToolsCameraOpen SetGUID Error: 0x%lX\n", hr);
+            return -1;
+        }
+        /* https://stackoverflow.com/questions/30825271/how-to-create-imfsample-for-windowsmediafoundation-h-264-encoder-mft */
+        MFT_OUTPUT_DATA_BUFFER *pTransformBuffer = malloc(sizeof(MFT_OUTPUT_DATA_BUFFER));
+        pTransformBuffer -> dwStreamID = 0;
+        pTransformBuffer -> pSample = NULL;
+        MFCreateSample(&(pTransformBuffer -> pSample));
+        IMFMediaBuffer *pBuffer = NULL;
+        MFCreateMemoryBuffer(osToolsCamera.camera -> data[cameraIndex + 1].i * osToolsCamera.camera -> data[cameraIndex + 2].i * 2, &pBuffer);
+        pTransformBuffer -> pSample -> lpVtbl -> AddBuffer(pTransformBuffer -> pSample, pBuffer);
+        pTransformBuffer -> dwStatus = 0;
+        pTransformBuffer -> pEvents = NULL;
+        osToolsCamera.camera -> data[cameraIndex + 7].p = (void *) pTransformBuffer;
+        /* NV12 decoder buffer */
+        pTransformBuffer = malloc(sizeof(MFT_OUTPUT_DATA_BUFFER));
+        pTransformBuffer -> dwStreamID = 0;
+        pTransformBuffer -> pSample = NULL;
+        MFCreateSample(&(pTransformBuffer -> pSample));
+        MFCreateMemoryBuffer(osToolsCamera.camera -> data[cameraIndex + 1].i * osToolsCamera.camera -> data[cameraIndex + 2].i * 4, &pBuffer);
+        pTransformBuffer -> pSample -> lpVtbl -> AddBuffer(pTransformBuffer -> pSample, pBuffer);
+        pTransformBuffer -> dwStatus = 0;
+        pTransformBuffer -> pEvents = NULL;
+        osToolsCamera.camera -> data[cameraIndex + 9].p = (void *) pTransformBuffer;
+    } else {
+        /* no decoder */
+        hr = readerType -> lpVtbl -> SetGUID(readerType, &MF_MT_SUBTYPE, &MFVideoFormat_RGB32);
+        if (FAILED(hr)) {
+            printf("osToolsCameraOpen SetGUID Error: 0x%lX\n", hr);
+            return -1;
+        }
     }
     hr = pReader -> lpVtbl -> SetCurrentMediaType(pReader, MF_SOURCE_READER_FIRST_VIDEO_STREAM, NULL, readerType);
     if (FAILED(hr)) {
@@ -35758,12 +35884,98 @@ int32_t osToolsCameraReceive(char *name, uint8_t *data) {
         /* this is reading in syncronous blocking mode, MF supports also async calls */
         hr = pReader -> lpVtbl -> ReadSample(pReader, MF_SOURCE_READER_FIRST_VIDEO_STREAM, 0, &stream, &flags, &timestamp, &pSample);
         if (FAILED(hr)) {
+            printf("osToolsCameraReceive ERROR: ReadSample failed with %lX\n", hr);
             return 0;
         }
         if (flags & MF_SOURCE_READERF_STREAMTICK) {
             continue;
         }
         break;
+    }
+
+    if (osToolsCamera.camera -> data[cameraIndex + 6].p) {
+        /* Phase 1: H264 to NV12 */
+        IMFTransform *h264decoder = (IMFTransform *) osToolsCamera.camera -> data[cameraIndex + 6].p;
+        IMFTransform *nv12decoder = (IMFTransform *) osToolsCamera.camera -> data[cameraIndex + 8].p;
+        hr = h264decoder -> lpVtbl -> ProcessInput(h264decoder, 0, pSample, 0);
+        if (FAILED(hr)) {
+            printf("osToolsCameraReceive ERROR: H264 ProcessInput failed with 0x%lX\n", hr);
+            pSample -> lpVtbl -> Release(pSample);
+            return 0;
+        }
+        // MFT_OUTPUT_STREAM_INFO outputInfo;
+        // hr = h264decoder -> lpVtbl -> GetOutputStreamInfo(h264decoder, 0, &outputInfo);
+        // printf("Output info flags: %lX\n", outputInfo.dwFlags);
+        /*
+        Output = 7.
+        MFT_OUTPUT_STREAM_WHOLE_SAMPLES = 0x1,
+        MFT_OUTPUT_STREAM_SINGLE_SAMPLE_PER_BUFFER = 0x2,
+        MFT_OUTPUT_STREAM_FIXED_SAMPLE_SIZE = 0x4,
+        */
+        while (1) {
+            MFT_OUTPUT_DATA_BUFFER *pTransformBuffer = (MFT_OUTPUT_DATA_BUFFER *) osToolsCamera.camera -> data[cameraIndex + 7].p;
+            if (pTransformBuffer == NULL) {
+                printf("osToolsCameraReceive ERROR: pTransformBuffer is NULL\n");
+                return 0;
+            }
+            IMFMediaBuffer *pBuffer;
+            hr = pTransformBuffer -> pSample -> lpVtbl -> GetBufferByIndex(pTransformBuffer -> pSample, 0, &pBuffer);
+            pBuffer -> lpVtbl -> SetCurrentLength(pBuffer, 0); // rewind buffer so it can be used again
+            DWORD transformFlags = 0;
+            hr = h264decoder -> lpVtbl -> ProcessOutput(h264decoder, 0, 1, pTransformBuffer, &transformFlags);
+            if (FAILED(hr)) {
+                if (hr == 0xC00D6D61 || (transformFlags & 0x100)) {
+                    /* stream change */
+                    IMFMediaType *possibleType;
+                    int32_t typeIndex = 0;
+                    printf("Possible Types:\n");
+                    while (!FAILED(h264decoder -> lpVtbl -> GetOutputAvailableType(h264decoder, 0, typeIndex, &possibleType))) {
+                        GUID possibleSubtype;
+                        hr = possibleType -> lpVtbl -> GetGUID(possibleType, &MF_MT_SUBTYPE, &possibleSubtype);
+                        printf("- Subtype: %08lx-%02hx%02hx-%02x%02x-%02x%02x%02x%02x%02x%02x\n", possibleSubtype.Data1, possibleSubtype.Data2, possibleSubtype.Data3,
+                        possibleSubtype.Data4[0], possibleSubtype.Data4[1], possibleSubtype.Data4[2], possibleSubtype.Data4[3], possibleSubtype.Data4[4], possibleSubtype.Data4[5], possibleSubtype.Data4[6], possibleSubtype.Data4[7]);
+                        if (typeIndex == 0) {
+                            /* just use the first one idfk */
+                            hr = h264decoder -> lpVtbl -> SetOutputType(h264decoder, 0, possibleType, 0);
+                            if (FAILED(hr)) {
+                                printf("osToolsCameraReceive ERROR: SetOutputType failed with 0x%lX\n", hr);
+                                return 0;
+                            }
+                        }
+                        typeIndex++;
+                    }
+                    continue;
+                } else {
+                    printf("osToolsCameraReceive ERROR: H264 ProcessOutput failed with 0x%lX with flag 0x%lX\n", hr, transformFlags);
+                    pSample -> lpVtbl -> Release(pSample); // assume sample must not be released between ProcessInput and ProcessOutput
+                    return 0;
+                }
+            }
+            pSample -> lpVtbl -> Release(pSample); // assume sample must not be released between ProcessInput and ProcessOutput
+            pSample = pTransformBuffer -> pSample;
+            /* Phase 2: NV12 to RGB32 */
+            // MFT_OUTPUT_STREAM_INFO outputInfo;
+            // hr = nv12decoder -> lpVtbl -> GetOutputStreamInfo(nv12decoder, 0, &outputInfo);
+            // printf("Output info flags: %lX\n", outputInfo.dwFlags);
+            /* literally 0 flags, i hate you */
+            pTransformBuffer = (MFT_OUTPUT_DATA_BUFFER *) osToolsCamera.camera -> data[cameraIndex + 9].p;
+            hr = pTransformBuffer -> pSample -> lpVtbl -> GetBufferByIndex(pTransformBuffer -> pSample, 0, &pBuffer);
+            pBuffer -> lpVtbl -> SetCurrentLength(pBuffer, 0); // rewind buffer so it can be used again
+            hr = nv12decoder -> lpVtbl -> ProcessInput(nv12decoder, 0, pSample, 0);
+            if (FAILED(hr)) {
+                printf("osToolsCameraReceive ERROR: NV12 ProcessInput failed with 0x%lX\n", hr);
+                nv12decoder -> lpVtbl -> ProcessMessage(nv12decoder, MFT_MESSAGE_COMMAND_FLUSH, 0);
+                return 0;
+            }
+            hr = nv12decoder -> lpVtbl -> ProcessOutput(nv12decoder, 0, 1, pTransformBuffer, &transformFlags);
+            if (FAILED(hr)) {
+                printf("osToolsCameraReceive ERROR: NV12 ProcessOutput failed with 0x%lX with flag 0x%lX\n", hr, transformFlags);
+                return 0;
+            }
+            nv12decoder -> lpVtbl -> ProcessMessage(nv12decoder, MFT_MESSAGE_COMMAND_FLUSH, 0);
+            pSample = pTransformBuffer -> pSample;
+            break;
+        }
     }
 
     IMFMediaBuffer *pBuffer;
@@ -35787,8 +35999,10 @@ int32_t osToolsCameraReceive(char *name, uint8_t *data) {
     }
 
     pBuffer -> lpVtbl -> Unlock(pBuffer);
-    pBuffer -> lpVtbl -> Release(pBuffer);
-    pSample -> lpVtbl -> Release(pSample);
+    if (osToolsCamera.camera -> data[cameraIndex + 6].p == NULL) {
+        pBuffer -> lpVtbl -> Release(pBuffer);
+        pSample -> lpVtbl -> Release(pSample);
+    }
     return iterData;
 }
 
@@ -35800,190 +36014,20 @@ int32_t osToolsCameraClose(char *name) {
     IMFSourceReader *pReader = (IMFSourceReader *) osToolsCamera.camera -> data[cameraIndex + 5].p;
     if (pReader) {
         pReader -> lpVtbl -> Release(pReader);
+        osToolsCamera.camera -> data[cameraIndex + 5].p = NULL;
+    }
+    IMFTransform *h264decoder = (IMFTransform *) osToolsCamera.camera -> data[cameraIndex + 6].p;
+    if (h264decoder) {
+        h264decoder -> lpVtbl -> ProcessMessage(h264decoder, MFT_MESSAGE_COMMAND_FLUSH, 0);
+        // h264decoder -> lpVtbl -> Release(h264decoder);
+        // osToolsCamera.camera -> data[cameraIndex + 6].p = NULL;
+    }
+    IMFTransform *nv12decoder = (IMFTransform *) osToolsCamera.camera -> data[cameraIndex + 6].p;
+    if (nv12decoder) {
+        nv12decoder -> lpVtbl -> ProcessMessage(nv12decoder, MFT_MESSAGE_COMMAND_FLUSH, 0);
     }
     return 0;
 }
-
-// int32_t win32tcpInit(char *address, char *port) {
-//     for (int32_t i = 0; i < WIN32TCP_NUM_SOCKETS; i++) {
-//         win32socket.connectSocket[i] = 0;
-//         win32socket.socketOpen[i] = 0;
-//     }
-//     win32socket.address = address;
-//     win32socket.port = port;
-//     char modifiable[strlen(address) + 1];
-//     strcpy(modifiable, address);
-//     char *check = strtok(modifiable, ".");
-//     int32_t segments = 0;
-//     uint8_t ipAddress[4] = {0};
-//     while (check != NULL) {
-//         if (segments > 3) {
-//             printf("Could not initialise win32tcp - invalid ip address\n");
-//             return 1;
-//         }
-//         int32_t segmentValue = atoi(check);
-//         if (segmentValue > 255 || segmentValue < 0) {
-//             printf("Could not initialise win32tcp - invalid ip address\n");
-//             return 1;
-//         }
-//         ipAddress[segments] = segmentValue;
-//         check = strtok(NULL, ".");
-//         segments++;
-//     }
-//     if (segments != 4) {
-//         printf("Could not initialise win32tcp - invalid ip address\n");
-//         return 1;
-//     }
-//     /* Initialize Winsock */
-//     WSADATA wsaData;
-//     int32_t status;
-//     status = WSAStartup(MAKEWORD(2,2), &wsaData);
-//     if (status != 0) {
-//         return 1;
-//     }
-    
-//     /* hints */
-//     struct addrinfo hints;
-//     struct addrinfo *result;
-//     struct addrinfo *ptr;
-//     ZeroMemory(&hints, sizeof(hints));
-//     hints.ai_family = AF_INET; // IPv4
-//     hints.ai_socktype = SOCK_STREAM;
-//     hints.ai_protocol = IPPROTO_TCP;
-
-//     /* Resolve the server address and port */
-//     status = getaddrinfo(address, port, &hints, &result);
-//     if (status != 0) {
-//         WSACleanup();
-//         return 1;
-//     }
-
-//     /* Attempt to connect to an address until one succeeds */
-//     for (ptr = result; ptr != NULL; ptr = ptr -> ai_next) {
-//         /* Create a SOCKET for connecting to server */
-//         win32socket.connectSocket[0] = socket(ptr -> ai_family, ptr -> ai_socktype, ptr -> ai_protocol);
-//         if (win32socket.connectSocket[0] == INVALID_SOCKET) {
-//             WSACleanup();
-//             return 1;
-//         }
-
-//         /* Connect to server */
-//         status = connect(win32socket.connectSocket[0], ptr -> ai_addr, (int) ptr -> ai_addrlen);
-//         if (status == SOCKET_ERROR) {
-//             closesocket(win32socket.connectSocket[0]);
-//             win32socket.connectSocket[0] = INVALID_SOCKET;
-//             continue;
-//         }
-//         break;
-//     }
-
-//     /* shutdown the connection since no more data will be sent */
-//     status = shutdown(win32socket.connectSocket[0], SD_SEND);
-//     if (status == SOCKET_ERROR) {
-//         closesocket(win32socket.connectSocket[0]);
-//         WSACleanup();
-//         return 1;
-//     }
-
-//     /* Receive until the peer closes the connection */
-//     int32_t recvbuflen = 512;
-//     char recvbuf[recvbuflen];
-//     status = 1;
-//     while (status > 0) {
-//         status = recv(win32socket.connectSocket[0], recvbuf, recvbuflen, 0);
-//         if (status > 0) {
-//             // printf("Bytes received: %d\n", status);
-//         } else if (status == 0) {
-//             // printf("Connection closed\n");
-//         } else {
-//             // printf("recv failed with error: %d\n", WSAGetLastError());
-//         }
-//     }
-
-//     /* cleanup */
-//     closesocket(win32socket.connectSocket[0]);
-//     printf("Successfully connected to %d.%d.%d.%d\n", ipAddress[0], ipAddress[1], ipAddress[2], ipAddress[3]);
-//     return 0;
-// }
-
-// SOCKET *win32tcpCreateSocket(int32_t timeoutMilliseconds) {
-//     /* define socket index */
-//     int32_t socketIndex = 0;
-//     for (int32_t i = 0; i < WIN32TCP_NUM_SOCKETS; i++) {
-//         if (win32socket.socketOpen[i] == 0) {
-//             win32socket.socketOpen[i] = 1;
-//             socketIndex = i;
-//             break;
-//         }
-//     }
-//     if (socketIndex == WIN32TCP_NUM_SOCKETS) {
-//         /* no sockets left */
-//         return NULL;
-//     }
-//     /* hints */
-//     struct addrinfo hints;
-//     struct addrinfo *result;
-//     struct addrinfo *ptr;
-//     ZeroMemory(&hints, sizeof(hints));
-//     hints.ai_family = AF_INET; // IPv4
-//     hints.ai_socktype = SOCK_STREAM;
-//     hints.ai_protocol = IPPROTO_TCP;
-
-//     /* Resolve the server address and port */
-//     int32_t status = getaddrinfo(win32socket.address, win32socket.port, &hints, &result);
-//     if (status != 0) {
-//         WSACleanup();
-//         return NULL;
-//     }
-
-//     /* Attempt to connect to an address until one succeeds */
-//     for (ptr = result; ptr != NULL; ptr = ptr -> ai_next) {
-//         /* Create a SOCKET for connecting to server */
-//         win32socket.connectSocket[socketIndex] = socket(ptr -> ai_family, ptr -> ai_socktype, ptr -> ai_protocol);
-//         if (win32socket.connectSocket[socketIndex] == INVALID_SOCKET) {
-//             WSACleanup();
-//             return NULL;
-//         }
-//         /* Connect to server */
-//         setsockopt(win32socket.connectSocket[socketIndex], SOL_SOCKET, SO_RCVTIMEO, (const char *) &timeoutMilliseconds, sizeof(timeoutMilliseconds));
-//         status = connect(win32socket.connectSocket[socketIndex], ptr -> ai_addr, (int) ptr -> ai_addrlen);
-//         if (status == SOCKET_ERROR) {
-//             closesocket(win32socket.connectSocket[socketIndex]);
-//             win32socket.connectSocket[socketIndex] = INVALID_SOCKET;
-//             continue;
-//         }
-//         break;
-//     }
-//     // uint32_t mode;
-//     // printf("ioctlsocket %d\n", ioctlsocket(win32socket.connectSocket[socketIndex], FIONBIO, &mode));
-//     return &win32socket.connectSocket[socketIndex];
-// }
-
-// int32_t win32tcpSend(SOCKET *socket, uint8_t *data, int32_t length) {
-//     int32_t status = send(*socket, (const char *) data, length, 0 );
-//     if (status == SOCKET_ERROR) {
-//         closesocket(*socket);
-//         return 1;
-//     }
-//     return 0;
-// }
-
-// int32_t win32tcpReceive(SOCKET *socket, uint8_t *buffer, int32_t length) {
-//     int32_t status = 1;
-//     status = recv(*socket, (char *) buffer, length, 0);
-//     if (status > 0) {
-//         // printf("Bytes received: %d\n", status);
-//     } else if (status == 0) {
-//         // printf("Connection closed\n");
-//     } else {
-//         // printf("recv failed with error: %d\n", WSAGetLastError());
-//     }
-//     return status;
-// }
-
-// void win32tcpDeinit() {
-//     WSACleanup();
-// }
 
 #endif
 #ifdef OS_LINUX
@@ -36236,38 +36280,411 @@ int32_t osToolsComClose(char *name) {
 }
 
 int32_t osToolsGetIP(char *address, uint8_t *buffer, int32_t maxSegments) {
-    return 0;
+    char modifiable[strlen(address) + 1];
+    strcpy(modifiable, address);
+    char *check = strtok(modifiable, ".");
+    int32_t segments = 0;
+    while (check != NULL) {
+        if (segments > maxSegments - 1) {
+            printf("osToolsGetIP ERROR: invalid ip address\n");
+            return -1;
+        }
+        int32_t segmentValue = atoi(check);
+        if (segmentValue > 255 || segmentValue < 0) {
+            printf("osToolsGetIP ERROR: invalid ip address\n");
+            return -1;
+        }
+        buffer[segments] = segmentValue;
+        check = strtok(NULL, ".");
+        segments++;
+    }
+    return segments;
 }
 
 int32_t osToolsGetSocketAddress(char *socketName, char *address, int32_t length) {
+    if (!socketName) {
+        printf("osToolsGetSocketAddress ERROR: socketName is NULL\n");
+        return -1;
+    }
+    if (!address) {
+        printf("osToolsGetSocketAddress ERROR: address is NULL\n");
+        return -1;
+    }
+    int32_t socketIndex = list_find(osToolsSocket.socket, (unitype) socketName, 's');
+    if (socketIndex == -1) {
+        printf("osToolsGetSocketAddress ERROR: Could not find socket %s\n", socketName);
+        return -1;
+    }
+    /* only IPv4 */
+    char addressA[32];
+    sprintf(addressA, "%hhu.%hhu.%hhu.%hhu", osToolsSocket.socket -> data[socketIndex + OSI_ADDRESS].i, osToolsSocket.socket -> data[socketIndex + OSI_ADDRESS + 1].i, osToolsSocket.socket -> data[socketIndex + OSI_ADDRESS + 2].i, osToolsSocket.socket -> data[socketIndex + OSI_ADDRESS + 3].i);
+    strncpy(address, addressA, length);
+    address[length - 1] = '\0';
     return 0;
 }
 
 int32_t osToolsGetPort(char *socketName, char *port, int32_t length) {
+    if (!socketName) {
+        printf("osToolsGetSocketAddress ERROR: socketName is NULL\n");
+        return -1;
+    }
+    if (!port) {
+        printf("osToolsGetSocketAddress ERROR: port is NULL\n");
+        return -1;
+    }
+    int32_t socketIndex = list_find(osToolsSocket.socket, (unitype) socketName, 's');
+    if (socketIndex == -1) {
+        printf("osToolsGetPort ERROR: Could not find socket %s\n", socketName);
+        return -1;
+    }
+    char portA[8];
+    sprintf(portA, "%d", osToolsSocket.socket -> data[socketIndex + OSI_PORT].i);
+    strncpy(port, portA, length);
+    port[length - 1] = '\0';
     return 0;
 }
 
 int32_t osToolsServerSocketCreate(char *serverName, osToolsSocketProtocol_t protocol, char *serverPort) {
+    if (!serverName) {
+        printf("osToolsServerSocketCreate ERROR: serverName is NULL\n");
+        return -1;
+    }
+    if (!serverPort) {
+        printf("osToolsServerSocketCreate ERROR: port is NULL\n");
+        return -1;
+    }
+    int32_t status;
+    struct addrinfo *result;
+    struct addrinfo hints;
+    for (int32_t i = 0; i < sizeof(hints); i++) {
+        *((((uint8_t *) &hints) + i)) = 0; // bzero
+    }
+    hints.ai_family = AF_INET; // IPv4
+    hints.ai_socktype = SOCK_STREAM;
+    if (protocol == OSTOOLS_PROTOCOL_TCP) {
+        hints.ai_protocol = IPPROTO_TCP;
+    } else if (protocol == OSTOOLS_PROTOCOL_UDP) {
+        hints.ai_protocol = IPPROTO_UDP;
+    }
+    hints.ai_flags = AI_PASSIVE;
+
+    /* get local address */
+    char hostName[128];
+    status = gethostname(hostName, sizeof(hostName));
+    if (status == -1) {
+        printf("osToolsServerSocketCreate ERROR: Could not gethostname\n");
+        return -1;
+    }
+    printf("Host Name: %s\n", hostName);
+
+    struct hostent *host = gethostbyname(hostName);
+    if (host == NULL) {
+        printf("osToolsServerSocketCreate ERROR: Could not gethostbyname\n");
+        return -1;
+    }
+
+    int32_t iter = 0;
+    struct in_addr address;
+    while (host -> h_addr_list[iter] != NULL) {
+        memcpy(&address, host -> h_addr_list[iter], sizeof(address));
+        printf("- Address: %s\n", inet_ntoa(address));
+        iter++;
+    }
+    char *serverAddress = inet_ntoa(address);
+    if (serverAddress == NULL) {
+        printf("osToolsServerSocketCreate ERROR: No addresses to create server on\n");
+        return -1;
+    }
+    uint8_t ipAddress[4] = {0};
+    if (osToolsGetIP(serverAddress, ipAddress, 4) != 4) {
+        printf("osToolsServerSocketCreate ERROR: Invalid ip address\n");
+    }
+
+    /* Resolve the server address and port */
+    status = getaddrinfo(serverAddress, serverPort, &hints, &result);
+    if (status != 0) {
+        printf("osToolsServerSocketCreate ERROR: Could not getaddrinfo\n");
+        return -1;
+    }
+    struct addrinfo *resultElement = result;
+    while (resultElement) {
+        printf("Hosting a server on address %s:%s\n", serverAddress, serverPort);
+        resultElement = resultElement -> ai_next;
+    }
+    if (result == NULL) {
+        printf("osToolsServerSocketCreate ERROR: getaddrinfo returned NULL\n");
+        return -1;
+    }
+
+    /* Create a SOCKET for the server to listen for client connections - Use the first element of linked list returned by getaddrinfo */
+    int32_t sockfd = socket(result -> ai_family, result -> ai_socktype, result -> ai_protocol);
+    if (sockfd == -1) {
+        freeaddrinfo(result);
+        printf("osToolsServerSocketCreate ERROR: Could not create socket\n");
+        return -1;
+    }
+
+    /* Bind the socket to the address */
+    status = bind(sockfd, result -> ai_addr, result -> ai_addrlen);
+    if (status == -1) {
+        freeaddrinfo(result);
+        printf("osToolsServerSocketCreate ERROR: Could not bind socket %s to address %s\n", serverName, serverAddress);
+        return -1;
+    }
+    freeaddrinfo(result);
+
+    list_append(osToolsSocket.socket, (unitype) serverName, 's');
+    list_append(osToolsSocket.socket, (unitype) sockfd, 'i'); // socket
+    list_append(osToolsSocket.socket, (unitype) 0, 'i'); // server specifier
+    list_append(osToolsSocket.socket, (unitype) 0, 'i'); // reserved
+    list_append(osToolsSocket.socket, (unitype) protocol, 'i'); // protocol
+    list_append(osToolsSocket.socket, (unitype) ipAddress[0], 'i'); // address[0]
+    list_append(osToolsSocket.socket, (unitype) ipAddress[1], 'i'); // address[1]
+    list_append(osToolsSocket.socket, (unitype) ipAddress[2], 'i'); // address[2]
+    list_append(osToolsSocket.socket, (unitype) ipAddress[3], 'i'); // address[3]
+    for (int32_t i = 4; i < 16; i++) {
+        list_append(osToolsSocket.socket, (unitype) 0, 'i'); // address padding
+    }
+    int32_t port;
+    sscanf(serverPort, "%d", &port);
+    list_append(osToolsSocket.socket, (unitype) port, 'i'); // port
+    for (int32_t i = 0; i < 10; i++) {
+        list_append(osToolsSocket.socket, (unitype) 0, 'i'); // reserved padding
+    }
     return 0;
 }
 
 int32_t osToolsServerSocketListen(char *serverName, char *clientName) {
+    if (!serverName) {
+        printf("osToolsServerSocketListen ERROR: serverName is NULL\n");
+        return -1;
+    }
+    if (!clientName) {
+        printf("osToolsServerSocketListen ERROR: clientName is NULL\n");
+        return -1;
+    }
+    int32_t socketIndex = list_find(osToolsSocket.socket, (unitype) serverName, 's');
+    if (socketIndex == -1) {
+        printf("osToolsServerSocketListen ERROR: Could not find socket %s\n", serverName);
+        return -1;
+    }
+    int32_t status;
+    int32_t sockfd = osToolsSocket.socket -> data[socketIndex + OSI_SOCKET].i;
+
+    status = listen(sockfd, SOMAXCONN);
+    if (status == -1) {
+        printf("osToolsServerSocketListen ERROR: Listen failed\n");
+        return -1;
+    }
+    struct sockaddr_in address;
+    uint32_t addressLen = sizeof(address);
+    int32_t connectionfd = accept(sockfd, (struct sockaddr *) &address, &addressLen);
+    if (connectionfd == -1) {
+        printf("osToolsServerSocketListen ERROR: Accept failed\n");
+        return -1;
+    }
+    uint8_t ipAddress[4] = {0};
+    if (osToolsGetIP(inet_ntoa(address.sin_addr), ipAddress, 4) != 4) {
+        printf("osToolsServerSocketListen ERROR: Invalid ip address\n");
+    }
+    printf("Incoming connection from %s:%d\n", inet_ntoa(address.sin_addr), address.sin_port);
+    list_append(osToolsSocket.socket, (unitype) clientName, 's');
+    list_append(osToolsSocket.socket, (unitype) connectionfd, 'i'); // socket
+    list_append(osToolsSocket.socket, (unitype) 1, 'i'); // client specifier
+    list_append(osToolsSocket.socket, (unitype) 0, 'i'); // reserved
+    list_append(osToolsSocket.socket, osToolsSocket.socket -> data[socketIndex + OSI_PROTOCOL], 'i'); // protocol
+    list_append(osToolsSocket.socket, (unitype) ipAddress[0], 'i'); // address[0]
+    list_append(osToolsSocket.socket, (unitype) ipAddress[1], 'i'); // address[1]
+    list_append(osToolsSocket.socket, (unitype) ipAddress[2], 'i'); // address[2]
+    list_append(osToolsSocket.socket, (unitype) ipAddress[3], 'i'); // address[3]
+    for (int32_t i = 4; i < 16; i++) {
+        list_append(osToolsSocket.socket, (unitype) 0, 'i'); // address padding
+    }
+    list_append(osToolsSocket.socket, (unitype) address.sin_port, 'i'); // port
+    for (int32_t i = 0; i < 10; i++) {
+        list_append(osToolsSocket.socket, (unitype) 0, 'i'); // reserved padding
+    }
     return 0;
 }
 
 int32_t osToolsClientSocketCreate(char *clientName, osToolsSocketProtocol_t protocol, char *serverAddress, char *serverPort, int32_t timeoutMilliseconds) {
+    if (!clientName) {
+        printf("osToolsClientSocketCreate ERROR: clientName is NULL\n");
+        return -1;
+    }
+    if (!serverAddress) {
+        printf("osToolsClientSocketCreate ERROR: serverAddress is NULL\n");
+        return -1;
+    }
+    if (!serverPort) {
+        printf("osToolsClientSocketCreate ERROR: port is NULL\n");
+        return -1;
+    }
+    uint8_t ipAddress[4] = {0};
+    if (osToolsGetIP(serverAddress, ipAddress, 4) != 4) {
+        printf("osToolsClientSocketCreate ERROR: Invalid ip address\n");
+        return -1;
+    }
+    int32_t status;
+    /* Create client socket */
+    struct addrinfo *result;
+    struct addrinfo hints;
+    for (int32_t i = 0; i < sizeof(hints); i++) {
+        *((((uint8_t *) &hints) + i)) = 0; // bzero
+    }
+    hints.ai_family = AF_INET; // IPv4
+    hints.ai_socktype = SOCK_STREAM;
+    if (protocol == OSTOOLS_PROTOCOL_TCP) {
+        hints.ai_protocol = IPPROTO_TCP;
+    } else if (protocol == OSTOOLS_PROTOCOL_UDP) {
+        hints.ai_protocol = IPPROTO_UDP;
+    }
+
+    status = getaddrinfo(serverAddress, serverPort, &hints, &result);
+    if (status != 0) {
+        printf("osToolsClientSocketCreate ERROR: Could not getaddrinfo of %s:%s, failed with %d\n", serverAddress, serverPort, status);
+        return -1;
+    }
+
+    struct addrinfo *resultElement = result;
+    while (resultElement) {
+        // printf("Connecting to %s:%s\n", serverAddress, serverPort);
+        resultElement = resultElement -> ai_next;
+    }
+    if (result == NULL) {
+        printf("osToolsClientSocketCreate ERROR: getaddrinfo returned NULL\n");
+        return -1;
+    }
+    /* Use the first element of linked list returned by getaddrinfo */
+    int32_t sockfd = socket(result -> ai_family, result -> ai_socktype, result -> ai_protocol);
+    if (sockfd == -1) {
+        freeaddrinfo(result);
+        printf("osToolsClientSocketCreate ERROR: Could not create socket\n");
+        return -1;
+    }
+    /* set socket to non blocking mode while connecting - https://stackoverflow.com/questions/1543466/how-do-i-change-a-tcp-socket-to-be-non-blocking */
+    status = fcntl(sockfd, F_GETFL, 0);
+    if (status == -1) {
+        printf("osToolsClientSocketCreate ERROR: Could not get fcntl flags\n");
+        return -1;
+    }
+    status &= O_NONBLOCK;
+    status = fcntl(sockfd, F_SETFL, status);
+    if (status != 0) {
+        printf("osToolsClientSocketCreate ERROR: Could not set socket to non-blocking mode\n");
+        return -1;
+    }
+    status = connect(sockfd, result -> ai_addr, (int32_t) result -> ai_addrlen);
+    if (status == -1) {
+        if (errno != EINPROGRESS) {
+            printf("osToolsClientSocketCreate ERROR: Could not connect socket %d (%s)\n", errno, strerror(errno));
+            return -1;
+        }
+        struct timeval timeout;
+        timeout.tv_sec = timeoutMilliseconds / 1000;
+        timeoutMilliseconds -= (timeoutMilliseconds / 1000) * 1000;
+        timeout.tv_usec = timeoutMilliseconds * 1000;
+        fd_set fdsockArray;
+        fdsockArray.__fds_bits[0] = sockfd;
+        status = select(sockfd + 1, NULL, &fdsockArray, NULL, &timeout);
+        if (status != 1) {
+            printf("osToolsClientSocketCreate ERROR: Could not connect socket (timeout)\n");
+            return -1;
+        }
+    }
+    /* set socket back to blocking mode */
+    status = fcntl(sockfd, F_GETFL, 0);
+    if (status == -1) {
+        printf("osToolsClientSocketCreate ERROR: Could not get fcntl flags\n");
+        return -1;
+    }
+    status &= ~O_NONBLOCK;
+    status = fcntl(sockfd, F_SETFL, status);
+    if (status != 0) {
+        printf("osToolsClientSocketCreate ERROR: Could not set socket to blocking mode\n");
+        return -1;
+    }
+    printf("Connected to %s:%s\n", serverAddress, serverPort);
+    list_append(osToolsSocket.socket, (unitype) clientName, 's');
+    list_append(osToolsSocket.socket, (unitype) sockfd, 'l'); // socket
+    list_append(osToolsSocket.socket, (unitype) 1, 'i'); // client specifier
+    list_append(osToolsSocket.socket, (unitype) 0, 'i'); // reserved
+    list_append(osToolsSocket.socket, (unitype) protocol, 'i'); // protocol
+    list_append(osToolsSocket.socket, (unitype) ipAddress[0], 'i'); // address[0]
+    list_append(osToolsSocket.socket, (unitype) ipAddress[1], 'i'); // address[1]
+    list_append(osToolsSocket.socket, (unitype) ipAddress[2], 'i'); // address[2]
+    list_append(osToolsSocket.socket, (unitype) ipAddress[3], 'i'); // address[3]
+    for (int32_t i = 4; i < 16; i++) {
+        list_append(osToolsSocket.socket, (unitype) 0, 'i'); // address padding
+    }
+    int32_t port;
+    sscanf(serverPort, "%d", &port);
+    list_append(osToolsSocket.socket, (unitype) port, 'i'); // port
+    for (int32_t i = 0; i < 10; i++) {
+        list_append(osToolsSocket.socket, (unitype) 0, 'i'); // reserved padding
+    }
     return 0;
 }
 
 int32_t osToolsSocketSend(char *socketName, uint8_t *data, int32_t length) {
-    return 0;
+    if (!socketName) {
+        printf("osToolsSocketSend ERROR: socketName is NULL\n");
+        return -1;
+    }
+    int32_t socketIndex = list_find(osToolsSocket.socket, (unitype) socketName, 's');
+    if (socketIndex == -1) {
+        printf("osToolsSocketSend ERROR: Could not find socket %s\n", socketName);
+        return -1;
+    }
+    int32_t status = send(osToolsSocket.socket -> data[socketIndex + OSI_SOCKET].i, (char *) data, length, 0);
+    if (status == -1) {
+        printf("osToolsSocketSend ERROR: Failed to send\n");
+        return -1;
+    }
+    return status;
 }
 
 int32_t osToolsSocketReceive(char *socketName, uint8_t *data, int32_t length, int32_t timeoutMilliseconds) {
-    return 0;
+    if (!socketName) {
+        printf("osToolsSocketReceive ERROR: socketName is NULL\n");
+        return -1;
+    }
+    int32_t socketIndex = list_find(osToolsSocket.socket, (unitype) socketName, 's');
+    if (socketIndex == -1) {
+        printf("osToolsSocketReceive ERROR: Could not find socket %s\n", socketName);
+        return -1;
+    }
+    setsockopt(osToolsSocket.socket -> data[socketIndex + OSI_SOCKET].i, SOL_SOCKET, SO_RCVTIMEO, (char *) &timeoutMilliseconds, sizeof(timeoutMilliseconds)); // https://stackoverflow.com/questions/2876024/linux-is-there-a-read-or-recv-from-socket-with-timeout
+    int32_t status = recv(osToolsSocket.socket -> data[socketIndex + OSI_SOCKET].i, (char *) data, length, 0);
+    if (status == -1) {
+        if (errno == EAGAIN || errno == EWOULDBLOCK) {
+            /* timeout */
+            printf("osToolsSocketReceive ERROR: Failed to receive (timeout)\n");
+            return 0;
+        }
+        printf("osToolsSocketReceive ERROR: Failed to receive\n");
+        return -1;
+    }
+    return status;
 }
 
 int32_t osToolsSocketDestroy(char *socketName) {
+    if (!socketName) {
+        printf("osToolsSocketDestroy ERROR: socketName is NULL\n");
+        return -1;
+    }
+    int32_t socketIndex = list_find(osToolsSocket.socket, (unitype) socketName, 's');
+    if (socketIndex == -1) {
+        printf("osToolsSocketDestroy ERROR: Could not find socket %s\n", socketName);
+        return -1;
+    }
+    /* shutdown and close socket */
+    int32_t status = shutdown(osToolsSocket.socket -> data[socketIndex + OSI_SOCKET].i, SHUT_RDWR);
+    if (status == -1) {
+        printf("osToolsSocketDestroy WARN: Shutdown not successful\n");
+    }
+    close(osToolsSocket.socket -> data[socketIndex + OSI_SOCKET].i);
+    list_delete_range(osToolsSocket.socket, socketIndex, socketIndex + OSI_NUMBER_OF_FIELDS);
     return 0;
 }
 

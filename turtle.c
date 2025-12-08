@@ -215,7 +215,7 @@ int main(int argc, char *argv[]) {
     // free(buffer);
     // osToolsSocketDestroy("Client1");
     /* Client testing */
-    // osToolsClientSocketCreate("Client1", OSTOOLS_PROTOCOL_TCP, "127.0.0.1", "6000", 2000);
+    // osToolsClientSocketCreate("Client1", OSTOOLS_PROTOCOL_TCP, "127.0.0.1", "6000", 10000);
     // osToolsSocketSend("Client1", (uint8_t *) "Hello World\r\n", strlen("Hello World\r\n"));
     // uint8_t *buffer = calloc(128, 1);
     // osToolsSocketReceive("Client1", buffer, 128, 10000);
