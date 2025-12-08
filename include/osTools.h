@@ -160,7 +160,7 @@ typedef enum {
 } os_socket_index_t;
 
 typedef struct {
-    list_t *socket; // Format Windows: name, SOCKET, client/server, reserved, protocol, address[0], address[1], address[2], address[4], reserved * 12, port (int), reserved * 10
+    list_t *socket; // Format: name, SOCKET (Windows) sockfd (Linux), client/server, reserved, protocol, address[0], address[1], address[2], address[4], reserved * 12, port (int), reserved * 10
     int8_t win32wsaActive;
 } ost_socket_t;
 
@@ -226,6 +226,13 @@ int32_t osToolsCameraClose(char *name);
 #include <sys/stat.h>
 #include <sys/mman.h>
 #include <dirent.h>
+#include <errno.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netdb.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <arpa/inet.h>
 #endif
 
 /* initialise osTools, pass in argv[0] from main function as well as GLFW window object */

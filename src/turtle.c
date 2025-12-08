@@ -804,9 +804,9 @@ turtle_texture_t turtleTextureLoadListArrayInternal(list_t *list, uint8_t *array
     turtle_texture_t texture = -1;
     char pointerValue[20];
     if (freeArrayFlag) {
-        sprintf(pointerValue, "0x%X", list);
+        sprintf(pointerValue, "0x%lX", (int64_t) list);
     } else {
-        sprintf(pointerValue, "0x%X", array);
+        sprintf(pointerValue, "0x%lX", (int64_t) array);
     }
     for (int32_t i = 4; i < turtle.textureList -> length; i += 4) {
         if (strcmp(turtle.textureList -> data[i].s, "") == 0) {
