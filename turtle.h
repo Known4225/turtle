@@ -35277,7 +35277,7 @@ int32_t osToolsServerSocketListen(char *serverName, char *clientName) {
         return -1;
     }
     struct sockaddr_in address;
-    uint32_t addressLen = sizeof(address);
+    int32_t addressLen = sizeof(address);
     SOCKET connection = accept(winsocket, (struct sockaddr *) &address, &addressLen);
     if (connection == INVALID_SOCKET) {
         printf("osToolsServerSocketListen ERROR: Accept failed\n");
@@ -35507,6 +35507,12 @@ const GUID CLSID_CMSH264DecoderMFT = {0x62CE7E72, 0x4C71, 0x4d20, {0xB1, 0x5D, 0
 const GUID CLSID_CWMADecMediaObject = {0x2eeb4adf, 0x4578, 0x4d10, {0xbc, 0xa7, 0xbb, 0x95, 0x5f, 0x56, 0x32, 0x0a}};
 const GUID CLSID_CWMAEncMediaObject = {0x70f598e9, 0xf4ab, 0x495a, {0x99, 0xe2, 0xa7, 0xc4, 0xd3, 0xd8, 0x9a, 0xbf}};
 
+/*
+https://learn.microsoft.com/en-us/answers/questions/804470/unexpected-u-v-plane-offset-with-windows-media-fou
+https://stackoverflow.com/questions/71783335/unexpected-u-v-plane-offset-with-windows-media-foundation-h264-decoder
+schwa walked so i could find no information on this problem
+*/
+
 list_t *osToolsCameraList() {
     list_clear(osToolsCamera.camera);
     list_t *output = list_init();
@@ -35660,6 +35666,9 @@ list_t *osToolsCameraList() {
                                 printf("osToolsCameraList ERROR: CoCreateInstance failed on H264 decoder 0x%lX\n", hr);
                                 goto osToolsCameraList_done;
                             }
+                            IMFAttributes *h264attributes;
+                            h264decoder -> lpVtbl -> GetAttributes(h264decoder, &h264attributes);
+                            h264attributes -> lpVtbl -> SetUINT32(h264attributes, &MF_LOW_LATENCY, 1);
                             DWORD numInputStreams;
                             DWORD numOutputStreams;
                             h264decoder -> lpVtbl -> GetStreamCount(h264decoder, &numInputStreams, &numOutputStreams);
@@ -35884,7 +35893,7 @@ int32_t osToolsCameraReceive(char *name, uint8_t *data) {
         /* this is reading in syncronous blocking mode, MF supports also async calls */
         hr = pReader -> lpVtbl -> ReadSample(pReader, MF_SOURCE_READER_FIRST_VIDEO_STREAM, 0, &stream, &flags, &timestamp, &pSample);
         if (FAILED(hr)) {
-            printf("osToolsCameraReceive ERROR: ReadSample failed with %lX\n", hr);
+            printf("osToolsCameraReceive ERROR: ReadSample failed with 0x%lX\n", hr);
             return 0;
         }
         if (flags & MF_SOURCE_READERF_STREAMTICK) {
@@ -35990,12 +35999,23 @@ int32_t osToolsCameraReceive(char *name, uint8_t *data) {
     if (FAILED(hr)) {
         return 0;
     }
-    /* drop the alpha character */
     int32_t iterData = 0;
-    for (int32_t i = 0; i < size; i += 4) {
-        data[iterData++] = rawBuffer[i + 2];
-        data[iterData++] = rawBuffer[i + 1];
-        data[iterData++] = rawBuffer[i];
+    if (osToolsCamera.camera -> data[cameraIndex + 6].p) {
+        /* flip image vertically for H264 decoded images (idk why) */
+        for (int32_t j = osToolsCamera.camera -> data[cameraIndex + 2].i - 1; j > -1; j--) {
+            for (int32_t i = 0; i < osToolsCamera.camera -> data[cameraIndex + 1].i * 4; i += 4) {
+                data[iterData++] = rawBuffer[j * osToolsCamera.camera -> data[cameraIndex + 1].i * 4 + i + 2];
+                data[iterData++] = rawBuffer[j * osToolsCamera.camera -> data[cameraIndex + 1].i * 4 + i + 1];
+                data[iterData++] = rawBuffer[j * osToolsCamera.camera -> data[cameraIndex + 1].i * 4 + i];
+            }
+        }
+    } else {
+        /* drop the alpha character */
+        for (int32_t i = 0; i < size; i += 4) {
+            data[iterData++] = rawBuffer[i + 2];
+            data[iterData++] = rawBuffer[i + 1];
+            data[iterData++] = rawBuffer[i];
+        }
     }
 
     pBuffer -> lpVtbl -> Unlock(pBuffer);
