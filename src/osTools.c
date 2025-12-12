@@ -1738,6 +1738,7 @@ int32_t osToolsCameraReceive(char *name, uint8_t *data) {
     }
     /* https://gist.github.com/mmozeiko/a5adab1ad11ea6d0643ceb67bb8e3e19 */
     IMFSample *pSample;
+    IMFMediaBuffer *pBuffer;
     DWORD stream;
     DWORD flags;
     LONGLONG timestamp;
@@ -1784,7 +1785,6 @@ int32_t osToolsCameraReceive(char *name, uint8_t *data) {
                 printf("osToolsCameraReceive ERROR: pTransformBuffer is NULL\n");
                 return 0;
             }
-            IMFMediaBuffer *pBuffer;
             hr = pTransformBuffer -> pSample -> lpVtbl -> GetBufferByIndex(pTransformBuffer -> pSample, 0, &pBuffer);
             pBuffer -> lpVtbl -> SetCurrentLength(pBuffer, 0); // rewind buffer so it can be used again
             DWORD transformFlags = 0;
@@ -1822,20 +1822,18 @@ int32_t osToolsCameraReceive(char *name, uint8_t *data) {
             pSample -> lpVtbl -> GetTotalLength(pSample, &sampleLength);
             // printf("NV12 Sample Length: %ld\n", sampleLength);
             int32_t expectedLength = (osToolsCamera.camera -> data[cameraIndex + 1].i * osToolsCamera.camera -> data[cameraIndex + 2].i * 3) / 2;
+            BYTE *rawBufferFix;
+            DWORD sizeBufferFix;
+            uint32_t offset = 0;
             if (sampleLength > expectedLength) {
                 /* fix bug described here: https://stackoverflow.com/questions/71783335/unexpected-u-v-plane-offset-with-windows-media-foundation-h264-decoder */
-                IMFMediaBuffer *bufferFix;
-                pSample -> lpVtbl -> GetBufferByIndex(pSample, 0, &bufferFix);
-                BYTE *rawBufferFix;
-                DWORD sizeBufferFix;
                 hr = pBuffer -> lpVtbl -> Lock(pBuffer, &rawBufferFix, NULL, &sizeBufferFix);
                 if (FAILED(hr)) {
                     return 0;
                 }
-                uint32_t offset = (sampleLength - expectedLength) / osToolsCamera.camera -> data[cameraIndex + 2].i * osToolsCamera.camera -> data[cameraIndex + 1].i; // experimental results
+                offset = (sampleLength - expectedLength) / osToolsCamera.camera -> data[cameraIndex + 2].i * osToolsCamera.camera -> data[cameraIndex + 1].i; // experimental results
                 memmove(rawBufferFix, rawBufferFix + offset, expectedLength); // shift back UV plane - also accessing memory that i shouldn't (subtract (offset - (sampleLength - expectedLength)) from expectedLength argument if this crashes)
                 pBuffer -> lpVtbl -> Unlock(pBuffer);
-                bufferFix -> lpVtbl -> Release(bufferFix);
             }
             /* Phase 2: NV12 to RGB32 */
             // MFT_OUTPUT_STREAM_INFO outputInfo;
@@ -1858,11 +1856,20 @@ int32_t osToolsCameraReceive(char *name, uint8_t *data) {
             }
             nv12decoder -> lpVtbl -> ProcessMessage(nv12decoder, MFT_MESSAGE_COMMAND_FLUSH, 0);
             pSample = pTransformBuffer -> pSample;
+            if (offset != 0) {
+                /* part 2 of bug fix: relocate green bar to top of frame */
+                expectedLength = osToolsCamera.camera -> data[cameraIndex + 1].i * osToolsCamera.camera -> data[cameraIndex + 2].i * 4;
+                hr = pBuffer -> lpVtbl -> Lock(pBuffer, &rawBufferFix, NULL, &sizeBufferFix);
+                if (FAILED(hr)) {
+                    return 0;
+                }
+                offset *= 4;
+                memmove(rawBufferFix, rawBufferFix + offset, expectedLength - offset); // it's opposite of what you'd expect because of vertical flip (idk why)
+                pBuffer -> lpVtbl -> Unlock(pBuffer);
+            }
             break;
         }
     }
-
-    IMFMediaBuffer *pBuffer;
 
     hr = pSample -> lpVtbl -> ConvertToContiguousBuffer(pSample, &pBuffer);
     if (FAILED(hr)) {
@@ -1894,8 +1901,8 @@ int32_t osToolsCameraReceive(char *name, uint8_t *data) {
     }
 
     pBuffer -> lpVtbl -> Unlock(pBuffer);
+    pBuffer -> lpVtbl -> Release(pBuffer);
     if (osToolsCamera.camera -> data[cameraIndex + 6].p == NULL) {
-        pBuffer -> lpVtbl -> Release(pBuffer);
         pSample -> lpVtbl -> Release(pSample);
     }
     return iterData;
