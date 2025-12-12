@@ -1766,6 +1766,9 @@ int32_t osToolsCameraReceive(char *name, uint8_t *data) {
             pSample -> lpVtbl -> Release(pSample);
             return 0;
         }
+        DWORD sampleLength;
+        pSample -> lpVtbl -> GetTotalLength(pSample, &sampleLength);
+        // printf("ReadSample Length: %ld\n", sampleLength);
         // MFT_OUTPUT_STREAM_INFO outputInfo;
         // hr = h264decoder -> lpVtbl -> GetOutputStreamInfo(h264decoder, 0, &outputInfo);
         // printf("Output info flags: %lX\n", outputInfo.dwFlags);
@@ -1816,6 +1819,24 @@ int32_t osToolsCameraReceive(char *name, uint8_t *data) {
             }
             pSample -> lpVtbl -> Release(pSample); // assume sample must not be released between ProcessInput and ProcessOutput
             pSample = pTransformBuffer -> pSample;
+            pSample -> lpVtbl -> GetTotalLength(pSample, &sampleLength);
+            // printf("NV12 Sample Length: %ld\n", sampleLength);
+            int32_t expectedLength = (osToolsCamera.camera -> data[cameraIndex + 1].i * osToolsCamera.camera -> data[cameraIndex + 2].i * 3) / 2;
+            if (sampleLength > expectedLength) {
+                /* fix bug described here: https://stackoverflow.com/questions/71783335/unexpected-u-v-plane-offset-with-windows-media-foundation-h264-decoder */
+                IMFMediaBuffer *bufferFix;
+                pSample -> lpVtbl -> GetBufferByIndex(pSample, 0, &bufferFix);
+                BYTE *rawBufferFix;
+                DWORD sizeBufferFix;
+                hr = pBuffer -> lpVtbl -> Lock(pBuffer, &rawBufferFix, NULL, &sizeBufferFix);
+                if (FAILED(hr)) {
+                    return 0;
+                }
+                uint32_t offset = (sampleLength - expectedLength) / osToolsCamera.camera -> data[cameraIndex + 2].i * osToolsCamera.camera -> data[cameraIndex + 1].i; // experimental results
+                memmove(rawBufferFix, rawBufferFix + offset, expectedLength); // shift back UV plane - also accessing memory that i shouldn't (subtract (offset - (sampleLength - expectedLength)) from expectedLength argument if this crashes)
+                pBuffer -> lpVtbl -> Unlock(pBuffer);
+                bufferFix -> lpVtbl -> Release(bufferFix);
+            }
             /* Phase 2: NV12 to RGB32 */
             // MFT_OUTPUT_STREAM_INFO outputInfo;
             // hr = nv12decoder -> lpVtbl -> GetOutputStreamInfo(nv12decoder, 0, &outputInfo);
