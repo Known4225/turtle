@@ -20088,7 +20088,7 @@ int32_t osToolsSocketDestroy(char *socketName);
 
 /* Camera support */
 typedef struct {
-    list_t *camera; // Format Windows: camera name, width, height, framerate, pointer to source reader, pointer to IMFTransform decoder, pointer to buffer, pointer to IMFTransform decoder, pointer to buffer
+    list_t *camera; // Format Windows: camera name, width, height, framerate, pointer to source reader, pointer to IMFTransform decoder, pointer to buffer, pointer to IMFTransform decoder, pointer to buffer, pointer to savedMediaType
 } ost_camera_t;
 
 extern ost_camera_t osToolsCamera;
@@ -35673,6 +35673,10 @@ list_t *osToolsCameraList() {
         }
         printf("- Saved Subtype: %08lx-%02hx%02hx-%02x%02x-%02x%02x%02x%02x%02x%02x\n", savedSubtype.Data1, savedSubtype.Data2, savedSubtype.Data3,
         savedSubtype.Data4[0], savedSubtype.Data4[1], savedSubtype.Data4[2], savedSubtype.Data4[3], savedSubtype.Data4[4], savedSubtype.Data4[5], savedSubtype.Data4[6], savedSubtype.Data4[7]);
+        IMFMediaType *NV12MediaType;
+        MFCreateMediaType(&NV12MediaType);
+        savedMediaType -> lpVtbl -> CopyAllItems(savedMediaType, (IMFAttributes *) NV12MediaType);
+        hr = NV12MediaType -> lpVtbl -> SetGUID(NV12MediaType, &MF_MT_SUBTYPE, &MFVideoFormat_NV12);
         if (savedSubtype.Data1 == 0x34363248) {
             /* H264 decoder required */
             hr = CoCreateInstance(&CLSID_CMSH264DecoderMFT, NULL, CLSCTX_ALL, &IID_IMFTransform, (void **) &h264decoder);
@@ -35694,10 +35698,6 @@ list_t *osToolsCameraList() {
             MFCreateMediaType(&inputNativeType);
             savedMediaType -> lpVtbl -> CopyAllItems(savedMediaType, (IMFAttributes *) inputNativeType);
             inputNativeType -> lpVtbl -> SetUINT32(inputNativeType, &MF_MT_INTERLACE_MODE, MFVideoInterlace_MixedInterlaceOrProgressive);
-            IMFMediaType *NV12MediaType;
-            MFCreateMediaType(&NV12MediaType);
-            inputNativeType -> lpVtbl -> CopyAllItems(inputNativeType, (IMFAttributes *) NV12MediaType);
-            hr = NV12MediaType -> lpVtbl -> SetGUID(NV12MediaType, &MF_MT_SUBTYPE, &MFVideoFormat_NV12);
             if (FAILED(hr)) {
                 printf("osToolsCameraList SetGUID Error: 0x%lX\n", hr);
                 goto osToolsCameraList_done;
@@ -35712,50 +35712,50 @@ list_t *osToolsCameraList() {
                 printf("osToolsCameraList H264 SetOutputType Error: 0x%lX\n", hr);
                 goto osToolsCameraList_done;
             }
-            /* NV12 to RGB32 decoder - https://learn.microsoft.com/en-us/windows/win32/medfound/registering-and-enumerating-mfts#enumerating-mfts */
-            IMFActivate **ppActivate = NULL;
-            MFT_REGISTER_TYPE_INFO inputInfo = {MFMediaType_Video, MFVideoFormat_NV12};
-            MFT_REGISTER_TYPE_INFO outputInfo = {MFMediaType_Video, MFVideoFormat_RGB32};
-            uint32_t unFlags = MFT_ENUM_FLAG_SYNCMFT  | MFT_ENUM_FLAG_LOCALMFT | MFT_ENUM_FLAG_SORTANDFILTER;
-            uint32_t codecs = 0;
-            hr = MFTEnumEx(MFT_CATEGORY_VIDEO_PROCESSOR, unFlags, &inputInfo, &outputInfo, &ppActivate, &codecs); // it's a video processor not an encoder/decoder
-            if (FAILED(hr)) {
-                printf("osToolsCameraList ERROR: MFTEnumEx failed with 0x%lX\n", hr);
-                goto osToolsCameraList_done;
-            }
-            if (SUCCEEDED(hr) && codecs == 0) {
-                printf("osToolsCameraList ERROR: No codecs for NV12 to RGB32\n");
-                goto osToolsCameraList_done;
-            }
-            hr = ppActivate[0] -> lpVtbl -> ActivateObject(ppActivate[0], &IID_IMFTransform, (void **) &nv12decoder);
-            for (int32_t i = 0; i < codecs; i++) {
-                ppActivate[i] -> lpVtbl -> Release(ppActivate[i]);
-            }
-            CoTaskMemFree(ppActivate);
-            if (FAILED(hr)) {
-                printf("osToolsCameraList ActivateObject Error: 0x%lX\n", hr);
-                goto osToolsCameraList_done;
-            }
-            IMFMediaType *RGB32MediaType;
-            MFCreateMediaType(&RGB32MediaType);
-            NV12MediaType -> lpVtbl -> CopyAllItems(NV12MediaType, (IMFAttributes *) RGB32MediaType);
-            hr = RGB32MediaType -> lpVtbl -> SetGUID(RGB32MediaType, &MF_MT_SUBTYPE, &MFVideoFormat_RGB32);
-            hr = nv12decoder -> lpVtbl -> SetInputType(nv12decoder, 0, NV12MediaType, 0);
-            if (FAILED(hr)) {
-                printf("osToolsCameraList NV12 SetInputType Error: 0x%lX\n", hr);
-                goto osToolsCameraList_done;
-            }
-            hr = nv12decoder -> lpVtbl -> SetOutputType(nv12decoder, 0, RGB32MediaType, 0);
-            if (FAILED(hr)) {
-                printf("osToolsCameraList NV12 SetOutputType Error: 0x%lX\n", hr);
-                goto osToolsCameraList_done;
-            }
         } else {
             hr = mediaTypeHandler -> lpVtbl -> SetCurrentMediaType(mediaTypeHandler, savedMediaType);
             if (FAILED(hr)) {
                 printf("osToolsCameraList SetCurrentMediaType Error: 0x%lX\n", hr);
                 goto osToolsCameraList_done;
             }
+        }
+        /* NV12 to RGB32 decoder - https://learn.microsoft.com/en-us/windows/win32/medfound/registering-and-enumerating-mfts#enumerating-mfts */
+        IMFActivate **ppActivate = NULL;
+        MFT_REGISTER_TYPE_INFO inputInfo = {MFMediaType_Video, MFVideoFormat_NV12};
+        MFT_REGISTER_TYPE_INFO outputInfo = {MFMediaType_Video, MFVideoFormat_RGB32};
+        uint32_t unFlags = MFT_ENUM_FLAG_SYNCMFT  | MFT_ENUM_FLAG_LOCALMFT | MFT_ENUM_FLAG_SORTANDFILTER;
+        uint32_t codecs = 0;
+        hr = MFTEnumEx(MFT_CATEGORY_VIDEO_PROCESSOR, unFlags, &inputInfo, &outputInfo, &ppActivate, &codecs); // it's a video processor not an encoder/decoder
+        if (FAILED(hr)) {
+            printf("osToolsCameraList ERROR: MFTEnumEx failed with 0x%lX\n", hr);
+            goto osToolsCameraList_done;
+        }
+        if (SUCCEEDED(hr) && codecs == 0) {
+            printf("osToolsCameraList ERROR: No codecs for NV12 to RGB32\n");
+            goto osToolsCameraList_done;
+        }
+        hr = ppActivate[0] -> lpVtbl -> ActivateObject(ppActivate[0], &IID_IMFTransform, (void **) &nv12decoder);
+        for (int32_t i = 0; i < codecs; i++) {
+            ppActivate[i] -> lpVtbl -> Release(ppActivate[i]);
+        }
+        CoTaskMemFree(ppActivate);
+        if (FAILED(hr)) {
+            printf("osToolsCameraList ActivateObject Error: 0x%lX\n", hr);
+            goto osToolsCameraList_done;
+        }
+        IMFMediaType *RGB32MediaType;
+        MFCreateMediaType(&RGB32MediaType);
+        NV12MediaType -> lpVtbl -> CopyAllItems(NV12MediaType, (IMFAttributes *) RGB32MediaType);
+        hr = RGB32MediaType -> lpVtbl -> SetGUID(RGB32MediaType, &MF_MT_SUBTYPE, &MFVideoFormat_RGB32);
+        hr = nv12decoder -> lpVtbl -> SetInputType(nv12decoder, 0, NV12MediaType, 0);
+        if (FAILED(hr)) {
+            printf("osToolsCameraList NV12 SetInputType Error: 0x%lX\n", hr);
+            goto osToolsCameraList_done;
+        }
+        hr = nv12decoder -> lpVtbl -> SetOutputType(nv12decoder, 0, RGB32MediaType, 0);
+        if (FAILED(hr)) {
+            printf("osToolsCameraList NV12 SetOutputType Error: 0x%lX\n", hr);
+            goto osToolsCameraList_done;
         }
         char cameraString[32];
         sprintf(cameraString, "USB Camera %d", i);
@@ -35773,6 +35773,7 @@ list_t *osToolsCameraList() {
         list_append(osToolsCamera.camera, (unitype) NULL, 'l');
         list_append(osToolsCamera.camera, (unitype) (void *) nv12decoder, 'l');
         list_append(osToolsCamera.camera, (unitype) NULL, 'l');
+        list_append(osToolsCamera.camera, (unitype) (void *) savedMediaType, 'l');
     }
 osToolsCameraList_done:
     if (pAttributes) {
@@ -35808,15 +35809,15 @@ int32_t osToolsCameraOpen(char *name) {
         return -1;
     }
     pReader -> lpVtbl -> SetStreamSelection(pReader, MF_SOURCE_READER_FIRST_VIDEO_STREAM, TRUE);
-    IMFMediaType *readerNativeType;
-    int32_t dwStreamIndex = 0;
-    while (pReader -> lpVtbl -> GetNativeMediaType(pReader, MF_SOURCE_READER_FIRST_VIDEO_STREAM, dwStreamIndex, &readerNativeType) == S_OK) {
-        GUID nativeSubtype;
-        readerNativeType -> lpVtbl -> GetGUID(readerNativeType, &MF_MT_SUBTYPE, &nativeSubtype);
-        // printf("- Native Subtype %d: %08lx-%02hx%02hx-%02x%02x-%02x%02x%02x%02x%02x%02x\n", dwStreamIndex, nativeSubtype.Data1, nativeSubtype.Data2, nativeSubtype.Data3,
-        // nativeSubtype.Data4[0], nativeSubtype.Data4[1], nativeSubtype.Data4[2], nativeSubtype.Data4[3], nativeSubtype.Data4[4], nativeSubtype.Data4[5], nativeSubtype.Data4[6], nativeSubtype.Data4[7]);
-        dwStreamIndex++;
-    }
+    // IMFMediaType *readerNativeType;
+    // int32_t dwStreamIndex = 0;
+    // while (pReader -> lpVtbl -> GetNativeMediaType(pReader, MF_SOURCE_READER_FIRST_VIDEO_STREAM, dwStreamIndex, &readerNativeType) == S_OK) {
+    //     GUID nativeSubtype;
+    //     readerNativeType -> lpVtbl -> GetGUID(readerNativeType, &MF_MT_SUBTYPE, &nativeSubtype);
+    //     printf("- Native Subtype %d: %08lx-%02hx%02hx-%02x%02x-%02x%02x%02x%02x%02x%02x\n", dwStreamIndex, nativeSubtype.Data1, nativeSubtype.Data2, nativeSubtype.Data3,
+    //     nativeSubtype.Data4[0], nativeSubtype.Data4[1], nativeSubtype.Data4[2], nativeSubtype.Data4[3], nativeSubtype.Data4[4], nativeSubtype.Data4[5], nativeSubtype.Data4[6], nativeSubtype.Data4[7]);
+    //     dwStreamIndex++;
+    // }
     /*
     https://learn.microsoft.com/en-us/windows/win32/medfound/media-type-attributes
     https://learn.microsoft.com/en-us/windows/win32/medfound/video-subtype-guids#yuv-formats-8-bit-and-palettized
@@ -35826,12 +35827,13 @@ int32_t osToolsCameraOpen(char *name) {
     */
     IMFMediaType *readerType;
     MFCreateMediaType(&readerType);
-    readerType -> lpVtbl -> SetUINT32(readerType, &MF_SOURCE_READER_ENABLE_VIDEO_PROCESSING, TRUE);
     hr = readerType -> lpVtbl -> SetGUID(readerType, &MF_MT_MAJOR_TYPE, &MFMediaType_Video);
     if (FAILED(hr)) {
         printf("osToolsCameraOpen SetGUID Error: 0x%lX\n", hr);
         return -1;
     }
+    MFT_OUTPUT_DATA_BUFFER *pTransformBuffer;
+    IMFMediaBuffer *pBuffer = NULL;
     if (osToolsCamera.camera -> data[cameraIndex + 6].p) {
         /* H264 decoder exists */
         hr = readerType -> lpVtbl -> SetGUID(readerType, &MF_MT_SUBTYPE, &MFVideoFormat_H264);
@@ -35840,9 +35842,8 @@ int32_t osToolsCameraOpen(char *name) {
             return -1;
         }
         /* https://stackoverflow.com/questions/30825271/how-to-create-imfsample-for-windowsmediafoundation-h-264-encoder-mft */
-        MFT_OUTPUT_DATA_BUFFER *pTransformBuffer = malloc(sizeof(MFT_OUTPUT_DATA_BUFFER));
+        pTransformBuffer = malloc(sizeof(MFT_OUTPUT_DATA_BUFFER));
         pTransformBuffer -> dwStreamID = 0;
-        pTransformBuffer -> pSample = NULL;
         MFCreateSample(&(pTransformBuffer -> pSample));
         IMFMediaBuffer *pBuffer = NULL;
         MFCreateMemoryBuffer(osToolsCamera.camera -> data[cameraIndex + 1].i * osToolsCamera.camera -> data[cameraIndex + 2].i * 2, &pBuffer);
@@ -35850,24 +35851,24 @@ int32_t osToolsCameraOpen(char *name) {
         pTransformBuffer -> dwStatus = 0;
         pTransformBuffer -> pEvents = NULL;
         osToolsCamera.camera -> data[cameraIndex + 7].p = (void *) pTransformBuffer;
-        /* NV12 decoder buffer */
-        pTransformBuffer = malloc(sizeof(MFT_OUTPUT_DATA_BUFFER));
-        pTransformBuffer -> dwStreamID = 0;
-        pTransformBuffer -> pSample = NULL;
-        MFCreateSample(&(pTransformBuffer -> pSample));
-        MFCreateMemoryBuffer(osToolsCamera.camera -> data[cameraIndex + 1].i * osToolsCamera.camera -> data[cameraIndex + 2].i * 4, &pBuffer);
-        pTransformBuffer -> pSample -> lpVtbl -> AddBuffer(pTransformBuffer -> pSample, pBuffer);
-        pTransformBuffer -> dwStatus = 0;
-        pTransformBuffer -> pEvents = NULL;
-        osToolsCamera.camera -> data[cameraIndex + 9].p = (void *) pTransformBuffer;
     } else {
         /* no decoder */
-        hr = readerType -> lpVtbl -> SetGUID(readerType, &MF_MT_SUBTYPE, &MFVideoFormat_RGB32);
+        hr = readerType -> lpVtbl -> SetGUID(readerType, &MF_MT_SUBTYPE, &MFVideoFormat_NV12);
         if (FAILED(hr)) {
             printf("osToolsCameraOpen SetGUID Error: 0x%lX\n", hr);
             return -1;
         }
     }
+    /* NV12 decoder buffer */
+    pTransformBuffer = malloc(sizeof(MFT_OUTPUT_DATA_BUFFER));
+    pTransformBuffer -> dwStreamID = 0;
+    pTransformBuffer -> pSample = NULL;
+    MFCreateSample(&(pTransformBuffer -> pSample));
+    MFCreateMemoryBuffer(osToolsCamera.camera -> data[cameraIndex + 1].i * osToolsCamera.camera -> data[cameraIndex + 2].i * 4, &pBuffer);
+    pTransformBuffer -> pSample -> lpVtbl -> AddBuffer(pTransformBuffer -> pSample, pBuffer);
+    pTransformBuffer -> dwStatus = 0;
+    pTransformBuffer -> pEvents = NULL;
+    osToolsCamera.camera -> data[cameraIndex + 9].p = (void *) pTransformBuffer;
     hr = pReader -> lpVtbl -> SetCurrentMediaType(pReader, MF_SOURCE_READER_FIRST_VIDEO_STREAM, NULL, readerType);
     if (FAILED(hr)) {
         printf("osToolsCameraOpen SetCurrentMediaType Error: 0x%lX\n", hr); // getting 0xC00D5212 -> MF_E_TOPO_CODEC_NOT_FOUND: Could not find a decoder for the native stream type
@@ -35907,10 +35908,13 @@ int32_t osToolsCameraReceive(char *name, uint8_t *data) {
         break;
     }
 
+    MFT_OUTPUT_DATA_BUFFER *pTransformBuffer = NULL;
+    IMFTransform *nv12decoder = (IMFTransform *) osToolsCamera.camera -> data[cameraIndex + 8].p;
+    uint32_t offset = 0;
+    int32_t expectedLength = 0;
     if (osToolsCamera.camera -> data[cameraIndex + 6].p) {
         /* Phase 1: H264 to NV12 */
         IMFTransform *h264decoder = (IMFTransform *) osToolsCamera.camera -> data[cameraIndex + 6].p;
-        IMFTransform *nv12decoder = (IMFTransform *) osToolsCamera.camera -> data[cameraIndex + 8].p;
         hr = h264decoder -> lpVtbl -> ProcessInput(h264decoder, 0, pSample, 0);
         if (FAILED(hr)) {
             printf("osToolsCameraReceive ERROR: H264 ProcessInput failed with 0x%lX\n", hr);
@@ -35930,7 +35934,7 @@ int32_t osToolsCameraReceive(char *name, uint8_t *data) {
         MFT_OUTPUT_STREAM_FIXED_SAMPLE_SIZE = 0x4,
         */
         while (1) {
-            MFT_OUTPUT_DATA_BUFFER *pTransformBuffer = (MFT_OUTPUT_DATA_BUFFER *) osToolsCamera.camera -> data[cameraIndex + 7].p;
+            pTransformBuffer = (MFT_OUTPUT_DATA_BUFFER *) osToolsCamera.camera -> data[cameraIndex + 7].p;
             if (pTransformBuffer == NULL) {
                 printf("osToolsCameraReceive ERROR: pTransformBuffer is NULL\n");
                 return 0;
@@ -35971,12 +35975,12 @@ int32_t osToolsCameraReceive(char *name, uint8_t *data) {
             pSample = pTransformBuffer -> pSample;
             pSample -> lpVtbl -> GetTotalLength(pSample, &sampleLength);
             // printf("NV12 Sample Length: %ld\n", sampleLength);
-            int32_t expectedLength = (osToolsCamera.camera -> data[cameraIndex + 1].i * osToolsCamera.camera -> data[cameraIndex + 2].i * 3) / 2;
-            BYTE *rawBufferFix;
-            DWORD sizeBufferFix;
-            uint32_t offset = 0;
+            expectedLength = (osToolsCamera.camera -> data[cameraIndex + 1].i * osToolsCamera.camera -> data[cameraIndex + 2].i * 3) / 2;
+            
             if (sampleLength > expectedLength) {
                 /* fix bug described here: https://stackoverflow.com/questions/71783335/unexpected-u-v-plane-offset-with-windows-media-foundation-h264-decoder */
+                BYTE *rawBufferFix;
+                DWORD sizeBufferFix;
                 hr = pBuffer -> lpVtbl -> Lock(pBuffer, &rawBufferFix, NULL, &sizeBufferFix);
                 if (FAILED(hr)) {
                     return 0;
@@ -35985,42 +35989,45 @@ int32_t osToolsCameraReceive(char *name, uint8_t *data) {
                 memmove(rawBufferFix, rawBufferFix + offset, expectedLength); // shift back UV plane - also accessing memory that i shouldn't (subtract (offset - (sampleLength - expectedLength)) from expectedLength argument if this crashes)
                 pBuffer -> lpVtbl -> Unlock(pBuffer);
             }
-            /* Phase 2: NV12 to RGB32 */
-            // MFT_OUTPUT_STREAM_INFO outputInfo;
-            // hr = nv12decoder -> lpVtbl -> GetOutputStreamInfo(nv12decoder, 0, &outputInfo);
-            // printf("Output info flags: %lX\n", outputInfo.dwFlags);
-            /* literally 0 flags, i hate you */
-            pTransformBuffer = (MFT_OUTPUT_DATA_BUFFER *) osToolsCamera.camera -> data[cameraIndex + 9].p;
-            hr = pTransformBuffer -> pSample -> lpVtbl -> GetBufferByIndex(pTransformBuffer -> pSample, 0, &pBuffer);
-            pBuffer -> lpVtbl -> SetCurrentLength(pBuffer, 0); // rewind buffer so it can be used again
-            hr = nv12decoder -> lpVtbl -> ProcessInput(nv12decoder, 0, pSample, 0);
-            if (FAILED(hr)) {
-                printf("osToolsCameraReceive ERROR: NV12 ProcessInput failed with 0x%lX\n", hr);
-                nv12decoder -> lpVtbl -> ProcessMessage(nv12decoder, MFT_MESSAGE_COMMAND_FLUSH, 0);
-                return 0;
-            }
-            hr = nv12decoder -> lpVtbl -> ProcessOutput(nv12decoder, 0, 1, pTransformBuffer, &transformFlags);
-            if (FAILED(hr)) {
-                printf("osToolsCameraReceive ERROR: NV12 ProcessOutput failed with 0x%lX with flag 0x%lX\n", hr, transformFlags);
-                return 0;
-            }
-            nv12decoder -> lpVtbl -> ProcessMessage(nv12decoder, MFT_MESSAGE_COMMAND_FLUSH, 0);
-            pSample = pTransformBuffer -> pSample;
-            if (offset != 0) {
-                /* part 2 of bug fix: relocate green bar to top of frame */
-                expectedLength = osToolsCamera.camera -> data[cameraIndex + 1].i * osToolsCamera.camera -> data[cameraIndex + 2].i * 4;
-                hr = pBuffer -> lpVtbl -> Lock(pBuffer, &rawBufferFix, NULL, &sizeBufferFix);
-                if (FAILED(hr)) {
-                    return 0;
-                }
-                offset *= 4;
-                memmove(rawBufferFix, rawBufferFix + offset, expectedLength - offset); // it's opposite of what you'd expect because of vertical flip (idk why)
-                pBuffer -> lpVtbl -> Unlock(pBuffer);
-            }
             break;
         }
     }
+    /* Phase 2: NV12 to RGB32 */
+    // MFT_OUTPUT_STREAM_INFO outputInfo;
+    // hr = nv12decoder -> lpVtbl -> GetOutputStreamInfo(nv12decoder, 0, &outputInfo);
+    // printf("Output info flags: %lX\n", outputInfo.dwFlags);
+    /* literally 0 flags, i hate you */
+    pTransformBuffer = (MFT_OUTPUT_DATA_BUFFER *) osToolsCamera.camera -> data[cameraIndex + 9].p;
+    hr = pTransformBuffer -> pSample -> lpVtbl -> GetBufferByIndex(pTransformBuffer -> pSample, 0, &pBuffer);
+    pBuffer -> lpVtbl -> SetCurrentLength(pBuffer, 0); // rewind buffer so it can be used again
+    if (FAILED(hr)) {
+        printf("osToolsCameraReceive ERROR: NV12 ProcessInput failed with 0x%lX\n", hr);
+        nv12decoder -> lpVtbl -> ProcessMessage(nv12decoder, MFT_MESSAGE_COMMAND_FLUSH, 0);
+        return 0;
+    }
+    DWORD transformFlags = 0;
+    hr = nv12decoder -> lpVtbl -> ProcessOutput(nv12decoder, 0, 1, pTransformBuffer, &transformFlags);
+    if (FAILED(hr)) {
+        printf("osToolsCameraReceive ERROR: NV12 ProcessOutput failed with 0x%lX with flag 0x%lX\n", hr, transformFlags);
+        return 0;
+    }
+    nv12decoder -> lpVtbl -> ProcessMessage(nv12decoder, MFT_MESSAGE_COMMAND_FLUSH, 0);
+    pSample = pTransformBuffer -> pSample;
+    if (offset != 0) {
+        /* part 2 of bug fix: relocate green bar to top of frame */
+        BYTE *rawBufferFix;
+        DWORD sizeBufferFix;
+        expectedLength = osToolsCamera.camera -> data[cameraIndex + 1].i * osToolsCamera.camera -> data[cameraIndex + 2].i * 4;
+        hr = pBuffer -> lpVtbl -> Lock(pBuffer, &rawBufferFix, NULL, &sizeBufferFix);
+        if (FAILED(hr)) {
+            return 0;
+        }
+        offset *= 4;
+        memmove(rawBufferFix, rawBufferFix + offset, expectedLength - offset); // it's opposite of what you'd expect because of vertical flip (idk why)
+        pBuffer -> lpVtbl -> Unlock(pBuffer);
+    }
 
+    /* commence the quence */
     hr = pSample -> lpVtbl -> ConvertToContiguousBuffer(pSample, &pBuffer);
     if (FAILED(hr)) {
         return 0;
@@ -36052,9 +36059,9 @@ int32_t osToolsCameraReceive(char *name, uint8_t *data) {
 
     pBuffer -> lpVtbl -> Unlock(pBuffer);
     pBuffer -> lpVtbl -> Release(pBuffer);
-    if (osToolsCamera.camera -> data[cameraIndex + 6].p == NULL) {
-        pSample -> lpVtbl -> Release(pSample);
-    }
+    // if (osToolsCamera.camera -> data[cameraIndex + 6].p != NULL) {
+    //     pSample -> lpVtbl -> Release(pSample);
+    // }
     return iterData;
 }
 
