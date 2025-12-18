@@ -1853,6 +1853,7 @@ int32_t osToolsCameraReceive(char *name, uint8_t *data) {
     pTransformBuffer = (MFT_OUTPUT_DATA_BUFFER *) osToolsCamera.camera -> data[cameraIndex + 9].p;
     hr = pTransformBuffer -> pSample -> lpVtbl -> GetBufferByIndex(pTransformBuffer -> pSample, 0, &pBuffer);
     pBuffer -> lpVtbl -> SetCurrentLength(pBuffer, 0); // rewind buffer so it can be used again
+    hr = nv12decoder -> lpVtbl -> ProcessInput(nv12decoder, 0, pSample, 0);
     if (FAILED(hr)) {
         printf("osToolsCameraReceive ERROR: NV12 ProcessInput failed with 0x%lX\n", hr);
         nv12decoder -> lpVtbl -> ProcessMessage(nv12decoder, MFT_MESSAGE_COMMAND_FLUSH, 0);
@@ -1865,6 +1866,9 @@ int32_t osToolsCameraReceive(char *name, uint8_t *data) {
         return 0;
     }
     nv12decoder -> lpVtbl -> ProcessMessage(nv12decoder, MFT_MESSAGE_COMMAND_FLUSH, 0);
+    if (osToolsCamera.camera -> data[cameraIndex + 6].p == NULL) {
+        pSample -> lpVtbl -> Release(pSample);
+    }
     pSample = pTransformBuffer -> pSample;
     if (offset != 0) {
         /* part 2 of bug fix: relocate green bar to top of frame */
@@ -1892,29 +1896,16 @@ int32_t osToolsCameraReceive(char *name, uint8_t *data) {
         return 0;
     }
     int32_t iterData = 0;
-    if (osToolsCamera.camera -> data[cameraIndex + 6].p) {
-        /* flip image vertically for H264 decoded images (idk why) */
-        for (int32_t j = osToolsCamera.camera -> data[cameraIndex + 2].i - 1; j > -1; j--) {
-            for (int32_t i = 0; i < osToolsCamera.camera -> data[cameraIndex + 1].i * 4; i += 4) {
-                data[iterData++] = rawBuffer[j * osToolsCamera.camera -> data[cameraIndex + 1].i * 4 + i + 2];
-                data[iterData++] = rawBuffer[j * osToolsCamera.camera -> data[cameraIndex + 1].i * 4 + i + 1];
-                data[iterData++] = rawBuffer[j * osToolsCamera.camera -> data[cameraIndex + 1].i * 4 + i];
-            }
-        }
-    } else {
-        /* drop the alpha character */
-        for (int32_t i = 0; i < size; i += 4) {
-            data[iterData++] = rawBuffer[i + 2];
-            data[iterData++] = rawBuffer[i + 1];
-            data[iterData++] = rawBuffer[i];
+    /* flip image vertically since the NV12 to RGB transform does this (idk why) */
+    for (int32_t j = osToolsCamera.camera -> data[cameraIndex + 2].i - 1; j > -1; j--) {
+        for (int32_t i = 0; i < osToolsCamera.camera -> data[cameraIndex + 1].i * 4; i += 4) {
+            data[iterData++] = rawBuffer[j * osToolsCamera.camera -> data[cameraIndex + 1].i * 4 + i + 2];
+            data[iterData++] = rawBuffer[j * osToolsCamera.camera -> data[cameraIndex + 1].i * 4 + i + 1];
+            data[iterData++] = rawBuffer[j * osToolsCamera.camera -> data[cameraIndex + 1].i * 4 + i];
         }
     }
-
     pBuffer -> lpVtbl -> Unlock(pBuffer);
     pBuffer -> lpVtbl -> Release(pBuffer);
-    // if (osToolsCamera.camera -> data[cameraIndex + 6].p != NULL) {
-    //     pSample -> lpVtbl -> Release(pSample);
-    // }
     return iterData;
 }
 
