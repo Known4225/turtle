@@ -1580,8 +1580,8 @@ void sliderUpdate() {
         }
         if (sliderp -> renderNumberFactor != 0) {
             tt_setColor(sliderp -> color[TT_COLOR_SLOT_SLIDER_TEXT]);
-            double rounded = round(sliderp -> value * sliderp -> renderNumberFactor);
-            turtleTextWriteStringf(sliderp -> x + sliderOffsetXFactorSmall, sliderp -> y + sliderOffsetYFactorSmall, 4, sliderAlignFactor, "%.0lf", rounded);
+            int32_t rounded = (int32_t) round(sliderp -> value * sliderp -> renderNumberFactor);
+            turtleTextWriteStringf(sliderp -> x + sliderOffsetXFactorSmall, sliderp -> y + sliderOffsetYFactorSmall, 4, sliderAlignFactor, "%d", rounded);
         }
         if (sliderp -> variable != NULL) {
             *sliderp -> variable = sliderp -> value;
