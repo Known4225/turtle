@@ -66,10 +66,9 @@ The example project has a set of files in the `config/` folder that can be modif
 - Alignment options for switches
 - Upward dropdown
 - Text-only textbox
-- Cleanup Win32Tcp
 - Write wiki/documentation
 - Fix flipped world coordinates
-- Linux COM and TCP/IP support
+- Linux COM support
 
 # License (MIT)
 
