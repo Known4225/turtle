@@ -19810,6 +19810,9 @@ typedef struct {
     /* value */
     char *text; // text of textbox
     char *value; // text of textbox (duplicate name - always equal to text)
+    /* whitelist */
+    list_t *whitelist;
+    list_t *blacklist;
 } tt_textbox_t;
 
 /* initialise UI elements */
@@ -32840,6 +32843,8 @@ tt_textbox_t *textboxInit(char *label, char *variable, uint32_t maxCharacters, d
     textboxp -> renderNumCharacters = 0;
     list_append(tt_elements.textboxes, (unitype) (void *) textboxp, 'p');
     list_append(tt_elements.all, (unitype) (void *) textboxp, 'l');
+    textboxp -> whitelist = NULL;
+    textboxp -> blacklist = NULL;
     return textboxp;
 }
 
@@ -33761,6 +33766,25 @@ void textboxAddKey(tt_textbox_t *textboxp, int32_t key) {
         size = 4;
     }
     if (len < textboxp -> maxCharacters) {
+        if (textboxp -> blacklist != NULL) {
+            for (int32_t i = 0; i < textboxp -> blacklist -> length; i++) {
+                if (strcmp(buffer, textboxp -> blacklist -> data[i].s) == 0) {
+                    return;
+                }
+            }
+        }
+        if (textboxp -> whitelist != NULL) {
+            int32_t onWhitelist = 0;
+            for (int32_t i = 0; i < textboxp -> whitelist -> length; i++) {
+                if (strcmp(buffer, textboxp -> whitelist -> data[i].s) == 0) {
+                    onWhitelist = 1;
+                    break;
+                }
+            }
+            if (onWhitelist == 0) {
+                return;
+            }
+        }
         strins(textboxp -> text, (char *) buffer, textboxp -> editIndex);
         textboxp -> editIndex += size;
     }
