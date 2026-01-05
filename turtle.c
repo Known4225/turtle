@@ -116,6 +116,21 @@ int main(int argc, char *argv[]) {
     }
     glfwMakeContextCurrent(window);
     glfwSetWindowSizeLimits(window, windowHeight * 16 / 9 * 0.4, windowHeight * 0.4, windowHeight * 16 / 9 * optimizedScalingFactor, windowHeight * optimizedScalingFactor);
+    /* initialise logo */
+    GLFWimage icon;
+    int32_t iconChannels;
+    char constructedFilepath[5120];
+    strcpy(constructedFilepath, osToolsFileDialog.executableFilepath);
+    strcat(constructedFilepath, "images/thumbnail.png");
+    uint8_t *iconPixels = stbi_load(constructedFilepath, &icon.width, &icon.height, &iconChannels, 4); // 4 color channels for RGBA
+    if (iconPixels != NULL) {
+        icon.pixels = iconPixels;
+        glfwSetWindowIcon(window, 1, &icon);
+        glfwPollEvents(); // update taskbar icon correctly on windows - https://github.com/glfw/glfw/issues/2753
+        free(iconPixels);
+    } else {
+        printf("Could not load thumbnail %s\n", constructedFilepath);
+    }
 
     /* initialise turtle */
     turtleInit(window, -320, -180, 320, 180);
@@ -132,7 +147,6 @@ int main(int argc, char *argv[]) {
     osToolsFileDialogAddGlobalExtension("txt"); // add txt to extension restrictions
     osToolsFileDialogAddGlobalExtension("csv"); // add csv to extension restrictions
     /* initialise turtleText */
-    char constructedFilepath[5120];
     strcpy(constructedFilepath, osToolsFileDialog.executableFilepath);
     strcat(constructedFilepath, "config/roberto.tgl");
     turtleTextInit(constructedFilepath);
@@ -164,20 +178,6 @@ int main(int argc, char *argv[]) {
     }
     if (columnLike != NULL) {
         list_print(columnLike);
-    }
-    /* initialise logo */
-    GLFWimage icon;
-    int32_t iconChannels;
-    strcpy(constructedFilepath, osToolsFileDialog.executableFilepath);
-    strcat(constructedFilepath, "images/thumbnail.png");
-    uint8_t *iconPixels = stbi_load(constructedFilepath, &icon.width, &icon.height, &iconChannels, 4); // 4 color channels for RGBA
-    if (iconPixels != NULL) {
-        icon.pixels = iconPixels;
-        glfwSetWindowIcon(window, 1, &icon);
-        glfwPollEvents(); // update taskbar icon correctly on windows - https://github.com/glfw/glfw/issues/2753
-        free(iconPixels);
-    } else {
-        printf("Could not load thumbnail %s\n", constructedFilepath);
     }
     /* textures */
     turtle_texture_t empvImage = turtleTextureLoad("images/EMPV.png");
