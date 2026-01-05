@@ -523,6 +523,9 @@ typedef struct {
     /* value */
     char *text; // text of textbox
     char *value; // text of textbox (duplicate name - always equal to text)
+    /* whitelist */
+    list_t *whitelist;
+    list_t *blacklist;
 } tt_textbox_t;
 
 /* initialise UI elements */
