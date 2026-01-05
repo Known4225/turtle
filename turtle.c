@@ -174,6 +174,8 @@ int main(int argc, char *argv[]) {
     if (iconPixels != NULL) {
         icon.pixels = iconPixels;
         glfwSetWindowIcon(window, 1, &icon);
+        glfwPollEvents(); // update taskbar icon correctly on windows - https://github.com/glfw/glfw/issues/2753
+        free(iconPixels);
     } else {
         printf("Could not load thumbnail %s\n", constructedFilepath);
     }
