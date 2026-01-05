@@ -217,6 +217,15 @@ turtle_texture_t turtleTextureLoadList(list_t *list, uint32_t width, uint32_t he
 /* load data from a list or array of uint8 (make one NULL) - use GL_RGB or GL_RGBA for encoding */
 turtle_texture_t turtleTextureLoadListArrayInternal(list_t *list, uint8_t *array, uint32_t width, uint32_t height, uint32_t encoding);
 
+/* get the original width of a loaded texture */
+int32_t turtleTextureGetWidth(turtle_texture_t texture);
+
+/* get the original height of a loaded texture */
+int32_t turtleTextureGetHeight(turtle_texture_t texture);
+
+/* print texture name, width, height, and channels */
+void turtleTexturePrint(turtle_texture_t texture);
+
 /* remove a texture from GPU memory */
 int32_t turtleTextureUnload(turtle_texture_t texture);
 
@@ -225,9 +234,6 @@ int32_t turtleTextureUnloadAll();
 
 /* adds a (blit) rectangular texture */
 void turtleTexture(turtle_texture_t texture, double x1, double y1, double x2, double y2, double rot, double r, double g, double b);
-
-/* print texture information */
-void turtleTexturePrint(turtle_texture_t texture);
 
 /* draws a circle at the specified x and y (coordinates) */
 void turtleCircleRenderInternal(double x, double y, double rad, double r, double g, double b, double a, double xcenter, double ycenter, double xfact, double yfact, double prez);

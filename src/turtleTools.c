@@ -1979,7 +1979,7 @@ void textboxAddKey(tt_textbox_t *textboxp, int32_t key) {
     if (len < textboxp -> maxCharacters) {
         if (textboxp -> blacklist != NULL) {
             for (int32_t i = 0; i < textboxp -> blacklist -> length; i++) {
-                if (strcmp(buffer, textboxp -> blacklist -> data[i].s) == 0) {
+                if (strcmp((char *) buffer, textboxp -> blacklist -> data[i].s) == 0) {
                     return;
                 }
             }
@@ -1987,7 +1987,7 @@ void textboxAddKey(tt_textbox_t *textboxp, int32_t key) {
         if (textboxp -> whitelist != NULL) {
             int32_t onWhitelist = 0;
             for (int32_t i = 0; i < textboxp -> whitelist -> length; i++) {
-                if (strcmp(buffer, textboxp -> whitelist -> data[i].s) == 0) {
+                if (strcmp((char *) buffer, textboxp -> whitelist -> data[i].s) == 0) {
                     onWhitelist = 1;
                     break;
                 }

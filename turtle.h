@@ -19104,6 +19104,15 @@ turtle_texture_t turtleTextureLoadList(list_t *list, uint32_t width, uint32_t he
 /* load data from a list or array of uint8 (make one NULL) - use GL_RGB or GL_RGBA for encoding */
 turtle_texture_t turtleTextureLoadListArrayInternal(list_t *list, uint8_t *array, uint32_t width, uint32_t height, uint32_t encoding);
 
+/* get the original width of a loaded texture */
+int32_t turtleTextureGetWidth(turtle_texture_t texture);
+
+/* get the original height of a loaded texture */
+int32_t turtleTextureGetHeight(turtle_texture_t texture);
+
+/* print texture name, width, height, and channels */
+void turtleTexturePrint(turtle_texture_t texture);
+
 /* remove a texture from GPU memory */
 int32_t turtleTextureUnload(turtle_texture_t texture);
 
@@ -19112,9 +19121,6 @@ int32_t turtleTextureUnloadAll();
 
 /* adds a (blit) rectangular texture */
 void turtleTexture(turtle_texture_t texture, double x1, double y1, double x2, double y2, double rot, double r, double g, double b);
-
-/* print texture information */
-void turtleTexturePrint(turtle_texture_t texture);
 
 /* draws a circle at the specified x and y (coordinates) */
 void turtleCircleRenderInternal(double x, double y, double rad, double r, double g, double b, double a, double xcenter, double ycenter, double xfact, double yfact, double prez);
@@ -29929,6 +29935,14 @@ turtle_texture_t turtleTextureLoadListArrayInternal(list_t *list, uint8_t *array
     return -1;
 }
 
+int32_t turtleTextureGetWidth(turtle_texture_t texture) {
+    return -1;
+}
+
+int32_t turtleTextureGetHeight(turtle_texture_t texture) {
+    return -1;
+}
+
 int32_t turtleTextureUnload(turtle_texture_t texture) {
     return -1;
 }
@@ -30204,6 +30218,35 @@ turtle_texture_t turtleTextureLoadListArrayInternal(list_t *list, uint8_t *array
     return texture;
 }
 
+int32_t turtleTextureGetWidth(turtle_texture_t texture) {
+    if (texture < 0 || texture >= turtle.textureList -> length) {
+        return -1;
+    }
+    return turtle.textureList -> data[texture + 1].i;
+}
+
+int32_t turtleTextureGetHeight(turtle_texture_t texture) {
+    if (texture < 0 || texture >= turtle.textureList -> length) {
+        return -1;
+    }
+    return turtle.textureList -> data[texture + 1].i;
+}
+
+void turtleTexturePrint(turtle_texture_t texture) {
+    printf("Texture ID: %d\n", texture);
+    if (texture >= 0 && texture < turtle.textureList -> length) {
+        printf("- Texture Name: %s\n", turtle.textureList -> data[texture].s);
+        printf("- Texture Width: %d\n", turtle.textureList -> data[texture + 1].i);
+        printf("- Texture Height: %d\n", turtle.textureList -> data[texture + 2].i);
+        printf("- Texture Channel: %d\n", turtle.textureList -> data[texture + 3].i);
+    } else {
+        printf("- Texture Name: NULL\n");
+        printf("- Texture Width: NULL\n");
+        printf("- Texture Height: NULL\n");
+        printf("- Texture Channel: NULL\n");
+    }
+}
+
 int32_t turtleTextureUnload(turtle_texture_t texture) {
     /* update list */
     if (texture >= turtle.textureList -> length || texture < 1) {
@@ -30233,18 +30276,6 @@ void turtleTexture(turtle_texture_t texture, double x1, double y1, double x2, do
     list_append(turtle.penPos, (unitype) (g / 255), 'd');
     list_append(turtle.penPos, (unitype) (128 + texture / 4), 'h'); // blit texture signifier + texture code - limited to 32639 textures
     list_append(turtle.penPos, (unitype) (b / 255), 'd');
-}
-
-void turtleTexturePrint(turtle_texture_t texture) {
-    printf("Texture ID: %d\n", texture);
-    if (texture >= 0 && texture < turtle.textureList -> length) {
-        printf("- Texture Name: %s\n", turtle.textureList -> data[texture].s);
-    } else {
-        printf("- Texture Name: NULL\n");
-    }
-    printf("- Texture Width: %d\n", turtle.textureList -> data[texture + 1].i);
-    printf("- Texture Height: %d\n", turtle.textureList -> data[texture + 2].i);
-    printf("- Texture Channel: %d\n", turtle.textureList -> data[texture + 3].i);
 }
 
 void turtleSetTextureSize(int32_t width, int32_t height) {
@@ -33768,7 +33799,7 @@ void textboxAddKey(tt_textbox_t *textboxp, int32_t key) {
     if (len < textboxp -> maxCharacters) {
         if (textboxp -> blacklist != NULL) {
             for (int32_t i = 0; i < textboxp -> blacklist -> length; i++) {
-                if (strcmp(buffer, textboxp -> blacklist -> data[i].s) == 0) {
+                if (strcmp((char *) buffer, textboxp -> blacklist -> data[i].s) == 0) {
                     return;
                 }
             }
@@ -33776,7 +33807,7 @@ void textboxAddKey(tt_textbox_t *textboxp, int32_t key) {
         if (textboxp -> whitelist != NULL) {
             int32_t onWhitelist = 0;
             for (int32_t i = 0; i < textboxp -> whitelist -> length; i++) {
-                if (strcmp(buffer, textboxp -> whitelist -> data[i].s) == 0) {
+                if (strcmp((char *) buffer, textboxp -> whitelist -> data[i].s) == 0) {
                     onWhitelist = 1;
                     break;
                 }
