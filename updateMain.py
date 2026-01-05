@@ -62,3 +62,8 @@ if outWindows == 0 and outLinux == 0:
     commitMessage = input("Enter commit message: ")
     subprocess.run(f"git commit -m\"{commitMessage}\"")
     subprocess.run("git push")
+    os.chdir("../turtle-development")
+    subprocess.run("git pull")
+    subprocess.run("git add .")
+    subprocess.run(f"git commit -m\"{commitMessage}\"")
+    subprocess.run("git push")
