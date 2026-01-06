@@ -266,7 +266,6 @@ int main(int argc, char *argv[]) {
     list_append(dropdownOptions, (unitype) "D", 's');
     list_append(dropdownOptions, (unitype) "E", 's');
     tt_dropdown_t *dropdown = dropdownInit("Dropdown", dropdownOptions, NULL, TT_DROPDOWN_ALIGN_CENTER, 0, 70, 10);
-    dropdown -> direction = TT_DROPDOWN_DIRECTION_UP;
     tt_textbox_t *textbox = textboxInit("Textbox", NULL, 128, -50, -110, 10, 100);
     list_t *contextOptions = list_init();
     list_append(contextOptions, (unitype) "Button", 's');

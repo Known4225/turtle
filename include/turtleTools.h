@@ -477,8 +477,9 @@ typedef enum {
 
 typedef enum {
     TT_DROPDOWN_DIRECTION_AUTO = 0,
-    TT_DROPDOWN_DIRECTION_UP = 1,
-    TT_DROPDOWN_DIRECTION_DOWN = 2,
+    TT_DROPDOWN_DIRECTION_AUTO_PREFER_UP = 1,
+    TT_DROPDOWN_DIRECTION_UP = 2,
+    TT_DROPDOWN_DIRECTION_DOWN = 3,
 } tt_dropdown_direction_t;
 
 /* dropdown */

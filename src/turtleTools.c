@@ -1319,7 +1319,6 @@ void switchUpdate() {
 /* angle between two coordinates (in degrees) */
 double angleBetween(double x1, double y1, double x2, double y2) {
     double output;
-    /* TODO - Fix issue with y2 - y1 equal to 0 breaking the angle */
     if (y2 == y1) {
         if (x2 >= x1) {
             output = 90;
@@ -1836,7 +1835,25 @@ void dropdownUpdate() {
             dropdownAlignFactor = 100;
             turtleTextWriteUnicode(dropdownp -> label, dropdownX - dropdownp -> size / 5, dropdownY + 2 * dropdownp -> size, dropdownp -> size - 1, dropdownAlignFactor);
         }
-        int32_t dropdownDirection = dropdownp -> direction; // TODO - handle auto
+        int32_t dropdownDirection = dropdownp -> direction;
+        if (dropdownDirection == TT_DROPDOWN_DIRECTION_AUTO) {
+            if (dropdownY - dropdownp -> size * 0.9 - (dropdownp -> options -> length - 1) * itemHeight <= turtle.initbounds[1]) {
+                dropdownDirection = TT_DROPDOWN_DIRECTION_UP;
+            } else {
+                dropdownDirection = TT_DROPDOWN_DIRECTION_DOWN;
+            }
+        }
+        if (dropdownDirection == TT_DROPDOWN_DIRECTION_AUTO_PREFER_UP) {
+            if (dropdownY + dropdownp -> size * 0.9 + (dropdownp -> options -> length - 1) * itemHeight >= turtle.initbounds[3]) {
+                dropdownDirection = TT_DROPDOWN_DIRECTION_DOWN;
+            } else {
+                dropdownDirection = TT_DROPDOWN_DIRECTION_UP;
+            }
+        }
+        int32_t directionRender = 1;
+        if (dropdownDirection == TT_DROPDOWN_DIRECTION_UP) {
+            directionRender = -1;
+        }
         if (dropdownp -> status == -1) {
             tt_setColor(dropdownp -> color[TT_COLOR_SLOT_DROPDOWN_SELECT]);
             turtleRectangle(dropdownXFactor[0], dropdownY - dropdownp -> size * 0.9, dropdownXFactor[1] + dropdownp -> size, dropdownY + dropdownp -> size * 0.9);
@@ -1872,8 +1889,11 @@ void dropdownUpdate() {
                 }
                 if (dropdownp -> status == 1) {
                     if (!turtleMouseDown()) {
-                        if (turtle.mouseX > dropdownMaxXFactor[0] && turtle.mouseX < dropdownMaxXFactor[1] && turtle.mouseY >= dropdownY - dropdownp -> size * 0.9 - (dropdownp -> options -> length - 1) * itemHeight && turtle.mouseY < dropdownY + dropdownp -> size * 0.9 - itemHeight) {
+                        if (turtle.mouseX > dropdownMaxXFactor[0] && turtle.mouseX < dropdownMaxXFactor[1] && ((directionRender == 1 && turtle.mouseY > dropdownY - dropdownp -> size * 0.9 - (dropdownp -> options -> length - 1) * itemHeight && turtle.mouseY <= dropdownY + dropdownp -> size * 0.9 - itemHeight) || (directionRender == -1 && turtle.mouseY < dropdownY + dropdownp -> size * 0.9 + (dropdownp -> options -> length - 1) * itemHeight && turtle.mouseY >= dropdownY - dropdownp -> size * 0.9 + itemHeight))) {
                             uint32_t selected = round((dropdownY - turtle.mouseY) / itemHeight);
+                            if (directionRender == -1) {
+                                selected = round((turtle.mouseY - dropdownY) / itemHeight);
+                            }
                             if (selected != 0) {
                                 if (dropdownp -> index >= selected) {
                                     dropdownp -> index = selected - 1;
@@ -1897,17 +1917,13 @@ void dropdownUpdate() {
                 if (dropdownp -> status == 2 || dropdownp -> status == 1) {
                     tt_globals.elementLogicType = TT_ELEMENT_PRIORITY_DROPDOWN;
                     tt_globals.elementLogicIndex = i;
-                    int32_t directionRender = 1;
-                    if (dropdownDirection == TT_DROPDOWN_DIRECTION_UP) {
-                        directionRender = -1;
-                    }
-                    if (turtle.mouseX > dropdownMaxXFactor[0] && turtle.mouseX < dropdownMaxXFactor[1] && ((directionRender == 1 && turtle.mouseY > dropdownY - dropdownp -> size * 0.9 - (dropdownp -> options -> length - 1) * itemHeight && turtle.mouseY <= dropdownY + dropdownp -> size * 0.9) || (directionRender == -1 && turtle.mouseY < dropdownY + dropdownp -> size * 0.9 + (dropdownp -> options -> length - 1) * itemHeight && turtle.mouseY <= dropdownY - dropdownp -> size * 0.9))) {
+                    if (turtle.mouseX > dropdownMaxXFactor[0] && turtle.mouseX < dropdownMaxXFactor[1] && ((directionRender == 1 && turtle.mouseY > dropdownY - dropdownp -> size * 0.9 - (dropdownp -> options -> length - 1) * itemHeight && turtle.mouseY <= dropdownY + dropdownp -> size * 0.9) || (directionRender == -1 && turtle.mouseY < dropdownY + dropdownp -> size * 0.9 + (dropdownp -> options -> length - 1) * itemHeight && turtle.mouseY >= dropdownY - dropdownp -> size * 0.9))) {
                         uint32_t selected = round((dropdownY - turtle.mouseY) / itemHeight);
                         if (directionRender == -1) {
                             selected = round((turtle.mouseY - dropdownY) / itemHeight);
                         }
                         tt_setColor(dropdownp -> color[TT_COLOR_SLOT_DROPDOWN_HOVER]);
-                        turtleRectangle(dropdownMaxXFactor[0], dropdownY - dropdownp -> size * 0.9 * directionRender - selected * itemHeight * directionRender, dropdownMaxXFactor[1], dropdownY + dropdownp -> size * 0.9 - selected * itemHeight * directionRender);
+                        turtleRectangle(dropdownMaxXFactor[0], dropdownY - dropdownp -> size * 0.9 - selected * itemHeight * directionRender, dropdownMaxXFactor[1], dropdownY + dropdownp -> size * 0.9 - selected * itemHeight * directionRender);
                         if (turtleMouseDown() && dropdownp -> status == 2) {
                             if (selected != 0) {
                                 if (dropdownp -> index >= selected) {
