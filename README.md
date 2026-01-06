@@ -64,6 +64,7 @@ The example project has a set of files in the `config/` folder that can be modif
 # To Do
 - Fix annoying bug with scrollbar and ribbon hover cancelling and closing dropdown (make it so you have to click on scrollbar)
 - Alignment options for switches
+- Add option to stretch or pad window (when resized)
 - Text-only textbox
 - Write wiki/documentation
 - Fix flipped world coordinates
