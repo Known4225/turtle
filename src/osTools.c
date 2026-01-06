@@ -173,7 +173,7 @@ void osToolsShowCursor() {
 
 list_t *osToolsLoadInternal(char *filename, ost_csv_t rowOrColumn, char delimeter, ost_csv_field_t fieldType) {
     uint32_t fileSize;
-    uint8_t *mappedFile = osToolsMapFile(filename, &fileSize);
+    uint8_t *mappedFile = osToolsFileMap(filename, &fileSize);
     if (mappedFile == NULL) {
         return NULL;
     }
@@ -370,7 +370,7 @@ list_t *osToolsLoadInternal(char *filename, ost_csv_t rowOrColumn, char delimete
         }
         list_append(outputList -> data[outputList -> length - 1].r, field, listType);
     }
-    osToolsUnmapFile(mappedFile);
+    osToolsFileUnmap(mappedFile);
     return outputList;
 }
 
@@ -604,7 +604,7 @@ int32_t osToolsFileDialogPrompt(ost_file_dialog_save_t openOrSave, ost_file_dial
     return 0;
 }
 
-uint8_t *osToolsMapFile(char *filename, uint32_t *sizeOutput) {
+uint8_t *osToolsFileMap(char *filename, uint32_t *sizeOutput) {
     HANDLE fileHandle = CreateFileA(filename, FILE_GENERIC_READ | FILE_GENERIC_WRITE, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
     if (fileHandle == INVALID_HANDLE_VALUE) {
         printf("Could not open file %ld\n", GetLastError());
@@ -639,7 +639,7 @@ uint8_t *osToolsMapFile(char *filename, uint32_t *sizeOutput) {
     return address;
 }
 
-int32_t osToolsUnmapFile(uint8_t *data) {
+int32_t osToolsFileUnmap(uint8_t *data) {
     UnmapViewOfFile(data);
     int32_t index = -1;
     for (uint32_t i = 0; i < osToolsMemmap.mappedFiles -> length; i += 4) {
@@ -662,11 +662,11 @@ int32_t osToolsUnmapFile(uint8_t *data) {
     }
 }
 
-list_t *osToolsListFilesAndFolders(char *directory) {
+list_t *osToolsFileAndFolderList(char *directory) {
     /* https://learn.microsoft.com/en-us/windows/win32/fileio/listing-the-files-in-a-directory */
     list_t *output = list_init();
     if (strlen(directory) > MAX_PATH - 3) {
-        printf("osToolsListFiles: Directory name too long\n");
+        printf("osToolsFileAndFolderList: Directory name too long\n");
         return output;
     }
     char directoryFor[MAX_PATH];
@@ -675,7 +675,7 @@ list_t *osToolsListFilesAndFolders(char *directory) {
     WIN32_FIND_DATA findData;
     HANDLE fileHandle = FindFirstFile(directoryFor, &findData);
     if (fileHandle == INVALID_HANDLE_VALUE) {
-        printf("osToolsListFiles: Handle invalid error %ld\n", GetLastError());
+        printf("osToolsFileAndFolderList: Handle invalid error %ld\n", GetLastError());
         return output;
     }
     LARGE_INTEGER filesize;
@@ -696,11 +696,11 @@ list_t *osToolsListFilesAndFolders(char *directory) {
     return output;
 }
 
-list_t *osToolsListFiles(char *directory) {
+list_t *osToolsFileList(char *directory) {
     /* https://learn.microsoft.com/en-us/windows/win32/fileio/listing-the-files-in-a-directory */
     list_t *output = list_init();
     if (strlen(directory) > MAX_PATH - 3) {
-        printf("osToolsListFiles: Directory name too long\n");
+        printf("osToolsFileList: Directory name too long\n");
         return output;
     }
     char directoryFor[MAX_PATH];
@@ -709,7 +709,7 @@ list_t *osToolsListFiles(char *directory) {
     WIN32_FIND_DATA findData;
     HANDLE fileHandle = FindFirstFile(directoryFor, &findData);
     if (fileHandle == INVALID_HANDLE_VALUE) {
-        printf("osToolsListFiles: Handle invalid error %ld\n", GetLastError());
+        printf("osToolsFileList: Handle invalid error %ld\n", GetLastError());
         return output;
     }
     LARGE_INTEGER filesize;
@@ -726,11 +726,11 @@ list_t *osToolsListFiles(char *directory) {
     return output;
 }
 
-list_t *osToolsListFolders(char *directory) {
+list_t *osToolsFolderList(char *directory) {
     /* https://learn.microsoft.com/en-us/windows/win32/fileio/listing-the-files-in-a-directory */
     list_t *output = list_init();
     if (strlen(directory) > MAX_PATH - 3) {
-        printf("osToolsListFolders: Directory name too long\n");
+        printf("osToolsFolderList: Directory name too long\n");
         return output;
     }
     char directoryFor[MAX_PATH];
@@ -739,7 +739,7 @@ list_t *osToolsListFolders(char *directory) {
     WIN32_FIND_DATA findData;
     HANDLE fileHandle = FindFirstFile(directoryFor, &findData);
     if (fileHandle == INVALID_HANDLE_VALUE) {
-        printf("osToolsListFolders: Handle invalid error %ld\n", GetLastError());
+        printf("osToolsFolderList: Handle invalid error %ld\n", GetLastError());
         return output;
     }
     do {
@@ -754,12 +754,12 @@ list_t *osToolsListFolders(char *directory) {
     return output;
 }
 
-int32_t osToolsCreateFolder(char *folder) {
+int32_t osToolsFolderCreate(char *folder) {
     /* https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-createdirectory */
     return CreateDirectory(folder, NULL);
 }
 
-int32_t osToolsDeleteFolder(char *folder) {
+int32_t osToolsFolderDestroy(char *folder) {
     /* https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-removedirectorya */
     char directoryFor[MAX_PATH + 10] = "rd /s /q ";
     int32_t len = strlen(folder);
@@ -2040,7 +2040,7 @@ int32_t osToolsFileDialogPrompt(ost_file_dialog_save_t openOrSave, ost_file_dial
     return 0;
 }
 
-uint8_t *osToolsMapFile(char *filename, uint32_t *sizeOutput) {
+uint8_t *osToolsFileMap(char *filename, uint32_t *sizeOutput) {
     int32_t fd = open(filename, O_RDWR);
     struct stat stats;
     if (fstat(fd, &stats) == -1) {
@@ -2060,7 +2060,7 @@ uint8_t *osToolsMapFile(char *filename, uint32_t *sizeOutput) {
     return (uint8_t *) out;
 }
 
-int32_t osToolsUnmapFile(uint8_t *data) {
+int32_t osToolsFileUnmap(uint8_t *data) {
     int32_t index = -1;
     for (uint32_t i = 0; i < osToolsMemmap.mappedFiles -> length; i += 2) {
         if (osToolsMemmap.mappedFiles -> data[i].p == data) {
@@ -2077,7 +2077,7 @@ int32_t osToolsUnmapFile(uint8_t *data) {
     }
 }
 
-list_t *osToolsListFilesAndFolders(char *directory) {
+list_t *osToolsFileAndFolderList(char *directory) {
     list_t *output = list_init();
     DIR *dir = opendir(directory);
     if (dir == NULL) {
@@ -2096,7 +2096,7 @@ list_t *osToolsListFilesAndFolders(char *directory) {
     return output;
 }
 
-list_t *osToolsListFiles(char *directory) {
+list_t *osToolsFileList(char *directory) {
     list_t *output = list_init();
     DIR *dir = opendir(directory);
     if (dir == NULL) {
@@ -2119,7 +2119,7 @@ list_t *osToolsListFiles(char *directory) {
     return output;
 }
 
-list_t *osToolsListFolders(char *directory) {
+list_t *osToolsFolderList(char *directory) {
     list_t *output = list_init();
     DIR *dir = opendir(directory);
     if (dir == NULL) {
@@ -2146,11 +2146,11 @@ list_t *osToolsListFolders(char *directory) {
     return output;
 }
 
-int32_t osToolsCreateFolder(char *folder) {
+int32_t osToolsFolderCreate(char *folder) {
     return mkdir(folder, 0755);
 }
 
-int32_t osToolsDeleteFolder(char *folder) {
+int32_t osToolsFolderDestroy(char *folder) {
     char command[5000] = "rm -rf ";
     strcat(command, folder);
     return system(command);

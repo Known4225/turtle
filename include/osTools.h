@@ -273,29 +273,29 @@ extensions: pass in a list of accepted file extensions or pass in NULL to use gl
 */
 int32_t osToolsFileDialogPrompt(ost_file_dialog_save_t openOrSave, ost_file_dialog_multiselect_t multiselect, ost_file_dialog_folder_t folder, char *prename, list_t *extensions);
 
-/* save dialog */
+/* save dialog - set prename to NULL for no prename, set extensions to NULL to use global extensions */
 int32_t osToolsFileDialogSave(ost_file_dialog_folder_t folder, char *prename, list_t *extensions);
 
-/* open dialog */
+/* open dialog - set prename to NULL for no prename, set extensions to NULL to use global extensions */
 int32_t osToolsFileDialogOpen(ost_file_dialog_multiselect_t multiselect, ost_file_dialog_folder_t folder, char *prename, list_t *extensions);
 
-uint8_t *osToolsMapFile(char *filename, uint32_t *sizeOutput);
+uint8_t *osToolsFileMap(char *filename, uint32_t *sizeOutput);
 
-int32_t osToolsUnmapFile(uint8_t *data);
+int32_t osToolsFileUnmap(uint8_t *data);
 
 /* lists files in a directory (does NOT list folders), format [name, size, name, size, ...] */
-list_t *osToolsListFiles(char *directory);
+list_t *osToolsFileList(char *directory);
 
 /* non-recursive, lists folders in a directory, format [name, name, ...] */
-list_t *osToolsListFolders(char *directory);
+list_t *osToolsFolderList(char *directory);
 
 /* lists files and folders in a directory, format [name, size, name, size, ...] (size is -1 for folders) */
-list_t *osToolsListFilesAndFolders(char *directory);
+list_t *osToolsFileAndFolderList(char *directory);
 
 /* create a folder */
-int32_t osToolsCreateFolder(char *folder);
+int32_t osToolsFolderCreate(char *folder);
 
 /* delete a folder (and all files and subfolders) */
-int32_t osToolsDeleteFolder(char *folder);
+int32_t osToolsFolderDestroy(char *folder);
 
 #endif /* OS_TOOLS_H */

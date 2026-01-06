@@ -189,9 +189,9 @@ int main(int argc, char *argv[]) {
     // };
     // turtle_texture_t empvImage = turtleTextureLoadArray(array, 4, 4, GL_GREEN);
     turtleTexturePrint(empvImage);
-    list_t *folders = osToolsListFolders(".");
-    list_t *files = osToolsListFiles(".");
-    list_t *filesAndFolders = osToolsListFilesAndFolders(".");
+    list_t *folders = osToolsFolderList(".");
+    list_t *files = osToolsFileList(".");
+    list_t *filesAndFolders = osToolsFileAndFolderList(".");
     list_print(folders);
     list_print(files);
     list_print(filesAndFolders);
