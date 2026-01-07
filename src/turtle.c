@@ -1058,6 +1058,18 @@ void turtleCircle(double x, double y, double radius) {
     list_append(turtle.penPos, (unitype) turtle.circleprez, 'd');
 }
 
+void turtleCircleColor(double x, double y, double radius, double r, double g, double b, double a) {
+    list_append(turtle.penPos, (unitype) x, 'd');
+    list_append(turtle.penPos, (unitype) y, 'd');
+    list_append(turtle.penPos, (unitype) radius, 'd');
+    list_append(turtle.penPos, (unitype) r, 'd');
+    list_append(turtle.penPos, (unitype) g, 'd');
+    list_append(turtle.penPos, (unitype) b, 'd');
+    list_append(turtle.penPos, (unitype) a, 'd');
+    list_append(turtle.penPos, (unitype) 64, 'h'); // blit circle signifier
+    list_append(turtle.penPos, (unitype) turtle.circleprez, 'd');
+}
+
 /* create a triangle in 3D */
 void turtle3DTriangle(double x1, double y1, double z1, double x2, double y2, double z2, double x3, double y3, double z3) {
     list_append(turtle.penPos, (unitype) x1, 'd');

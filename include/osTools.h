@@ -233,6 +233,7 @@ int32_t osToolsCameraClose(char *name);
 #include <unistd.h>
 #include <fcntl.h>
 #include <arpa/inet.h>
+#include <termios.h>
 #endif
 
 /* initialise osTools, pass in argv[0] from main function as well as GLFW window object */

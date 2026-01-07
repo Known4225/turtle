@@ -2161,6 +2161,8 @@ void osToolsCloseConsole() {
     return;
 }
 
+/* Serial support on linux: https://blog.mbedded.ninja/programming/operating-systems/linux/linux-serial-ports-using-c-cpp/ */
+
 list_t *osToolsSerialList() {
     list_t *output = list_init();
     return output;
