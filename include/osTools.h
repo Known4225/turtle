@@ -103,7 +103,7 @@ list_t *osToolsLoadCSVString(char *filename, ost_csv_t rowOrColumn);
 /* untether the program from the console that spawned it - will close a console if the program is run independently */
 void osToolsCloseConsole();
 
-/* COM support */
+/* Serial support */
 typedef enum {
     OSTOOLS_BAUD_110 = 110,
     OSTOOLS_BAUD_300 = 300,
@@ -120,28 +120,28 @@ typedef enum {
     OSTOOLS_BAUD_115200 = 115200, // common high speed baud rate
     OSTOOLS_BAUD_128000 = 128000,
     OSTOOLS_BAUD_256000 = 256000,
-} osToolsComBaud_t;
+} osToolsSerialBaud_t;
 
 typedef struct {
-    list_t *com; // Format Windows: name, HANDLE
-} ost_com_t;
+    list_t *serial; // Format Windows: name, HANDLE
+} ost_serial_t;
 
-extern ost_com_t osToolsCom;
+extern ost_serial_t osToolsSerial;
 
-/* get a list of all com ports (strings) */
-list_t *osToolsComList();
+/* get a list of all serial ports (strings) */
+list_t *osToolsSerialList();
 
-/* opens a com port */
-int32_t osToolsComOpen(char *name, osToolsComBaud_t baudRate);
+/* opens a serial port */
+int32_t osToolsSerialOpen(char *name, osToolsSerialBaud_t baudRate);
 
 /* returns number of bytes sent. This function blocks until all data has been sent (or error) */
-int32_t osToolsComSend(char *name, uint8_t *data, int32_t length);
+int32_t osToolsSerialSend(char *name, uint8_t *data, int32_t length);
 
 /* returns number of bytes received. This function blocks until length bytes are received or timeoutMilliseconds is exceeded */
-int32_t osToolsComReceive(char *name, uint8_t *buffer, int32_t length, int32_t timeoutMilliseconds);
+int32_t osToolsSerialReceive(char *name, uint8_t *buffer, int32_t length, int32_t timeoutMilliseconds);
 
-/* closes a com port */
-int32_t osToolsComClose(char *name);
+/* closes a serial port */
+int32_t osToolsSerialClose(char *name);
 
 /* Socket (IPv4) support */
 typedef enum {

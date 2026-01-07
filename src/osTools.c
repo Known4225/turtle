@@ -59,7 +59,7 @@ ost_glfw_t osToolsGLFW;
 ost_clipboard_t osToolsClipboard;
 ost_file_dialog_t osToolsFileDialog;
 ost_memmap_t osToolsMemmap;
-ost_com_t osToolsCom;
+ost_serial_t osToolsSerial;
 ost_socket_t osToolsSocket;
 ost_camera_t osToolsCamera;
 
@@ -96,8 +96,8 @@ void osToolsIndependentInit(GLFWwindow *window) {
     osToolsGLFW.standardCursors[8] = glfwCreateCursor(&moveCursor, 12, 12);
     /* initialise memmap module */
     osToolsMemmap.mappedFiles = list_init();
-    /* initialise COM module */
-    osToolsCom.com = list_init();
+    /* initialise serial module */
+    osToolsSerial.serial = list_init();
     /* initialise sockets module */
     osToolsSocket.socket = list_init();
     osToolsSocket.win32wsaActive = 0;
@@ -780,11 +780,11 @@ void osToolsCloseConsole() {
 }
 
 /*
-windows COM port support
+windows serial port support
 https://learn.microsoft.com/en-us/windows/win32/devio/configuring-a-communications-resource
 */
 
-list_t *osToolsComList() {
+list_t *osToolsSerialList() {
     list_t *output = list_init();
     char comName[8] = "COM";
     char pathInfo[128];
@@ -795,29 +795,29 @@ list_t *osToolsComList() {
             list_append(output, (unitype) comName, 's');
         }
         if (GetLastError() == ERROR_INSUFFICIENT_BUFFER) {
-            printf("osToolsComList: Unusual COM device detected on %s\n", comName);
+            printf("osToolsSerialList: Unusual COM device detected on %s\n", comName);
         }
     }
     return output;
 }
 
-int32_t osToolsComOpen(char *name, osToolsComBaud_t baudRate) {
+int32_t osToolsSerialOpen(char *name, osToolsSerialBaud_t baudRate) {
     /* verify COM */
     if (strlen(name) < 3 || name[0] != 'C' || name[1] != 'O' || name[2] != 'M') {
-        // printf("osToolsComOpen: name must start with \"COM\"\n");
+        // printf("osToolsSerialOpen: name must start with \"COM\"\n");
         return -1;
     }
     /* check if this port is already open */
-    int32_t index = list_find(osToolsCom.com, (unitype) name, 's');
+    int32_t index = list_find(osToolsSerial.serial, (unitype) name, 's');
     if (index != -1) {
-        if (CloseHandle((HANDLE) (osToolsCom.com -> data[index + 1].l)) == 0) {
-            printf("osToolsComClose failed with error %ld\n", GetLastError());
+        if (CloseHandle((HANDLE) (osToolsSerial.serial -> data[index + 1].l)) == 0) {
+            printf("osToolsSerialOpen failed with error %ld\n", GetLastError());
             return -1;
         }
-        list_delete(osToolsCom.com, index);
-        list_delete(osToolsCom.com, index);
+        list_delete(osToolsSerial.serial, index);
+        list_delete(osToolsSerial.serial, index);
     }
-    /* open COM port */
+    /* open serial port */
     DCB dcb;
     BOOL fSuccess;
     /* https://support.microsoft.com/en-us/topic/howto-specify-serial-ports-larger-than-com9-db9078a5-b7b6-bf00-240f-f749ebfd913e */
@@ -832,8 +832,8 @@ int32_t osToolsComOpen(char *name, osToolsComBaud_t baudRate) {
         printf("Could not open com port %s, error %ld\n", name, GetLastError());
         return -1;
     } else {
-        list_append(osToolsCom.com, (unitype) name, 's');
-        list_append(osToolsCom.com, (unitype) comHandle, 'l');
+        list_append(osToolsSerial.serial, (unitype) name, 's');
+        list_append(osToolsSerial.serial, (unitype) comHandle, 'l');
     }
     /* Initialize the DCB structure. */
     SecureZeroMemory(&dcb, sizeof(DCB));
@@ -868,51 +868,51 @@ int32_t osToolsComOpen(char *name, osToolsComBaud_t baudRate) {
     return 0;
 }
 
-int32_t osToolsComSend(char *name, uint8_t *data, int32_t length) {
+int32_t osToolsSerialSend(char *name, uint8_t *data, int32_t length) {
     /* check if this port is open */
-    int32_t index = list_find(osToolsCom.com, (unitype) name, 's');
+    int32_t index = list_find(osToolsSerial.serial, (unitype) name, 's');
     if (index == -1) {
-        printf("osToolsComSend: %s not open\n", name);
+        printf("osToolsSerialSend: %s not open\n", name);
         return 0;
     }
     /* https://www.codeproject.com/Articles/3061/Creating-a-Serial-communication-on-Win32#sending */
     DWORD bytes;
-    if (WriteFile((HANDLE) (osToolsCom.com -> data[index + 1].l), data, length, &bytes, NULL) == 0) {
-        printf("osToolsComSend failed with error %ld\n", GetLastError());
+    if (WriteFile((HANDLE) (osToolsSerial.serial -> data[index + 1].l), data, length, &bytes, NULL) == 0) {
+        printf("osToolsSerialSend failed with error %ld\n", GetLastError());
         return -1;
     }
     return bytes;
 }
 
-int32_t osToolsComReceive(char *name, uint8_t *buffer, int32_t length, int32_t timeoutMilliseconds) {
+int32_t osToolsSerialReceive(char *name, uint8_t *buffer, int32_t length, int32_t timeoutMilliseconds) {
     /* check if this port is open */
-    int32_t index = list_find(osToolsCom.com, (unitype) name, 's');
+    int32_t index = list_find(osToolsSerial.serial, (unitype) name, 's');
     if (index == -1) {
-        printf("osToolsComReceive: %s not open\n", name);
+        printf("osToolsSerialReceive: %s not open\n", name);
         return 0;
     }
     /* Set comm timeout */
     COMMTIMEOUTS timeout = {0, 0, timeoutMilliseconds, 0, 0};
-    SetCommTimeouts((HANDLE) (osToolsCom.com -> data[index + 1].l), &timeout);
+    SetCommTimeouts((HANDLE) (osToolsSerial.serial -> data[index + 1].l), &timeout);
     /* read from COM */
     DWORD bytes;
-    if (ReadFile((HANDLE) (osToolsCom.com -> data[index + 1].l), buffer, length, &bytes, NULL) == 0) {
-        printf("osToolsComReceive failed with error %ld\n", GetLastError());
+    if (ReadFile((HANDLE) (osToolsSerial.serial -> data[index + 1].l), buffer, length, &bytes, NULL) == 0) {
+        printf("osToolsSerialReceive failed with error %ld\n", GetLastError());
         return -1;
     }
     return bytes;
 }
 
-int32_t osToolsComClose(char *name) {
+int32_t osToolsSerialClose(char *name) {
     /* check if this port is already open */
-    int32_t index = list_find(osToolsCom.com, (unitype) name, 's');
+    int32_t index = list_find(osToolsSerial.serial, (unitype) name, 's');
     if (index != -1) {
-        if (CloseHandle((HANDLE) (osToolsCom.com -> data[index + 1].l)) == 0) {
-            printf("osToolsComClose failed with error %ld\n", GetLastError());
+        if (CloseHandle((HANDLE) (osToolsSerial.serial -> data[index + 1].l)) == 0) {
+            printf("osToolsSerialClose failed with error %ld\n", GetLastError());
             return -1;
         }
-        list_delete(osToolsCom.com, index);
-        list_delete(osToolsCom.com, index);
+        list_delete(osToolsSerial.serial, index);
+        list_delete(osToolsSerial.serial, index);
     }
     return 0;
 }
@@ -2161,24 +2161,24 @@ void osToolsCloseConsole() {
     return;
 }
 
-list_t *osToolsComList() {
+list_t *osToolsSerialList() {
     list_t *output = list_init();
     return output;
 }
 
-int32_t osToolsComOpen(char *name, osToolsComBaud_t baudRate) {
+int32_t osToolsSerialOpen(char *name, osToolsSerialBaud_t baudRate) {
     return -1;
 }
 
-int32_t osToolsComSend(char *name, uint8_t *data, int32_t length) {
+int32_t osToolsSerialSend(char *name, uint8_t *data, int32_t length) {
     return -1;
 }
 
-int32_t osToolsComReceive(char *name, uint8_t *buffer, int32_t length, int32_t timeoutMilliseconds) {
+int32_t osToolsSerialReceive(char *name, uint8_t *buffer, int32_t length, int32_t timeoutMilliseconds) {
     return -1;
 }
 
-int32_t osToolsComClose(char *name) {
+int32_t osToolsSerialClose(char *name) {
     return -1;
 }
 
