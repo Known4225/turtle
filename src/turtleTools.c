@@ -1179,6 +1179,12 @@ void switchUpdate() {
         }
         double switchX = switchp -> x;
         double switchY = switchp -> y;
+        if (switchp -> align == TT_SWITCH_ALIGN_LEFT) {
+            switchX = switchp -> x + switchp -> size * 1.5;
+        }
+        if (switchp -> align == TT_SWITCH_ALIGN_RIGHT) {
+            switchX = switchp -> x - switchp -> size * 1.5;
+        }
         double switchClickLeft = switchX;
         double switchClickRight = switchX;
         double switchClickDown = switchY;
@@ -1223,7 +1229,13 @@ void switchUpdate() {
             /* render text */
             tt_setColor(switchp -> color[TT_COLOR_SLOT_SWITCH_TEXT]);
             if (switchp -> style == TT_SWITCH_STYLE_CLASSIC) {
-                turtleTextWriteUnicode(switchp -> label, switchX, switchY + 1.6 * switchp -> size, switchp -> size - 1, 50);
+                if (switchp -> align == TT_SWITCH_ALIGN_CENTER) {
+                    turtleTextWriteUnicode(switchp -> label, switchX, switchY + 1.6 * switchp -> size, switchp -> size - 1, 50);
+                } else if (switchp -> align == TT_SWITCH_ALIGN_LEFT) {
+                    turtleTextWriteUnicode(switchp -> label, switchX - switchp -> size * 1.2, switchY + 1.6 * switchp -> size, switchp -> size - 1, 0);
+                } else if (switchp -> align == TT_SWITCH_ALIGN_RIGHT) {
+                    turtleTextWriteUnicode(switchp -> label, switchX + switchp -> size * 1.2, switchY + 1.6 * switchp -> size, switchp -> size - 1, 100);
+                }
             } else if (switchp -> style == TT_SWITCH_STYLE_SIDESWIPE_LEFT) {
                 if (switchp -> status == 0) {
                     tt_setColor(switchp -> color[TT_COLOR_SLOT_SWITCH_TEXT]);
