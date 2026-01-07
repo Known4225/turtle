@@ -19151,6 +19151,8 @@ void turtleRectangleColor(double x1, double y1, double x2, double y2, double r, 
 /* adds a (blit) circle to the pipeline */
 void turtleCircle(double x, double y, double radius);
 
+void turtleCircleColor(double x, double y, double radius, double r, double g, double b, double a);
+
 /* create a triangle in 3D */
 void turtle3DTriangle(double x1, double y1, double z1, double x2, double y2, double z2, double x3, double y3, double z3);
 
@@ -20145,6 +20147,7 @@ int32_t osToolsCameraClose(char *name);
 #include <unistd.h>
 #include <fcntl.h>
 #include <arpa/inet.h>
+#include <termios.h>
 #endif
 
 /* initialise osTools, pass in argv[0] from main function as well as GLFW window object */
@@ -30443,6 +30446,18 @@ void turtleCircle(double x, double y, double radius) {
     list_append(turtle.penPos, (unitype) turtle.circleprez, 'd');
 }
 
+void turtleCircleColor(double x, double y, double radius, double r, double g, double b, double a) {
+    list_append(turtle.penPos, (unitype) x, 'd');
+    list_append(turtle.penPos, (unitype) y, 'd');
+    list_append(turtle.penPos, (unitype) radius, 'd');
+    list_append(turtle.penPos, (unitype) r, 'd');
+    list_append(turtle.penPos, (unitype) g, 'd');
+    list_append(turtle.penPos, (unitype) b, 'd');
+    list_append(turtle.penPos, (unitype) a, 'd');
+    list_append(turtle.penPos, (unitype) 64, 'h'); // blit circle signifier
+    list_append(turtle.penPos, (unitype) turtle.circleprez, 'd');
+}
+
 /* create a triangle in 3D */
 void turtle3DTriangle(double x1, double y1, double z1, double x2, double y2, double z2, double x3, double y3, double z3) {
     list_append(turtle.penPos, (unitype) x1, 'd');
@@ -36408,6 +36423,8 @@ void osToolsCloseConsole() {
     /* don't know how to do this yet - https://unix.stackexchange.com/questions/743272/programatically-start-a-background-process-under-linux */
     return;
 }
+
+/* Serial support on linux: https://blog.mbedded.ninja/programming/operating-systems/linux/linux-serial-ports-using-c-cpp/ */
 
 list_t *osToolsSerialList() {
     list_t *output = list_init();
