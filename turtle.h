@@ -32177,7 +32177,7 @@ int32_t ribbonInitInternal(FILE *configFile, list_t *configList, int8_t fileExis
         tt_elements.all = list_init();
     }
     /* set ribbon parameters */
-    tt_ribbon.marginSize = (turtle.bounds[3] - turtle.bounds[1]) / 36.0; // number of pixels between different items in the ribbon (not affected by ribbonSize)
+    tt_ribbon.marginSize = (turtle.initbounds[3] - turtle.initbounds[1]) / 36.0; // number of pixels between different items in the ribbon (not affected by ribbonSize)
     tt_ribbon.mainselect[0] = -1;
     tt_ribbon.mainselect[1] = -1;
     tt_ribbon.mainselect[2] = -1;
@@ -32190,12 +32190,19 @@ int32_t ribbonInitInternal(FILE *configFile, list_t *configList, int8_t fileExis
 
     tt_ribbon.mouseDown = 0;
 
-    tt_ribbon.bounds[0] = turtle.bounds[0];
-    tt_ribbon.bounds[1] = turtle.bounds[1];
-    tt_ribbon.bounds[2] = turtle.bounds[2];
-    tt_ribbon.bounds[3] = turtle.bounds[3];
+    tt_ribbon.bounds[0] = turtle.initbounds[0];
+    tt_ribbon.bounds[1] = turtle.initbounds[1];
+    tt_ribbon.bounds[2] = turtle.initbounds[2];
+    tt_ribbon.bounds[3] = turtle.initbounds[3];
 
-    tt_ribbon.ribbonSize = (turtle.bounds[3] - turtle.bounds[1]) / 360.0; // 1 is default for 640 by 360 coordiantes, below 1 is smaller, above 1 is larger (scales as a multiplier, 0.1 is 100x smaller than 10)
+    tt_ribbon.ribbonSize = (turtle.initbounds[3] - turtle.initbounds[1]) / 360.0; // 1 is default for 640 by 360 coordiantes, below 1 is smaller, above 1 is larger (scales as a multiplier, 0.1 is 100x smaller than 10)
+    if (tt_ribbon.options != NULL) {
+        /* support reinitialising to change ribbon contents */
+        list_free(tt_ribbon.options);
+    }
+    if (tt_ribbon.lengths != NULL) {
+        list_free(tt_ribbon.lengths);
+    }
     tt_ribbon.options = list_init();
     tt_ribbon.lengths = list_init();
 
@@ -32239,10 +32246,6 @@ int32_t ribbonInitInternal(FILE *configFile, list_t *configList, int8_t fileExis
 
 /* render ribbon */
 void ribbonUpdate() {
-    char shapeSave = turtle.penshape;
-    double sizeSave = turtle.pensize;
-    turtlePenSize(20);
-    turtlePenShape("square");
     tt_setColor(TT_COLOR_SLOT_RIBBON_TOP);
     turtleRectangle(tt_ribbon.bounds[0], tt_ribbon.bounds[3] - tt_ribbon.ribbonSize * 10, tt_ribbon.bounds[2], tt_ribbon.bounds[3]);
     tt_setColor(TT_COLOR_TEXT_ALTERNATE);
@@ -32323,8 +32326,6 @@ void ribbonUpdate() {
             tt_ribbon.subselect[1] = tt_ribbon.subselect[0];
         }
     }
-    turtle.penshape = shapeSave;
-    turtle.pensize = sizeSave;
 }
 
 /* popup */
