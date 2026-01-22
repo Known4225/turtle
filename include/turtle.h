@@ -74,7 +74,7 @@ typedef struct {
     double peng; // pen green (0 to 1)
     double penb; // pen blue (0 to 1)
     double pena; // pen alpha (0 to 1)
-    double currentColor[4]; // for reducing API color calls
+    uint8_t currentColor[4]; // for reducing API color calls
 
     /* 3D variables */
     double cameraX;
@@ -160,13 +160,13 @@ void turtleInit(GLFWwindow *window, double leftX, double bottomY, double rightX,
 void turtleGetMouseCoords();
 
 /* set the background color */
-void turtleBgColor(double r, double g, double b);
+void turtleBgColor(uint8_t r, uint8_t g, uint8_t b);
 
 /* set the pen color */
-void turtlePenColor(double r, double g, double b);
+void turtlePenColor(uint8_t r, uint8_t g, uint8_t b);
 
 /* set the pen color (with transparency) */
-void turtlePenColorAlpha(double r, double g, double b, double a);
+void turtlePenColorAlpha(uint8_t r, uint8_t g, uint8_t b, uint8_t a);
 
 /* set the pen size */
 void turtlePenSize(double size);
@@ -224,7 +224,7 @@ int32_t turtleTextureUnload(turtle_texture_t texture);
 int32_t turtleTextureUnloadAll();
 
 /* adds a (blit) rectangular texture */
-void turtleTexture(turtle_texture_t texture, double x1, double y1, double x2, double y2, double rot, double r, double g, double b);
+void turtleTexture(turtle_texture_t texture, double x1, double y1, double x2, double y2, double rot, uint8_t r, uint8_t g, uint8_t b);
 
 /* print texture information */
 void turtleTexturePrint(turtle_texture_t texture);
@@ -232,8 +232,8 @@ void turtleTexturePrint(turtle_texture_t texture);
 /* draws a circle at the specified x and y (coordinates) */
 void turtleCircleRenderInternal(double x, double y, double rad, double r, double g, double b, double a, double xcenter, double ycenter, double xfact, double yfact, double prez);
 
-/* draws a square */
-void turtleSquareRenderInternal(double x1, double y1, double x2, double y2, double r, double g, double b, double a, double xcenter, double ycenter, double xfact, double yfact);
+/* draws a rectangle */
+void turtleRectangleRenderInternal(double x1, double y1, double x2, double y2, double r, double g, double b, double a, double xcenter, double ycenter, double xfact, double yfact);
 
 /* draws a triangle */
 void turtleTriangleRenderInternal(double x1, double y1, double x2, double y2, double x3, double y3, double r, double g, double b, double a, double xcenter, double ycenter, double xfact, double yfact);
@@ -244,17 +244,17 @@ void turtleQuadRenderInternal(double x1, double y1, double x2, double y2, double
 /* adds a (blit) triangle to the pipeline (for better speed) */
 void turtleTriangle(double x1, double y1, double x2, double y2, double x3, double y3);
 
-void turtleTriangleColor(double x1, double y1, double x2, double y2, double x3, double y3, double r, double g, double b, double a);
+void turtleTriangleColor(double x1, double y1, double x2, double y2, double x3, double y3, uint8_t r, uint8_t g, uint8_t b, uint8_t a);
 
 /* adds a (blit) quad to the pipeline (for better speed) */
 void turtleQuad(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4);
 
-void turtleQuadColor(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, double r, double g, double b, double a);
+void turtleQuadColor(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, uint8_t r, uint8_t g, uint8_t b, uint8_t a);
 
 /* adds a (blit) rectangle to the pipeline (uses quad interface) */
 void turtleRectangle(double x1, double y1, double x2, double y2);
 
-void turtleRectangleColor(double x1, double y1, double x2, double y2, double r, double g, double b, double a);
+void turtleRectangleColor(double x1, double y1, double x2, double y2, uint8_t r, uint8_t g, uint8_t b, uint8_t a);
 
 /* adds a (blit) circle to the pipeline */
 void turtleCircle(double x, double y, double radius);
