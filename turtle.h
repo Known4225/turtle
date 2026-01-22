@@ -18975,33 +18975,32 @@ typedef struct {
 /* stb_image_resize2 pixel_layout enum */
 #ifndef STBIRDEF
 typedef enum {
-  STBIR_1CHANNEL = 1,
-  STBIR_2CHANNEL = 2,
-  STBIR_RGB      = 3,               // 3-chan, with order specified (for channel flipping)
-  STBIR_BGR      = 0,               // 3-chan, with order specified (for channel flipping)
-  STBIR_4CHANNEL = 5,
+    STBIR_1CHANNEL = 1,
+    STBIR_2CHANNEL = 2,
+    STBIR_RGB      = 3,               // 3-chan, with order specified (for channel flipping)
+    STBIR_BGR      = 0,               // 3-chan, with order specified (for channel flipping)
+    STBIR_4CHANNEL = 5,
 
-  STBIR_RGBA = 4,                   // alpha formats, where alpha is NOT premultiplied into color channels
-  STBIR_BGRA = 6,
-  STBIR_ARGB = 7,
-  STBIR_ABGR = 8,
-  STBIR_RA   = 9,
-  STBIR_AR   = 10,
+    STBIR_RGBA = 4,                   // alpha formats, where alpha is NOT premultiplied into color channels
+    STBIR_BGRA = 6,
+    STBIR_ARGB = 7,
+    STBIR_ABGR = 8,
+    STBIR_RA   = 9,
+    STBIR_AR   = 10,
 
-  STBIR_RGBA_PM = 11,               // alpha formats, where alpha is premultiplied into color channels
-  STBIR_BGRA_PM = 12,
-  STBIR_ARGB_PM = 13,
-  STBIR_ABGR_PM = 14,
-  STBIR_RA_PM   = 15,
-  STBIR_AR_PM   = 16,
+    STBIR_RGBA_PM = 11,               // alpha formats, where alpha is premultiplied into color channels
+    STBIR_BGRA_PM = 12,
+    STBIR_ARGB_PM = 13,
+    STBIR_ABGR_PM = 14,
+    STBIR_RA_PM   = 15,
+    STBIR_AR_PM   = 16,
 
-  STBIR_RGBA_NO_AW = 11,            // alpha formats, where NO alpha weighting is applied at all!
-  STBIR_BGRA_NO_AW = 12,            //   these are just synonyms for the _PM flags (which also do
-  STBIR_ARGB_NO_AW = 13,            //   no alpha weighting). These names just make it more clear
-  STBIR_ABGR_NO_AW = 14,            //   for some folks).
-  STBIR_RA_NO_AW   = 15,
-  STBIR_AR_NO_AW   = 16,
-
+    STBIR_RGBA_NO_AW = 11,            // alpha formats, where NO alpha weighting is applied at all!
+    STBIR_BGRA_NO_AW = 12,            //   these are just synonyms for the _PM flags (which also do
+    STBIR_ARGB_NO_AW = 13,            //   no alpha weighting). These names just make it more clear
+    STBIR_ABGR_NO_AW = 14,            //   for some folks).
+    STBIR_RA_NO_AW   = 15,
+    STBIR_AR_NO_AW   = 16,
 } stbir_pixel_layout;
 #endif
 
@@ -19104,6 +19103,15 @@ turtle_texture_t turtleTextureLoadList(list_t *list, uint32_t width, uint32_t he
 /* load data from a list or array of uint8 (make one NULL) - use GL_RGB or GL_RGBA for encoding */
 turtle_texture_t turtleTextureLoadListArrayInternal(list_t *list, uint8_t *array, uint32_t width, uint32_t height, uint32_t encoding);
 
+/* get the original width of a loaded texture */
+int32_t turtleTextureGetWidth(turtle_texture_t texture);
+
+/* get the original height of a loaded texture */
+int32_t turtleTextureGetHeight(turtle_texture_t texture);
+
+/* print texture name, width, height, and channels */
+void turtleTexturePrint(turtle_texture_t texture);
+
 /* remove a texture from GPU memory */
 int32_t turtleTextureUnload(turtle_texture_t texture);
 
@@ -19112,9 +19120,6 @@ int32_t turtleTextureUnloadAll();
 
 /* adds a (blit) rectangular texture */
 void turtleTexture(turtle_texture_t texture, double x1, double y1, double x2, double y2, double rot, uint8_t r, uint8_t g, uint8_t b);
-
-/* print texture information */
-void turtleTexturePrint(turtle_texture_t texture);
 
 /* draws a circle at the specified x and y (coordinates) */
 void turtleCircleRenderInternal(double x, double y, double rad, double r, double g, double b, double a, double xcenter, double ycenter, double xfact, double yfact, double prez);
@@ -19145,6 +19150,8 @@ void turtleRectangleColor(double x1, double y1, double x2, double y2, uint8_t r,
 
 /* adds a (blit) circle to the pipeline */
 void turtleCircle(double x, double y, double radius);
+
+void turtleCircleColor(double x, double y, double radius, double r, double g, double b, double a);
 
 /* create a triangle in 3D */
 void turtle3DTriangle(double x1, double y1, double z1, double x2, double y2, double z2, double x3, double y3, double z3);
@@ -19762,6 +19769,13 @@ typedef enum {
     TT_DROPDOWN_ALIGN_RIGHT = 2,
 } tt_dropdown_align_t;
 
+typedef enum {
+    TT_DROPDOWN_DIRECTION_AUTO = 0,
+    TT_DROPDOWN_DIRECTION_AUTO_PREFER_UP = 1,
+    TT_DROPDOWN_DIRECTION_UP = 2,
+    TT_DROPDOWN_DIRECTION_DOWN = 3,
+} tt_dropdown_direction_t;
+
 /* dropdown */
 typedef struct {
     tt_element_names_t element;
@@ -19775,6 +19789,7 @@ typedef struct {
     list_t *options;
     int32_t status;
     tt_dropdown_align_t align;
+    tt_dropdown_direction_t direction;
     double maxXfactor;
     /* value */
     int32_t index; // index of selected option
@@ -19810,6 +19825,9 @@ typedef struct {
     /* value */
     char *text; // text of textbox
     char *value; // text of textbox (duplicate name - always equal to text)
+    /* whitelist */
+    list_t *whitelist;
+    list_t *blacklist;
 } tt_textbox_t;
 
 /* initialise UI elements */
@@ -19999,7 +20017,7 @@ list_t *osToolsLoadCSVString(char *filename, ost_csv_t rowOrColumn);
 /* untether the program from the console that spawned it - will close a console if the program is run independently */
 void osToolsCloseConsole();
 
-/* COM support */
+/* Serial support */
 typedef enum {
     OSTOOLS_BAUD_110 = 110,
     OSTOOLS_BAUD_300 = 300,
@@ -20016,28 +20034,28 @@ typedef enum {
     OSTOOLS_BAUD_115200 = 115200, // common high speed baud rate
     OSTOOLS_BAUD_128000 = 128000,
     OSTOOLS_BAUD_256000 = 256000,
-} osToolsComBaud_t;
+} osToolsSerialBaud_t;
 
 typedef struct {
-    list_t *com; // Format Windows: name, HANDLE
-} ost_com_t;
+    list_t *serial; // Format Windows: name, HANDLE
+} ost_serial_t;
 
-extern ost_com_t osToolsCom;
+extern ost_serial_t osToolsSerial;
 
-/* get a list of all com ports (strings) */
-list_t *osToolsComList();
+/* get a list of all serial ports (strings) */
+list_t *osToolsSerialList();
 
-/* opens a com port */
-int32_t osToolsComOpen(char *name, osToolsComBaud_t baudRate);
+/* opens a serial port */
+int32_t osToolsSerialOpen(char *name, osToolsSerialBaud_t baudRate);
 
 /* returns number of bytes sent. This function blocks until all data has been sent (or error) */
-int32_t osToolsComSend(char *name, uint8_t *data, int32_t length);
+int32_t osToolsSerialSend(char *name, uint8_t *data, int32_t length);
 
 /* returns number of bytes received. This function blocks until length bytes are received or timeoutMilliseconds is exceeded */
-int32_t osToolsComReceive(char *name, uint8_t *buffer, int32_t length, int32_t timeoutMilliseconds);
+int32_t osToolsSerialReceive(char *name, uint8_t *buffer, int32_t length, int32_t timeoutMilliseconds);
 
-/* closes a com port */
-int32_t osToolsComClose(char *name);
+/* closes a serial port */
+int32_t osToolsSerialClose(char *name);
 
 /* Socket (IPv4) support */
 typedef enum {
@@ -20129,6 +20147,7 @@ int32_t osToolsCameraClose(char *name);
 #include <unistd.h>
 #include <fcntl.h>
 #include <arpa/inet.h>
+#include <termios.h>
 #endif
 
 /* initialise osTools, pass in argv[0] from main function as well as GLFW window object */
@@ -20169,30 +20188,30 @@ extensions: pass in a list of accepted file extensions or pass in NULL to use gl
 */
 int32_t osToolsFileDialogPrompt(ost_file_dialog_save_t openOrSave, ost_file_dialog_multiselect_t multiselect, ost_file_dialog_folder_t folder, char *prename, list_t *extensions);
 
-/* save dialog */
+/* save dialog - set prename to NULL for no prename, set extensions to NULL to use global extensions */
 int32_t osToolsFileDialogSave(ost_file_dialog_folder_t folder, char *prename, list_t *extensions);
 
-/* open dialog */
+/* open dialog - set prename to NULL for no prename, set extensions to NULL to use global extensions */
 int32_t osToolsFileDialogOpen(ost_file_dialog_multiselect_t multiselect, ost_file_dialog_folder_t folder, char *prename, list_t *extensions);
 
-uint8_t *osToolsMapFile(char *filename, uint32_t *sizeOutput);
+uint8_t *osToolsFileMap(char *filename, uint32_t *sizeOutput);
 
-int32_t osToolsUnmapFile(uint8_t *data);
+int32_t osToolsFileUnmap(uint8_t *data);
 
 /* lists files in a directory (does NOT list folders), format [name, size, name, size, ...] */
-list_t *osToolsListFiles(char *directory);
+list_t *osToolsFileList(char *directory);
 
 /* non-recursive, lists folders in a directory, format [name, name, ...] */
-list_t *osToolsListFolders(char *directory);
+list_t *osToolsFolderList(char *directory);
 
 /* lists files and folders in a directory, format [name, size, name, size, ...] (size is -1 for folders) */
-list_t *osToolsListFilesAndFolders(char *directory);
+list_t *osToolsFileAndFolderList(char *directory);
 
 /* create a folder */
-int32_t osToolsCreateFolder(char *folder);
+int32_t osToolsFolderCreate(char *folder);
 
 /* delete a folder (and all files and subfolders) */
-int32_t osToolsDeleteFolder(char *folder);
+int32_t osToolsFolderDestroy(char *folder);
 
 #endif /* OS_TOOLS_H */
 
@@ -29926,6 +29945,14 @@ turtle_texture_t turtleTextureLoadListArrayInternal(list_t *list, uint8_t *array
     return -1;
 }
 
+int32_t turtleTextureGetWidth(turtle_texture_t texture) {
+    return -1;
+}
+
+int32_t turtleTextureGetHeight(turtle_texture_t texture) {
+    return -1;
+}
+
 int32_t turtleTextureUnload(turtle_texture_t texture) {
     return -1;
 }
@@ -30201,6 +30228,35 @@ turtle_texture_t turtleTextureLoadListArrayInternal(list_t *list, uint8_t *array
     return texture;
 }
 
+int32_t turtleTextureGetWidth(turtle_texture_t texture) {
+    if (texture < 0 || texture >= turtle.textureList -> length) {
+        return -1;
+    }
+    return turtle.textureList -> data[texture + 1].i;
+}
+
+int32_t turtleTextureGetHeight(turtle_texture_t texture) {
+    if (texture < 0 || texture >= turtle.textureList -> length) {
+        return -1;
+    }
+    return turtle.textureList -> data[texture + 1].i;
+}
+
+void turtleTexturePrint(turtle_texture_t texture) {
+    printf("Texture ID: %d\n", texture);
+    if (texture >= 0 && texture < turtle.textureList -> length) {
+        printf("- Texture Name: %s\n", turtle.textureList -> data[texture].s);
+        printf("- Texture Width: %d\n", turtle.textureList -> data[texture + 1].i);
+        printf("- Texture Height: %d\n", turtle.textureList -> data[texture + 2].i);
+        printf("- Texture Channel: %d\n", turtle.textureList -> data[texture + 3].i);
+    } else {
+        printf("- Texture Name: NULL\n");
+        printf("- Texture Width: NULL\n");
+        printf("- Texture Height: NULL\n");
+        printf("- Texture Channel: NULL\n");
+    }
+}
+
 int32_t turtleTextureUnload(turtle_texture_t texture) {
     /* update list */
     if (texture >= turtle.textureList -> length || texture < 1) {
@@ -30230,18 +30286,6 @@ void turtleTexture(turtle_texture_t texture, double x1, double y1, double x2, do
     list_append(turtle.penPos, (unitype) (g / 255.0), 'd');
     list_append(turtle.penPos, (unitype) (128 + texture / 4), 'h'); // blit texture signifier + texture code - limited to 32639 textures
     list_append(turtle.penPos, (unitype) (b / 255.0), 'd');
-}
-
-void turtleTexturePrint(turtle_texture_t texture) {
-    printf("Texture ID: %d\n", texture);
-    if (texture >= 0 && texture < turtle.textureList -> length) {
-        printf("- Texture Name: %s\n", turtle.textureList -> data[texture].s);
-    } else {
-        printf("- Texture Name: NULL\n");
-    }
-    printf("- Texture Width: %d\n", turtle.textureList -> data[texture + 1].i);
-    printf("- Texture Height: %d\n", turtle.textureList -> data[texture + 2].i);
-    printf("- Texture Channel: %d\n", turtle.textureList -> data[texture + 3].i);
 }
 
 void turtleSetTextureSize(int32_t width, int32_t height) {
@@ -30402,6 +30446,7 @@ void turtleCircle(double x, double y, double radius) {
     list_append(turtle.penPos, (unitype) turtle.circleprez, 'd');
 }
 
+<<<<<<< HEAD
 void turtleCircleColor(double x, double y, double radius, uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
     list_append(turtle.penPos, (unitype) x, 'd');
     list_append(turtle.penPos, (unitype) y, 'd');
@@ -30410,6 +30455,16 @@ void turtleCircleColor(double x, double y, double radius, uint8_t r, uint8_t g, 
     list_append(turtle.penPos, (unitype) (g / 255.0), 'd');
     list_append(turtle.penPos, (unitype) (b / 255.0), 'd');
     list_append(turtle.penPos, (unitype) (a / 255.0), 'd');
+=======
+void turtleCircleColor(double x, double y, double radius, double r, double g, double b, double a) {
+    list_append(turtle.penPos, (unitype) x, 'd');
+    list_append(turtle.penPos, (unitype) y, 'd');
+    list_append(turtle.penPos, (unitype) radius, 'd');
+    list_append(turtle.penPos, (unitype) r, 'd');
+    list_append(turtle.penPos, (unitype) g, 'd');
+    list_append(turtle.penPos, (unitype) b, 'd');
+    list_append(turtle.penPos, (unitype) a, 'd');
+>>>>>>> 4e0ffe5e1bd2d6afd0cb960e3933c7765519a8fe
     list_append(turtle.penPos, (unitype) 64, 'h'); // blit circle signifier
     list_append(turtle.penPos, (unitype) turtle.circleprez, 'd');
 }
@@ -30525,7 +30580,7 @@ void turtleUpdate() {
             if (renType[i] == 'd') {
                 switch (ren[i + 7].h) {
                 case 0: // penshape circle
-                    if (lastSize != ren[i + 2].d || lastPrez == ren[i + 8].d) {
+                    if (lastSize != ren[i + 2].d || lastPrez != ren[i + 8].d) {
                         precomputedLog = ren[i + 8].d * log(2.71 + ren[i + 2].d);
                     }
                     lastSize = ren[i + 2].d;
@@ -30540,7 +30595,7 @@ void turtleUpdate() {
                 break;
                 case 5: // penshape text
                     if (i - 9 < 0 || i + 9 >= len || renType[i - 1] == 'c' || ren[i - 2].h > 5) {
-                        if (lastSize != ren[i + 2].d || lastPrez == ren[i + 8].d) {
+                        if (lastSize != ren[i + 2].d || lastPrez != ren[i + 8].d) {
                             precomputedLog = ren[i + 8].d * log(2.71 + ren[i + 2].d);
                         }
                         lastSize = ren[i + 2].d;
@@ -31851,7 +31906,6 @@ char *strdel(char *dest, int32_t index, int32_t size) {
 
 tt_theme_name_t tt_theme;
 tt_enabled_t tt_enabled; // all start at 0 (global variable)
-
 tt_elements_t tt_elements;
 
 /* default colours (light theme) */
@@ -32134,7 +32188,7 @@ int32_t ribbonInitInternal(FILE *configFile, list_t *configList, int8_t fileExis
         tt_elements.all = list_init();
     }
     /* set ribbon parameters */
-    tt_ribbon.marginSize = (turtle.bounds[3] - turtle.bounds[1]) / 36.0; // number of pixels between different items in the ribbon (not affected by ribbonSize)
+    tt_ribbon.marginSize = (turtle.initbounds[3] - turtle.initbounds[1]) / 36.0; // number of pixels between different items in the ribbon (not affected by ribbonSize)
     tt_ribbon.mainselect[0] = -1;
     tt_ribbon.mainselect[1] = -1;
     tt_ribbon.mainselect[2] = -1;
@@ -32147,12 +32201,19 @@ int32_t ribbonInitInternal(FILE *configFile, list_t *configList, int8_t fileExis
 
     tt_ribbon.mouseDown = 0;
 
-    tt_ribbon.bounds[0] = turtle.bounds[0];
-    tt_ribbon.bounds[1] = turtle.bounds[1];
-    tt_ribbon.bounds[2] = turtle.bounds[2];
-    tt_ribbon.bounds[3] = turtle.bounds[3];
+    tt_ribbon.bounds[0] = turtle.initbounds[0];
+    tt_ribbon.bounds[1] = turtle.initbounds[1];
+    tt_ribbon.bounds[2] = turtle.initbounds[2];
+    tt_ribbon.bounds[3] = turtle.initbounds[3];
 
-    tt_ribbon.ribbonSize = (turtle.bounds[3] - turtle.bounds[1]) / 360.0; // 1 is default for 640 by 360 coordiantes, below 1 is smaller, above 1 is larger (scales as a multiplier, 0.1 is 100x smaller than 10)
+    tt_ribbon.ribbonSize = (turtle.initbounds[3] - turtle.initbounds[1]) / 360.0; // 1 is default for 640 by 360 coordiantes, below 1 is smaller, above 1 is larger (scales as a multiplier, 0.1 is 100x smaller than 10)
+    if (tt_ribbon.options != NULL) {
+        /* support reinitialising to change ribbon contents */
+        list_free(tt_ribbon.options);
+    }
+    if (tt_ribbon.lengths != NULL) {
+        list_free(tt_ribbon.lengths);
+    }
     tt_ribbon.options = list_init();
     tt_ribbon.lengths = list_init();
 
@@ -32196,10 +32257,6 @@ int32_t ribbonInitInternal(FILE *configFile, list_t *configList, int8_t fileExis
 
 /* render ribbon */
 void ribbonUpdate() {
-    char shapeSave = turtle.penshape;
-    double sizeSave = turtle.pensize;
-    turtlePenSize(20);
-    turtlePenShape("square");
     tt_setColor(TT_COLOR_SLOT_RIBBON_TOP);
     turtleRectangle(tt_ribbon.bounds[0], tt_ribbon.bounds[3] - tt_ribbon.ribbonSize * 10, tt_ribbon.bounds[2], tt_ribbon.bounds[3]);
     tt_setColor(TT_COLOR_TEXT_ALTERNATE);
@@ -32280,8 +32337,6 @@ void ribbonUpdate() {
             tt_ribbon.subselect[1] = tt_ribbon.subselect[0];
         }
     }
-    turtle.penshape = shapeSave;
-    turtle.pensize = sizeSave;
 }
 
 /* popup */
@@ -32790,6 +32845,7 @@ tt_dropdown_t *dropdownInit(char *label, list_t *options, int32_t *variable, tt_
     dropdownp -> value = dropdownp -> index;
     dropdownp -> status = 0;
     dropdownp -> align = align;
+    dropdownp -> direction = TT_DROPDOWN_DIRECTION_AUTO;
     dropdownp -> x = x;
     dropdownp -> y = y;
     dropdownp -> size = size;
@@ -32852,6 +32908,8 @@ tt_textbox_t *textboxInit(char *label, char *variable, uint32_t maxCharacters, d
     textboxp -> renderNumCharacters = 0;
     list_append(tt_elements.textboxes, (unitype) (void *) textboxp, 'p');
     list_append(tt_elements.all, (unitype) (void *) textboxp, 'l');
+    textboxp -> whitelist = NULL;
+    textboxp -> blacklist = NULL;
     return textboxp;
 }
 
@@ -32975,6 +33033,12 @@ void switchUpdate() {
         }
         double switchX = switchp -> x;
         double switchY = switchp -> y;
+        if (switchp -> align == TT_SWITCH_ALIGN_LEFT) {
+            switchX = switchp -> x + switchp -> size * 1.5;
+        }
+        if (switchp -> align == TT_SWITCH_ALIGN_RIGHT) {
+            switchX = switchp -> x - switchp -> size * 1.5;
+        }
         double switchClickLeft = switchX;
         double switchClickRight = switchX;
         double switchClickDown = switchY;
@@ -33019,7 +33083,13 @@ void switchUpdate() {
             /* render text */
             tt_setColor(switchp -> color[TT_COLOR_SLOT_SWITCH_TEXT]);
             if (switchp -> style == TT_SWITCH_STYLE_CLASSIC) {
-                turtleTextWriteUnicode(switchp -> label, switchX, switchY + 1.6 * switchp -> size, switchp -> size - 1, 50);
+                if (switchp -> align == TT_SWITCH_ALIGN_CENTER) {
+                    turtleTextWriteUnicode(switchp -> label, switchX, switchY + 1.6 * switchp -> size, switchp -> size - 1, 50);
+                } else if (switchp -> align == TT_SWITCH_ALIGN_LEFT) {
+                    turtleTextWriteUnicode(switchp -> label, switchX - switchp -> size * 1.2, switchY + 1.6 * switchp -> size, switchp -> size - 1, 0);
+                } else if (switchp -> align == TT_SWITCH_ALIGN_RIGHT) {
+                    turtleTextWriteUnicode(switchp -> label, switchX + switchp -> size * 1.2, switchY + 1.6 * switchp -> size, switchp -> size - 1, 100);
+                }
             } else if (switchp -> style == TT_SWITCH_STYLE_SIDESWIPE_LEFT) {
                 if (switchp -> status == 0) {
                     tt_setColor(switchp -> color[TT_COLOR_SLOT_SWITCH_TEXT]);
@@ -33115,7 +33185,6 @@ void switchUpdate() {
 /* angle between two coordinates (in degrees) */
 double angleBetween(double x1, double y1, double x2, double y2) {
     double output;
-    /* TODO - Fix issue with y2 - y1 equal to 0 breaking the angle */
     if (y2 == y1) {
         if (x2 >= x1) {
             output = 90;
@@ -33378,8 +33447,8 @@ void sliderUpdate() {
         }
         if (sliderp -> renderNumberFactor != 0) {
             tt_setColor(sliderp -> color[TT_COLOR_SLOT_SLIDER_TEXT]);
-            double rounded = round(sliderp -> value * sliderp -> renderNumberFactor);
-            turtleTextWriteStringf(sliderp -> x + sliderOffsetXFactorSmall, sliderp -> y + sliderOffsetYFactorSmall, 4, sliderAlignFactor, "%.0lf", rounded);
+            int32_t rounded = (int32_t) round(sliderp -> value * sliderp -> renderNumberFactor);
+            turtleTextWriteStringf(sliderp -> x + sliderOffsetXFactorSmall, sliderp -> y + sliderOffsetYFactorSmall, 4, sliderAlignFactor, "%d", rounded);
         }
         if (sliderp -> variable != NULL) {
             *sliderp -> variable = sliderp -> value;
@@ -33605,11 +33674,11 @@ void dropdownUpdate() {
         tt_setColor(dropdownp -> color[TT_COLOR_SLOT_DROPDOWN_TEXT]);
         if (dropdownp -> align == TT_DROPDOWN_ALIGN_LEFT) {
             dropdownXFactor[0] = dropdownX;
-            dropdownXFactor[1] = dropdownX + xfactor + dropdownp -> size;
+            dropdownXFactor[1] = dropdownX + xfactor + dropdownp -> size * 1.2;
             dropdownMaxXFactor[0] = dropdownX;
-            dropdownMaxXFactor[1] = dropdownX + dropdownp -> maxXfactor + dropdownp -> size / 2.5;
-            if (dropdownXFactor[1] + dropdownp -> size > dropdownMaxXFactor[1]) {
-                dropdownMaxXFactor[1] = dropdownXFactor[1] + dropdownp -> size;
+            dropdownMaxXFactor[1] = dropdownX + dropdownp -> maxXfactor + dropdownp -> size * 1.1;
+            if (dropdownXFactor[1] + dropdownp -> size * 1.2 > dropdownMaxXFactor[1]) {
+                dropdownMaxXFactor[1] = dropdownXFactor[1] + dropdownp -> size * 1.2;
             }
             dropdownAlignFactor = 0;
             turtleTextWriteUnicode(dropdownp -> label, dropdownX + dropdownp -> size / 5, dropdownY + 2 * dropdownp -> size, dropdownp -> size - 1, dropdownAlignFactor);
@@ -33632,12 +33701,35 @@ void dropdownUpdate() {
             dropdownAlignFactor = 100;
             turtleTextWriteUnicode(dropdownp -> label, dropdownX - dropdownp -> size / 5, dropdownY + 2 * dropdownp -> size, dropdownp -> size - 1, dropdownAlignFactor);
         }
+        int32_t dropdownDirection = dropdownp -> direction;
+        if (dropdownDirection == TT_DROPDOWN_DIRECTION_AUTO) {
+            if (dropdownY - dropdownp -> size * 0.9 - (dropdownp -> options -> length - 1) * itemHeight <= turtle.initbounds[1]) {
+                dropdownDirection = TT_DROPDOWN_DIRECTION_UP;
+            } else {
+                dropdownDirection = TT_DROPDOWN_DIRECTION_DOWN;
+            }
+        }
+        if (dropdownDirection == TT_DROPDOWN_DIRECTION_AUTO_PREFER_UP) {
+            if (dropdownY + dropdownp -> size * 0.9 + (dropdownp -> options -> length - 1) * itemHeight >= turtle.initbounds[3]) {
+                dropdownDirection = TT_DROPDOWN_DIRECTION_DOWN;
+            } else {
+                dropdownDirection = TT_DROPDOWN_DIRECTION_UP;
+            }
+        }
+        int32_t directionRender = 1;
+        if (dropdownDirection == TT_DROPDOWN_DIRECTION_UP) {
+            directionRender = -1;
+        }
         if (dropdownp -> status == -1) {
             tt_setColor(dropdownp -> color[TT_COLOR_SLOT_DROPDOWN_SELECT]);
             turtleRectangle(dropdownXFactor[0], dropdownY - dropdownp -> size * 0.9, dropdownXFactor[1] + dropdownp -> size, dropdownY + dropdownp -> size * 0.9);
         } else if (dropdownp -> status >= 1) {
             tt_setColor(dropdownp -> color[TT_COLOR_SLOT_DROPDOWN_BASE]);
-            turtleRectangle(dropdownMaxXFactor[0], dropdownY - dropdownp -> size * 0.9 - (dropdownp -> options -> length - 1) * itemHeight, dropdownMaxXFactor[1], dropdownY + dropdownp -> size * 0.9);
+            if (dropdownDirection == TT_DROPDOWN_DIRECTION_UP) {
+                turtleRectangle(dropdownMaxXFactor[0], dropdownY + dropdownp -> size * 0.9 + (dropdownp -> options -> length - 1) * itemHeight, dropdownMaxXFactor[1], dropdownY - dropdownp -> size * 0.9);
+            } else {
+                turtleRectangle(dropdownMaxXFactor[0], dropdownY - dropdownp -> size * 0.9 - (dropdownp -> options -> length - 1) * itemHeight, dropdownMaxXFactor[1], dropdownY + dropdownp -> size * 0.9);
+            }
         } else {
             tt_setColor(dropdownp -> color[TT_COLOR_SLOT_DROPDOWN_BASE]);
             turtleRectangle(dropdownXFactor[0], dropdownY - dropdownp -> size * 0.9, dropdownXFactor[1] + dropdownp -> size, dropdownY + dropdownp -> size * 0.9);
@@ -33663,8 +33755,11 @@ void dropdownUpdate() {
                 }
                 if (dropdownp -> status == 1) {
                     if (!turtleMouseDown()) {
-                        if (turtle.mouseX > dropdownMaxXFactor[0] && turtle.mouseX < dropdownMaxXFactor[1] && turtle.mouseY >= dropdownY - dropdownp -> size * 0.9 - (dropdownp -> options -> length - 1) * itemHeight && turtle.mouseY < dropdownY + dropdownp -> size * 0.9 - itemHeight) {
+                        if (turtle.mouseX > dropdownMaxXFactor[0] && turtle.mouseX < dropdownMaxXFactor[1] && ((directionRender == 1 && turtle.mouseY > dropdownY - dropdownp -> size * 0.9 - (dropdownp -> options -> length - 1) * itemHeight && turtle.mouseY <= dropdownY + dropdownp -> size * 0.9 - itemHeight) || (directionRender == -1 && turtle.mouseY < dropdownY + dropdownp -> size * 0.9 + (dropdownp -> options -> length - 1) * itemHeight && turtle.mouseY >= dropdownY - dropdownp -> size * 0.9 + itemHeight))) {
                             uint32_t selected = round((dropdownY - turtle.mouseY) / itemHeight);
+                            if (directionRender == -1) {
+                                selected = round((turtle.mouseY - dropdownY) / itemHeight);
+                            }
                             if (selected != 0) {
                                 if (dropdownp -> index >= selected) {
                                     dropdownp -> index = selected - 1;
@@ -33688,10 +33783,13 @@ void dropdownUpdate() {
                 if (dropdownp -> status == 2 || dropdownp -> status == 1) {
                     tt_globals.elementLogicType = TT_ELEMENT_PRIORITY_DROPDOWN;
                     tt_globals.elementLogicIndex = i;
-                    if (turtle.mouseX > dropdownMaxXFactor[0] && turtle.mouseX < dropdownMaxXFactor[1] && turtle.mouseY >= dropdownY - dropdownp -> size * 0.9 - (dropdownp -> options -> length - 1) * itemHeight && turtle.mouseY < dropdownY + dropdownp -> size * 0.9) {
+                    if (turtle.mouseX > dropdownMaxXFactor[0] && turtle.mouseX < dropdownMaxXFactor[1] && ((directionRender == 1 && turtle.mouseY > dropdownY - dropdownp -> size * 0.9 - (dropdownp -> options -> length - 1) * itemHeight && turtle.mouseY <= dropdownY + dropdownp -> size * 0.9) || (directionRender == -1 && turtle.mouseY < dropdownY + dropdownp -> size * 0.9 + (dropdownp -> options -> length - 1) * itemHeight && turtle.mouseY >= dropdownY - dropdownp -> size * 0.9))) {
                         uint32_t selected = round((dropdownY - turtle.mouseY) / itemHeight);
+                        if (directionRender == -1) {
+                            selected = round((turtle.mouseY - dropdownY) / itemHeight);
+                        }
                         tt_setColor(dropdownp -> color[TT_COLOR_SLOT_DROPDOWN_HOVER]);
-                        turtleRectangle(dropdownMaxXFactor[0], dropdownY - dropdownp -> size * 0.9 - selected * itemHeight, dropdownMaxXFactor[1], dropdownY + dropdownp -> size * 0.9 - selected * itemHeight);
+                        turtleRectangle(dropdownMaxXFactor[0], dropdownY - dropdownp -> size * 0.9 - selected * itemHeight * directionRender, dropdownMaxXFactor[1], dropdownY + dropdownp -> size * 0.9 - selected * itemHeight * directionRender);
                         if (turtleMouseDown() && dropdownp -> status == 2) {
                             if (selected != 0) {
                                 if (dropdownp -> index >= selected) {
@@ -33714,11 +33812,11 @@ void dropdownUpdate() {
                     for (uint32_t i = 0; i < dropdownp -> options -> length; i++) {
                         if (i != dropdownp -> index) {
                             if (dropdownp -> align == TT_DROPDOWN_ALIGN_LEFT) {
-                                turtleTextWriteUnicode(dropdownp -> options -> data[i].s, dropdownMaxXFactor[0] + dropdownp -> size / 5, dropdownY - renderIndex * itemHeight, dropdownp -> size - 1, dropdownAlignFactor);
+                                turtleTextWriteUnicode(dropdownp -> options -> data[i].s, dropdownMaxXFactor[0] + dropdownp -> size / 2, dropdownY - renderIndex * itemHeight * directionRender, dropdownp -> size - 1, dropdownAlignFactor);
                             } else if (dropdownp -> align == TT_DROPDOWN_ALIGN_CENTER) {
-                                turtleTextWriteUnicode(dropdownp -> options -> data[i].s, (dropdownMaxXFactor[0] + dropdownMaxXFactor[1]) / 2, dropdownY - renderIndex * itemHeight, dropdownp -> size - 1, dropdownAlignFactor);
+                                turtleTextWriteUnicode(dropdownp -> options -> data[i].s, (dropdownMaxXFactor[0] + dropdownMaxXFactor[1]) / 2, dropdownY - renderIndex * itemHeight * directionRender, dropdownp -> size - 1, dropdownAlignFactor);
                             } else if (dropdownp -> align == TT_DROPDOWN_ALIGN_RIGHT) {
-                                turtleTextWriteUnicode(dropdownp -> options -> data[i].s, dropdownMaxXFactor[1] - dropdownp -> size * 1.58, dropdownY - renderIndex * itemHeight, dropdownp -> size - 1, dropdownAlignFactor);
+                                turtleTextWriteUnicode(dropdownp -> options -> data[i].s, dropdownMaxXFactor[1] - dropdownp -> size * 1.58, dropdownY - renderIndex * itemHeight * directionRender, dropdownp -> size - 1, dropdownAlignFactor);
                             }
                             renderIndex++;
                         }
@@ -33730,11 +33828,11 @@ void dropdownUpdate() {
         }
         tt_setColor(dropdownp -> color[TT_COLOR_SLOT_DROPDOWN_TEXT_HOVER]);
         if (dropdownp -> align == TT_DROPDOWN_ALIGN_LEFT) {
-            turtleTextWriteUnicode(dropdownp -> options -> data[dropdownp -> index].s, dropdownXFactor[0] + dropdownp -> size / 5, dropdownY, dropdownp -> size - 1, dropdownAlignFactor);
+            turtleTextWriteUnicode(dropdownp -> options -> data[dropdownp -> index].s, dropdownXFactor[0] + dropdownp -> size / 2, dropdownY, dropdownp -> size - 1, dropdownAlignFactor);
         } else if (dropdownp -> align == TT_DROPDOWN_ALIGN_CENTER) {
             turtleTextWriteUnicode(dropdownp -> options -> data[dropdownp -> index].s, (dropdownXFactor[0] + dropdownXFactor[1]) / 2, dropdownY, dropdownp -> size - 1, dropdownAlignFactor);
         } else if (dropdownp -> align == TT_DROPDOWN_ALIGN_RIGHT) {
-            turtleTextWriteUnicode(dropdownp -> options -> data[dropdownp -> index].s, dropdownXFactor[1] - dropdownp -> size * 0.6, dropdownY, dropdownp -> size - 1, dropdownAlignFactor);
+            turtleTextWriteUnicode(dropdownp -> options -> data[dropdownp -> index].s, dropdownXFactor[1] - dropdownp -> size * 0.55, dropdownY, dropdownp -> size - 1, dropdownAlignFactor);
         }
         tt_setColor(dropdownp -> color[TT_COLOR_SLOT_DROPDOWN_TRIANGLE]);
         if (dropdownp -> status >= 1) {
@@ -33773,6 +33871,25 @@ void textboxAddKey(tt_textbox_t *textboxp, int32_t key) {
         size = 4;
     }
     if (len < textboxp -> maxCharacters) {
+        if (textboxp -> blacklist != NULL) {
+            for (int32_t i = 0; i < textboxp -> blacklist -> length; i++) {
+                if (strcmp((char *) buffer, textboxp -> blacklist -> data[i].s) == 0) {
+                    return;
+                }
+            }
+        }
+        if (textboxp -> whitelist != NULL) {
+            int32_t onWhitelist = 0;
+            for (int32_t i = 0; i < textboxp -> whitelist -> length; i++) {
+                if (strcmp((char *) buffer, textboxp -> whitelist -> data[i].s) == 0) {
+                    onWhitelist = 1;
+                    break;
+                }
+            }
+            if (onWhitelist == 0) {
+                return;
+            }
+        }
         strins(textboxp -> text, (char *) buffer, textboxp -> editIndex);
         textboxp -> editIndex += size;
     }
@@ -34217,7 +34334,7 @@ ost_glfw_t osToolsGLFW;
 ost_clipboard_t osToolsClipboard;
 ost_file_dialog_t osToolsFileDialog;
 ost_memmap_t osToolsMemmap;
-ost_com_t osToolsCom;
+ost_serial_t osToolsSerial;
 ost_socket_t osToolsSocket;
 ost_camera_t osToolsCamera;
 
@@ -34254,8 +34371,8 @@ void osToolsIndependentInit(GLFWwindow *window) {
     osToolsGLFW.standardCursors[8] = glfwCreateCursor(&moveCursor, 12, 12);
     /* initialise memmap module */
     osToolsMemmap.mappedFiles = list_init();
-    /* initialise COM module */
-    osToolsCom.com = list_init();
+    /* initialise serial module */
+    osToolsSerial.serial = list_init();
     /* initialise sockets module */
     osToolsSocket.socket = list_init();
     osToolsSocket.win32wsaActive = 0;
@@ -34331,7 +34448,7 @@ void osToolsShowCursor() {
 
 list_t *osToolsLoadInternal(char *filename, ost_csv_t rowOrColumn, char delimeter, ost_csv_field_t fieldType) {
     uint32_t fileSize;
-    uint8_t *mappedFile = osToolsMapFile(filename, &fileSize);
+    uint8_t *mappedFile = osToolsFileMap(filename, &fileSize);
     if (mappedFile == NULL) {
         return NULL;
     }
@@ -34528,7 +34645,7 @@ list_t *osToolsLoadInternal(char *filename, ost_csv_t rowOrColumn, char delimete
         }
         list_append(outputList -> data[outputList -> length - 1].r, field, listType);
     }
-    osToolsUnmapFile(mappedFile);
+    osToolsFileUnmap(mappedFile);
     return outputList;
 }
 
@@ -34762,7 +34879,7 @@ int32_t osToolsFileDialogPrompt(ost_file_dialog_save_t openOrSave, ost_file_dial
     return 0;
 }
 
-uint8_t *osToolsMapFile(char *filename, uint32_t *sizeOutput) {
+uint8_t *osToolsFileMap(char *filename, uint32_t *sizeOutput) {
     HANDLE fileHandle = CreateFileA(filename, FILE_GENERIC_READ | FILE_GENERIC_WRITE, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
     if (fileHandle == INVALID_HANDLE_VALUE) {
         printf("Could not open file %ld\n", GetLastError());
@@ -34797,7 +34914,7 @@ uint8_t *osToolsMapFile(char *filename, uint32_t *sizeOutput) {
     return address;
 }
 
-int32_t osToolsUnmapFile(uint8_t *data) {
+int32_t osToolsFileUnmap(uint8_t *data) {
     UnmapViewOfFile(data);
     int32_t index = -1;
     for (uint32_t i = 0; i < osToolsMemmap.mappedFiles -> length; i += 4) {
@@ -34820,11 +34937,11 @@ int32_t osToolsUnmapFile(uint8_t *data) {
     }
 }
 
-list_t *osToolsListFilesAndFolders(char *directory) {
+list_t *osToolsFileAndFolderList(char *directory) {
     /* https://learn.microsoft.com/en-us/windows/win32/fileio/listing-the-files-in-a-directory */
     list_t *output = list_init();
     if (strlen(directory) > MAX_PATH - 3) {
-        printf("osToolsListFiles: Directory name too long\n");
+        printf("osToolsFileAndFolderList: Directory name too long\n");
         return output;
     }
     char directoryFor[MAX_PATH];
@@ -34833,7 +34950,7 @@ list_t *osToolsListFilesAndFolders(char *directory) {
     WIN32_FIND_DATA findData;
     HANDLE fileHandle = FindFirstFile(directoryFor, &findData);
     if (fileHandle == INVALID_HANDLE_VALUE) {
-        printf("osToolsListFiles: Handle invalid error %ld\n", GetLastError());
+        printf("osToolsFileAndFolderList: Handle invalid error %ld\n", GetLastError());
         return output;
     }
     LARGE_INTEGER filesize;
@@ -34854,11 +34971,11 @@ list_t *osToolsListFilesAndFolders(char *directory) {
     return output;
 }
 
-list_t *osToolsListFiles(char *directory) {
+list_t *osToolsFileList(char *directory) {
     /* https://learn.microsoft.com/en-us/windows/win32/fileio/listing-the-files-in-a-directory */
     list_t *output = list_init();
     if (strlen(directory) > MAX_PATH - 3) {
-        printf("osToolsListFiles: Directory name too long\n");
+        printf("osToolsFileList: Directory name too long\n");
         return output;
     }
     char directoryFor[MAX_PATH];
@@ -34867,7 +34984,7 @@ list_t *osToolsListFiles(char *directory) {
     WIN32_FIND_DATA findData;
     HANDLE fileHandle = FindFirstFile(directoryFor, &findData);
     if (fileHandle == INVALID_HANDLE_VALUE) {
-        printf("osToolsListFiles: Handle invalid error %ld\n", GetLastError());
+        printf("osToolsFileList: Handle invalid error %ld\n", GetLastError());
         return output;
     }
     LARGE_INTEGER filesize;
@@ -34884,11 +35001,11 @@ list_t *osToolsListFiles(char *directory) {
     return output;
 }
 
-list_t *osToolsListFolders(char *directory) {
+list_t *osToolsFolderList(char *directory) {
     /* https://learn.microsoft.com/en-us/windows/win32/fileio/listing-the-files-in-a-directory */
     list_t *output = list_init();
     if (strlen(directory) > MAX_PATH - 3) {
-        printf("osToolsListFolders: Directory name too long\n");
+        printf("osToolsFolderList: Directory name too long\n");
         return output;
     }
     char directoryFor[MAX_PATH];
@@ -34897,7 +35014,7 @@ list_t *osToolsListFolders(char *directory) {
     WIN32_FIND_DATA findData;
     HANDLE fileHandle = FindFirstFile(directoryFor, &findData);
     if (fileHandle == INVALID_HANDLE_VALUE) {
-        printf("osToolsListFolders: Handle invalid error %ld\n", GetLastError());
+        printf("osToolsFolderList: Handle invalid error %ld\n", GetLastError());
         return output;
     }
     do {
@@ -34912,12 +35029,12 @@ list_t *osToolsListFolders(char *directory) {
     return output;
 }
 
-int32_t osToolsCreateFolder(char *folder) {
+int32_t osToolsFolderCreate(char *folder) {
     /* https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-createdirectory */
     return CreateDirectory(folder, NULL);
 }
 
-int32_t osToolsDeleteFolder(char *folder) {
+int32_t osToolsFolderDestroy(char *folder) {
     /* https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-removedirectorya */
     char directoryFor[MAX_PATH + 10] = "rd /s /q ";
     int32_t len = strlen(folder);
@@ -34938,11 +35055,11 @@ void osToolsCloseConsole() {
 }
 
 /*
-windows COM port support
+windows serial port support
 https://learn.microsoft.com/en-us/windows/win32/devio/configuring-a-communications-resource
 */
 
-list_t *osToolsComList() {
+list_t *osToolsSerialList() {
     list_t *output = list_init();
     char comName[8] = "COM";
     char pathInfo[128];
@@ -34953,29 +35070,29 @@ list_t *osToolsComList() {
             list_append(output, (unitype) comName, 's');
         }
         if (GetLastError() == ERROR_INSUFFICIENT_BUFFER) {
-            printf("osToolsComList: Unusual COM device detected on %s\n", comName);
+            printf("osToolsSerialList: Unusual COM device detected on %s\n", comName);
         }
     }
     return output;
 }
 
-int32_t osToolsComOpen(char *name, osToolsComBaud_t baudRate) {
+int32_t osToolsSerialOpen(char *name, osToolsSerialBaud_t baudRate) {
     /* verify COM */
     if (strlen(name) < 3 || name[0] != 'C' || name[1] != 'O' || name[2] != 'M') {
-        // printf("osToolsComOpen: name must start with \"COM\"\n");
+        // printf("osToolsSerialOpen: name must start with \"COM\"\n");
         return -1;
     }
     /* check if this port is already open */
-    int32_t index = list_find(osToolsCom.com, (unitype) name, 's');
+    int32_t index = list_find(osToolsSerial.serial, (unitype) name, 's');
     if (index != -1) {
-        if (CloseHandle((HANDLE) (osToolsCom.com -> data[index + 1].l)) == 0) {
-            printf("osToolsComClose failed with error %ld\n", GetLastError());
+        if (CloseHandle((HANDLE) (osToolsSerial.serial -> data[index + 1].l)) == 0) {
+            printf("osToolsSerialOpen failed with error %ld\n", GetLastError());
             return -1;
         }
-        list_delete(osToolsCom.com, index);
-        list_delete(osToolsCom.com, index);
+        list_delete(osToolsSerial.serial, index);
+        list_delete(osToolsSerial.serial, index);
     }
-    /* open COM port */
+    /* open serial port */
     DCB dcb;
     BOOL fSuccess;
     /* https://support.microsoft.com/en-us/topic/howto-specify-serial-ports-larger-than-com9-db9078a5-b7b6-bf00-240f-f749ebfd913e */
@@ -34990,8 +35107,8 @@ int32_t osToolsComOpen(char *name, osToolsComBaud_t baudRate) {
         printf("Could not open com port %s, error %ld\n", name, GetLastError());
         return -1;
     } else {
-        list_append(osToolsCom.com, (unitype) name, 's');
-        list_append(osToolsCom.com, (unitype) comHandle, 'l');
+        list_append(osToolsSerial.serial, (unitype) name, 's');
+        list_append(osToolsSerial.serial, (unitype) comHandle, 'l');
     }
     /* Initialize the DCB structure. */
     SecureZeroMemory(&dcb, sizeof(DCB));
@@ -35026,51 +35143,51 @@ int32_t osToolsComOpen(char *name, osToolsComBaud_t baudRate) {
     return 0;
 }
 
-int32_t osToolsComSend(char *name, uint8_t *data, int32_t length) {
+int32_t osToolsSerialSend(char *name, uint8_t *data, int32_t length) {
     /* check if this port is open */
-    int32_t index = list_find(osToolsCom.com, (unitype) name, 's');
+    int32_t index = list_find(osToolsSerial.serial, (unitype) name, 's');
     if (index == -1) {
-        printf("osToolsComSend: %s not open\n", name);
+        printf("osToolsSerialSend: %s not open\n", name);
         return 0;
     }
     /* https://www.codeproject.com/Articles/3061/Creating-a-Serial-communication-on-Win32#sending */
     DWORD bytes;
-    if (WriteFile((HANDLE) (osToolsCom.com -> data[index + 1].l), data, length, &bytes, NULL) == 0) {
-        printf("osToolsComSend failed with error %ld\n", GetLastError());
+    if (WriteFile((HANDLE) (osToolsSerial.serial -> data[index + 1].l), data, length, &bytes, NULL) == 0) {
+        printf("osToolsSerialSend failed with error %ld\n", GetLastError());
         return -1;
     }
     return bytes;
 }
 
-int32_t osToolsComReceive(char *name, uint8_t *buffer, int32_t length, int32_t timeoutMilliseconds) {
+int32_t osToolsSerialReceive(char *name, uint8_t *buffer, int32_t length, int32_t timeoutMilliseconds) {
     /* check if this port is open */
-    int32_t index = list_find(osToolsCom.com, (unitype) name, 's');
+    int32_t index = list_find(osToolsSerial.serial, (unitype) name, 's');
     if (index == -1) {
-        printf("osToolsComReceive: %s not open\n", name);
+        printf("osToolsSerialReceive: %s not open\n", name);
         return 0;
     }
     /* Set comm timeout */
     COMMTIMEOUTS timeout = {0, 0, timeoutMilliseconds, 0, 0};
-    SetCommTimeouts((HANDLE) (osToolsCom.com -> data[index + 1].l), &timeout);
+    SetCommTimeouts((HANDLE) (osToolsSerial.serial -> data[index + 1].l), &timeout);
     /* read from COM */
     DWORD bytes;
-    if (ReadFile((HANDLE) (osToolsCom.com -> data[index + 1].l), buffer, length, &bytes, NULL) == 0) {
-        printf("osToolsComReceive failed with error %ld\n", GetLastError());
+    if (ReadFile((HANDLE) (osToolsSerial.serial -> data[index + 1].l), buffer, length, &bytes, NULL) == 0) {
+        printf("osToolsSerialReceive failed with error %ld\n", GetLastError());
         return -1;
     }
     return bytes;
 }
 
-int32_t osToolsComClose(char *name) {
+int32_t osToolsSerialClose(char *name) {
     /* check if this port is already open */
-    int32_t index = list_find(osToolsCom.com, (unitype) name, 's');
+    int32_t index = list_find(osToolsSerial.serial, (unitype) name, 's');
     if (index != -1) {
-        if (CloseHandle((HANDLE) (osToolsCom.com -> data[index + 1].l)) == 0) {
-            printf("osToolsComClose failed with error %ld\n", GetLastError());
+        if (CloseHandle((HANDLE) (osToolsSerial.serial -> data[index + 1].l)) == 0) {
+            printf("osToolsSerialClose failed with error %ld\n", GetLastError());
             return -1;
         }
-        list_delete(osToolsCom.com, index);
-        list_delete(osToolsCom.com, index);
+        list_delete(osToolsSerial.serial, index);
+        list_delete(osToolsSerial.serial, index);
     }
     return 0;
 }
@@ -36198,7 +36315,7 @@ int32_t osToolsFileDialogPrompt(ost_file_dialog_save_t openOrSave, ost_file_dial
     return 0;
 }
 
-uint8_t *osToolsMapFile(char *filename, uint32_t *sizeOutput) {
+uint8_t *osToolsFileMap(char *filename, uint32_t *sizeOutput) {
     int32_t fd = open(filename, O_RDWR);
     struct stat stats;
     if (fstat(fd, &stats) == -1) {
@@ -36218,7 +36335,7 @@ uint8_t *osToolsMapFile(char *filename, uint32_t *sizeOutput) {
     return (uint8_t *) out;
 }
 
-int32_t osToolsUnmapFile(uint8_t *data) {
+int32_t osToolsFileUnmap(uint8_t *data) {
     int32_t index = -1;
     for (uint32_t i = 0; i < osToolsMemmap.mappedFiles -> length; i += 2) {
         if (osToolsMemmap.mappedFiles -> data[i].p == data) {
@@ -36235,7 +36352,7 @@ int32_t osToolsUnmapFile(uint8_t *data) {
     }
 }
 
-list_t *osToolsListFilesAndFolders(char *directory) {
+list_t *osToolsFileAndFolderList(char *directory) {
     list_t *output = list_init();
     DIR *dir = opendir(directory);
     if (dir == NULL) {
@@ -36254,7 +36371,7 @@ list_t *osToolsListFilesAndFolders(char *directory) {
     return output;
 }
 
-list_t *osToolsListFiles(char *directory) {
+list_t *osToolsFileList(char *directory) {
     list_t *output = list_init();
     DIR *dir = opendir(directory);
     if (dir == NULL) {
@@ -36277,7 +36394,7 @@ list_t *osToolsListFiles(char *directory) {
     return output;
 }
 
-list_t *osToolsListFolders(char *directory) {
+list_t *osToolsFolderList(char *directory) {
     list_t *output = list_init();
     DIR *dir = opendir(directory);
     if (dir == NULL) {
@@ -36304,11 +36421,11 @@ list_t *osToolsListFolders(char *directory) {
     return output;
 }
 
-int32_t osToolsCreateFolder(char *folder) {
+int32_t osToolsFolderCreate(char *folder) {
     return mkdir(folder, 0755);
 }
 
-int32_t osToolsDeleteFolder(char *folder) {
+int32_t osToolsFolderDestroy(char *folder) {
     char command[5000] = "rm -rf ";
     strcat(command, folder);
     return system(command);
@@ -36319,24 +36436,26 @@ void osToolsCloseConsole() {
     return;
 }
 
-list_t *osToolsComList() {
+/* Serial support on linux: https://blog.mbedded.ninja/programming/operating-systems/linux/linux-serial-ports-using-c-cpp/ */
+
+list_t *osToolsSerialList() {
     list_t *output = list_init();
     return output;
 }
 
-int32_t osToolsComOpen(char *name, osToolsComBaud_t baudRate) {
+int32_t osToolsSerialOpen(char *name, osToolsSerialBaud_t baudRate) {
     return -1;
 }
 
-int32_t osToolsComSend(char *name, uint8_t *data, int32_t length) {
+int32_t osToolsSerialSend(char *name, uint8_t *data, int32_t length) {
     return -1;
 }
 
-int32_t osToolsComReceive(char *name, uint8_t *buffer, int32_t length, int32_t timeoutMilliseconds) {
+int32_t osToolsSerialReceive(char *name, uint8_t *buffer, int32_t length, int32_t timeoutMilliseconds) {
     return -1;
 }
 
-int32_t osToolsComClose(char *name) {
+int32_t osToolsSerialClose(char *name) {
     return -1;
 }
 

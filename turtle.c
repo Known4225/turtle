@@ -116,6 +116,21 @@ int main(int argc, char *argv[]) {
     }
     glfwMakeContextCurrent(window);
     glfwSetWindowSizeLimits(window, windowHeight * 16 / 9 * 0.4, windowHeight * 0.4, windowHeight * 16 / 9 * optimizedScalingFactor, windowHeight * optimizedScalingFactor);
+    /* initialise logo */
+    GLFWimage icon;
+    int32_t iconChannels;
+    char constructedFilepath[5120];
+    strcpy(constructedFilepath, osToolsFileDialog.executableFilepath);
+    strcat(constructedFilepath, "images/thumbnail.png");
+    uint8_t *iconPixels = stbi_load(constructedFilepath, &icon.width, &icon.height, &iconChannels, 4); // 4 color channels for RGBA
+    if (iconPixels != NULL) {
+        icon.pixels = iconPixels;
+        glfwSetWindowIcon(window, 1, &icon);
+        glfwPollEvents(); // update taskbar icon correctly on windows - https://github.com/glfw/glfw/issues/2753
+        free(iconPixels);
+    } else {
+        printf("Could not load thumbnail %s\n", constructedFilepath);
+    }
 
     /* initialise turtle */
     turtleInit(window, -320, -180, 320, 180);
@@ -132,7 +147,6 @@ int main(int argc, char *argv[]) {
     osToolsFileDialogAddGlobalExtension("txt"); // add txt to extension restrictions
     osToolsFileDialogAddGlobalExtension("csv"); // add csv to extension restrictions
     /* initialise turtleText */
-    char constructedFilepath[5120];
     strcpy(constructedFilepath, osToolsFileDialog.executableFilepath);
     strcat(constructedFilepath, "config/roberto.tgl");
     turtleTextInit(constructedFilepath);
@@ -165,18 +179,6 @@ int main(int argc, char *argv[]) {
     if (columnLike != NULL) {
         list_print(columnLike);
     }
-    /* initialise logo */
-    GLFWimage icon;
-    int32_t iconChannels;
-    strcpy(constructedFilepath, osToolsFileDialog.executableFilepath);
-    strcat(constructedFilepath, "images/thumbnail.png");
-    uint8_t *iconPixels = stbi_load(constructedFilepath, &icon.width, &icon.height, &iconChannels, 4); // 4 color channels for RGBA
-    if (iconPixels != NULL) {
-        icon.pixels = iconPixels;
-        glfwSetWindowIcon(window, 1, &icon);
-    } else {
-        printf("Could not load thumbnail %s\n", constructedFilepath);
-    }
     /* textures */
     turtle_texture_t empvImage = turtleTextureLoad("images/EMPV.png");
     // uint8_t array[16] = {
@@ -187,24 +189,24 @@ int main(int argc, char *argv[]) {
     // };
     // turtle_texture_t empvImage = turtleTextureLoadArray(array, 4, 4, GL_GREEN);
     turtleTexturePrint(empvImage);
-    list_t *folders = osToolsListFolders(".");
-    list_t *files = osToolsListFiles(".");
-    list_t *filesAndFolders = osToolsListFilesAndFolders(".");
+    list_t *folders = osToolsFolderList(".");
+    list_t *files = osToolsFileList(".");
+    list_t *filesAndFolders = osToolsFileAndFolderList(".");
     list_print(folders);
     list_print(files);
     list_print(filesAndFolders);
     list_free(folders);
     list_free(files);
     list_free(filesAndFolders);
-    list_t *comPorts = osToolsComList();
-    printf("COM Ports: ");
-    list_print(comPorts);
-    for (int32_t i = 0; i < comPorts -> length; i++) {
-        osToolsComOpen(comPorts -> data[i].s, OSTOOLS_BAUD_115200);
-        osToolsComSend(comPorts -> data[i].s, (uint8_t *) "Hello World\r\n", strlen("Hello World\r\n"));
-        osToolsComClose(comPorts -> data[i].s);
+    list_t *serialPorts = osToolsSerialList();
+    printf("Serial Ports: ");
+    list_print(serialPorts);
+    for (int32_t i = 0; i < serialPorts -> length; i++) {
+        osToolsSerialOpen(serialPorts -> data[i].s, OSTOOLS_BAUD_115200);
+        osToolsSerialSend(serialPorts -> data[i].s, (uint8_t *) "Hello World\r\n", strlen("Hello World\r\n"));
+        osToolsSerialClose(serialPorts -> data[i].s);
     }
-    list_free(comPorts);
+    list_free(serialPorts);
     /* Server testing */
     // osToolsServerSocketCreate("Server1", OSTOOLS_PROTOCOL_TCP, "6000");
     // osToolsServerSocketListen("Server1", "Client1");
@@ -263,7 +265,7 @@ int main(int argc, char *argv[]) {
     list_append(dropdownOptions, (unitype) "C", 's');
     list_append(dropdownOptions, (unitype) "D", 's');
     list_append(dropdownOptions, (unitype) "E", 's');
-    dropdownInit("Dropdown", dropdownOptions, NULL, TT_DROPDOWN_ALIGN_CENTER, 0, 70, 10);
+    tt_dropdown_t *dropdown = dropdownInit("Dropdown", dropdownOptions, NULL, TT_DROPDOWN_ALIGN_CENTER, 0, 70, 10);
     tt_textbox_t *textbox = textboxInit("Textbox", NULL, 128, -50, -110, 10, 100);
     list_t *contextOptions = list_init();
     list_append(contextOptions, (unitype) "Button", 's');

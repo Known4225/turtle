@@ -475,6 +475,13 @@ typedef enum {
     TT_DROPDOWN_ALIGN_RIGHT = 2,
 } tt_dropdown_align_t;
 
+typedef enum {
+    TT_DROPDOWN_DIRECTION_AUTO = 0,
+    TT_DROPDOWN_DIRECTION_AUTO_PREFER_UP = 1,
+    TT_DROPDOWN_DIRECTION_UP = 2,
+    TT_DROPDOWN_DIRECTION_DOWN = 3,
+} tt_dropdown_direction_t;
+
 /* dropdown */
 typedef struct {
     tt_element_names_t element;
@@ -488,6 +495,7 @@ typedef struct {
     list_t *options;
     int32_t status;
     tt_dropdown_align_t align;
+    tt_dropdown_direction_t direction;
     double maxXfactor;
     /* value */
     int32_t index; // index of selected option
@@ -523,6 +531,9 @@ typedef struct {
     /* value */
     char *text; // text of textbox
     char *value; // text of textbox (duplicate name - always equal to text)
+    /* whitelist */
+    list_t *whitelist;
+    list_t *blacklist;
 } tt_textbox_t;
 
 /* initialise UI elements */

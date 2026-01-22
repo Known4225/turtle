@@ -33,5 +33,5 @@ winsource:
 winsourcerel:
 	gcc turtle.c src/*.c -L./Windows -lglfw3 -lopengl32 -lgdi32 -lglad -lole32 -luuid -lwsock32 -lWs2_32 -lMf -lMfplat -lmfreadwrite -lmfuuid -DOS_WINDOWS -O3 -o turtle.exe
 singlefile:
-	gcc deploy.c -o deploy.exe
-	./deploy.exe
+	gcc singlefile.c -o singlefile.exe
+	./singlefile.exe

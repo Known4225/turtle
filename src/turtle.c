@@ -557,6 +557,14 @@ turtle_texture_t turtleTextureLoadListArrayInternal(list_t *list, uint8_t *array
     return -1;
 }
 
+int32_t turtleTextureGetWidth(turtle_texture_t texture) {
+    return -1;
+}
+
+int32_t turtleTextureGetHeight(turtle_texture_t texture) {
+    return -1;
+}
+
 int32_t turtleTextureUnload(turtle_texture_t texture) {
     return -1;
 }
@@ -832,6 +840,35 @@ turtle_texture_t turtleTextureLoadListArrayInternal(list_t *list, uint8_t *array
     return texture;
 }
 
+int32_t turtleTextureGetWidth(turtle_texture_t texture) {
+    if (texture < 0 || texture >= turtle.textureList -> length) {
+        return -1;
+    }
+    return turtle.textureList -> data[texture + 1].i;
+}
+
+int32_t turtleTextureGetHeight(turtle_texture_t texture) {
+    if (texture < 0 || texture >= turtle.textureList -> length) {
+        return -1;
+    }
+    return turtle.textureList -> data[texture + 1].i;
+}
+
+void turtleTexturePrint(turtle_texture_t texture) {
+    printf("Texture ID: %d\n", texture);
+    if (texture >= 0 && texture < turtle.textureList -> length) {
+        printf("- Texture Name: %s\n", turtle.textureList -> data[texture].s);
+        printf("- Texture Width: %d\n", turtle.textureList -> data[texture + 1].i);
+        printf("- Texture Height: %d\n", turtle.textureList -> data[texture + 2].i);
+        printf("- Texture Channel: %d\n", turtle.textureList -> data[texture + 3].i);
+    } else {
+        printf("- Texture Name: NULL\n");
+        printf("- Texture Width: NULL\n");
+        printf("- Texture Height: NULL\n");
+        printf("- Texture Channel: NULL\n");
+    }
+}
+
 int32_t turtleTextureUnload(turtle_texture_t texture) {
     /* update list */
     if (texture >= turtle.textureList -> length || texture < 1) {
@@ -861,18 +898,6 @@ void turtleTexture(turtle_texture_t texture, double x1, double y1, double x2, do
     list_append(turtle.penPos, (unitype) (g / 255.0), 'd');
     list_append(turtle.penPos, (unitype) (128 + texture / 4), 'h'); // blit texture signifier + texture code - limited to 32639 textures
     list_append(turtle.penPos, (unitype) (b / 255.0), 'd');
-}
-
-void turtleTexturePrint(turtle_texture_t texture) {
-    printf("Texture ID: %d\n", texture);
-    if (texture >= 0 && texture < turtle.textureList -> length) {
-        printf("- Texture Name: %s\n", turtle.textureList -> data[texture].s);
-    } else {
-        printf("- Texture Name: NULL\n");
-    }
-    printf("- Texture Width: %d\n", turtle.textureList -> data[texture + 1].i);
-    printf("- Texture Height: %d\n", turtle.textureList -> data[texture + 2].i);
-    printf("- Texture Channel: %d\n", turtle.textureList -> data[texture + 3].i);
 }
 
 void turtleSetTextureSize(int32_t width, int32_t height) {
@@ -1156,7 +1181,7 @@ void turtleUpdate() {
             if (renType[i] == 'd') {
                 switch (ren[i + 7].h) {
                 case 0: // penshape circle
-                    if (lastSize != ren[i + 2].d || lastPrez == ren[i + 8].d) {
+                    if (lastSize != ren[i + 2].d || lastPrez != ren[i + 8].d) {
                         precomputedLog = ren[i + 8].d * log(2.71 + ren[i + 2].d);
                     }
                     lastSize = ren[i + 2].d;
@@ -1171,7 +1196,7 @@ void turtleUpdate() {
                 break;
                 case 5: // penshape text
                     if (i - 9 < 0 || i + 9 >= len || renType[i - 1] == 'c' || ren[i - 2].h > 5) {
-                        if (lastSize != ren[i + 2].d || lastPrez == ren[i + 8].d) {
+                        if (lastSize != ren[i + 2].d || lastPrez != ren[i + 8].d) {
                             precomputedLog = ren[i + 8].d * log(2.71 + ren[i + 2].d);
                         }
                         lastSize = ren[i + 2].d;

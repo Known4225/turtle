@@ -88,33 +88,32 @@ typedef struct {
 /* stb_image_resize2 pixel_layout enum */
 #ifndef STBIRDEF
 typedef enum {
-  STBIR_1CHANNEL = 1,
-  STBIR_2CHANNEL = 2,
-  STBIR_RGB      = 3,               // 3-chan, with order specified (for channel flipping)
-  STBIR_BGR      = 0,               // 3-chan, with order specified (for channel flipping)
-  STBIR_4CHANNEL = 5,
+    STBIR_1CHANNEL = 1,
+    STBIR_2CHANNEL = 2,
+    STBIR_RGB      = 3,               // 3-chan, with order specified (for channel flipping)
+    STBIR_BGR      = 0,               // 3-chan, with order specified (for channel flipping)
+    STBIR_4CHANNEL = 5,
 
-  STBIR_RGBA = 4,                   // alpha formats, where alpha is NOT premultiplied into color channels
-  STBIR_BGRA = 6,
-  STBIR_ARGB = 7,
-  STBIR_ABGR = 8,
-  STBIR_RA   = 9,
-  STBIR_AR   = 10,
+    STBIR_RGBA = 4,                   // alpha formats, where alpha is NOT premultiplied into color channels
+    STBIR_BGRA = 6,
+    STBIR_ARGB = 7,
+    STBIR_ABGR = 8,
+    STBIR_RA   = 9,
+    STBIR_AR   = 10,
 
-  STBIR_RGBA_PM = 11,               // alpha formats, where alpha is premultiplied into color channels
-  STBIR_BGRA_PM = 12,
-  STBIR_ARGB_PM = 13,
-  STBIR_ABGR_PM = 14,
-  STBIR_RA_PM   = 15,
-  STBIR_AR_PM   = 16,
+    STBIR_RGBA_PM = 11,               // alpha formats, where alpha is premultiplied into color channels
+    STBIR_BGRA_PM = 12,
+    STBIR_ARGB_PM = 13,
+    STBIR_ABGR_PM = 14,
+    STBIR_RA_PM   = 15,
+    STBIR_AR_PM   = 16,
 
-  STBIR_RGBA_NO_AW = 11,            // alpha formats, where NO alpha weighting is applied at all!
-  STBIR_BGRA_NO_AW = 12,            //   these are just synonyms for the _PM flags (which also do
-  STBIR_ARGB_NO_AW = 13,            //   no alpha weighting). These names just make it more clear
-  STBIR_ABGR_NO_AW = 14,            //   for some folks).
-  STBIR_RA_NO_AW   = 15,
-  STBIR_AR_NO_AW   = 16,
-
+    STBIR_RGBA_NO_AW = 11,            // alpha formats, where NO alpha weighting is applied at all!
+    STBIR_BGRA_NO_AW = 12,            //   these are just synonyms for the _PM flags (which also do
+    STBIR_ARGB_NO_AW = 13,            //   no alpha weighting). These names just make it more clear
+    STBIR_ABGR_NO_AW = 14,            //   for some folks).
+    STBIR_RA_NO_AW   = 15,
+    STBIR_AR_NO_AW   = 16,
 } stbir_pixel_layout;
 #endif
 
@@ -217,6 +216,15 @@ turtle_texture_t turtleTextureLoadList(list_t *list, uint32_t width, uint32_t he
 /* load data from a list or array of uint8 (make one NULL) - use GL_RGB or GL_RGBA for encoding */
 turtle_texture_t turtleTextureLoadListArrayInternal(list_t *list, uint8_t *array, uint32_t width, uint32_t height, uint32_t encoding);
 
+/* get the original width of a loaded texture */
+int32_t turtleTextureGetWidth(turtle_texture_t texture);
+
+/* get the original height of a loaded texture */
+int32_t turtleTextureGetHeight(turtle_texture_t texture);
+
+/* print texture name, width, height, and channels */
+void turtleTexturePrint(turtle_texture_t texture);
+
 /* remove a texture from GPU memory */
 int32_t turtleTextureUnload(turtle_texture_t texture);
 
@@ -225,9 +233,6 @@ int32_t turtleTextureUnloadAll();
 
 /* adds a (blit) rectangular texture */
 void turtleTexture(turtle_texture_t texture, double x1, double y1, double x2, double y2, double rot, uint8_t r, uint8_t g, uint8_t b);
-
-/* print texture information */
-void turtleTexturePrint(turtle_texture_t texture);
 
 /* draws a circle at the specified x and y (coordinates) */
 void turtleCircleRenderInternal(double x, double y, double rad, double r, double g, double b, double a, double xcenter, double ycenter, double xfact, double yfact, double prez);
@@ -258,6 +263,8 @@ void turtleRectangleColor(double x1, double y1, double x2, double y2, uint8_t r,
 
 /* adds a (blit) circle to the pipeline */
 void turtleCircle(double x, double y, double radius);
+
+void turtleCircleColor(double x, double y, double radius, double r, double g, double b, double a);
 
 /* create a triangle in 3D */
 void turtle3DTriangle(double x1, double y1, double z1, double x2, double y2, double z2, double x3, double y3, double z3);
