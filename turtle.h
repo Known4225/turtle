@@ -19151,7 +19151,7 @@ void turtleRectangleColor(double x1, double y1, double x2, double y2, uint8_t r,
 /* adds a (blit) circle to the pipeline */
 void turtleCircle(double x, double y, double radius);
 
-void turtleCircleColor(double x, double y, double radius, double r, double g, double b, double a);
+void turtleCircleColor(double x, double y, double radius, uint8_t r, uint8_t g, uint8_t b, uint8_t a);
 
 /* create a triangle in 3D */
 void turtle3DTriangle(double x1, double y1, double z1, double x2, double y2, double z2, double x3, double y3, double z3);
@@ -30446,7 +30446,6 @@ void turtleCircle(double x, double y, double radius) {
     list_append(turtle.penPos, (unitype) turtle.circleprez, 'd');
 }
 
-<<<<<<< HEAD
 void turtleCircleColor(double x, double y, double radius, uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
     list_append(turtle.penPos, (unitype) x, 'd');
     list_append(turtle.penPos, (unitype) y, 'd');
@@ -30455,16 +30454,6 @@ void turtleCircleColor(double x, double y, double radius, uint8_t r, uint8_t g, 
     list_append(turtle.penPos, (unitype) (g / 255.0), 'd');
     list_append(turtle.penPos, (unitype) (b / 255.0), 'd');
     list_append(turtle.penPos, (unitype) (a / 255.0), 'd');
-=======
-void turtleCircleColor(double x, double y, double radius, double r, double g, double b, double a) {
-    list_append(turtle.penPos, (unitype) x, 'd');
-    list_append(turtle.penPos, (unitype) y, 'd');
-    list_append(turtle.penPos, (unitype) radius, 'd');
-    list_append(turtle.penPos, (unitype) r, 'd');
-    list_append(turtle.penPos, (unitype) g, 'd');
-    list_append(turtle.penPos, (unitype) b, 'd');
-    list_append(turtle.penPos, (unitype) a, 'd');
->>>>>>> 4e0ffe5e1bd2d6afd0cb960e3933c7765519a8fe
     list_append(turtle.penPos, (unitype) 64, 'h'); // blit circle signifier
     list_append(turtle.penPos, (unitype) turtle.circleprez, 'd');
 }

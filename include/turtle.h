@@ -264,7 +264,7 @@ void turtleRectangleColor(double x1, double y1, double x2, double y2, uint8_t r,
 /* adds a (blit) circle to the pipeline */
 void turtleCircle(double x, double y, double radius);
 
-void turtleCircleColor(double x, double y, double radius, double r, double g, double b, double a);
+void turtleCircleColor(double x, double y, double radius, uint8_t r, uint8_t g, uint8_t b, uint8_t a);
 
 /* create a triangle in 3D */
 void turtle3DTriangle(double x1, double y1, double z1, double x2, double y2, double z2, double x3, double y3, double z3);
