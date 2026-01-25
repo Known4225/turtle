@@ -34,13 +34,13 @@ This is the relevant portion of the file that will simply be pasted instead of #
 #else
 #define stbir__encode_simdfX_unflip stbir__encode_simdf4_unflip
 #endif
-static float*STBIR__CODER_NAME(stbir__decode_uint8_linear_scaled)(float*decodep, int width_times_channels, void const*inputp)
+static float * STBIR__CODER_NAME(stbir__decode_uint8_linear_scaled)(float * decodep, int width_times_channels, void const * inputp)
 {
 float STBIR_STREAMOUT_PTR(*) decode = decodep;
-float*decode_end = (float*) decode+width_times_channels;
-unsigned char const*input = (unsigned char const*)inputp;
+float * decode_end = (float*) decode + width_times_channels;
+unsigned char const * input = (unsigned char const*)inputp;
 #ifdef STBIR_SIMD
-unsigned char const*end_input_m16 = input+width_times_channels-16;
+unsigned char const * end_input_m16 = input + width_times_channels - 16;
 if (width_times_channels >= 16)
 {
 decode_end -= 16;
@@ -59,8 +59,8 @@ stbir__simdf8_mult(of0, of0, STBIR_max_uint8_as_float_inverted8);
 stbir__simdf8_mult(of1, of1, STBIR_max_uint8_as_float_inverted8);
 stbir__decode_simdf8_flip(of0);
 stbir__decode_simdf8_flip(of1);
-stbir__simdf8_store(decode+0, of0);
-stbir__simdf8_store(decode+8, of1);
+stbir__simdf8_store(decode + 0, of0);
+stbir__simdf8_store(decode + 8, of1);
 #else
 stbir__simdi i, o0, o1, o2, o3;
 stbir__simdf of0, of1, of2, of3;
@@ -79,21 +79,21 @@ stbir__decode_simdf4_flip(of0);
 stbir__decode_simdf4_flip(of1);
 stbir__decode_simdf4_flip(of2);
 stbir__decode_simdf4_flip(of3);
-stbir__simdf_store(decode+0,  of0);
-stbir__simdf_store(decode+4,  of1);
-stbir__simdf_store(decode+8,  of2);
-stbir__simdf_store(decode+12, of3);
+stbir__simdf_store(decode + 0,  of0);
+stbir__simdf_store(decode + 4,  of1);
+stbir__simdf_store(decode + 8,  of2);
+stbir__simdf_store(decode + 12, of3);
 #endif
 decode += 16;
 input += 16;
 if (decode <= decode_end)
 continue;
-if (decode == (decode_end+16))
+if (decode == (decode_end + 16))
 break;
 decode = decode_end;
 input = end_input_m16;
 }
-return decode_end+16;
+return decode_end + 16;
 }
 #endif
 #if stbir__coder_min_num != 3
@@ -102,10 +102,10 @@ STBIR_SIMD_NO_UNROLL_LOOP_START
 while(decode <= decode_end)
 {
 STBIR_SIMD_NO_UNROLL(decode);
-decode[0-4] = ((float)(input[stbir__decode_order0]))*stbir__max_uint8_as_float_inverted;
-decode[1-4] = ((float)(input[stbir__decode_order1]))*stbir__max_uint8_as_float_inverted;
-decode[2-4] = ((float)(input[stbir__decode_order2]))*stbir__max_uint8_as_float_inverted;
-decode[3-4] = ((float)(input[stbir__decode_order3]))*stbir__max_uint8_as_float_inverted;
+decode[0-4] = ((float)(input[stbir__decode_order0])) * stbir__max_uint8_as_float_inverted;
+decode[1-4] = ((float)(input[stbir__decode_order1])) * stbir__max_uint8_as_float_inverted;
+decode[2-4] = ((float)(input[stbir__decode_order2])) * stbir__max_uint8_as_float_inverted;
+decode[3-4] = ((float)(input[stbir__decode_order3])) * stbir__max_uint8_as_float_inverted;
 decode += 4;
 input += 4;
 }
@@ -116,12 +116,12 @@ STBIR_NO_UNROLL_LOOP_START
 while(decode < decode_end)
 {
 STBIR_NO_UNROLL(decode);
-decode[0] = ((float)(input[stbir__decode_order0]))*stbir__max_uint8_as_float_inverted;
+decode[0] = ((float)(input[stbir__decode_order0])) * stbir__max_uint8_as_float_inverted;
 #if stbir__coder_min_num >= 2
-decode[1] = ((float)(input[stbir__decode_order1]))*stbir__max_uint8_as_float_inverted;
+decode[1] = ((float)(input[stbir__decode_order1])) * stbir__max_uint8_as_float_inverted;
 #endif
 #if stbir__coder_min_num >= 3
-decode[2] = ((float)(input[stbir__decode_order2]))*stbir__max_uint8_as_float_inverted;
+decode[2] = ((float)(input[stbir__decode_order2])) * stbir__max_uint8_as_float_inverted;
 #endif
 decode += stbir__coder_min_num;
 input += stbir__coder_min_num;
@@ -129,14 +129,14 @@ input += stbir__coder_min_num;
 #endif
 return decode_end;
 }
-static void STBIR__CODER_NAME(stbir__encode_uint8_linear_scaled)(void*outputp, int width_times_channels, float const*encode)
+static void STBIR__CODER_NAME(stbir__encode_uint8_linear_scaled)(void * outputp, int width_times_channels, float const * encode)
 {
 unsigned char STBIR_SIMD_STREAMOUT_PTR(*) output = (unsigned char *) outputp;
-unsigned char*end_output = ((unsigned char *) output)+width_times_channels;
+unsigned char * end_output = ((unsigned char *) output) + width_times_channels;
 #ifdef STBIR_SIMD
 if (width_times_channels >= stbir__simdfX_float_count*2)
 {
-float const*end_encode_m8 = encode+width_times_channels-stbir__simdfX_float_count*2;
+float const * end_encode_m8 = encode + width_times_channels - stbir__simdfX_float_count*2;
 end_output -= stbir__simdfX_float_count*2;
 STBIR_NO_UNROLL_LOOP_START_INF_FOR
 for(;;)
@@ -159,7 +159,7 @@ encode += stbir__simdfX_float_count*2;
 output += stbir__simdfX_float_count*2;
 if (output <= end_output)
 continue;
-if (output == (end_output+stbir__simdfX_float_count*2))
+if (output == (end_output + stbir__simdfX_float_count*2))
 break;
 output = end_output;
 encode = end_encode_m8;
@@ -207,10 +207,10 @@ output += 4;
 while(output <= end_output)
 {
 float f;
-f = encode[stbir__encode_order0]*stbir__max_uint8_as_float+0.5f; STBIR_CLAMP(f, 0, 255); output[0-4] = (unsigned char)f;
-f = encode[stbir__encode_order1]*stbir__max_uint8_as_float+0.5f; STBIR_CLAMP(f, 0, 255); output[1-4] = (unsigned char)f;
-f = encode[stbir__encode_order2]*stbir__max_uint8_as_float+0.5f; STBIR_CLAMP(f, 0, 255); output[2-4] = (unsigned char)f;
-f = encode[stbir__encode_order3]*stbir__max_uint8_as_float+0.5f; STBIR_CLAMP(f, 0, 255); output[3-4] = (unsigned char)f;
+f = encode[stbir__encode_order0] * stbir__max_uint8_as_float + 0.5f; STBIR_CLAMP(f, 0, 255); output[0-4] = (unsigned char)f;
+f = encode[stbir__encode_order1] * stbir__max_uint8_as_float + 0.5f; STBIR_CLAMP(f, 0, 255); output[1-4] = (unsigned char)f;
+f = encode[stbir__encode_order2] * stbir__max_uint8_as_float + 0.5f; STBIR_CLAMP(f, 0, 255); output[2-4] = (unsigned char)f;
+f = encode[stbir__encode_order3] * stbir__max_uint8_as_float + 0.5f; STBIR_CLAMP(f, 0, 255); output[3-4] = (unsigned char)f;
 output += 4;
 encode += 4;
 }
@@ -222,12 +222,12 @@ while(output < end_output)
 {
 float f;
 STBIR_NO_UNROLL(encode);
-f = encode[stbir__encode_order0]*stbir__max_uint8_as_float+0.5f; STBIR_CLAMP(f, 0, 255); output[0] = (unsigned char)f;
+f = encode[stbir__encode_order0] * stbir__max_uint8_as_float + 0.5f; STBIR_CLAMP(f, 0, 255); output[0] = (unsigned char)f;
 #if stbir__coder_min_num >= 2
-f = encode[stbir__encode_order1]*stbir__max_uint8_as_float+0.5f; STBIR_CLAMP(f, 0, 255); output[1] = (unsigned char)f;
+f = encode[stbir__encode_order1] * stbir__max_uint8_as_float + 0.5f; STBIR_CLAMP(f, 0, 255); output[1] = (unsigned char)f;
 #endif
 #if stbir__coder_min_num >= 3
-f = encode[stbir__encode_order2]*stbir__max_uint8_as_float+0.5f; STBIR_CLAMP(f, 0, 255); output[2] = (unsigned char)f;
+f = encode[stbir__encode_order2] * stbir__max_uint8_as_float + 0.5f; STBIR_CLAMP(f, 0, 255); output[2] = (unsigned char)f;
 #endif
 output += stbir__coder_min_num;
 encode += stbir__coder_min_num;
@@ -235,13 +235,13 @@ encode += stbir__coder_min_num;
 #endif
 #endif
 }
-static float*STBIR__CODER_NAME(stbir__decode_uint8_linear)(float*decodep, int width_times_channels, void const*inputp)
+static float * STBIR__CODER_NAME(stbir__decode_uint8_linear)(float * decodep, int width_times_channels, void const * inputp)
 {
 float STBIR_STREAMOUT_PTR(*) decode = decodep;
-float*decode_end = (float*) decode+width_times_channels;
-unsigned char const*input = (unsigned char const*)inputp;
+float * decode_end = (float*) decode + width_times_channels;
+unsigned char const * input = (unsigned char const*)inputp;
 #ifdef STBIR_SIMD
-unsigned char const*end_input_m16 = input+width_times_channels-16;
+unsigned char const * end_input_m16 = input + width_times_channels - 16;
 if (width_times_channels >= 16)
 {
 decode_end -= 16;
@@ -258,8 +258,8 @@ stbir__simdi8_convert_i32_to_float(of0, o0);
 stbir__simdi8_convert_i32_to_float(of1, o1);
 stbir__decode_simdf8_flip(of0);
 stbir__decode_simdf8_flip(of1);
-stbir__simdf8_store(decode+0, of0);
-stbir__simdf8_store(decode+8, of1);
+stbir__simdf8_store(decode + 0, of0);
+stbir__simdf8_store(decode + 8, of1);
 #else
 stbir__simdi i, o0, o1, o2, o3;
 stbir__simdf of0, of1, of2, of3;
@@ -274,21 +274,21 @@ stbir__decode_simdf4_flip(of0);
 stbir__decode_simdf4_flip(of1);
 stbir__decode_simdf4_flip(of2);
 stbir__decode_simdf4_flip(of3);
-stbir__simdf_store(decode+0, of0);
-stbir__simdf_store(decode+4, of1);
-stbir__simdf_store(decode+8, of2);
-stbir__simdf_store(decode+12, of3);
+stbir__simdf_store(decode + 0, of0);
+stbir__simdf_store(decode + 4, of1);
+stbir__simdf_store(decode + 8, of2);
+stbir__simdf_store(decode + 12, of3);
 #endif
 decode += 16;
 input += 16;
 if (decode <= decode_end)
 continue;
-if (decode == (decode_end+16))
+if (decode == (decode_end + 16))
 break;
 decode = decode_end;
 input = end_input_m16;
 }
-return decode_end+16;
+return decode_end + 16;
 }
 #endif
 #if stbir__coder_min_num != 3
@@ -324,14 +324,14 @@ input += stbir__coder_min_num;
 #endif
 return decode_end;
 }
-static void STBIR__CODER_NAME(stbir__encode_uint8_linear)(void*outputp, int width_times_channels, float const*encode)
+static void STBIR__CODER_NAME(stbir__encode_uint8_linear)(void * outputp, int width_times_channels, float const * encode)
 {
 unsigned char STBIR_SIMD_STREAMOUT_PTR(*) output = (unsigned char *) outputp;
-unsigned char*end_output = ((unsigned char *) output)+width_times_channels;
+unsigned char * end_output = ((unsigned char *) output) + width_times_channels;
 #ifdef STBIR_SIMD
 if (width_times_channels >= stbir__simdfX_float_count*2)
 {
-float const*end_encode_m8 = encode+width_times_channels-stbir__simdfX_float_count*2;
+float const * end_encode_m8 = encode + width_times_channels - stbir__simdfX_float_count*2;
 end_output -= stbir__simdfX_float_count*2;
 STBIR_SIMD_NO_UNROLL_LOOP_START_INF_FOR
 for(;;)
@@ -354,7 +354,7 @@ encode += stbir__simdfX_float_count*2;
 output += stbir__simdfX_float_count*2;
 if (output <= end_output)
 continue;
-if (output == (end_output+stbir__simdfX_float_count*2))
+if (output == (end_output + stbir__simdfX_float_count*2))
 break;
 output = end_output;
 encode = end_encode_m8;
@@ -385,10 +385,10 @@ output += 4;
 while(output <= end_output)
 {
 float f;
-f = encode[stbir__encode_order0]+0.5f; STBIR_CLAMP(f, 0, 255); output[0-4] = (unsigned char)f;
-f = encode[stbir__encode_order1]+0.5f; STBIR_CLAMP(f, 0, 255); output[1-4] = (unsigned char)f;
-f = encode[stbir__encode_order2]+0.5f; STBIR_CLAMP(f, 0, 255); output[2-4] = (unsigned char)f;
-f = encode[stbir__encode_order3]+0.5f; STBIR_CLAMP(f, 0, 255); output[3-4] = (unsigned char)f;
+f = encode[stbir__encode_order0] + 0.5f; STBIR_CLAMP(f, 0, 255); output[0-4] = (unsigned char)f;
+f = encode[stbir__encode_order1] + 0.5f; STBIR_CLAMP(f, 0, 255); output[1-4] = (unsigned char)f;
+f = encode[stbir__encode_order2] + 0.5f; STBIR_CLAMP(f, 0, 255); output[2-4] = (unsigned char)f;
+f = encode[stbir__encode_order3] + 0.5f; STBIR_CLAMP(f, 0, 255); output[3-4] = (unsigned char)f;
 output += 4;
 encode += 4;
 }
@@ -401,23 +401,23 @@ while(output < end_output)
 {
 float f;
 STBIR_NO_UNROLL(encode);
-f = encode[stbir__encode_order0]+0.5f; STBIR_CLAMP(f, 0, 255); output[0] = (unsigned char)f;
+f = encode[stbir__encode_order0] + 0.5f; STBIR_CLAMP(f, 0, 255); output[0] = (unsigned char)f;
 #if stbir__coder_min_num >= 2
-f = encode[stbir__encode_order1]+0.5f; STBIR_CLAMP(f, 0, 255); output[1] = (unsigned char)f;
+f = encode[stbir__encode_order1] + 0.5f; STBIR_CLAMP(f, 0, 255); output[1] = (unsigned char)f;
 #endif
 #if stbir__coder_min_num >= 3
-f = encode[stbir__encode_order2]+0.5f; STBIR_CLAMP(f, 0, 255); output[2] = (unsigned char)f;
+f = encode[stbir__encode_order2] + 0.5f; STBIR_CLAMP(f, 0, 255); output[2] = (unsigned char)f;
 #endif
 output += stbir__coder_min_num;
 encode += stbir__coder_min_num;
 }
 #endif
 }
-static float*STBIR__CODER_NAME(stbir__decode_uint8_srgb)(float*decodep, int width_times_channels, void const*inputp)
+static float * STBIR__CODER_NAME(stbir__decode_uint8_srgb)(float * decodep, int width_times_channels, void const * inputp)
 {
 float STBIR_STREAMOUT_PTR(*) decode = decodep;
-float*decode_end = (float*) decode+width_times_channels;
-unsigned char const*input = (unsigned char const *)inputp;
+float * decode_end = (float*) decode + width_times_channels;
+unsigned char const * input = (unsigned char const *)inputp;
 
 #if stbir__coder_min_num != 3
 decode += 4;
@@ -507,14 +507,14 @@ v1 = temp1.m128i_i128; \
 v2 = temp2.m128i_i128; \
 v3 = temp3.m128i_i128; \
 }
-static void STBIR__CODER_NAME(stbir__encode_uint8_srgb)(void*outputp, int width_times_channels, float const*encode)
+static void STBIR__CODER_NAME(stbir__encode_uint8_srgb)(void * outputp, int width_times_channels, float const * encode)
 {
 unsigned char STBIR_SIMD_STREAMOUT_PTR(*) output = (unsigned char*) outputp;
-unsigned char*end_output = ((unsigned char*) output)+width_times_channels;
+unsigned char * end_output = ((unsigned char*) output) + width_times_channels;
 #ifdef STBIR_SIMD
 if (width_times_channels >= 16)
 {
-float const*end_encode_m16 = encode+width_times_channels-16;
+float const * end_encode_m16 = encode + width_times_channels - 16;
 end_output -= 16;
 STBIR_SIMD_NO_UNROLL_LOOP_START_INF_FOR
 for(;;)
@@ -527,7 +527,7 @@ stbir__min_max_shift20(i0, f0);
 stbir__min_max_shift20(i1, f1);
 stbir__min_max_shift20(i2, f2);
 stbir__min_max_shift20(i3, f3);
-stbir__simdi_table_lookup4(i0, i1, i2, i3, (fp32_to_srgb8_tab4-(127-13)*8));
+stbir__simdi_table_lookup4(i0, i1, i2, i3, (fp32_to_srgb8_tab4 - (127-13)*8));
 stbir__linear_to_srgb_finish(i0, f0);
 stbir__linear_to_srgb_finish(i1, f1);
 stbir__linear_to_srgb_finish(i2, f2);
@@ -537,7 +537,7 @@ encode += 16;
 output += 16;
 if (output <= end_output)
 continue;
-if (output == (end_output+16))
+if (output == (end_output + 16))
 break;
 output = end_output;
 encode = end_encode_m16;
@@ -578,29 +578,29 @@ encode += stbir__coder_min_num;
 #endif
 }
 #if (stbir__coder_min_num == 4) || ((stbir__coder_min_num == 1) && (!defined(stbir__decode_swizzle)))
-static float*STBIR__CODER_NAME(stbir__decode_uint8_srgb4_linearalpha)(float*decodep, int width_times_channels, void const*inputp)
+static float * STBIR__CODER_NAME(stbir__decode_uint8_srgb4_linearalpha)(float * decodep, int width_times_channels, void const * inputp)
 {
 float STBIR_STREAMOUT_PTR(*) decode = decodep;
-float*decode_end = (float*) decode+width_times_channels;
-unsigned char const*input = (unsigned char const *)inputp;
+float * decode_end = (float*) decode + width_times_channels;
+unsigned char const * input = (unsigned char const *)inputp;
 do {
 decode[0] = stbir__srgb_uchar_to_linear_float[ input[stbir__decode_order0] ];
 decode[1] = stbir__srgb_uchar_to_linear_float[ input[stbir__decode_order1] ];
 decode[2] = stbir__srgb_uchar_to_linear_float[ input[stbir__decode_order2] ];
-decode[3] = ((float) input[stbir__decode_order3])*stbir__max_uint8_as_float_inverted;
+decode[3] = ((float) input[stbir__decode_order3]) * stbir__max_uint8_as_float_inverted;
 input += 4;
 decode += 4;
 } while(decode < decode_end);
 return decode_end;
 }
-static void STBIR__CODER_NAME(stbir__encode_uint8_srgb4_linearalpha)(void*outputp, int width_times_channels, float const*encode)
+static void STBIR__CODER_NAME(stbir__encode_uint8_srgb4_linearalpha)(void * outputp, int width_times_channels, float const * encode)
 {
 unsigned char STBIR_SIMD_STREAMOUT_PTR(*) output = (unsigned char*) outputp;
-unsigned char*end_output = ((unsigned char*) output)+width_times_channels;
+unsigned char * end_output = ((unsigned char*) output) + width_times_channels;
 #ifdef STBIR_SIMD
 if (width_times_channels >= 16)
 {
-float const*end_encode_m16 = encode+width_times_channels-16;
+float const * end_encode_m16 = encode + width_times_channels - 16;
 end_output -= 16;
 STBIR_SIMD_NO_UNROLL_LOOP_START_INF_FOR
 for(;;)
@@ -613,7 +613,7 @@ stbir__min_max_shift20(i0, f0);
 stbir__min_max_shift20(i1, f1);
 stbir__min_max_shift20(i2, f2);
 stbir__scale_and_convert(i3, f3);
-stbir__simdi_table_lookup3(i0, i1, i2, (fp32_to_srgb8_tab4-(127-13)*8));
+stbir__simdi_table_lookup3(i0, i1, i2, (fp32_to_srgb8_tab4 - (127-13)*8));
 stbir__linear_to_srgb_finish(i0, f0);
 stbir__linear_to_srgb_finish(i1, f1);
 stbir__linear_to_srgb_finish(i2, f2);
@@ -622,7 +622,7 @@ output += 16;
 encode += 16;
 if (output <= end_output)
 continue;
-if (output == (end_output+16))
+if (output == (end_output + 16))
 break;
 output = end_output;
 encode = end_encode_m16;
@@ -637,7 +637,7 @@ STBIR_SIMD_NO_UNROLL(encode);
 output[stbir__decode_order0] = stbir__linear_to_srgb_uchar(encode[0]);
 output[stbir__decode_order1] = stbir__linear_to_srgb_uchar(encode[1]);
 output[stbir__decode_order2] = stbir__linear_to_srgb_uchar(encode[2]);
-f = encode[3]*stbir__max_uint8_as_float+0.5f;
+f = encode[3] * stbir__max_uint8_as_float + 0.5f;
 STBIR_CLAMP(f, 0, 255);
 output[stbir__decode_order3] = (unsigned char) f;
 output += 4;
@@ -646,18 +646,18 @@ encode += 4;
 }
 #endif
 #if (stbir__coder_min_num == 2) || ((stbir__coder_min_num == 1) && (!defined(stbir__decode_swizzle)))
-static float*STBIR__CODER_NAME(stbir__decode_uint8_srgb2_linearalpha)(float*decodep, int width_times_channels, void const*inputp)
+static float * STBIR__CODER_NAME(stbir__decode_uint8_srgb2_linearalpha)(float * decodep, int width_times_channels, void const * inputp)
 {
 float STBIR_STREAMOUT_PTR(*) decode = decodep;
-float*decode_end = (float*) decode+width_times_channels;
-unsigned char const*input = (unsigned char const *)inputp;
+float * decode_end = (float*) decode + width_times_channels;
+unsigned char const * input = (unsigned char const *)inputp;
 decode += 4;
 while(decode <= decode_end)
 {
 decode[0-4] = stbir__srgb_uchar_to_linear_float[ input[stbir__decode_order0] ];
-decode[1-4] = ((float) input[stbir__decode_order1])*stbir__max_uint8_as_float_inverted;
+decode[1-4] = ((float) input[stbir__decode_order1]) * stbir__max_uint8_as_float_inverted;
 decode[2-4] = stbir__srgb_uchar_to_linear_float[ input[stbir__decode_order0+2] ];
-decode[3-4] = ((float) input[stbir__decode_order1+2])*stbir__max_uint8_as_float_inverted;
+decode[3-4] = ((float) input[stbir__decode_order1+2]) * stbir__max_uint8_as_float_inverted;
 input += 4;
 decode += 4;
 }
@@ -665,18 +665,18 @@ decode -= 4;
 if(decode < decode_end)
 {
 decode[0] = stbir__srgb_uchar_to_linear_float[ stbir__decode_order0 ];
-decode[1] = ((float) input[stbir__decode_order1])*stbir__max_uint8_as_float_inverted;
+decode[1] = ((float) input[stbir__decode_order1]) * stbir__max_uint8_as_float_inverted;
 }
 return decode_end;
 }
-static void STBIR__CODER_NAME(stbir__encode_uint8_srgb2_linearalpha)(void*outputp, int width_times_channels, float const*encode)
+static void STBIR__CODER_NAME(stbir__encode_uint8_srgb2_linearalpha)(void * outputp, int width_times_channels, float const * encode)
 {
 unsigned char STBIR_SIMD_STREAMOUT_PTR(*) output = (unsigned char*) outputp;
-unsigned char*end_output = ((unsigned char*) output)+width_times_channels;
+unsigned char * end_output = ((unsigned char*) output) + width_times_channels;
 #ifdef STBIR_SIMD
 if (width_times_channels >= 16)
 {
-float const*end_encode_m16 = encode+width_times_channels-16;
+float const * end_encode_m16 = encode + width_times_channels - 16;
 end_output -= 16;
 STBIR_SIMD_NO_UNROLL_LOOP_START_INF_FOR
 for(;;)
@@ -689,7 +689,7 @@ stbir__min_max_shift20(i0, f0);
 stbir__scale_and_convert(i1, f1);
 stbir__min_max_shift20(i2, f2);
 stbir__scale_and_convert(i3, f3);
-stbir__simdi_table_lookup2(i0, i2, (fp32_to_srgb8_tab4-(127-13)*8));
+stbir__simdi_table_lookup2(i0, i2, (fp32_to_srgb8_tab4 - (127-13)*8));
 stbir__linear_to_srgb_finish(i0, f0);
 stbir__linear_to_srgb_finish(i2, f2);
 stbir__interleave_pack_and_store_16_u8(output, STBIR_strs_join1(i, ,stbir__encode_order0), STBIR_strs_join1(i, ,stbir__encode_order1), STBIR_strs_join1(i, ,stbir__encode_order2), STBIR_strs_join1(i, ,stbir__encode_order3));
@@ -697,7 +697,7 @@ output += 16;
 encode += 16;
 if (output <= end_output)
 continue;
-if (output == (end_output+16))
+if (output == (end_output + 16))
 break;
 output = end_output;
 encode = end_encode_m16;
@@ -710,7 +710,7 @@ do {
 float f;
 STBIR_SIMD_NO_UNROLL(encode);
 output[stbir__decode_order0] = stbir__linear_to_srgb_uchar(encode[0]);
-f = encode[1]*stbir__max_uint8_as_float+0.5f;
+f = encode[1] * stbir__max_uint8_as_float + 0.5f;
 STBIR_CLAMP(f, 0, 255);
 output[stbir__decode_order1] = (unsigned char) f;
 output += 2;
@@ -718,13 +718,13 @@ encode += 2;
 } while(output < end_output);
 }
 #endif
-static float*STBIR__CODER_NAME(stbir__decode_uint16_linear_scaled)(float*decodep, int width_times_channels, void const*inputp)
+static float * STBIR__CODER_NAME(stbir__decode_uint16_linear_scaled)(float * decodep, int width_times_channels, void const * inputp)
 {
 float STBIR_STREAMOUT_PTR(*) decode = decodep;
-float*decode_end = (float*) decode+width_times_channels;
-unsigned short const*input = (unsigned short const *)inputp;
+float * decode_end = (float*) decode + width_times_channels;
+unsigned short const * input = (unsigned short const *)inputp;
 #ifdef STBIR_SIMD
-unsigned short const*end_input_m8 = input+width_times_channels-8;
+unsigned short const * end_input_m8 = input + width_times_channels - 8;
 if (width_times_channels >= 8)
 {
 decode_end -= 8;
@@ -740,7 +740,7 @@ stbir__simdi8_expand_u16_to_u32(o, i);
 stbir__simdi8_convert_i32_to_float(of, o);
 stbir__simdf8_mult(of, of, STBIR_max_uint16_as_float_inverted8);
 stbir__decode_simdf8_flip(of);
-stbir__simdf8_store(decode+0, of);
+stbir__simdf8_store(decode + 0, of);
 #else
 stbir__simdi i, o0, o1;
 stbir__simdf of0, of1;
@@ -753,19 +753,19 @@ stbir__simdf_mult(of0, of0, STBIR__CONSTF(STBIR_max_uint16_as_float_inverted));
 stbir__simdf_mult(of1, of1, STBIR__CONSTF(STBIR_max_uint16_as_float_inverted));
 stbir__decode_simdf4_flip(of0);
 stbir__decode_simdf4_flip(of1);
-stbir__simdf_store(decode+0, of0);
-stbir__simdf_store(decode+4, of1);
+stbir__simdf_store(decode + 0, of0);
+stbir__simdf_store(decode + 4, of1);
 #endif
 decode += 8;
 input += 8;
 if (decode <= decode_end)
 continue;
-if (decode == (decode_end+8))
+if (decode == (decode_end + 8))
 break;
 decode = decode_end;
 input = end_input_m8;
 }
-return decode_end+8;
+return decode_end + 8;
 }
 #endif
 #if stbir__coder_min_num != 3
@@ -774,10 +774,10 @@ STBIR_SIMD_NO_UNROLL_LOOP_START
 while(decode <= decode_end)
 {
 STBIR_SIMD_NO_UNROLL(decode);
-decode[0-4] = ((float)(input[stbir__decode_order0]))*stbir__max_uint16_as_float_inverted;
-decode[1-4] = ((float)(input[stbir__decode_order1]))*stbir__max_uint16_as_float_inverted;
-decode[2-4] = ((float)(input[stbir__decode_order2]))*stbir__max_uint16_as_float_inverted;
-decode[3-4] = ((float)(input[stbir__decode_order3]))*stbir__max_uint16_as_float_inverted;
+decode[0-4] = ((float)(input[stbir__decode_order0])) * stbir__max_uint16_as_float_inverted;
+decode[1-4] = ((float)(input[stbir__decode_order1])) * stbir__max_uint16_as_float_inverted;
+decode[2-4] = ((float)(input[stbir__decode_order2])) * stbir__max_uint16_as_float_inverted;
+decode[3-4] = ((float)(input[stbir__decode_order3])) * stbir__max_uint16_as_float_inverted;
 decode += 4;
 input += 4;
 }
@@ -788,12 +788,12 @@ STBIR_NO_UNROLL_LOOP_START
 while(decode < decode_end)
 {
 STBIR_NO_UNROLL(decode);
-decode[0] = ((float)(input[stbir__decode_order0]))*stbir__max_uint16_as_float_inverted;
+decode[0] = ((float)(input[stbir__decode_order0])) * stbir__max_uint16_as_float_inverted;
 #if stbir__coder_min_num >= 2
-decode[1] = ((float)(input[stbir__decode_order1]))*stbir__max_uint16_as_float_inverted;
+decode[1] = ((float)(input[stbir__decode_order1])) * stbir__max_uint16_as_float_inverted;
 #endif
 #if stbir__coder_min_num >= 3
-decode[2] = ((float)(input[stbir__decode_order2]))*stbir__max_uint16_as_float_inverted;
+decode[2] = ((float)(input[stbir__decode_order2])) * stbir__max_uint16_as_float_inverted;
 #endif
 decode += stbir__coder_min_num;
 input += stbir__coder_min_num;
@@ -801,15 +801,15 @@ input += stbir__coder_min_num;
 #endif
 return decode_end;
 }
-static void STBIR__CODER_NAME(stbir__encode_uint16_linear_scaled)(void*outputp, int width_times_channels, float const*encode)
+static void STBIR__CODER_NAME(stbir__encode_uint16_linear_scaled)(void * outputp, int width_times_channels, float const * encode)
 {
 unsigned short STBIR_SIMD_STREAMOUT_PTR(*) output = (unsigned short*) outputp;
-unsigned short*end_output = ((unsigned short*) output)+width_times_channels;
+unsigned short * end_output = ((unsigned short*) output) + width_times_channels;
 #ifdef STBIR_SIMD
 {
 if (width_times_channels >= stbir__simdfX_float_count*2)
 {
-float const*end_encode_m8 = encode+width_times_channels-stbir__simdfX_float_count*2;
+float const * end_encode_m8 = encode + width_times_channels - stbir__simdfX_float_count*2;
 end_output -= stbir__simdfX_float_count*2;
 STBIR_SIMD_NO_UNROLL_LOOP_START_INF_FOR
 for(;;)
@@ -827,7 +827,7 @@ encode += stbir__simdfX_float_count*2;
 output += stbir__simdfX_float_count*2;
 if (output <= end_output)
 continue;
-if (output == (end_output+stbir__simdfX_float_count*2))
+if (output == (end_output + stbir__simdfX_float_count*2))
 break;
 output = end_output;
 encode = end_encode_m8;
@@ -878,10 +878,10 @@ while(output <= end_output)
 {
 float f;
 STBIR_SIMD_NO_UNROLL(encode);
-f = encode[stbir__encode_order0]*stbir__max_uint16_as_float+0.5f; STBIR_CLAMP(f, 0, 65535); output[0-4] = (unsigned short)f;
-f = encode[stbir__encode_order1]*stbir__max_uint16_as_float+0.5f; STBIR_CLAMP(f, 0, 65535); output[1-4] = (unsigned short)f;
-f = encode[stbir__encode_order2]*stbir__max_uint16_as_float+0.5f; STBIR_CLAMP(f, 0, 65535); output[2-4] = (unsigned short)f;
-f = encode[stbir__encode_order3]*stbir__max_uint16_as_float+0.5f; STBIR_CLAMP(f, 0, 65535); output[3-4] = (unsigned short)f;
+f = encode[stbir__encode_order0] * stbir__max_uint16_as_float + 0.5f; STBIR_CLAMP(f, 0, 65535); output[0-4] = (unsigned short)f;
+f = encode[stbir__encode_order1] * stbir__max_uint16_as_float + 0.5f; STBIR_CLAMP(f, 0, 65535); output[1-4] = (unsigned short)f;
+f = encode[stbir__encode_order2] * stbir__max_uint16_as_float + 0.5f; STBIR_CLAMP(f, 0, 65535); output[2-4] = (unsigned short)f;
+f = encode[stbir__encode_order3] * stbir__max_uint16_as_float + 0.5f; STBIR_CLAMP(f, 0, 65535); output[3-4] = (unsigned short)f;
 output += 4;
 encode += 4;
 }
@@ -893,12 +893,12 @@ while(output < end_output)
 {
 float f;
 STBIR_NO_UNROLL(encode);
-f = encode[stbir__encode_order0]*stbir__max_uint16_as_float+0.5f; STBIR_CLAMP(f, 0, 65535); output[0] = (unsigned short)f;
+f = encode[stbir__encode_order0] * stbir__max_uint16_as_float + 0.5f; STBIR_CLAMP(f, 0, 65535); output[0] = (unsigned short)f;
 #if stbir__coder_min_num >= 2
-f = encode[stbir__encode_order1]*stbir__max_uint16_as_float+0.5f; STBIR_CLAMP(f, 0, 65535); output[1] = (unsigned short)f;
+f = encode[stbir__encode_order1] * stbir__max_uint16_as_float + 0.5f; STBIR_CLAMP(f, 0, 65535); output[1] = (unsigned short)f;
 #endif
 #if stbir__coder_min_num >= 3
-f = encode[stbir__encode_order2]*stbir__max_uint16_as_float+0.5f; STBIR_CLAMP(f, 0, 65535); output[2] = (unsigned short)f;
+f = encode[stbir__encode_order2] * stbir__max_uint16_as_float + 0.5f; STBIR_CLAMP(f, 0, 65535); output[2] = (unsigned short)f;
 #endif
 output += stbir__coder_min_num;
 encode += stbir__coder_min_num;
@@ -906,13 +906,13 @@ encode += stbir__coder_min_num;
 #endif
 #endif
 }
-static float*STBIR__CODER_NAME(stbir__decode_uint16_linear)(float*decodep, int width_times_channels, void const*inputp)
+static float * STBIR__CODER_NAME(stbir__decode_uint16_linear)(float * decodep, int width_times_channels, void const * inputp)
 {
 float STBIR_STREAMOUT_PTR(*) decode = decodep;
-float*decode_end = (float*) decode+width_times_channels;
-unsigned short const*input = (unsigned short const *)inputp;
+float * decode_end = (float*) decode + width_times_channels;
+unsigned short const * input = (unsigned short const *)inputp;
 #ifdef STBIR_SIMD
-unsigned short const*end_input_m8 = input+width_times_channels-8;
+unsigned short const * end_input_m8 = input + width_times_channels - 8;
 if (width_times_channels >= 8)
 {
 decode_end -= 8;
@@ -927,7 +927,7 @@ stbir__simdi_load(i, input);
 stbir__simdi8_expand_u16_to_u32(o, i);
 stbir__simdi8_convert_i32_to_float(of, o);
 stbir__decode_simdf8_flip(of);
-stbir__simdf8_store(decode+0, of);
+stbir__simdf8_store(decode + 0, of);
 #else
 stbir__simdi i, o0, o1;
 stbir__simdf of0, of1;
@@ -938,19 +938,19 @@ stbir__simdi_convert_i32_to_float(of0, o0);
 stbir__simdi_convert_i32_to_float(of1, o1);
 stbir__decode_simdf4_flip(of0);
 stbir__decode_simdf4_flip(of1);
-stbir__simdf_store(decode+0, of0);
-stbir__simdf_store(decode+4, of1);
+stbir__simdf_store(decode + 0, of0);
+stbir__simdf_store(decode + 4, of1);
 #endif
 decode += 8;
 input += 8;
 if (decode <= decode_end)
 continue;
-if (decode == (decode_end+8))
+if (decode == (decode_end + 8))
 break;
 decode = decode_end;
 input = end_input_m8;
 }
-return decode_end+8;
+return decode_end + 8;
 }
 #endif
 #if stbir__coder_min_num != 3
@@ -986,15 +986,15 @@ input += stbir__coder_min_num;
 #endif
 return decode_end;
 }
-static void STBIR__CODER_NAME(stbir__encode_uint16_linear)(void*outputp, int width_times_channels, float const*encode)
+static void STBIR__CODER_NAME(stbir__encode_uint16_linear)(void * outputp, int width_times_channels, float const * encode)
 {
 unsigned short STBIR_SIMD_STREAMOUT_PTR(*) output = (unsigned short*) outputp;
-unsigned short*end_output = ((unsigned short*) output)+width_times_channels;
+unsigned short * end_output = ((unsigned short*) output) + width_times_channels;
 #ifdef STBIR_SIMD
 {
 if (width_times_channels >= stbir__simdfX_float_count*2)
 {
-float const*end_encode_m8 = encode+width_times_channels-stbir__simdfX_float_count*2;
+float const * end_encode_m8 = encode + width_times_channels - stbir__simdfX_float_count*2;
 end_output -= stbir__simdfX_float_count*2;
 STBIR_SIMD_NO_UNROLL_LOOP_START_INF_FOR
 for(;;)
@@ -1012,7 +1012,7 @@ encode += stbir__simdfX_float_count*2;
 output += stbir__simdfX_float_count*2;
 if (output <= end_output)
 continue;
-if (output == (end_output+stbir__simdfX_float_count*2))
+if (output == (end_output + stbir__simdfX_float_count*2))
 break;
 output = end_output;
 encode = end_encode_m8;
@@ -1046,10 +1046,10 @@ while(output <= end_output)
 {
 float f;
 STBIR_SIMD_NO_UNROLL(encode);
-f = encode[stbir__encode_order0]+0.5f; STBIR_CLAMP(f, 0, 65535); output[0-4] = (unsigned short)f;
-f = encode[stbir__encode_order1]+0.5f; STBIR_CLAMP(f, 0, 65535); output[1-4] = (unsigned short)f;
-f = encode[stbir__encode_order2]+0.5f; STBIR_CLAMP(f, 0, 65535); output[2-4] = (unsigned short)f;
-f = encode[stbir__encode_order3]+0.5f; STBIR_CLAMP(f, 0, 65535); output[3-4] = (unsigned short)f;
+f = encode[stbir__encode_order0] + 0.5f; STBIR_CLAMP(f, 0, 65535); output[0-4] = (unsigned short)f;
+f = encode[stbir__encode_order1] + 0.5f; STBIR_CLAMP(f, 0, 65535); output[1-4] = (unsigned short)f;
+f = encode[stbir__encode_order2] + 0.5f; STBIR_CLAMP(f, 0, 65535); output[2-4] = (unsigned short)f;
+f = encode[stbir__encode_order3] + 0.5f; STBIR_CLAMP(f, 0, 65535); output[3-4] = (unsigned short)f;
 output += 4;
 encode += 4;
 }
@@ -1062,27 +1062,27 @@ while(output < end_output)
 {
 float f;
 STBIR_NO_UNROLL(encode);
-f = encode[stbir__encode_order0]+0.5f; STBIR_CLAMP(f, 0, 65535); output[0] = (unsigned short)f;
+f = encode[stbir__encode_order0] + 0.5f; STBIR_CLAMP(f, 0, 65535); output[0] = (unsigned short)f;
 #if stbir__coder_min_num >= 2
-f = encode[stbir__encode_order1]+0.5f; STBIR_CLAMP(f, 0, 65535); output[1] = (unsigned short)f;
+f = encode[stbir__encode_order1] + 0.5f; STBIR_CLAMP(f, 0, 65535); output[1] = (unsigned short)f;
 #endif
 #if stbir__coder_min_num >= 3
-f = encode[stbir__encode_order2]+0.5f; STBIR_CLAMP(f, 0, 65535); output[2] = (unsigned short)f;
+f = encode[stbir__encode_order2] + 0.5f; STBIR_CLAMP(f, 0, 65535); output[2] = (unsigned short)f;
 #endif
 output += stbir__coder_min_num;
 encode += stbir__coder_min_num;
 }
 #endif
 }
-static float*STBIR__CODER_NAME(stbir__decode_half_float_linear)(float*decodep, int width_times_channels, void const*inputp)
+static float * STBIR__CODER_NAME(stbir__decode_half_float_linear)(float * decodep, int width_times_channels, void const * inputp)
 {
 float STBIR_STREAMOUT_PTR(*) decode = decodep;
-float*decode_end = (float*) decode+width_times_channels;
-stbir__FP16 const*input = (stbir__FP16 const *)inputp;
+float * decode_end = (float*) decode + width_times_channels;
+stbir__FP16 const * input = (stbir__FP16 const *)inputp;
 #ifdef STBIR_SIMD
 if (width_times_channels >= 8)
 {
-stbir__FP16 const*end_input_m8 = input+width_times_channels-8;
+stbir__FP16 const * end_input_m8 = input + width_times_channels - 8;
 decode_end -= 8;
 STBIR_NO_UNROLL_LOOP_START_INF_FOR
 for(;;)
@@ -1113,12 +1113,12 @@ decode += 8;
 input += 8;
 if (decode <= decode_end)
 continue;
-if (decode == (decode_end+8))
+if (decode == (decode_end + 8))
 break;
 decode = decode_end;
 input = end_input_m8;
 }
-return decode_end+8;
+return decode_end + 8;
 }
 #endif
 #if stbir__coder_min_num != 3
@@ -1154,14 +1154,14 @@ input += stbir__coder_min_num;
 #endif
 return decode_end;
 }
-static void STBIR__CODER_NAME(stbir__encode_half_float_linear)(void*outputp, int width_times_channels, float const*encode)
+static void STBIR__CODER_NAME(stbir__encode_half_float_linear)(void * outputp, int width_times_channels, float const * encode)
 {
 stbir__FP16 STBIR_SIMD_STREAMOUT_PTR(*) output = (stbir__FP16*) outputp;
-stbir__FP16*end_output = ((stbir__FP16*) output)+width_times_channels;
+stbir__FP16 * end_output = ((stbir__FP16*) output) + width_times_channels;
 #ifdef STBIR_SIMD
 if (width_times_channels >= 8)
 {
-float const*end_encode_m8 = encode+width_times_channels-8;
+float const * end_encode_m8 = encode + width_times_channels - 8;
 end_output -= 8;
 STBIR_SIMD_NO_UNROLL_LOOP_START_INF_FOR
 for(;;)
@@ -1192,7 +1192,7 @@ encode += 8;
 output += 8;
 if (output <= end_output)
 continue;
-if (output == (end_output+8))
+if (output == (end_output + 8))
 break;
 output = end_output;
 encode = end_encode_m8;
@@ -1232,16 +1232,16 @@ encode += stbir__coder_min_num;
 }
 #endif
 }
-static float*STBIR__CODER_NAME(stbir__decode_float_linear)(float*decodep, int width_times_channels, void const*inputp)
+static float * STBIR__CODER_NAME(stbir__decode_float_linear)(float * decodep, int width_times_channels, void const * inputp)
 {
 #ifdef stbir__decode_swizzle
 float STBIR_STREAMOUT_PTR(*) decode = decodep;
-float*decode_end = (float*) decode+width_times_channels;
-float const*input = (float const *)inputp;
+float * decode_end = (float*) decode + width_times_channels;
+float const * input = (float const *)inputp;
 #ifdef STBIR_SIMD
 if (width_times_channels >= 16)
 {
-float const*end_input_m16 = input+width_times_channels-16;
+float const * end_input_m16 = input + width_times_channels - 16;
 decode_end -= 16;
 STBIR_NO_UNROLL_LOOP_START_INF_FOR
 for(;;)
@@ -1280,12 +1280,12 @@ decode += 16;
 input += 16;
 if (decode <= decode_end)
 continue;
-if (decode == (decode_end+16))
+if (decode == (decode_end + 16))
 break;
 decode = decode_end;
 input = end_input_m16;
 }
-return decode_end+16;
+return decode_end + 16;
 }
 #endif
 #if stbir__coder_min_num != 3
@@ -1322,18 +1322,18 @@ input += stbir__coder_min_num;
 return decode_end;
 #else
 if ((void*)decodep != inputp)
-STBIR_MEMCPY(decodep, inputp, width_times_channels*sizeof(float));
-return decodep+width_times_channels;
+STBIR_MEMCPY(decodep, inputp, width_times_channels * sizeof(float));
+return decodep + width_times_channels;
 #endif
 }
-static void STBIR__CODER_NAME(stbir__encode_float_linear)(void*outputp, int width_times_channels, float const*encode)
+static void STBIR__CODER_NAME(stbir__encode_float_linear)(void * outputp, int width_times_channels, float const * encode)
 {
 #if !defined(STBIR_FLOAT_HIGH_CLAMP) && !defined(STBIR_FLOAT_LO_CLAMP) && !defined(stbir__decode_swizzle)
 if ((void*)outputp != (void*) encode)
-STBIR_MEMCPY(outputp, encode, width_times_channels*sizeof(float));
+STBIR_MEMCPY(outputp, encode, width_times_channels * sizeof(float));
 #else
 float STBIR_SIMD_STREAMOUT_PTR(*) output = (float*) outputp;
-float*end_output = ((float*) output)+width_times_channels;
+float * end_output = ((float*) output) + width_times_channels;
 #ifdef STBIR_FLOAT_HIGH_CLAMP
 #define stbir_scalar_hi_clamp(v) if (v > STBIR_FLOAT_HIGH_CLAMP) v = STBIR_FLOAT_HIGH_CLAMP;
 #else
@@ -1351,10 +1351,10 @@ const stbir__simdfX high_clamp = stbir__simdf_frepX(STBIR_FLOAT_HIGH_CLAMP);
 #ifdef STBIR_FLOAT_LOW_CLAMP
 const stbir__simdfX low_clamp = stbir__simdf_frepX(STBIR_FLOAT_LOW_CLAMP);
 #endif
-if (width_times_channels >= (stbir__simdfX_float_count*2))
+if (width_times_channels >= (stbir__simdfX_float_count * 2))
 {
-float const*end_encode_m8 = encode+width_times_channels-(stbir__simdfX_float_count*2);
-end_output -= (stbir__simdfX_float_count*2);
+float const * end_encode_m8 = encode + width_times_channels - (stbir__simdfX_float_count * 2);
+end_output -= (stbir__simdfX_float_count * 2);
 STBIR_SIMD_NO_UNROLL_LOOP_START_INF_FOR
 for(;;)
 {
@@ -1374,11 +1374,11 @@ stbir__encode_simdfX_unflip(e0);
 stbir__encode_simdfX_unflip(e1);
 stbir__simdfX_store(output, e0);
 stbir__simdfX_store(output+stbir__simdfX_float_count, e1);
-encode += stbir__simdfX_float_count*2;
-output += stbir__simdfX_float_count*2;
+encode += stbir__simdfX_float_count * 2;
+output += stbir__simdfX_float_count * 2;
 if (output < end_output)
 continue;
-if (output == (end_output+(stbir__simdfX_float_count*2)))
+if (output == (end_output + (stbir__simdfX_float_count * 2)))
 break;
 output = end_output;
 encode = end_encode_m8;
@@ -1509,7 +1509,7 @@ encode += stbir__coder_min_num;
 #else
 #define stbIF7(code)
 #endif
-static void STBIR_chans(stbir__vertical_scatter_with_,_coeffs)(float ** outputs, float const*vertical_coefficients, float const*input, float const*input_end)
+static void STBIR_chans(stbir__vertical_scatter_with_,_coeffs)(float ** outputs, float const * vertical_coefficients, float const * input, float const * input_end)
 {
 stbIF0(float STBIR_SIMD_STREAMOUT_PTR(*) output0 = outputs[0]; float c0s = vertical_coefficients[0];)
 stbIF1(float STBIR_SIMD_STREAMOUT_PTR(*) output1 = outputs[1]; float c1s = vertical_coefficients[1];)
@@ -1530,7 +1530,7 @@ stbIF5(stbir__simdfX c5 = stbir__simdf_frepX(c5s);)
 stbIF6(stbir__simdfX c6 = stbir__simdf_frepX(c6s);)
 stbIF7(stbir__simdfX c7 = stbir__simdf_frepX(c7s);)
 STBIR_SIMD_NO_UNROLL_LOOP_START
-while (((char*)input_end-(char*) input) >= (16*stbir__simdfX_float_count))
+while (((char*)input_end - (char*) input) >= (16*stbir__simdfX_float_count))
 {
 stbir__simdfX o0, o1, o2, o3, r0, r1, r2, r3;
 STBIR_SIMD_NO_UNROLL(output0);
@@ -1582,7 +1582,7 @@ input += (4*stbir__simdfX_float_count);
 stbIF0(output0 += (4*stbir__simdfX_float_count);) stbIF1(output1 += (4*stbir__simdfX_float_count);) stbIF2(output2 += (4*stbir__simdfX_float_count);) stbIF3(output3 += (4*stbir__simdfX_float_count);) stbIF4(output4 += (4*stbir__simdfX_float_count);) stbIF5(output5 += (4*stbir__simdfX_float_count);) stbIF6(output6 += (4*stbir__simdfX_float_count);) stbIF7(output7 += (4*stbir__simdfX_float_count);)
 }
 STBIR_SIMD_NO_UNROLL_LOOP_START
-while (((char*)input_end-(char*) input) >= 16)
+while (((char*)input_end - (char*) input) >= 16)
 {
 stbir__simdf o0, r0;
 STBIR_SIMD_NO_UNROLL(output0);
@@ -1612,29 +1612,29 @@ stbIF0(output0 += 4;) stbIF1(output1 += 4;) stbIF2(output2 += 4;) stbIF3(output3
 }
 #else
 STBIR_NO_UNROLL_LOOP_START
-while (((char*)input_end-(char*) input) >= 16)
+while (((char*)input_end - (char*) input) >= 16)
 {
 float r0, r1, r2, r3;
 STBIR_NO_UNROLL(input);
 r0 = input[0], r1 = input[1], r2 = input[2], r3 = input[3];
 #ifdef STB_IMAGE_RESIZE_VERTICAL_CONTINUE
-stbIF0(output0[0] += (r0*c0s); output0[1] += (r1*c0s); output0[2] += (r2*c0s); output0[3] += (r3*c0s);)
-stbIF1(output1[0] += (r0*c1s); output1[1] += (r1*c1s); output1[2] += (r2*c1s); output1[3] += (r3*c1s);)
-stbIF2(output2[0] += (r0*c2s); output2[1] += (r1*c2s); output2[2] += (r2*c2s); output2[3] += (r3*c2s);)
-stbIF3(output3[0] += (r0*c3s); output3[1] += (r1*c3s); output3[2] += (r2*c3s); output3[3] += (r3*c3s);)
-stbIF4(output4[0] += (r0*c4s); output4[1] += (r1*c4s); output4[2] += (r2*c4s); output4[3] += (r3*c4s);)
-stbIF5(output5[0] += (r0*c5s); output5[1] += (r1*c5s); output5[2] += (r2*c5s); output5[3] += (r3*c5s);)
-stbIF6(output6[0] += (r0*c6s); output6[1] += (r1*c6s); output6[2] += (r2*c6s); output6[3] += (r3*c6s);)
-stbIF7(output7[0] += (r0*c7s); output7[1] += (r1*c7s); output7[2] += (r2*c7s); output7[3] += (r3*c7s);)
+stbIF0(output0[0] += (r0 * c0s); output0[1] += (r1 * c0s); output0[2] += (r2 * c0s); output0[3] += (r3 * c0s);)
+stbIF1(output1[0] += (r0 * c1s); output1[1] += (r1 * c1s); output1[2] += (r2 * c1s); output1[3] += (r3 * c1s);)
+stbIF2(output2[0] += (r0 * c2s); output2[1] += (r1 * c2s); output2[2] += (r2 * c2s); output2[3] += (r3 * c2s);)
+stbIF3(output3[0] += (r0 * c3s); output3[1] += (r1 * c3s); output3[2] += (r2 * c3s); output3[3] += (r3 * c3s);)
+stbIF4(output4[0] += (r0 * c4s); output4[1] += (r1 * c4s); output4[2] += (r2 * c4s); output4[3] += (r3 * c4s);)
+stbIF5(output5[0] += (r0 * c5s); output5[1] += (r1 * c5s); output5[2] += (r2 * c5s); output5[3] += (r3 * c5s);)
+stbIF6(output6[0] += (r0 * c6s); output6[1] += (r1 * c6s); output6[2] += (r2 * c6s); output6[3] += (r3 * c6s);)
+stbIF7(output7[0] += (r0 * c7s); output7[1] += (r1 * c7s); output7[2] += (r2 * c7s); output7[3] += (r3 * c7s);)
 #else
-stbIF0(output0[0] = (r0*c0s); output0[1] = (r1*c0s); output0[2] = (r2*c0s); output0[3] = (r3*c0s);)
-stbIF1(output1[0] = (r0*c1s); output1[1] = (r1*c1s); output1[2] = (r2*c1s); output1[3] = (r3*c1s);)
-stbIF2(output2[0] = (r0*c2s); output2[1] = (r1*c2s); output2[2] = (r2*c2s); output2[3] = (r3*c2s);)
-stbIF3(output3[0] = (r0*c3s); output3[1] = (r1*c3s); output3[2] = (r2*c3s); output3[3] = (r3*c3s);)
-stbIF4(output4[0] = (r0*c4s); output4[1] = (r1*c4s); output4[2] = (r2*c4s); output4[3] = (r3*c4s);)
-stbIF5(output5[0] = (r0*c5s); output5[1] = (r1*c5s); output5[2] = (r2*c5s); output5[3] = (r3*c5s);)
-stbIF6(output6[0] = (r0*c6s); output6[1] = (r1*c6s); output6[2] = (r2*c6s); output6[3] = (r3*c6s);)
-stbIF7(output7[0] = (r0*c7s); output7[1] = (r1*c7s); output7[2] = (r2*c7s); output7[3] = (r3*c7s);)
+stbIF0(output0[0] = (r0 * c0s); output0[1] = (r1 * c0s); output0[2] = (r2 * c0s); output0[3] = (r3 * c0s);)
+stbIF1(output1[0] = (r0 * c1s); output1[1] = (r1 * c1s); output1[2] = (r2 * c1s); output1[3] = (r3 * c1s);)
+stbIF2(output2[0] = (r0 * c2s); output2[1] = (r1 * c2s); output2[2] = (r2 * c2s); output2[3] = (r3 * c2s);)
+stbIF3(output3[0] = (r0 * c3s); output3[1] = (r1 * c3s); output3[2] = (r2 * c3s); output3[3] = (r3 * c3s);)
+stbIF4(output4[0] = (r0 * c4s); output4[1] = (r1 * c4s); output4[2] = (r2 * c4s); output4[3] = (r3 * c4s);)
+stbIF5(output5[0] = (r0 * c5s); output5[1] = (r1 * c5s); output5[2] = (r2 * c5s); output5[3] = (r3 * c5s);)
+stbIF6(output6[0] = (r0 * c6s); output6[1] = (r1 * c6s); output6[2] = (r2 * c6s); output6[3] = (r3 * c6s);)
+stbIF7(output7[0] = (r0 * c7s); output7[1] = (r1 * c7s); output7[2] = (r2 * c7s); output7[3] = (r3 * c7s);)
 #endif
 input += 4;
 stbIF0(output0 += 4;) stbIF1(output1 += 4;) stbIF2(output2 += 4;) stbIF3(output3 += 4;) stbIF4(output4 += 4;) stbIF5(output5 += 4;) stbIF6(output6 += 4;) stbIF7(output7 += 4;)
@@ -1646,43 +1646,43 @@ while (input < input_end)
 float r = input[0];
 STBIR_NO_UNROLL(output0);
 #ifdef STB_IMAGE_RESIZE_VERTICAL_CONTINUE
-stbIF0(output0[0] += (r*c0s);)
-stbIF1(output1[0] += (r*c1s);)
-stbIF2(output2[0] += (r*c2s);)
-stbIF3(output3[0] += (r*c3s);)
-stbIF4(output4[0] += (r*c4s);)
-stbIF5(output5[0] += (r*c5s);)
-stbIF6(output6[0] += (r*c6s);)
-stbIF7(output7[0] += (r*c7s);)
+stbIF0(output0[0] += (r * c0s);)
+stbIF1(output1[0] += (r * c1s);)
+stbIF2(output2[0] += (r * c2s);)
+stbIF3(output3[0] += (r * c3s);)
+stbIF4(output4[0] += (r * c4s);)
+stbIF5(output5[0] += (r * c5s);)
+stbIF6(output6[0] += (r * c6s);)
+stbIF7(output7[0] += (r * c7s);)
 #else
-stbIF0(output0[0] = (r*c0s);)
-stbIF1(output1[0] = (r*c1s);)
-stbIF2(output2[0] = (r*c2s);)
-stbIF3(output3[0] = (r*c3s);)
-stbIF4(output4[0] = (r*c4s);)
-stbIF5(output5[0] = (r*c5s);)
-stbIF6(output6[0] = (r*c6s);)
-stbIF7(output7[0] = (r*c7s);)
+stbIF0(output0[0] = (r * c0s);)
+stbIF1(output1[0] = (r * c1s);)
+stbIF2(output2[0] = (r * c2s);)
+stbIF3(output3[0] = (r * c3s);)
+stbIF4(output4[0] = (r * c4s);)
+stbIF5(output5[0] = (r * c5s);)
+stbIF6(output6[0] = (r * c6s);)
+stbIF7(output7[0] = (r * c7s);)
 #endif
 ++input;
 stbIF0(++output0;) stbIF1(++output1;) stbIF2(++output2;) stbIF3(++output3;) stbIF4(++output4;) stbIF5(++output5;) stbIF6(++output6;) stbIF7(++output7;)
 }
 }
-static void STBIR_chans(stbir__vertical_gather_with_,_coeffs)(float*outputp, float const*vertical_coefficients, float const ** inputs, float const*input0_end)
+static void STBIR_chans(stbir__vertical_gather_with_,_coeffs)(float * outputp, float const * vertical_coefficients, float const ** inputs, float const * input0_end)
 {
 float STBIR_SIMD_STREAMOUT_PTR(*) output = outputp;
-stbIF0(float const*input0 = inputs[0]; float c0s = vertical_coefficients[0];)
-stbIF1(float const*input1 = inputs[1]; float c1s = vertical_coefficients[1];)
-stbIF2(float const*input2 = inputs[2]; float c2s = vertical_coefficients[2];)
-stbIF3(float const*input3 = inputs[3]; float c3s = vertical_coefficients[3];)
-stbIF4(float const*input4 = inputs[4]; float c4s = vertical_coefficients[4];)
-stbIF5(float const*input5 = inputs[5]; float c5s = vertical_coefficients[5];)
-stbIF6(float const*input6 = inputs[6]; float c6s = vertical_coefficients[6];)
-stbIF7(float const*input7 = inputs[7]; float c7s = vertical_coefficients[7];)
+stbIF0(float const * input0 = inputs[0]; float c0s = vertical_coefficients[0];)
+stbIF1(float const * input1 = inputs[1]; float c1s = vertical_coefficients[1];)
+stbIF2(float const * input2 = inputs[2]; float c2s = vertical_coefficients[2];)
+stbIF3(float const * input3 = inputs[3]; float c3s = vertical_coefficients[3];)
+stbIF4(float const * input4 = inputs[4]; float c4s = vertical_coefficients[4];)
+stbIF5(float const * input5 = inputs[5]; float c5s = vertical_coefficients[5];)
+stbIF6(float const * input6 = inputs[6]; float c6s = vertical_coefficients[6];)
+stbIF7(float const * input7 = inputs[7]; float c7s = vertical_coefficients[7];)
 #if (STBIR__vertical_channels == 1) && !defined(STB_IMAGE_RESIZE_VERTICAL_CONTINUE)
 if ((c0s >= (1.0f-0.000001f)) && (c0s <= (1.0f+0.000001f)))
 {
-STBIR_MEMCPY(output, input0, (char*)input0_end-(char*)input0);
+STBIR_MEMCPY(output, input0, (char*)input0_end - (char*)input0);
 return;
 }
 #endif
@@ -1697,19 +1697,19 @@ stbIF5(stbir__simdfX c5 = stbir__simdf_frepX(c5s);)
 stbIF6(stbir__simdfX c6 = stbir__simdf_frepX(c6s);)
 stbIF7(stbir__simdfX c7 = stbir__simdf_frepX(c7s);)
 STBIR_SIMD_NO_UNROLL_LOOP_START
-while (((char*)input0_end-(char*) input0) >= (16*stbir__simdfX_float_count))
+while (((char*)input0_end - (char*) input0) >= (16*stbir__simdfX_float_count))
 {
 stbir__simdfX o0, o1, o2, o3, r0, r1, r2, r3;
 STBIR_SIMD_NO_UNROLL(output);
 
-stbIF0(stbir__prefetch(input0+(16*stbir__simdfX_float_count));)
-stbIF1(stbir__prefetch(input1+(16*stbir__simdfX_float_count));)
-stbIF2(stbir__prefetch(input2+(16*stbir__simdfX_float_count));)
-stbIF3(stbir__prefetch(input3+(16*stbir__simdfX_float_count));)
-stbIF4(stbir__prefetch(input4+(16*stbir__simdfX_float_count));)
-stbIF5(stbir__prefetch(input5+(16*stbir__simdfX_float_count));)
-stbIF6(stbir__prefetch(input6+(16*stbir__simdfX_float_count));)
-stbIF7(stbir__prefetch(input7+(16*stbir__simdfX_float_count));)
+stbIF0(stbir__prefetch(input0 + (16*stbir__simdfX_float_count));)
+stbIF1(stbir__prefetch(input1 + (16*stbir__simdfX_float_count));)
+stbIF2(stbir__prefetch(input2 + (16*stbir__simdfX_float_count));)
+stbIF3(stbir__prefetch(input3 + (16*stbir__simdfX_float_count));)
+stbIF4(stbir__prefetch(input4 + (16*stbir__simdfX_float_count));)
+stbIF5(stbir__prefetch(input5 + (16*stbir__simdfX_float_count));)
+stbIF6(stbir__prefetch(input6 + (16*stbir__simdfX_float_count));)
+stbIF7(stbir__prefetch(input7 + (16*stbir__simdfX_float_count));)
 #ifdef STB_IMAGE_RESIZE_VERTICAL_CONTINUE
 stbIF0(stbir__simdfX_load(o0, output);  stbir__simdfX_load(o1, output+stbir__simdfX_float_count);   stbir__simdfX_load(o2, output+(2*stbir__simdfX_float_count));   stbir__simdfX_load(o3, output+(3*stbir__simdfX_float_count));
 stbir__simdfX_load(r0, input0);  stbir__simdfX_load(r1, input0+stbir__simdfX_float_count);   stbir__simdfX_load(r2, input0+(2*stbir__simdfX_float_count));   stbir__simdfX_load(r3, input0+(3*stbir__simdfX_float_count));
@@ -1737,7 +1737,7 @@ output += (4*stbir__simdfX_float_count);
 stbIF0(input0 += (4*stbir__simdfX_float_count);) stbIF1(input1 += (4*stbir__simdfX_float_count);) stbIF2(input2 += (4*stbir__simdfX_float_count);) stbIF3(input3 += (4*stbir__simdfX_float_count);) stbIF4(input4 += (4*stbir__simdfX_float_count);) stbIF5(input5 += (4*stbir__simdfX_float_count);) stbIF6(input6 += (4*stbir__simdfX_float_count);) stbIF7(input7 += (4*stbir__simdfX_float_count);)
 }
 STBIR_SIMD_NO_UNROLL_LOOP_START
-while (((char*)input0_end-(char*) input0) >= 16)
+while (((char*)input0_end - (char*) input0) >= 16)
 {
 stbir__simdf o0, r0;
 STBIR_SIMD_NO_UNROLL(output);
@@ -1760,22 +1760,22 @@ stbIF0(input0 += 4;) stbIF1(input1 += 4;) stbIF2(input2 += 4;) stbIF3(input3 += 
 }
 #else
 STBIR_NO_UNROLL_LOOP_START
-while (((char*)input0_end-(char*) input0) >= 16)
+while (((char*)input0_end - (char*) input0) >= 16)
 {
 float o0, o1, o2, o3;
 STBIR_NO_UNROLL(output);
 #ifdef STB_IMAGE_RESIZE_VERTICAL_CONTINUE
-stbIF0(o0 = output[0]+input0[0]*c0s; o1 = output[1]+input0[1]*c0s; o2 = output[2]+input0[2]*c0s; o3 = output[3]+input0[3]*c0s;)
+stbIF0(o0 = output[0] + input0[0] * c0s; o1 = output[1] + input0[1] * c0s; o2 = output[2] + input0[2] * c0s; o3 = output[3] + input0[3] * c0s;)
 #else
-stbIF0(o0 = input0[0]*c0s; o1 = input0[1]*c0s; o2 = input0[2]*c0s; o3 = input0[3]*c0s;)
+stbIF0(o0 = input0[0] * c0s; o1 = input0[1] * c0s; o2 = input0[2] * c0s; o3 = input0[3] * c0s;)
 #endif
-stbIF1(o0 += input1[0]*c1s; o1 += input1[1]*c1s; o2 += input1[2]*c1s; o3 += input1[3]*c1s;)
-stbIF2(o0 += input2[0]*c2s; o1 += input2[1]*c2s; o2 += input2[2]*c2s; o3 += input2[3]*c2s;)
-stbIF3(o0 += input3[0]*c3s; o1 += input3[1]*c3s; o2 += input3[2]*c3s; o3 += input3[3]*c3s;)
-stbIF4(o0 += input4[0]*c4s; o1 += input4[1]*c4s; o2 += input4[2]*c4s; o3 += input4[3]*c4s;)
-stbIF5(o0 += input5[0]*c5s; o1 += input5[1]*c5s; o2 += input5[2]*c5s; o3 += input5[3]*c5s;)
-stbIF6(o0 += input6[0]*c6s; o1 += input6[1]*c6s; o2 += input6[2]*c6s; o3 += input6[3]*c6s;)
-stbIF7(o0 += input7[0]*c7s; o1 += input7[1]*c7s; o2 += input7[2]*c7s; o3 += input7[3]*c7s;)
+stbIF1(o0 += input1[0] * c1s; o1 += input1[1] * c1s; o2 += input1[2] * c1s; o3 += input1[3] * c1s;)
+stbIF2(o0 += input2[0] * c2s; o1 += input2[1] * c2s; o2 += input2[2] * c2s; o3 += input2[3] * c2s;)
+stbIF3(o0 += input3[0] * c3s; o1 += input3[1] * c3s; o2 += input3[2] * c3s; o3 += input3[3] * c3s;)
+stbIF4(o0 += input4[0] * c4s; o1 += input4[1] * c4s; o2 += input4[2] * c4s; o3 += input4[3] * c4s;)
+stbIF5(o0 += input5[0] * c5s; o1 += input5[1] * c5s; o2 += input5[2] * c5s; o3 += input5[3] * c5s;)
+stbIF6(o0 += input6[0] * c6s; o1 += input6[1] * c6s; o2 += input6[2] * c6s; o3 += input6[3] * c6s;)
+stbIF7(o0 += input7[0] * c7s; o1 += input7[1] * c7s; o2 += input7[2] * c7s; o3 += input7[3] * c7s;)
 output[0] = o0; output[1] = o1; output[2] = o2; output[3] = o3;
 output += 4;
 stbIF0(input0 += 4;) stbIF1(input1 += 4;) stbIF2(input2 += 4;) stbIF3(input3 += 4;) stbIF4(input4 += 4;) stbIF5(input5 += 4;) stbIF6(input6 += 4;) stbIF7(input7 += 4;)
@@ -1787,17 +1787,17 @@ while (input0 < input0_end)
 float o0;
 STBIR_NO_UNROLL(output);
 #ifdef STB_IMAGE_RESIZE_VERTICAL_CONTINUE
-stbIF0(o0 = output[0]+input0[0]*c0s;)
+stbIF0(o0 = output[0] + input0[0] * c0s;)
 #else
-stbIF0(o0 = input0[0]*c0s;)
+stbIF0(o0 = input0[0] * c0s;)
 #endif
-stbIF1(o0 += input1[0]*c1s;)
-stbIF2(o0 += input2[0]*c2s;)
-stbIF3(o0 += input3[0]*c3s;)
-stbIF4(o0 += input4[0]*c4s;)
-stbIF5(o0 += input5[0]*c5s;)
-stbIF6(o0 += input6[0]*c6s;)
-stbIF7(o0 += input7[0]*c7s;)
+stbIF1(o0 += input1[0] * c1s;)
+stbIF2(o0 += input2[0] * c2s;)
+stbIF3(o0 += input3[0] * c3s;)
+stbIF4(o0 += input4[0] * c4s;)
+stbIF5(o0 += input5[0] * c5s;)
+stbIF6(o0 += input6[0] * c6s;)
+stbIF7(o0 += input7[0] * c7s;)
 output[0] = o0;
 ++output;
 stbIF0(++input0;) stbIF1(++input1;) stbIF2(++input2;) stbIF3(++input3;) stbIF4(++input4;) stbIF5(++input5;) stbIF6(++input6;) stbIF7(++input7;)
