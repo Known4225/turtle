@@ -62,7 +62,6 @@ The example project can be built with `make win` on windows or `make` on linux. 
 The example project has a set of files in the `config/` folder that can be modified to change certain aspects of the project (the font, the ribbon, and the popup). If these files are not found then default versions of these configurations are used (which happen to be identical to the ones in the `config/` folder).
 
 # To Do
-- Fix building issue (making library directly from single header doesn't work ???)
 - Fix annoying bug with scrollbar and ribbon hover cancelling and closing dropdown (make it so you have to click on scrollbar)
 - Add option to stretch or pad window (when resized)
 - Mouse interactions with textbox (highlight, index select)
