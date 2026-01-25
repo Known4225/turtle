@@ -57267,7 +57267,7 @@ void turtleGetMouseCoords() {
 
 /* set the background color */
 void turtleBgColor(uint8_t r, uint8_t g, uint8_t b) {
-    glClearColor(r / 255.0, g / 255.0, b / 255.0, 255.0);
+    glClearColor(r / 255.0, g / 255.0, b / 255.0, 1.0);
 }
 
 /* set the pen color */
@@ -57275,7 +57275,7 @@ void turtlePenColor(uint8_t r, uint8_t g, uint8_t b) {
     turtle.penr = r / 255.0;
     turtle.peng = g / 255.0;
     turtle.penb = b / 255.0;
-    turtle.pena = 255.0;
+    turtle.pena = 1.0;
 }
 
 /* set the pen color (with transparency) */
@@ -57283,7 +57283,7 @@ void turtlePenColorAlpha(uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
     turtle.penr = r / 255.0;
     turtle.peng = g / 255.0;
     turtle.penb = b / 255.0;
-    turtle.pena = 1.0 - a / 255;
+    turtle.pena = 1.0 - a / 255.0;
 }
 
 /* set the pen size */
@@ -57904,7 +57904,7 @@ void turtleTriangleColor(double x1, double y1, double x2, double y2, double x3, 
     list_append(turtle.penPos, (unitype) (r / 255.0), 'd');
     list_append(turtle.penPos, (unitype) (g / 255.0), 'd');
     list_append(turtle.penPos, (unitype) (b / 255.0), 'd');
-    list_append(turtle.penPos, (unitype) (a / 255.0), 'd');
+    list_append(turtle.penPos, (unitype) (1.0 - a / 255.0), 'd');
     list_append(turtle.penPos, (unitype) 66, 'h'); // blit triangle signifier
     list_append(turtle.penPos, (unitype) y2, 'd'); // some unconventional formatting but it works
 
@@ -57949,7 +57949,7 @@ void turtleQuadColor(double x1, double y1, double x2, double y2, double x3, doub
     list_append(turtle.penPos, (unitype) (r / 255.0), 'd');
     list_append(turtle.penPos, (unitype) (g / 255.0), 'd');
     list_append(turtle.penPos, (unitype) (b / 255.0), 'd');
-    list_append(turtle.penPos, (unitype) (a / 255.0), 'd');
+    list_append(turtle.penPos, (unitype) (1.0 - a / 255.0), 'd');
     list_append(turtle.penPos, (unitype) 67, 'h'); // blit quad signifier
     list_append(turtle.penPos, (unitype) y2, 'd'); // some unconventional formatting but it works
 
@@ -57994,7 +57994,7 @@ void turtleRectangleColor(double x1, double y1, double x2, double y2, uint8_t r,
     list_append(turtle.penPos, (unitype) (r / 255.0), 'd');
     list_append(turtle.penPos, (unitype) (g / 255.0), 'd');
     list_append(turtle.penPos, (unitype) (b / 255.0), 'd');
-    list_append(turtle.penPos, (unitype) (a / 255.0), 'd');
+    list_append(turtle.penPos, (unitype) (1.0 - a / 255.0), 'd');
     list_append(turtle.penPos, (unitype) 67, 'h'); // blit quad signifier
     list_append(turtle.penPos, (unitype) y1, 'd'); // some unconventional formatting but it works
 
@@ -58029,7 +58029,7 @@ void turtleCircleColor(double x, double y, double radius, uint8_t r, uint8_t g, 
     list_append(turtle.penPos, (unitype) (r / 255.0), 'd');
     list_append(turtle.penPos, (unitype) (g / 255.0), 'd');
     list_append(turtle.penPos, (unitype) (b / 255.0), 'd');
-    list_append(turtle.penPos, (unitype) (a / 255.0), 'd');
+    list_append(turtle.penPos, (unitype) (1.0 - a / 255.0), 'd');
     list_append(turtle.penPos, (unitype) 64, 'h'); // blit circle signifier
     list_append(turtle.penPos, (unitype) turtle.circleprez, 'd');
 }
