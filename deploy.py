@@ -10,10 +10,8 @@ import shutil
 import subprocess
 
 # Build on development
-# outWindows = subprocess.run("make winrel").returncode
-outWindows = subprocess.run("make winreltextures").returncode
-# outLinux = subprocess.run("wsl -e make rel").returncode
-outLinux = subprocess.run("wsl -e make reltextures").returncode
+outWindows = subprocess.run("make winrel").returncode
+outLinux = subprocess.run("wsl -e make rel").returncode
 if outWindows != 0 or outLinux != 0:
     quit()
 
@@ -45,16 +43,12 @@ print("\
 shutil.copy("turtle.c", "../turtle-main/turtle.c")
 shutil.copy("turtle.h", "../turtle-main/turtle.h")
 shutil.copy("Windows/turtle.lib", "../turtle-main/Windows/turtle.lib")
-shutil.copy("Windows/turtletextures.lib", "../turtle-main/Windows/turtletextures.lib")
 shutil.copy("Linux/libturtle.a", "../turtle-main/Linux/libturtle.a")
-shutil.copy("Linux/libturtletextures.a", "../turtle-main/Linux/libturtletextures.a")
 
 # Build on main
 os.chdir("../turtle-main")
 outWindows = subprocess.run("make winrel").returncode
-outWindows = subprocess.run("make winreltextures").returncode or outWindows
 outLinux = subprocess.run("wsl -e make rel").returncode
-outLinux = subprocess.run("wsl -e make reltextures").returncode or outLinux
 # Push to git if checks passed
 if outWindows == 0 and outLinux == 0:
     subprocess.run("git pull")
