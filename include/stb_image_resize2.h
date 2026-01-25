@@ -4039,6 +4039,7 @@ static void stbir__calculate_filters( stbir__sampler * samp, stbir__sampler * ot
 
 #define stbir__coder_min_num 1
 #define STB_IMAGE_RESIZE_DO_CODERS
+#undef TURTLE_H
 #include STBIR__HEADER_FILENAME
 
 #define stbir__decode_suffix BGRA
@@ -4053,6 +4054,7 @@ static void stbir__calculate_filters( stbir__sampler * samp, stbir__sampler * ot
 #define stbir__encode_order3  3
 #define stbir__coder_min_num 4
 #define STB_IMAGE_RESIZE_DO_CODERS
+#undef TURTLE_H
 #include STBIR__HEADER_FILENAME
 
 #define stbir__decode_suffix ARGB
@@ -4067,6 +4069,7 @@ static void stbir__calculate_filters( stbir__sampler * samp, stbir__sampler * ot
 #define stbir__encode_order3  2
 #define stbir__coder_min_num 4
 #define STB_IMAGE_RESIZE_DO_CODERS
+#undef TURTLE_H
 #include STBIR__HEADER_FILENAME
 
 #define stbir__decode_suffix ABGR
@@ -4081,6 +4084,7 @@ static void stbir__calculate_filters( stbir__sampler * samp, stbir__sampler * ot
 #define stbir__encode_order3  0
 #define stbir__coder_min_num 4
 #define STB_IMAGE_RESIZE_DO_CODERS
+#undef TURTLE_H
 #include STBIR__HEADER_FILENAME
 
 #define stbir__decode_suffix AR
@@ -4095,6 +4099,7 @@ static void stbir__calculate_filters( stbir__sampler * samp, stbir__sampler * ot
 #define stbir__encode_order3  2
 #define stbir__coder_min_num 2
 #define STB_IMAGE_RESIZE_DO_CODERS
+#undef TURTLE_H
 #include STBIR__HEADER_FILENAME
 
 
@@ -4802,6 +4807,7 @@ static void stbir__decode_scanline(stbir__info const * stbir_info, int n, float 
 
 #define STBIR__horizontal_channels 1
 #define STB_IMAGE_RESIZE_DO_HORIZONTALS
+#undef TURTLE_H
 #include STBIR__HEADER_FILENAME
 
 
@@ -5042,6 +5048,7 @@ static void stbir__decode_scanline(stbir__info const * stbir_info, int n, float 
 
 #define STBIR__horizontal_channels 2
 #define STB_IMAGE_RESIZE_DO_HORIZONTALS
+#undef TURTLE_H
 #include STBIR__HEADER_FILENAME
 
 
@@ -5343,6 +5350,7 @@ static void stbir__decode_scanline(stbir__info const * stbir_info, int n, float 
 
 #define STBIR__horizontal_channels 3
 #define STB_IMAGE_RESIZE_DO_HORIZONTALS
+#undef TURTLE_H
 #include STBIR__HEADER_FILENAME
 
 //=================
@@ -5640,6 +5648,7 @@ static void stbir__decode_scanline(stbir__info const * stbir_info, int n, float 
 
 #define STBIR__horizontal_channels 4
 #define STB_IMAGE_RESIZE_DO_HORIZONTALS
+#undef TURTLE_H
 #include STBIR__HEADER_FILENAME
 
 
@@ -6043,6 +6052,7 @@ static void stbir__decode_scanline(stbir__info const * stbir_info, int n, float 
 
 #define STBIR__horizontal_channels 7
 #define STB_IMAGE_RESIZE_DO_HORIZONTALS
+#undef TURTLE_H
 #include STBIR__HEADER_FILENAME
 
 
@@ -6050,74 +6060,90 @@ static void stbir__decode_scanline(stbir__info const * stbir_info, int n, float 
 
 #define STBIR__vertical_channels 1
 #define STB_IMAGE_RESIZE_DO_VERTICALS
+#undef TURTLE_H
 #include STBIR__HEADER_FILENAME
 
 #define STBIR__vertical_channels 1
 #define STB_IMAGE_RESIZE_DO_VERTICALS
 #define STB_IMAGE_RESIZE_VERTICAL_CONTINUE
+#undef TURTLE_H
 #include STBIR__HEADER_FILENAME
 
 #define STBIR__vertical_channels 2
 #define STB_IMAGE_RESIZE_DO_VERTICALS
+#undef TURTLE_H
 #include STBIR__HEADER_FILENAME
 
 #define STBIR__vertical_channels 2
 #define STB_IMAGE_RESIZE_DO_VERTICALS
 #define STB_IMAGE_RESIZE_VERTICAL_CONTINUE
+#undef TURTLE_H
 #include STBIR__HEADER_FILENAME
 
 #define STBIR__vertical_channels 3
 #define STB_IMAGE_RESIZE_DO_VERTICALS
+#undef TURTLE_H
 #include STBIR__HEADER_FILENAME
 
 #define STBIR__vertical_channels 3
 #define STB_IMAGE_RESIZE_DO_VERTICALS
 #define STB_IMAGE_RESIZE_VERTICAL_CONTINUE
+#undef TURTLE_H
 #include STBIR__HEADER_FILENAME
 
 #define STBIR__vertical_channels 4
 #define STB_IMAGE_RESIZE_DO_VERTICALS
+#undef TURTLE_H
 #include STBIR__HEADER_FILENAME
 
 #define STBIR__vertical_channels 4
 #define STB_IMAGE_RESIZE_DO_VERTICALS
 #define STB_IMAGE_RESIZE_VERTICAL_CONTINUE
+#undef TURTLE_H
 #include STBIR__HEADER_FILENAME
 
 #define STBIR__vertical_channels 5
 #define STB_IMAGE_RESIZE_DO_VERTICALS
+#undef TURTLE_H
 #include STBIR__HEADER_FILENAME
 
 #define STBIR__vertical_channels 5
 #define STB_IMAGE_RESIZE_DO_VERTICALS
 #define STB_IMAGE_RESIZE_VERTICAL_CONTINUE
+#undef TURTLE_H
 #include STBIR__HEADER_FILENAME
 
 #define STBIR__vertical_channels 6
 #define STB_IMAGE_RESIZE_DO_VERTICALS
+#undef TURTLE_H
 #include STBIR__HEADER_FILENAME
 
 #define STBIR__vertical_channels 6
 #define STB_IMAGE_RESIZE_DO_VERTICALS
 #define STB_IMAGE_RESIZE_VERTICAL_CONTINUE
+#undef TURTLE_H
 #include STBIR__HEADER_FILENAME
 
 #define STBIR__vertical_channels 7
 #define STB_IMAGE_RESIZE_DO_VERTICALS
+#undef TURTLE_H
 #include STBIR__HEADER_FILENAME
 
 #define STBIR__vertical_channels 7
 #define STB_IMAGE_RESIZE_DO_VERTICALS
 #define STB_IMAGE_RESIZE_VERTICAL_CONTINUE
+#undef TURTLE_H
 #include STBIR__HEADER_FILENAME
 
 #define STBIR__vertical_channels 8
 #define STB_IMAGE_RESIZE_DO_VERTICALS
+#undef TURTLE_H
 #include STBIR__HEADER_FILENAME
 
 #define STBIR__vertical_channels 8
 #define STB_IMAGE_RESIZE_DO_VERTICALS
 #define STB_IMAGE_RESIZE_VERTICAL_CONTINUE
+#undef TURTLE_H
 #include STBIR__HEADER_FILENAME
 
 typedef void STBIR_VERTICAL_GATHERFUNC( float * output, float const * coeffs, float const ** inputs, float const * input0_end );

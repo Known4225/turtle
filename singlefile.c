@@ -68,7 +68,8 @@ int32_t lineBlacklist(char *line) {
     if (line[0] != '#' || line[1] != 'i') {
         return 0;
     }
-    char blacklisted[headerLength * 6][128];
+    const int32_t permutations = 6;
+    char blacklisted[headerLength * permutations + 2][128];
     for (int32_t i = 0; i < headerLength; i++) {
         sprintf(blacklisted[i], "#include \"%s\"\r\n", headerFiles[i] + 8); // linux
         sprintf(blacklisted[i + headerLength], "#include \"%s\"\n", headerFiles[i] + 8); // windows (ridiculous, windows turns \n into \r\n for NO REASON)
@@ -81,11 +82,19 @@ int32_t lineBlacklist(char *line) {
         sprintf(blacklisted[i + headerLength * 4], "#include \"../%s\"\r\n", headerFiles[i]);
         sprintf(blacklisted[i + headerLength * 5], "#include \"../%s\"\n", headerFiles[i]);
     }
-    for (int32_t i = 0; i < headerLength * 6; i++) {
+    sprintf(blacklisted[headerLength * permutations], "#include STBIR__HEADER_FILENAME\r\n");
+    sprintf(blacklisted[headerLength * permutations + 1], "#include STBIR__HEADER_FILENAME\n");
+    for (int32_t i = 0; i < headerLength * permutations; i++) {
         // printf("%s%s %d\n", blacklisted[i], line, strcmp(blacklisted[i], line));
         if (strcmp(blacklisted[i], line) == 0) {
             // printf("found %s", blacklisted[i]);
             return 1;
+        }
+    }
+    /* special: replace #include STBIR__HEADER_FILENAME with the contents of include/stb_image_resize2_reinclude.h */
+    for (int32_t i = headerLength * permutations; i < headerLength * permutations + 2; i++) {
+        if (strcmp(blacklisted[i], line) == 0) {
+            return 2;
         }
     }
     return 0;
@@ -123,8 +132,18 @@ int main(int argc, char *argv[]) {
         FILE *headerfp = fopen(headerFiles[i], "r");
         uint8_t buffer[4096]; // line cannot exceed 4096 characters, my longest line is 446 characters so I think we're safe
         while (fgets(buffer, 4096, headerfp) != NULL) {
-            if (!lineBlacklist(buffer)) {
+            int32_t blacklist = lineBlacklist(buffer);
+            if (!blacklist) {
                 fprintf(outputfp, "%s", buffer);
+            } else if (blacklist == 2) {
+                /* replace line with contents of stb_image_resize2_reinclude.h */
+                uint8_t reincludeBuffer[4096];
+                FILE *reincludefp = fopen("include/stb_image_resize2_reinclude.h", "r");
+                while (fgets(reincludeBuffer, 4096, reincludefp) != NULL) {
+                    fprintf(outputfp, "%s", reincludeBuffer);
+                }
+                fwrite("\n", 1, 1, outputfp);
+                fclose(reincludefp);
             }
         }
         fwrite("\n", 1, 1, outputfp);
@@ -178,7 +197,8 @@ https://patorjk.com/software/taag/#p=display&f=ANSI%%20Shadow\n\
         FILE *sourcefp = fopen(sourceFiles[i], "r");
         uint8_t buffer[4096];
         while (fgets(buffer, 4096, sourcefp) != NULL) {
-            if (!lineBlacklist(buffer)) {
+            int32_t blacklist = lineBlacklist(buffer);
+            if (!blacklist) {
                 fprintf(outputfp, "%s", buffer);
             }
         }
