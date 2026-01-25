@@ -106,7 +106,7 @@ int main(int argc, char *argv[]) {
     for (int32_t i = 0; i < headerLength; i++) {
         FILE *fileExists = fopen(headerFiles[i], "r");
         if (!fileExists) {
-            printf("ERROR: Header file %s does not exist, exiting\n", sourceFiles[i]);
+            printf("ERROR: Header file %s does not exist, exiting\n", headerFiles[i]);
             return -1;
         }
         fclose(fileExists);
