@@ -779,6 +779,8 @@ void osToolsCloseConsole() {
     FreeConsole();
 }
 
+#ifdef TURTLE_ENABLE_SERIAL
+
 /*
 windows serial port support
 https://learn.microsoft.com/en-us/windows/win32/devio/configuring-a-communications-resource
@@ -917,6 +919,8 @@ int32_t osToolsSerialClose(char *name) {
     return 0;
 }
 
+#endif /* TURTLE_ENABLE_SERIAL */
+
 /*
 https://gist.github.com/mmozeiko/c0dfcc8fec527a90a02145d2cc0bfb6d
 https://learn.microsoft.com/en-us/windows/win32/winsock/complete-server-code
@@ -989,6 +993,8 @@ int32_t osToolsGetPort(char *socketName, char *port, int32_t length) {
     port[length - 1] = '\0';
     return 0;
 }
+
+#ifdef TURTLE_ENABLE_SOCKETS
 
 int32_t osToolsServerSocketCreate(char *serverName, osToolsSocketProtocol_t protocol, char *serverPort) {
     if (!serverName) {
@@ -1340,6 +1346,10 @@ int32_t osToolsSocketDestroy(char *socketName) {
     list_delete_range(osToolsSocket.socket, socketIndex, socketIndex + OSI_NUMBER_OF_FIELDS);
     return 0;
 }
+
+#endif /* TURTLE_ENABLE_SOCKETS */
+
+#ifdef TURTLE_ENABLE_CAMERA
 
 /* symbol IID_IMFMediaSource and MF_MT_FRAME_SIZE not linked despite their existence in mfapi.h and mfidl.h. Found in mfuuid.lib */
 // const GUID IID_IMFMediaSource = {0x279a808d, 0xaec7, 0x40c8, {0x9c,0x6b, 0xa6, 0xb4, 0x92, 0xc7, 0x8a, 0x66}};
@@ -1932,6 +1942,8 @@ int32_t osToolsCameraClose(char *name) {
     return 0;
 }
 
+#endif /* TURTLE_ENABLE_CAMERA */
+
 #endif
 #ifdef OS_LINUX
 
@@ -2161,6 +2173,8 @@ void osToolsCloseConsole() {
     return;
 }
 
+#ifdef TURTLE_ENABLE_SERIAL
+
 /* Serial support on linux: https://blog.mbedded.ninja/programming/operating-systems/linux/linux-serial-ports-using-c-cpp/ */
 
 list_t *osToolsSerialList() {
@@ -2183,6 +2197,8 @@ int32_t osToolsSerialReceive(char *name, uint8_t *buffer, int32_t length, int32_
 int32_t osToolsSerialClose(char *name) {
     return -1;
 }
+
+#endif /* TURTLE_ENABLE_SERIAL */
 
 int32_t osToolsGetIP(char *address, uint8_t *buffer, int32_t maxSegments) {
     char modifiable[strlen(address) + 1];
@@ -2248,6 +2264,8 @@ int32_t osToolsGetPort(char *socketName, char *port, int32_t length) {
     port[length - 1] = '\0';
     return 0;
 }
+
+#ifdef TURTLE_ENABLE_SOCKETS
 
 int32_t osToolsServerSocketCreate(char *serverName, osToolsSocketProtocol_t protocol, char *serverPort) {
     if (!serverName) {
@@ -2593,6 +2611,10 @@ int32_t osToolsSocketDestroy(char *socketName) {
     return 0;
 }
 
+#endif /* TURTLE_ENABLE_SOCKETS */
+
+#ifdef TURTLE_ENABLE_CAMERA
+
 list_t *osToolsCameraList() {
     list_t *output = list_init();
     return output;
@@ -2609,6 +2631,8 @@ int32_t osToolsCameraReceive(char *name, uint8_t *data) {
 int32_t osToolsCameraClose(char *name) {
     return -1;
 }
+
+#endif /* TURTLE_ENABLE_CAMERA */
 
 #endif
 
