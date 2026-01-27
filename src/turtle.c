@@ -160,10 +160,9 @@ void turtleInit(GLFWwindow *window, double leftX, double bottomY, double rightX,
     turtle.peng = 0.0;
     turtle.penb = 0.0;
     turtle.pena = 0.0;
-    for (uint8_t i = 0; i < 3; i++) {
-        turtle.currentColor[i] = 0.0;
+    for (uint8_t i = 0; i < 4; i++) {
+        turtle.currentColor[i] = -1.0;
     }
-    turtle.currentColor[3] = 1.0;
     /* 3D variables */
     turtle.cameraX = 0;
     turtle.cameraY = 0;
@@ -205,7 +204,7 @@ void unicodeSense(GLFWwindow *window, uint32_t codepoint) {
 }
 
 /* detect key presses */
-void keySense(GLFWwindow* window, int32_t key, int32_t scancode, int32_t action, int32_t mods) {
+void keySense(GLFWwindow *window, int32_t key, int32_t scancode, int32_t action, int32_t mods) {
     if (turtle.keyCallback != NULL) {
         turtle.keyCallback(key, scancode, action);
     }
@@ -258,7 +257,7 @@ void mouseSense(GLFWwindow *window, int32_t button, int32_t action, int32_t mods
 }
 
 /* detect scroll wheel */
-void scrollSense(GLFWwindow* window, double xoffset, double yoffset) {
+void scrollSense(GLFWwindow *window, double xoffset, double yoffset) {
     turtle.scrollY = yoffset;
 }
 
@@ -535,81 +534,6 @@ void turtleQuadRenderInternal(double x1, double y1, double x2, double y2, double
     glVertex2d(x3 * xfact + xcenter, y3 * yfact + ycenter);
     glVertex2d(x4 * xfact + xcenter, y4 * yfact + ycenter);
     glEnd();
-}
-
-turtle_texture_t turtleTextureLoad(char *filename) {
-    printf("turtleTextureLoad: TURTLE_ENABLE_TEXTURES not enabled - textures will not render\n");
-    return -1;
-}
-
-turtle_texture_t turtleTextureLoadArray(uint8_t *array, uint32_t width, uint32_t height, uint32_t encoding) {
-    printf("turtleTextureLoadArray: TURTLE_ENABLE_TEXTURES not enabled - textures will not render\n");
-    return -1;
-}
-
-turtle_texture_t turtleTextureLoadList(list_t *list, uint32_t width, uint32_t height, uint32_t encoding) {
-    printf("turtleTextureLoadList: TURTLE_ENABLE_TEXTURES not enabled - textures will not render\n");
-    return -1;
-}
-
-turtle_texture_t turtleTextureLoadListArrayInternal(list_t *list, uint8_t *array, uint32_t width, uint32_t height, uint32_t encoding) {
-    printf("turtleTextureLoadListArrayInternal: TURTLE_ENABLE_TEXTURES not enabled - textures will not render\n");
-    return -1;
-}
-
-int32_t turtleTextureGetWidth(turtle_texture_t texture) {
-    return -1;
-}
-
-int32_t turtleTextureGetHeight(turtle_texture_t texture) {
-    return -1;
-}
-
-int32_t turtleTextureUnload(turtle_texture_t texture) {
-    return -1;
-}
-
-int32_t turtleTextureUnloadAll() {
-    return -1;
-}
-
-void turtleTexture(turtle_texture_t texture, double x1, double y1, double x2, double y2, double rot, uint8_t r, uint8_t g, uint8_t b) {
-    return;
-}
-
-void turtleTexturePrint(turtle_texture_t texture) {
-    printf("turtleTexturePrint: TURTLE_ENABLE_TEXTURES not enabled\n");
-}
-
-unsigned char *stbi_load(char const *filename, int *width, int *height, int *channels_in_file, int desired_channels) {
-    printf("stbi_load: TURTLE_ENABLE_TEXTURES not enabled, stbi_load not enabled\n");
-    return NULL;
-}
-
-unsigned char *stbir_resize_uint8_srgb(const unsigned char *input_pixels, int input_w, int input_h, int input_stride_in_bytes, unsigned char *output_pixels, int output_w, int output_h, int output_stride_in_bytes, int pixel_type) {
-    printf("stbir_resize_uint8_srgb: TURTLE_ENABLE_TEXTURES not enabled, stbir_resize_uint8_srgb not enabled\n");
-    return NULL;
-}
-
-unsigned char *stbir_resize_uint8_linear(const unsigned char *input_pixels, int input_w, int input_h, int input_stride_in_bytes, unsigned char *output_pixels, int output_w, int output_h, int output_stride_in_bytes, int pixel_type) {
-    printf("stbir_resize_uint8_linear: TURTLE_ENABLE_TEXTURES not enabled, stbir_resize_uint8_linear not enabled\n");
-    return NULL;
-}
-
-float *stbir_resize_float_linear(const float *input_pixels, int input_w, int input_h, int input_stride_in_bytes, float *output_pixels, int output_w, int output_h, int output_stride_in_bytes, int pixel_type) {
-    printf("stbir_resize_float_linear: TURTLE_ENABLE_TEXTURES not enabled, stbir_resize_float_linear not enabled\n");
-    return NULL;
-}
-
-void turtleSetTextureSize(int32_t width, int32_t height) {
-    turtle.textureWidth = width;
-    turtle.textureHeight = height;
-    printf("turtleSetTextureSize: TURTLE_ENABLE_TEXTURES not enabled\n");
-}
-
-void turtleSetMaxTextures(int32_t maxTextures) {
-    turtle.maxTextures = maxTextures;
-    printf("turtleSetMaxTextures: TURTLE_ENABLE_TEXTURES not enabled\n");
 }
 #endif /* TURTLE_ENABLE_TEXTURES */
 

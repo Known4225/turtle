@@ -74,7 +74,7 @@ typedef struct {
     double peng; // pen green (0 to 1)
     double penb; // pen blue (0 to 1)
     double pena; // pen alpha (0 to 1)
-    uint8_t currentColor[4]; // for reducing API color calls
+    double currentColor[4]; // for reducing API color calls
 
     /* 3D variables */
     double cameraX;
