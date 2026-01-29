@@ -61,18 +61,6 @@ The example project can be built with `make win` on windows or `make` on linux. 
 
 The example project has a set of files in the `config/` folder that can be modified to change certain aspects of the project (the font, the ribbon, and the popup). If these files are not found then default versions of these configurations are used (which happen to be identical to the ones in the `config/` folder).
 
-# To Do
-- Fix bug with textures disabled library colors not working
-- Make optional features behave the same way (probably linker error if trying to use features that have not been enabled)
-- Reduce size of turtle.h, find a building solution that doesn't involve 26936 lines of duplicate code
-- Fix annoying bug with scrollbar and ribbon hover cancelling and closing dropdown (make it so you have to click on scrollbar)
-- Add option to stretch or pad window (when resized)
-- Mouse interactions with textbox (highlight, index select)
-- Text-only textbox
-- Write wiki/documentation
-- Fix flipped world coordinates
-- Linux COM support
-
 # License (MIT)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
