@@ -35,7 +35,6 @@ The following build commands are available:
 # To Do
 - Reduce size of turtle.h, find a building solution that doesn't involve 26936 lines of duplicate code
 - Fix annoying bug with scrollbar and ribbon hover cancelling and closing dropdown (make it so you have to click on scrollbar)
-- Add option to stretch or pad window (when resized)
 - Mouse interactions with textbox (highlight, index select)
 - Text-only textbox
 - Write wiki/documentation
