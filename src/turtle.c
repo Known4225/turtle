@@ -222,15 +222,21 @@ void mouseSense(GLFWwindow *window, int32_t button, int32_t action, int32_t mods
         switch(button) {
         case GLFW_MOUSE_BUTTON_LEFT:
             list_append(turtle.keyPressed, (unitype) "m1", 's');
-            turtle.mousePressed[0] = 1;
+            if (turtle.mouseX > turtle.initbounds[0] && turtle.mouseX < turtle.initbounds[2] && turtle.mouseY > turtle.initbounds[1] && turtle.mouseY < turtle.initbounds[3]) {
+                turtle.mousePressed[0] = 1;
+            }
         break;
         case GLFW_MOUSE_BUTTON_RIGHT:
             list_append(turtle.keyPressed, (unitype) "m2", 's');
-            turtle.mousePressed[1] = 1;
+            if (turtle.mouseX > turtle.initbounds[0] && turtle.mouseX < turtle.initbounds[2] && turtle.mouseY > turtle.initbounds[1] && turtle.mouseY < turtle.initbounds[3]) {
+                turtle.mousePressed[1] = 1;
+            }
         break;
         case GLFW_MOUSE_BUTTON_MIDDLE:
             list_append(turtle.keyPressed, (unitype) "m3", 's');
-            turtle.mousePressed[2] = 1;
+            if (turtle.mouseX > turtle.initbounds[0] && turtle.mouseX < turtle.initbounds[2] && turtle.mouseY > turtle.initbounds[1] && turtle.mouseY < turtle.initbounds[3]) {
+                turtle.mousePressed[2] = 1;
+            }
         break;
         default:
         break;
@@ -1237,6 +1243,18 @@ void turtleUpdate() {
                 // if (ren[i + 7].h == 259) { // blit 3D quad
 
                 // }
+            }
+        }
+        if (turtle.resizeMode != TURTLE_RESIZE_MODE_STRETCH) {
+            /* pad sides of window with black bars */
+            double originalAspect = (double) turtle.initscreenbounds[0] / turtle.initscreenbounds[1];
+            double currentAspect = (double) turtle.screenbounds[0] / turtle.screenbounds[1];
+            if (currentAspect > originalAspect) {
+                turtleRectangleRenderInternal(turtle.initbounds[0], turtle.initbounds[1], turtle.bounds[0], turtle.initbounds[3], 0, 0, 0, 1.0, xcenter, ycenter, xfact, yfact);
+                turtleRectangleRenderInternal(turtle.initbounds[2], turtle.initbounds[1], turtle.bounds[2], turtle.initbounds[3], 0, 0, 0, 1.0, xcenter, ycenter, xfact, yfact);
+            } else {
+                turtleRectangleRenderInternal(turtle.initbounds[0], turtle.initbounds[1], turtle.initbounds[2], turtle.bounds[1], 0, 0, 0, 1.0, xcenter, ycenter, xfact, yfact);
+                turtleRectangleRenderInternal(turtle.initbounds[0], turtle.initbounds[3], turtle.initbounds[2], turtle.bounds[3], 0, 0, 0, 1.0, xcenter, ycenter, xfact, yfact);
             }
         }
         #ifdef TURTLE_ENABLE_TEXTURES
