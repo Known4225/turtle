@@ -39,6 +39,7 @@ typedef struct {
     int32_t screenbounds[2]; // list of screen bounds (pixels)
     int32_t lastscreenbounds[2]; // list of screen bounds last frame
     int32_t initscreenbounds[2]; // screenbounds at initialisation
+    int32_t resizeMode; // TURTLE_RESIZE_MODE_PAD or TURTLE_RESIZE_MODE_STRETCH
     double initbounds[4]; // list of coordinate bounds at initialisation (leftX, bottomY, rightX, topY)
     double bounds[4]; // list of coordinate bounds (leftX, bottomY, rightX, topY)
     double centerAndScale[4]; // centerX, centerY, ratioX, ratioY
@@ -84,6 +85,11 @@ typedef struct {
     double cameraDirectionLeftRight;
     double cameraDirectionUpDown;
 } turtle_t;
+
+typedef enum {
+    TURTLE_RESIZE_MODE_PAD = 0,
+    TURTLE_RESIZE_MODE_STRETCH = 1,
+} turtle_resize_mode_t;
 
 /* stb_image_resize2 pixel_layout enum */
 #ifndef STBIRDEF
@@ -152,7 +158,7 @@ int8_t turtleMouseMiddle();
 /* alternate duplicate of top level boolean output call to check if the middle mouse button is currently being held down */
 int8_t turtleMouseMid();
 
-/* initialises the turtle module */
+/* initialises the turtle module, supply coordinate bounds */
 void turtleInit(GLFWwindow *window, double leftX, double bottomY, double rightX, double topY);
 
 /* gets the mouse coordinates */
@@ -203,6 +209,9 @@ void turtleSetTextureSize(int32_t width, int32_t height);
 
 /* set maximum number of textures (default 64) - must be done BEFORE turtleInit */
 void turtleSetMaxTextures(int32_t maxTextures);
+
+/* set resize mode of turtle (default TURTLE_RESIZE_MODE_PAD) - must be done BEFORE turtleInit */
+void turtleSetResizeMode(turtle_resize_mode_t resizeMode);
 
 /* load a png, jpg, or bmp to GPU memory as a texture */
 turtle_texture_t turtleTextureLoad(char *filename);

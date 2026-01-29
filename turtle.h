@@ -46502,6 +46502,7 @@ typedef struct {
     int32_t screenbounds[2]; // list of screen bounds (pixels)
     int32_t lastscreenbounds[2]; // list of screen bounds last frame
     int32_t initscreenbounds[2]; // screenbounds at initialisation
+    int32_t resizeMode; // TURTLE_RESIZE_MODE_PAD or TURTLE_RESIZE_MODE_STRETCH
     double initbounds[4]; // list of coordinate bounds at initialisation (leftX, bottomY, rightX, topY)
     double bounds[4]; // list of coordinate bounds (leftX, bottomY, rightX, topY)
     double centerAndScale[4]; // centerX, centerY, ratioX, ratioY
@@ -46547,6 +46548,11 @@ typedef struct {
     double cameraDirectionLeftRight;
     double cameraDirectionUpDown;
 } turtle_t;
+
+typedef enum {
+    TURTLE_RESIZE_MODE_PAD = 0,
+    TURTLE_RESIZE_MODE_STRETCH = 1,
+} turtle_resize_mode_t;
 
 /* stb_image_resize2 pixel_layout enum */
 #ifndef STBIRDEF
@@ -46615,7 +46621,7 @@ int8_t turtleMouseMiddle();
 /* alternate duplicate of top level boolean output call to check if the middle mouse button is currently being held down */
 int8_t turtleMouseMid();
 
-/* initialises the turtle module */
+/* initialises the turtle module, supply coordinate bounds */
 void turtleInit(GLFWwindow *window, double leftX, double bottomY, double rightX, double topY);
 
 /* gets the mouse coordinates */
@@ -46666,6 +46672,9 @@ void turtleSetTextureSize(int32_t width, int32_t height);
 
 /* set maximum number of textures (default 64) - must be done BEFORE turtleInit */
 void turtleSetMaxTextures(int32_t maxTextures);
+
+/* set resize mode of turtle (default TURTLE_RESIZE_MODE_PAD) - must be done BEFORE turtleInit */
+void turtleSetResizeMode(turtle_resize_mode_t resizeMode);
 
 /* load a png, jpg, or bmp to GPU memory as a texture */
 turtle_texture_t turtleTextureLoad(char *filename);
@@ -57260,8 +57269,20 @@ int8_t turtleMouseMid() {
 /* gets the mouse coordinates */
 void turtleGetMouseCoords() {
     glfwGetCursorPos(turtle.window, &turtle.mouseAbsX, &turtle.mouseAbsY); // get mouse positions (absolute)
-    turtle.mouseX = (turtle.mouseAbsX - turtle.screenbounds[0] / 2) / turtle.screenbounds[0] * (turtle.initbounds[2] - turtle.initbounds[0]) + (turtle.bounds[0] + turtle.bounds[2]) / 2;
-    turtle.mouseY = (turtle.mouseAbsY - turtle.screenbounds[1] / 2) / turtle.screenbounds[1] * (turtle.initbounds[1] - turtle.initbounds[3]) + (turtle.bounds[1] + turtle.bounds[3]) / 2;
+    if (turtle.resizeMode == TURTLE_RESIZE_MODE_STRETCH) {
+        turtle.mouseX = (turtle.mouseAbsX - turtle.screenbounds[0] / 2) / turtle.screenbounds[0] * (turtle.initbounds[2] - turtle.initbounds[0]) + (turtle.bounds[0] + turtle.bounds[2]) / 2;
+        turtle.mouseY = (turtle.mouseAbsY - turtle.screenbounds[1] / 2) / turtle.screenbounds[1] * (turtle.initbounds[1] - turtle.initbounds[3]) + (turtle.bounds[1] + turtle.bounds[3]) / 2;
+    } else {
+        double originalAspect = (double) turtle.initscreenbounds[0] / turtle.initscreenbounds[1];
+        double currentAspect = (double) turtle.screenbounds[0] / turtle.screenbounds[1];
+        if (currentAspect > originalAspect) {
+            turtle.mouseX = ((turtle.mouseAbsX - turtle.screenbounds[0] / 2) / turtle.screenbounds[0] * (turtle.initbounds[2] - turtle.initbounds[0]) + (turtle.bounds[0] + turtle.bounds[2]) / 2) * currentAspect / originalAspect;
+            turtle.mouseY = (turtle.mouseAbsY - turtle.screenbounds[1] / 2) / turtle.screenbounds[1] * (turtle.initbounds[1] - turtle.initbounds[3]) + (turtle.bounds[1] + turtle.bounds[3]) / 2;
+        } else {
+            turtle.mouseX = (turtle.mouseAbsX - turtle.screenbounds[0] / 2) / turtle.screenbounds[0] * (turtle.initbounds[2] - turtle.initbounds[0]) + (turtle.bounds[0] + turtle.bounds[2]) / 2;
+            turtle.mouseY = ((turtle.mouseAbsY - turtle.screenbounds[1] / 2) / turtle.screenbounds[1] * (turtle.initbounds[1] - turtle.initbounds[3]) + (turtle.bounds[1] + turtle.bounds[3]) / 2) * originalAspect / currentAspect;
+        }
+    }
 }
 
 /* set the background color */
@@ -57798,6 +57819,10 @@ void turtleSetMaxTextures(int32_t maxTextures) {
 }
 #endif /* TURTLE_ENABLE_TEXTURES */
 
+void turtleSetResizeMode(turtle_resize_mode_t resizeMode) {
+    turtle.resizeMode = resizeMode;
+}
+
 /* adds a (blit) triangle to the pipeline (for better speed) */
 void turtleTriangle(double x1, double y1, double x2, double y2, double x3, double y3) {
     list_append(turtle.penPos, (unitype) x1, 'd');
@@ -58049,10 +58074,27 @@ void turtleUpdate() {
         turtle.lastscreenbounds[0] = turtle.screenbounds[0];
         turtle.lastscreenbounds[1] = turtle.screenbounds[1];
     }
-    turtle.bounds[0] = turtle.centerAndScale[0] - turtle.centerAndScale[2] / turtle.screenbounds[0];
-    turtle.bounds[2] = turtle.centerAndScale[0] + turtle.centerAndScale[2] / turtle.screenbounds[0];
-    turtle.bounds[1] = turtle.centerAndScale[1] - turtle.centerAndScale[3] / turtle.screenbounds[1];
-    turtle.bounds[3] = turtle.centerAndScale[1] + turtle.centerAndScale[3] / turtle.screenbounds[1];
+    if (turtle.resizeMode == TURTLE_RESIZE_MODE_STRETCH) {
+        turtle.bounds[0] = turtle.centerAndScale[0] - turtle.centerAndScale[2] / turtle.screenbounds[0];
+        turtle.bounds[2] = turtle.centerAndScale[0] + turtle.centerAndScale[2] / turtle.screenbounds[0];
+        turtle.bounds[1] = turtle.centerAndScale[1] - turtle.centerAndScale[3] / turtle.screenbounds[1];
+        turtle.bounds[3] = turtle.centerAndScale[1] + turtle.centerAndScale[3] / turtle.screenbounds[1];
+        
+    } else {
+        double originalAspect = (double) turtle.initscreenbounds[0] / turtle.initscreenbounds[1];
+        double currentAspect = (double) turtle.screenbounds[0] / turtle.screenbounds[1];
+        if (currentAspect > originalAspect) {
+            turtle.bounds[0] = turtle.centerAndScale[0] - turtle.centerAndScale[2] / turtle.screenbounds[0] * currentAspect / originalAspect;
+            turtle.bounds[2] = turtle.centerAndScale[0] + turtle.centerAndScale[2] / turtle.screenbounds[0] * currentAspect / originalAspect;
+            turtle.bounds[1] = turtle.centerAndScale[1] - turtle.centerAndScale[3] / turtle.screenbounds[1];
+            turtle.bounds[3] = turtle.centerAndScale[1] + turtle.centerAndScale[3] / turtle.screenbounds[1];
+        } else {
+            turtle.bounds[0] = turtle.centerAndScale[0] - turtle.centerAndScale[2] / turtle.screenbounds[0];
+            turtle.bounds[2] = turtle.centerAndScale[0] + turtle.centerAndScale[2] / turtle.screenbounds[0];
+            turtle.bounds[1] = turtle.centerAndScale[1] - turtle.centerAndScale[3] / turtle.screenbounds[1] * originalAspect / currentAspect;
+            turtle.bounds[3] = turtle.centerAndScale[1] + turtle.centerAndScale[3] / turtle.screenbounds[1] * originalAspect / currentAspect;
+        }
+    }
     if (changed) {
         #ifdef TURTLE_ENABLE_TEXTURES
         turtle.bufferList -> length = 0; // don't bother freeing the memory
@@ -58061,6 +58103,12 @@ void turtleUpdate() {
         double yfact = 1.0 / ((turtle.bounds[3] - turtle.bounds[1]) / 2);
         double xcenter = (double) turtle.screenbounds[0] / turtle.initscreenbounds[0] - 1 - (turtle.bounds[0] + turtle.bounds[2]) / 2 * xfact;
         double ycenter = (double) turtle.screenbounds[1] / turtle.initscreenbounds[1] - 1 - (turtle.bounds[1] + turtle.bounds[3]) / 2 * yfact;
+        if (turtle.resizeMode == TURTLE_RESIZE_MODE_PAD) {
+            
+            if ((turtle.bounds[2] - turtle.bounds[0]) / (turtle.bounds[3] - turtle.bounds[1])) {
+
+            }
+        }
         double lastSize = -1;
         double lastPrez = -1;
         double precomputedLog = 5;
