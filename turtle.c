@@ -138,7 +138,7 @@ int main(int argc, char *argv[]) {
     glfwSetWindowPos(window, 0, 36);
     #endif
     if (optimizedScalingFactor > 0.85) {
-        glfwSetWindowSize(window, windowHeight * 16 / 9 * 0.85, windowHeight * 0.85); // doing it this way ensures the window spawns in the top left of the monitor and fixes resizing limits
+        glfwSetWindowSize(window, windowHeight * 16 / 9 * 0.865, windowHeight * 0.85); // doing it this way ensures the window spawns in the top left of the monitor and fixes resizing limits
     } else {
         glfwSetWindowSize(window, windowHeight * 16 / 9 * optimizedScalingFactor, windowHeight * optimizedScalingFactor);
     }
