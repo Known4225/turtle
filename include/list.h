@@ -145,11 +145,17 @@ void list_sort(list_t *list);
 /* return a list of indices that would sort the list (biggest to smallest) */
 list_t *list_sort_index(list_t *list);
 
+/* return a list of indices that would sort the list (for a list of doubles) */
+list_t *list_sort_index_double(list_t *list);
+
 /* sort list (stride) (biggest to smallest) */
 void list_sort_stride(list_t *list, int32_t stride, int32_t offset);
 
 /* return a list of indices that would sort the list (stride) (biggest to smallest) */
 list_t *list_sort_stride_index(list_t *list, int32_t stride, int32_t offset);
+
+/* return a list of indices that would sort the list (stride) (for a list of doubles) */
+list_t *list_sort_stride_index_double(list_t *list, int32_t stride, int32_t offset);
 
 /* deletes the first instance of the item from the list, returns the index the item was at, returns -1 and doesn't modify the list if not found */
 int32_t list_remove(list_t *list, unitype item, char type);
