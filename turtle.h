@@ -148,11 +148,17 @@ void list_sort(list_t *list);
 /* return a list of indices that would sort the list (biggest to smallest) */
 list_t *list_sort_index(list_t *list);
 
+/* return a list of indices that would sort the list (for a list of doubles) */
+list_t *list_sort_index_double(list_t *list);
+
 /* sort list (stride) (biggest to smallest) */
 void list_sort_stride(list_t *list, int32_t stride, int32_t offset);
 
 /* return a list of indices that would sort the list (stride) (biggest to smallest) */
 list_t *list_sort_stride_index(list_t *list, int32_t stride, int32_t offset);
+
+/* return a list of indices that would sort the list (stride) (for a list of doubles) */
+list_t *list_sort_stride_index_double(list_t *list, int32_t stride, int32_t offset);
 
 /* deletes the first instance of the item from the list, returns the index the item was at, returns -1 and doesn't modify the list if not found */
 int32_t list_remove(list_t *list, unitype item, char type);
@@ -56536,6 +56542,28 @@ list_t *list_sort_index(list_t *list) {
     return output;
 }
 
+/* return a list of indices that would sort the list (for a list of doubles) */
+list_t *list_sort_index_double(list_t *list) {
+    list_t *output = list_init();
+    for (int32_t i = 0; i < list -> length; i++) {
+        list_append(output, (unitype) -1, 'i');
+    }
+    for (int32_t j = 0; j < list -> length; j++) {
+        double max = -1.79769313486231570814527423731704357e+308;
+        int64_t maxIndex = -1;
+        for (int32_t i = 0; i < list -> length; i++) {
+            if (list -> data[i].d > max && output -> data[i].i == -1) {
+                max = list -> data[i].d;
+                maxIndex = i;
+            }
+        }
+        if (maxIndex > -1) {
+            output -> data[maxIndex].i = j;
+        }
+    }
+    return output;
+}
+
 /* sort list (stride) */
 void list_sort_stride(list_t *list, int32_t stride, int32_t offset) {
     offset %= stride;
@@ -56605,6 +56633,28 @@ list_t *list_sort_stride_index(list_t *list, int32_t stride, int32_t offset) {
         for (int32_t i = 0; i < list -> length / stride; i++) {
             if (list -> data[i * stride + offset].i > max && output -> data[i].i == -1) {
                 max = list -> data[i * stride + offset].i;
+                maxIndex = i;
+            }
+        }
+        if (maxIndex > -1) {
+            output -> data[maxIndex].i = j * stride + offset;
+        }
+    }
+    return output;
+}
+
+/* return a list of indices that would sort the list (stride) (for a list of doubles) */
+list_t *list_sort_stride_index_double(list_t *list, int32_t stride, int32_t offset) {
+    list_t *output = list_init();
+    for (int32_t i = 0; i < list -> length / stride; i++) {
+        list_append(output, (unitype) -1, 'i');
+    }
+    for (int32_t j = 0; j < list -> length / stride; j++) {
+        double max = -1.79769313486231570814527423731704357e+308;
+        int64_t maxIndex = -1;
+        for (int32_t i = 0; i < list -> length / stride; i++) {
+            if (list -> data[i * stride + offset].d > max && output -> data[i].i == -1) {
+                max = list -> data[i * stride + offset].d;
                 maxIndex = i;
             }
         }
