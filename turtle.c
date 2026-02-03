@@ -154,21 +154,21 @@ int main(int argc, char *argv[]) {
     turtleToolsSetTheme(TT_THEME_DARK); // dark theme preset
     strcpy(constructedFilepath, osToolsFileDialog.executableFilepath);
     strcat(constructedFilepath, "config/ribbonConfig.txt");
-    ribbonInit(constructedFilepath);
+    tt_ribbonInit(constructedFilepath);
     // list_t *ribbonConfig = list_init();
     // list_append(ribbonConfig, (unitype) "File, New, Save, Save As..., Open", 's');
     // list_append(ribbonConfig, (unitype) "Edit, Undo, Redo, Cut, Copy, Paste", 's');
     // list_append(ribbonConfig, (unitype) "View, Change Theme, GLFW", 's');
-    // ribbonInitList(ribbonConfig);
+    // tt_ribbonInitList(ribbonConfig);
     /* initialise turtleTools popup */
     strcpy(constructedFilepath, osToolsFileDialog.executableFilepath);
     strcat(constructedFilepath, "config/popupConfig.txt");
-    popupInit(constructedFilepath);
+    tt_popupInit(constructedFilepath);
     // list_t *popupConfig = list_init();
     // list_append(popupConfig, (unitype) "Are you sure you want to close?", 's');
     // list_append(popupConfig, (unitype) "Cancel", 's');
     // list_append(popupConfig, (unitype) "Close", 's');
-    // popupInitList(popupConfig);
+    // tt_popupInitList(popupConfig);
     strcpy(constructedFilepath, osToolsFileDialog.executableFilepath);
     strcat(constructedFilepath, "config/test.csv");
     list_t *rowLike = osToolsLoadCSVString(constructedFilepath, OSTOOLS_CSV_ROW);
@@ -235,7 +235,7 @@ int main(int argc, char *argv[]) {
     for (int32_t i = 0; i < cameras -> length; i += 4) {
         list_append(imageDropdownOptions, cameras -> data[i], 's');
     }
-    tt_dropdown_t *imageDropdown = dropdownInit("Source", imageDropdownOptions, NULL, TT_DROPDOWN_ALIGN_RIGHT, 700, 36, 8);
+    tt_dropdown_t *imageDropdown = tt_dropdownInit("Source", imageDropdownOptions, NULL, TT_DROPDOWN_ALIGN_RIGHT, 700, 36, 8);
     int32_t oldImageDropdown = imageDropdown -> value;
 
     uint32_t tps = 120; // ticks per second (locked to fps in this case)
@@ -243,20 +243,20 @@ int main(int argc, char *argv[]) {
     clock_t start, end;
 
     double sliderVar, dialVar;
-    tt_button_t *button = buttonInit("Button", NULL, 150, 20, 10);
+    tt_button_t *button = tt_buttonInit("Button", NULL, 150, 20, 10);
     button -> shape = TT_BUTTON_SHAPE_ROUNDED_RECTANGLE;
-    switchInit("Switch", NULL, 150, -20, 10);
-    dialInit("Exp", &dialVar, TT_DIAL_SCALE_EXP, -150, 20, 10, 0, 1000, 1);
-    dialInit("Linear", &dialVar, TT_DIAL_SCALE_LINEAR, -150, -20, 10, 0, 1000, 1);
-    dialInit("Log", &dialVar, TT_DIAL_SCALE_LOG, -150, -60, 10, 0, 1000, 1);
-    sliderInit("Slider", NULL, TT_SLIDER_TYPE_HORIZONTAL, TT_SLIDER_ALIGN_LEFT, -100, 35, 10, 50, 0, 255, 1);
-    sliderInit("Slider", NULL, TT_SLIDER_TYPE_HORIZONTAL, TT_SLIDER_ALIGN_CENTER, 0, 35, 10, 50, 0, 255, 1);
-    sliderInit("Slider", NULL, TT_SLIDER_TYPE_HORIZONTAL, TT_SLIDER_ALIGN_RIGHT, 100, 35, 10, 50, 0, 255, 1);
-    sliderInit("Log", &sliderVar, TT_SLIDER_TYPE_VERTICAL, TT_SLIDER_ALIGN_LEFT, -100, -35, 10, 50, 0, 255, 1) -> scale = TT_SLIDER_SCALE_LOG;
-    sliderInit("Linear", &sliderVar, TT_SLIDER_TYPE_VERTICAL, TT_SLIDER_ALIGN_CENTER, 0, -35, 10, 50, 0, 255, 1) -> scale = TT_SLIDER_SCALE_LINEAR;
-    sliderInit("Exp", &sliderVar, TT_SLIDER_TYPE_VERTICAL, TT_SLIDER_ALIGN_RIGHT, 100, -35, 10, 50, 0, 255, 1) -> scale = TT_SLIDER_SCALE_EXP;
-    tt_scrollbar_t *scrollbarX = scrollbarInit(NULL, TT_SCROLLBAR_HORIZONTAL, 20, -170, 10, 550, 50);
-    tt_scrollbar_t *scrollbarY = scrollbarInit(NULL, TT_SCROLLBAR_VERTICAL, 310, 0, 10, 320, 33);
+    tt_switchInit("Switch", NULL, 150, -20, 10);
+    tt_dialInit("Exp", &dialVar, TT_DIAL_SCALE_EXP, -150, 20, 10, 0, 1000, 1);
+    tt_dialInit("Linear", &dialVar, TT_DIAL_SCALE_LINEAR, -150, -20, 10, 0, 1000, 1);
+    tt_dialInit("Log", &dialVar, TT_DIAL_SCALE_LOG, -150, -60, 10, 0, 1000, 1);
+    tt_sliderInit("Slider", NULL, TT_SLIDER_TYPE_HORIZONTAL, TT_SLIDER_ALIGN_LEFT, -100, 35, 10, 50, 0, 255, 1);
+    tt_sliderInit("Slider", NULL, TT_SLIDER_TYPE_HORIZONTAL, TT_SLIDER_ALIGN_CENTER, 0, 35, 10, 50, 0, 255, 1);
+    tt_sliderInit("Slider", NULL, TT_SLIDER_TYPE_HORIZONTAL, TT_SLIDER_ALIGN_RIGHT, 100, 35, 10, 50, 0, 255, 1);
+    tt_sliderInit("Log", &sliderVar, TT_SLIDER_TYPE_VERTICAL, TT_SLIDER_ALIGN_LEFT, -100, -35, 10, 50, 0, 255, 1) -> scale = TT_SLIDER_SCALE_LOG;
+    tt_sliderInit("Linear", &sliderVar, TT_SLIDER_TYPE_VERTICAL, TT_SLIDER_ALIGN_CENTER, 0, -35, 10, 50, 0, 255, 1) -> scale = TT_SLIDER_SCALE_LINEAR;
+    tt_sliderInit("Exp", &sliderVar, TT_SLIDER_TYPE_VERTICAL, TT_SLIDER_ALIGN_RIGHT, 100, -35, 10, 50, 0, 255, 1) -> scale = TT_SLIDER_SCALE_EXP;
+    tt_scrollbar_t *scrollbarX = tt_scrollbarInit(NULL, TT_SCROLLBAR_HORIZONTAL, 20, -170, 10, 550, 50);
+    tt_scrollbar_t *scrollbarY = tt_scrollbarInit(NULL, TT_SCROLLBAR_VERTICAL, 310, 0, 10, 320, 33);
     list_t *dropdownOptions = list_init();
     list_append(dropdownOptions, (unitype) "A", 's');
     list_append(dropdownOptions, (unitype) "Long Item", 's');
@@ -265,8 +265,8 @@ int main(int argc, char *argv[]) {
     list_append(dropdownOptions, (unitype) "C", 's');
     list_append(dropdownOptions, (unitype) "D", 's');
     list_append(dropdownOptions, (unitype) "E", 's');
-    tt_dropdown_t *dropdown = dropdownInit("Dropdown", dropdownOptions, NULL, TT_DROPDOWN_ALIGN_CENTER, 0, 70, 10);
-    tt_textbox_t *textbox = textboxInit("Textbox", NULL, 128, -50, -110, 10, 100);
+    tt_dropdown_t *dropdown = tt_dropdownInit("Dropdown", dropdownOptions, NULL, TT_DROPDOWN_ALIGN_CENTER, 0, 70, 10);
+    tt_textbox_t *textbox = tt_textboxInit("Textbox", NULL, 128, -50, -110, 10, 100);
     list_t *contextOptions = list_init();
     list_append(contextOptions, (unitype) "Button", 's');
     list_append(contextOptions, (unitype) "Switch", 's');
@@ -276,7 +276,7 @@ int main(int argc, char *argv[]) {
     list_append(contextOptions, (unitype) "Context", 's');
     list_append(contextOptions, (unitype) "Dropdown", 's');
     list_append(contextOptions, (unitype) "Textbox", 's');
-    tt_context_t *context = contextInit(contextOptions, NULL, 0, 0, 10);
+    tt_context_t *context = tt_contextInit(contextOptions, NULL, 0, 0, 10);
     context -> enabled = TT_ELEMENT_HIDE;
 
     double x = 103, y = 95, z = 215;
@@ -287,27 +287,27 @@ int main(int argc, char *argv[]) {
     list_append(sources, (unitype) "SP928", 's');
     list_append(sources, (unitype) "SP1203", 's');
     list_append(sources, (unitype) "SP-1550M", 's');
-    dialInit("Power", NULL, TT_DIAL_SCALE_LINEAR, -150, -210, 10, 0, 100, 1);
-    dialInit("Speed", NULL, TT_DIAL_SCALE_LINEAR, -100, -210, 10, 0, 1000, 1);
-    dialInit("Exposure", NULL, TT_DIAL_SCALE_EXP, -50, -210, 10, 0, 1000, 1);
-    dropdownInit("Source", sources, NULL, TT_DROPDOWN_ALIGN_LEFT, -10, -207, 10);
-    tt_slider_t *xSlider = sliderInit("", &x, TT_SLIDER_TYPE_HORIZONTAL, TT_SLIDER_ALIGN_CENTER, -100, -240, 10, 100, -300, 300, 0);
-    tt_slider_t *ySlider = sliderInit("", &y, TT_SLIDER_TYPE_HORIZONTAL, TT_SLIDER_ALIGN_CENTER, -100, -260, 10, 100, -300, 300, 0);
-    tt_slider_t *zSlider = sliderInit("", &z, TT_SLIDER_TYPE_HORIZONTAL, TT_SLIDER_ALIGN_CENTER, -100, -280, 10, 100, -300, 300, 0);
-    switchInit("", NULL, -10, -240, 10);
-    switchInit("", NULL, -10, -260, 10);
-    switchInit("", NULL, -10, -280, 10);
+    tt_dialInit("Power", NULL, TT_DIAL_SCALE_LINEAR, -150, -210, 10, 0, 100, 1);
+    tt_dialInit("Speed", NULL, TT_DIAL_SCALE_LINEAR, -100, -210, 10, 0, 1000, 1);
+    tt_dialInit("Exposure", NULL, TT_DIAL_SCALE_EXP, -50, -210, 10, 0, 1000, 1);
+    tt_dropdownInit("Source", sources, NULL, TT_DROPDOWN_ALIGN_LEFT, -10, -207, 10);
+    tt_slider_t *xSlider = tt_sliderInit("", &x, TT_SLIDER_TYPE_HORIZONTAL, TT_SLIDER_ALIGN_CENTER, -100, -240, 10, 100, -300, 300, 0);
+    tt_slider_t *ySlider = tt_sliderInit("", &y, TT_SLIDER_TYPE_HORIZONTAL, TT_SLIDER_ALIGN_CENTER, -100, -260, 10, 100, -300, 300, 0);
+    tt_slider_t *zSlider = tt_sliderInit("", &z, TT_SLIDER_TYPE_HORIZONTAL, TT_SLIDER_ALIGN_CENTER, -100, -280, 10, 100, -300, 300, 0);
+    tt_switchInit("", NULL, -10, -240, 10);
+    tt_switchInit("", NULL, -10, -260, 10);
+    tt_switchInit("", NULL, -10, -280, 10);
 
-    tt_switch_t *sideswipe = switchInit("Side Swipe", NULL, 305, 15, 10);
-    tt_switch_t *checkbox = switchInit("Checkbox", NULL, 300, 0, 10);
-    tt_switch_t *xbox = switchInit("Xbox", NULL, 300, -15, 10);
+    tt_switch_t *sideswipe = tt_switchInit("Side Swipe", NULL, 305, 15, 10);
+    tt_switch_t *checkbox = tt_switchInit("Checkbox", NULL, 300, 0, 10);
+    tt_switch_t *xbox = tt_switchInit("Xbox", NULL, 300, -15, 10);
     sideswipe -> style = TT_SWITCH_STYLE_SIDESWIPE_LEFT;
     checkbox -> value = 1;
     checkbox -> style = TT_SWITCH_STYLE_CHECKBOX;
     xbox -> value = 1;
     xbox -> style = TT_SWITCH_STYLE_XBOX;
-    tt_button_t *textButton = buttonInit("Text Button", NULL, 330, -30, 10);
-    tt_button_t *circleButton = buttonInit("Circle Button", NULL, 338, -100, 10);
+    tt_button_t *textButton = tt_buttonInit("Text Button", NULL, 330, -30, 10);
+    tt_button_t *circleButton = tt_buttonInit("Circle Button", NULL, 338, -100, 10);
     textButton -> shape = TT_BUTTON_SHAPE_TEXT;
     circleButton -> shape = TT_BUTTON_SHAPE_CIRCLE;
 
