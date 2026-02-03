@@ -423,8 +423,8 @@ typedef struct {
 } tt_slider_t;
 
 typedef enum {
-    TT_SCROLLBAR_HORIZONTAL = 0,
-    TT_SCROLLBAR_VERTICAL = 1,
+    TT_SCROLLBAR_TYPE_HORIZONTAL = 0,
+    TT_SCROLLBAR_TYPE_VERTICAL = 1,
 } tt_scrollbar_type_t;
 
 /* scrollbar */
