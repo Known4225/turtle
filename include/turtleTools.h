@@ -201,9 +201,9 @@ typedef enum {
     TT_COLOR_SLOT_TEXTBOX_LINE = 3,
 } tt_color_slots_t;
 
-void elementResetColor(void *elementp, int32_t elementType);
+void tt_elementResetColor(void *elementp, int32_t elementType);
 
-int32_t elementFree(void *elementp);
+int32_t tt_elementFree(void *elementp);
 
 /* ribbon */
 
@@ -223,16 +223,16 @@ typedef struct {
 extern tt_ribbon_t tt_ribbon;
 
 /* initialise ribbon */
-int32_t ribbonInit(const char *filename);
+int32_t tt_ribbonInit(const char *filename);
 
 /* initialise ribbon with a list instead of a config file - this function frees the list so you don't have to */
-int32_t ribbonInitList(list_t *config);
+int32_t tt_ribbonInitList(list_t *config);
 
 /* internal */
-int32_t ribbonInitInternal(FILE *configFile, list_t *configList, int8_t fileExists);
+int32_t tt_ribbonInitInternal(FILE *configFile, list_t *configList, int8_t fileExists);
 
 /* render ribbon */
-void ribbonUpdate();
+void tt_ribbonUpdate();
 
 /* popup */
 
@@ -260,19 +260,19 @@ typedef struct {
 extern tt_popup_t tt_popup;
 
 /* initialise popup */
-int32_t popupInit(char *filename);
+int32_t tt_popupInit(char *filename);
 
 /* initialise popup with a list instead of a config file - this function frees the list so you don't have to */
-int32_t popupInitList(list_t *config);
+int32_t tt_popupInitList(list_t *config);
 
 /* internal */
-int32_t popupInitInternal(FILE *configFile, list_t *configList, int8_t fileExists);
+int32_t tt_popupInitInternal(FILE *configFile, list_t *configList, int8_t fileExists);
 
 /* render popup */
-void popupUpdate();
+void tt_popupUpdate();
 
 /* free popup */
-void popupFree();
+void tt_popupFree();
 
 /* UI tools */
 
@@ -280,6 +280,7 @@ typedef struct {
     double dialAnchorX;
     double dialAnchorY;
     double barAnchor;
+    int32_t elementLogicTemp;
     tt_element_priority_t elementLogicType;
     int32_t elementLogicIndex;
     tt_element_priority_t elementLogicTypeOld;
@@ -539,84 +540,96 @@ typedef struct {
 /* initialise UI elements */
 
 /* create a button */
-tt_button_t *buttonInit(char *label, int8_t *variable, double x, double y, double size);
+tt_button_t *tt_buttonInit(char *label, int8_t *variable, double x, double y, double size);
 
-void buttonFree(tt_button_t *buttonp);
+void tt_buttonFree(tt_button_t *buttonp);
 
 /* create a switch */
-tt_switch_t *switchInit(char *label, int8_t *variable, double x, double y, double size);
+tt_switch_t *tt_switchInit(char *label, int8_t *variable, double x, double y, double size);
 
-void switchFree(tt_switch_t *switchp);
+void tt_switchFree(tt_switch_t *switchp);
 
 /* create a dial - make renderNumberFactor 0 to hide dial number */
-tt_dial_t *dialInit(char *label, double *variable, tt_dial_scale_t scale, double x, double y, double size, double bottom, double top, double renderNumberFactor);
+tt_dial_t *tt_dialInit(char *label, double *variable, tt_dial_scale_t scale, double x, double y, double size, double bottom, double top, double renderNumberFactor);
 
-void dialFree(tt_dial_t *dialp);
+void tt_dialFree(tt_dial_t *dialp);
 
 /* create a slider - make renderNumberFactor 0 to hide slider number */
-tt_slider_t *sliderInit(char *label, double *variable, tt_slider_type_t type, tt_slider_align_t align, double x, double y, double size, double length, double bottom, double top, double renderNumberFactor);
+tt_slider_t *tt_sliderInit(char *label, double *variable, tt_slider_type_t type, tt_slider_align_t align, double x, double y, double size, double length, double bottom, double top, double renderNumberFactor);
 
-void sliderFree(tt_slider_t *sliderp);
+void tt_sliderFree(tt_slider_t *sliderp);
 
 /* create a scrollbar */
-tt_scrollbar_t *scrollbarInit(double *variable, tt_scrollbar_type_t type, double x, double y, double size, double length, double barPercentage);
+tt_scrollbar_t *tt_scrollbarInit(double *variable, tt_scrollbar_type_t type, double x, double y, double size, double length, double barPercentage);
 
-void scrollbarFree(tt_scrollbar_t *scrollbarp);
+void tt_scrollbarFree(tt_scrollbar_t *scrollbarp);
 
-void contextCalculateMax(tt_context_t *contextp);
+void tt_contextCalculateMax(tt_context_t *contextp);
 
-tt_context_t *contextInit(list_t *options, int32_t *variable, double x, double y, double size);
+tt_context_t *tt_contextInit(list_t *options, int32_t *variable, double x, double y, double size);
 
-void contextFree(tt_context_t *contextp);
+void tt_contextFree(tt_context_t *contextp);
 
-void dropdownCalculateMax(tt_dropdown_t *dropdownp);
+void tt_dropdownCalculateMax(tt_dropdown_t *dropdownp);
 
 /* create a dropdown - use a list of strings for options */
-tt_dropdown_t *dropdownInit(char *label, list_t *options, int32_t *variable, tt_dropdown_align_t align, double x, double y, double size);
+tt_dropdown_t *tt_dropdownInit(char *label, list_t *options, int32_t *variable, tt_dropdown_align_t align, double x, double y, double size);
 
-void dropdownFree(tt_dropdown_t *dropdownp);
+void tt_dropdownFree(tt_dropdown_t *dropdownp);
 
 /* create a textbox */
-tt_textbox_t *textboxInit(char *label, char *variable, uint32_t maxCharacters, double x, double y, double size, double length);
+tt_textbox_t *tt_textboxInit(char *label, char *variable, uint32_t maxCharacters, double x, double y, double size, double length);
 
-void textboxFree(tt_textbox_t *textboxp);
+void tt_textboxFree(tt_textbox_t *textboxp);
 
-void buttonUpdate();
+/* update a button */
+void tt_buttonUpdate(tt_button_t *buttonp);
 
-void switchUpdate();
+/* update a switch */
+void tt_switchUpdate(tt_switch_t *switchp);
 
 /* angle between two coordinates (in degrees) */
-double angleBetween(double x1, double y1, double x2, double y2);
+double tt_angleBetween(double x1, double y1, double x2, double y2);
 
-void dialUpdate();
+/* update a dial */
+void tt_dialUpdate(tt_dial_t *dialp);
 
-void sliderUpdate();
+/* update a slider */
+void tt_sliderUpdate(tt_slider_t *sliderp);
 
 /*
+update a scrollbar
 scrollbar range of motion (coordinates):
 scrollbar.length * (1 - scrollbar.barPercentage / 100)
 tip: try to match the ratio of visible content to the scrollbar's barPercentage - if half of the content can be shown on one screen then make the barPercentage 50
 */
-void scrollbarUpdate();
+void tt_scrollbarUpdate(tt_scrollbar_t *scrollbarp);
 
-void dropdownUpdate();
+/* update context */
+void tt_contextUpdate(tt_context_t *contextp);
 
-void textboxAddKey(tt_textbox_t *textboxp, int32_t key);
+/* update dropdown */
+void tt_dropdownUpdate(tt_dropdown_t *dropdownp);
 
-void textboxUnicodeCallback(uint32_t codepoint);
+void tt_textboxAddKey(tt_textbox_t *textboxp, int32_t key);
 
-void textboxHandleOtherKey(tt_textbox_t *textboxp, int32_t key);
+void tt_textboxUnicodeCallback(uint32_t codepoint);
 
-void textboxKeyCallback(int32_t key, int32_t scancode, int32_t action);
+void tt_textboxHandleOtherKey(tt_textbox_t *textboxp, int32_t key);
 
-int32_t textboxCalculateMaximumCharacters(uint32_t *charlist, int32_t textLength, double size, double lengthPixels, int8_t sweepDirection, double *outputLength);
+void tt_textboxKeyCallback(int32_t key, int32_t scancode, int32_t action);
 
-void textboxUpdate();
+int32_t tt_textboxCalculateMaximumCharacters(uint32_t *charlist, int32_t textLength, double size, double lengthPixels, int8_t sweepDirection, double *outputLength);
 
+void tt_textboxUpdate(tt_textbox_t *textboxp);
+
+/* update all turtleTools */
 void turtleToolsUpdate();
 
+/* update all turtleTools except ribbon and popup */
 void turtleToolsUpdateUI();
 
+/* update ribbon and popup */
 void turtleToolsUpdateRibbonPopup();
 
 #endif /* TURTLETOOLS_H */
