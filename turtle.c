@@ -255,8 +255,8 @@ int main(int argc, char *argv[]) {
     tt_sliderInit("Log", &sliderVar, TT_SLIDER_TYPE_VERTICAL, TT_SLIDER_ALIGN_LEFT, -100, -35, 10, 50, 0, 255, 1) -> scale = TT_SLIDER_SCALE_LOG;
     tt_sliderInit("Linear", &sliderVar, TT_SLIDER_TYPE_VERTICAL, TT_SLIDER_ALIGN_CENTER, 0, -35, 10, 50, 0, 255, 1) -> scale = TT_SLIDER_SCALE_LINEAR;
     tt_sliderInit("Exp", &sliderVar, TT_SLIDER_TYPE_VERTICAL, TT_SLIDER_ALIGN_RIGHT, 100, -35, 10, 50, 0, 255, 1) -> scale = TT_SLIDER_SCALE_EXP;
-    tt_scrollbar_t *scrollbarX = tt_scrollbarInit(NULL, TT_SCROLLBAR_HORIZONTAL, 20, -170, 10, 550, 50);
-    tt_scrollbar_t *scrollbarY = tt_scrollbarInit(NULL, TT_SCROLLBAR_VERTICAL, 310, 0, 10, 320, 33);
+    tt_scrollbar_t *scrollbarX = tt_scrollbarInit(NULL, TT_SCROLLBAR_TYPE_HORIZONTAL, 20, -170, 10, 550, 50);
+    tt_scrollbar_t *scrollbarY = tt_scrollbarInit(NULL, TT_SCROLLBAR_TYPE_VERTICAL, 310, 0, 10, 320, 33);
     list_t *dropdownOptions = list_init();
     list_append(dropdownOptions, (unitype) "A", 's');
     list_append(dropdownOptions, (unitype) "Long Item", 's');

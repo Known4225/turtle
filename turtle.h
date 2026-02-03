@@ -47308,8 +47308,8 @@ typedef struct {
 } tt_slider_t;
 
 typedef enum {
-    TT_SCROLLBAR_HORIZONTAL = 0,
-    TT_SCROLLBAR_VERTICAL = 1,
+    TT_SCROLLBAR_TYPE_HORIZONTAL = 0,
+    TT_SCROLLBAR_TYPE_VERTICAL = 1,
 } tt_scrollbar_type_t;
 
 /* scrollbar */
@@ -61083,7 +61083,7 @@ void tt_scrollbarUpdate(tt_scrollbar_t *scrollbarp) {
     if (scrollbarp -> enabled == TT_ELEMENT_HIDE) {
         return;
     }
-    if (scrollbarp -> type == TT_SCROLLBAR_HORIZONTAL) {
+    if (scrollbarp -> type == TT_SCROLLBAR_TYPE_HORIZONTAL) {
         double scrollbarLeft = scrollbarp -> x - scrollbarp -> length / 2;
         double scrollbarRight = scrollbarp -> x + scrollbarp -> length / 2;
         double dragLeft = scrollbarLeft + scrollbarp -> value / 100 * (scrollbarp -> length * (1 - scrollbarp -> barPercentage / 100));
@@ -61142,7 +61142,7 @@ void tt_scrollbarUpdate(tt_scrollbar_t *scrollbarp) {
         } else {
             scrollbarp -> status = 0;
         }
-    } else if (scrollbarp -> type == TT_SCROLLBAR_VERTICAL) {
+    } else if (scrollbarp -> type == TT_SCROLLBAR_TYPE_VERTICAL) {
         double scrollbarTop = scrollbarp -> y + scrollbarp -> length / 2;
         double scrollbarBottom = scrollbarp -> y - scrollbarp -> length / 2;
         double dragTop = scrollbarTop - scrollbarp -> value / 100 * (scrollbarp -> length * (1 - scrollbarp -> barPercentage / 100));
