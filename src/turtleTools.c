@@ -1631,7 +1631,7 @@ void tt_scrollbarUpdate(tt_scrollbar_t *scrollbarp) {
         turtlePenDown();
         turtleGoto(dragRight, scrollbarp -> y);
         turtlePenUp();
-        if (scrollbarp -> enabled == TT_ELEMENT_ENABLED && (tt_globals.elementLogicTypeOld < TT_ELEMENT_PRIORITY_SCROLLBAR || (tt_globals.elementLogicTypeOld == TT_ELEMENT_PRIORITY_SCROLLBAR && tt_globals.elementLogicIndexOld <= (int32_t) tt_globals.elementLogicTemp))) {
+        if (scrollbarp -> enabled == TT_ELEMENT_ENABLED && (tt_globals.elementLogicTypeOld < TT_ELEMENT_PRIORITY_SCROLLBAR || (tt_globals.elementLogicTypeOld == TT_ELEMENT_PRIORITY_SCROLLBAR && tt_globals.elementLogicIndexOld <= (int32_t) tt_globals.elementLogicTemp) || scrollbarp -> status > 0)) {
             if (scrollbarp -> status == 2) {
                 tt_globals.barAnchor = turtle.mouseX - dragLeft;
                 scrollbarp -> status = 1;
@@ -1645,6 +1645,8 @@ void tt_scrollbarUpdate(tt_scrollbar_t *scrollbarp) {
                         scrollbarp -> status = -2;
                     }
                     scrollbarp -> status *= -1;
+                    tt_globals.elementLogicType = TT_ELEMENT_PRIORITY_HIGHEST;
+                    tt_globals.elementLogicIndex = TT_ELEMENT_PRIORITY_SCROLLBAR; // subverting expectations
                 }
             } else {
                 if (turtle.mouseY > scrollbarp -> y - scrollbarp -> size * 0.5 && turtle.mouseY < scrollbarp -> y + scrollbarp -> size * 0.5 && turtle.mouseX < scrollbarRight && turtle.mouseX > scrollbarLeft) {
@@ -1691,7 +1693,7 @@ void tt_scrollbarUpdate(tt_scrollbar_t *scrollbarp) {
         turtleGoto(scrollbarp -> x, dragBottom);
         turtlePenUp();
         /* mouse */
-        if (scrollbarp -> enabled == TT_ELEMENT_ENABLED && (tt_globals.elementLogicTypeOld < TT_ELEMENT_PRIORITY_SCROLLBAR || (tt_globals.elementLogicTypeOld == TT_ELEMENT_PRIORITY_SCROLLBAR && tt_globals.elementLogicIndexOld <= (int32_t) tt_globals.elementLogicTemp))) {
+        if (scrollbarp -> enabled == TT_ELEMENT_ENABLED && (tt_globals.elementLogicTypeOld < TT_ELEMENT_PRIORITY_SCROLLBAR || (tt_globals.elementLogicTypeOld == TT_ELEMENT_PRIORITY_SCROLLBAR && tt_globals.elementLogicIndexOld <= (int32_t) tt_globals.elementLogicTemp) || scrollbarp -> status > 0)) {
             if (scrollbarp -> status == 2) {
                 tt_globals.barAnchor = dragTop - turtle.mouseY;
                 scrollbarp -> status = 1;
@@ -1705,6 +1707,8 @@ void tt_scrollbarUpdate(tt_scrollbar_t *scrollbarp) {
                         scrollbarp -> status = -2;
                     }
                     scrollbarp -> status *= -1;
+                    tt_globals.elementLogicType = TT_ELEMENT_PRIORITY_HIGHEST;
+                    tt_globals.elementLogicIndex = TT_ELEMENT_PRIORITY_SCROLLBAR; // subverting expectations
                 }
             } else {
                 if (turtle.mouseX > scrollbarp -> x - scrollbarp -> size * 0.5 && turtle.mouseX < scrollbarp -> x + scrollbarp -> size * 0.5 && turtle.mouseY > scrollbarBottom && turtle.mouseY < scrollbarTop) {
@@ -1867,7 +1871,7 @@ void tt_dropdownUpdate(tt_dropdown_t *dropdownp) {
         turtleRectangle(dropdownXFactor[0], dropdownY - dropdownp -> size * 0.9, dropdownXFactor[1] + dropdownp -> size, dropdownY + dropdownp -> size * 0.9);
     }
     /* mouse */
-    if (dropdownp -> enabled == TT_ELEMENT_ENABLED && (tt_globals.elementLogicTypeOld < TT_ELEMENT_PRIORITY_DROPDOWN || (tt_globals.elementLogicTypeOld == TT_ELEMENT_PRIORITY_DROPDOWN && tt_globals.elementLogicIndexOld <= (int32_t) tt_globals.elementLogicTemp))) {
+    if (dropdownp -> enabled == TT_ELEMENT_ENABLED && (tt_globals.elementLogicTypeOld < TT_ELEMENT_PRIORITY_DROPDOWN || (tt_globals.elementLogicTypeOld == TT_ELEMENT_PRIORITY_DROPDOWN && tt_globals.elementLogicIndexOld <= (int32_t) tt_globals.elementLogicTemp) || dropdownp -> status > 0)) {
         if (dropdownp -> enabled == TT_ELEMENT_ENABLED && tt_ribbon.mainselect[2] == -1) {
             if (turtle.mouseX > dropdownXFactor[0] && turtle.mouseX < dropdownXFactor[1] + dropdownp -> size && turtle.mouseY >= dropdownY - dropdownp -> size * 0.9 && turtle.mouseY < dropdownY + dropdownp -> size * 0.9) {
                 if (!turtleMouseDown() && dropdownp -> status == 0) {
@@ -1883,6 +1887,8 @@ void tt_dropdownUpdate(tt_dropdown_t *dropdownp) {
             if (dropdownp -> status == -1) {
                 if (turtleMouseDown()) {
                     dropdownp -> status = 1;
+                    tt_globals.elementLogicType = TT_ELEMENT_PRIORITY_HIGHEST;
+                    tt_globals.elementLogicIndex = TT_ELEMENT_PRIORITY_DROPDOWN; // subverting expectations
                 }
             }
             if (dropdownp -> status == 1) {
@@ -2279,7 +2285,7 @@ void tt_textboxUpdate(tt_textbox_t *textboxp) {
         turtleRectangle(textboxp -> x + textboxp -> renderPixelOffset + textLength, textboxp -> y - textboxp -> size * 0.8, textboxp -> x + textboxp -> renderPixelOffset + textLength + 1, textboxp -> y + textboxp -> size * 0.8);
     }
     /* mouse */
-    if (textboxp -> enabled == TT_ELEMENT_ENABLED && (tt_globals.elementLogicTypeOld < TT_ELEMENT_PRIORITY_TEXTBOX || (tt_globals.elementLogicTypeOld == TT_ELEMENT_PRIORITY_TEXTBOX && tt_globals.elementLogicIndexOld <= (int32_t) tt_globals.elementLogicTemp))) {
+    if (textboxp -> enabled == TT_ELEMENT_ENABLED && (tt_globals.elementLogicTypeOld < TT_ELEMENT_PRIORITY_TEXTBOX || (tt_globals.elementLogicTypeOld == TT_ELEMENT_PRIORITY_TEXTBOX && tt_globals.elementLogicIndexOld <= (int32_t) tt_globals.elementLogicTemp) || textboxp -> status > 1)) {
         if (turtle.mouseX > textboxp -> x && turtle.mouseX < textboxp -> x + textboxp -> length && turtle.mouseY > textboxp -> y - textboxp -> size && turtle.mouseY < textboxp -> y + textboxp -> size) {
             textboxp -> mouseOver = 1;
         } else {
@@ -2296,6 +2302,8 @@ void tt_textboxUpdate(tt_textbox_t *textboxp) {
         } else {
             if (textboxp -> status == 1) {
                 textboxp -> status = 2;
+                tt_globals.elementLogicType = TT_ELEMENT_PRIORITY_HIGHEST;
+                tt_globals.elementLogicIndex = TT_ELEMENT_PRIORITY_TEXTBOX; // subverting expectations
             } else if (textboxp -> status < 2) {
                 if (textboxp -> mouseOver) {
                     textboxp -> status = -1;

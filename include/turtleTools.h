@@ -74,6 +74,7 @@ typedef enum {
     TT_ELEMENT_PRIORITY_CONTEXT = 8,
     TT_ELEMENT_PRIORITY_RIBBON = 9,
     TT_ELEMENT_PRIORITY_POPUP = 10,
+    TT_ELEMENT_PRIORITY_HIGHEST = 11,
 } tt_element_priority_t;
 
 typedef struct {
