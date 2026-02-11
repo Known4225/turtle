@@ -25,6 +25,7 @@ The following build commands are available:
 - `make singlefile` - This will package the turtle headers and source files into a single `turtle.h` file.
 
 # To Do
+- Merge enums tt_element_names_t and tt_element_priority_t
 - Reduce size of turtle.h, find a building solution that doesn't involve 26936 lines of duplicate code
 - Mouse interactions with textbox (highlight, index select)
 - 3D support
