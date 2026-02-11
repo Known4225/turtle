@@ -695,6 +695,12 @@ int32_t tt_elementFree(void *elementp) {
     return 0;
 }
 
+void tt_hideAllElements() {
+    for (int32_t i = 0; i < tt_elements.all -> length; i++) {
+        ((tt_button_t *) tt_elements.all -> data[i].p) -> enabled = TT_ELEMENT_HIDE;
+    }
+}
+
 /* initialise UI elements */
 
 /* create a button */
@@ -918,6 +924,7 @@ void tt_contextCalculateMax(tt_context_t *contextp) {
     }
 }
 
+/* create a context menu */
 tt_context_t *tt_contextInit(list_t *options, int32_t *variable, double x, double y, double size) {
     if (tt_enabled.contextEnabled == 0) {
         tt_enabled.contextEnabled = 1;
@@ -947,6 +954,8 @@ tt_context_t *tt_contextInit(list_t *options, int32_t *variable, double x, doubl
     contextp -> variable = variable;
     tt_contextCalculateMax(contextp);
     contextp -> direction = TT_CONTEXT_DIRECTION_AUTO;
+    contextp -> autoLowerBound = turtle.initbounds[1];
+    contextp -> autoRightBound = turtle.initbounds[2];
     list_append(tt_elements.contexts, (unitype) (void *) contextp, 'p');
     list_append(tt_elements.all, (unitype) (void *) contextp, 'l');
     return contextp;
@@ -1000,8 +1009,8 @@ tt_dropdown_t *tt_dropdownInit(char *label, list_t *options, int32_t *variable, 
     dropdownp -> status = 0;
     dropdownp -> align = align;
     dropdownp -> direction = TT_DROPDOWN_DIRECTION_AUTO;
-    dropdownp -> dropdownAutoLowerBound = turtle.initbounds[1];
-    dropdownp -> dropdownAutoUpperBound = turtle.initbounds[3];
+    dropdownp -> autoLowerBound = turtle.initbounds[1];
+    dropdownp -> autoUpperBound = turtle.initbounds[3];
     dropdownp -> x = x;
     dropdownp -> y = y;
     dropdownp -> size = size;
@@ -1752,10 +1761,10 @@ void tt_contextUpdate(tt_context_t *contextp) {
     double contextTextY = contextp -> y - itemHeight / 2 - 2;
     /* determine direction */
     if (contextp -> direction == TT_CONTEXT_DIRECTION_AUTO) {
-        if (contextTextX + contextp -> maxXfactor + contextp -> size / 1.25 >= turtle.initbounds[2]) {
+        if (contextTextX + contextp -> maxXfactor + contextp -> size / 1.25 >= contextp -> autoRightBound) {
             contextTextX = contextp -> x - contextp -> maxXfactor - contextp -> size / 1.25;
         }
-        if (contextTextY - contextp -> size * 0.9 - (contextp -> options -> length - 1) * itemHeight - 2 <= turtle.initbounds[1]) {
+        if (contextTextY - contextp -> size * 0.9 - (contextp -> options -> length - 1) * itemHeight - 2 <= contextp -> autoLowerBound) {
             contextTextY = contextp -> y + contextp -> size * 0.9 + (contextp -> options -> length - 1) * itemHeight + 2;
         }
     } else {
@@ -1841,14 +1850,14 @@ void tt_dropdownUpdate(tt_dropdown_t *dropdownp) {
     }
     int32_t dropdownDirection = dropdownp -> direction;
     if (dropdownDirection == TT_DROPDOWN_DIRECTION_AUTO) {
-        if (dropdownY - dropdownp -> size * 0.9 - (dropdownp -> options -> length - 1) * itemHeight <= dropdownp -> dropdownAutoLowerBound) {
+        if (dropdownY - dropdownp -> size * 0.9 - (dropdownp -> options -> length - 1) * itemHeight <= dropdownp -> autoLowerBound) {
             dropdownDirection = TT_DROPDOWN_DIRECTION_UP;
         } else {
             dropdownDirection = TT_DROPDOWN_DIRECTION_DOWN;
         }
     }
     if (dropdownDirection == TT_DROPDOWN_DIRECTION_AUTO_PREFER_UP) {
-        if (dropdownY + dropdownp -> size * 0.9 + (dropdownp -> options -> length - 1) * itemHeight >= dropdownp -> dropdownAutoUpperBound) {
+        if (dropdownY + dropdownp -> size * 0.9 + (dropdownp -> options -> length - 1) * itemHeight >= dropdownp -> autoUpperBound) {
             dropdownDirection = TT_DROPDOWN_DIRECTION_DOWN;
         } else {
             dropdownDirection = TT_DROPDOWN_DIRECTION_UP;

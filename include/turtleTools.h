@@ -206,6 +206,8 @@ void tt_elementResetColor(void *elementp, int32_t elementType);
 
 int32_t tt_elementFree(void *elementp);
 
+void tt_hideAllElements();
+
 /* ribbon */
 
 /* ribbon variables */
@@ -465,6 +467,8 @@ typedef struct {
     list_t *options;
     int32_t status;
     tt_context_direction_t direction;
+    double autoLowerBound;
+    double autoRightBound;
     double maxXfactor;
     /* value */
     int32_t index; // index of selected option
@@ -498,8 +502,8 @@ typedef struct {
     int32_t status;
     tt_dropdown_align_t align;
     tt_dropdown_direction_t direction;
-    double dropdownAutoLowerBound;
-    double dropdownAutoUpperBound;
+    double autoLowerBound;
+    double autoUpperBound;
     double maxXfactor;
     /* value */
     int32_t index; // index of selected option
@@ -512,6 +516,7 @@ typedef enum {
     TT_TEXTBOX_ALIGN_RIGHT = 2,
 } tt_textbox_align_t;
 
+/* textbox */
 typedef struct {
     tt_element_names_t element;
     tt_element_enabled_t enabled;
