@@ -1000,6 +1000,8 @@ tt_dropdown_t *tt_dropdownInit(char *label, list_t *options, int32_t *variable, 
     dropdownp -> status = 0;
     dropdownp -> align = align;
     dropdownp -> direction = TT_DROPDOWN_DIRECTION_AUTO;
+    dropdownp -> dropdownAutoLowerBound = turtle.initbounds[1];
+    dropdownp -> dropdownAutoUpperBound = turtle.initbounds[3];
     dropdownp -> x = x;
     dropdownp -> y = y;
     dropdownp -> size = size;
@@ -1839,14 +1841,14 @@ void tt_dropdownUpdate(tt_dropdown_t *dropdownp) {
     }
     int32_t dropdownDirection = dropdownp -> direction;
     if (dropdownDirection == TT_DROPDOWN_DIRECTION_AUTO) {
-        if (dropdownY - dropdownp -> size * 0.9 - (dropdownp -> options -> length - 1) * itemHeight <= turtle.initbounds[1]) {
+        if (dropdownY - dropdownp -> size * 0.9 - (dropdownp -> options -> length - 1) * itemHeight <= dropdownp -> dropdownAutoLowerBound) {
             dropdownDirection = TT_DROPDOWN_DIRECTION_UP;
         } else {
             dropdownDirection = TT_DROPDOWN_DIRECTION_DOWN;
         }
     }
     if (dropdownDirection == TT_DROPDOWN_DIRECTION_AUTO_PREFER_UP) {
-        if (dropdownY + dropdownp -> size * 0.9 + (dropdownp -> options -> length - 1) * itemHeight >= turtle.initbounds[3]) {
+        if (dropdownY + dropdownp -> size * 0.9 + (dropdownp -> options -> length - 1) * itemHeight >= dropdownp -> dropdownAutoUpperBound) {
             dropdownDirection = TT_DROPDOWN_DIRECTION_DOWN;
         } else {
             dropdownDirection = TT_DROPDOWN_DIRECTION_UP;

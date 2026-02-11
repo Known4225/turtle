@@ -498,6 +498,8 @@ typedef struct {
     int32_t status;
     tt_dropdown_align_t align;
     tt_dropdown_direction_t direction;
+    double dropdownAutoLowerBound;
+    double dropdownAutoUpperBound;
     double maxXfactor;
     /* value */
     int32_t index; // index of selected option
