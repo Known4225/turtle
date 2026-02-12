@@ -51,31 +51,20 @@ typedef struct {
 extern tt_enabled_t tt_enabled; // all start at 0 (global variable)
 
 typedef enum {
-    TT_ELEMENT_BUTTON = 0,
-    TT_ELEMENT_SWITCH = 1,
-    TT_ELEMENT_DIAL = 2,
-    TT_ELEMENT_SLIDER = 3,
-    TT_ELEMENT_SCROLLBAR = 4,
-    TT_ELEMENT_CONTEXT = 5,
+    TT_ELEMENT_NONE = 0, // lowest priority
+    TT_ELEMENT_BUTTON = 1,
+    TT_ELEMENT_SWITCH = 2,
+    TT_ELEMENT_DIAL = 3,
+    TT_ELEMENT_SLIDER = 4,
+    TT_ELEMENT_TEXTBOX = 5,
     TT_ELEMENT_DROPDOWN = 6,
-    TT_ELEMENT_TEXTBOX = 7,
-    TT_NUMBER_OF_ELEMENTS = 8,
+    TT_ELEMENT_SCROLLBAR = 7,
+    TT_ELEMENT_CONTEXT = 8,
+    TT_ELEMENT_RIBBON = 9,
+    TT_ELEMENT_POPUP = 10,
+    TT_ELEMENT_HIGHEST = 11, // highest priority
+    TT_NUMBER_OF_ELEMENTS = 11,
 } tt_element_names_t;
-
-typedef enum {
-    TT_ELEMENT_PRIORITY_NONE = 0,
-    TT_ELEMENT_PRIORITY_BUTTON = 1,
-    TT_ELEMENT_PRIORITY_SWITCH = 2,
-    TT_ELEMENT_PRIORITY_DIAL = 3,
-    TT_ELEMENT_PRIORITY_SLIDER = 4,
-    TT_ELEMENT_PRIORITY_TEXTBOX = 5,
-    TT_ELEMENT_PRIORITY_DROPDOWN = 6,
-    TT_ELEMENT_PRIORITY_SCROLLBAR = 7,
-    TT_ELEMENT_PRIORITY_CONTEXT = 8,
-    TT_ELEMENT_PRIORITY_RIBBON = 9,
-    TT_ELEMENT_PRIORITY_POPUP = 10,
-    TT_ELEMENT_PRIORITY_HIGHEST = 11,
-} tt_element_priority_t;
 
 typedef struct {
     list_t *all;
@@ -83,13 +72,19 @@ typedef struct {
     list_t *switches;
     list_t *dials;
     list_t *sliders;
+    list_t *textboxes;
+    list_t *dropdowns;
     list_t *scrollbars;
     list_t *contexts;
-    list_t *dropdowns;
-    list_t *textboxes;
 } tt_elements_t;
 
 extern tt_elements_t tt_elements;
+
+typedef enum {
+    TT_ELEMENT_ENABLED = 0,
+    TT_ELEMENT_NO_MOUSE = 1,
+    TT_ELEMENT_HIDE = 2,
+} tt_element_enabled_t;
 
 typedef enum {
     TT_COLOR_BACKGROUND = 0,
@@ -150,14 +145,6 @@ void turtleToolsSetTheme(tt_theme_name_t theme);
 extern int32_t tt_color_default[];
 
 typedef enum {
-    /* ribbon and popup (special cases) */
-    TT_COLOR_SLOT_RIBBON_TOP = TT_COLOR_COMPONENT_HIGHLIGHT,
-    TT_COLOR_SLOT_RIBBON_DROPDOWN = TT_COLOR_COMPONENT_HIGHLIGHT,
-    TT_COLOR_SLOT_RIBBON_HOVER = TT_COLOR_COMPONENT,
-    TT_COLOR_SLOT_RIBBON_SELECT = TT_COLOR_COMPONENT,
-    TT_COLOR_SLOT_POPUP_BOX = TT_COLOR_COMPONENT_ALTERNATE,
-    TT_COLOR_SLOT_POPUP_BUTTON_SELECT = TT_COLOR_COMPONENT_HIGHLIGHT,
-    TT_COLOR_SLOT_POPUP_BUTTON = TT_COLOR_COMPONENT,
     /* button */
     TT_COLOR_SLOT_BUTTON_TEXT = 0,
     TT_COLOR_SLOT_BUTTON = 1,
@@ -179,6 +166,18 @@ typedef enum {
     TT_COLOR_SLOT_SLIDER_TEXT = 0,
     TT_COLOR_SLOT_SLIDER_BAR = 1,
     TT_COLOR_SLOT_SLIDER_CIRCLE = 2,
+    /* textbox */
+    TT_COLOR_SLOT_TEXTBOX_TEXT = 0,
+    TT_COLOR_SLOT_TEXTBOX_BOX = 1,
+    TT_COLOR_SLOT_TEXTBOX_PHANTOM_TEXT = 2,
+    TT_COLOR_SLOT_TEXTBOX_LINE = 3,
+    /* dropdown */
+    TT_COLOR_SLOT_DROPDOWN_TEXT = 0,
+    TT_COLOR_SLOT_DROPDOWN_TEXT_HOVER = 1,
+    TT_COLOR_SLOT_DROPDOWN_BASE = 2,
+    TT_COLOR_SLOT_DROPDOWN_SELECT = 3,
+    TT_COLOR_SLOT_DROPDOWN_HOVER = 4,
+    TT_COLOR_SLOT_DROPDOWN_TRIANGLE = 5,
     /* scrollbar */
     TT_COLOR_SLOT_SCROLLBAR_BASE = 1,
     TT_COLOR_SLOT_SCROLLBAR_BAR = 2,
@@ -188,21 +187,20 @@ typedef enum {
     TT_COLOR_SLOT_CONTEXT_TEXT = 0,
     TT_COLOR_SLOT_CONTEXT_BASE = 1,
     TT_COLOR_SLOT_CONTEXT_SELECT = 2,
-    /* dropdown */
-    TT_COLOR_SLOT_DROPDOWN_TEXT = 0,
-    TT_COLOR_SLOT_DROPDOWN_TEXT_HOVER = 1,
-    TT_COLOR_SLOT_DROPDOWN_BASE = 2,
-    TT_COLOR_SLOT_DROPDOWN_SELECT = 3,
-    TT_COLOR_SLOT_DROPDOWN_HOVER = 4,
-    TT_COLOR_SLOT_DROPDOWN_TRIANGLE = 5,
-    /* textbox */
-    TT_COLOR_SLOT_TEXTBOX_TEXT = 0,
-    TT_COLOR_SLOT_TEXTBOX_BOX = 1,
-    TT_COLOR_SLOT_TEXTBOX_PHANTOM_TEXT = 2,
-    TT_COLOR_SLOT_TEXTBOX_LINE = 3,
+    /* ribbon */
+    TT_COLOR_SLOT_RIBBON_TEXT = 0,
+    TT_COLOR_SLOT_RIBBON_TOP = 1,
+    TT_COLOR_SLOT_RIBBON_DROPDOWN = 2,
+    TT_COLOR_SLOT_RIBBON_HOVER = 3,
+    TT_COLOR_SLOT_RIBBON_SELECT = 4,
+    /* popup */
+    TT_COLOR_SLOT_POPUP_TEXT = 0,
+    TT_COLOR_SLOT_POPUP_BOX = 1,
+    TT_COLOR_SLOT_POPUP_BUTTON_SELECT = 2,
+    TT_COLOR_SLOT_POPUP_BUTTON = 3,
 } tt_color_slots_t;
 
-void tt_elementResetColor(void *elementp, int32_t elementType);
+void tt_elementResetColor(void *elementp);
 
 int32_t tt_elementFree(void *elementp);
 
@@ -212,6 +210,9 @@ void tt_hideAllElements();
 
 /* ribbon variables */
 typedef struct {
+    tt_element_names_t element;
+    tt_element_enabled_t enabled;
+    int32_t color[8];
     uint8_t marginSize;
     int8_t mainselect[4]; // 0 - select, 1 - mouseHover, 2 - selected, 3 - premove close dropdown
     int8_t subselect[4]; // 0 - select, 1 - mouseHover, 2 - selected, 3 - free
@@ -241,6 +242,9 @@ void tt_ribbonUpdate();
 
 /* popup variables */
 typedef struct {
+    tt_element_names_t element;
+    tt_element_enabled_t enabled;
+    int32_t color[8];
     char *message; // message displayed on the popup
     double minX; // left edge of box
     double minY; // bottom of box
@@ -284,19 +288,13 @@ typedef struct {
     double dialAnchorY;
     double barAnchor;
     int32_t elementLogicTemp;
-    tt_element_priority_t elementLogicType;
+    tt_element_names_t elementLogicType;
     int32_t elementLogicIndex;
-    tt_element_priority_t elementLogicTypeOld;
+    tt_element_names_t elementLogicTypeOld;
     int32_t elementLogicIndexOld;
 } tt_globals_t;
 
 extern tt_globals_t tt_globals;
-
-typedef enum {
-    TT_ELEMENT_ENABLED = 0,
-    TT_ELEMENT_NO_MOUSE = 1,
-    TT_ELEMENT_HIDE = 2,
-} tt_element_enabled_t;
 
 #define TT_LABEL_LENGTH_LIMIT 128
 
@@ -567,6 +565,18 @@ tt_slider_t *tt_sliderInit(char *label, double *variable, tt_slider_type_t type,
 
 void tt_sliderFree(tt_slider_t *sliderp);
 
+/* create a textbox */
+tt_textbox_t *tt_textboxInit(char *label, char *variable, uint32_t maxCharacters, double x, double y, double size, double length);
+
+void tt_textboxFree(tt_textbox_t *textboxp);
+
+void tt_dropdownCalculateMax(tt_dropdown_t *dropdownp);
+
+/* create a dropdown - use a list of strings for options (options must have at least one string) */
+tt_dropdown_t *tt_dropdownInit(char *label, list_t *options, int32_t *variable, tt_dropdown_align_t align, double x, double y, double size);
+
+void tt_dropdownFree(tt_dropdown_t *dropdownp);
+
 /* create a scrollbar */
 tt_scrollbar_t *tt_scrollbarInit(double *variable, tt_scrollbar_type_t type, double x, double y, double size, double length, double barPercentage);
 
@@ -577,18 +587,6 @@ void tt_contextCalculateMax(tt_context_t *contextp);
 tt_context_t *tt_contextInit(list_t *options, int32_t *variable, double x, double y, double size);
 
 void tt_contextFree(tt_context_t *contextp);
-
-void tt_dropdownCalculateMax(tt_dropdown_t *dropdownp);
-
-/* create a dropdown - use a list of strings for options */
-tt_dropdown_t *tt_dropdownInit(char *label, list_t *options, int32_t *variable, tt_dropdown_align_t align, double x, double y, double size);
-
-void tt_dropdownFree(tt_dropdown_t *dropdownp);
-
-/* create a textbox */
-tt_textbox_t *tt_textboxInit(char *label, char *variable, uint32_t maxCharacters, double x, double y, double size, double length);
-
-void tt_textboxFree(tt_textbox_t *textboxp);
 
 /* update a button */
 void tt_buttonUpdate(tt_button_t *buttonp);
@@ -605,20 +603,6 @@ void tt_dialUpdate(tt_dial_t *dialp);
 /* update a slider */
 void tt_sliderUpdate(tt_slider_t *sliderp);
 
-/*
-update a scrollbar
-scrollbar range of motion (coordinates):
-scrollbar.length * (1 - scrollbar.barPercentage / 100)
-tip: try to match the ratio of visible content to the scrollbar's barPercentage - if half of the content can be shown on one screen then make the barPercentage 50
-*/
-void tt_scrollbarUpdate(tt_scrollbar_t *scrollbarp);
-
-/* update context */
-void tt_contextUpdate(tt_context_t *contextp);
-
-/* update dropdown */
-void tt_dropdownUpdate(tt_dropdown_t *dropdownp);
-
 void tt_textboxAddKey(tt_textbox_t *textboxp, int32_t key);
 
 void tt_textboxUnicodeCallback(uint32_t codepoint);
@@ -629,7 +613,22 @@ void tt_textboxKeyCallback(int32_t key, int32_t scancode, int32_t action);
 
 int32_t tt_textboxCalculateMaximumCharacters(uint32_t *charlist, int32_t textLength, double size, double lengthPixels, int8_t sweepDirection, double *outputLength);
 
+/* update a textbox */
 void tt_textboxUpdate(tt_textbox_t *textboxp);
+
+/* update a dropdown */
+void tt_dropdownUpdate(tt_dropdown_t *dropdownp);
+
+/*
+update a scrollbar
+scrollbar range of motion (coordinates):
+scrollbar.length * (1 - scrollbar.barPercentage / 100)
+tip: try to match the ratio of visible content to the scrollbar's barPercentage - if half of the content can be shown on one screen then make the barPercentage 50
+*/
+void tt_scrollbarUpdate(tt_scrollbar_t *scrollbarp);
+
+/* update a context */
+void tt_contextUpdate(tt_context_t *contextp);
 
 /* update all turtleTools */
 void turtleToolsUpdate();
