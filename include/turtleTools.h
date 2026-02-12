@@ -80,11 +80,18 @@ typedef struct {
 
 extern tt_elements_t tt_elements;
 
+/* display setting of the element */
 typedef enum {
     TT_ELEMENT_ENABLED = 0,
     TT_ELEMENT_NO_MOUSE = 1,
     TT_ELEMENT_HIDE = 2,
 } tt_element_enabled_t;
+
+/* if an element is ignored then it is not updated with turtleToolsUpdate() and must be updated separately */
+typedef enum {
+    TT_ELEMENT_NOT_IGNORED = 0,
+    TT_ELEMENT_IGNORED = 1,
+} tt_element_ignored_t;
 
 typedef enum {
     TT_COLOR_BACKGROUND = 0,
@@ -212,6 +219,7 @@ void tt_hideAllElements();
 typedef struct {
     tt_element_names_t element;
     tt_element_enabled_t enabled;
+    tt_element_ignored_t ignored;
     int32_t color[8];
     uint8_t marginSize;
     int8_t mainselect[4]; // 0 - select, 1 - mouseHover, 2 - selected, 3 - premove close dropdown
@@ -244,6 +252,7 @@ void tt_ribbonUpdate();
 typedef struct {
     tt_element_names_t element;
     tt_element_enabled_t enabled;
+    tt_element_ignored_t ignored;
     int32_t color[8];
     char *message; // message displayed on the popup
     double minX; // left edge of box
@@ -315,6 +324,7 @@ typedef enum {
 typedef struct {
     tt_element_names_t element;
     tt_element_enabled_t enabled;
+    tt_element_ignored_t ignored;
     int32_t color[8];
     double x;
     double y;
@@ -346,6 +356,7 @@ typedef enum {
 typedef struct {
     tt_element_names_t element;
     tt_element_enabled_t enabled;
+    tt_element_ignored_t ignored;
     int32_t color[8];
     double x;
     double y;
@@ -369,6 +380,7 @@ typedef enum {
 typedef struct {
     tt_element_names_t element;
     tt_element_enabled_t enabled;
+    tt_element_ignored_t ignored;
     int32_t color[8];
     double x;
     double y;
@@ -405,6 +417,7 @@ typedef enum {
 typedef struct {
     tt_element_names_t element;
     tt_element_enabled_t enabled;
+    tt_element_ignored_t ignored;
     int32_t color[8];
     double x;
     double y;
@@ -424,6 +437,78 @@ typedef struct {
 } tt_slider_t;
 
 typedef enum {
+    TT_TEXTBOX_ALIGN_LEFT = 0,
+    TT_TEXTBOX_ALIGN_CENTER = 1,
+    TT_TEXTBOX_ALIGN_RIGHT = 2,
+} tt_textbox_align_t;
+
+/* textbox */
+typedef struct {
+    tt_element_names_t element;
+    tt_element_enabled_t enabled;
+    tt_element_ignored_t ignored;
+    int32_t color[8];
+    double x;
+    double y;
+    double size;
+    char label[TT_LABEL_LENGTH_LIMIT];
+    int32_t status;
+    int8_t mouseOver;
+    tt_textbox_align_t align;
+    double length;
+    int32_t maxCharacters;
+    int32_t editIndex;
+    int32_t lastKey;
+    int32_t keyTimeout;
+    /* render variables */
+    double renderPixelOffset;
+    int32_t renderStartingIndex;
+    int32_t renderNumCharacters;
+    /* value */
+    char *text; // text of textbox
+    char *value; // text of textbox (duplicate name - always equal to text)
+    /* whitelist */
+    list_t *whitelist;
+    list_t *blacklist;
+} tt_textbox_t;
+
+typedef enum {
+    TT_DROPDOWN_ALIGN_LEFT = 0,
+    TT_DROPDOWN_ALIGN_CENTER = 1,
+    TT_DROPDOWN_ALIGN_RIGHT = 2,
+} tt_dropdown_align_t;
+
+typedef enum {
+    TT_DROPDOWN_DIRECTION_AUTO = 0,
+    TT_DROPDOWN_DIRECTION_AUTO_PREFER_UP = 1,
+    TT_DROPDOWN_DIRECTION_UP = 2,
+    TT_DROPDOWN_DIRECTION_DOWN = 3,
+} tt_dropdown_direction_t;
+
+/* dropdown */
+typedef struct {
+    tt_element_names_t element;
+    tt_element_enabled_t enabled;
+    tt_element_ignored_t ignored;
+    int32_t color[8];
+    double x;
+    double y;
+    double size;
+    int32_t *variable; // bound variable (can be NULL)
+    char label[TT_LABEL_LENGTH_LIMIT];
+    list_t *options;
+    int32_t status;
+    tt_dropdown_align_t align;
+    tt_dropdown_direction_t direction;
+    double autoLowerBound;
+    double autoUpperBound;
+    double maxXfactor;
+    /* value */
+    int32_t index; // index of selected option
+    int32_t value; // index of selected option (duplicate name - always equal to index)
+} tt_dropdown_t;
+
+typedef enum {
     TT_SCROLLBAR_TYPE_HORIZONTAL = 0,
     TT_SCROLLBAR_TYPE_VERTICAL = 1,
 } tt_scrollbar_type_t;
@@ -432,6 +517,7 @@ typedef enum {
 typedef struct {
     tt_element_names_t element;
     tt_element_enabled_t enabled;
+    tt_element_ignored_t ignored;
     int32_t color[8];
     double x;
     double y;
@@ -457,6 +543,7 @@ typedef enum {
 typedef struct {
     tt_element_names_t element;
     tt_element_enabled_t enabled;
+    tt_element_ignored_t ignored;
     int32_t color[8];
     double x;
     double y;
@@ -472,76 +559,6 @@ typedef struct {
     int32_t index; // index of selected option
     int32_t value; // index of selected option (duplicate name - always equal to index)
 } tt_context_t;
-
-typedef enum {
-    TT_DROPDOWN_ALIGN_LEFT = 0,
-    TT_DROPDOWN_ALIGN_CENTER = 1,
-    TT_DROPDOWN_ALIGN_RIGHT = 2,
-} tt_dropdown_align_t;
-
-typedef enum {
-    TT_DROPDOWN_DIRECTION_AUTO = 0,
-    TT_DROPDOWN_DIRECTION_AUTO_PREFER_UP = 1,
-    TT_DROPDOWN_DIRECTION_UP = 2,
-    TT_DROPDOWN_DIRECTION_DOWN = 3,
-} tt_dropdown_direction_t;
-
-/* dropdown */
-typedef struct {
-    tt_element_names_t element;
-    tt_element_enabled_t enabled;
-    int32_t color[8];
-    double x;
-    double y;
-    double size;
-    int32_t *variable; // bound variable (can be NULL)
-    char label[TT_LABEL_LENGTH_LIMIT];
-    list_t *options;
-    int32_t status;
-    tt_dropdown_align_t align;
-    tt_dropdown_direction_t direction;
-    double autoLowerBound;
-    double autoUpperBound;
-    double maxXfactor;
-    /* value */
-    int32_t index; // index of selected option
-    int32_t value; // index of selected option (duplicate name - always equal to index)
-} tt_dropdown_t;
-
-typedef enum {
-    TT_TEXTBOX_ALIGN_LEFT = 0,
-    TT_TEXTBOX_ALIGN_CENTER = 1,
-    TT_TEXTBOX_ALIGN_RIGHT = 2,
-} tt_textbox_align_t;
-
-/* textbox */
-typedef struct {
-    tt_element_names_t element;
-    tt_element_enabled_t enabled;
-    int32_t color[8];
-    double x;
-    double y;
-    double size;
-    char label[TT_LABEL_LENGTH_LIMIT];
-    int32_t status;
-    int8_t mouseOver;
-    tt_textbox_align_t align;
-    double length;
-    int32_t maxCharacters;
-    int32_t editIndex;
-    int32_t lastKey;
-    int32_t keyTimeout;
-    /* render variables */
-    double renderPixelOffset;
-    int32_t renderStartingIndex;
-    int32_t renderNumCharacters;
-    /* value */
-    char *text; // text of textbox
-    char *value; // text of textbox (duplicate name - always equal to text)
-    /* whitelist */
-    list_t *whitelist;
-    list_t *blacklist;
-} tt_textbox_t;
 
 /* initialise UI elements */
 
