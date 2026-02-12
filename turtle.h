@@ -46965,11 +46965,18 @@ typedef struct {
 
 extern tt_elements_t tt_elements;
 
+/* display setting of the element */
 typedef enum {
     TT_ELEMENT_ENABLED = 0,
     TT_ELEMENT_NO_MOUSE = 1,
     TT_ELEMENT_HIDE = 2,
 } tt_element_enabled_t;
+
+/* if an element is ignored then it is not updated with turtleToolsUpdate() and must be updated separately */
+typedef enum {
+    TT_ELEMENT_NOT_IGNORED = 0,
+    TT_ELEMENT_IGNORED = 1,
+} tt_element_ignored_t;
 
 typedef enum {
     TT_COLOR_BACKGROUND = 0,
@@ -47097,6 +47104,7 @@ void tt_hideAllElements();
 typedef struct {
     tt_element_names_t element;
     tt_element_enabled_t enabled;
+    tt_element_ignored_t ignored;
     int32_t color[8];
     uint8_t marginSize;
     int8_t mainselect[4]; // 0 - select, 1 - mouseHover, 2 - selected, 3 - premove close dropdown
@@ -47129,6 +47137,7 @@ void tt_ribbonUpdate();
 typedef struct {
     tt_element_names_t element;
     tt_element_enabled_t enabled;
+    tt_element_ignored_t ignored;
     int32_t color[8];
     char *message; // message displayed on the popup
     double minX; // left edge of box
@@ -47200,6 +47209,7 @@ typedef enum {
 typedef struct {
     tt_element_names_t element;
     tt_element_enabled_t enabled;
+    tt_element_ignored_t ignored;
     int32_t color[8];
     double x;
     double y;
@@ -47231,6 +47241,7 @@ typedef enum {
 typedef struct {
     tt_element_names_t element;
     tt_element_enabled_t enabled;
+    tt_element_ignored_t ignored;
     int32_t color[8];
     double x;
     double y;
@@ -47254,6 +47265,7 @@ typedef enum {
 typedef struct {
     tt_element_names_t element;
     tt_element_enabled_t enabled;
+    tt_element_ignored_t ignored;
     int32_t color[8];
     double x;
     double y;
@@ -47290,6 +47302,7 @@ typedef enum {
 typedef struct {
     tt_element_names_t element;
     tt_element_enabled_t enabled;
+    tt_element_ignored_t ignored;
     int32_t color[8];
     double x;
     double y;
@@ -47309,6 +47322,78 @@ typedef struct {
 } tt_slider_t;
 
 typedef enum {
+    TT_TEXTBOX_ALIGN_LEFT = 0,
+    TT_TEXTBOX_ALIGN_CENTER = 1,
+    TT_TEXTBOX_ALIGN_RIGHT = 2,
+} tt_textbox_align_t;
+
+/* textbox */
+typedef struct {
+    tt_element_names_t element;
+    tt_element_enabled_t enabled;
+    tt_element_ignored_t ignored;
+    int32_t color[8];
+    double x;
+    double y;
+    double size;
+    char label[TT_LABEL_LENGTH_LIMIT];
+    int32_t status;
+    int8_t mouseOver;
+    tt_textbox_align_t align;
+    double length;
+    int32_t maxCharacters;
+    int32_t editIndex;
+    int32_t lastKey;
+    int32_t keyTimeout;
+    /* render variables */
+    double renderPixelOffset;
+    int32_t renderStartingIndex;
+    int32_t renderNumCharacters;
+    /* value */
+    char *text; // text of textbox
+    char *value; // text of textbox (duplicate name - always equal to text)
+    /* whitelist */
+    list_t *whitelist;
+    list_t *blacklist;
+} tt_textbox_t;
+
+typedef enum {
+    TT_DROPDOWN_ALIGN_LEFT = 0,
+    TT_DROPDOWN_ALIGN_CENTER = 1,
+    TT_DROPDOWN_ALIGN_RIGHT = 2,
+} tt_dropdown_align_t;
+
+typedef enum {
+    TT_DROPDOWN_DIRECTION_AUTO = 0,
+    TT_DROPDOWN_DIRECTION_AUTO_PREFER_UP = 1,
+    TT_DROPDOWN_DIRECTION_UP = 2,
+    TT_DROPDOWN_DIRECTION_DOWN = 3,
+} tt_dropdown_direction_t;
+
+/* dropdown */
+typedef struct {
+    tt_element_names_t element;
+    tt_element_enabled_t enabled;
+    tt_element_ignored_t ignored;
+    int32_t color[8];
+    double x;
+    double y;
+    double size;
+    int32_t *variable; // bound variable (can be NULL)
+    char label[TT_LABEL_LENGTH_LIMIT];
+    list_t *options;
+    int32_t status;
+    tt_dropdown_align_t align;
+    tt_dropdown_direction_t direction;
+    double autoLowerBound;
+    double autoUpperBound;
+    double maxXfactor;
+    /* value */
+    int32_t index; // index of selected option
+    int32_t value; // index of selected option (duplicate name - always equal to index)
+} tt_dropdown_t;
+
+typedef enum {
     TT_SCROLLBAR_TYPE_HORIZONTAL = 0,
     TT_SCROLLBAR_TYPE_VERTICAL = 1,
 } tt_scrollbar_type_t;
@@ -47317,6 +47402,7 @@ typedef enum {
 typedef struct {
     tt_element_names_t element;
     tt_element_enabled_t enabled;
+    tt_element_ignored_t ignored;
     int32_t color[8];
     double x;
     double y;
@@ -47342,6 +47428,7 @@ typedef enum {
 typedef struct {
     tt_element_names_t element;
     tt_element_enabled_t enabled;
+    tt_element_ignored_t ignored;
     int32_t color[8];
     double x;
     double y;
@@ -47357,76 +47444,6 @@ typedef struct {
     int32_t index; // index of selected option
     int32_t value; // index of selected option (duplicate name - always equal to index)
 } tt_context_t;
-
-typedef enum {
-    TT_DROPDOWN_ALIGN_LEFT = 0,
-    TT_DROPDOWN_ALIGN_CENTER = 1,
-    TT_DROPDOWN_ALIGN_RIGHT = 2,
-} tt_dropdown_align_t;
-
-typedef enum {
-    TT_DROPDOWN_DIRECTION_AUTO = 0,
-    TT_DROPDOWN_DIRECTION_AUTO_PREFER_UP = 1,
-    TT_DROPDOWN_DIRECTION_UP = 2,
-    TT_DROPDOWN_DIRECTION_DOWN = 3,
-} tt_dropdown_direction_t;
-
-/* dropdown */
-typedef struct {
-    tt_element_names_t element;
-    tt_element_enabled_t enabled;
-    int32_t color[8];
-    double x;
-    double y;
-    double size;
-    int32_t *variable; // bound variable (can be NULL)
-    char label[TT_LABEL_LENGTH_LIMIT];
-    list_t *options;
-    int32_t status;
-    tt_dropdown_align_t align;
-    tt_dropdown_direction_t direction;
-    double autoLowerBound;
-    double autoUpperBound;
-    double maxXfactor;
-    /* value */
-    int32_t index; // index of selected option
-    int32_t value; // index of selected option (duplicate name - always equal to index)
-} tt_dropdown_t;
-
-typedef enum {
-    TT_TEXTBOX_ALIGN_LEFT = 0,
-    TT_TEXTBOX_ALIGN_CENTER = 1,
-    TT_TEXTBOX_ALIGN_RIGHT = 2,
-} tt_textbox_align_t;
-
-/* textbox */
-typedef struct {
-    tt_element_names_t element;
-    tt_element_enabled_t enabled;
-    int32_t color[8];
-    double x;
-    double y;
-    double size;
-    char label[TT_LABEL_LENGTH_LIMIT];
-    int32_t status;
-    int8_t mouseOver;
-    tt_textbox_align_t align;
-    double length;
-    int32_t maxCharacters;
-    int32_t editIndex;
-    int32_t lastKey;
-    int32_t keyTimeout;
-    /* render variables */
-    double renderPixelOffset;
-    int32_t renderStartingIndex;
-    int32_t renderNumCharacters;
-    /* value */
-    char *text; // text of textbox
-    char *value; // text of textbox (duplicate name - always equal to text)
-    /* whitelist */
-    list_t *whitelist;
-    list_t *blacklist;
-} tt_textbox_t;
 
 /* initialise UI elements */
 
@@ -60208,6 +60225,7 @@ tt_button_t *tt_buttonInit(char *label, int8_t *variable, double x, double y, do
     tt_button_t *buttonp = calloc(1, sizeof(tt_button_t));
     buttonp -> element = TT_ELEMENT_BUTTON;
     buttonp -> enabled = TT_ELEMENT_ENABLED;
+    buttonp -> ignored = TT_ELEMENT_NOT_IGNORED;
     if (label == NULL) {
         memcpy(buttonp -> label, "", strlen("") + 1);
     } else {
@@ -60250,6 +60268,7 @@ tt_switch_t *tt_switchInit(char *label, int8_t *variable, double x, double y, do
     tt_switch_t *switchp = calloc(1, sizeof(tt_switch_t));
     switchp -> element = TT_ELEMENT_SWITCH;
     switchp -> enabled = TT_ELEMENT_ENABLED;
+    switchp -> ignored = TT_ELEMENT_NOT_IGNORED;
     if (label == NULL) {
         memcpy(switchp -> label, "", strlen("") + 1);
     } else {
@@ -60289,6 +60308,7 @@ tt_dial_t *tt_dialInit(char *label, double *variable, tt_dial_scale_t scale, dou
     tt_dial_t *dialp = calloc(1, sizeof(tt_dial_t));
     dialp -> element = TT_ELEMENT_DIAL;
     dialp -> enabled = TT_ELEMENT_ENABLED;
+    dialp -> ignored = TT_ELEMENT_NOT_IGNORED;
     if (label == NULL) {
         memcpy(dialp -> label, "", strlen("") + 1);
     } else {
@@ -60335,6 +60355,7 @@ tt_slider_t *tt_sliderInit(char *label, double *variable, tt_slider_type_t type,
     tt_slider_t *sliderp = calloc(1, sizeof(tt_slider_t));
     sliderp -> element = TT_ELEMENT_SLIDER;
     sliderp -> enabled = TT_ELEMENT_ENABLED;
+    sliderp -> ignored = TT_ELEMENT_NOT_IGNORED;
     if (label == NULL) {
         memcpy(sliderp -> label, "", strlen("") + 1);
     } else {
@@ -60386,6 +60407,7 @@ tt_textbox_t *tt_textboxInit(char *label, char *variable, uint32_t maxCharacters
     tt_textbox_t *textboxp = calloc(1, sizeof(tt_textbox_t));
     textboxp -> element = TT_ELEMENT_TEXTBOX;
     textboxp -> enabled = TT_ELEMENT_ENABLED;
+    textboxp -> ignored = TT_ELEMENT_NOT_IGNORED;
     if (label == NULL) {
         memcpy(textboxp -> label, "", strlen("") + 1);
     } else {
@@ -60422,6 +60444,16 @@ void tt_textboxFree(tt_textbox_t *textboxp) {
     list_remove(tt_elements.textboxes, (unitype) (void *) textboxp, 'p');
 }
 
+void tt_dropdownCalculateMax(tt_dropdown_t *dropdownp) {
+    dropdownp -> maxXfactor = 0;
+    for (uint32_t i = 0; i < dropdownp -> options -> length; i++) {
+        double stringLength = turtleTextGetStringLength(dropdownp -> options -> data[i].s, dropdownp -> size - 1);
+        if (stringLength > dropdownp -> maxXfactor) {
+            dropdownp -> maxXfactor = stringLength;
+        }
+    }
+}
+
 /* create a dropdown - use a list of strings for options */
 tt_dropdown_t *tt_dropdownInit(char *label, list_t *options, int32_t *variable, tt_dropdown_align_t align, double x, double y, double size) {
     if (tt_enabled.dropdownEnabled == 0) {
@@ -60438,6 +60470,7 @@ tt_dropdown_t *tt_dropdownInit(char *label, list_t *options, int32_t *variable, 
     tt_dropdown_t *dropdownp = calloc(1, sizeof(tt_dropdown_t));
     dropdownp -> element = TT_ELEMENT_DROPDOWN;
     dropdownp -> enabled = TT_ELEMENT_ENABLED;
+    dropdownp -> ignored = TT_ELEMENT_NOT_IGNORED;
     if (label == NULL) {
         memcpy(dropdownp -> label, "", strlen("") + 1);
     } else {
@@ -60488,6 +60521,7 @@ tt_scrollbar_t *tt_scrollbarInit(double *variable, tt_scrollbar_type_t type, dou
     tt_scrollbar_t *scrollbarp = calloc(1, sizeof(tt_scrollbar_t));
     scrollbarp -> element = TT_ELEMENT_SCROLLBAR;
     scrollbarp -> enabled = TT_ELEMENT_ENABLED;
+    scrollbarp -> ignored = TT_ELEMENT_NOT_IGNORED;
     tt_elementResetColor(scrollbarp);
     scrollbarp -> status = 0;
     scrollbarp -> type = type;
@@ -60533,6 +60567,7 @@ tt_context_t *tt_contextInit(list_t *options, int32_t *variable, double x, doubl
     tt_context_t *contextp = calloc(1, sizeof(tt_context_t));
     contextp -> element = TT_ELEMENT_CONTEXT;
     contextp -> enabled = TT_ELEMENT_ENABLED;
+    contextp -> ignored = TT_ELEMENT_NOT_IGNORED;
     tt_elementResetColor(contextp);
     contextp -> options = options;
     contextp -> index = -1;
@@ -60558,16 +60593,6 @@ void tt_contextFree(tt_context_t *contextp) {
     list_free(contextp -> options);
     list_remove(tt_elements.all, (unitype) (uint64_t) contextp, 'l');
     list_remove(tt_elements.contexts, (unitype) (void *) contextp, 'p');
-}
-
-void tt_dropdownCalculateMax(tt_dropdown_t *dropdownp) {
-    dropdownp -> maxXfactor = 0;
-    for (uint32_t i = 0; i < dropdownp -> options -> length; i++) {
-        double stringLength = turtleTextGetStringLength(dropdownp -> options -> data[i].s, dropdownp -> size - 1);
-        if (stringLength > dropdownp -> maxXfactor) {
-            dropdownp -> maxXfactor = stringLength;
-        }
-    }
 }
 
 void tt_buttonUpdate(tt_button_t *buttonp) {
@@ -61821,67 +61846,9 @@ void tt_contextUpdate(tt_context_t *contextp) {
 }
 
 void turtleToolsUpdate() {
-    tt_globals.elementLogicType = TT_ELEMENT_NONE;
-    tt_globals.elementLogicIndex = -1;
-    tt_globals.elementLogicTemp = -1;
+    turtleToolsUpdateUI();
     char shapeSave = turtle.penshape;
     turtlePenShape("circle");
-    if (tt_enabled.buttonEnabled) {
-        tt_globals.elementLogicTemp = 0;
-        for (uint32_t i = 0; i < tt_elements.buttons -> length; i++) {
-            tt_buttonUpdate((tt_button_t *) (tt_elements.buttons -> data[i].p));
-            tt_globals.elementLogicTemp++;
-        }
-    }
-    if (tt_enabled.switchEnabled) {
-        tt_globals.elementLogicTemp = 0;
-        for (uint32_t i = 0; i < tt_elements.switches -> length; i++) {
-            tt_switchUpdate((tt_switch_t *) (tt_elements.switches -> data[i].p));
-            tt_globals.elementLogicTemp++;
-        }
-    }
-    if (tt_enabled.dialEnabled) {
-        tt_globals.elementLogicTemp = 0;
-        for (uint32_t i = 0; i < tt_elements.dials -> length; i++) {
-            tt_dialUpdate((tt_dial_t *) (tt_elements.dials -> data[i].p));
-            tt_globals.elementLogicTemp++;
-        }
-    }
-    if (tt_enabled.sliderEnabled) {
-        tt_globals.elementLogicTemp = 0;
-        for (uint32_t i = 0; i < tt_elements.sliders -> length; i++) {
-            tt_sliderUpdate((tt_slider_t *) (tt_elements.sliders -> data[i].p));
-            tt_globals.elementLogicTemp++;
-        }
-    }
-    if (tt_enabled.textboxEnabled) {
-        tt_globals.elementLogicTemp = 0;
-        for (uint32_t i = 0; i < tt_elements.textboxes -> length; i++) {
-            tt_textboxUpdate((tt_textbox_t *) (tt_elements.textboxes -> data[i].p));
-            tt_globals.elementLogicTemp++;
-        }
-    }
-    if (tt_enabled.dropdownEnabled) {
-        tt_globals.elementLogicTemp = 0;
-        for (uint32_t i = 0; i < tt_elements.dropdowns -> length; i++) {
-            tt_dropdownUpdate((tt_dropdown_t *) (tt_elements.dropdowns -> data[i].p));
-            tt_globals.elementLogicTemp++;
-        }
-    }
-    if (tt_enabled.scrollbarEnabled) {
-        tt_globals.elementLogicTemp = 0;
-        for (uint32_t i = 0; i < tt_elements.scrollbars -> length; i++) {
-            tt_scrollbarUpdate((tt_scrollbar_t *) (tt_elements.scrollbars -> data[i].p));
-            tt_globals.elementLogicTemp++;
-        }
-    }
-    if (tt_enabled.contextEnabled) {
-        tt_globals.elementLogicTemp = 0;
-        for (uint32_t i = 0; i < tt_elements.contexts -> length; i++) {
-            tt_contextUpdate((tt_context_t *) (tt_elements.contexts -> data[i].p));
-            tt_globals.elementLogicTemp++;
-        }
-    }
     if (tt_enabled.ribbonEnabled) {
         tt_ribbonUpdate();
     }
@@ -61902,6 +61869,9 @@ void turtleToolsUpdateUI() {
     if (tt_enabled.buttonEnabled) {
         tt_globals.elementLogicTemp = 0;
         for (uint32_t i = 0; i < tt_elements.buttons -> length; i++) {
+            if (((tt_button_t *) (tt_elements.buttons -> data[i].p)) -> ignored == TT_ELEMENT_IGNORED) {
+                continue;
+            }
             tt_buttonUpdate((tt_button_t *) (tt_elements.buttons -> data[i].p));
             tt_globals.elementLogicTemp++;
         }
@@ -61909,6 +61879,9 @@ void turtleToolsUpdateUI() {
     if (tt_enabled.switchEnabled) {
         tt_globals.elementLogicTemp = 0;
         for (uint32_t i = 0; i < tt_elements.switches -> length; i++) {
+            if (((tt_switch_t *) (tt_elements.switches -> data[i].p)) -> ignored == TT_ELEMENT_IGNORED) {
+                continue;
+            }
             tt_switchUpdate((tt_switch_t *) (tt_elements.switches -> data[i].p));
             tt_globals.elementLogicTemp++;
         }
@@ -61916,6 +61889,9 @@ void turtleToolsUpdateUI() {
     if (tt_enabled.dialEnabled) {
         tt_globals.elementLogicTemp = 0;
         for (uint32_t i = 0; i < tt_elements.dials -> length; i++) {
+            if (((tt_dial_t *) (tt_elements.dials -> data[i].p)) -> ignored == TT_ELEMENT_IGNORED) {
+                continue;
+            }
             tt_dialUpdate((tt_dial_t *) (tt_elements.dials -> data[i].p));
             tt_globals.elementLogicTemp++;
         }
@@ -61923,6 +61899,9 @@ void turtleToolsUpdateUI() {
     if (tt_enabled.sliderEnabled) {
         tt_globals.elementLogicTemp = 0;
         for (uint32_t i = 0; i < tt_elements.sliders -> length; i++) {
+            if (((tt_slider_t *) (tt_elements.sliders -> data[i].p)) -> ignored == TT_ELEMENT_IGNORED) {
+                continue;
+            }
             tt_sliderUpdate((tt_slider_t *) (tt_elements.sliders -> data[i].p));
             tt_globals.elementLogicTemp++;
         }
@@ -61930,6 +61909,9 @@ void turtleToolsUpdateUI() {
     if (tt_enabled.textboxEnabled) {
         tt_globals.elementLogicTemp = 0;
         for (uint32_t i = 0; i < tt_elements.textboxes -> length; i++) {
+            if (((tt_textbox_t *) (tt_elements.textboxes -> data[i].p)) -> ignored == TT_ELEMENT_IGNORED) {
+                continue;
+            }
             tt_textboxUpdate((tt_textbox_t *) (tt_elements.textboxes -> data[i].p));
             tt_globals.elementLogicTemp++;
         }
@@ -61937,6 +61919,9 @@ void turtleToolsUpdateUI() {
     if (tt_enabled.dropdownEnabled) {
         tt_globals.elementLogicTemp = 0;
         for (uint32_t i = 0; i < tt_elements.dropdowns -> length; i++) {
+            if (((tt_dropdown_t *) (tt_elements.dropdowns -> data[i].p)) -> ignored == TT_ELEMENT_IGNORED) {
+                continue;
+            }
             tt_dropdownUpdate((tt_dropdown_t *) (tt_elements.dropdowns -> data[i].p));
             tt_globals.elementLogicTemp++;
         }
@@ -61944,6 +61929,9 @@ void turtleToolsUpdateUI() {
     if (tt_enabled.scrollbarEnabled) {
         tt_globals.elementLogicTemp = 0;
         for (uint32_t i = 0; i < tt_elements.scrollbars -> length; i++) {
+            if (((tt_scrollbar_t *) (tt_elements.scrollbars -> data[i].p)) -> ignored == TT_ELEMENT_IGNORED) {
+                continue;
+            }
             tt_scrollbarUpdate((tt_scrollbar_t *) (tt_elements.scrollbars -> data[i].p));
             tt_globals.elementLogicTemp++;
         }
@@ -61951,6 +61939,9 @@ void turtleToolsUpdateUI() {
     if (tt_enabled.contextEnabled) {
         tt_globals.elementLogicTemp = 0;
         for (uint32_t i = 0; i < tt_elements.contexts -> length; i++) {
+            if (((tt_context_t *) (tt_elements.contexts -> data[i].p)) -> ignored == TT_ELEMENT_IGNORED) {
+                continue;
+            }
             tt_contextUpdate((tt_context_t *) (tt_elements.contexts -> data[i].p));
             tt_globals.elementLogicTemp++;
         }
