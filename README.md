@@ -26,6 +26,7 @@ The following build commands are available:
 
 # To Do
 - Reduce size of turtle.h, find a building solution that doesn't involve 26936 lines of duplicate code
+- Please fix dropdown x factor calculations (do the math the right way)
 - Vertical switches
 - Mouse interactions with textbox (highlight, index select)
 - 3D support
