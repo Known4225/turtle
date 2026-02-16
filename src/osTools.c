@@ -756,12 +756,12 @@ list_t *osToolsFolderList(char *directory) {
 
 int32_t osToolsFolderCreate(char *folder) {
     /* https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-createdirectory */
-    return CreateDirectory(folder, NULL);
+    return !CreateDirectory(folder, NULL);
 }
 
 int32_t osToolsFolderDestroy(char *folder) {
     /* https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-removedirectorya */
-    char directoryFor[MAX_PATH + 10] = "rd /s /q ";
+    char directoryFor[MAX_PATH + 12] = "rd /s /q \"";
     int32_t len = strlen(folder);
     char *holdingCell = strdup(folder);
     for (int32_t i = 0; i < len; i++) {
@@ -770,6 +770,7 @@ int32_t osToolsFolderDestroy(char *folder) {
         }
     }
     strcat(directoryFor, holdingCell);
+    strcat(directoryFor, "\"");
     free(holdingCell);
     return system(directoryFor);
     // RemoveDirectoryA(folder);
