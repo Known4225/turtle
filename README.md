@@ -25,6 +25,7 @@ The following build commands are available:
 - `make singlefile` - This will package the turtle headers and source files into a single `turtle.h` file.
 
 # To Do
+- Please make list lengths an int32_t not a uint32_t
 - Reduce size of turtle.h, find a building solution that doesn't involve 26936 lines of duplicate code
 - Please fix dropdown x factor calculations (do the math the right way)
 - Vertical switches
