@@ -137,7 +137,7 @@ unitype list_delete(list_t *list, int32_t index) {
     if (list -> type[index] == 's' || list -> type[index] == 'p') {
         free(list -> data[index].p);
     }
-    for (uint32_t i = index; i < list -> length - 1 ; i++) {
+    for (int32_t i = index; i < list -> length - 1 ; i++) {
         list -> data[i] = list -> data[i + 1];
         list -> type[i] = list -> type[i + 1];
     }
@@ -153,14 +153,14 @@ unitype list_delete(list_t *list, int32_t index) {
 }
 
 /* deletes many items from the list spanning from [indexMin] to [indexMax - 1] */
-void list_delete_range(list_t *list, uint32_t indexMin, uint32_t indexMax) {
+void list_delete_range(list_t *list, int32_t indexMin, int32_t indexMax) {
     if (indexMin > indexMax) {
-        uint32_t swap = indexMin;
+        int32_t swap = indexMin;
         indexMin = indexMax;
         indexMax = swap;
     }
     int8_t zerod = 0; // edge case: "should've used list_clear"
-    uint32_t difference = (indexMax - indexMin);
+    int32_t difference = (indexMax - indexMin);
     list -> realLength = list -> length - difference;
     if (list -> realLength <= 1) {
         zerod = 1;
@@ -169,17 +169,18 @@ void list_delete_range(list_t *list, uint32_t indexMin, uint32_t indexMax) {
     
     int8_t *newType = malloc(list -> realLength * sizeof(int8_t)); // no need to calloc we're gonna fill it all up anyway
     unitype *newData = malloc(list -> realLength * sizeof(unitype));
-    for (uint32_t i = 0; i < indexMin; i++) {
+    for (int32_t i = 0; i < indexMin; i++) {
         newType[i] = list -> type[i];
         newData[i] = list -> data[i];
     }
-    for (uint32_t i = indexMax; i < list -> length; i++) {
+    for (int32_t i = indexMax; i < list -> length; i++) {
         newType[i - difference] = list -> type[i];
         newData[i - difference] = list -> data[i];
     }
     list -> length = list -> realLength;
-    if (zerod)
+    if (zerod) {
         list -> length = 0;
+    }
     free(list -> type);
     free(list -> data);
     list -> type = newType;
@@ -235,7 +236,7 @@ int32_t unitype_check_equal(unitype item1, unitype item2, int8_t typeItem1, int8
 
 /* returns the index of the first instance of the item in the list, returns -1 if not found */
 int32_t list_find(list_t *list, unitype item, char type) {
-    for (uint32_t i = 0; i < list -> length; i++) {
+    for (int32_t i = 0; i < list -> length; i++) {
         if (unitype_check_equal(list -> data[i], item, list -> type[i], type)) {
             return i;
         }
@@ -245,7 +246,7 @@ int32_t list_find(list_t *list, unitype item, char type) {
 
 /* duplicate of list_find */
 int32_t list_index(list_t *list, unitype item, char type) {
-    for (uint32_t i = 0; i < list -> length; i++) {
+    for (int32_t i = 0; i < list -> length; i++) {
         if (unitype_check_equal(list -> data[i], item, list -> type[i], type)) {
             return i;
         }
@@ -254,9 +255,9 @@ int32_t list_index(list_t *list, unitype item, char type) {
 }
 
 /* counts how many instances of an item is found in the list */
-uint32_t list_count(list_t *list, unitype item, char type) {
-    uint32_t count = 0;
-    for (uint32_t i = 0; i < list -> length; i++) {
+int32_t list_count(list_t *list, unitype item, char type) {
+    int32_t count = 0;
+    for (int32_t i = 0; i < list -> length; i++) {
         count += unitype_check_equal(list -> data[i], item, list -> type[i], type);
     }
     return count;
@@ -267,7 +268,7 @@ void list_sort(list_t *list) {
     /* create min heap */
     int64_t temp;
     int8_t tempType;
-    for (uint32_t i = 2; i < list -> length + 1; i++) {
+    for (int32_t i = 2; i < list -> length + 1; i++) {
         int32_t j = i;
         while (j > 1 && list -> data[j / 2 - 1].l > list -> data[j - 1].l) {
             temp = list -> data[j / 2 - 1].l;
@@ -363,7 +364,7 @@ void list_sort_stride(list_t *list, int32_t stride, int32_t offset) {
     /* create min heap */
     int64_t temp;
     int8_t tempType;
-    for (uint32_t i = 2; i < list -> length / stride + 1; i++) {
+    for (int32_t i = 2; i < list -> length / stride + 1; i++) {
         int32_t j = i;
         while (j > 1 && list -> data[(j / 2 - 1) * stride + offset].i > list -> data[(j - 1) * stride + offset].i) {
             for (int32_t k = 0; k < stride; k++) {
@@ -460,7 +461,7 @@ list_t *list_sort_stride_index_double(list_t *list, int32_t stride, int32_t offs
 
 /* deletes the first instance of the item from the list, returns the index the item was at, returns -1 and doesn't modify the list if not found */
 int32_t list_remove(list_t *list, unitype item, char type) {
-    for (uint32_t i = 0; i < list -> length; i++) {
+    for (int32_t i = 0; i < list -> length; i++) {
         if (unitype_check_equal(list -> data[i], item, list -> type[i], type)) {
             list_delete(list, i);
             return i;
@@ -525,10 +526,10 @@ void list_copy(list_t *dest, list_t *src) {
     list_free_lite(dest);
     dest -> type = calloc(src -> realLength, sizeof(int32_t));
     dest -> data = calloc(src -> realLength, sizeof(unitype));
-    uint32_t len = src -> length;
+    int32_t len = src -> length;
     dest -> length = len;
     dest -> realLength = src -> realLength;
-    for (uint32_t i = 0; i < len; i++) {
+    for (int32_t i = 0; i < len; i++) {
         dest -> type[i] = src -> type[i];
         if (src -> type[i] == 'r') {
             dest -> data[i] = (unitype) (void *) list_init();
@@ -554,7 +555,7 @@ void list_fprint_emb(FILE *fp, list_t *list) {
         fprintf(fp, "]");
         return;
     }
-    for (uint32_t i = 0; i < list -> length; i++) {
+    for (int32_t i = 0; i < list -> length; i++) {
         unitype_fprint(fp, list -> data[i], list -> type[i]);
         if (i == list -> length - 1) {
             fprintf(fp, "]");
@@ -577,7 +578,7 @@ void list_print_type(list_t *list) {
         printf("]\n");
         return;
     }
-    for (uint32_t i = 0; i < list -> length; i++) {
+    for (int32_t i = 0; i < list -> length; i++) {
         printf("%c", list -> type[i]);
         if (i == list -> length - 1) {
             printf("]\n");
@@ -589,7 +590,7 @@ void list_print_type(list_t *list) {
 
 /* frees the list's data but not the list itself */
 void list_free_lite(list_t *list) {
-    for (uint32_t i = 0; i < list -> length; i++) {
+    for (int32_t i = 0; i < list -> length; i++) {
         if (list -> type[i] == 'r') {
             list_free(list -> data[i].r);
         }
@@ -608,7 +609,7 @@ void list_free(list_t *list) {
 }
 
 /* creates a sublist (from bottom to top - 1) out of an existing list, do not modify a parent list while a sublist exist */
-sublist_t *sublist_init(list_t *list, uint32_t bottom, uint32_t top) {
+sublist_t *sublist_init(list_t *list, int32_t bottom, int32_t top) {
     sublist_t *sublist = malloc(sizeof(sublist_t));
     sublist -> length = top - bottom;
     sublist -> dummy = top - bottom;

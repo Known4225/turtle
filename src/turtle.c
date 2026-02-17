@@ -1097,7 +1097,7 @@ void turtleUpdate() {
     /* used to have a feature that only redrew the screen if there have been any changes from last frame, but it has been removed.
        opted to redraw every frame and not list_copy, an alternative is hashing the penPos list. An interesting idea for sure... for another time */
     int8_t changed = 0;
-    uint32_t len = turtle.penPos -> length;
+    int32_t len = turtle.penPos -> length;
     unitype *ren = turtle.penPos -> data;
     int8_t *renType = turtle.penPos -> type;
     changed = 1;
@@ -1136,17 +1136,11 @@ void turtleUpdate() {
         double yfact = 1.0 / ((turtle.bounds[3] - turtle.bounds[1]) / 2);
         double xcenter = (double) turtle.screenbounds[0] / turtle.initscreenbounds[0] - 1 - (turtle.bounds[0] + turtle.bounds[2]) / 2 * xfact;
         double ycenter = (double) turtle.screenbounds[1] / turtle.initscreenbounds[1] - 1 - (turtle.bounds[1] + turtle.bounds[3]) / 2 * yfact;
-        if (turtle.resizeMode == TURTLE_RESIZE_MODE_PAD) {
-            
-            if ((turtle.bounds[2] - turtle.bounds[0]) / (turtle.bounds[3] - turtle.bounds[1])) {
-
-            }
-        }
         double lastSize = -1;
         double lastPrez = -1;
         double precomputedLog = 5;
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        for (int32_t i = 0; i < (int32_t) len; i += 9) {
+        for (int32_t i = 0; i < len; i += 9) {
             if (renType[i] == 'd') {
                 switch (ren[i + 7].h) {
                 case 0: // penshape circle
@@ -1176,12 +1170,12 @@ void turtleUpdate() {
                 default:
                 break;
                 }
-                if (i + 18 < (int32_t) len && renType[i + 9] == 'd' && ren[i + 7].h < 64 && (ren[i + 7].h == 4 || ren[i + 7].h == 5 || (fabs(ren[i].d - ren[i + 9].d) > ren[i + 2].d / 2 || fabs(ren[i + 1].d - ren[i + 10].d) > ren[i + 2].d / 2))) { // tests for next point continuity and also ensures that the next point is at sufficiently different coordinates
+                if (i + 18 < len && renType[i + 9] == 'd' && ren[i + 7].h < 64 && (ren[i + 7].h == 4 || ren[i + 7].h == 5 || (fabs(ren[i].d - ren[i + 9].d) > ren[i + 2].d / 2 || fabs(ren[i + 1].d - ren[i + 10].d) > ren[i + 2].d / 2))) { // tests for next point continuity and also ensures that the next point is at sufficiently different coordinates
                     double dir = atan((ren[i + 9].d - ren[i].d) / (ren[i + 1].d - ren[i + 10].d));
                     double sinn = sin(dir + M_PI / 2);
                     double coss = cos(dir + M_PI / 2);
                     turtleQuadRenderInternal(ren[i].d + ren[i + 2].d * sinn, ren[i + 1].d - ren[i + 2].d * coss, ren[i + 9].d + ren[i + 2].d * sinn, ren[i + 10].d - ren[i + 2].d * coss, ren[i + 9].d - ren[i + 2].d * sinn, ren[i + 10].d + ren[i + 2].d * coss, ren[i].d - ren[i + 2].d * sinn, ren[i + 1].d + ren[i + 2].d * coss, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xcenter, ycenter, xfact, yfact);
-                    if ((ren[i + 7].h == 4 || ren[i + 7].h == 5) && i + 18 < (int32_t) len && renType[i + 18] == 'd') {
+                    if ((ren[i + 7].h == 4 || ren[i + 7].h == 5) && i + 18 < len && renType[i + 18] == 'd') {
                         double dir2 = atan((ren[i + 18].d - ren[i + 9].d) / (ren[i + 10].d - ren[i + 19].d));
                         double sinn2 = sin(dir2 + M_PI / 2);
                         double coss2 = cos(dir2 + M_PI / 2);

@@ -583,7 +583,7 @@ tt_slider_t *tt_sliderInit(char *label, double *variable, tt_slider_type_t type,
 void tt_sliderFree(tt_slider_t *sliderp);
 
 /* create a textbox */
-tt_textbox_t *tt_textboxInit(char *label, char *variable, uint32_t maxCharacters, double x, double y, double size, double length);
+tt_textbox_t *tt_textboxInit(char *label, char *variable, int32_t maxCharacters, double x, double y, double size, double length);
 
 void tt_textboxFree(tt_textbox_t *textboxp);
 

@@ -51,7 +51,7 @@ float bufferList_delete(bufferList_t *list, int32_t index) {
     while (index < 0) {index += list -> length;}
     index %= list -> length;
     float ret = list -> data[index];
-    for (uint32_t i = index; i < list -> length - 1 ; i++) {
+    for (int32_t i = index; i < list -> length - 1 ; i++) {
         list -> data[i] = list -> data[i + 1];
     }
     list -> length -= 1;
@@ -64,14 +64,14 @@ float bufferList_delete(bufferList_t *list, int32_t index) {
 }
 
 /* deletes many items from the list spanning from [indexMin] to [indexMax - 1] */
-void bufferList_delete_range(bufferList_t* list, uint32_t indexMin, uint32_t indexMax) {
+void bufferList_delete_range(bufferList_t* list, int32_t indexMin, int32_t indexMax) {
     if (indexMin > indexMax) {
-        uint32_t swap = indexMin;
+        int32_t swap = indexMin;
         indexMin = indexMax;
         indexMax = swap;
     }
     char zerod = 0; // edge case: "should've used list_clear"
-    uint32_t difference = (indexMax - indexMin);
+    int32_t difference = (indexMax - indexMin);
     list -> realLength = list -> length - difference;
     if (list -> realLength <= 1) {
         zerod = 1;
@@ -79,10 +79,10 @@ void bufferList_delete_range(bufferList_t* list, uint32_t indexMin, uint32_t ind
     }
     
     float *newData = malloc(list -> realLength * sizeof(float)); // no need to calloc we're gonna fill it all up anyway
-    for (uint32_t i = 0; i < indexMin; i++) {
+    for (int32_t i = 0; i < indexMin; i++) {
         newData[i] = list -> data[i];
     }
-    for (uint32_t i = indexMax; i < list -> length; i++) {
+    for (int32_t i = indexMax; i < list -> length; i++) {
         newData[i - difference] = list -> data[i];
     }
     list -> length = list -> realLength;
@@ -94,7 +94,7 @@ void bufferList_delete_range(bufferList_t* list, uint32_t indexMin, uint32_t ind
 
 /* returns the index of the first instance of the item in the list, returns -1 if not found (python) */
 int32_t bufferList_find(bufferList_t *list, float item) {
-    for (uint32_t i = 0; i < list -> length; i++) {
+    for (int32_t i = 0; i < list -> length; i++) {
         if (list -> data[i] == item) {
             return i;
         }
@@ -104,7 +104,7 @@ int32_t bufferList_find(bufferList_t *list, float item) {
 
 /* duplicate of list_find */
 int32_t bufferList_index(bufferList_t *list, float item) {
-    for (uint32_t i = 0; i < list -> length; i++) {
+    for (int32_t i = 0; i < list -> length; i++) {
         if (list -> data[i] == item) {
             return i;
         }
@@ -113,9 +113,9 @@ int32_t bufferList_index(bufferList_t *list, float item) {
 }
 
 /* counts how many instances of an item is found in the list */
-uint32_t bufferList_count(bufferList_t *list, float item) {
-    uint32_t count = 0;
-    for (uint32_t i = 0; i < list -> length; i++) {
+int32_t bufferList_count(bufferList_t *list, float item) {
+    int32_t count = 0;
+    for (int32_t i = 0; i < list -> length; i++) {
         count += (list -> data[i] == item);
     }
     return count;
@@ -123,7 +123,7 @@ uint32_t bufferList_count(bufferList_t *list, float item) {
 
 /* deletes the first instance of the item from the list, returns the index the item was at, returns -1 and doesn't modify the list if not found (python but without ValueError) */
 int32_t bufferList_remove(bufferList_t *list, float item) {
-    for (uint32_t i = 0; i < list -> length; i++) {
+    for (int32_t i = 0; i < list -> length; i++) {
         if (list -> data[i] == item) {
             bufferList_delete(list, i);
             return i;
@@ -136,10 +136,10 @@ int32_t bufferList_remove(bufferList_t *list, float item) {
 void bufferList_copy(bufferList_t *dest, bufferList_t *src) {
     bufferList_free_lite(dest);
     dest -> data = calloc(src -> realLength, sizeof(float));
-    uint32_t len = src -> length;
+    int32_t len = src -> length;
     dest -> length = len;
     dest -> realLength = src -> realLength;
-    for (uint32_t i = 0; i < len; i++) {
+    for (int32_t i = 0; i < len; i++) {
         dest -> data[i] = src -> data[i];
     }
 }
@@ -151,7 +151,7 @@ void bufferList_print(bufferList_t *list) {
         printf("]\n");
         return;
     }
-    for (uint32_t i = 0; i < list -> length; i++) {
+    for (int32_t i = 0; i < list -> length; i++) {
         printf("%f", list -> data[i]);
         if (i == list -> length - 1) {
             printf("]\n");
@@ -168,7 +168,7 @@ void bufferList_print_emb(bufferList_t *list) {
         printf("]");
         return;
     }
-    for (uint32_t i = 0; i < list -> length; i++) {
+    for (int32_t i = 0; i < list -> length; i++) {
         printf("%f", list -> data[i]);
         if (i == list -> length - 1) {
             printf("]");

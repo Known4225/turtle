@@ -23,8 +23,8 @@ bufferList - like a normal list but only supports floats
 */
 
 typedef struct {
-    uint32_t length;
-    uint32_t realLength;
+    int32_t length;
+    int32_t realLength;
     float *data;
 } bufferList_t;
 
@@ -44,7 +44,7 @@ float bufferList_pop(bufferList_t *list);
 float bufferList_delete(bufferList_t *list, int32_t index);
 
 /* deletes many items from the list spanning from [indexMin] to [indexMax - 1] */
-void bufferList_delete_range(bufferList_t* list, uint32_t indexMin, uint32_t indexMax);
+void bufferList_delete_range(bufferList_t* list, int32_t indexMin, int32_t indexMax);
 
 /* returns the index of the first instance of the item in the list, returns -1 if not found (python) */
 int32_t bufferList_find(bufferList_t *list, float item);
@@ -53,7 +53,7 @@ int32_t bufferList_find(bufferList_t *list, float item);
 int32_t bufferList_index(bufferList_t *list, float item);
 
 /* counts how many instances of an item is found in the list */
-uint32_t bufferList_count(bufferList_t *list, float item);
+int32_t bufferList_count(bufferList_t *list, float item);
 
 /* deletes the first instance of the item from the list, returns the index the item was at, returns -1 and doesn't modify the list if not found (python but without ValueError) */
 int32_t bufferList_remove(bufferList_t *list, float item);

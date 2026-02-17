@@ -499,7 +499,7 @@ int32_t osToolsFileDialogPrompt(ost_file_dialog_save_t openOrSave, ost_file_dial
             buildFilter[j] = (uint16_t) '*';
             buildFilter[j + 1] = (uint16_t) '.';
             j += 2;
-            for (uint32_t k = 0; k < strlen(extensions -> data[i].s) && k < 8; k++) {
+            for (int32_t k = 0; k < strlen(extensions -> data[i].s) && k < 8; k++) {
                 buildFilter[j] = extensions -> data[i].s[k];
                 j += 1;
             }
@@ -642,7 +642,7 @@ uint8_t *osToolsFileMap(char *filename, uint32_t *sizeOutput) {
 int32_t osToolsFileUnmap(uint8_t *data) {
     UnmapViewOfFile(data);
     int32_t index = -1;
-    for (uint32_t i = 0; i < osToolsMemmap.mappedFiles -> length; i += 4) {
+    for (int32_t i = 0; i < osToolsMemmap.mappedFiles -> length; i += 4) {
         if (osToolsMemmap.mappedFiles -> data[i + 3].p == data) {
             index = i;
             break;
@@ -2075,7 +2075,7 @@ uint8_t *osToolsFileMap(char *filename, uint32_t *sizeOutput) {
 
 int32_t osToolsFileUnmap(uint8_t *data) {
     int32_t index = -1;
-    for (uint32_t i = 0; i < osToolsMemmap.mappedFiles -> length; i += 2) {
+    for (int32_t i = 0; i < osToolsMemmap.mappedFiles -> length; i += 2) {
         if (osToolsMemmap.mappedFiles -> data[i].p == data) {
             index = i;
             break;

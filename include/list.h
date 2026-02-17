@@ -93,15 +93,15 @@ typedef union {
 } unitype;
 
 struct list_f {
-    uint32_t length;
-    uint32_t realLength;
+    int32_t length;
+    int32_t realLength;
     int8_t *type;
     unitype *data;
 };
 
 typedef struct {
-    uint32_t length;
-    uint32_t dummy;
+    int32_t length;
+    int32_t dummy;
     int8_t *type;
     unitype *data;
 } sublist_t;
@@ -125,7 +125,7 @@ unitype list_pop(list_t *list);
 unitype list_delete(list_t *list, int32_t index);
 
 /* deletes many items from the list spanning from [indexMin] to [indexMax - 1] */
-void list_delete_range(list_t *list, uint32_t indexMin, uint32_t indexMax);
+void list_delete_range(list_t *list, int32_t indexMin, int32_t indexMax);
 
 /* checks if two unitype items are equal */
 int32_t unitype_check_equal(unitype item1, unitype item2, int8_t typeItem1, int8_t typeItem2);
@@ -137,7 +137,7 @@ int32_t list_find(list_t *list, unitype item, char type);
 int32_t list_index(list_t *list, unitype item, char type);
 
 /* counts how many instances of an item is found in the list */
-uint32_t list_count(list_t *list, unitype item, char type);
+int32_t list_count(list_t *list, unitype item, char type);
 
 /* sort list (biggest to smallest) */
 void list_sort(list_t *list);
@@ -182,7 +182,7 @@ void list_free_lite(list_t *list);
 void list_free(list_t *list);
 
 /* creates a sublist (from bottom to top - 1) out of an existing list, do not modify a parent list while a sublist exist */
-sublist_t *sublist_init(list_t *list, uint32_t bottom, uint32_t top);
+sublist_t *sublist_init(list_t *list, int32_t bottom, int32_t top);
 
 /* delete a sublist */
 void sublist_free(sublist_t *sublist);

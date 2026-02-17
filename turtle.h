@@ -96,15 +96,15 @@ typedef union {
 } unitype;
 
 struct list_f {
-    uint32_t length;
-    uint32_t realLength;
+    int32_t length;
+    int32_t realLength;
     int8_t *type;
     unitype *data;
 };
 
 typedef struct {
-    uint32_t length;
-    uint32_t dummy;
+    int32_t length;
+    int32_t dummy;
     int8_t *type;
     unitype *data;
 } sublist_t;
@@ -128,7 +128,7 @@ unitype list_pop(list_t *list);
 unitype list_delete(list_t *list, int32_t index);
 
 /* deletes many items from the list spanning from [indexMin] to [indexMax - 1] */
-void list_delete_range(list_t *list, uint32_t indexMin, uint32_t indexMax);
+void list_delete_range(list_t *list, int32_t indexMin, int32_t indexMax);
 
 /* checks if two unitype items are equal */
 int32_t unitype_check_equal(unitype item1, unitype item2, int8_t typeItem1, int8_t typeItem2);
@@ -140,7 +140,7 @@ int32_t list_find(list_t *list, unitype item, char type);
 int32_t list_index(list_t *list, unitype item, char type);
 
 /* counts how many instances of an item is found in the list */
-uint32_t list_count(list_t *list, unitype item, char type);
+int32_t list_count(list_t *list, unitype item, char type);
 
 /* sort list (biggest to smallest) */
 void list_sort(list_t *list);
@@ -185,7 +185,7 @@ void list_free_lite(list_t *list);
 void list_free(list_t *list);
 
 /* creates a sublist (from bottom to top - 1) out of an existing list, do not modify a parent list while a sublist exist */
-sublist_t *sublist_init(list_t *list, uint32_t bottom, uint32_t top);
+sublist_t *sublist_init(list_t *list, int32_t bottom, int32_t top);
 
 /* delete a sublist */
 void sublist_free(sublist_t *sublist);
@@ -218,8 +218,8 @@ bufferList - like a normal list but only supports floats
 */
 
 typedef struct {
-    uint32_t length;
-    uint32_t realLength;
+    int32_t length;
+    int32_t realLength;
     float *data;
 } bufferList_t;
 
@@ -239,7 +239,7 @@ float bufferList_pop(bufferList_t *list);
 float bufferList_delete(bufferList_t *list, int32_t index);
 
 /* deletes many items from the list spanning from [indexMin] to [indexMax - 1] */
-void bufferList_delete_range(bufferList_t* list, uint32_t indexMin, uint32_t indexMax);
+void bufferList_delete_range(bufferList_t* list, int32_t indexMin, int32_t indexMax);
 
 /* returns the index of the first instance of the item in the list, returns -1 if not found (python) */
 int32_t bufferList_find(bufferList_t *list, float item);
@@ -248,7 +248,7 @@ int32_t bufferList_find(bufferList_t *list, float item);
 int32_t bufferList_index(bufferList_t *list, float item);
 
 /* counts how many instances of an item is found in the list */
-uint32_t bufferList_count(bufferList_t *list, float item);
+int32_t bufferList_count(bufferList_t *list, float item);
 
 /* deletes the first instance of the item from the list, returns the index the item was at, returns -1 and doesn't modify the list if not found (python but without ValueError) */
 int32_t bufferList_remove(bufferList_t *list, float item);
@@ -47468,7 +47468,7 @@ tt_slider_t *tt_sliderInit(char *label, double *variable, tt_slider_type_t type,
 void tt_sliderFree(tt_slider_t *sliderp);
 
 /* create a textbox */
-tt_textbox_t *tt_textboxInit(char *label, char *variable, uint32_t maxCharacters, double x, double y, double size, double length);
+tt_textbox_t *tt_textboxInit(char *label, char *variable, int32_t maxCharacters, double x, double y, double size, double length);
 
 void tt_textboxFree(tt_textbox_t *textboxp);
 
@@ -56385,7 +56385,7 @@ unitype list_delete(list_t *list, int32_t index) {
     if (list -> type[index] == 's' || list -> type[index] == 'p') {
         free(list -> data[index].p);
     }
-    for (uint32_t i = index; i < list -> length - 1 ; i++) {
+    for (int32_t i = index; i < list -> length - 1 ; i++) {
         list -> data[i] = list -> data[i + 1];
         list -> type[i] = list -> type[i + 1];
     }
@@ -56401,14 +56401,14 @@ unitype list_delete(list_t *list, int32_t index) {
 }
 
 /* deletes many items from the list spanning from [indexMin] to [indexMax - 1] */
-void list_delete_range(list_t *list, uint32_t indexMin, uint32_t indexMax) {
+void list_delete_range(list_t *list, int32_t indexMin, int32_t indexMax) {
     if (indexMin > indexMax) {
-        uint32_t swap = indexMin;
+        int32_t swap = indexMin;
         indexMin = indexMax;
         indexMax = swap;
     }
     int8_t zerod = 0; // edge case: "should've used list_clear"
-    uint32_t difference = (indexMax - indexMin);
+    int32_t difference = (indexMax - indexMin);
     list -> realLength = list -> length - difference;
     if (list -> realLength <= 1) {
         zerod = 1;
@@ -56417,17 +56417,18 @@ void list_delete_range(list_t *list, uint32_t indexMin, uint32_t indexMax) {
     
     int8_t *newType = malloc(list -> realLength * sizeof(int8_t)); // no need to calloc we're gonna fill it all up anyway
     unitype *newData = malloc(list -> realLength * sizeof(unitype));
-    for (uint32_t i = 0; i < indexMin; i++) {
+    for (int32_t i = 0; i < indexMin; i++) {
         newType[i] = list -> type[i];
         newData[i] = list -> data[i];
     }
-    for (uint32_t i = indexMax; i < list -> length; i++) {
+    for (int32_t i = indexMax; i < list -> length; i++) {
         newType[i - difference] = list -> type[i];
         newData[i - difference] = list -> data[i];
     }
     list -> length = list -> realLength;
-    if (zerod)
+    if (zerod) {
         list -> length = 0;
+    }
     free(list -> type);
     free(list -> data);
     list -> type = newType;
@@ -56483,7 +56484,7 @@ int32_t unitype_check_equal(unitype item1, unitype item2, int8_t typeItem1, int8
 
 /* returns the index of the first instance of the item in the list, returns -1 if not found */
 int32_t list_find(list_t *list, unitype item, char type) {
-    for (uint32_t i = 0; i < list -> length; i++) {
+    for (int32_t i = 0; i < list -> length; i++) {
         if (unitype_check_equal(list -> data[i], item, list -> type[i], type)) {
             return i;
         }
@@ -56493,7 +56494,7 @@ int32_t list_find(list_t *list, unitype item, char type) {
 
 /* duplicate of list_find */
 int32_t list_index(list_t *list, unitype item, char type) {
-    for (uint32_t i = 0; i < list -> length; i++) {
+    for (int32_t i = 0; i < list -> length; i++) {
         if (unitype_check_equal(list -> data[i], item, list -> type[i], type)) {
             return i;
         }
@@ -56502,9 +56503,9 @@ int32_t list_index(list_t *list, unitype item, char type) {
 }
 
 /* counts how many instances of an item is found in the list */
-uint32_t list_count(list_t *list, unitype item, char type) {
-    uint32_t count = 0;
-    for (uint32_t i = 0; i < list -> length; i++) {
+int32_t list_count(list_t *list, unitype item, char type) {
+    int32_t count = 0;
+    for (int32_t i = 0; i < list -> length; i++) {
         count += unitype_check_equal(list -> data[i], item, list -> type[i], type);
     }
     return count;
@@ -56515,7 +56516,7 @@ void list_sort(list_t *list) {
     /* create min heap */
     int64_t temp;
     int8_t tempType;
-    for (uint32_t i = 2; i < list -> length + 1; i++) {
+    for (int32_t i = 2; i < list -> length + 1; i++) {
         int32_t j = i;
         while (j > 1 && list -> data[j / 2 - 1].l > list -> data[j - 1].l) {
             temp = list -> data[j / 2 - 1].l;
@@ -56611,7 +56612,7 @@ void list_sort_stride(list_t *list, int32_t stride, int32_t offset) {
     /* create min heap */
     int64_t temp;
     int8_t tempType;
-    for (uint32_t i = 2; i < list -> length / stride + 1; i++) {
+    for (int32_t i = 2; i < list -> length / stride + 1; i++) {
         int32_t j = i;
         while (j > 1 && list -> data[(j / 2 - 1) * stride + offset].i > list -> data[(j - 1) * stride + offset].i) {
             for (int32_t k = 0; k < stride; k++) {
@@ -56708,7 +56709,7 @@ list_t *list_sort_stride_index_double(list_t *list, int32_t stride, int32_t offs
 
 /* deletes the first instance of the item from the list, returns the index the item was at, returns -1 and doesn't modify the list if not found */
 int32_t list_remove(list_t *list, unitype item, char type) {
-    for (uint32_t i = 0; i < list -> length; i++) {
+    for (int32_t i = 0; i < list -> length; i++) {
         if (unitype_check_equal(list -> data[i], item, list -> type[i], type)) {
             list_delete(list, i);
             return i;
@@ -56773,10 +56774,10 @@ void list_copy(list_t *dest, list_t *src) {
     list_free_lite(dest);
     dest -> type = calloc(src -> realLength, sizeof(int32_t));
     dest -> data = calloc(src -> realLength, sizeof(unitype));
-    uint32_t len = src -> length;
+    int32_t len = src -> length;
     dest -> length = len;
     dest -> realLength = src -> realLength;
-    for (uint32_t i = 0; i < len; i++) {
+    for (int32_t i = 0; i < len; i++) {
         dest -> type[i] = src -> type[i];
         if (src -> type[i] == 'r') {
             dest -> data[i] = (unitype) (void *) list_init();
@@ -56802,7 +56803,7 @@ void list_fprint_emb(FILE *fp, list_t *list) {
         fprintf(fp, "]");
         return;
     }
-    for (uint32_t i = 0; i < list -> length; i++) {
+    for (int32_t i = 0; i < list -> length; i++) {
         unitype_fprint(fp, list -> data[i], list -> type[i]);
         if (i == list -> length - 1) {
             fprintf(fp, "]");
@@ -56825,7 +56826,7 @@ void list_print_type(list_t *list) {
         printf("]\n");
         return;
     }
-    for (uint32_t i = 0; i < list -> length; i++) {
+    for (int32_t i = 0; i < list -> length; i++) {
         printf("%c", list -> type[i]);
         if (i == list -> length - 1) {
             printf("]\n");
@@ -56837,7 +56838,7 @@ void list_print_type(list_t *list) {
 
 /* frees the list's data but not the list itself */
 void list_free_lite(list_t *list) {
-    for (uint32_t i = 0; i < list -> length; i++) {
+    for (int32_t i = 0; i < list -> length; i++) {
         if (list -> type[i] == 'r') {
             list_free(list -> data[i].r);
         }
@@ -56856,7 +56857,7 @@ void list_free(list_t *list) {
 }
 
 /* creates a sublist (from bottom to top - 1) out of an existing list, do not modify a parent list while a sublist exist */
-sublist_t *sublist_init(list_t *list, uint32_t bottom, uint32_t top) {
+sublist_t *sublist_init(list_t *list, int32_t bottom, int32_t top) {
     sublist_t *sublist = malloc(sizeof(sublist_t));
     sublist -> length = top - bottom;
     sublist -> dummy = top - bottom;
@@ -56924,7 +56925,7 @@ float bufferList_delete(bufferList_t *list, int32_t index) {
     while (index < 0) {index += list -> length;}
     index %= list -> length;
     float ret = list -> data[index];
-    for (uint32_t i = index; i < list -> length - 1 ; i++) {
+    for (int32_t i = index; i < list -> length - 1 ; i++) {
         list -> data[i] = list -> data[i + 1];
     }
     list -> length -= 1;
@@ -56937,14 +56938,14 @@ float bufferList_delete(bufferList_t *list, int32_t index) {
 }
 
 /* deletes many items from the list spanning from [indexMin] to [indexMax - 1] */
-void bufferList_delete_range(bufferList_t* list, uint32_t indexMin, uint32_t indexMax) {
+void bufferList_delete_range(bufferList_t* list, int32_t indexMin, int32_t indexMax) {
     if (indexMin > indexMax) {
-        uint32_t swap = indexMin;
+        int32_t swap = indexMin;
         indexMin = indexMax;
         indexMax = swap;
     }
     char zerod = 0; // edge case: "should've used list_clear"
-    uint32_t difference = (indexMax - indexMin);
+    int32_t difference = (indexMax - indexMin);
     list -> realLength = list -> length - difference;
     if (list -> realLength <= 1) {
         zerod = 1;
@@ -56952,10 +56953,10 @@ void bufferList_delete_range(bufferList_t* list, uint32_t indexMin, uint32_t ind
     }
     
     float *newData = malloc(list -> realLength * sizeof(float)); // no need to calloc we're gonna fill it all up anyway
-    for (uint32_t i = 0; i < indexMin; i++) {
+    for (int32_t i = 0; i < indexMin; i++) {
         newData[i] = list -> data[i];
     }
-    for (uint32_t i = indexMax; i < list -> length; i++) {
+    for (int32_t i = indexMax; i < list -> length; i++) {
         newData[i - difference] = list -> data[i];
     }
     list -> length = list -> realLength;
@@ -56967,7 +56968,7 @@ void bufferList_delete_range(bufferList_t* list, uint32_t indexMin, uint32_t ind
 
 /* returns the index of the first instance of the item in the list, returns -1 if not found (python) */
 int32_t bufferList_find(bufferList_t *list, float item) {
-    for (uint32_t i = 0; i < list -> length; i++) {
+    for (int32_t i = 0; i < list -> length; i++) {
         if (list -> data[i] == item) {
             return i;
         }
@@ -56977,7 +56978,7 @@ int32_t bufferList_find(bufferList_t *list, float item) {
 
 /* duplicate of list_find */
 int32_t bufferList_index(bufferList_t *list, float item) {
-    for (uint32_t i = 0; i < list -> length; i++) {
+    for (int32_t i = 0; i < list -> length; i++) {
         if (list -> data[i] == item) {
             return i;
         }
@@ -56986,9 +56987,9 @@ int32_t bufferList_index(bufferList_t *list, float item) {
 }
 
 /* counts how many instances of an item is found in the list */
-uint32_t bufferList_count(bufferList_t *list, float item) {
-    uint32_t count = 0;
-    for (uint32_t i = 0; i < list -> length; i++) {
+int32_t bufferList_count(bufferList_t *list, float item) {
+    int32_t count = 0;
+    for (int32_t i = 0; i < list -> length; i++) {
         count += (list -> data[i] == item);
     }
     return count;
@@ -56996,7 +56997,7 @@ uint32_t bufferList_count(bufferList_t *list, float item) {
 
 /* deletes the first instance of the item from the list, returns the index the item was at, returns -1 and doesn't modify the list if not found (python but without ValueError) */
 int32_t bufferList_remove(bufferList_t *list, float item) {
-    for (uint32_t i = 0; i < list -> length; i++) {
+    for (int32_t i = 0; i < list -> length; i++) {
         if (list -> data[i] == item) {
             bufferList_delete(list, i);
             return i;
@@ -57009,10 +57010,10 @@ int32_t bufferList_remove(bufferList_t *list, float item) {
 void bufferList_copy(bufferList_t *dest, bufferList_t *src) {
     bufferList_free_lite(dest);
     dest -> data = calloc(src -> realLength, sizeof(float));
-    uint32_t len = src -> length;
+    int32_t len = src -> length;
     dest -> length = len;
     dest -> realLength = src -> realLength;
-    for (uint32_t i = 0; i < len; i++) {
+    for (int32_t i = 0; i < len; i++) {
         dest -> data[i] = src -> data[i];
     }
 }
@@ -57024,7 +57025,7 @@ void bufferList_print(bufferList_t *list) {
         printf("]\n");
         return;
     }
-    for (uint32_t i = 0; i < list -> length; i++) {
+    for (int32_t i = 0; i < list -> length; i++) {
         printf("%f", list -> data[i]);
         if (i == list -> length - 1) {
             printf("]\n");
@@ -57041,7 +57042,7 @@ void bufferList_print_emb(bufferList_t *list) {
         printf("]");
         return;
     }
-    for (uint32_t i = 0; i < list -> length; i++) {
+    for (int32_t i = 0; i < list -> length; i++) {
         printf("%f", list -> data[i]);
         if (i == list -> length - 1) {
             printf("]");
@@ -58161,7 +58162,7 @@ void turtleUpdate() {
     /* used to have a feature that only redrew the screen if there have been any changes from last frame, but it has been removed.
        opted to redraw every frame and not list_copy, an alternative is hashing the penPos list. An interesting idea for sure... for another time */
     int8_t changed = 0;
-    uint32_t len = turtle.penPos -> length;
+    int32_t len = turtle.penPos -> length;
     unitype *ren = turtle.penPos -> data;
     int8_t *renType = turtle.penPos -> type;
     changed = 1;
@@ -58200,17 +58201,11 @@ void turtleUpdate() {
         double yfact = 1.0 / ((turtle.bounds[3] - turtle.bounds[1]) / 2);
         double xcenter = (double) turtle.screenbounds[0] / turtle.initscreenbounds[0] - 1 - (turtle.bounds[0] + turtle.bounds[2]) / 2 * xfact;
         double ycenter = (double) turtle.screenbounds[1] / turtle.initscreenbounds[1] - 1 - (turtle.bounds[1] + turtle.bounds[3]) / 2 * yfact;
-        if (turtle.resizeMode == TURTLE_RESIZE_MODE_PAD) {
-            
-            if ((turtle.bounds[2] - turtle.bounds[0]) / (turtle.bounds[3] - turtle.bounds[1])) {
-
-            }
-        }
         double lastSize = -1;
         double lastPrez = -1;
         double precomputedLog = 5;
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        for (int32_t i = 0; i < (int32_t) len; i += 9) {
+        for (int32_t i = 0; i < len; i += 9) {
             if (renType[i] == 'd') {
                 switch (ren[i + 7].h) {
                 case 0: // penshape circle
@@ -58240,12 +58235,12 @@ void turtleUpdate() {
                 default:
                 break;
                 }
-                if (i + 18 < (int32_t) len && renType[i + 9] == 'd' && ren[i + 7].h < 64 && (ren[i + 7].h == 4 || ren[i + 7].h == 5 || (fabs(ren[i].d - ren[i + 9].d) > ren[i + 2].d / 2 || fabs(ren[i + 1].d - ren[i + 10].d) > ren[i + 2].d / 2))) { // tests for next point continuity and also ensures that the next point is at sufficiently different coordinates
+                if (i + 18 < len && renType[i + 9] == 'd' && ren[i + 7].h < 64 && (ren[i + 7].h == 4 || ren[i + 7].h == 5 || (fabs(ren[i].d - ren[i + 9].d) > ren[i + 2].d / 2 || fabs(ren[i + 1].d - ren[i + 10].d) > ren[i + 2].d / 2))) { // tests for next point continuity and also ensures that the next point is at sufficiently different coordinates
                     double dir = atan((ren[i + 9].d - ren[i].d) / (ren[i + 1].d - ren[i + 10].d));
                     double sinn = sin(dir + M_PI / 2);
                     double coss = cos(dir + M_PI / 2);
                     turtleQuadRenderInternal(ren[i].d + ren[i + 2].d * sinn, ren[i + 1].d - ren[i + 2].d * coss, ren[i + 9].d + ren[i + 2].d * sinn, ren[i + 10].d - ren[i + 2].d * coss, ren[i + 9].d - ren[i + 2].d * sinn, ren[i + 10].d + ren[i + 2].d * coss, ren[i].d - ren[i + 2].d * sinn, ren[i + 1].d + ren[i + 2].d * coss, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xcenter, ycenter, xfact, yfact);
-                    if ((ren[i + 7].h == 4 || ren[i + 7].h == 5) && i + 18 < (int32_t) len && renType[i + 18] == 'd') {
+                    if ((ren[i + 7].h == 4 || ren[i + 7].h == 5) && i + 18 < len && renType[i + 18] == 'd') {
                         double dir2 = atan((ren[i + 18].d - ren[i + 9].d) / (ren[i + 10].d - ren[i + 19].d));
                         double sinn2 = sin(dir2 + M_PI / 2);
                         double coss2 = cos(dir2 + M_PI / 2);
@@ -58548,15 +58543,15 @@ int32_t turtleTextInit(const char *filename) {
     list_append(fontPointerInit, (unitype) (int32_t) (fontDataInit -> length), 'i'); // last pointer
     // list_print(fontDataInit);
     turtleText.fontData = malloc(sizeof(int32_t) * fontDataInit -> length); // convert lists to arrays (could be optimised cuz we already have the -> data arrays but who really cares this runs once)
-    for (uint32_t i = 0; i < fontDataInit -> length; i++) {
+    for (int32_t i = 0; i < fontDataInit -> length; i++) {
         turtleText.fontData[i] = fontDataInit -> data[i].i;
     }
     turtleText.fontPointer = malloc(sizeof(int32_t) * fontPointerInit -> length);
-    for (uint32_t i = 0; i < fontPointerInit -> length; i++) {
+    for (int32_t i = 0; i < fontPointerInit -> length; i++) {
         turtleText.fontPointer[i] = fontPointerInit -> data[i].i;
     }
     turtleText.supportedCharReference = malloc(sizeof(int32_t) * supportedCharReferenceInit -> length);
-    for (uint32_t i = 0; i < supportedCharReferenceInit -> length; i++) {
+    for (int32_t i = 0; i < supportedCharReferenceInit -> length; i++) {
         turtleText.supportedCharReference[i] = supportedCharReferenceInit -> data[i].i;
     }
 
@@ -58679,9 +58674,9 @@ double turtleTextGetLength(const uint32_t *text, int32_t textLength, double size
 
 /* gets the length of a formatted string in coordinates on the screen */
 double turtleTextGetStringLength(const char *str, double size) {
-    uint32_t len = strlen(str);
+    int32_t len = strlen(str);
     uint32_t converted[len];
-    for (uint32_t i = 0; i < len; i++) {
+    for (int32_t i = 0; i < len; i++) {
         converted[i] = (uint32_t) str[i];
     }
     return turtleTextGetLength(converted, len, size);
@@ -59544,7 +59539,7 @@ char *strins(char *dest, char *source, int32_t index) {
 char *strdel(char *dest, int32_t index, int32_t size) {
     int32_t len = strlen(dest);
     memmove(dest + index, dest + index + size, len - index - size);
-    for (uint32_t i = 0; i < size + 1; i++) {
+    for (int32_t i = 0; i < size + 1; i++) {
         dest[len - size + i] = '\0';
     }
     return dest;
@@ -59889,10 +59884,10 @@ int32_t tt_ribbonInitInternal(FILE *configFile, list_t *configList, int8_t fileE
         fclose(configFile);
     }
 
-    for (uint32_t i = 0; i < tt_ribbon.options -> length; i++) {
+    for (int32_t i = 0; i < tt_ribbon.options -> length; i++) {
         list_append(tt_ribbon.lengths, (unitype) turtleTextGetStringLength(tt_ribbon.options -> data[i].r -> data[0].s, 7 * tt_ribbon.ribbonSize), 'd');
         double max = 0;
-        for (uint32_t j = 1; j < tt_ribbon.options -> data[i].r -> length; j++) {
+        for (int32_t j = 1; j < tt_ribbon.options -> data[i].r -> length; j++) {
             double current = turtleTextGetStringLength(tt_ribbon.options -> data[i].r -> data[j].s, 7 * tt_ribbon.ribbonSize);
             if (current > max) {
                 max = current;
@@ -59912,15 +59907,15 @@ void tt_ribbonUpdate() {
     double cutoff = tt_ribbon.bounds[0] + tt_ribbon.marginSize;
     tt_ribbon.mainselect[0] = -1;
     tt_ribbon.subselect[0] = -1;
-    for (uint32_t i = 0; i < tt_ribbon.options -> length; i++) {
+    for (int32_t i = 0; i < tt_ribbon.options -> length; i++) {
         double prevCutoff = cutoff;
-        if (i == (uint32_t) tt_ribbon.mainselect[2]) {
+        if (i == tt_ribbon.mainselect[2]) {
             double xLeft = prevCutoff - tt_ribbon.marginSize / 2.0;
             double xRight = prevCutoff + tt_ribbon.lengths -> data[i * 2 + 1].d + tt_ribbon.marginSize / 2.0;
             double yDown = tt_ribbon.bounds[3] - 10 * tt_ribbon.ribbonSize - 15 * tt_ribbon.ribbonSize * (tt_ribbon.options -> data[i].r -> length - 1) - tt_ribbon.marginSize / 2.0;
             tt_setColor(tt_ribbon.color[TT_COLOR_SLOT_RIBBON_DROPDOWN]);
             turtleRectangle(xLeft, tt_ribbon.bounds[3] - 10 * tt_ribbon.ribbonSize, xRight, yDown); // ribbon highlight
-            for (uint32_t j = 1; j < tt_ribbon.options -> data[i].r -> length; j++) {
+            for (int32_t j = 1; j < tt_ribbon.options -> data[i].r -> length; j++) {
                 if (tt_globals.elementLogicTypeOld <= TT_ELEMENT_RIBBON) {
                     if (turtle.mouseY > tt_ribbon.bounds[3] - 10 * tt_ribbon.ribbonSize - 15 * tt_ribbon.ribbonSize * j - tt_ribbon.marginSize / 4.0 && turtle.mouseY < tt_ribbon.bounds[3] - 10 * tt_ribbon.ribbonSize && turtle.mouseX > xLeft && turtle.mouseX < xRight && tt_ribbon.subselect[0] == -1) {
                         tt_setColor(tt_ribbon.color[TT_COLOR_SLOT_RIBBON_HOVER]);
@@ -60089,7 +60084,7 @@ void tt_popupUpdate() {
         turtleTextWriteUnicode(tt_popup.message, textX, textY, tt_popup.size, 50);
         textY -= tt_popup.size * 4;
         double fullLength = 0;
-        for (uint32_t i = 0; i < tt_popup.options -> length; i++) {
+        for (int32_t i = 0; i < tt_popup.options -> length; i++) {
             fullLength += turtleTextGetStringLength(tt_popup.options -> data[i].s, tt_popup.size);
         }
         /* we have the length of the strings, now we pad with n + 1 padding regions */
@@ -60099,7 +60094,7 @@ void tt_popupUpdate() {
         if (!turtleMouseDown() && tt_popup.mouseDown == 1) {
             flagged = 1; // flagged for mouse misbehaviour
         }
-        for (uint32_t i = 0; i < tt_popup.options -> length; i++) {
+        for (int32_t i = 0; i < tt_popup.options -> length; i++) {
             double strLen = turtleTextGetStringLength(tt_popup.options -> data[i].s, tt_popup.size);
             if (turtle.mouseX > textX - tt_popup.size && turtle.mouseX < textX + strLen + tt_popup.size && turtle.mouseY > textY - tt_popup.size && turtle.mouseY < textY + tt_popup.size) {
                 tt_setColor(tt_popup.color[TT_COLOR_SLOT_POPUP_BUTTON_SELECT]);
@@ -60160,7 +60155,7 @@ int32_t tt_color_default[] = {
 
 void tt_elementResetColor(void *elementp) {
     int32_t elementType = ((tt_button_t *) elementp) -> element;
-    for (uint32_t i = 0; i < 8; i++) {
+    for (int32_t i = 0; i < 8; i++) {
         ((tt_button_t *) elementp) -> color[i] = tt_color_default[i * TT_NUMBER_OF_ELEMENTS + elementType];
     }
 }
@@ -60390,7 +60385,7 @@ void tt_sliderFree(tt_slider_t *sliderp) {
 }
 
 /* create a textbox */
-tt_textbox_t *tt_textboxInit(char *label, char *variable, uint32_t maxCharacters, double x, double y, double size, double length) {
+tt_textbox_t *tt_textboxInit(char *label, char *variable, int32_t maxCharacters, double x, double y, double size, double length) {
     if (tt_enabled.textboxEnabled == 0) {
         turtle.unicodeCallback = tt_textboxUnicodeCallback;
         turtle.keyCallback = tt_textboxKeyCallback;
@@ -60446,7 +60441,7 @@ void tt_textboxFree(tt_textbox_t *textboxp) {
 
 void tt_dropdownCalculateMax(tt_dropdown_t *dropdownp) {
     dropdownp -> maxXfactor = 0;
-    for (uint32_t i = 0; i < dropdownp -> options -> length; i++) {
+    for (int32_t i = 0; i < dropdownp -> options -> length; i++) {
         double stringLength = turtleTextGetStringLength(dropdownp -> options -> data[i].s, dropdownp -> size - 1);
         if (stringLength > dropdownp -> maxXfactor) {
             dropdownp -> maxXfactor = stringLength;
@@ -60543,7 +60538,7 @@ void tt_scrollbarFree(tt_scrollbar_t *scrollbarp) {
 
 void tt_contextCalculateMax(tt_context_t *contextp) {
     contextp -> maxXfactor = 0;
-    for (uint32_t i = 0; i < contextp -> options -> length; i++) {
+    for (int32_t i = 0; i < contextp -> options -> length; i++) {
         double stringLength = turtleTextGetStringLength(contextp -> options -> data[i].s, contextp -> size - 1);
         if (stringLength > contextp -> maxXfactor) {
             contextp -> maxXfactor = stringLength;
@@ -61171,7 +61166,7 @@ void tt_textboxAddKey(tt_textbox_t *textboxp, int32_t key) {
 }
 
 void tt_textboxUnicodeCallback(uint32_t codepoint) {
-    for (uint32_t i = 0; i < tt_elements.textboxes -> length; i++) {
+    for (int32_t i = 0; i < tt_elements.textboxes -> length; i++) {
         tt_textbox_t *textboxp = (tt_textbox_t *) (tt_elements.textboxes -> data[i].p);
         if (textboxp -> status > 1) {
             tt_textboxAddKey(textboxp, codepoint);
@@ -61244,7 +61239,7 @@ void tt_textboxHandleOtherKey(tt_textbox_t *textboxp, int32_t key) {
 void tt_textboxKeyCallback(int32_t key, int32_t scancode, int32_t action) {
     /* non-printable keys */
     if (action == GLFW_PRESS) {
-        for (uint32_t i = 0; i < tt_elements.textboxes -> length; i++) {
+        for (int32_t i = 0; i < tt_elements.textboxes -> length; i++) {
             tt_textbox_t *textboxp = (tt_textbox_t *) (tt_elements.textboxes -> data[i].p);
             if (textboxp -> status > 1) {
                 textboxp -> lastKey = key;
@@ -61561,7 +61556,7 @@ void tt_dropdownUpdate(tt_dropdown_t *dropdownp) {
             if (dropdownp -> status == 1) {
                 if (!turtleMouseDown()) {
                     if (turtle.mouseX > dropdownMaxXFactor[0] && turtle.mouseX < dropdownMaxXFactor[1] && ((directionRender == 1 && turtle.mouseY > dropdownY - dropdownp -> size * 0.9 - (dropdownp -> options -> length - 1) * itemHeight && turtle.mouseY <= dropdownY + dropdownp -> size * 0.9 - itemHeight) || (directionRender == -1 && turtle.mouseY < dropdownY + dropdownp -> size * 0.9 + (dropdownp -> options -> length - 1) * itemHeight && turtle.mouseY >= dropdownY - dropdownp -> size * 0.9 + itemHeight))) {
-                        uint32_t selected = round((dropdownY - turtle.mouseY) / itemHeight);
+                        int32_t selected = round((dropdownY - turtle.mouseY) / itemHeight);
                         if (directionRender == -1) {
                             selected = round((turtle.mouseY - dropdownY) / itemHeight);
                         }
@@ -61589,7 +61584,7 @@ void tt_dropdownUpdate(tt_dropdown_t *dropdownp) {
                 tt_globals.elementLogicType = TT_ELEMENT_DROPDOWN;
                 tt_globals.elementLogicIndex = tt_globals.elementLogicTemp;
                 if (turtle.mouseX > dropdownMaxXFactor[0] && turtle.mouseX < dropdownMaxXFactor[1] && ((directionRender == 1 && turtle.mouseY > dropdownY - dropdownp -> size * 0.9 - (dropdownp -> options -> length - 1) * itemHeight && turtle.mouseY <= dropdownY + dropdownp -> size * 0.9) || (directionRender == -1 && turtle.mouseY < dropdownY + dropdownp -> size * 0.9 + (dropdownp -> options -> length - 1) * itemHeight && turtle.mouseY >= dropdownY - dropdownp -> size * 0.9))) {
-                    uint32_t selected = round((dropdownY - turtle.mouseY) / itemHeight);
+                    int32_t selected = round((dropdownY - turtle.mouseY) / itemHeight);
                     if (directionRender == -1) {
                         selected = dropdownp -> options -> length - round((turtle.mouseY - dropdownY) / itemHeight);
                     }
@@ -61617,7 +61612,7 @@ void tt_dropdownUpdate(tt_dropdown_t *dropdownp) {
                 }
                 tt_setColor(dropdownp -> color[TT_COLOR_SLOT_DROPDOWN_TEXT_HOVER]);
                 int32_t renderIndex = 1;
-                for (uint32_t i = 0; i < dropdownp -> options -> length; i++) {
+                for (int32_t i = 0; i < dropdownp -> options -> length; i++) {
                     if (i != dropdownp -> index) {
                         if (dropdownp -> align == TT_DROPDOWN_ALIGN_LEFT) {
                             turtleTextWriteUnicode(dropdownp -> options -> data[i].s, dropdownMaxXFactor[0] + dropdownp -> size / 2, dropdownY - (directionRender - 1) / 2.0 * dropdownp -> options -> length * itemHeight - renderIndex * itemHeight, dropdownp -> size - 1, dropdownAlignFactor);
@@ -61871,7 +61866,7 @@ void turtleToolsUpdateUI() {
     turtlePenShape("circle");
     if (tt_enabled.buttonEnabled) {
         tt_globals.elementLogicTemp = 0;
-        for (uint32_t i = 0; i < tt_elements.buttons -> length; i++) {
+        for (int32_t i = 0; i < tt_elements.buttons -> length; i++) {
             if (((tt_button_t *) (tt_elements.buttons -> data[i].p)) -> ignored == TT_ELEMENT_IGNORED) {
                 continue;
             }
@@ -61881,7 +61876,7 @@ void turtleToolsUpdateUI() {
     }
     if (tt_enabled.switchEnabled) {
         tt_globals.elementLogicTemp = 0;
-        for (uint32_t i = 0; i < tt_elements.switches -> length; i++) {
+        for (int32_t i = 0; i < tt_elements.switches -> length; i++) {
             if (((tt_switch_t *) (tt_elements.switches -> data[i].p)) -> ignored == TT_ELEMENT_IGNORED) {
                 continue;
             }
@@ -61891,7 +61886,7 @@ void turtleToolsUpdateUI() {
     }
     if (tt_enabled.dialEnabled) {
         tt_globals.elementLogicTemp = 0;
-        for (uint32_t i = 0; i < tt_elements.dials -> length; i++) {
+        for (int32_t i = 0; i < tt_elements.dials -> length; i++) {
             if (((tt_dial_t *) (tt_elements.dials -> data[i].p)) -> ignored == TT_ELEMENT_IGNORED) {
                 continue;
             }
@@ -61901,7 +61896,7 @@ void turtleToolsUpdateUI() {
     }
     if (tt_enabled.sliderEnabled) {
         tt_globals.elementLogicTemp = 0;
-        for (uint32_t i = 0; i < tt_elements.sliders -> length; i++) {
+        for (int32_t i = 0; i < tt_elements.sliders -> length; i++) {
             if (((tt_slider_t *) (tt_elements.sliders -> data[i].p)) -> ignored == TT_ELEMENT_IGNORED) {
                 continue;
             }
@@ -61911,7 +61906,7 @@ void turtleToolsUpdateUI() {
     }
     if (tt_enabled.textboxEnabled) {
         tt_globals.elementLogicTemp = 0;
-        for (uint32_t i = 0; i < tt_elements.textboxes -> length; i++) {
+        for (int32_t i = 0; i < tt_elements.textboxes -> length; i++) {
             if (((tt_textbox_t *) (tt_elements.textboxes -> data[i].p)) -> ignored == TT_ELEMENT_IGNORED) {
                 continue;
             }
@@ -61921,7 +61916,7 @@ void turtleToolsUpdateUI() {
     }
     if (tt_enabled.dropdownEnabled) {
         tt_globals.elementLogicTemp = 0;
-        for (uint32_t i = 0; i < tt_elements.dropdowns -> length; i++) {
+        for (int32_t i = 0; i < tt_elements.dropdowns -> length; i++) {
             if (((tt_dropdown_t *) (tt_elements.dropdowns -> data[i].p)) -> ignored == TT_ELEMENT_IGNORED) {
                 continue;
             }
@@ -61931,7 +61926,7 @@ void turtleToolsUpdateUI() {
     }
     if (tt_enabled.scrollbarEnabled) {
         tt_globals.elementLogicTemp = 0;
-        for (uint32_t i = 0; i < tt_elements.scrollbars -> length; i++) {
+        for (int32_t i = 0; i < tt_elements.scrollbars -> length; i++) {
             if (((tt_scrollbar_t *) (tt_elements.scrollbars -> data[i].p)) -> ignored == TT_ELEMENT_IGNORED) {
                 continue;
             }
@@ -61941,7 +61936,7 @@ void turtleToolsUpdateUI() {
     }
     if (tt_enabled.contextEnabled) {
         tt_globals.elementLogicTemp = 0;
-        for (uint32_t i = 0; i < tt_elements.contexts -> length; i++) {
+        for (int32_t i = 0; i < tt_elements.contexts -> length; i++) {
             if (((tt_context_t *) (tt_elements.contexts -> data[i].p)) -> ignored == TT_ELEMENT_IGNORED) {
                 continue;
             }
@@ -62470,7 +62465,7 @@ int32_t osToolsFileDialogPrompt(ost_file_dialog_save_t openOrSave, ost_file_dial
             buildFilter[j] = (uint16_t) '*';
             buildFilter[j + 1] = (uint16_t) '.';
             j += 2;
-            for (uint32_t k = 0; k < strlen(extensions -> data[i].s) && k < 8; k++) {
+            for (int32_t k = 0; k < strlen(extensions -> data[i].s) && k < 8; k++) {
                 buildFilter[j] = extensions -> data[i].s[k];
                 j += 1;
             }
@@ -62613,7 +62608,7 @@ uint8_t *osToolsFileMap(char *filename, uint32_t *sizeOutput) {
 int32_t osToolsFileUnmap(uint8_t *data) {
     UnmapViewOfFile(data);
     int32_t index = -1;
-    for (uint32_t i = 0; i < osToolsMemmap.mappedFiles -> length; i += 4) {
+    for (int32_t i = 0; i < osToolsMemmap.mappedFiles -> length; i += 4) {
         if (osToolsMemmap.mappedFiles -> data[i + 3].p == data) {
             index = i;
             break;
@@ -64046,7 +64041,7 @@ uint8_t *osToolsFileMap(char *filename, uint32_t *sizeOutput) {
 
 int32_t osToolsFileUnmap(uint8_t *data) {
     int32_t index = -1;
-    for (uint32_t i = 0; i < osToolsMemmap.mappedFiles -> length; i += 2) {
+    for (int32_t i = 0; i < osToolsMemmap.mappedFiles -> length; i += 2) {
         if (osToolsMemmap.mappedFiles -> data[i].p == data) {
             index = i;
             break;

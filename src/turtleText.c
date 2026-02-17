@@ -187,15 +187,15 @@ int32_t turtleTextInit(const char *filename) {
     list_append(fontPointerInit, (unitype) (int32_t) (fontDataInit -> length), 'i'); // last pointer
     // list_print(fontDataInit);
     turtleText.fontData = malloc(sizeof(int32_t) * fontDataInit -> length); // convert lists to arrays (could be optimised cuz we already have the -> data arrays but who really cares this runs once)
-    for (uint32_t i = 0; i < fontDataInit -> length; i++) {
+    for (int32_t i = 0; i < fontDataInit -> length; i++) {
         turtleText.fontData[i] = fontDataInit -> data[i].i;
     }
     turtleText.fontPointer = malloc(sizeof(int32_t) * fontPointerInit -> length);
-    for (uint32_t i = 0; i < fontPointerInit -> length; i++) {
+    for (int32_t i = 0; i < fontPointerInit -> length; i++) {
         turtleText.fontPointer[i] = fontPointerInit -> data[i].i;
     }
     turtleText.supportedCharReference = malloc(sizeof(int32_t) * supportedCharReferenceInit -> length);
-    for (uint32_t i = 0; i < supportedCharReferenceInit -> length; i++) {
+    for (int32_t i = 0; i < supportedCharReferenceInit -> length; i++) {
         turtleText.supportedCharReference[i] = supportedCharReferenceInit -> data[i].i;
     }
 
@@ -318,9 +318,9 @@ double turtleTextGetLength(const uint32_t *text, int32_t textLength, double size
 
 /* gets the length of a formatted string in coordinates on the screen */
 double turtleTextGetStringLength(const char *str, double size) {
-    uint32_t len = strlen(str);
+    int32_t len = strlen(str);
     uint32_t converted[len];
-    for (uint32_t i = 0; i < len; i++) {
+    for (int32_t i = 0; i < len; i++) {
         converted[i] = (uint32_t) str[i];
     }
     return turtleTextGetLength(converted, len, size);
