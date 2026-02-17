@@ -313,7 +313,7 @@ int main(int argc, char *argv[]) {
 
     list_t *xPositions = list_init();
     list_t *yPositions = list_init();
-    for (uint32_t i = 0; i < tt_elements.all -> length; i++) {
+    for (int32_t i = 0; i < tt_elements.all -> length; i++) {
         list_append(xPositions, (unitype) ((tt_button_t *) tt_elements.all -> data[i].p) -> x, 'd');
         list_append(yPositions, (unitype) ((tt_button_t *) tt_elements.all -> data[i].p) -> y, 'd');
     }
@@ -326,7 +326,7 @@ int main(int argc, char *argv[]) {
         turtleGetMouseCoords();
         turtleClear();
         /* update element positions */
-        for (uint32_t i = 0; i < tt_elements.all -> length; i++) {
+        for (int32_t i = 0; i < tt_elements.all -> length; i++) {
             if (((tt_button_t *) tt_elements.all -> data[i].p) -> element != TT_ELEMENT_SCROLLBAR && ((tt_button_t *) tt_elements.all -> data[i].p) -> element != TT_ELEMENT_CONTEXT) {
                 ((tt_button_t *) tt_elements.all -> data[i].p) -> x = xPositions -> data[i].d - scrollbarX -> value * 5;
                 ((tt_button_t *) tt_elements.all -> data[i].p) -> y = yPositions -> data[i].d + scrollbarY -> value * 3.3;
