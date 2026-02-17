@@ -930,6 +930,8 @@ tt_textbox_t *tt_textboxInit(char *label, char *variable, int32_t maxCharacters,
     textboxp -> editIndex = 0;
     textboxp -> lastKey = 0;
     textboxp -> keyTimeout = 0;
+    textboxp -> initialKeyTimeout = 48;
+    textboxp -> heldKeyTimeout = 2;
     textboxp -> renderPixelOffset = 0;
     textboxp -> renderStartingIndex = 0;
     textboxp -> renderNumCharacters = 0;
@@ -1749,7 +1751,7 @@ void tt_textboxKeyCallback(int32_t key, int32_t scancode, int32_t action) {
             tt_textbox_t *textboxp = (tt_textbox_t *) (tt_elements.textboxes -> data[i].p);
             if (textboxp -> status > 1) {
                 textboxp -> lastKey = key;
-                textboxp -> keyTimeout = 50;
+                textboxp -> keyTimeout = textboxp -> initialKeyTimeout;
                 tt_textboxHandleOtherKey(textboxp, key);
                 break;
             }
@@ -1835,7 +1837,7 @@ void tt_textboxUpdate(tt_textbox_t *textboxp) {
     if (textboxp -> lastKey > 0) {
         if (turtleKeyPressed(textboxp -> lastKey)) {
             if (textboxp -> keyTimeout == 0) {
-                textboxp -> keyTimeout = 4;
+                textboxp -> keyTimeout = textboxp -> heldKeyTimeout;
                 tt_textboxHandleOtherKey(textboxp, textboxp -> lastKey);
             }
         } else {

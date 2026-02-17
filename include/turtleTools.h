@@ -460,6 +460,8 @@ typedef struct {
     int32_t editIndex;
     int32_t lastKey;
     int32_t keyTimeout;
+    int32_t initialKeyTimeout;
+    int32_t heldKeyTimeout;
     /* render variables */
     double renderPixelOffset;
     int32_t renderStartingIndex;
