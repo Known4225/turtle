@@ -258,13 +258,10 @@ int main(int argc, char *argv[]) {
     tt_scrollbar_t *scrollbarX = tt_scrollbarInit(NULL, TT_SCROLLBAR_TYPE_HORIZONTAL, 20, -170, 10, 550, 50);
     tt_scrollbar_t *scrollbarY = tt_scrollbarInit(NULL, TT_SCROLLBAR_TYPE_VERTICAL, 310, 0, 10, 320, 33);
     list_t *dropdownOptions = list_init();
-    list_append(dropdownOptions, (unitype) "A", 's');
-    list_append(dropdownOptions, (unitype) "Long Item", 's');
-    list_append(dropdownOptions, (unitype) "Very Long Item Name", 's');
-    list_append(dropdownOptions, (unitype) "B", 's');
-    list_append(dropdownOptions, (unitype) "C", 's');
-    list_append(dropdownOptions, (unitype) "D", 's');
-    list_append(dropdownOptions, (unitype) "E", 's');
+    list_append(dropdownOptions, (unitype) "Indicator", 's');
+    list_append(dropdownOptions, (unitype) "Register", 's');
+    list_append(dropdownOptions, (unitype) "P15 Pin", 's');
+    list_append(dropdownOptions, (unitype) "K50 Touch", 's');
     tt_dropdown_t *dropdown = tt_dropdownInit("Dropdown", dropdownOptions, NULL, TT_DROPDOWN_ALIGN_CENTER, 0, 70, 10);
     tt_textbox_t *textbox = tt_textboxInit("Textbox", NULL, 128, -50, -110, 10, 100);
     list_t *contextOptions = list_init();
