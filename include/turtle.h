@@ -30,6 +30,12 @@ extern void glVertex2d(double x, double y);
 extern void glEnd();
 typedef struct GLFWwindow GLFWwindow;
 
+/* special function that can be called prior to turtleInit - this function condenses the window creation code boilerplate */
+GLFWwindow *turtleCreateWindow(char *windowName);
+
+/* special function that can be called prior to turtleInit - this function condenses the window creation code with icon boilerplate */
+GLFWwindow *turtleCreateWindowIcon(char *windowName, char *filename);
+
 typedef struct {
     GLFWwindow *window; // the window
     list_t *keyPressed; // global keyPressed and mousePressed list

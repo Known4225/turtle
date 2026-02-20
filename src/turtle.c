@@ -48,6 +48,74 @@ const char *turtleFragmentShaderSource =
 "}\0";
 #endif /* TURTLE_ENABLE_TEXTURES */
 
+/* special function that can be called prior to turtleInit - this function condenses the window creation code boilerplate */
+GLFWwindow *turtleCreateWindow(char *windowName) {
+    /* Initialise glfw */
+    if (!glfwInit()) {
+        return NULL;
+    }
+    glfwWindowHint(GLFW_SAMPLES, 4); // MSAA (Anti-Aliasing) with 4 samples (must be done before window is created (?))
+
+    /* Create a windowed mode window and its OpenGL context */
+    const GLFWvidmode *monitorSize = glfwGetVideoMode(glfwGetPrimaryMonitor());
+    int32_t windowHeight = monitorSize -> height;
+    double optimizedScalingFactor = 0.8; // Set this number to 1 on windows and 0.8 on Ubuntu for maximum compatibility (fixes issue with incorrect stretching)
+    #ifdef OS_WINDOWS
+    optimizedScalingFactor = 1;
+    #endif
+    #ifdef OS_LINUX
+    optimizedScalingFactor = 0.8;
+    #endif
+    GLFWwindow *window = glfwCreateWindow(windowHeight * 16 / 9 * optimizedScalingFactor, windowHeight * optimizedScalingFactor, windowName, NULL, NULL);
+    if (!window) {
+        glfwTerminate();
+        return NULL;
+    }
+    glfwMakeContextCurrent(window);
+    glfwSetWindowSizeLimits(window, windowHeight * 16 / 9 * 0.4, windowHeight * 0.4, windowHeight * 16 / 9 * optimizedScalingFactor, windowHeight * optimizedScalingFactor);
+    return window;
+}
+
+/* special function that can be called prior to turtleInit - this function condenses the window creation code with icon boilerplate */
+GLFWwindow *turtleCreateWindowIcon(char *windowName, char *filename) {
+    /* Initialise glfw */
+    if (!glfwInit()) {
+        return NULL;
+    }
+    glfwWindowHint(GLFW_SAMPLES, 4); // MSAA (Anti-Aliasing) with 4 samples (must be done before window is created (?))
+
+    /* Create a windowed mode window and its OpenGL context */
+    const GLFWvidmode *monitorSize = glfwGetVideoMode(glfwGetPrimaryMonitor());
+    int32_t windowHeight = monitorSize -> height;
+    double optimizedScalingFactor = 0.8; // Set this number to 1 on windows and 0.8 on Ubuntu for maximum compatibility (fixes issue with incorrect stretching)
+    #ifdef OS_WINDOWS
+    optimizedScalingFactor = 1;
+    #endif
+    #ifdef OS_LINUX
+    optimizedScalingFactor = 0.8;
+    #endif
+    GLFWwindow *window = glfwCreateWindow(windowHeight * 16 / 9 * optimizedScalingFactor, windowHeight * optimizedScalingFactor, windowName, NULL, NULL);
+    if (!window) {
+        glfwTerminate();
+        return NULL;
+    }
+    glfwMakeContextCurrent(window);
+    glfwSetWindowSizeLimits(window, windowHeight * 16 / 9 * 0.4, windowHeight * 0.4, windowHeight * 16 / 9 * optimizedScalingFactor, windowHeight * optimizedScalingFactor);
+    /* initialise logo */
+    GLFWimage icon;
+    int32_t iconChannels;
+    uint8_t *iconPixels = stbi_load(filename, &icon.width, &icon.height, &iconChannels, 4); // 4 color channels for RGBA
+    if (iconPixels != NULL) {
+        icon.pixels = iconPixels;
+        glfwSetWindowIcon(window, 1, &icon);
+        glfwPollEvents(); // update taskbar icon correctly on windows - https://github.com/glfw/glfw/issues/2753
+        free(iconPixels);
+    } else {
+        printf("Could not load thumbnail %s\n", filename);
+    }
+    return window;
+}
+
 /* initializes the turtletools module */
 void turtleInit(GLFWwindow *window, double leftX, double bottomY, double rightX, double topY) {
     #ifndef TURTLE_ENABLE_TEXTURES
@@ -178,6 +246,15 @@ void turtleInit(GLFWwindow *window, double leftX, double bottomY, double rightX,
     glfwSetKeyCallback(window, keySense); // initiate mouse and keyboard detection
     glfwSetMouseButtonCallback(window, mouseSense);
     glfwSetScrollCallback(window, scrollSense);
+
+    /* adjust window position and size */
+    #ifdef OS_LINUX
+    glfwSetWindowPos(window, 0, 36);
+    #endif
+    #ifdef OS_WINDOWS
+    glfwSetWindowPos(window, 0, 31);
+    #endif
+    glfwSetWindowSize(window, turtle.screenbounds[1] * 16 / 9 * 0.865, turtle.screenbounds[1] * 0.85); // doing it this way ensures the window spawns in the top left of the monitor and fixes resizing limits
 }
 
 /* run this to set the bounds of the window in coordinates */
