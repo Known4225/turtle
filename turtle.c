@@ -386,8 +386,7 @@ int main(int argc, char *argv[]) {
         }
         if (cameraName) {
             osToolsCameraReceive(cameraName, cameraFrame);
-            turtleTextureUnload(empvImage);
-            empvImage = turtleTextureLoadArray(cameraFrame, cameras -> data[(imageDropdown -> value - 1) * 4 + 1].i, cameras -> data[(imageDropdown -> value - 1) * 4 + 2].i, GL_RGB);
+            turtleTextureReplaceArray(empvImage, cameraFrame, cameras -> data[(imageDropdown -> value - 1) * 4 + 1].i, cameras -> data[(imageDropdown -> value - 1) * 4 + 2].i, GL_RGB);
             double textureCenterX = 550;
             double textureCenterY = -60.5;
             double textureWidth = 300.0 / ((16.0 / 9) * ((double) cameras -> data[(imageDropdown -> value - 1) * 4 + 2].i / cameras -> data[(imageDropdown -> value - 1) * 4 + 1].i));

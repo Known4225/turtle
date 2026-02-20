@@ -642,7 +642,6 @@ void turtleTextureRenderInternal(int32_t textureCode, double x1, double y1, doub
 }
 
 turtle_texture_t turtleTextureLoad(char *filename) {
-    /* determine encoding */
     /* load image */
     int width;
     int height;
@@ -708,6 +707,7 @@ turtle_texture_t turtleTextureLoadList(list_t *list, uint32_t width, uint32_t he
 }
 
 turtle_texture_t turtleTextureLoadListArrayInternal(list_t *list, uint8_t *array, uint32_t width, uint32_t height, uint32_t encoding) {
+    /* determine encoding */
     uint8_t stride = 0;
     uint32_t stb_encoding = 0;
     if (encoding == GL_RGB) {
@@ -754,9 +754,9 @@ turtle_texture_t turtleTextureLoadListArrayInternal(list_t *list, uint8_t *array
     turtle_texture_t texture = -1;
     char pointerValue[20];
     if (freeArrayFlag) {
-        sprintf(pointerValue, "0x%lX", (int64_t) list);
+        sprintf(pointerValue, "0x%lX", (uint64_t) list);
     } else {
-        sprintf(pointerValue, "0x%lX", (int64_t) array);
+        sprintf(pointerValue, "0x%lX", (uint64_t) array);
     }
     for (int32_t i = 4; i < turtle.textureList -> length; i += 4) {
         if (strcmp(turtle.textureList -> data[i].s, "") == 0) {
@@ -809,6 +809,104 @@ void turtleTexturePrint(turtle_texture_t texture) {
         printf("- Texture Height: NULL\n");
         printf("- Texture Channel: NULL\n");
     }
+}
+
+/* replace a texture with new data from a png, jpg, or bmp */
+int32_t turtleTextureReplace(turtle_texture_t texture, char *filename) {
+    /* load image */
+    int width;
+    int height;
+    int channels;
+    unsigned char *image = stbi_load(filename, &width, &height, &channels, 0);
+    if (image == NULL) {
+        printf("turtleTextureReplace: Could not load image %s\n", filename);
+        return -1;
+    }
+    uint32_t encoding = GL_RGB;
+    uint32_t stb_encoding = STBIR_RGB;
+    uint8_t stride = 3;
+    if (channels == 4) {
+        encoding = GL_RGBA;
+        stb_encoding = STBIR_RGBA;
+        stride = 4;
+    }
+    if (channels == 1) {
+        encoding = GL_RED;
+        stb_encoding = STBIR_1CHANNEL;
+        stride = 1;
+    }
+    unsigned char *resized = malloc(stride * turtle.textureWidth * turtle.textureHeight);
+    stbir_resize_uint8_linear(image, width, height, stride * width, resized, turtle.textureWidth, turtle.textureHeight, stride * turtle.textureWidth, stb_encoding);
+    free(image);
+    if (resized == NULL) {
+        printf("turtleTextureReplace: Could not resize image %s\n", filename);
+        return -1;
+    }
+    /* load to GPU */
+    glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, texture / 4, turtle.textureWidth, turtle.textureHeight, 1, encoding, GL_UNSIGNED_BYTE, resized);
+    glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
+    free(resized);
+    return texture;
+}
+
+/* replace a texture with new data from an array - supported encodings: GL_RGB, GL_RGBA, GL_BGR, GL_BGRA, GL_RED, GL_GREEN, GL_BLUE, GL_ALPHA */
+int32_t turtleTextureReplaceArray(turtle_texture_t texture, uint8_t *array, uint32_t width, uint32_t height, uint32_t encoding) {
+    return turtleTextureReplaceListArrayInternal(texture, NULL, array, width, height, encoding);
+}
+
+/* replace a texture with new data from an list - supported encodings: GL_RGB, GL_RGBA, GL_BGR, GL_BGRA, GL_RED, GL_GREEN, GL_BLUE, GL_ALPHA */
+int32_t turtleTextureReplaceList(turtle_texture_t texture, list_t *list, uint32_t width, uint32_t height, uint32_t encoding) {
+    return turtleTextureReplaceListArrayInternal(texture, list, NULL, width, height, encoding);
+}
+
+int32_t turtleTextureReplaceListArrayInternal(turtle_texture_t texture, list_t *list, uint8_t *array, uint32_t width, uint32_t height, uint32_t encoding) {
+    /* determine encoding */
+    uint8_t stride = 0;
+    uint32_t stb_encoding = 0;
+    if (encoding == GL_RGB) {
+        stride = 3;
+        stb_encoding = STBIR_RGB;
+    } else if (encoding == GL_BGR) {
+        stride = 3;
+        stb_encoding = STBIR_BGR;
+    } else if (encoding == GL_RGBA) {
+        stride = 4;
+        stb_encoding = STBIR_RGBA;
+    } else if (encoding == GL_BGRA) {
+        stride = 4;
+        stb_encoding = STBIR_BGRA;
+    } else if (encoding == GL_RED || encoding == GL_GREEN || encoding == GL_BLUE || encoding == GL_ALPHA) {
+        stride = 1;
+        stb_encoding = STBIR_1CHANNEL;
+    } else {
+        printf("turtleTextureReplaceListArrayInternal: Unsupported encoding %d\n", encoding);
+        return -1;
+    }
+    uint8_t freeArrayFlag = 0;
+    if (array == NULL) {
+        if (list == NULL) {
+            printf("turtleTextureReplaceListArrayInternal: both list and array are NULL\n");
+            return -1;
+        }
+        array = malloc(list -> length);
+        for (int32_t i = 0; i < list -> length; i++) {
+            array[i] = list -> data[i].b;
+        }
+        freeArrayFlag = 1;
+    }
+    unsigned char *resized = malloc(stride * turtle.textureWidth * turtle.textureHeight);
+    stbir_resize_uint8_linear(array, width, height, stride * width, resized, turtle.textureWidth, turtle.textureHeight, stride * turtle.textureWidth, stb_encoding);
+    if (freeArrayFlag) {
+        free(array);
+    }
+    if (resized == NULL) {
+        printf("turtleTextureReplaceListArrayInternal: Could not resize image\n");
+        return -1;
+    }
+    glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, texture / 4, turtle.textureWidth, turtle.textureHeight, 1, encoding, GL_UNSIGNED_BYTE, resized);
+    glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
+    free(resized);
+    return texture;
 }
 
 int32_t turtleTextureUnload(turtle_texture_t texture) {

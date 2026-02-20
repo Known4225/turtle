@@ -216,13 +216,13 @@ void turtleSetResizeMode(turtle_resize_mode_t resizeMode);
 /* load a png, jpg, or bmp to GPU memory as a texture */
 turtle_texture_t turtleTextureLoad(char *filename);
 
-/* load data from an array of uint8 - use GL_RGB or GL_RGBA for encoding */
+/* load data from an array - supported encodings: GL_RGB, GL_RGBA, GL_BGR, GL_BGRA, GL_RED, GL_GREEN, GL_BLUE, GL_ALPHA */
 turtle_texture_t turtleTextureLoadArray(uint8_t *array, uint32_t width, uint32_t height, uint32_t encoding);
 
-/* load data from a list - use GL_RGB or GL_RGBA for encoding */
+/* load data from a list - supported encodings: GL_RGB, GL_RGBA, GL_BGR, GL_BGRA, GL_RED, GL_GREEN, GL_BLUE, GL_ALPHA */
 turtle_texture_t turtleTextureLoadList(list_t *list, uint32_t width, uint32_t height, uint32_t encoding);
 
-/* load data from a list or array of uint8 (make one NULL) - use GL_RGB or GL_RGBA for encoding */
+/* load data from a list or array of uint8 (make one NULL) - supported encodings: GL_RGB, GL_RGBA, GL_BGR, GL_BGRA, GL_RED, GL_GREEN, GL_BLUE, GL_ALPHA */
 turtle_texture_t turtleTextureLoadListArrayInternal(list_t *list, uint8_t *array, uint32_t width, uint32_t height, uint32_t encoding);
 
 /* get the original width of a loaded texture */
@@ -233,6 +233,18 @@ int32_t turtleTextureGetHeight(turtle_texture_t texture);
 
 /* print texture name, width, height, and channels */
 void turtleTexturePrint(turtle_texture_t texture);
+
+/* replace a texture with new data from a png, jpg, or bmp */
+int32_t turtleTextureReplace(turtle_texture_t texture, char *filename);
+
+/* replace a texture with new data from an array - supported encodings: GL_RGB, GL_RGBA, GL_BGR, GL_BGRA, GL_RED, GL_GREEN, GL_BLUE, GL_ALPHA */
+int32_t turtleTextureReplaceArray(turtle_texture_t texture, uint8_t *array, uint32_t width, uint32_t height, uint32_t encoding);
+
+/* replace a texture with new data from a list - supported encodings: GL_RGB, GL_RGBA, GL_BGR, GL_BGRA, GL_RED, GL_GREEN, GL_BLUE, GL_ALPHA */
+int32_t turtleTextureReplaceList(turtle_texture_t texture, list_t *list, uint32_t width, uint32_t height, uint32_t encoding);
+
+/* replace a texture with new data from a list or array of uint8 (make one NULL) - supported encodings: GL_RGB, GL_RGBA, GL_BGR, GL_BGRA, GL_RED, GL_GREEN, GL_BLUE, GL_ALPHA */
+int32_t turtleTextureReplaceListArrayInternal(turtle_texture_t texture, list_t *list, uint8_t *array, uint32_t width, uint32_t height, uint32_t encoding);
 
 /* remove a texture from GPU memory */
 int32_t turtleTextureUnload(turtle_texture_t texture);
