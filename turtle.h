@@ -56587,7 +56587,7 @@ list_t *list_sort_index(list_t *list) {
     }
     for (int32_t j = 0; j < list -> length; j++) {
         int32_t max = -2147483648;
-        int64_t maxIndex = -1;
+        int32_t maxIndex = -1;
         for (int32_t i = 0; i < list -> length; i++) {
             if (list -> data[i].i > max && marked[i] == 0) {
                 max = list -> data[i].i;
@@ -56611,7 +56611,7 @@ list_t *list_sort_index_double(list_t *list) {
     }
     for (int32_t j = 0; j < list -> length; j++) {
         double max = -1.79769313486231570814527423731704357e+308;
-        int64_t maxIndex = -1;
+        int32_t maxIndex = -1;
         for (int32_t i = 0; i < list -> length; i++) {
             if (list -> data[i].d > max && marked[i] == 0) {
                 max = list -> data[i].d;
@@ -56625,6 +56625,9 @@ list_t *list_sort_index_double(list_t *list) {
     }
     return output;
 }
+
+/* Note on double sorts - it may be possible to use uint64_t consistent comparison for doubles - however i am not sure if setting the integer portion of the unitype union will fill the top four bytes with 0s.
+If it doesn't then the scheme will not work */
 
 /* sort list (stride) */
 void list_sort_stride(list_t *list, int32_t stride, int32_t offset) {
@@ -56685,45 +56688,55 @@ void list_sort_stride(list_t *list, int32_t stride, int32_t offset) {
 
 /* return a list of indices that would sort the list (stride) */
 list_t *list_sort_stride_index(list_t *list, int32_t stride, int32_t offset) {
+    offset %= stride;
+    int8_t *marked = calloc(list -> length / stride, 1);
     list_t *output = list_init();
-    // for (int32_t i = 0; i < list -> length / stride; i++) {
-    //     list_append(output, (unitype) -1, 'i');
-    // }
-    // for (int32_t j = 0; j < list -> length / stride; j++) {
-    //     int32_t max = -2147483648;
-    //     int64_t maxIndex = -1;
-    //     for (int32_t i = 0; i < list -> length / stride; i++) {
-    //         if (list -> data[i * stride + offset].i > max && output -> data[i].i == -1) {
-    //             max = list -> data[i * stride + offset].i;
-    //             maxIndex = i;
-    //         }
-    //     }
-    //     if (maxIndex > -1) {
-    //         output -> data[maxIndex].i = j * stride + offset;
-    //     }
-    // }
+    for (int32_t i = 0; i < list -> length; i++) {
+        list_append(output, (unitype) -1, 'i');
+    }
+    for (int32_t j = 0; j < list -> length; j += stride) {
+        int32_t max = -2147483648;
+        int32_t maxIndex = -1;
+        for (int32_t i = offset; i < list -> length; i += stride) {
+            if (list -> data[i].i > max && marked[i / stride] == 0) {
+                max = list -> data[i].i;
+                maxIndex = i;
+            }
+        }
+        if (maxIndex > -1) {
+            marked[maxIndex / stride] = 1;
+            for (int32_t k = 0; k < stride; k++) {
+                output -> data[j + k].i = maxIndex - offset + k;
+            }
+        }
+    }
     return output;
 }
 
 /* return a list of indices that would sort the list (stride) (for a list of doubles) */
 list_t *list_sort_stride_index_double(list_t *list, int32_t stride, int32_t offset) {
+    offset %= stride;
+    int8_t *marked = calloc(list -> length / stride, 1);
     list_t *output = list_init();
-    // for (int32_t i = 0; i < list -> length / stride; i++) {
-    //     list_append(output, (unitype) -1, 'i');
-    // }
-    // for (int32_t j = 0; j < list -> length / stride; j++) {
-    //     double max = -1.79769313486231570814527423731704357e+308;
-    //     int64_t maxIndex = -1;
-    //     for (int32_t i = 0; i < list -> length / stride; i++) {
-    //         if (list -> data[i * stride + offset].d > max && output -> data[i].i == -1) {
-    //             max = list -> data[i * stride + offset].d;
-    //             maxIndex = i;
-    //         }
-    //     }
-    //     if (maxIndex > -1) {
-    //         output -> data[maxIndex].i = j * stride + offset;
-    //     }
-    // }
+    for (int32_t i = 0; i < list -> length; i++) {
+        list_append(output, (unitype) -1, 'i');
+    }
+    for (int32_t j = 0; j < list -> length; j += stride) {
+        double max = -1.79769313486231570814527423731704357e+308;
+        int32_t maxIndex = -1;
+        for (int32_t i = offset; i < list -> length; i += stride) {
+            if (list -> data[i].d > max && marked[i / stride] == 0) {
+                max = list -> data[i].d;
+                maxIndex = i;
+            }
+        }
+        if (maxIndex > -1) {
+            marked[maxIndex / stride] = 1;
+            for (int32_t k = 0; k < stride; k++) {
+                output -> data[j + k].i = maxIndex - offset + k;
+            }
+        }
+    }
     return output;
 }
 
