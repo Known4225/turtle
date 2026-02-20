@@ -26,6 +26,7 @@ The following build commands are available:
 
 # To Do
 - I think there is a way to increase performance for texture enabled turtle - I think it is possible to remove penpos entirely and just write straight to bufferList
+- Write tests
 - Reduce size of turtle.h, find a building solution that doesn't involve 26936 lines of duplicate code
 - Vertical switches
 - Mouse interactions with textbox (highlight, index select)
