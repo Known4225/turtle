@@ -93,73 +93,38 @@ void parsePopupOutput(GLFWwindow *window) {
 }
 
 int main(int argc, char *argv[]) {
-    /* Initialise glfw */
-    if (!glfwInit()) {
-        return -1;
-    }
-    glfwWindowHint(GLFW_SAMPLES, 4); // MSAA (Anti-Aliasing) with 4 samples (must be done before window is created (?))
-
-    /* Create a windowed mode window and its OpenGL context */
-    const GLFWvidmode *monitorSize = glfwGetVideoMode(glfwGetPrimaryMonitor());
-    int32_t windowHeight = monitorSize -> height;
-    double optimizedScalingFactor = 0.8; // Set this number to 1 on windows and 0.8 on Ubuntu for maximum compatibility (fixes issue with incorrect stretching)
-    #ifdef OS_WINDOWS
-    optimizedScalingFactor = 1;
-    #endif
-    #ifdef OS_LINUX
-    optimizedScalingFactor = 0.8;
-    #endif
-    GLFWwindow *window = glfwCreateWindow(windowHeight * 16 / 9 * optimizedScalingFactor, windowHeight * optimizedScalingFactor, "turtle demo", NULL, NULL);
-    if (!window) {
-        glfwTerminate();
-        return -1;
-    }
-    glfwMakeContextCurrent(window);
-    glfwSetWindowSizeLimits(window, windowHeight * 16 / 9 * 0.4, windowHeight * 0.4, windowHeight * 16 / 9 * optimizedScalingFactor, windowHeight * optimizedScalingFactor);
-    /* initialise logo */
-    GLFWimage icon;
-    int32_t iconChannels;
-    char constructedFilepath[5120];
-    strcpy(constructedFilepath, osToolsFileDialog.executableFilepath);
-    strcat(constructedFilepath, "images/thumbnail.png");
-    uint8_t *iconPixels = stbi_load(constructedFilepath, &icon.width, &icon.height, &iconChannels, 4); // 4 color channels for RGBA
-    if (iconPixels != NULL) {
-        icon.pixels = iconPixels;
-        glfwSetWindowIcon(window, 1, &icon);
-        glfwPollEvents(); // update taskbar icon correctly on windows - https://github.com/glfw/glfw/issues/2753
-        free(iconPixels);
-    } else {
-        printf("Could not load thumbnail %s\n", constructedFilepath);
+    /* create window */
+    GLFWwindow *window = turtleCreateWindowIcon("turtle demo", "images/thumbnail.png");
+    if (window == NULL) {
+        return -1; // failed to create window
     }
 
     /* initialise turtle */
     turtleInit(window, -320, -180, 320, 180);
-    #ifdef OS_LINUX
-    glfwSetWindowPos(window, 0, 36);
-    #endif
-    if (optimizedScalingFactor > 0.85) {
-        glfwSetWindowSize(window, windowHeight * 16 / 9 * 0.865, windowHeight * 0.85); // doing it this way ensures the window spawns in the top left of the monitor and fixes resizing limits
-    } else {
-        glfwSetWindowSize(window, windowHeight * 16 / 9 * optimizedScalingFactor, windowHeight * optimizedScalingFactor);
-    }
+    
     /* initialise osTools */
     osToolsInit(argv[0], window); // must include argv[0] to get executableFilepath, must include GLFW window for copy paste and cursor functionality
     osToolsFileDialogAddGlobalExtension("txt"); // add txt to extension restrictions
     osToolsFileDialogAddGlobalExtension("csv"); // add csv to extension restrictions
+
     /* initialise turtleText */
+    char constructedFilepath[5120];
     strcpy(constructedFilepath, osToolsFileDialog.executableFilepath);
     strcat(constructedFilepath, "config/roberto.tgl");
     turtleTextInit(constructedFilepath);
+
     /* initialise turtleTools ribbon */
     turtleToolsSetTheme(TT_THEME_DARK); // dark theme preset
     strcpy(constructedFilepath, osToolsFileDialog.executableFilepath);
     strcat(constructedFilepath, "config/ribbonConfig.txt");
     tt_ribbonInit(constructedFilepath);
+
     // list_t *ribbonConfig = list_init();
     // list_append(ribbonConfig, (unitype) "File, New, Save, Save As..., Open", 's');
     // list_append(ribbonConfig, (unitype) "Edit, Undo, Redo, Cut, Copy, Paste", 's');
     // list_append(ribbonConfig, (unitype) "View, Change Theme, GLFW", 's');
     // tt_ribbonInitList(ribbonConfig);
+
     /* initialise turtleTools popup */
     strcpy(constructedFilepath, osToolsFileDialog.executableFilepath);
     strcat(constructedFilepath, "config/popupConfig.txt");
@@ -179,6 +144,7 @@ int main(int argc, char *argv[]) {
     if (columnLike != NULL) {
         list_print(columnLike);
     }
+
     /* textures */
     turtle_texture_t empvImage = turtleTextureLoad("images/EMPV.png");
     // uint8_t array[16] = {
@@ -207,6 +173,7 @@ int main(int argc, char *argv[]) {
         osToolsSerialClose(serialPorts -> data[i].s);
     }
     list_free(serialPorts);
+
     /* Server testing */
     // osToolsServerSocketCreate("Server1", OSTOOLS_PROTOCOL_TCP, "6000");
     // osToolsServerSocketListen("Server1", "Client1");
