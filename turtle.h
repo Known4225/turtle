@@ -57161,6 +57161,7 @@ GLFWwindow *turtleCreateWindow(char *windowName) {
     return window;
 }
 
+#ifdef TURTLE_ENABLE_TEXTURES
 /* special function that can be called prior to turtleInit - this function condenses the window creation code with icon boilerplate */
 GLFWwindow *turtleCreateWindowIcon(char *windowName, char *filename) {
     /* Initialise glfw */
@@ -57200,6 +57201,7 @@ GLFWwindow *turtleCreateWindowIcon(char *windowName, char *filename) {
     }
     return window;
 }
+#endif
 
 /* initializes the turtletools module */
 void turtleInit(GLFWwindow *window, double leftX, double bottomY, double rightX, double topY) {
