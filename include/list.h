@@ -16,9 +16,10 @@ https://patorjk.com/software/taag/#p=display&f=ANSI%20Shadow
 #include <string.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdatomic.h>
 
 /*
-21.04.23:
+Created by Ryan Srichai 21.04.23:
 unitype list, supports a variety of types
 
 example usage:
@@ -46,7 +47,7 @@ list_free(newList);
 Notes:
 Strings added to the list will be "strdup"d - meaning that you can pass in stack allocated buffers and string literals. This does not apply to pointers added to the list which must be heap allocated
 When calling list_clear() or list_free(), the list will free all strings, pointers, and lists within itself. If you don't want this to happen append the item to the list as a uint64
-list_copy will make a copy of all strings, pointers, and lists - it will not use the same pointers (a list can be safely freed after being copied without causing effects to the copied list)
+list_copy will make a copy of all strings, pointers, and lists - it will not use the same pointers (a list can be safely freed after being copied without causing effects to the copied list). The data in pointers is not copied as the list does not know how big the data is
 You must call list_init() when intending to copy a list - all lists must be initialised before any functions can be called on them (if your program is crashing - check to make sure you initialised all your lists)
 */
 
@@ -93,6 +94,8 @@ typedef union {
 } unitype;
 
 struct list_f {
+    _Atomic volatile int8_t lock;
+    int32_t ID;
     int32_t length;
     int32_t realLength;
     int8_t *type;
@@ -100,6 +103,8 @@ struct list_f {
 };
 
 typedef struct {
+    _Atomic volatile int8_t lock;
+    int32_t ID;
     int32_t length;
     int32_t dummy;
     int8_t *type;
@@ -108,6 +113,12 @@ typedef struct {
 
 /* create a list */
 list_t *list_init();
+
+/* acquire lock on list (only do this in multithreaded applications) */
+void list_acquire(list_t *list);
+
+/* release lock on list (only do this in multithreaded applications) */
+void list_release(list_t *list);
 
 /* append to list, must specify type */
 void list_append(list_t *list, unitype data, char type);
