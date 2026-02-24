@@ -177,8 +177,11 @@ void unitype_fprint(FILE *fp, unitype item, char type);
 /* copies one list to another (duplicates strings or pointers) */
 void list_copy(list_t *dest, list_t *src);
 
-/* prints the list without brackets */
+/* prints the list to a file without brackets */
 void list_fprint_emb(FILE *fp, list_t *list);
+
+/* prints the list to a file */
+void list_fprint(FILE *fp, list_t *list);
 
 /* prints the list */
 void list_print(list_t *list);

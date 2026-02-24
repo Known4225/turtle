@@ -294,7 +294,6 @@ void list_sort(list_t *list) {
             j /= 2;
         }
     }
-    list_print(list);
     /* heapsort */
     for (int32_t i = list -> length - 1; i > 0; i--) {
         temp = list -> data[0].l;
@@ -540,7 +539,7 @@ void unitype_fprint(FILE *fp, unitype item, char type) {
             fprintf(fp, "%p", item.p);
         break;
         case LIST_TYPE_LIST:
-            list_fprint_emb(fp, item.r);
+            list_fprint(fp, item.r);
         break;
         default:
             printf("unitype_fprint - type %d not recognized\n", type);
@@ -572,8 +571,18 @@ void list_copy(list_t *dest, list_t *src) {
     }
 }
 
-/* prints the list without brackets */
+/* prints the list to a file without brackets */
 void list_fprint_emb(FILE *fp, list_t *list) {
+    for (int32_t i = 0; i < list -> length; i++) {
+        unitype_fprint(fp, list -> data[i], list -> type[i]);
+        if (i != list -> length - 1) {
+            fprintf(fp, ", ");
+        }
+    }
+}
+
+/* prints the list to a file */
+void list_fprint(FILE *fp, list_t *list) {
     fprintf(fp, "[");
     if (list -> length == 0) {
         fprintf(fp, "]");
@@ -591,7 +600,7 @@ void list_fprint_emb(FILE *fp, list_t *list) {
 
 /* prints the list */
 void list_print(list_t *list) {
-    list_fprint_emb(stdout, list);
+    list_fprint(stdout, list);
     printf("\n");
 }
 
@@ -610,6 +619,57 @@ void list_print_type(list_t *list) {
             printf(", ");
         }
     }
+}
+
+/* writes list to a file in a special format: [data, type, data, type, ...]. Can be retrieved with list_read() */
+void list_write(FILE *fp, list_t *list) {
+    fprintf(fp, "[");
+    if (list -> length == 0) {
+        fprintf(fp, "]");
+        return;
+    }
+    for (int32_t i = 0; i < list -> length; i++) {
+        if (list -> type[i] == 's') {
+            /* special: add escape characters (\) before commas (,) and right brackets (]) to avoid ambiguity */
+            char *originalString = list -> data[i].s;
+            int32_t len = strlen(originalString);
+            char writeString[len * 2 + 2];
+            int32_t writeStringNext = 0;
+            for (int32_t j = 0; j < len; j++) {
+                if (originalString[j] == ',' || originalString[j] == ']') {
+                    writeString[writeStringNext] = '\\';
+                    writeStringNext++;
+                }
+                writeString[writeStringNext] = originalString[j];
+                writeStringNext++;
+            }
+            if (writeStringNext > 0 && writeString[writeStringNext - 1] == '\\') {
+                writeString[writeStringNext] = ' '; // special: if a '\' is the last character add a space to avoid ignoring the succeeding comma
+                writeStringNext++;
+            }
+            writeString[writeStringNext] = '\0';
+        } else {
+            unitype_fprint(fp, list -> data[i], list -> type[i]);
+        }
+        fprintf(fp, ", %c", list -> type[i]);
+        if (i == list -> length - 1) {
+            fprintf(fp, "]");
+        } else {
+            fprintf(fp, ", ");
+        }
+    }
+}
+
+/* reads list from a file that was written to with list_write() - ensure file pointer is located at the start of the list */
+list_t *list_read(FILE *fp) {
+    /* locate start of list */
+    char checkChar;
+    while (fread(&checkChar, 1, 1, fp) == 1) {
+        if (checkChar == '[') {
+            break;
+        }
+    }
+    
 }
 
 /* frees the list's data but not the list itself */
