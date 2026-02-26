@@ -192,6 +192,28 @@ int main(int argc, char *argv[]) {
     // free(buffer);
     // osToolsSocketDestroy("Client1");
 
+    /* test list saving and loading */
+    // list_t *listWrite = list_init();
+    // list_append(listWrite, (unitype) 'A', 'c');
+    // list_append(listWrite, (unitype) 1.0, 'd');
+    // list_append(listWrite, (unitype) 500.1, 'd');
+    // list_append(listWrite, (unitype) 2938274, 'i');
+    // list_append(listWrite, (unitype) 6552, 'h');
+    // list_t *listEmbed = list_init();
+    // list_append(listEmbed, (unitype) "C:\\Information\\Programming\\C\\openGL\\turtle-development", 's');
+    // list_append(listWrite, (unitype) listEmbed, 'r');
+    // list_append(listWrite, (unitype) "SimpleString", 's');
+    // list_append(listWrite, (unitype) "Hello World illegal ,,[],\\\\akdja", 's');
+    // list_append(listWrite, (unitype) 'Z', 'c');
+    // FILE *listWriteFile = fopen("listWriteFile.txt", "w");
+    // list_write(listWriteFile, listWrite);
+    // fclose(listWriteFile);
+    // FILE *listReadFile = fopen("listWriteFile.txt", "r");
+    // list_t *listRead = list_read(listReadFile);
+    // fclose(listReadFile);
+    // list_print(listWrite);
+    // list_print(listRead);
+
     list_t *cameras = osToolsCameraList();
     printf("Cameras: ");
     list_print(cameras);
@@ -281,29 +303,6 @@ int main(int argc, char *argv[]) {
         list_append(xPositions, (unitype) ((tt_button_t *) tt_elements.all -> data[i].p) -> x, 'd');
         list_append(yPositions, (unitype) ((tt_button_t *) tt_elements.all -> data[i].p) -> y, 'd');
     }
-
-    /* test list saving and loading */
-    list_t *listWrite = list_init();
-    list_append(listWrite, (unitype) 'A', 'c');
-    list_append(listWrite, (unitype) 1.0, 'd');
-    list_append(listWrite, (unitype) 500.1, 'd');
-    list_append(listWrite, (unitype) 2938274, 'i');
-    list_append(listWrite, (unitype) 6552, 'h');
-    list_t *listEmbed = list_init();
-    list_append(listEmbed, (unitype) "C:\\Information\\Programming\\C\\openGL\\turtle-development", 's');
-    list_append(listWrite, (unitype) listEmbed, 'r');
-    list_append(listWrite, (unitype) "SimpleString", 's');
-    list_append(listWrite, (unitype) "Hello World illegal ,,[],\\\\akdja", 's');
-    list_append(listWrite, (unitype) 'Z', 'c');
-    FILE *listWriteFile = fopen("listWriteFile.txt", "w");
-    list_write(listWriteFile, listWrite);
-    fclose(listWriteFile);
-    FILE *listReadFile = fopen("listWriteFile.txt", "r");
-    list_t *listRead = list_read(listReadFile);
-    fclose(listReadFile);
-    list_print(listWrite);
-    list_print(listRead);
-    exit(1);
 
     double scroll = 0.0;
     double scrollFactor = 15;
