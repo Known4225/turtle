@@ -25,14 +25,16 @@ The following build commands are available:
 - `make singlefile` - This will package the turtle headers and source files into a single `turtle.h` file.
 
 # To Do
-- I think there is a way to increase performance for texture enabled turtle - I think it is possible to remove penpos entirely and just write straight to bufferList
+- Experiment with wasm and webgl building into an html executable (insane potential)
 - Write tests
-- Reduce size of turtle.h, find a building solution that doesn't involve 26936 lines of duplicate code
 - Vertical switches
+- Fix flipped world coordinates
 - Mouse interactions with textbox (highlight, index select)
+- Text-only textbox
 - 3D support
 - Audio support
-- Text-only textbox
-- Write wiki/documentation
-- Fix flipped world coordinates
+- Update wiki/documentation
 - Linux COM support
+- Reduce size of turtle.h, find a building solution that doesn't involve 26936 lines of duplicate code
+- I think there is a way to increase performance for texture enabled turtle - I think it is possible to remove penpos entirely and just write straight to bufferList - this would probably only increase CPU performance which has not, in my experience, been the bottleneck for most machines
+- increase performance by reverting the GPU always dying update (special handling for cases that would not otherwise mutate the penpos list)
