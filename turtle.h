@@ -192,6 +192,15 @@ void list_print(list_t *list);
 /* prints the types of the list */
 void list_print_type(list_t *list);
 
+/* writes list to a file in a special format: [data, type, data, type, ...]. Can be retrieved with list_read() */
+void list_write(FILE *fp, list_t *list);
+
+/* a list_append that takes a string and parses it to the appropriate type */
+void list_append_element(list_t *list, char *element, char type);
+
+/* reads list from a file that was written to with list_write() - ensure file pointer is located at the start of the list */
+list_t *list_read(FILE *fp);
+
 /* frees the list's data but not the list itself */
 void list_free_lite(list_t *list);
 
@@ -56488,7 +56497,6 @@ int32_t unitype_check_equal(unitype item1, unitype item2, int8_t typeItem1, int8
     if ((typeItem1 == 's' || typeItem2 == 's' || typeItem1 == 'p' || typeItem2 == 'p' || typeItem1 == 'r' || typeItem2 == 'r') && typeItem1 != typeItem2) {
         return 0;
     }
-
     switch (typeItem1) {
         case LIST_TYPE_CHAR:
             if (item1.c == item2.c) {return 1;}
@@ -56815,7 +56823,7 @@ void unitype_fprint(FILE *fp, unitype item, char type) {
             fprintf(fp, "%lf", item.d);
         break;
         case LIST_TYPE_STRING:
-            fprintf(fp, "%s", item.s);
+            fprintf(fp, item.s);
         break;
         case LIST_TYPE_POINTER:
             fprintf(fp, "%p", item.p);
@@ -56912,13 +56920,13 @@ void list_write(FILE *fp, list_t *list) {
     }
     for (int32_t i = 0; i < list -> length; i++) {
         if (list -> type[i] == 's') {
-            /* special: add escape characters (\) before commas (,) and right brackets (]) to avoid ambiguity */
+            /* special: add escape characters (\) before commas (,) left brackets ([), and right brackets (]) to avoid ambiguity */
             char *originalString = list -> data[i].s;
             int32_t len = strlen(originalString);
-            char writeString[len * 2 + 2];
+            char *writeString = malloc(len * 2 + 2);
             int32_t writeStringNext = 0;
             for (int32_t j = 0; j < len; j++) {
-                if (originalString[j] == ',' || originalString[j] == ']') {
+                if (originalString[j] == ',' || originalString[j] == '[' || originalString[j] == ']') {
                     writeString[writeStringNext] = '\\';
                     writeStringNext++;
                 }
@@ -56930,6 +56938,11 @@ void list_write(FILE *fp, list_t *list) {
                 writeStringNext++;
             }
             writeString[writeStringNext] = '\0';
+            fprintf(fp, writeString);
+            free(writeString);
+        } else if (list -> type[i] == 'r') {
+            /* special: list should get written in list_write format */
+            list_write(fp, list -> data[i].r);
         } else {
             unitype_fprint(fp, list -> data[i], list -> type[i]);
         }
@@ -56942,16 +56955,161 @@ void list_write(FILE *fp, list_t *list) {
     }
 }
 
+/* a list_append that takes a string and parses it to the appropriate type */
+void list_append_element(list_t *list, char *element, char type) {
+    switch (type) {
+        case LIST_TYPE_CHAR:
+            int8_t itemChar;
+            sscanf(element, "%c", &itemChar);
+            list_append(list, (unitype) itemChar, type);
+            return;
+        case LIST_TYPE_INT8:
+        case LIST_TYPE_UINT8: // UINT8 or BOOL
+            int8_t itemByte;
+            sscanf(element, "%d", &itemByte);
+            list_append(list, (unitype) itemByte, type);
+            return;
+        case LIST_TYPE_INT16:
+        case LIST_TYPE_UINT16:
+            int16_t itemShort;
+            sscanf(element, "%d", &itemShort);
+            list_append(list, (unitype) itemShort, type);
+            return;
+        case LIST_TYPE_INT32:
+        case LIST_TYPE_UINT32:
+            int32_t itemInt;
+            sscanf(element, "%d", &itemInt);
+            list_append(list, (unitype) itemInt, type);
+            return;
+        case LIST_TYPE_INT64:
+        case LIST_TYPE_UINT64:
+            int64_t itemLong;
+            sscanf(element, "%lld", &itemLong);
+            list_append(list, (unitype) itemLong, type);
+            return;
+        case LIST_TYPE_FLOAT:
+            float itemFloat;
+            sscanf(element, "%f", &itemFloat);
+            list_append(list, (unitype) itemFloat, type);
+            return;
+        case LIST_TYPE_DOUBLE:
+            double itemDouble;
+            sscanf(element, "%lf", &itemDouble);
+            list_append(list, (unitype) itemDouble, type);
+            return;
+        case LIST_TYPE_STRING:
+            list_append(list, (unitype) element, type);
+            return;
+        case LIST_TYPE_POINTER:
+            void *itemPointer;
+            sscanf(element, "%p", &itemPointer); // i honestly don't know if this will work
+            list_append(list, (unitype) itemPointer, type);
+            return;
+        case LIST_TYPE_LIST:
+            printf("list_append_element - no support for list\n");
+            return;
+        default:
+            printf("list_append_element - type %d not recognized\n", type);
+            return;
+    }
+}
+
 /* reads list from a file that was written to with list_write() - ensure file pointer is located at the start of the list */
 list_t *list_read(FILE *fp) {
+    list_t *output = list_init();
     /* locate start of list */
     char checkChar;
-    while (fread(&checkChar, 1, 1, fp) == 1) {
+    int32_t status;
+    do {
+        status = fread(&checkChar, 1, 1, fp);
         if (checkChar == '[') {
             break;
         }
+    } while (status == 1);
+    if (status != 1) {
+        printf("list_read: ERROR - Could not locate start of list\n");
+        return output;
     }
-    
+    char *item = malloc(2048); // no string can exceed 2048 characters
+    while (status == 1) {
+        /* read item */
+        int32_t writePointer = 0;
+        int8_t backslashFound = 0;
+        list_t *embeddedList = NULL;
+        while (writePointer < 2047 && status == 1) {
+            status = fread(item + writePointer, 1, 1, fp);
+            if (!backslashFound && item[writePointer] == ',') {
+                /* end of element */
+                break;
+            }
+            if (!backslashFound && item[writePointer] == '[') {
+                /* embedded list */
+                fseek(fp, -1, SEEK_CUR); // move filepointer back one
+                embeddedList = list_read(fp);
+                status = fread(&checkChar, 1, 1, fp); // skip comma
+                if (checkChar != ',') {
+                    /* expected comma here - fail */
+                    free(item);
+                    printf("list_read: ERROR - expected comma after embedded list\n");
+                    return output;
+                }
+                break;
+            }
+            if (!backslashFound && item[writePointer] == ']') {
+                /* end of list - should not happen here (missing type) */
+                return output;
+            }
+            if (backslashFound && item[writePointer] != ',' && item[writePointer] != '[' && item[writePointer] != ']') {
+                /* readd backslash */
+                char savedChar = item[writePointer];
+                item[writePointer] = '\\';
+                writePointer++;
+                item[writePointer] = savedChar;
+            }
+            backslashFound = 0;
+            if (item[writePointer] == '\\') {
+                writePointer--;
+                backslashFound = 1;
+            }
+            writePointer++;
+        }
+        if (status != 1) {
+            free(item);
+            printf("list_read: ERROR - Failed to find end of list\n");
+            return output;
+        }
+        item[writePointer] = '\0';
+        /* read type */
+        status = fread(&checkChar, 1, 1, fp); // skip space
+        status = fread(&checkChar, 1, 1, fp);
+        if (checkChar == LIST_TYPE_LIST) {
+            if (embeddedList == NULL) {
+                /* type indicated list but no list was found - fail */
+                free(item);
+                printf("list_read: ERROR - type indicated list but no list was found\n");
+                return output;
+            }
+            list_append(output, (unitype) embeddedList, 'r');
+        } else {
+            list_append_element(output, item, checkChar);
+        }
+        status = fread(&checkChar, 1, 1, fp); // skip comma
+        if (checkChar == ']') {
+            /* end of list */
+            free(item);
+            return output;
+        }
+        if (checkChar != ',') {
+            /* expected comma here - fail */
+            free(item);
+            printf("list_read: ERROR - expected comma or end of list\n");
+            return output;
+        }
+        status = fread(&checkChar, 1, 1, fp); // skip space
+    }
+    free(item);
+    printf("list_read: ERROR - Failed to find end of list\n");
+    return output;
 }
 
 /* frees the list's data but not the list itself */
