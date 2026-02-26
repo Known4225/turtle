@@ -189,6 +189,15 @@ void list_print(list_t *list);
 /* prints the types of the list */
 void list_print_type(list_t *list);
 
+/* writes list to a file in a special format: [data, type, data, type, ...]. Can be retrieved with list_read() */
+void list_write(FILE *fp, list_t *list);
+
+/* a list_append that takes a string and parses it to the appropriate type */
+void list_append_element(list_t *list, char *element, char type);
+
+/* reads list from a file that was written to with list_write() - ensure file pointer is located at the start of the list */
+list_t *list_read(FILE *fp);
+
 /* frees the list's data but not the list itself */
 void list_free_lite(list_t *list);
 
