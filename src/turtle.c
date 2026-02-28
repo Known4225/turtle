@@ -27,7 +27,7 @@ const char *turtleVertexShaderSource =
 "precision mediump float;\n"
 #else
 "#version 330 core\n"
-#endif
+#endif /* OS_BROWSER */
 "layout(location = 0) in vec2 vPosition;\n"
 "layout(location = 1) in vec4 vColor;\n"
 "layout(location = 2) in vec3 textureCoordVert;\n"
@@ -49,7 +49,7 @@ const char *turtleFragmentShaderSource =
 #else
 "#version 330 core\n"
 "uniform sampler2DArray textureImages;\n"
-#endif
+#endif /* OS_BROWSER */
 "in vec4 shadeColor;\n"
 "in vec2 textureCoordFrag;\n"
 "in float textureIndex;\n"
@@ -100,29 +100,7 @@ GLFWwindow *turtleCreateWindow(char *windowName) {
 #ifdef TURTLE_ENABLE_TEXTURES
 /* special function that can be called prior to turtleInit - this function condenses the window creation code with icon boilerplate */
 GLFWwindow *turtleCreateWindowIcon(char *windowName, char *filename) {
-    /* Initialise glfw */
-    if (!glfwInit()) {
-        return NULL;
-    }
-    glfwWindowHint(GLFW_SAMPLES, 4); // MSAA (Anti-Aliasing) with 4 samples (must be done before window is created (?))
-
-    /* Create a windowed mode window and its OpenGL context */
-    const GLFWvidmode *monitorSize = glfwGetVideoMode(glfwGetPrimaryMonitor());
-    int32_t windowHeight = monitorSize -> height;
-    double optimizedScalingFactor = 0.8; // Set this number to 1 on windows and 0.8 on Ubuntu for maximum compatibility (fixes issue with incorrect stretching)
-    #ifdef OS_WINDOWS
-    optimizedScalingFactor = 1;
-    #endif
-    #ifdef OS_LINUX
-    optimizedScalingFactor = 0.8;
-    #endif
-    GLFWwindow *window = glfwCreateWindow(windowHeight * 16 / 9 * optimizedScalingFactor, windowHeight * optimizedScalingFactor, windowName, NULL, NULL);
-    if (!window) {
-        glfwTerminate();
-        return NULL;
-    }
-    glfwMakeContextCurrent(window);
-    glfwSetWindowSizeLimits(window, windowHeight * 16 / 9 * 0.4, windowHeight * 0.4, windowHeight * 16 / 9 * optimizedScalingFactor, windowHeight * optimizedScalingFactor);
+    GLFWwindow *window = turtleCreateWindow(windowName);
     /* initialise logo */
     GLFWimage icon;
     int32_t iconChannels;
@@ -153,7 +131,7 @@ void turtleInit(GLFWwindow *window, double leftX, double bottomY, double rightX,
     if (glGenVertexArrays == NULL) {
         printf("couldn't load openGL\n");
     }
-    #endif
+    #endif /* OS_BROWSER */
 
     /* set up shaders */
     uint32_t VAO;

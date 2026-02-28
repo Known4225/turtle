@@ -674,6 +674,8 @@ typedef khronos_uint16_t GLhalf;
 #define GL_TEXTURE_WRAP_R                 0x8072
 #define GL_MAX_3D_TEXTURE_SIZE            0x8073
 #define GL_UNSIGNED_INT_2_10_10_10_REV    0x8368
+#define GL_BGR                            0x80E0
+#define GL_BGRA                           0x80E1
 #define GL_MAX_ELEMENTS_VERTICES          0x80E8
 #define GL_MAX_ELEMENTS_INDICES           0x80E9
 #define GL_TEXTURE_MIN_LOD                0x813A
