@@ -48219,10 +48219,11 @@ typedef enum {
         https://glad.dav1d.de/#profile=core&language=c&specification=gl&loader=on&api=gl%3D3.3
 */
 
+#ifndef OS_BROWSER
+
 #ifndef __glad_h_
 #define __glad_h_
 
-#ifndef OS_BROWSER
 
 #ifdef __gl_h_
 #error OpenGL header already included, remove this include, glad already provides it
@@ -50326,18 +50327,9 @@ GLAPI PFNGLSECONDARYCOLORP3UIVPROC glad_glSecondaryColorP3uiv;
 }
 #endif
 
-#else
-#define GL_RED 0x1903
-#define GL_GREEN 0x1904
-#define GL_BLUE 0x1905
-#define GL_ALPHA 0x1906
-#define GL_RGB 0x1907
-#define GL_RGBA 0x1908
-#define GL_BGR 0x80E0
-#define GL_BGRA 0x80E1
-#endif /* OS_BROWSER */
-
 #endif /* __glad_h_ */
+
+#endif /* OS_BROWSER */
 
 #ifdef OS_BROWSER
 #ifndef __gles2_gl3_h_
@@ -51015,6 +51007,8 @@ typedef khronos_uint16_t GLhalf;
 #define GL_TEXTURE_WRAP_R                 0x8072
 #define GL_MAX_3D_TEXTURE_SIZE            0x8073
 #define GL_UNSIGNED_INT_2_10_10_10_REV    0x8368
+#define GL_BGR                            0x80E0
+#define GL_BGRA                           0x80E1
 #define GL_MAX_ELEMENTS_VERTICES          0x80E8
 #define GL_MAX_ELEMENTS_INDICES           0x80E9
 #define GL_TEXTURE_MIN_LOD                0x813A
@@ -59456,7 +59450,7 @@ const char *turtleVertexShaderSource =
 "precision mediump float;\n"
 #else
 "#version 330 core\n"
-#endif
+#endif /* OS_BROWSER */
 "layout(location = 0) in vec2 vPosition;\n"
 "layout(location = 1) in vec4 vColor;\n"
 "layout(location = 2) in vec3 textureCoordVert;\n"
@@ -59478,7 +59472,7 @@ const char *turtleFragmentShaderSource =
 #else
 "#version 330 core\n"
 "uniform sampler2DArray textureImages;\n"
-#endif
+#endif /* OS_BROWSER */
 "in vec4 shadeColor;\n"
 "in vec2 textureCoordFrag;\n"
 "in float textureIndex;\n"
@@ -59529,29 +59523,7 @@ GLFWwindow *turtleCreateWindow(char *windowName) {
 #ifdef TURTLE_ENABLE_TEXTURES
 /* special function that can be called prior to turtleInit - this function condenses the window creation code with icon boilerplate */
 GLFWwindow *turtleCreateWindowIcon(char *windowName, char *filename) {
-    /* Initialise glfw */
-    if (!glfwInit()) {
-        return NULL;
-    }
-    glfwWindowHint(GLFW_SAMPLES, 4); // MSAA (Anti-Aliasing) with 4 samples (must be done before window is created (?))
-
-    /* Create a windowed mode window and its OpenGL context */
-    const GLFWvidmode *monitorSize = glfwGetVideoMode(glfwGetPrimaryMonitor());
-    int32_t windowHeight = monitorSize -> height;
-    double optimizedScalingFactor = 0.8; // Set this number to 1 on windows and 0.8 on Ubuntu for maximum compatibility (fixes issue with incorrect stretching)
-    #ifdef OS_WINDOWS
-    optimizedScalingFactor = 1;
-    #endif
-    #ifdef OS_LINUX
-    optimizedScalingFactor = 0.8;
-    #endif
-    GLFWwindow *window = glfwCreateWindow(windowHeight * 16 / 9 * optimizedScalingFactor, windowHeight * optimizedScalingFactor, windowName, NULL, NULL);
-    if (!window) {
-        glfwTerminate();
-        return NULL;
-    }
-    glfwMakeContextCurrent(window);
-    glfwSetWindowSizeLimits(window, windowHeight * 16 / 9 * 0.4, windowHeight * 0.4, windowHeight * 16 / 9 * optimizedScalingFactor, windowHeight * optimizedScalingFactor);
+    GLFWwindow *window = turtleCreateWindow(windowName);
     /* initialise logo */
     GLFWimage icon;
     int32_t iconChannels;
@@ -59582,7 +59554,7 @@ void turtleInit(GLFWwindow *window, double leftX, double bottomY, double rightX,
     if (glGenVertexArrays == NULL) {
         printf("couldn't load openGL\n");
     }
-    #endif
+    #endif /* OS_BROWSER */
 
     /* set up shaders */
     uint32_t VAO;
