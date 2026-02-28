@@ -227,10 +227,6 @@ int main(int argc, char *argv[]) {
     tt_dropdown_t *imageDropdown = tt_dropdownInit("Source", imageDropdownOptions, NULL, TT_DROPDOWN_ALIGN_RIGHT, 700, 36, 8);
     int32_t oldImageDropdown = imageDropdown -> value;
 
-    uint32_t tps = 120; // ticks per second (locked to fps in this case)
-    uint64_t tick = 0; // count number of ticks since application started
-    clock_t start, end;
-
     double sliderVar, dialVar;
     tt_button_t *button = tt_buttonInit("Button", NULL, 150, 20, 10);
     button -> shape = TT_BUTTON_SHAPE_ROUNDED_RECTANGLE;
@@ -307,6 +303,11 @@ int main(int argc, char *argv[]) {
     double scroll = 0.0;
     double scrollFactor = 15;
     char keys[8] = {0};
+
+    uint32_t tps = 120; // ticks per second (locked to fps in this case)
+    uint64_t tick = 0; // count number of ticks since application started
+    clock_t start, end;
+    
     while (turtle.popupClose == 0) {
         start = clock();
         turtleGetMouseCoords();

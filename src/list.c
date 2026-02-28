@@ -532,7 +532,7 @@ void unitype_fprint(FILE *fp, unitype item, char type) {
             fprintf(fp, "%lf", item.d);
         break;
         case LIST_TYPE_STRING:
-            fprintf(fp, item.s);
+            fprintf(fp, "%s", item.s);
         break;
         case LIST_TYPE_POINTER:
             fprintf(fp, "%p", item.p);
@@ -647,7 +647,7 @@ void list_write(FILE *fp, list_t *list) {
                 writeStringNext++;
             }
             writeString[writeStringNext] = '\0';
-            fprintf(fp, writeString);
+            fprintf(fp, "%s", writeString);
             free(writeString);
         } else if (list -> type[i] == 'r') {
             /* special: list should get written in list_write format */
@@ -667,49 +667,49 @@ void list_write(FILE *fp, list_t *list) {
 /* a list_append that takes a string and parses it to the appropriate type */
 void list_append_element(list_t *list, char *element, char type) {
     switch (type) {
-        case LIST_TYPE_CHAR:
+        case LIST_TYPE_CHAR:;
             int8_t itemChar;
             sscanf(element, "%c", &itemChar);
             list_append(list, (unitype) itemChar, type);
             return;
         case LIST_TYPE_INT8:
-        case LIST_TYPE_UINT8: // UINT8 or BOOL
+        case LIST_TYPE_UINT8:; // UINT8 or BOOL
             int8_t itemByte;
-            sscanf(element, "%d", &itemByte);
+            sscanf(element, "%hhd", &itemByte);
             list_append(list, (unitype) itemByte, type);
             return;
         case LIST_TYPE_INT16:
-        case LIST_TYPE_UINT16:
+        case LIST_TYPE_UINT16:;
             int16_t itemShort;
-            sscanf(element, "%d", &itemShort);
+            sscanf(element, "%hd", &itemShort);
             list_append(list, (unitype) itemShort, type);
             return;
         case LIST_TYPE_INT32:
-        case LIST_TYPE_UINT32:
+        case LIST_TYPE_UINT32:;
             int32_t itemInt;
             sscanf(element, "%d", &itemInt);
             list_append(list, (unitype) itemInt, type);
             return;
         case LIST_TYPE_INT64:
-        case LIST_TYPE_UINT64:
+        case LIST_TYPE_UINT64:;
             int64_t itemLong;
             sscanf(element, "%lld", &itemLong);
             list_append(list, (unitype) itemLong, type);
             return;
-        case LIST_TYPE_FLOAT:
+        case LIST_TYPE_FLOAT:;
             float itemFloat;
             sscanf(element, "%f", &itemFloat);
             list_append(list, (unitype) itemFloat, type);
             return;
-        case LIST_TYPE_DOUBLE:
+        case LIST_TYPE_DOUBLE:;
             double itemDouble;
             sscanf(element, "%lf", &itemDouble);
             list_append(list, (unitype) itemDouble, type);
             return;
-        case LIST_TYPE_STRING:
+        case LIST_TYPE_STRING:;
             list_append(list, (unitype) element, type);
             return;
-        case LIST_TYPE_POINTER:
+        case LIST_TYPE_POINTER:;
             void *itemPointer;
             sscanf(element, "%p", &itemPointer); // i honestly don't know if this will work
             list_append(list, (unitype) itemPointer, type);

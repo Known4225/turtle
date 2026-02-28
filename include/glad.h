@@ -19,9 +19,10 @@
         https://glad.dav1d.de/#profile=core&language=c&specification=gl&loader=on&api=gl%3D3.3
 */
 
-
 #ifndef __glad_h_
 #define __glad_h_
+
+#ifndef OS_BROWSER
 
 #ifdef __gl_h_
 #error OpenGL header already included, remove this include, glad already provides it
@@ -2126,4 +2127,15 @@ GLAPI PFNGLSECONDARYCOLORP3UIVPROC glad_glSecondaryColorP3uiv;
 }
 #endif
 
-#endif
+#else
+#define GL_RED 0x1903
+#define GL_GREEN 0x1904
+#define GL_BLUE 0x1905
+#define GL_ALPHA 0x1906
+#define GL_RGB 0x1907
+#define GL_RGBA 0x1908
+#define GL_BGR 0x80E0
+#define GL_BGRA 0x80E1
+#endif /* OS_BROWSER */
+
+#endif /* __glad_h_ */

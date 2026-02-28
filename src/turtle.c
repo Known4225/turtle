@@ -22,7 +22,12 @@ turtle_t turtle;
 #define STB_IMAGE_IMPLEMENTATION
 /* shader code */
 const char *turtleVertexShaderSource = 
+#ifdef OS_BROWSER
+"#version 300 es\n"
+"precision mediump float;\n"
+#else
 "#version 330 core\n"
+#endif
 "layout(location = 0) in vec2 vPosition;\n"
 "layout(location = 1) in vec4 vColor;\n"
 "layout(location = 2) in vec3 textureCoordVert;\n"
@@ -37,14 +42,24 @@ const char *turtleVertexShaderSource =
 "}\0";
 
 const char *turtleFragmentShaderSource = 
+#ifdef OS_BROWSER
+"#version 300 es\n"
+"uniform mediump sampler2DArray textureImages;\n"
+"precision mediump float;\n"
+#else
 "#version 330 core\n"
 "uniform sampler2DArray textureImages;\n"
-"in vec4 shadeColor;\n;"
+#endif
+"in vec4 shadeColor;\n"
 "in vec2 textureCoordFrag;\n"
 "in float textureIndex;\n"
 "out vec4 fragColor;\n"
 "void main() {\n"
-"     fragColor = texture(textureImages, vec3(textureCoordFrag, textureIndex)) * shadeColor + shadeColor * (1 / (1 + pow(2, 20 * textureIndex - 10)));\n"
+"    if (textureIndex > 0.5) {\n"
+"        fragColor = texture(textureImages, vec3(textureCoordFrag, textureIndex)) * shadeColor;\n"
+"    } else {\n"
+"        fragColor = shadeColor;\n"
+"    }\n"
 "}\0";
 #endif /* TURTLE_ENABLE_TEXTURES */
 
@@ -56,6 +71,7 @@ GLFWwindow *turtleCreateWindow(char *windowName) {
     }
     glfwWindowHint(GLFW_SAMPLES, 4); // MSAA (Anti-Aliasing) with 4 samples (must be done before window is created (?))
 
+    #ifndef OS_BROWSER
     /* Create a windowed mode window and its OpenGL context */
     const GLFWvidmode *monitorSize = glfwGetVideoMode(glfwGetPrimaryMonitor());
     int32_t windowHeight = monitorSize -> height;
@@ -67,12 +83,17 @@ GLFWwindow *turtleCreateWindow(char *windowName) {
     optimizedScalingFactor = 0.8;
     #endif
     GLFWwindow *window = glfwCreateWindow(windowHeight * 16 / 9 * optimizedScalingFactor, windowHeight * optimizedScalingFactor, windowName, NULL, NULL);
+    #else
+    GLFWwindow *window = glfwCreateWindow(1920, 1080, windowName, NULL, NULL);
+    #endif /* OS_BROWSER */
     if (!window) {
         glfwTerminate();
         return NULL;
     }
     glfwMakeContextCurrent(window);
+    #ifndef OS_BROWSER
     glfwSetWindowSizeLimits(window, windowHeight * 16 / 9 * 0.4, windowHeight * 0.4, windowHeight * 16 / 9 * optimizedScalingFactor, windowHeight * optimizedScalingFactor);
+    #endif /* OS_BROWSER */
     return window;
 }
 
@@ -125,12 +146,14 @@ void turtleInit(GLFWwindow *window, double leftX, double bottomY, double rightX,
     gladLoadGL();
     #endif /* TURTLE_ENABLE_TEXTURES */
     #ifdef TURTLE_ENABLE_TEXTURES
+    #ifndef OS_BROWSER
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
         printf("could not initialise glad\n");
     }
     if (glGenVertexArrays == NULL) {
         printf("couldn't load openGL\n");
     }
+    #endif
 
     /* set up shaders */
     uint32_t VAO;
@@ -158,6 +181,7 @@ void turtleInit(GLFWwindow *window, double leftX, double bottomY, double rightX,
         glGetShaderInfoLog(vertexShader, 512, NULL, errorMessage);
         printf("Error compiling vertex shader\n");
         printf("%s\n", errorMessage);
+        return;
     }
     int32_t fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
     glShaderSource(fragmentShader, 1, &turtleFragmentShaderSource, NULL);
@@ -167,6 +191,7 @@ void turtleInit(GLFWwindow *window, double leftX, double bottomY, double rightX,
         glGetShaderInfoLog(fragmentShader, 512, NULL, errorMessage);
         printf("Error compiling fragment shader\n");
         printf("%s\n", errorMessage);
+        return;
     }
     int32_t shaderProgram = glCreateProgram();
     glAttachShader(shaderProgram, vertexShader);
@@ -177,6 +202,7 @@ void turtleInit(GLFWwindow *window, double leftX, double bottomY, double rightX,
         glGetShaderInfoLog(shaderProgram, 512, NULL, errorMessage);
         printf("Error linking shaders\n");
         printf("%s\n", errorMessage);
+        return;
     }
     
     glUseProgram(shaderProgram);
@@ -833,9 +859,9 @@ turtle_texture_t turtleTextureLoadListArrayInternal(list_t *list, uint8_t *array
     turtle_texture_t texture = -1;
     char pointerValue[20];
     if (freeArrayFlag) {
-        sprintf(pointerValue, "0x%lX", (uint64_t) list);
+        sprintf(pointerValue, "0x%llX", (uint64_t) list);
     } else {
-        sprintf(pointerValue, "0x%lX", (uint64_t) array);
+        sprintf(pointerValue, "0x%llX", (uint64_t) array);
     }
     for (int32_t i = 4; i < turtle.textureList -> length; i += 4) {
         if (strcmp(turtle.textureList -> data[i].s, "") == 0) {
@@ -1447,6 +1473,9 @@ void turtleUpdate() {
             glfwTerminate();
         }
     }
+    #ifdef OS_BROWSER
+    emscripten_sleep(0);
+    #endif /* OS_BROWSER */
 }
 
 /* keeps the window open while doing nothing else (from python turtleMainLoop()) */

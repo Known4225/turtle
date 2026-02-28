@@ -4407,7 +4407,7 @@ tot3+=decode[3+(ofs)]*hc[3+(ofs)];
 tot0+=decode[0+(ofs)]*hc[0+(ofs)];
 #define stbir__2_coeff_remnant(ofs)        \
 tot0+=decode[0+(ofs)]*hc[0+(ofs)];   \
-tot1+=decode[1+(ofs)]*hc[1+(ofs)];   \
+tot1+=decode[1+(ofs)]*hc[1+(ofs)];
 #define stbir__3_coeff_remnant(ofs)        \
 tot0+=decode[0+(ofs)]*hc[0+(ofs)];   \
 tot1+=decode[1+(ofs)]*hc[1+(ofs)];   \
@@ -4870,7 +4870,7 @@ tota2+=decode[2+(ofs)*3]*c;      \
 c=hc[1+(ofs)];                   \
 totb0+=decode[3+(ofs)*3]*c;      \
 totb1+=decode[4+(ofs)*3]*c;      \
-totb2+=decode[5+(ofs)*3]*c;      \
+totb2+=decode[5+(ofs)*3]*c;
 #define stbir__3_coeff_remnant(ofs)  \
 c=hc[0+(ofs)];                   \
 tota0+=decode[0+(ofs)*3]*c;      \
@@ -5350,7 +5350,7 @@ tot2+=decode[9]*c;             \
 tot3+=decode[10]*c;            \
 tot4+=decode[11]*c;            \
 tot5+=decode[12]*c;            \
-tot6+=decode[13]*c;            \
+tot6+=decode[13]*c;
 #define stbir__3_coeff_only()        \
 float tot0,tot1,tot2,tot3,tot4,tot5,tot6,c; \
 c=hc[0];                       \
@@ -5376,7 +5376,7 @@ tot2+=decode[16]*c;            \
 tot3+=decode[17]*c;            \
 tot4+=decode[18]*c;            \
 tot5+=decode[19]*c;            \
-tot6+=decode[20]*c;            \
+tot6+=decode[20]*c;
 #define stbir__store_output_tiny()                \
 output[0]=tot0;                             \
 output[1]=tot1;                             \
@@ -5466,7 +5466,7 @@ x2+=decode[2+(ofs)*7]*c;   \
 x3+=decode[3+(ofs)*7]*c;   \
 x4+=decode[4+(ofs)*7]*c;   \
 x5+=decode[5+(ofs)*7]*c;   \
-x6+=decode[6+(ofs)*7]*c;   \
+x6+=decode[6+(ofs)*7]*c;
 #define stbir__2_coeff_remnant(ofs) \
 STBIR_SIMD_NO_UNROLL(decode);  \
 c=hc[0+(ofs)];               \
@@ -5484,7 +5484,7 @@ y2+=decode[9+(ofs)*7]*c;   \
 y3+=decode[10+(ofs)*7]*c;  \
 y4+=decode[11+(ofs)*7]*c;  \
 y5+=decode[12+(ofs)*7]*c;  \
-y6+=decode[13+(ofs)*7]*c;  \
+y6+=decode[13+(ofs)*7]*c;
 #define stbir__3_coeff_remnant(ofs) \
 STBIR_SIMD_NO_UNROLL(decode);  \
 c=hc[0+(ofs)];               \
@@ -5510,7 +5510,7 @@ x2+=decode[16+(ofs)*7]*c;  \
 x3+=decode[17+(ofs)*7]*c;  \
 x4+=decode[18+(ofs)*7]*c;  \
 x5+=decode[19+(ofs)*7]*c;  \
-x6+=decode[20+(ofs)*7]*c;  \
+x6+=decode[20+(ofs)*7]*c;
 #define stbir__store_output()                     \
 output[0]=x0+y0;                          \
 output[1]=x1+y1;                          \

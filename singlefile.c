@@ -27,6 +27,8 @@ const char headerFiles[][128] = {
     "include/osTools.h",
     "include/khrplatform.h",
     "include/glad.h",
+    "include/gl3.h",
+    "include/emscripten.h",
     "include/glfw3.h",
 };
 
