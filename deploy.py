@@ -43,6 +43,13 @@ print("\
 # Move files to turtle-main
 shutil.copy("turtle.c", "../turtle-main/turtle.c")
 shutil.copy("turtle.h", "../turtle-main/turtle.h")
+shutil.copy("config/combine.c", "../turtle-main/config/combine.c")
+shutil.copy("config/popupConfig.txt", "../turtle-main/config/popupConfig.txt")
+shutil.copy("config/ribbonConfig.txt", "../turtle-main/config/ribbonConfig.txt")
+shutil.copy("config/roberto.tgl", "../turtle-main/config/roberto.tgl")
+shutil.copy("config/robertoMono.tgl", "../turtle-main/config/robertoMono.tgl")
+shutil.copy("config/test.csv", "../turtle-main/config/test.csv")
+shutil.copy("config/turtle_shell.html", "../turtle-main/config/turtle_shell.html")
 shutil.copy("Windows/turtle.lib", "../turtle-main/Windows/turtle.lib")
 shutil.copy("Linux/libturtle.a", "../turtle-main/Linux/libturtle.a")
 
