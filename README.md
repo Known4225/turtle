@@ -25,7 +25,6 @@ The following build commands are available:
 - `make singlefile` - This will package the turtle headers and source files into a single `turtle.h` file.
 
 # To Do
-- Experiment with wasm and webgl building into an html executable (insane potential)
 - Write tests
 - Vertical switches
 - Fix flipped world coordinates
@@ -35,12 +34,12 @@ The following build commands are available:
 - Audio support
 - Update wiki/documentation
 - Linux COM support
-- Reduce size of turtle.h, find a building solution that doesn't involve 26936 lines of duplicate code
+- Reduce size of turtle.h, find a building solution that doesn't involve 26936 lines of duplicate code (`stb_image_resize2.h` macro `STBIR__HEADER_FILENAME` presents a problems when this file does not exist)
 - I think there is a way to increase performance for texture enabled turtle - I think it is possible to remove penpos entirely and just write straight to bufferList - this would probably only increase CPU performance which has not, in my experience, been the bottleneck for most machines
 - increase performance by reverting the GPU always dying update (special handling for cases that would not otherwise mutate the penpos list)
 
 # Limitations of web deployment
-- Cannot use osTools in any form (can't even initialise osTools)
+- Must osTools features will not work
 - Must compile with TURTLE_ENABLE_TEXTURES (fixed function pipeline like `glBegin` are not supported in WebGl)
 - Cannot compile using static library (must use TURTLE_IMPLEMENTATION macro in source)
 - Textures must be loaded with GL_RGBA (this is a bug that I can't figure out how to fix)
