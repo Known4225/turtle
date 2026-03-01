@@ -38,3 +38,9 @@ The following build commands are available:
 - Reduce size of turtle.h, find a building solution that doesn't involve 26936 lines of duplicate code
 - I think there is a way to increase performance for texture enabled turtle - I think it is possible to remove penpos entirely and just write straight to bufferList - this would probably only increase CPU performance which has not, in my experience, been the bottleneck for most machines
 - increase performance by reverting the GPU always dying update (special handling for cases that would not otherwise mutate the penpos list)
+
+# Limitations of web deployment
+- Cannot use osTools in any form (can't even initialise osTools)
+- Must compile with TURTLE_ENABLE_TEXTURES (fixed function pipeline like `glBegin` are not supported in WebGl)
+- Cannot compile using static library (must use TURTLE_IMPLEMENTATION macro in source)
+- Textures must be loaded with GL_RGBA (this is a bug that I can't figure out how to fix)

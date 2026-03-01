@@ -219,7 +219,7 @@ int32_t osToolsCameraClose(char *name);
 #include <mfapi.h>
 #include <mfreadwrite.h>
 #include <wmcodecdsp.h>
-#endif
+#endif /* OS_WINDOWS */
 
 #ifdef OS_LINUX
 #include <fcntl.h>
@@ -234,7 +234,22 @@ int32_t osToolsCameraClose(char *name);
 #include <fcntl.h>
 #include <arpa/inet.h>
 #include <termios.h>
-#endif
+#endif /* OS_LINUX */
+
+#ifdef OS_BROWSER
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <sys/mman.h>
+#include <dirent.h>
+#include <errno.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netdb.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <arpa/inet.h>
+#include <termios.h>
+#endif /* OS_BROWSER */
 
 /* initialise osTools, pass in argv[0] from main function as well as GLFW window object */
 int32_t osToolsInit(char argv0[], GLFWwindow *window);

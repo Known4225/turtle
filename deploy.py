@@ -11,8 +11,9 @@ import subprocess
 
 # Build on development
 outWindows = subprocess.run("make winrel").returncode
+outBrowser = subprocess.run("make html").returncode
 outLinux = subprocess.run("wsl -e make rel").returncode
-if outWindows != 0 or outLinux != 0:
+if outWindows != 0 or outBrowser != 0 or outLinux != 0:
     quit()
 
 # Check if file exists
@@ -48,9 +49,10 @@ shutil.copy("Linux/libturtle.a", "../turtle-main/Linux/libturtle.a")
 # Build on main
 os.chdir("../turtle-main")
 outWindows = subprocess.run("make winrel").returncode
+outBrowser = subprocess.run("make html").returncode
 outLinux = subprocess.run("wsl -e make rel").returncode
 # Push to git if checks passed
-if outWindows == 0 and outLinux == 0:
+if outWindows == 0 and outBrowser == 0 and outLinux == 0:
     subprocess.run("git pull")
     subprocess.run("git add .")
     commitMessage = input("Enter commit message: ")

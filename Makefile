@@ -17,3 +17,12 @@ winlib: singlefile
 singlefile:
 	gcc singlefile.c -o singlefile.exe
 	./singlefile.exe
+html: singlefile
+	emcc turtle.c --shell-file config/turtle_shell.html -sUSE_GLFW=3 -sMAX_WEBGL_VERSION=2 -sASYNCIFY -sINITIAL_MEMORY=1073741824 -sWASM=0 -DTURTLE_IMPLEMENTATION -DTURTLE_ENABLE_TEXTURES -DTURTLE_ENABLE_SERIAL -DTURTLE_ENABLE_SOCKETS -DTURTLE_ENABLE_CAMERA -DOS_BROWSER -Oz -o turtle.html --embed-file images
+	gcc config/combine.c -o combine.exe
+	combine.exe turtle.html
+	rm combine.exe
+htmlserver: singlefile
+	emcc turtle.c --shell-file config/turtle_shell.html -sUSE_GLFW=3 -sMAX_WEBGL_VERSION=2 -sASYNCIFY -sINITIAL_MEMORY=1073741824 -DTURTLE_IMPLEMENTATION -DTURTLE_ENABLE_TEXTURES -DTURTLE_ENABLE_SERIAL -DTURTLE_ENABLE_SOCKETS -DTURTLE_ENABLE_CAMERA -DOS_BROWSER -O3 -o turtle.html --embed-file images
+runserver:
+	emrun turtle.html
