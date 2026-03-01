@@ -63450,7 +63450,7 @@ void tt_dialUpdate(tt_dial_t *dialp) {
     tt_setColor(dialp -> color[TT_COLOR_SLOT_DIAL]);
     turtlePenSize(1);
     turtlePenDown();
-    double dialAngle;
+    double dialAngle = 0.0;
     if (dialp -> scale == TT_DIAL_SCALE_LOG) {
         dialAngle = pow(361, (dialp -> value - dialp -> range[0]) / (dialp -> range[1] - dialp -> range[0])) - 1;
     } else if (dialp -> scale == TT_DIAL_SCALE_LINEAR) {
@@ -63519,11 +63519,11 @@ void tt_sliderUpdate(tt_slider_t *sliderp) {
     if (sliderp -> enabled == TT_ELEMENT_HIDE) {
         return;
     }
-    double sliderXLeft;
-    double sliderYLeft;
-    double sliderXRight;
-    double sliderYRight;
-    double sliderAlignFactor;
+    double sliderXLeft = 0;
+    double sliderYLeft = 0;
+    double sliderXRight = 0;
+    double sliderYRight = 0;
+    double sliderAlignFactor = 0;
     double sliderOffsetXFactor = 0;
     double sliderOffsetYFactor = 0;
     double sliderOffsetXFactorSmall = 0;
@@ -64242,6 +64242,7 @@ void tt_scrollbarUpdate(tt_scrollbar_t *scrollbarp) {
         turtlePenDown();
         turtleGoto(dragRight, scrollbarp -> y);
         turtlePenUp();
+        /* mouse */
         if (scrollbarp -> enabled == TT_ELEMENT_ENABLED && (tt_globals.elementLogicTypeOld < TT_ELEMENT_SCROLLBAR || (tt_globals.elementLogicTypeOld == TT_ELEMENT_SCROLLBAR && tt_globals.elementLogicIndexOld <= (int32_t) tt_globals.elementLogicTemp) || scrollbarp -> status > 0)) {
             if (scrollbarp -> status == 2) {
                 tt_globals.barAnchor = turtle.mouseX - dragLeft;
@@ -64260,7 +64261,7 @@ void tt_scrollbarUpdate(tt_scrollbar_t *scrollbarp) {
                     tt_globals.elementLogicIndex = TT_ELEMENT_SCROLLBAR; // subverting expectations
                 }
             } else {
-                if (turtle.mouseY > scrollbarp -> y - scrollbarp -> size * 0.5 && turtle.mouseY < scrollbarp -> y + scrollbarp -> size * 0.5 && turtle.mouseX < scrollbarRight && turtle.mouseX > scrollbarLeft) {
+                if (turtle.mouseY > scrollbarp -> y - scrollbarp -> size * 0.5 && turtle.mouseY < scrollbarp -> y + scrollbarp -> size * 0.5 && turtle.mouseX < scrollbarRight + scrollbarp -> size * 0.5 && turtle.mouseX > scrollbarLeft - scrollbarp -> size * 0.5) {
                     scrollbarp -> status = -1;
                     tt_globals.elementLogicType = TT_ELEMENT_SCROLLBAR;
                     tt_globals.elementLogicIndex = tt_globals.elementLogicTemp;
@@ -64322,7 +64323,7 @@ void tt_scrollbarUpdate(tt_scrollbar_t *scrollbarp) {
                     tt_globals.elementLogicIndex = TT_ELEMENT_SCROLLBAR; // subverting expectations
                 }
             } else {
-                if (turtle.mouseX > scrollbarp -> x - scrollbarp -> size * 0.5 && turtle.mouseX < scrollbarp -> x + scrollbarp -> size * 0.5 && turtle.mouseY > scrollbarBottom && turtle.mouseY < scrollbarTop) {
+                if (turtle.mouseX > scrollbarp -> x - scrollbarp -> size * 0.5 && turtle.mouseX < scrollbarp -> x + scrollbarp -> size * 0.5 && turtle.mouseY > scrollbarBottom - scrollbarp -> size * 0.5 && turtle.mouseY < scrollbarTop + scrollbarp -> size * 0.5) {
                     scrollbarp -> status = -1;
                     tt_globals.elementLogicType = TT_ELEMENT_SCROLLBAR;
                     tt_globals.elementLogicIndex = tt_globals.elementLogicTemp;
@@ -64815,6 +64816,7 @@ list_t *osToolsLoadInternal(char *filename, ost_csv_t rowOrColumn, char delimete
             /* case: comma */
             mappedFile[rightIndex] = '\0';
             unitype field;
+            field.l = 0;
             if (fieldType == OSTOOLS_CSV_FIELD_DOUBLE) {
                 sscanf((char *) (mappedFile + leftIndex), "%lf", (double *) &field);
             } else if (fieldType == OSTOOLS_CSV_FIELD_INT) {
@@ -64846,6 +64848,7 @@ list_t *osToolsLoadInternal(char *filename, ost_csv_t rowOrColumn, char delimete
                 char tempHold = mappedFile[rightIndex];
                 mappedFile[rightIndex] = '\0';
                 unitype field;
+                field.l = 0;
                 if (fieldType == OSTOOLS_CSV_FIELD_DOUBLE) {
                     sscanf((char *) (mappedFile + leftIndex), "%lf", (double *) &field);
                 } else if (fieldType == OSTOOLS_CSV_FIELD_INT) {
@@ -64885,6 +64888,7 @@ list_t *osToolsLoadInternal(char *filename, ost_csv_t rowOrColumn, char delimete
         }
     } else {
         unitype field;
+        field.l = 0;
         if (fieldType == OSTOOLS_CSV_FIELD_DOUBLE) {
             sscanf((char *) (mappedFile + leftIndex), "%lf", (double *) &field);
         } else if (fieldType == OSTOOLS_CSV_FIELD_INT) {

@@ -290,6 +290,7 @@ list_t *osToolsLoadInternal(char *filename, ost_csv_t rowOrColumn, char delimete
             /* case: comma */
             mappedFile[rightIndex] = '\0';
             unitype field;
+            field.l = 0;
             if (fieldType == OSTOOLS_CSV_FIELD_DOUBLE) {
                 sscanf((char *) (mappedFile + leftIndex), "%lf", (double *) &field);
             } else if (fieldType == OSTOOLS_CSV_FIELD_INT) {
@@ -321,6 +322,7 @@ list_t *osToolsLoadInternal(char *filename, ost_csv_t rowOrColumn, char delimete
                 char tempHold = mappedFile[rightIndex];
                 mappedFile[rightIndex] = '\0';
                 unitype field;
+                field.l = 0;
                 if (fieldType == OSTOOLS_CSV_FIELD_DOUBLE) {
                     sscanf((char *) (mappedFile + leftIndex), "%lf", (double *) &field);
                 } else if (fieldType == OSTOOLS_CSV_FIELD_INT) {
@@ -360,6 +362,7 @@ list_t *osToolsLoadInternal(char *filename, ost_csv_t rowOrColumn, char delimete
         }
     } else {
         unitype field;
+        field.l = 0;
         if (fieldType == OSTOOLS_CSV_FIELD_DOUBLE) {
             sscanf((char *) (mappedFile + leftIndex), "%lf", (double *) &field);
         } else if (fieldType == OSTOOLS_CSV_FIELD_INT) {
