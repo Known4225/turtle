@@ -22,7 +22,7 @@ int main(int argc, char *argv[]) {
     fclose(filesizefp);
     sprintf(command, "truncate -s %d %s", filesize - filenameLen - 27, argv[1]);
     system(command);
-    sprintf(command, "echo ^> >> %s", argv[1]);
+    sprintf(command, "printf \">\\n\" >> %s", argv[1]);
     system(command);
     sprintf(command, "cat %s %s >> %sTEMP", argv[1], jsFile, argv[1]);
     system(command);
