@@ -25,6 +25,8 @@ The following build commands are available:
 - `make singlefile` - This will package the turtle headers and source files into a single `turtle.h` file.
 
 # To Do
+- Build some support for osTools on OS_BROWSER
+- Write documentation for web deployment using emcc (emcc installation, get emcc working on linux)
 - Write tests
 - Vertical switches
 - Fix flipped world coordinates
