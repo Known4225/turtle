@@ -14,3 +14,12 @@ winlib:
 	cp turtle.h turtlelib.c
 	gcc turtlelib.c -c -DTURTLE_IMPLEMENTATION -DTURTLE_ENABLE_TEXTURES -DTURTLE_ENABLE_SERIAL -DTURTLE_ENABLE_SOCKETS -DTURTLE_ENABLE_CAMERA -DOS_WINDOWS -O3 -o Windows/turtle.lib
 	rm turtlelib.c
+html:
+	emcc turtle.c --shell-file config/turtle_shell.html -sUSE_GLFW=3 -sMAX_WEBGL_VERSION=2 -sASYNCIFY -sINITIAL_MEMORY=1073741824 -sWASM=0 -DTURTLE_IMPLEMENTATION -DTURTLE_ENABLE_TEXTURES -DTURTLE_ENABLE_SERIAL -DTURTLE_ENABLE_SOCKETS -DTURTLE_ENABLE_CAMERA -DOS_BROWSER -Oz -o turtle.html --embed-file images
+	gcc config/combine.c -o combine.exe
+	combine.exe turtle.html
+	rm combine.exe
+htmlserver:
+	emcc turtle.c --shell-file config/turtle_shell.html -sUSE_GLFW=3 -sMAX_WEBGL_VERSION=2 -sASYNCIFY -sINITIAL_MEMORY=1073741824 -DTURTLE_IMPLEMENTATION -DTURTLE_ENABLE_TEXTURES -DTURTLE_ENABLE_SERIAL -DTURTLE_ENABLE_SOCKETS -DTURTLE_ENABLE_CAMERA -DOS_BROWSER -O3 -o turtle.html --embed-file images
+runserver:
+	emrun turtle.html
