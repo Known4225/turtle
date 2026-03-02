@@ -27,6 +27,7 @@ The following build commands are available:
 # To Do
 - Build some support for osTools on OS_BROWSER
 - Write documentation for web deployment using emcc (emcc installation, get emcc working on linux)
+- Fix window resize behaviour on browser
 - Change `turtle_shell.html`
 - Write tests
 - Vertical switches
@@ -46,3 +47,4 @@ The following build commands are available:
 - Must compile with TURTLE_ENABLE_TEXTURES (fixed function pipeline like `glBegin` are not supported in WebGl)
 - Cannot compile using static library (must use TURTLE_IMPLEMENTATION macro in source)
 - Textures must be loaded with GL_RGBA (this is a bug that I can't figure out how to fix)
+- pthreads don't appear to work (despite emcc saying they can, I have not been able to get them to work)
