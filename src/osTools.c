@@ -885,7 +885,7 @@ int32_t osToolsSerialSend(char *name, uint8_t *data, int32_t length) {
     DWORD bytes;
     if (WriteFile((HANDLE) (osToolsSerial.serial -> data[index + 1].l), data, length, &bytes, NULL) == 0) {
         printf("osToolsSerialSend failed with error %ld\n", GetLastError());
-        return -1;
+        return 0;
     }
     return bytes;
 }
@@ -904,7 +904,7 @@ int32_t osToolsSerialReceive(char *name, uint8_t *buffer, int32_t length, int32_
     DWORD bytes;
     if (ReadFile((HANDLE) (osToolsSerial.serial -> data[index + 1].l), buffer, length, &bytes, NULL) == 0) {
         printf("osToolsSerialReceive failed with error %ld\n", GetLastError());
-        return -1;
+        return 0;
     }
     return bytes;
 }

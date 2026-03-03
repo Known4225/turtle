@@ -61146,6 +61146,7 @@ void renderBezier(double x1, double y1, double x2, double y2, double x3, double 
 
 /* renders a single character - INTERNAL */
 void renderChar(int32_t index, double x, double y, double size) {
+    double sizeSave = turtle.pensize;
     index += 1;
     int32_t len1 = turtleText.fontData[index];
     for (int32_t i = 0; i < len1; i++) {
@@ -61154,6 +61155,11 @@ void renderChar(int32_t index, double x, double y, double size) {
             turtlePenUp();
         }
         int32_t len2 = turtleText.fontData[index];
+        if (len2 == 1) {
+            turtle.pensize = sizeSave * 1.5; // dots on is are a bit bigger
+        } else {
+            turtle.pensize = sizeSave;
+        }
         for (int32_t j = 0; j < len2; j++) {
             index += 1;
             if (turtleText.fontData[index] == 140894115) { // 140894115 is the b value (reserved)
@@ -61172,6 +61178,7 @@ void renderChar(int32_t index, double x, double y, double size) {
         }
     }
     turtlePenUp();
+    turtle.pensize = sizeSave;
 }
 
 /* special version of renderChar with rotation - INTERNAL */
@@ -65411,7 +65418,7 @@ int32_t osToolsSerialSend(char *name, uint8_t *data, int32_t length) {
     DWORD bytes;
     if (WriteFile((HANDLE) (osToolsSerial.serial -> data[index + 1].l), data, length, &bytes, NULL) == 0) {
         printf("osToolsSerialSend failed with error %ld\n", GetLastError());
-        return -1;
+        return 0;
     }
     return bytes;
 }
@@ -65430,7 +65437,7 @@ int32_t osToolsSerialReceive(char *name, uint8_t *buffer, int32_t length, int32_
     DWORD bytes;
     if (ReadFile((HANDLE) (osToolsSerial.serial -> data[index + 1].l), buffer, length, &bytes, NULL) == 0) {
         printf("osToolsSerialReceive failed with error %ld\n", GetLastError());
-        return -1;
+        return 0;
     }
     return bytes;
 }
