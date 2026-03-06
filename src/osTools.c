@@ -2074,12 +2074,13 @@ uint8_t *osToolsFileMap(char *filename, uint32_t *sizeOutput) {
     }
     list_append(osToolsMemmap.mappedFiles, (unitype) out, 'l');
     list_append(osToolsMemmap.mappedFiles, (unitype) *sizeOutput, 'i');
+    list_append(osToolsMemmap.mappedFiles, (unitype) fd, 'i');
     return (uint8_t *) out;
 }
 
 int32_t osToolsFileUnmap(uint8_t *data) {
     int32_t index = -1;
-    for (int32_t i = 0; i < osToolsMemmap.mappedFiles -> length; i += 2) {
+    for (int32_t i = 0; i < osToolsMemmap.mappedFiles -> length; i += 3) {
         if (osToolsMemmap.mappedFiles -> data[i].p == data) {
             index = i;
             break;
@@ -2087,6 +2088,10 @@ int32_t osToolsFileUnmap(uint8_t *data) {
     }
     if (index >= 0) {
         munmap(data, osToolsMemmap.mappedFiles -> data[index + 1].i);
+        close(osToolsMemmap.mappedFiles -> data[index + 2].i);
+        list_delete(osToolsMemmap.mappedFiles, index);
+        list_delete(osToolsMemmap.mappedFiles, index);
+        list_delete(osToolsMemmap.mappedFiles, index);
         return 0;
     } else {
         printf("Could not find %p in memory mapped index\n", data);
@@ -2685,12 +2690,13 @@ uint8_t *osToolsFileMap(char *filename, uint32_t *sizeOutput) {
     }
     list_append(osToolsMemmap.mappedFiles, (unitype) out, 'l');
     list_append(osToolsMemmap.mappedFiles, (unitype) *sizeOutput, 'i');
+    list_append(osToolsMemmap.mappedFiles, (unitype) fd, 'i');
     return (uint8_t *) out;
 }
 
 int32_t osToolsFileUnmap(uint8_t *data) {
     int32_t index = -1;
-    for (int32_t i = 0; i < osToolsMemmap.mappedFiles -> length; i += 2) {
+    for (int32_t i = 0; i < osToolsMemmap.mappedFiles -> length; i += 3) {
         if (osToolsMemmap.mappedFiles -> data[i].p == data) {
             index = i;
             break;
@@ -2698,6 +2704,10 @@ int32_t osToolsFileUnmap(uint8_t *data) {
     }
     if (index >= 0) {
         munmap(data, osToolsMemmap.mappedFiles -> data[index + 1].i);
+        close(osToolsMemmap.mappedFiles -> data[index + 2].i);
+        list_delete(osToolsMemmap.mappedFiles, index);
+        list_delete(osToolsMemmap.mappedFiles, index);
+        list_delete(osToolsMemmap.mappedFiles, index);
         return 0;
     } else {
         printf("Could not find %p in memory mapped index\n", data);

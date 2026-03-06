@@ -28,6 +28,7 @@ The following build commands are available:
 - Build some support for osTools on OS_BROWSER
 - Write documentation for web deployment using emcc (emcc installation, get emcc working on linux)
 - Fix window resize behaviour on browser
+- Add icon and window name to the html file
 - Change `turtle_shell.html`
 - Write tests
 - Vertical switches
