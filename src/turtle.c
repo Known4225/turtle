@@ -63,6 +63,17 @@ const char *turtleFragmentShaderSource =
 "}\0";
 #endif /* TURTLE_ENABLE_TEXTURES */
 
+#ifdef OS_BROWSER
+/* https://github.com/emscripten-core/emscripten/pull/20831#discussion_r1415646154 */
+static EM_BOOL turtleBrowserWindowResize(int eventType, const EmscriptenUiEvent *uiEvent, void* userData) {
+    printf("resizing canvas\n");
+    double canvas_width, canvas_height;
+    emscripten_get_element_css_size("#canvas-container", &canvas_width, &canvas_height);
+    glfwSetWindowSize(glfwGetCurrentContext(), (int)canvas_width, (int)canvas_height);
+    return true;
+}
+#endif /* OS_BROWSER */
+
 /* special function that can be called prior to turtleInit - this function condenses the window creation code boilerplate */
 GLFWwindow *turtleCreateWindow(char *windowName) {
     /* Initialise glfw */
@@ -91,7 +102,9 @@ GLFWwindow *turtleCreateWindow(char *windowName) {
         return NULL;
     }
     glfwMakeContextCurrent(window);
-    #ifndef OS_BROWSER
+    #ifdef OS_BROWSER
+    emscripten_set_resize_callback(EMSCRIPTEN_EVENT_TARGET_WINDOW, glfwGetCurrentContext(), false, turtleBrowserWindowResize);
+    #else
     glfwSetWindowSizeLimits(window, windowHeight * 16 / 9 * 0.4, windowHeight * 0.4, windowHeight * 16 / 9 * optimizedScalingFactor, windowHeight * optimizedScalingFactor);
     #endif /* OS_BROWSER */
     return window;
