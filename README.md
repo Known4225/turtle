@@ -30,6 +30,7 @@ The following build commands are available:
 - Fix window resize behaviour on browser
 - Add icon and window name to the html file
 - Change `turtle_shell.html`
+- Fix turtleTools UI elements to work better on touch screen (solve behaviour of mouse move + click in the same tick)
 - Write tests
 - Vertical switches
 - Fix flipped world coordinates
@@ -45,7 +46,7 @@ The following build commands are available:
 
 # Limitations of web deployment
 - Must osTools features will not work
-- Must compile with TURTLE_ENABLE_TEXTURES (fixed function pipeline like `glBegin` are not supported in WebGl)
+- Must compile with TURTLE_ENABLE_TEXTURES (fixed function pipeline like `glBegin` are not supported in WebGL)
 - Cannot compile using static library (must use TURTLE_IMPLEMENTATION macro in source)
 - Textures must be loaded with GL_RGBA (this is a bug that I can't figure out how to fix)
-- pthreads don't appear to work (despite emcc saying they can, I have not been able to get them to work)
+- pthreads don't appear to work (despite [emcc saying they can](https://emscripten.org/docs/porting/pthreads.html), I have not been able to get them to work)
