@@ -16,7 +16,8 @@ dial
 slider
 scrollbar
 dropdown
-text box (under development)
+textbox
+context
 
 TODO:
 using the tab key to select different elements? And allowing them to be changed with the keyboard??
@@ -54,6 +55,19 @@ char *strdel(char *dest, int32_t index, int32_t size) {
 tt_theme_name_t tt_theme;
 tt_enabled_t tt_enabled; // all start at 0 (global variable)
 tt_elements_t tt_elements;
+
+/* UI element colours (in order listed in tt_element_names_t) */
+int32_t tt_color_default[] = {
+    /*         none                           button                         switch                            dial                           slider                          textbox                        dropdown                         scrollbar                      context                       variable reader                   list reader                     ribbon                           popup               */
+    0,                              TT_COLOR_TEXT_ALTERNATE,        TT_COLOR_TEXT_BASE,             TT_COLOR_TEXT_BASE,             TT_COLOR_TEXT_BASE,             TT_COLOR_TEXT_ALTERNATE,        TT_COLOR_TEXT_BASE,             0,                              TT_COLOR_TEXT_ALTERNATE,        TT_COLOR_BLACK,                 TT_COLOR_BLACK,                 TT_COLOR_TEXT_ALTERNATE,        TT_COLOR_TEXT_ALTERNATE,        
+    0,                              TT_COLOR_COMPONENT,             TT_COLOR_TEXT_ALTERNATE,        TT_COLOR_TEXT_BASE,             TT_COLOR_COMPONENT_ALTERNATE,   TT_COLOR_COMPONENT_BASE,        TT_COLOR_TEXT_ALTERNATE,        TT_COLOR_COMPONENT_BASE,        TT_COLOR_COMPONENT_BASE,        TT_COLOR_LIGHT_GREY,            TT_COLOR_LIGHT_GREY,            TT_COLOR_COMPONENT_HIGHLIGHT,   TT_COLOR_COMPONENT_ALTERNATE,   
+    0,                              TT_COLOR_COMPONENT_HIGHLIGHT,   TT_COLOR_COMPONENT_BASE,        TT_COLOR_BACKGROUND_BASE,       TT_COLOR_BACKGROUND_COMPLEMENT, TT_COLOR_TEXT_HIGHLIGHT,        TT_COLOR_COMPONENT_BASE,        TT_COLOR_COMPONENT_COMPLEMENT,  TT_COLOR_COMPONENT_HIGHLIGHT,   TT_COLOR_ORANGE,                TT_COLOR_RED,                   TT_COLOR_COMPONENT_HIGHLIGHT,   TT_COLOR_COMPONENT_HIGHLIGHT,   
+    0,                              TT_COLOR_TEXT_BASE,             TT_COLOR_COMPONENT_HIGHLIGHT,   0,                              0,                              TT_COLOR_TEXT_ALTERNATE,        TT_COLOR_COMPONENT_HIGHLIGHT,   TT_COLOR_BACKGROUND_ALTERNATE,  0,                              0,                              TT_COLOR_COMPONENT_BASE,        TT_COLOR_COMPONENT,             TT_COLOR_COMPONENT,             
+    0,                              TT_COLOR_COMPONENT_COMPLEMENT,  TT_COLOR_BACKGROUND_ALTERNATE,  0,                              0,                              TT_COLOR_BLUE,                  TT_COLOR_COMPONENT_HIGHLIGHT,   TT_COLOR_BACKGROUND_HIGHLIGHT,  0,                              0,                              TT_COLOR_COMPONENT_COMPLEMENT,  TT_COLOR_COMPONENT,             0,                              
+    0,                              0,                              TT_COLOR_TERTIARY_BASE,         0,                              0,                              0,                              TT_COLOR_TEXT_ALTERNATE,        0,                              0,                              0,                              TT_COLOR_BACKGROUND_ALTERNATE,  0,                              0,                              
+    0,                              0,                              0,                              0,                              0,                              0,                              0,                              0,                              0,                              0,                              TT_COLOR_BACKGROUND_HIGHLIGHT,  0,                              0,                              
+    0,                              0,                              0,                              0,                              0,                              0,                              0,                              0,                              0,                              0,                              0,                              0,                              0,                              
+};
 
 /* default colours (light theme) */
 double tt_themeColors[] = {
@@ -647,18 +661,6 @@ void tt_popupFree() {
 
 tt_globals_t tt_globals;
 
-int32_t tt_color_default[] = {
-    /*         none                           button                         switch                            dial                           slider                          textbox                        dropdown                         scrollbar                      context                          ribbon                           popup               */
-    0,                              TT_COLOR_TEXT_ALTERNATE,        TT_COLOR_TEXT_BASE,             TT_COLOR_TEXT_BASE,             TT_COLOR_TEXT_BASE,             TT_COLOR_TEXT_ALTERNATE,        TT_COLOR_TEXT_BASE,             0,                              TT_COLOR_TEXT_ALTERNATE,        TT_COLOR_TEXT_ALTERNATE,        TT_COLOR_TEXT_ALTERNATE,        
-    0,                              TT_COLOR_COMPONENT,             TT_COLOR_TEXT_ALTERNATE,        TT_COLOR_TEXT_BASE,             TT_COLOR_COMPONENT_ALTERNATE,   TT_COLOR_COMPONENT_BASE,        TT_COLOR_TEXT_ALTERNATE,        TT_COLOR_COMPONENT_BASE,        TT_COLOR_COMPONENT_BASE,        TT_COLOR_COMPONENT_HIGHLIGHT,   TT_COLOR_COMPONENT_ALTERNATE,   
-    0,                              TT_COLOR_COMPONENT_HIGHLIGHT,   TT_COLOR_COMPONENT_BASE,        TT_COLOR_BACKGROUND_BASE,       TT_COLOR_BACKGROUND_COMPLEMENT, TT_COLOR_TEXT_HIGHLIGHT,        TT_COLOR_COMPONENT_BASE,        TT_COLOR_COMPONENT_COMPLEMENT,  TT_COLOR_COMPONENT_HIGHLIGHT,   TT_COLOR_COMPONENT_HIGHLIGHT,   TT_COLOR_COMPONENT_HIGHLIGHT,   
-    0,                              TT_COLOR_TEXT_BASE,             TT_COLOR_COMPONENT_HIGHLIGHT,   0,                              0,                              TT_COLOR_TEXT_ALTERNATE,        TT_COLOR_COMPONENT_HIGHLIGHT,   TT_COLOR_BACKGROUND_ALTERNATE,  0,                              TT_COLOR_COMPONENT,             TT_COLOR_COMPONENT,             
-    0,                              TT_COLOR_COMPONENT_COMPLEMENT,  TT_COLOR_BACKGROUND_ALTERNATE,  0,                              0,                              TT_COLOR_BLUE,                  TT_COLOR_COMPONENT_HIGHLIGHT,   TT_COLOR_BACKGROUND_HIGHLIGHT,  0,                              TT_COLOR_COMPONENT,             0,                              
-    0,                              0,                              TT_COLOR_TERTIARY_BASE,         0,                              0,                              0,                              TT_COLOR_TEXT_ALTERNATE,        0,                              0,                              0,                              0,                              
-    0,                              0,                              0,                              0,                              0,                              0,                              0,                              0,                              0,                              0,                              0,                              
-    0,                              0,                              0,                              0,                              0,                              0,                              0,                              0,                              0,                              0,                              0,                              
-};
-
 void tt_elementResetColor(void *elementp) {
     int32_t elementType = ((tt_button_t *) elementp) -> element;
     for (int32_t i = 0; i < 8; i++) {
@@ -683,17 +685,21 @@ int32_t tt_elementFree(void *elementp) {
     case TT_ELEMENT_SLIDER:
         tt_sliderFree((tt_slider_t *) elementp);
     break;
+    case TT_ELEMENT_TEXTBOX:
+        tt_textboxFree((tt_textbox_t *) elementp);
+    break;
+    case TT_ELEMENT_DROPDOWN:
+        tt_dropdownFree((tt_dropdown_t *) elementp);
+    break;
     case TT_ELEMENT_SCROLLBAR:
         tt_scrollbarFree((tt_scrollbar_t *) elementp);
     break;
     case TT_ELEMENT_CONTEXT:
         tt_contextFree((tt_context_t *) elementp);
     break;
-    case TT_ELEMENT_DROPDOWN:
-        tt_dropdownFree((tt_dropdown_t *) elementp);
-    break;
-    case TT_ELEMENT_TEXTBOX:
-        tt_textboxFree((tt_textbox_t *) elementp);
+    case TT_ELEMENT_VARIABLE_READER:
+    case TT_ELEMENT_LIST_READER:
+        tt_readerFree((tt_reader_t *) elementp);
     break;
     default:
         return -1;
@@ -710,12 +716,7 @@ void tt_hideAllElements() {
 
 /* initialise UI elements */
 
-/* create a button */
-tt_button_t *tt_buttonInit(char *label, int8_t *variable, double x, double y, double size) {
-    if (tt_enabled.buttonEnabled == 0) {
-        tt_enabled.buttonEnabled = 1;
-        tt_elements.buttons = list_init();
-    }
+void turtleToolsInit() {
     if (tt_enabled.turtleToolsEnabled == 0) {
         tt_enabled.turtleToolsEnabled = 1;
         tt_globals.elementLogicType = TT_ELEMENT_NONE;
@@ -723,6 +724,15 @@ tt_button_t *tt_buttonInit(char *label, int8_t *variable, double x, double y, do
         tt_globals.elementLogicTemp = -1;
         tt_elements.all = list_init();
     }
+}
+
+/* create a button */
+tt_button_t *tt_buttonInit(char *label, int8_t *variable, double x, double y, double size) {
+    if (tt_enabled.buttonEnabled == 0) {
+        tt_enabled.buttonEnabled = 1;
+        tt_elements.buttons = list_init();
+    }
+    turtleToolsInit();
     tt_button_t *buttonp = calloc(1, sizeof(tt_button_t));
     buttonp -> element = TT_ELEMENT_BUTTON;
     buttonp -> enabled = TT_ELEMENT_ENABLED;
@@ -759,13 +769,7 @@ tt_switch_t *tt_switchInit(char *label, int8_t *variable, double x, double y, do
         tt_enabled.switchEnabled = 1;
         tt_elements.switches = list_init();
     }
-    if (tt_enabled.turtleToolsEnabled == 0) {
-        tt_enabled.turtleToolsEnabled = 1;
-        tt_globals.elementLogicType = TT_ELEMENT_NONE;
-        tt_globals.elementLogicIndex = -1;
-        tt_globals.elementLogicTemp = -1;
-        tt_elements.all = list_init();
-    }
+    turtleToolsInit();
     tt_switch_t *switchp = calloc(1, sizeof(tt_switch_t));
     switchp -> element = TT_ELEMENT_SWITCH;
     switchp -> enabled = TT_ELEMENT_ENABLED;
@@ -799,13 +803,7 @@ tt_dial_t *tt_dialInit(char *label, double *variable, tt_dial_scale_t scale, dou
         tt_enabled.dialEnabled = 1;
         tt_elements.dials = list_init();
     }
-    if (tt_enabled.turtleToolsEnabled == 0) {
-        tt_enabled.turtleToolsEnabled = 1;
-        tt_globals.elementLogicType = TT_ELEMENT_NONE;
-        tt_globals.elementLogicIndex = -1;
-        tt_globals.elementLogicTemp = -1;
-        tt_elements.all = list_init();
-    }
+    turtleToolsInit();
     tt_dial_t *dialp = calloc(1, sizeof(tt_dial_t));
     dialp -> element = TT_ELEMENT_DIAL;
     dialp -> enabled = TT_ELEMENT_ENABLED;
@@ -846,13 +844,7 @@ tt_slider_t *tt_sliderInit(char *label, double *variable, tt_slider_type_t type,
         tt_enabled.sliderEnabled = 1;
         tt_elements.sliders = list_init();
     }
-    if (tt_enabled.turtleToolsEnabled == 0) {
-        tt_enabled.turtleToolsEnabled = 1;
-        tt_globals.elementLogicType = TT_ELEMENT_NONE;
-        tt_globals.elementLogicIndex = -1;
-        tt_globals.elementLogicTemp = -1;
-        tt_elements.all = list_init();
-    }
+    turtleToolsInit();
     tt_slider_t *sliderp = calloc(1, sizeof(tt_slider_t));
     sliderp -> element = TT_ELEMENT_SLIDER;
     sliderp -> enabled = TT_ELEMENT_ENABLED;
@@ -898,13 +890,7 @@ tt_textbox_t *tt_textboxInit(char *label, char *variable, int32_t maxCharacters,
         tt_enabled.textboxEnabled = 1;
         tt_elements.textboxes = list_init();
     }
-    if (tt_enabled.turtleToolsEnabled == 0) {
-        tt_enabled.turtleToolsEnabled = 1;
-        tt_globals.elementLogicType = TT_ELEMENT_NONE;
-        tt_globals.elementLogicIndex = -1;
-        tt_globals.elementLogicTemp = -1;
-        tt_elements.all = list_init();
-    }
+    turtleToolsInit();
     tt_textbox_t *textboxp = calloc(1, sizeof(tt_textbox_t));
     textboxp -> element = TT_ELEMENT_TEXTBOX;
     textboxp -> enabled = TT_ELEMENT_ENABLED;
@@ -963,13 +949,7 @@ tt_dropdown_t *tt_dropdownInit(char *label, list_t *options, int32_t *variable, 
         tt_enabled.dropdownEnabled = 1;
         tt_elements.dropdowns = list_init();
     }
-    if (tt_enabled.turtleToolsEnabled == 0) {
-        tt_enabled.turtleToolsEnabled = 1;
-        tt_globals.elementLogicType = TT_ELEMENT_NONE;
-        tt_globals.elementLogicIndex = -1;
-        tt_globals.elementLogicTemp = -1;
-        tt_elements.all = list_init();
-    }
+    turtleToolsInit();
     tt_dropdown_t *dropdownp = calloc(1, sizeof(tt_dropdown_t));
     dropdownp -> element = TT_ELEMENT_DROPDOWN;
     dropdownp -> enabled = TT_ELEMENT_ENABLED;
@@ -1014,13 +994,7 @@ tt_scrollbar_t *tt_scrollbarInit(double *variable, tt_scrollbar_type_t type, dou
         tt_enabled.scrollbarEnabled = 1;
         tt_elements.scrollbars = list_init();
     }
-    if (tt_enabled.turtleToolsEnabled == 0) {
-        tt_enabled.turtleToolsEnabled = 1;
-        tt_globals.elementLogicType = TT_ELEMENT_NONE;
-        tt_globals.elementLogicIndex = -1;
-        tt_globals.elementLogicTemp = -1;
-        tt_elements.all = list_init();
-    }
+    turtleToolsInit();
     tt_scrollbar_t *scrollbarp = calloc(1, sizeof(tt_scrollbar_t));
     scrollbarp -> element = TT_ELEMENT_SCROLLBAR;
     scrollbarp -> enabled = TT_ELEMENT_ENABLED;
@@ -1060,13 +1034,7 @@ tt_context_t *tt_contextInit(list_t *options, int32_t *variable, double x, doubl
         tt_enabled.contextEnabled = 1;
         tt_elements.contexts = list_init();
     }
-    if (tt_enabled.turtleToolsEnabled == 0) {
-        tt_enabled.turtleToolsEnabled = 1;
-        tt_globals.elementLogicType = TT_ELEMENT_NONE;
-        tt_globals.elementLogicIndex = -1;
-        tt_globals.elementLogicTemp = -1;
-        tt_elements.all = list_init();
-    }
+    turtleToolsInit();
     tt_context_t *contextp = calloc(1, sizeof(tt_context_t));
     contextp -> element = TT_ELEMENT_CONTEXT;
     contextp -> enabled = TT_ELEMENT_ENABLED;
@@ -1096,6 +1064,60 @@ void tt_contextFree(tt_context_t *contextp) {
     list_free(contextp -> options);
     list_remove(tt_elements.all, (unitype) (uint64_t) contextp, 'l');
     list_remove(tt_elements.contexts, (unitype) (void *) contextp, 'p');
+}
+
+tt_reader_t *tt_readerInit(char *label, unitype *variable, char type, double x, double y, double size) {
+    if (tt_enabled.readerEnabled == 0) {
+        tt_enabled.readerEnabled = 1;
+        tt_elements.readers = list_init();
+    }
+    turtleToolsInit();
+    tt_reader_t *readerp = calloc(1, sizeof(tt_reader_t));
+    if (type == LIST_TYPE_LIST) {
+        readerp -> element = TT_ELEMENT_LIST_READER;
+    } else {
+        readerp -> element = TT_ELEMENT_VARIABLE_READER;
+    }
+    readerp -> enabled = TT_ELEMENT_ENABLED;
+    readerp -> ignored = TT_ELEMENT_NOT_IGNORED;
+    if (label == NULL) {
+        memcpy(readerp -> label, "", strlen("") + 1);
+    } else {
+        memcpy(readerp -> label, label, strlen(label) + 1);
+    }
+    tt_elementResetColor(readerp);
+    readerp -> x = x;
+    readerp -> y = y;
+    readerp -> size = size;
+    readerp -> variable = variable;
+    readerp -> type = type;
+    readerp -> scrollbarp = NULL;
+    if (readerp -> element == TT_ELEMENT_LIST_READER) {
+        readerp -> width = size * 5;
+        readerp -> height = size * 20;
+        list_t *list = (*(readerp -> variable)).r; // insane syntax
+        double percentage = 100;
+        if (list -> length > 20) {
+            percentage = 100.0 / ((list -> length - 20) / 10);
+        }
+        readerp -> scrollbarp = tt_scrollbarInit(NULL, TT_SCROLLBAR_TYPE_VERTICAL, x + size * 5, y, size, size * 10, percentage);
+        readerp -> scrollbarp -> ignored = TT_ELEMENT_IGNORED; // this scrollbar is updated with the list reader to ensure it appears on top of the reader
+    }
+    list_append(tt_elements.readers, (unitype) (void *) readerp, 'p');
+    list_append(tt_elements.all, (unitype) (void *) readerp, 'l');
+    return readerp;
+}
+
+void tt_readerFree(tt_reader_t *readerp) {
+    if (readerp -> element == TT_ELEMENT_VARIABLE_READER) {
+        list_remove(tt_elements.all, (unitype) (uint64_t) readerp, 'l');
+        list_remove(tt_elements.readers, (unitype) (void *) readerp, 'p');
+    } else if (readerp -> element == TT_ELEMENT_LIST_READER) {
+        list_remove(tt_elements.all, (unitype) (uint64_t) readerp -> scrollbarp, 'l');
+        list_remove(tt_elements.scrollbars, (unitype) (void *) readerp -> scrollbarp, 'p');
+        list_remove(tt_elements.all, (unitype) (uint64_t) readerp, 'l');
+        list_remove(tt_elements.readers, (unitype) (void *) readerp, 'p');
+    }
 }
 
 void tt_buttonUpdate(tt_button_t *buttonp) {
@@ -2352,6 +2374,54 @@ void tt_contextUpdate(tt_context_t *contextp) {
     }
 }
 
+void tt_readerUpdate(tt_reader_t *readerp) {
+    if (readerp -> element == TT_ELEMENT_LIST_READER) {
+
+    } else if (readerp -> element == TT_ELEMENT_VARIABLE_READER) {
+        char readerString[256];
+        unitype variable = *(readerp -> variable);
+        unitype_sprint(readerString, variable, readerp -> type);
+        double innerWidth = turtleTextGetUnicodeLength(readerString, readerp -> size);
+        if (innerWidth < readerp -> size * 5) {
+            innerWidth = readerp -> size * 5;
+        }
+        double readerWidth = turtleTextGetUnicodeLength(readerp -> label, readerp -> size) + innerWidth + readerp -> size * 1.6;
+        double readerLeftX = readerp -> x;
+        double readerRightX = readerp -> x + readerWidth;
+        double readerY = readerp -> y;
+        double readerHeight = readerp -> size * 1.75;
+        /* rounded rectangle (base) */
+        tt_setColor(readerp -> color[TT_COLOR_SLOT_VARIABLE_READER_BASE]);
+        turtlePenSize(readerp -> size);
+        turtleGoto(readerLeftX + readerp -> size / 2, readerY - readerHeight / 2 + readerp -> size / 2);
+        turtlePenDown();
+        turtleGoto(readerRightX - readerp -> size / 2, readerY - readerHeight / 2 + readerp -> size / 2);
+        turtleGoto(readerRightX - readerp -> size / 2, readerY + readerHeight / 2 - readerp -> size / 2);
+        turtleGoto(readerLeftX + readerp -> size / 2, readerY + readerHeight / 2 - readerp -> size / 2);
+        turtleGoto(readerLeftX + readerp -> size / 2, readerY - readerHeight / 2 + readerp -> size / 2);
+        turtlePenUp();
+        turtleRectangle(readerLeftX + readerWidth / 4, readerY - readerHeight / 4, readerRightX - readerWidth / 4, readerY + readerHeight / 4);
+        /* rounded rectangle (item) */
+        readerRightX -= readerp -> size * 0.6;
+        readerLeftX = readerRightX - innerWidth;
+        readerHeight *= 0.8;
+        tt_setColor(readerp -> color[TT_COLOR_SLOT_VARIABLE_READER_ITEM]);
+        turtlePenSize(readerp -> size * 0.8);
+        turtleGoto(readerLeftX + readerp -> size / 2, readerY - readerHeight / 2 + readerp -> size / 2);
+        turtlePenDown();
+        turtleGoto(readerRightX - readerp -> size / 2, readerY - readerHeight / 2 + readerp -> size / 2);
+        turtleGoto(readerRightX - readerp -> size / 2, readerY + readerHeight / 2 - readerp -> size / 2);
+        turtleGoto(readerLeftX + readerp -> size / 2, readerY + readerHeight / 2 - readerp -> size / 2);
+        turtleGoto(readerLeftX + readerp -> size / 2, readerY - readerHeight / 2 + readerp -> size / 2);
+        turtlePenUp();
+        turtleRectangle(readerLeftX + readerWidth / 4, readerY - readerHeight / 4, readerRightX - readerWidth / 4, readerY + readerHeight / 4);
+        /* render text */
+        tt_setColor(readerp -> color[TT_COLOR_SLOT_VARIABLE_READER_TEXT]);
+        turtleTextWriteUnicode(readerp -> label, readerp -> x + readerp -> size * 0.6, readerp -> y, readerp -> size - 1, 0);
+        turtleTextWriteUnicode(readerString, readerLeftX + readerp -> size * 0.6, readerp -> y, readerp -> size - 1, 0);
+    }
+}
+
 void turtleToolsUpdate() {
     turtleToolsUpdateUI();
     char shapeSave = turtle.penshape;
@@ -2450,6 +2520,16 @@ void turtleToolsUpdateUI() {
                 continue;
             }
             tt_contextUpdate((tt_context_t *) (tt_elements.contexts -> data[i].p));
+            tt_globals.elementLogicTemp++;
+        }
+    }
+    if (tt_enabled.readerEnabled) {
+        tt_globals.elementLogicTemp = 0;
+        for (int32_t i = 0; i < tt_elements.readers -> length; i++) {
+            if (((tt_reader_t *) (tt_elements.readers -> data[i].p)) -> ignored == TT_ELEMENT_IGNORED) {
+                continue;
+            }
+            tt_readerUpdate((tt_reader_t *) (tt_elements.readers -> data[i].p));
             tt_globals.elementLogicTemp++;
         }
     }

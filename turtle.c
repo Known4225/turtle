@@ -294,6 +294,9 @@ int main(int argc, char *argv[]) {
     textButton -> shape = TT_BUTTON_SHAPE_TEXT;
     circleButton -> shape = TT_BUTTON_SHAPE_CIRCLE;
 
+    uint64_t tick = 0; // count number of ticks since application started
+    tt_readerInit("tick", (unitype *) &tick, 'l', -315, 155, 10);
+
     list_t *xPositions = list_init();
     list_t *yPositions = list_init();
     for (int32_t i = 0; i < tt_elements.all -> length; i++) {
@@ -306,12 +309,11 @@ int main(int argc, char *argv[]) {
     char keys[8] = {0};
 
     uint32_t tps = 120; // ticks per second (locked to fps in this case)
-    uint64_t tick = 0; // count number of ticks since application started
     clock_t start, end;
     
     while (turtle.popupClose == 0) {
         start = clock();
-        turtleGetMouseCoords();
+        turtleGetMouseCoordinates();
         turtleClear();
         /* update element positions */
         for (int32_t i = 0; i < tt_elements.all -> length; i++) {

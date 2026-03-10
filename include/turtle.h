@@ -155,20 +155,23 @@ int8_t turtleKeyPressed(int32_t key);
 /* top level boolean output call to check if the left click button is currently being held down */
 int8_t turtleMouseDown();
 
+/* alternate duplicate of turtleMouseDown() */
+int8_t turtleMouseLeft();
+
 /* top level boolean output call to check if the right click button is currently being held down */
 int8_t turtleMouseRight();
 
 /* top level boolean output call to check if the middle mouse button is currently being held down */
 int8_t turtleMouseMiddle();
 
-/* alternate duplicate of top level boolean output call to check if the middle mouse button is currently being held down */
+/* alternate duplicate of turtleMouseMiddle() */
 int8_t turtleMouseMid();
 
 /* initialises the turtle module, supply coordinate bounds */
 void turtleInit(GLFWwindow *window, double leftX, double bottomY, double rightX, double topY);
 
-/* gets the mouse coordinates */
-void turtleGetMouseCoords();
+/* puts the mouse coordinates in turtle.mouseX and turtle.mouseY */
+void turtleGetMouseCoordinates();
 
 /* set the background color */
 void turtleBackgroundColor(uint8_t r, uint8_t g, uint8_t b);

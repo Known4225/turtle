@@ -36,16 +36,17 @@ extern tt_theme_name_t tt_theme;
 
 typedef struct {
     int8_t turtleToolsEnabled;
-    int8_t ribbonEnabled;
-    int8_t popupEnabled;
     int8_t buttonEnabled;
     int8_t switchEnabled;
     int8_t dialEnabled;
     int8_t sliderEnabled;
+    int8_t textboxEnabled;
+    int8_t dropdownEnabled;
     int8_t scrollbarEnabled;
     int8_t contextEnabled;
-    int8_t dropdownEnabled;
-    int8_t textboxEnabled;
+    int8_t readerEnabled;
+    int8_t ribbonEnabled;
+    int8_t popupEnabled;
 } tt_enabled_t;
 
 extern tt_enabled_t tt_enabled; // all start at 0 (global variable)
@@ -60,10 +61,12 @@ typedef enum {
     TT_ELEMENT_DROPDOWN = 6,
     TT_ELEMENT_SCROLLBAR = 7,
     TT_ELEMENT_CONTEXT = 8,
-    TT_ELEMENT_RIBBON = 9,
-    TT_ELEMENT_POPUP = 10,
-    TT_ELEMENT_HIGHEST = 11, // highest priority
-    TT_NUMBER_OF_ELEMENTS = 11,
+    TT_ELEMENT_VARIABLE_READER = 9,
+    TT_ELEMENT_LIST_READER = 10,
+    TT_ELEMENT_RIBBON = 11,
+    TT_ELEMENT_POPUP = 12,
+    TT_ELEMENT_HIGHEST = 13, // highest priority
+    TT_NUMBER_OF_ELEMENTS = 13,
 } tt_element_names_t;
 
 typedef struct {
@@ -76,6 +79,7 @@ typedef struct {
     list_t *dropdowns;
     list_t *scrollbars;
     list_t *contexts;
+    list_t *readers;
 } tt_elements_t;
 
 extern tt_elements_t tt_elements;
@@ -194,6 +198,18 @@ typedef enum {
     TT_COLOR_SLOT_CONTEXT_TEXT = 0,
     TT_COLOR_SLOT_CONTEXT_BASE = 1,
     TT_COLOR_SLOT_CONTEXT_SELECT = 2,
+    /* variable reader */
+    TT_COLOR_SLOT_VARIABLE_READER_TEXT = 0,
+    TT_COLOR_SLOT_VARIABLE_READER_BASE = 1,
+    TT_COLOR_SLOT_VARIABLE_READER_ITEM = 2,
+    /* list reader */
+    TT_COLOR_SLOT_LIST_READER_TEXT = 0,
+    TT_COLOR_SLOT_LIST_READER_BASE = 1,
+    TT_COLOR_SLOT_LIST_READER_ITEM = 2,
+    TT_COLOR_SLOT_LIST_READER_SCROLLBAR_BASE = 3,
+    TT_COLOR_SLOT_LIST_READER_SCROLLBAR_BAR = 4,
+    TT_COLOR_SLOT_LIST_READER_SCROLLBAR_HOVER = 5,
+    TT_COLOR_SLOT_LIST_READER_SCROLLBAR_CLICKED = 6,
     /* ribbon */
     TT_COLOR_SLOT_RIBBON_TEXT = 0,
     TT_COLOR_SLOT_RIBBON_TOP = 1,
@@ -562,7 +578,27 @@ typedef struct {
     int32_t value; // index of selected option (duplicate name - always equal to index)
 } tt_context_t;
 
+/* reader */
+typedef struct {
+    tt_element_names_t element;
+    tt_element_enabled_t enabled;
+    tt_element_ignored_t ignored;
+    int32_t color[8];
+    double x;
+    double y;
+    double size;
+    unitype *variable;
+    char label[TT_LABEL_LENGTH_LIMIT];
+    char type;
+    double width; // only used for list readers
+    double height; // only used for list readers
+    tt_scrollbar_t *scrollbarp; // only used for list readers
+} tt_reader_t;
+
 /* initialise UI elements */
+
+/* this function is automatically called when creating any turtleTools elements, it is not required to be called by the user */
+void turtleToolsInit();
 
 /* create a button */
 tt_button_t *tt_buttonInit(char *label, int8_t *variable, double x, double y, double size);
@@ -607,6 +643,11 @@ tt_context_t *tt_contextInit(list_t *options, int32_t *variable, double x, doubl
 
 void tt_contextFree(tt_context_t *contextp);
 
+/* create a reader */
+tt_reader_t *tt_readerInit(char *label, unitype *variable, char type, double x, double y, double size);
+
+void tt_readerFree(tt_reader_t *readerp);
+
 /* update a button */
 void tt_buttonUpdate(tt_button_t *buttonp);
 
@@ -648,6 +689,9 @@ void tt_scrollbarUpdate(tt_scrollbar_t *scrollbarp);
 
 /* update a context */
 void tt_contextUpdate(tt_context_t *contextp);
+
+/* update a reader */
+void tt_readerUpdate(tt_reader_t *readerp);
 
 /* update all turtleTools */
 void turtleToolsUpdate();

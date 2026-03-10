@@ -174,16 +174,25 @@ int32_t list_remove(list_t *list, unitype item, char type);
 /* prints a unitype item */
 void unitype_fprint(FILE *fp, unitype item, char type);
 
+/* prints a unitype item to a string, it is on you to provide a buffer that is big enough */
+void unitype_sprint(char *str, unitype item, char type);
+
 /* copies one list to another (duplicates strings or pointers) */
 void list_copy(list_t *dest, list_t *src);
 
-/* prints the list to a file without brackets */
-void list_fprint_emb(FILE *fp, list_t *list);
+/* prints the list to a file without brackets (no trailing newline) */
+void list_fprint_no_brackets(FILE *fp, list_t *list);
 
-/* prints the list to a file */
+/* prints the list to a file (no trailing newline) */
 void list_fprint(FILE *fp, list_t *list);
 
-/* prints the list */
+/* prints the list to a string without brackets (no trailing newline), it is on you to provide a buffer that is big enough */
+void list_sprint_no_brackets(char *str, list_t *list);
+
+/* prints the list to a string (no trailing newline), it is on you to provide a buffer that is big enough */
+void list_sprint(char *str, list_t *list);
+
+/* prints the list to stdout (with a training newline) */
 void list_print(list_t *list);
 
 /* prints the types of the list */

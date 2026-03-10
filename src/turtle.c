@@ -382,6 +382,11 @@ int8_t turtleMouseDown() {
     return turtle.mousePressed[0];
 }
 
+/* alternate duplicate of turtleMouseDown() */
+int8_t turtleMouseLeft() {
+    return turtle.mousePressed[0];
+}
+
 /* top level boolean output call to check if the right click button is currently being held down */
 int8_t turtleMouseRight() {
     return turtle.mousePressed[1];
@@ -392,13 +397,13 @@ int8_t turtleMouseMiddle() {
     return turtle.mousePressed[2];
 }
 
-/* alternate duplicate of top level boolean output call to check if the middle mouse button is currently being held down */
+/* alternate duplicate of turtleMouseMiddle() */
 int8_t turtleMouseMid() {
     return turtle.mousePressed[2];
 }
 
-/* gets the mouse coordinates */
-void turtleGetMouseCoords() {
+/* puts the mouse coordinates in turtle.mouseX and turtle.mouseY */
+void turtleGetMouseCoordinates() {
     glfwGetCursorPos(turtle.window, &turtle.mouseAbsX, &turtle.mouseAbsY); // get mouse positions (absolute)
     if (turtle.resizeMode == TURTLE_RESIZE_MODE_STRETCH) {
         turtle.mouseX = (turtle.mouseAbsX - turtle.screenbounds[0] / 2) / turtle.screenbounds[0] * (turtle.initbounds[2] - turtle.initbounds[0]) + (turtle.bounds[0] + turtle.bounds[2]) / 2;

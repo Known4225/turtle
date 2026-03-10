@@ -542,7 +542,55 @@ void unitype_fprint(FILE *fp, unitype item, char type) {
         break;
         default:
             printf("unitype_fprint - type %d not recognized\n", type);
-            return;
+    }
+}
+
+void unitype_sprint(char *str, unitype item, char type) {
+    switch (type) {
+        case LIST_TYPE_CHAR:
+            sprintf(str, "%c", item.c);
+        break;
+        case LIST_TYPE_INT8:
+            sprintf(str, "%hhi", item.b);
+        break;
+        case LIST_TYPE_UINT8: // UINT8 or BOOL
+            sprintf(str, "%hhu", item.b);
+        break;
+        case LIST_TYPE_INT16:
+            sprintf(str, "%hi", item.h);
+        break;
+        case LIST_TYPE_UINT16:
+            sprintf(str, "%hu", item.hu);
+        break;
+        case LIST_TYPE_INT32:
+            sprintf(str, "%d", item.i);
+        break;
+        case LIST_TYPE_UINT32:
+            sprintf(str, "%u", item.u);
+        break;
+        case LIST_TYPE_INT64:
+            sprintf(str, "%lli", item.li);
+        break;
+        case LIST_TYPE_UINT64:
+            sprintf(str, "%llu", item.l);
+        break;
+        case LIST_TYPE_FLOAT:
+            sprintf(str, "%f", item.f);
+        break;
+        case LIST_TYPE_DOUBLE:
+            sprintf(str, "%lf", item.d);
+        break;
+        case LIST_TYPE_STRING:
+            sprintf(str, "%s", item.s);
+        break;
+        case LIST_TYPE_POINTER:
+            sprintf(str, "%p", item.p);
+        break;
+        case LIST_TYPE_LIST:
+            list_sprint(str, item.r);
+        break; 
+        default:
+            printf("unitype_sprint - type %d not recognized\n", type);
     }
 }
 
@@ -570,8 +618,8 @@ void list_copy(list_t *dest, list_t *src) {
     }
 }
 
-/* prints the list to a file without brackets */
-void list_fprint_emb(FILE *fp, list_t *list) {
+/* prints the list to a file without brackets (no trailing newline) */
+void list_fprint_no_brackets(FILE *fp, list_t *list) {
     for (int32_t i = 0; i < list -> length; i++) {
         unitype_fprint(fp, list -> data[i], list -> type[i]);
         if (i != list -> length - 1) {
@@ -580,7 +628,7 @@ void list_fprint_emb(FILE *fp, list_t *list) {
     }
 }
 
-/* prints the list to a file */
+/* prints the list to a file (no trailing newline) */
 void list_fprint(FILE *fp, list_t *list) {
     fprintf(fp, "[");
     if (list -> length == 0) {
@@ -593,6 +641,34 @@ void list_fprint(FILE *fp, list_t *list) {
             fprintf(fp, "]");
         } else {
             fprintf(fp, ", ");
+        }
+    }
+}
+
+/* prints the list to a string without brackets (no trailing newline), it is on you to provide a buffer that is big enough */
+void list_sprint_no_brackets(char *str, list_t *list) {
+    str[0] = '\0';
+    for (int32_t i = 0; i < list -> length; i++) {
+        unitype_sprint(str + strlen(str), list -> data[i], list -> type[i]);
+        if (i != list -> length - 1) {
+            sprintf(str + strlen(str), ", ");
+        }
+    }
+}
+
+/* prints the list to a string (no trailing newline), it is on you to provide a buffer that is big enough */
+void list_sprint(char *str, list_t *list) {
+    sprintf(str, "[");
+    if (list -> length == 0) {
+        sprintf(str + strlen(str), "]");
+        return;
+    }
+    for (int32_t i = 0; i < list -> length; i++) {
+        unitype_sprint(str + strlen(str), list -> data[i], list -> type[i]);
+        if (i == list -> length - 1) {
+            sprintf(str + strlen(str), "]");
+        } else {
+            sprintf(str + strlen(str), ", ");
         }
     }
 }
