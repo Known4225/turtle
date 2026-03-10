@@ -32,6 +32,7 @@ The following build commands are available:
 - Vertical switches
 - Fix flipped world coordinates
 - Mouse interactions with textbox (highlight, index select)
+- Scratch variable and list reader (draggable, live updating, unitype reader)
 - Text-only textbox
 - 3D support
 - Audio support
