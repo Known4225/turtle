@@ -1,15 +1,18 @@
 <!doctype html>
-<html lang="en-us">
+<html>
   <head>
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>turtle</title>
+    <title>turtle demo</title>
     <link rel="shortcut icon" type="image/x-icon" href="images/thumbnail.png" />
     <style>
+      body { margin: 0; }
+      div.size_watcher {
+        height: 100vh; /* For 100% screen height */
+        width:  100vw; /* For 100% screen width */
+      }
       .emscripten { padding-right: 0; margin-left: auto; margin-right: auto; display: block; }
-      textarea.emscripten { font-family: monospace; width: 80%; }
-      div.emscripten { text-align: center; }
-      div.emscripten_border { border: 1px solid rgb(0, 0, 0); }
+      div.emscripten_border { border: 0px solid rgb(0, 0, 0); }
       /* the canvas *must not* have any border or padding, or mouse coords will be wrong */
       canvas.emscripten { border: 0px none; background-color: rgb(0, 0, 0); }
 
@@ -48,19 +51,12 @@
     </style>
   </head>
   <body style="background-color:rgb(0, 0, 0);">
-    <!-- <hr/> -->
-    <figure style="overflow:visible;" id="spinner"><div class="spinner"></div><center style="margin-top:0.5em"><strong>turtle</strong></center></figure>
-    <div class="emscripten" id="status">Downloading...</div>
-    <div class="emscripten">
-      <progress value="0" max="100" id="progress" hidden=1></progress>
-    </div>
+    <figure style="overflow:visible;" id="spinner"><div class="spinner"></figure>
     <div class="emscripten_border" id="canvas-container">
       <canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault()" tabindex=-1></canvas>
     </div>
-    <!-- <textarea class="emscripten" id="output" rows="8"></textarea> -->
-    <!-- <hr> -->
+    <div class="size_watcher" id="size-watcher"></div>
     <script type='text/javascript'>
-      var statusElement = document.getElementById('status');
       var progressElement = document.getElementById('progress');
       var spinnerElement = document.getElementById('spinner');
       var canvasElement = document.getElementById('canvas');
@@ -85,17 +81,10 @@
         setStatus.last.text = text;
         if (m) {
           text = m[1];
-          progressElement.value = parseInt(m[2])*100;
-          progressElement.max = parseInt(m[4])*100;
-          progressElement.hidden = false;
           spinnerElement.hidden = false;
         } else {
-          progressElement.value = null;
-          progressElement.max = null;
-          progressElement.hidden = true;
           if (!text) spinnerElement.hidden = true;
         }
-        statusElement.innerHTML = text;
       }
 
 #if MODULARIZE && !EXPORT_ES6

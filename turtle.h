@@ -46663,7 +46663,7 @@ void turtleInit(GLFWwindow *window, double leftX, double bottomY, double rightX,
 void turtleGetMouseCoords();
 
 /* set the background color */
-void turtleBgColor(uint8_t r, uint8_t g, uint8_t b);
+void turtleBackgroundColor(uint8_t r, uint8_t g, uint8_t b);
 
 /* set the pen color */
 void turtlePenColor(uint8_t r, uint8_t g, uint8_t b);
@@ -59973,11 +59973,10 @@ const char *turtleFragmentShaderSource =
 
 #ifdef OS_BROWSER
 /* https://github.com/emscripten-core/emscripten/pull/20831#discussion_r1415646154 */
-static EM_BOOL turtleBrowserWindowResize(int eventType, const EmscriptenUiEvent *uiEvent, void* userData) {
-    printf("resizing canvas\n");
-    double canvas_width, canvas_height;
-    emscripten_get_element_css_size("#canvas-container", &canvas_width, &canvas_height);
-    glfwSetWindowSize(glfwGetCurrentContext(), (int)canvas_width, (int)canvas_height);
+static EM_BOOL turtleBrowserWindowResize(int eventType, const EmscriptenUiEvent *uiEvent, void *userData) {
+    double canvasWidth, canvasHeight;
+    emscripten_get_element_css_size("#size-watcher", &canvasWidth, &canvasHeight);
+    glfwSetWindowSize(glfwGetCurrentContext(), (int32_t) canvasWidth, (int32_t) canvasHeight);
     return true;
 }
 #endif /* OS_BROWSER */
@@ -60182,6 +60181,9 @@ void turtleInit(GLFWwindow *window, double leftX, double bottomY, double rightX,
     glfwSetWindowPos(window, 0, 31);
     #endif
     glfwSetWindowSize(window, turtle.screenbounds[1] * 16 / 9 * 0.865, turtle.screenbounds[1] * 0.85); // doing it this way ensures the window spawns in the top left of the monitor and fixes resizing limits
+    #ifdef OS_BROWSER
+    turtleBrowserWindowResize(0, NULL, NULL);
+    #endif
 }
 
 /* run this to set the bounds of the window in coordinates */
@@ -60323,7 +60325,7 @@ void turtleGetMouseCoords() {
 }
 
 /* set the background color */
-void turtleBgColor(uint8_t r, uint8_t g, uint8_t b) {
+void turtleBackgroundColor(uint8_t r, uint8_t g, uint8_t b) {
     glClearColor(r / 255.0, g / 255.0, b / 255.0, 1.0);
 }
 
@@ -62836,7 +62838,7 @@ void turtleToolsSetTheme(tt_theme_name_t theme) {
         };
         memcpy(tt_themeColors, tt_themeCopy, sizeof(tt_themeCopy));
     }
-    turtleBgColor(tt_themeColors[TT_COLOR_BACKGROUND], tt_themeColors[TT_COLOR_BACKGROUND + 1], tt_themeColors[TT_COLOR_BACKGROUND + 2]);
+    turtleBackgroundColor(tt_themeColors[TT_COLOR_BACKGROUND], tt_themeColors[TT_COLOR_BACKGROUND + 1], tt_themeColors[TT_COLOR_BACKGROUND + 2]);
 }
 
 /* ribbon */
