@@ -171,7 +171,7 @@ void turtleInit(GLFWwindow *window, double leftX, double bottomY, double rightX,
 void turtleGetMouseCoords();
 
 /* set the background color */
-void turtleBgColor(uint8_t r, uint8_t g, uint8_t b);
+void turtleBackgroundColor(uint8_t r, uint8_t g, uint8_t b);
 
 /* set the pen color */
 void turtlePenColor(uint8_t r, uint8_t g, uint8_t b);
