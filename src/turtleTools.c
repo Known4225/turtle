@@ -2381,11 +2381,11 @@ void tt_readerUpdate(tt_reader_t *readerp) {
         char readerString[256];
         unitype variable = *(readerp -> variable);
         unitype_sprint(readerString, variable, readerp -> type);
-        double innerWidth = turtleTextGetUnicodeLength(readerString, readerp -> size);
-        if (innerWidth < readerp -> size * 5) {
-            innerWidth = readerp -> size * 5;
+        double innerWidth = turtleTextGetUnicodeLength(readerString, readerp -> size - 1) + readerp -> size;
+        if (innerWidth < readerp -> size * 4) {
+            innerWidth = readerp -> size * 4;
         }
-        double readerWidth = turtleTextGetUnicodeLength(readerp -> label, readerp -> size) + innerWidth + readerp -> size * 1.6;
+        double readerWidth = turtleTextGetUnicodeLength(readerp -> label, readerp -> size - 1) + innerWidth + readerp -> size * 1.8;
         double readerLeftX = readerp -> x;
         double readerRightX = readerp -> x + readerWidth;
         double readerY = readerp -> y;
@@ -2404,16 +2404,17 @@ void tt_readerUpdate(tt_reader_t *readerp) {
         /* rounded rectangle (item) */
         readerRightX -= readerp -> size * 0.6;
         readerLeftX = readerRightX - innerWidth;
+        readerHeight *= 0.8;
         tt_setColor(readerp -> color[TT_COLOR_SLOT_VARIABLE_READER_ITEM]);
         turtlePenSize(readerp -> size * 0.5);
-        turtleGoto(readerLeftX + readerp -> size / 2, readerY - readerHeight / 2 + readerp -> size / 2);
+        turtleGoto(readerLeftX + readerp -> size / 4, readerY - readerHeight / 2 + readerp -> size / 4);
         turtlePenDown();
-        turtleGoto(readerRightX - readerp -> size / 2, readerY - readerHeight / 2 + readerp -> size / 2);
-        turtleGoto(readerRightX - readerp -> size / 2, readerY + readerHeight / 2 - readerp -> size / 2);
-        turtleGoto(readerLeftX + readerp -> size / 2, readerY + readerHeight / 2 - readerp -> size / 2);
-        turtleGoto(readerLeftX + readerp -> size / 2, readerY - readerHeight / 2 + readerp -> size / 2);
+        turtleGoto(readerRightX - readerp -> size / 4, readerY - readerHeight / 2 + readerp -> size / 4);
+        turtleGoto(readerRightX - readerp -> size / 4, readerY + readerHeight / 2 - readerp -> size / 4);
+        turtleGoto(readerLeftX + readerp -> size / 4, readerY + readerHeight / 2 - readerp -> size / 4);
+        turtleGoto(readerLeftX + readerp -> size / 4, readerY - readerHeight / 2 + readerp -> size / 4);
         turtlePenUp();
-        turtleRectangle(readerLeftX + readerp -> size / 2, readerY - readerHeight / 2 + readerp -> size / 2, readerRightX - readerp -> size / 2, readerY + readerHeight / 2 - readerp -> size / 2);
+        turtleRectangle(readerLeftX + readerp -> size / 4, readerY - readerHeight / 2 + readerp -> size / 4, readerRightX - readerp -> size / 4, readerY + readerHeight / 2 - readerp -> size / 4);
         /* render text */
         tt_setColor(readerp -> color[TT_COLOR_SLOT_VARIABLE_READER_TEXT]);
         turtleTextWriteUnicode(readerp -> label, readerp -> x + readerp -> size * 0.6, readerp -> y, readerp -> size - 1, 0);
