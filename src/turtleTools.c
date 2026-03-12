@@ -1212,8 +1212,6 @@ void tt_buttonUpdate(tt_button_t *buttonp) {
                     /* first tick hover */
                     buttonp -> status = TT_STATUS_HOVER_FIRST_TICK;
                 }
-                tt_globals.elementLogicType = TT_ELEMENT_BUTTON;
-                tt_globals.elementLogicIndex = tt_globals.elementLogicTemp;
             } else {
                 buttonp -> status = TT_STATUS_IDLE;
             }
@@ -1227,8 +1225,6 @@ void tt_buttonUpdate(tt_button_t *buttonp) {
                     /* first tick hover */
                     buttonp -> status = TT_STATUS_HOVER_FIRST_TICK;
                 }
-                tt_globals.elementLogicType = TT_ELEMENT_BUTTON;
-                tt_globals.elementLogicIndex = tt_globals.elementLogicTemp;
             } else {
                 buttonp -> status = TT_STATUS_IDLE;
             }
@@ -1259,6 +1255,10 @@ void tt_buttonUpdate(tt_button_t *buttonp) {
         if (buttonp -> status != TT_STATUS_CLICK) {
             buttonp -> value = 0;
         }
+    }
+    if (buttonp -> status == TT_STATUS_HOVER || buttonp -> status == TT_STATUS_CLICK || buttonp -> status == TT_STATUS_HOVER_FIRST_TICK || buttonp -> status == TT_STATUS_CLICK_FIRST_TICK) {
+        tt_globals.elementLogicType = TT_ELEMENT_BUTTON;
+        tt_globals.elementLogicIndex = tt_globals.elementLogicTemp;
     }
     if (buttonp -> variable != NULL) {
         *buttonp -> variable = buttonp -> value;
@@ -1414,8 +1414,6 @@ void tt_switchUpdate(tt_switch_t *switchp) {
                 /* first tick hover */
                 switchp -> status = TT_STATUS_HOVER_FIRST_TICK;
             }
-            tt_globals.elementLogicType = TT_ELEMENT_SWITCH;
-            tt_globals.elementLogicIndex = tt_globals.elementLogicTemp;
         } else {
             switchp -> status = TT_STATUS_IDLE;
         }
@@ -1440,6 +1438,10 @@ void tt_switchUpdate(tt_switch_t *switchp) {
     }
     if (switchp -> status == TT_STATUS_CLICK_FIRST_TICK) {
         switchp -> value = !switchp -> value;
+    }
+    if (switchp -> status == TT_STATUS_HOVER || switchp -> status == TT_STATUS_CLICK || switchp -> status == TT_STATUS_HOVER_FIRST_TICK || switchp -> status == TT_STATUS_CLICK_FIRST_TICK) {
+        tt_globals.elementLogicType = TT_ELEMENT_SWITCH;
+        tt_globals.elementLogicIndex = tt_globals.elementLogicTemp;
     }
     if (switchp -> variable != NULL) {
         *switchp -> variable = switchp -> value;

@@ -47027,6 +47027,7 @@ typedef enum {
     TT_ELEMENT_ENABLED = 0,
     TT_ELEMENT_NO_MOUSE = 1,
     TT_ELEMENT_HIDE = 2,
+    TT_ELEMENT_DISABLED = 2,
 } tt_element_enabled_t;
 
 /* if an element is ignored then it is not updated with turtleToolsUpdate() and must be updated separately */
@@ -63908,8 +63909,6 @@ void tt_buttonUpdate(tt_button_t *buttonp) {
                     /* first tick hover */
                     buttonp -> status = TT_STATUS_HOVER_FIRST_TICK;
                 }
-                tt_globals.elementLogicType = TT_ELEMENT_BUTTON;
-                tt_globals.elementLogicIndex = tt_globals.elementLogicTemp;
             } else {
                 buttonp -> status = TT_STATUS_IDLE;
             }
@@ -63923,8 +63922,6 @@ void tt_buttonUpdate(tt_button_t *buttonp) {
                     /* first tick hover */
                     buttonp -> status = TT_STATUS_HOVER_FIRST_TICK;
                 }
-                tt_globals.elementLogicType = TT_ELEMENT_BUTTON;
-                tt_globals.elementLogicIndex = tt_globals.elementLogicTemp;
             } else {
                 buttonp -> status = TT_STATUS_IDLE;
             }
@@ -63955,6 +63952,10 @@ void tt_buttonUpdate(tt_button_t *buttonp) {
         if (buttonp -> status != TT_STATUS_CLICK) {
             buttonp -> value = 0;
         }
+    }
+    if (buttonp -> status == TT_STATUS_HOVER || buttonp -> status == TT_STATUS_CLICK || buttonp -> status == TT_STATUS_HOVER_FIRST_TICK || buttonp -> status == TT_STATUS_CLICK_FIRST_TICK) {
+        tt_globals.elementLogicType = TT_ELEMENT_BUTTON;
+        tt_globals.elementLogicIndex = tt_globals.elementLogicTemp;
     }
     if (buttonp -> variable != NULL) {
         *buttonp -> variable = buttonp -> value;
@@ -64110,8 +64111,6 @@ void tt_switchUpdate(tt_switch_t *switchp) {
                 /* first tick hover */
                 switchp -> status = TT_STATUS_HOVER_FIRST_TICK;
             }
-            tt_globals.elementLogicType = TT_ELEMENT_SWITCH;
-            tt_globals.elementLogicIndex = tt_globals.elementLogicTemp;
         } else {
             switchp -> status = TT_STATUS_IDLE;
         }
@@ -64133,6 +64132,10 @@ void tt_switchUpdate(tt_switch_t *switchp) {
             switchp -> status = TT_STATUS_IDLE;
             goto LABEL_SWITCH_CHECK_HOVER; // done to avoid a single IDLE tick if mouse is hovering over button when unclicked
         }
+    }
+    if (switchp -> status == TT_STATUS_HOVER || switchp -> status == TT_STATUS_CLICK || switchp -> status == TT_STATUS_HOVER_FIRST_TICK || switchp -> status == TT_STATUS_CLICK_FIRST_TICK) {
+        tt_globals.elementLogicType = TT_ELEMENT_SWITCH;
+        tt_globals.elementLogicIndex = tt_globals.elementLogicTemp;
     }
     if (switchp -> status == TT_STATUS_CLICK_FIRST_TICK) {
         switchp -> value = !switchp -> value;

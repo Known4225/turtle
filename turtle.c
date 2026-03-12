@@ -296,6 +296,7 @@ int main(int argc, char *argv[]) {
 
     uint64_t tick = 0; // count number of ticks since application started
     tt_readerInit("tick", (unitype *) &tick, 'l', -315, 155, 10);
+    tt_readerInit("tt_globals.elementLogicTypeOld", (unitype *) &tt_globals.elementLogicTypeOld, 'i', -315, 130, 10);
 
     list_t *xPositions = list_init();
     list_t *yPositions = list_init();
