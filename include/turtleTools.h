@@ -591,7 +591,12 @@ typedef struct {
     double size;
     unitype *variable;
     char label[TT_LABEL_LENGTH_LIMIT];
+    int32_t status;
     char type;
+    double anchorX;
+    double anchorY;
+    double mouseAnchorX;
+    double mouseAnchorY;
     double width; // only used for list readers
     double height; // only used for list readers
     tt_scrollbar_t *scrollbarp; // only used for list readers

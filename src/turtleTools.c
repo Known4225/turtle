@@ -1089,6 +1089,7 @@ tt_reader_t *tt_readerInit(char *label, unitype *variable, char type, double x, 
     readerp -> x = x;
     readerp -> y = y;
     readerp -> size = size;
+    readerp -> status = 0;
     readerp -> variable = variable;
     readerp -> type = type;
     readerp -> scrollbarp = NULL;
@@ -2376,7 +2377,7 @@ void tt_contextUpdate(tt_context_t *contextp) {
 
 void tt_readerUpdate(tt_reader_t *readerp) {
     if (readerp -> element == TT_ELEMENT_LIST_READER) {
-
+        
     } else if (readerp -> element == TT_ELEMENT_VARIABLE_READER) {
         char readerString[256];
         unitype variable = *(readerp -> variable);
