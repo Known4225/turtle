@@ -89,6 +89,7 @@ typedef enum {
     TT_ELEMENT_ENABLED = 0,
     TT_ELEMENT_NO_MOUSE = 1,
     TT_ELEMENT_HIDE = 2,
+    TT_ELEMENT_DISABLED = 2,
 } tt_element_enabled_t;
 
 /* if an element is ignored then it is not updated with turtleToolsUpdate() and must be updated separately */
@@ -323,6 +324,15 @@ typedef struct {
 
 extern tt_globals_t tt_globals;
 
+typedef enum {
+    TT_STATUS_IDLE = 0,
+    TT_STATUS_HOVER_FIRST_TICK = 1,
+    TT_STATUS_HOVER = 2,
+    TT_STATUS_CLICK_FIRST_TICK = 3,
+    TT_STATUS_CLICK = 4,
+    TT_STATUS_CLICK_BLOCKED = 5,
+} tt_status_t;
+
 #define TT_LABEL_LENGTH_LIMIT 128
 
 typedef enum {
@@ -405,7 +415,7 @@ typedef struct {
     double size;
     double *variable; // bound variable (can be NULL)
     char label[TT_LABEL_LENGTH_LIMIT];
-    int32_t status[2];
+    tt_status_t status[2];
     tt_dial_scale_t scale;
     double range[2];
     double renderNumberFactor; // multiply rendered variable by this amount
