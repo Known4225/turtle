@@ -325,12 +325,16 @@ typedef struct {
 extern tt_globals_t tt_globals;
 
 typedef enum {
-    TT_STATUS_IDLE = 0,
-    TT_STATUS_HOVER_FIRST_TICK = 1,
-    TT_STATUS_HOVER = 2,
-    TT_STATUS_CLICK_FIRST_TICK = 3,
-    TT_STATUS_CLICK = 4,
-    TT_STATUS_CLICK_BLOCKED = 5,
+    TT_STATUS_IDLE = 0,                  // Not being interacted with
+    TT_STATUS_BLOCKED = 1,               // Blocked from interaction
+    TT_STATUS_HOVER_FIRST_TICK = 2,      // When mouse comes into contact with element this is the status of the element for one tick
+    TT_STATUS_HOVER = 3,                 // Subsequent ticks of an element that the mouse is touching
+    TT_STATUS_CLICK_FIRST_TICK = 4,      // When mouse clicks an element this is the status of the element for one tick
+    TT_STATUS_CLICK = 5,                 // Subsequent ticks of an element that has been clicked (until the mouse is released)
+    TT_STATUS_OPEN_FIRST_TICK = 6,       // On dropdowns, textboxes, and context menus they remain active even after mouse is released
+    TT_STATUS_OPEN = 7,                  // Used to indicate a context menu or dropdown is open, or a textbox is accepting text
+    TT_STATUS_OPEN_CLICK_FIRST_TICK = 8,
+    TT_STATUS_OPEN_CLICK = 9,
 } tt_status_t;
 
 #define TT_LABEL_LENGTH_LIMIT 128
@@ -359,7 +363,7 @@ typedef struct {
     double size;
     int8_t *variable; // bound variable (can be NULL)
     char label[TT_LABEL_LENGTH_LIMIT];
-    int32_t status;
+    tt_status_t status;
     tt_button_shape_t shape;
     tt_button_align_t align;
     /* value */
@@ -391,7 +395,7 @@ typedef struct {
     double size;
     int8_t *variable; // bound variable (can be NULL)
     char label[TT_LABEL_LENGTH_LIMIT];
-    int32_t status;
+    tt_status_t status;
     tt_switch_style_t style;
     tt_switch_align_t align;
     /* value */
@@ -415,7 +419,8 @@ typedef struct {
     double size;
     double *variable; // bound variable (can be NULL)
     char label[TT_LABEL_LENGTH_LIMIT];
-    tt_status_t status[2];
+    tt_status_t status;
+    double mouseAnchor;
     tt_dial_scale_t scale;
     double range[2];
     double renderNumberFactor; // multiply rendered variable by this amount
@@ -452,7 +457,7 @@ typedef struct {
     double size;
     double *variable; // bound variable (can be NULL)
     char label[TT_LABEL_LENGTH_LIMIT];
-    int32_t status;
+    tt_status_t status;
     tt_slider_type_t type;
     tt_slider_align_t align;
     tt_slider_scale_t scale;
@@ -527,7 +532,7 @@ typedef struct {
     int32_t *variable; // bound variable (can be NULL)
     char label[TT_LABEL_LENGTH_LIMIT];
     list_t *options;
-    int32_t status;
+    tt_status_t status;
     tt_dropdown_align_t align;
     tt_dropdown_direction_t direction;
     double autoLowerBound;
