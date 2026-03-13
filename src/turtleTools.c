@@ -2179,7 +2179,7 @@ void tt_dropdownUpdate(tt_dropdown_t *dropdownp) {
     if (dropdownp -> status == TT_STATUS_HOVER || dropdownp -> status == TT_STATUS_HOVER_FIRST_TICK) {
         tt_setColor(dropdownp -> color[TT_COLOR_SLOT_DROPDOWN_SELECT]);
         turtleRectangle(dropdownXFactor[0], dropdownY - dropdownp -> size * 0.9, dropdownXFactor[1] + dropdownp -> size, dropdownY + dropdownp -> size * 0.9);
-    } else if (dropdownp -> status == TT_STATUS_OPEN_CLICK || dropdownp -> status == TT_STATUS_OPEN_CLICK_FIRST_TICK || dropdownp -> status == TT_STATUS_CLICK || dropdownp -> status == TT_STATUS_CLICK_FIRST_TICK) {
+    } else if (dropdownp -> status == TT_STATUS_OPEN || dropdownp -> status == TT_STATUS_CLICK || dropdownp -> status == TT_STATUS_OPEN_FIRST_TICK || dropdownp -> status == TT_STATUS_CLICK_FIRST_TICK) {
         tt_setColor(dropdownp -> color[TT_COLOR_SLOT_DROPDOWN_BASE]);
         if (dropdownDirection == TT_DROPDOWN_DIRECTION_UP) {
             turtleRectangle(dropdownMaxXFactor[0], dropdownY + dropdownp -> size * 0.9 + (dropdownp -> options -> length - 1) * itemHeight, dropdownMaxXFactor[1], dropdownY - dropdownp -> size * 0.9);
@@ -2193,7 +2193,7 @@ void tt_dropdownUpdate(tt_dropdown_t *dropdownp) {
     /* mouse */
     if (dropdownp -> enabled != TT_ELEMENT_ENABLED || tt_globals.elementLogicTypeOld > TT_ELEMENT_DROPDOWN || (tt_globals.elementLogicTypeOld == TT_ELEMENT_DROPDOWN && tt_globals.elementLogicIndexOld > tt_globals.elementLogicTemp)) {
         /* dropdown not enabled or higher priority element is being interacted with */
-        if (dropdownp -> status == TT_STATUS_CLICK_FIRST_TICK && tt_globals.elementLogicTypeOld == TT_ELEMENT_HIGHEST && tt_globals.elementLogicIndexOld == TT_ELEMENT_DROPDOWN) {
+        if ((dropdownp -> status == TT_STATUS_OPEN || dropdownp -> status == TT_STATUS_OPEN_FIRST_TICK) && tt_globals.elementLogicTypeOld == TT_ELEMENT_HIGHEST && tt_globals.elementLogicIndexOld == TT_ELEMENT_DROPDOWN) {
             goto LABEL_DROPDOWN_CHECK_HOVER;
         }
         dropdownp -> status = TT_STATUS_IDLE;
@@ -2204,7 +2204,7 @@ void tt_dropdownUpdate(tt_dropdown_t *dropdownp) {
         goto LABEL_DROPDOWN_END;
     }
     LABEL_DROPDOWN_CHECK_HOVER:
-    if (dropdownp -> status != TT_STATUS_CLICK && dropdownp -> status != TT_STATUS_BLOCKED && dropdownp -> status != TT_STATUS_CLICK_FIRST_TICK) {
+    if (dropdownp -> status != TT_STATUS_CLICK && dropdownp -> status != TT_STATUS_OPEN && dropdownp -> status != TT_STATUS_BLOCKED && dropdownp -> status != TT_STATUS_CLICK_FIRST_TICK && dropdownp -> status != TT_STATUS_OPEN_FIRST_TICK) {
         if (turtle.mouseX > dropdownXFactor[0] && turtle.mouseX < dropdownXFactor[1] + dropdownp -> size && turtle.mouseY >= dropdownY - dropdownp -> size * 0.9 && turtle.mouseY < dropdownY + dropdownp -> size * 0.9) {
             if (dropdownp -> status == TT_STATUS_HOVER || dropdownp -> status == TT_STATUS_HOVER_FIRST_TICK) {
                 /* hovering dropdown */
@@ -2281,23 +2281,15 @@ void tt_dropdownUpdate(tt_dropdown_t *dropdownp) {
             goto LABEL_DROPDOWN_CHECK_HOVER;
         }
     }
-    if (dropdownp -> status == TT_STATUS_CLICK || dropdownp -> status == TT_STATUS_CLICK_FIRST_TICK) {
+    if (dropdownp -> status == TT_STATUS_OPEN || dropdownp -> status == TT_STATUS_CLICK || dropdownp -> status == TT_STATUS_OPEN_FIRST_TICK || dropdownp -> status == TT_STATUS_CLICK_FIRST_TICK) {
         int32_t selected = round((dropdownY - turtle.mouseY) / itemHeight);
         if (directionRender == -1) {
             selected = dropdownp -> options -> length - round((turtle.mouseY - dropdownY) / itemHeight);
         }
-        tt_setColor(dropdownp -> color[TT_COLOR_SLOT_DROPDOWN_HOVER]);
-        turtleRectangle(dropdownMaxXFactor[0], dropdownY - dropdownp -> size * 0.9 - (directionRender - 1) / 2.0 * dropdownp -> options -> length * itemHeight - selected * itemHeight, dropdownMaxXFactor[1], dropdownY + dropdownp -> size * 0.9 - (directionRender - 1) / 2.0 * dropdownp -> options -> length * itemHeight - selected * itemHeight);
-    }
-    if (dropdownp -> status == TT_STATUS_CLICK_FIRST_TICK) {
-        tt_globals.elementLogicType = TT_ELEMENT_HIGHEST;
-        tt_globals.elementLogicIndex = TT_ELEMENT_DROPDOWN; // subverting expectations
-    }
-    if (dropdownp -> status == TT_STATUS_OPEN_CLICK || dropdownp -> status == TT_STATUS_OPEN || dropdownp -> status == TT_STATUS_HOVER || dropdownp -> status == TT_STATUS_CLICK || dropdownp -> status == TT_STATUS_OPEN_CLICK_FIRST_TICK || dropdownp -> status == TT_STATUS_OPEN_FIRST_TICK || dropdownp -> status == TT_STATUS_HOVER_FIRST_TICK) {
-        tt_globals.elementLogicType = TT_ELEMENT_DROPDOWN;
-        tt_globals.elementLogicIndex = tt_globals.elementLogicTemp;
-    }
-    if (dropdownp -> status == TT_STATUS_OPEN_CLICK || dropdownp -> status == TT_STATUS_OPEN_CLICK_FIRST_TICK || dropdownp -> status == TT_STATUS_CLICK || dropdownp -> status == TT_STATUS_CLICK_FIRST_TICK) {
+        if (turtle.mouseX > dropdownMaxXFactor[0] && turtle.mouseX < dropdownMaxXFactor[1] && selected >= 0 && selected < dropdownp -> options -> length) {
+            tt_setColor(dropdownp -> color[TT_COLOR_SLOT_DROPDOWN_HOVER]);
+            turtleRectangle(dropdownMaxXFactor[0], dropdownY - dropdownp -> size * 0.9 - (directionRender - 1) / 2.0 * dropdownp -> options -> length * itemHeight - selected * itemHeight, dropdownMaxXFactor[1], dropdownY + dropdownp -> size * 0.9 - (directionRender - 1) / 2.0 * dropdownp -> options -> length * itemHeight - selected * itemHeight);
+        }
         tt_setColor(dropdownp -> color[TT_COLOR_SLOT_DROPDOWN_TEXT_HOVER]);
         int32_t renderIndex = 1;
         for (int32_t i = 0; i < dropdownp -> options -> length; i++) {
@@ -2313,6 +2305,14 @@ void tt_dropdownUpdate(tt_dropdown_t *dropdownp) {
             }
         }
     }
+    if (dropdownp -> status == TT_STATUS_OPEN || dropdownp -> status == TT_STATUS_OPEN_FIRST_TICK) {
+        tt_globals.elementLogicType = TT_ELEMENT_HIGHEST;
+        tt_globals.elementLogicIndex = TT_ELEMENT_DROPDOWN; // subverting expectations
+    }
+    if (dropdownp -> status == TT_STATUS_OPEN_CLICK || dropdownp -> status == TT_STATUS_HOVER || dropdownp -> status == TT_STATUS_CLICK || dropdownp -> status == TT_STATUS_OPEN_CLICK_FIRST_TICK || dropdownp -> status == TT_STATUS_HOVER_FIRST_TICK) {
+        tt_globals.elementLogicType = TT_ELEMENT_DROPDOWN;
+        tt_globals.elementLogicIndex = tt_globals.elementLogicTemp;
+    }
     LABEL_DROPDOWN_END:
     tt_setColor(dropdownp -> color[TT_COLOR_SLOT_DROPDOWN_TEXT_HOVER]);
     if (dropdownp -> align == TT_DROPDOWN_ALIGN_LEFT) {
@@ -2323,7 +2323,7 @@ void tt_dropdownUpdate(tt_dropdown_t *dropdownp) {
         turtleTextWriteUnicode(dropdownp -> options -> data[dropdownp -> index].s, dropdownXFactor[1] - dropdownp -> size * 0.55, dropdownY, dropdownp -> size - 1, dropdownAlignFactor);
     }
     tt_setColor(dropdownp -> color[TT_COLOR_SLOT_DROPDOWN_TRIANGLE]);
-    if (dropdownp -> status == TT_STATUS_OPEN_CLICK || dropdownp -> status == TT_STATUS_OPEN_CLICK_FIRST_TICK || dropdownp -> status == TT_STATUS_CLICK || dropdownp -> status == TT_STATUS_CLICK_FIRST_TICK) {
+    if (dropdownp -> status == TT_STATUS_OPEN || dropdownp -> status == TT_STATUS_CLICK || dropdownp -> status == TT_STATUS_OPEN_FIRST_TICK || dropdownp -> status == TT_STATUS_CLICK_FIRST_TICK) {
         turtleTriangle(dropdownXFactor[1] + dropdownp -> size * 0.4, dropdownY + dropdownp -> size * 0.4, dropdownXFactor[1] + dropdownp -> size * 0.4, dropdownY - dropdownp -> size * 0.4, dropdownXFactor[1] - dropdownp -> size * 0.2, dropdownY);
     } else {
         turtleTriangle(dropdownXFactor[1] + dropdownp -> size * 0.6, dropdownY + dropdownp -> size * 0.3, dropdownXFactor[1] - dropdownp -> size * 0.2, dropdownY + dropdownp -> size * 0.3, dropdownXFactor[1] + dropdownp -> size * 0.2, dropdownY - dropdownp -> size * 0.3);
