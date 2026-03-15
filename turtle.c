@@ -297,7 +297,7 @@ int main(int argc, char *argv[]) {
     uint64_t tick = 0; // count number of ticks since application started
     tt_readerInit("tick", (unitype *) &tick, 'l', -315, 155, 10);
     tt_readerInit("tt_globals.elementLogicTypeOld", (unitype *) &tt_globals.elementLogicTypeOld, 'i', -315, 135, 10);
-    tt_readerInit("scrollbarY -> status", (unitype *) &(scrollbarY -> status), 'i', -315, 115, 10);
+    tt_readerInit("tt_globals.elementLogicIndexOld", (unitype *) &tt_globals.elementLogicIndexOld, 'i', -315, 115, 10);
 
     list_t *xPositions = list_init();
     list_t *yPositions = list_init();
@@ -320,6 +320,11 @@ int main(int argc, char *argv[]) {
         /* update element positions */
         for (int32_t i = 0; i < tt_elements.all -> length; i++) {
             if (((tt_button_t *) tt_elements.all -> data[i].p) -> element != TT_ELEMENT_SCROLLBAR && ((tt_button_t *) tt_elements.all -> data[i].p) -> element != TT_ELEMENT_CONTEXT) {
+                if (((tt_button_t *) tt_elements.all -> data[i].p) -> element == TT_ELEMENT_VARIABLE_READER && (((tt_reader_t *) tt_elements.all -> data[i].p) -> status == TT_STATUS_CLICK || ((tt_reader_t *) tt_elements.all -> data[i].p) -> status == TT_STATUS_CLICK_FIRST_TICK)) {
+                    xPositions -> data[i].d = ((tt_button_t *) tt_elements.all -> data[i].p) -> x + scrollbarX -> value * 5;
+                    yPositions -> data[i].d = ((tt_button_t *) tt_elements.all -> data[i].p) -> y - scrollbarY -> value * 3.3;
+                    continue;
+                }
                 ((tt_button_t *) tt_elements.all -> data[i].p) -> x = xPositions -> data[i].d - scrollbarX -> value * 5;
                 ((tt_button_t *) tt_elements.all -> data[i].p) -> y = yPositions -> data[i].d + scrollbarY -> value * 3.3;
             }

@@ -501,12 +501,12 @@ typedef struct {
     double renderPixelOffset;
     int32_t renderStartingIndex;
     int32_t renderNumCharacters;
-    /* value */
-    char *text; // text of textbox
-    char *value; // text of textbox (duplicate name - always equal to text)
     /* whitelist */
     list_t *whitelist;
     list_t *blacklist;
+    /* value */
+    char *text; // text of textbox
+    char *value; // text of textbox (duplicate name - always equal to text)
 } tt_textbox_t;
 
 typedef enum {

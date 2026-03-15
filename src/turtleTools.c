@@ -461,7 +461,7 @@ void tt_ribbonUpdate() {
         turtleTextWriteUnicode(tt_ribbon.options -> data[i].r -> data[0].s, prevCutoff, tt_ribbon.bounds[3] - 5.5 * tt_ribbon.ribbonSize, 7 * tt_ribbon.ribbonSize, 0);
     }
     if (tt_globals.elementLogicTypeOld <= TT_ELEMENT_RIBBON) {
-        if (tt_ribbon.mainselect[2] > -1) {
+        if (tt_ribbon.mainselect[2] > -1 || tt_ribbon.subselect[2] > -1) {
             tt_globals.elementLogicType = TT_ELEMENT_RIBBON;
         }
         if (turtleMouseDown()) { // this is hideous
@@ -490,8 +490,8 @@ void tt_ribbonUpdate() {
                     tt_ribbon.output[1] = tt_ribbon.mainselect[2];
                     tt_ribbon.output[2] = tt_ribbon.subselect[2];
                     tt_ribbon.mainselect[2] = -1;
-                    tt_ribbon.subselect[2] = -1;
                 }
+                tt_ribbon.subselect[2] = -1;
             }
             if (tt_ribbon.mainselect[3] == -1 && tt_ribbon.mainselect[0] == tt_ribbon.mainselect[2]) {
                 tt_ribbon.mainselect[2] = -1;
@@ -2344,11 +2344,7 @@ void tt_dropdownUpdate(tt_dropdown_t *dropdownp) {
             }
         }
     }
-    if (dropdownp -> status == TT_STATUS_OPEN_FIRST_TICK) {
-        tt_globals.elementLogicType = TT_ELEMENT_HIGHEST;
-        tt_globals.elementLogicIndex = TT_ELEMENT_DROPDOWN; // subverting expectations
-    }
-    if (dropdownp -> status == TT_STATUS_OPEN || dropdownp -> status == TT_STATUS_OPEN_CLICK || dropdownp -> status == TT_STATUS_HOVER || dropdownp -> status == TT_STATUS_CLICK || dropdownp -> status == TT_STATUS_OPEN_CLICK_FIRST_TICK || dropdownp -> status == TT_STATUS_HOVER_FIRST_TICK) {
+    if (dropdownp -> status == TT_STATUS_OPEN || dropdownp -> status == TT_STATUS_OPEN_CLICK || dropdownp -> status == TT_STATUS_HOVER || dropdownp -> status == TT_STATUS_CLICK || dropdownp -> status == TT_STATUS_OPEN_FIRST_TICK || dropdownp -> status == TT_STATUS_OPEN_CLICK_FIRST_TICK || dropdownp -> status == TT_STATUS_HOVER_FIRST_TICK) {
         tt_globals.elementLogicType = TT_ELEMENT_DROPDOWN;
         tt_globals.elementLogicIndex = tt_globals.elementLogicTemp;
     }
@@ -2590,24 +2586,83 @@ void tt_readerUpdate(tt_reader_t *readerp) {
         turtlePenUp();
         turtleRectangle(readerLeftX + readerp -> size / 2, readerY - readerHeight / 2 + readerp -> size / 2, readerRightX - readerp -> size / 2,  readerY + readerHeight / 2 - readerp -> size / 2);
         /* rounded rectangle (item) */
-        readerRightX -= readerp -> size * 0.6;
-        readerLeftX = readerRightX - innerWidth;
-        readerHeight *= 0.8;
+        double readerInnerRightX = readerRightX - readerp -> size * 0.6;
+        double readerInnerLeftX = readerInnerRightX - innerWidth;
+        double readerInnerHeight = readerHeight * 0.8;
         tt_setColor(readerp -> color[TT_COLOR_SLOT_VARIABLE_READER_ITEM]);
         turtlePenSize(readerp -> size * 0.5);
-        turtleGoto(readerLeftX + readerp -> size / 4, readerY - readerHeight / 2 + readerp -> size / 4);
+        turtleGoto(readerInnerLeftX + readerp -> size / 4, readerY - readerInnerHeight / 2 + readerp -> size / 4);
         turtlePenDown();
-        turtleGoto(readerRightX - readerp -> size / 4, readerY - readerHeight / 2 + readerp -> size / 4);
-        turtleGoto(readerRightX - readerp -> size / 4, readerY + readerHeight / 2 - readerp -> size / 4);
-        turtleGoto(readerLeftX + readerp -> size / 4, readerY + readerHeight / 2 - readerp -> size / 4);
-        turtleGoto(readerLeftX + readerp -> size / 4, readerY - readerHeight / 2 + readerp -> size / 4);
+        turtleGoto(readerInnerRightX - readerp -> size / 4, readerY - readerInnerHeight / 2 + readerp -> size / 4);
+        turtleGoto(readerInnerRightX - readerp -> size / 4, readerY + readerInnerHeight / 2 - readerp -> size / 4);
+        turtleGoto(readerInnerLeftX + readerp -> size / 4, readerY + readerInnerHeight / 2 - readerp -> size / 4);
+        turtleGoto(readerInnerLeftX + readerp -> size / 4, readerY - readerInnerHeight / 2 + readerp -> size / 4);
         turtlePenUp();
-        turtleRectangle(readerLeftX + readerp -> size / 4, readerY - readerHeight / 2 + readerp -> size / 4, readerRightX - readerp -> size / 4, readerY + readerHeight / 2 - readerp -> size / 4);
+        turtleRectangle(readerInnerLeftX + readerp -> size / 4, readerY - readerInnerHeight / 2 + readerp -> size / 4, readerInnerRightX - readerp -> size / 4, readerY + readerInnerHeight / 2 - readerp -> size / 4);
         /* render text */
         tt_setColor(readerp -> color[TT_COLOR_SLOT_VARIABLE_READER_TEXT]);
         turtleTextWriteUnicode(readerp -> label, readerp -> x + readerp -> size * 0.6, readerp -> y, readerp -> size - 1, 0);
         tt_setColor(readerp -> color[TT_COLOR_SLOT_VARIABLE_READER_TEXT_ITEM]);
-        turtleTextWriteUnicode(readerString, (readerLeftX + readerRightX) / 2, readerp -> y, readerp -> size - 1, 50);
+        turtleTextWriteUnicode(readerString, (readerInnerLeftX + readerInnerRightX) / 2, readerp -> y, readerp -> size - 1, 50);
+        /* mouse */
+        if (readerp -> enabled != TT_ELEMENT_ENABLED || tt_globals.elementLogicTypeOld > TT_ELEMENT_VARIABLE_READER || (tt_globals.elementLogicTypeOld == TT_ELEMENT_VARIABLE_READER && tt_globals.elementLogicIndexOld > tt_globals.elementLogicTemp)) {
+            /* reader not enabled or higher priority element is being interacted with */
+            if (readerp -> status == TT_STATUS_CLICK || readerp -> status == TT_STATUS_CLICK_FIRST_TICK) {
+                goto LABEL_VARIABLE_READER_CHECK_HOVER;
+            }
+            readerp -> status = TT_STATUS_IDLE;
+            return;
+        }
+        LABEL_VARIABLE_READER_CHECK_HOVER:
+        if (readerp -> status != TT_STATUS_CLICK && readerp -> status != TT_STATUS_BLOCKED && readerp -> status != TT_STATUS_CLICK_FIRST_TICK) {
+            if (turtle.mouseX > readerLeftX && turtle.mouseX < readerRightX && turtle.mouseY > readerY - readerHeight / 2 && turtle.mouseY < readerY + readerHeight / 2) {
+                if (readerp -> status == TT_STATUS_HOVER || readerp -> status == TT_STATUS_HOVER_FIRST_TICK) {
+                    /* hovering reader */
+                    readerp -> status = TT_STATUS_HOVER;
+                } else {
+                    /* first tick hover */
+                    readerp -> status = TT_STATUS_HOVER_FIRST_TICK;
+                }
+            } else {
+                readerp -> status = TT_STATUS_IDLE;
+            }
+        }
+        if (turtleMouseDown()) {
+            if (readerp -> status == TT_STATUS_HOVER || readerp -> status == TT_STATUS_HOVER_FIRST_TICK) {
+                /* first tick clicked */
+                readerp -> anchorX = readerp -> x;
+                readerp -> anchorY = readerp -> y;
+                readerp -> mouseAnchorX = turtle.mouseX;
+                readerp -> mouseAnchorY = turtle.mouseY;
+                int32_t index = list_find(tt_elements.readers, (unitype) (void *) readerp, 'p');
+                if (index != -1) {
+                    tt_elements.readers -> type[index] = 'l'; // switch to l to avoid free
+                    list_delete(tt_elements.readers, index);
+                    list_append(tt_elements.readers, (unitype) (void *) readerp, 'p');
+                }
+                readerp -> status = TT_STATUS_CLICK_FIRST_TICK;
+            } else if (readerp -> status == TT_STATUS_CLICK || readerp -> status == TT_STATUS_CLICK_FIRST_TICK) {
+                /* reader is being held */
+                readerp -> status = TT_STATUS_CLICK;
+            } else {
+                /* reader is blocked from interaction until mouse is unclicked */
+                readerp -> status = TT_STATUS_BLOCKED;
+            }
+        } else {
+            if (readerp -> status == TT_STATUS_CLICK || readerp -> status == TT_STATUS_BLOCKED || readerp -> status == TT_STATUS_CLICK_FIRST_TICK) {
+                /* first tick unclicked */
+                readerp -> status = TT_STATUS_IDLE;
+                goto LABEL_VARIABLE_READER_CHECK_HOVER; // done to avoid a single IDLE tick if mouse is hovering over reader when unclicked
+            }
+        }
+        if (readerp -> status == TT_STATUS_CLICK || readerp -> status == TT_STATUS_CLICK_FIRST_TICK) {
+            readerp -> x = readerp -> anchorX + turtle.mouseX - readerp -> mouseAnchorX;
+            readerp -> y = readerp -> anchorY + turtle.mouseY - readerp -> mouseAnchorY;
+        }
+        if (readerp -> status == TT_STATUS_HOVER || readerp -> status == TT_STATUS_CLICK || readerp -> status == TT_STATUS_HOVER_FIRST_TICK || readerp -> status == TT_STATUS_CLICK_FIRST_TICK) {
+            tt_globals.elementLogicType = TT_ELEMENT_VARIABLE_READER;
+            tt_globals.elementLogicIndex = tt_globals.elementLogicTemp;
+        }
     }
 }
 
