@@ -46539,10 +46539,10 @@ enum {
     TURTLE_WINDOW_MONITOR_HEIGHT, // primary monitor height
 };
 
-/* special function that can be called prior to turtleInit - this function condenses the window creation code boilerplate */
+/* special function that can be called prior to turtleInit() - this function condenses the window creation code boilerplate */
 GLFWwindow *turtleCreateWindow(int32_t windowWidth, int32_t windowHeight, char *windowName);
 
-/* special function that can be called prior to turtleInit - this function condenses the window creation code with icon boilerplate */
+/* special function that can be called prior to turtleInit() - this function condenses the window creation code with icon boilerplate */
 GLFWwindow *turtleCreateWindowIcon(int32_t windowWidth, int32_t windowHeight, char *windowName, char *filename);
 
 typedef struct {
@@ -46554,7 +46554,7 @@ typedef struct {
     int32_t screenbounds[2]; // current window size (x, y) (pixels)
     int32_t lastscreenbounds[2]; // last frame window size (x, y) (pixels)
     int32_t initscreenbounds[2]; // window size (x, y) (pixels) at initialisation
-    int32_t resizeMode; // TURTLE_RESIZE_MODE_PAD, TURTLE_RESIZE_MODE_STRETCH, TURTLE_RESIZE_MODE_PAD_NO_BARS
+    int32_t resizeMode; // TURTLE_RESIZE_MODE_PAD, TURTLE_RESIZE_MODE_STRETCH, TURTLE_RESIZE_MODE_PAD_NO_BARS (call turtleSetResizeMode() prior to turtleInit() to change)
     double initbounds[4]; // list of coordinate bounds at initialisation (leftX, bottomY, rightX, topY)
     double bounds[4]; // list of coordinate bounds (leftX, bottomY, rightX, topY)
     double centerAndScale[4]; // centerX, centerY, ratioX, ratioY
@@ -46573,10 +46573,10 @@ typedef struct {
     void *bufferList;
     #endif /* TURTLE_ENABLE_TEXTURES */
     list_t *textureList; // filename, original width, original height, channels
-    int32_t textureWidth; // turtle texture width (default 1024) (call turtleSetTextureSize() prior to turtleInit to change)
-    int32_t textureHeight; // turtle texture height (default 1024) (call turtleSetTextureSize() prior to turtleInit to change)
+    int32_t textureWidth; // turtle texture width (default 1024) (call turtleSetTextureSize() prior to turtleInit() to change)
+    int32_t textureHeight; // turtle texture height (default 1024) (call turtleSetTextureSize() prior to turtleInit() to change)
     int32_t textureBuffer; // size of GPU glTex 2D Array (default 64)
-    int32_t maxTextures; // size of GPU glTex 2D Array (default 64) (call turtleSetMaxTextures() prior to turtleInit to change)
+    int32_t maxTextures; // size of GPU glTex 2D Array (default 64) (call turtleSetMaxTextures() prior to turtleInit() to change)
     uint32_t textureID; // openGL texture handle
     list_t *penPos; // a list of where to draw
     uint64_t penHash; // the penPos list is hashed and this hash is used to determine if any changes occured between frames
@@ -46724,13 +46724,13 @@ void addVertex(double x, double y, double r, double g, double b, double a, doubl
 void turtleTextureRenderInternal(int32_t textureCode, double x1, double y1, double x2, double y2, double r, double g, double b, double rot, double xcenter, double ycenter, double xfact, double yfact);
 #endif /* TURTLE_ENABLE_TEXTURES */
 
-/* set pixel width and height of textures (determines how blurry pictures are, default 1024, 1024) - must be done BEFORE turtleInit */
+/* set pixel width and height of textures (determines how blurry pictures are, default 1024, 1024) - must be done BEFORE turtleInit() */
 void turtleSetTextureSize(int32_t width, int32_t height);
 
-/* set maximum number of textures (default 64) - must be done BEFORE turtleInit */
+/* set maximum number of textures (default 64) - must be done BEFORE turtleInit() */
 void turtleSetMaxTextures(int32_t maxTextures);
 
-/* set resize mode of turtle (default TURTLE_RESIZE_MODE_PAD) - must be done BEFORE turtleInit */
+/* set resize mode of turtle (default TURTLE_RESIZE_MODE_PAD) - must be done BEFORE turtleInit() */
 void turtleSetResizeMode(turtle_resize_mode_t resizeMode);
 
 /* load a png, jpg, or bmp to GPU memory as a texture */
