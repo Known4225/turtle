@@ -154,7 +154,7 @@ int32_t turtleTextInit(const char *filename) {
             list_append(fontDataInit, (unitype) savedWidth, 'i');
         } else {
             if (maximums[0] < 0) {
-                list_append(fontDataInit, (unitype) 90, 'i'); // default width of character
+                list_append(fontDataInit, (unitype) 45, 'i'); // default width of character (space)
             } else {
                 list_append(fontDataInit, (unitype) maximums[0], 'i');
             }

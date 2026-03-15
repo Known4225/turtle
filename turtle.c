@@ -225,8 +225,8 @@ int main(int argc, char *argv[]) {
     for (int32_t i = 0; i < cameras -> length; i += 4) {
         list_append(imageDropdownOptions, cameras -> data[i], 's');
     }
-    // tt_dropdown_t *imageDropdown = tt_dropdownInit("Source", imageDropdownOptions, NULL, TT_DROPDOWN_ALIGN_RIGHT, 700, 36, 8);
-    // int32_t oldImageDropdown = imageDropdown -> value;
+    tt_dropdown_t *imageDropdown = tt_dropdownInit("Source", imageDropdownOptions, NULL, TT_DROPDOWN_ALIGN_RIGHT, 700, 36, 8);
+    int32_t oldImageDropdown = imageDropdown -> value;
 
     double sliderVar, dialVar;
     tt_button_t *button = tt_buttonInit("Button", NULL, 150, 20, 10);
@@ -273,7 +273,7 @@ int main(int argc, char *argv[]) {
     tt_dialInit("Power", NULL, TT_DIAL_SCALE_LINEAR, -150, -210, 10, 0, 100, 1);
     tt_dialInit("Speed", NULL, TT_DIAL_SCALE_LINEAR, -100, -210, 10, 0, 1000, 1);
     tt_dialInit("Exposure", NULL, TT_DIAL_SCALE_EXP, -50, -210, 10, 0, 1000, 1);
-    // tt_dropdownInit("Source", sources, NULL, TT_DROPDOWN_ALIGN_LEFT, -10, -207, 10);
+    tt_dropdownInit("Source", sources, NULL, TT_DROPDOWN_ALIGN_LEFT, -10, -207, 10);
     tt_slider_t *xSlider = tt_sliderInit("", &x, TT_SLIDER_TYPE_HORIZONTAL, TT_SLIDER_ALIGN_CENTER, -100, -240, 10, 100, -300, 300, 0);
     tt_slider_t *ySlider = tt_sliderInit("", &y, TT_SLIDER_TYPE_HORIZONTAL, TT_SLIDER_ALIGN_CENTER, -100, -260, 10, 100, -300, 300, 0);
     tt_slider_t *zSlider = tt_sliderInit("", &z, TT_SLIDER_TYPE_HORIZONTAL, TT_SLIDER_ALIGN_CENTER, -100, -280, 10, 100, -300, 300, 0);
@@ -297,7 +297,7 @@ int main(int argc, char *argv[]) {
     uint64_t tick = 0; // count number of ticks since application started
     tt_readerInit("tick", (unitype *) &tick, 'l', -315, 155, 10);
     tt_readerInit("tt_globals.elementLogicTypeOld", (unitype *) &tt_globals.elementLogicTypeOld, 'i', -315, 135, 10);
-    tt_readerInit("dropdown -> status", (unitype *) &(dropdown -> status), 'i', -315, 115, 10);
+    tt_readerInit("textbox -> status", (unitype *) &(textbox -> status), 'i', -315, 115, 10);
 
     list_t *xPositions = list_init();
     list_t *yPositions = list_init();
@@ -333,7 +333,7 @@ int main(int argc, char *argv[]) {
         turtleTextWriteStringf(ySlider -> x + ySlider -> length / 2 + xSlider -> size, ySlider -> y, 4, 0, "%.01lf", round(y) / 10);
         turtleTextWriteString("Z", zSlider -> x - zSlider -> length / 2 - xSlider -> size, zSlider -> y, xSlider -> size - 1, 100);
         turtleTextWriteStringf(zSlider -> x + zSlider -> length / 2 + xSlider -> size, zSlider -> y, 4, 0, "%.01lf", round(z) / 10);
-        if (textbox -> mouseOver) {
+        if (textbox -> status == TT_STATUS_HOVER || textbox -> status == TT_STATUS_HOVER_FIRST_TICK) {
             osToolsSetCursor(GLFW_IBEAM_CURSOR);
         } else {
             osToolsSetCursor(GLFW_ARROW_CURSOR);
@@ -357,45 +357,45 @@ int main(int argc, char *argv[]) {
         turtleTextWriteStringRotated("Rotated Text", scrollbarX -> value * -5 - 100, scrollbarY -> value * 3.3 + 75, 9, 50, -15);
         
         /* draw texture */
-        // if (oldImageDropdown != imageDropdown -> value) {
-        //     if (cameraName) {
-        //         osToolsCameraClose(cameraName);
-        //     }
-        //     oldImageDropdown = imageDropdown -> value;
-        //     if (imageDropdown -> value == 0) {
-        //         cameraName = NULL;
-        //         if (cameraFrame) {
-        //             free(cameraFrame);
-        //             cameraFrame = NULL;
-        //         }
-        //         turtleTextureUnload(empvImage);
-        //         empvImage = turtleTextureLoad("images/EMPV.png");
-        //     } else {
-        //         cameraName = cameras -> data[(imageDropdown -> value - 1) * 4].s;
-        //         osToolsCameraOpen(cameraName);
-        //         if (cameraFrame) {
-        //             free(cameraFrame);
-        //         }
-        //         cameraFrame = malloc(cameras -> data[(imageDropdown -> value - 1) * 4 + 1].i * cameras -> data[(imageDropdown -> value - 1) * 4 + 2].i * 3);
-        //     }
-        // }
-        // if (cameraName) {
-        //     osToolsCameraReceive(cameraName, cameraFrame);
-        //     turtleTextureReplaceArray(empvImage, cameraFrame, cameras -> data[(imageDropdown -> value - 1) * 4 + 1].i, cameras -> data[(imageDropdown -> value - 1) * 4 + 2].i, GL_RGB);
-        //     double textureCenterX = 550;
-        //     double textureCenterY = -60.5;
-        //     double textureWidth = 300.0 / ((16.0 / 9) * ((double) cameras -> data[(imageDropdown -> value - 1) * 4 + 2].i / cameras -> data[(imageDropdown -> value - 1) * 4 + 1].i));
-        //     if (textureWidth > 300) {
-        //         textureWidth = 300;
-        //     }
-        //     double textureHeight = (16.0 / 9) * ((double) cameras -> data[(imageDropdown -> value - 1) * 4 + 2].i / cameras -> data[(imageDropdown -> value - 1) * 4 + 1].i) * 169.0;
-        //     if (textureHeight > 169) {
-        //         textureHeight = 169;
-        //     }
-        //     turtleTexture(empvImage, scrollbarX -> value * -5 + textureCenterX - textureWidth / 2, scrollbarY -> value * 3.3 + textureCenterY - textureHeight / 2, scrollbarX -> value * -5 + textureCenterX + textureWidth / 2, scrollbarY -> value * 3.3 + textureCenterY + textureHeight / 2, 0, 255, 255, 255);
-        // } else {
-        //     turtleTexture(empvImage, scrollbarX -> value * -5 + 400, scrollbarY -> value * 3.3 - 145, scrollbarX -> value * -5 + 700, scrollbarY -> value * 3.3 + 24, 0, 255, 255, 255);
-        // }
+        if (oldImageDropdown != imageDropdown -> value) {
+            if (cameraName) {
+                osToolsCameraClose(cameraName);
+            }
+            oldImageDropdown = imageDropdown -> value;
+            if (imageDropdown -> value == 0) {
+                cameraName = NULL;
+                if (cameraFrame) {
+                    free(cameraFrame);
+                    cameraFrame = NULL;
+                }
+                turtleTextureUnload(empvImage);
+                empvImage = turtleTextureLoad("images/EMPV.png");
+            } else {
+                cameraName = cameras -> data[(imageDropdown -> value - 1) * 4].s;
+                osToolsCameraOpen(cameraName);
+                if (cameraFrame) {
+                    free(cameraFrame);
+                }
+                cameraFrame = malloc(cameras -> data[(imageDropdown -> value - 1) * 4 + 1].i * cameras -> data[(imageDropdown -> value - 1) * 4 + 2].i * 3);
+            }
+        }
+        if (cameraName) {
+            osToolsCameraReceive(cameraName, cameraFrame);
+            turtleTextureReplaceArray(empvImage, cameraFrame, cameras -> data[(imageDropdown -> value - 1) * 4 + 1].i, cameras -> data[(imageDropdown -> value - 1) * 4 + 2].i, GL_RGB);
+            double textureCenterX = 550;
+            double textureCenterY = -60.5;
+            double textureWidth = 300.0 / ((16.0 / 9) * ((double) cameras -> data[(imageDropdown -> value - 1) * 4 + 2].i / cameras -> data[(imageDropdown -> value - 1) * 4 + 1].i));
+            if (textureWidth > 300) {
+                textureWidth = 300;
+            }
+            double textureHeight = (16.0 / 9) * ((double) cameras -> data[(imageDropdown -> value - 1) * 4 + 2].i / cameras -> data[(imageDropdown -> value - 1) * 4 + 1].i) * 169.0;
+            if (textureHeight > 169) {
+                textureHeight = 169;
+            }
+            turtleTexture(empvImage, scrollbarX -> value * -5 + textureCenterX - textureWidth / 2, scrollbarY -> value * 3.3 + textureCenterY - textureHeight / 2, scrollbarX -> value * -5 + textureCenterX + textureWidth / 2, scrollbarY -> value * 3.3 + textureCenterY + textureHeight / 2, 0, 255, 255, 255);
+        } else {
+            turtleTexture(empvImage, scrollbarX -> value * -5 + 400, scrollbarY -> value * 3.3 - 145, scrollbarX -> value * -5 + 700, scrollbarY -> value * 3.3 + 24, 0, 255, 255, 255);
+        }
 
         // turtlePenColor(0, 0, 0);
         // turtle3DTriangle(-5, 0, 10, 5, 0, 10, 0, 5, 10);

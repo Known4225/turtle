@@ -184,8 +184,8 @@ typedef enum {
     TT_COLOR_SLOT_TEXTBOX_PHANTOM_TEXT = 2,
     TT_COLOR_SLOT_TEXTBOX_LINE = 3,
     /* dropdown */
-    TT_COLOR_SLOT_DROPDOWN_TEXT = 0,
-    TT_COLOR_SLOT_DROPDOWN_TEXT_HOVER = 1,
+    TT_COLOR_SLOT_DROPDOWN_TEXT_LABEL = 0,
+    TT_COLOR_SLOT_DROPDOWN_TEXT = 1,
     TT_COLOR_SLOT_DROPDOWN_BASE = 2,
     TT_COLOR_SLOT_DROPDOWN_SELECT = 3,
     TT_COLOR_SLOT_DROPDOWN_HOVER = 4,
@@ -333,8 +333,8 @@ typedef enum {
     TT_STATUS_CLICK = 5,                 // Subsequent ticks of an element that has been clicked (until the mouse is released)
     TT_STATUS_OPEN_FIRST_TICK = 6,       // On dropdowns, textboxes, and context menus they remain active even after mouse is released
     TT_STATUS_OPEN = 7,                  // Used to indicate a context menu or dropdown is open, or a textbox is accepting text
-    TT_STATUS_OPEN_CLICK_FIRST_TICK = 8,
-    TT_STATUS_OPEN_CLICK = 9,
+    TT_STATUS_OPEN_CLICK_FIRST_TICK = 8, // used for dropdowns
+    TT_STATUS_OPEN_CLICK = 9,            // used for dropdowns
 } tt_status_t;
 
 #define TT_LABEL_LENGTH_LIMIT 128
@@ -485,8 +485,8 @@ typedef struct {
     double y;
     double size;
     char label[TT_LABEL_LENGTH_LIMIT];
-    int32_t status;
-    int8_t mouseOver;
+    tt_status_t status;
+    int32_t count;
     tt_textbox_align_t align;
     double length;
     int32_t maxCharacters;
@@ -495,6 +495,7 @@ typedef struct {
     int32_t keyTimeout;
     int32_t initialKeyTimeout;
     int32_t heldKeyTimeout;
+    int32_t linePeriod;
     /* render variables */
     double renderPixelOffset;
     int32_t renderStartingIndex;
