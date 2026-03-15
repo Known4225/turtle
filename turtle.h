@@ -177,16 +177,25 @@ int32_t list_remove(list_t *list, unitype item, char type);
 /* prints a unitype item */
 void unitype_fprint(FILE *fp, unitype item, char type);
 
+/* prints a unitype item to a string, it is on you to provide a buffer that is big enough */
+void unitype_sprint(char *str, unitype item, char type);
+
 /* copies one list to another (duplicates strings or pointers) */
 void list_copy(list_t *dest, list_t *src);
 
-/* prints the list to a file without brackets */
-void list_fprint_emb(FILE *fp, list_t *list);
+/* prints the list to a file without brackets (no trailing newline) */
+void list_fprint_no_brackets(FILE *fp, list_t *list);
 
-/* prints the list to a file */
+/* prints the list to a file (no trailing newline) */
 void list_fprint(FILE *fp, list_t *list);
 
-/* prints the list */
+/* prints the list to a string without brackets (no trailing newline), it is on you to provide a buffer that is big enough */
+void list_sprint_no_brackets(char *str, list_t *list);
+
+/* prints the list to a string (no trailing newline), it is on you to provide a buffer that is big enough */
+void list_sprint(char *str, list_t *list);
+
+/* prints the list to stdout (with a training newline) */
 void list_print(list_t *list);
 
 /* prints the types of the list */
@@ -46647,20 +46656,23 @@ int8_t turtleKeyPressed(int32_t key);
 /* top level boolean output call to check if the left click button is currently being held down */
 int8_t turtleMouseDown();
 
+/* alternate duplicate of turtleMouseDown() */
+int8_t turtleMouseLeft();
+
 /* top level boolean output call to check if the right click button is currently being held down */
 int8_t turtleMouseRight();
 
 /* top level boolean output call to check if the middle mouse button is currently being held down */
 int8_t turtleMouseMiddle();
 
-/* alternate duplicate of top level boolean output call to check if the middle mouse button is currently being held down */
+/* alternate duplicate of turtleMouseMiddle() */
 int8_t turtleMouseMid();
 
 /* initialises the turtle module, supply coordinate bounds */
 void turtleInit(GLFWwindow *window, double leftX, double bottomY, double rightX, double topY);
 
-/* gets the mouse coordinates */
-void turtleGetMouseCoords();
+/* puts the mouse coordinates in turtle.mouseX and turtle.mouseY */
+void turtleGetMouseCoordinates();
 
 /* set the background color */
 void turtleBackgroundColor(uint8_t r, uint8_t g, uint8_t b);
@@ -46962,16 +46974,17 @@ extern tt_theme_name_t tt_theme;
 
 typedef struct {
     int8_t turtleToolsEnabled;
-    int8_t ribbonEnabled;
-    int8_t popupEnabled;
     int8_t buttonEnabled;
     int8_t switchEnabled;
     int8_t dialEnabled;
     int8_t sliderEnabled;
+    int8_t textboxEnabled;
+    int8_t dropdownEnabled;
     int8_t scrollbarEnabled;
     int8_t contextEnabled;
-    int8_t dropdownEnabled;
-    int8_t textboxEnabled;
+    int8_t readerEnabled;
+    int8_t ribbonEnabled;
+    int8_t popupEnabled;
 } tt_enabled_t;
 
 extern tt_enabled_t tt_enabled; // all start at 0 (global variable)
@@ -46986,10 +46999,12 @@ typedef enum {
     TT_ELEMENT_DROPDOWN = 6,
     TT_ELEMENT_SCROLLBAR = 7,
     TT_ELEMENT_CONTEXT = 8,
-    TT_ELEMENT_RIBBON = 9,
-    TT_ELEMENT_POPUP = 10,
-    TT_ELEMENT_HIGHEST = 11, // highest priority
-    TT_NUMBER_OF_ELEMENTS = 11,
+    TT_ELEMENT_VARIABLE_READER = 9,
+    TT_ELEMENT_LIST_READER = 10,
+    TT_ELEMENT_RIBBON = 11,
+    TT_ELEMENT_POPUP = 12,
+    TT_ELEMENT_HIGHEST = 13, // highest priority
+    TT_NUMBER_OF_ELEMENTS = 13,
 } tt_element_names_t;
 
 typedef struct {
@@ -47002,6 +47017,7 @@ typedef struct {
     list_t *dropdowns;
     list_t *scrollbars;
     list_t *contexts;
+    list_t *readers;
 } tt_elements_t;
 
 extern tt_elements_t tt_elements;
@@ -47011,6 +47027,7 @@ typedef enum {
     TT_ELEMENT_ENABLED = 0,
     TT_ELEMENT_NO_MOUSE = 1,
     TT_ELEMENT_HIDE = 2,
+    TT_ELEMENT_DISABLED = 2,
 } tt_element_enabled_t;
 
 /* if an element is ignored then it is not updated with turtleToolsUpdate() and must be updated separately */
@@ -47105,8 +47122,8 @@ typedef enum {
     TT_COLOR_SLOT_TEXTBOX_PHANTOM_TEXT = 2,
     TT_COLOR_SLOT_TEXTBOX_LINE = 3,
     /* dropdown */
-    TT_COLOR_SLOT_DROPDOWN_TEXT = 0,
-    TT_COLOR_SLOT_DROPDOWN_TEXT_HOVER = 1,
+    TT_COLOR_SLOT_DROPDOWN_TEXT_LABEL = 0,
+    TT_COLOR_SLOT_DROPDOWN_TEXT = 1,
     TT_COLOR_SLOT_DROPDOWN_BASE = 2,
     TT_COLOR_SLOT_DROPDOWN_SELECT = 3,
     TT_COLOR_SLOT_DROPDOWN_HOVER = 4,
@@ -47120,6 +47137,20 @@ typedef enum {
     TT_COLOR_SLOT_CONTEXT_TEXT = 0,
     TT_COLOR_SLOT_CONTEXT_BASE = 1,
     TT_COLOR_SLOT_CONTEXT_SELECT = 2,
+    /* variable reader */
+    TT_COLOR_SLOT_VARIABLE_READER_TEXT = 0,
+    TT_COLOR_SLOT_VARIABLE_READER_TEXT_ITEM = 1,
+    TT_COLOR_SLOT_VARIABLE_READER_BASE = 2,
+    TT_COLOR_SLOT_VARIABLE_READER_ITEM = 3,
+    /* list reader */
+    TT_COLOR_SLOT_LIST_READER_TEXT = 0,
+    TT_COLOR_SLOT_LIST_READER_TEXT_ITEM = 1,
+    TT_COLOR_SLOT_LIST_READER_BASE = 2,
+    TT_COLOR_SLOT_LIST_READER_ITEM = 3,
+    TT_COLOR_SLOT_LIST_READER_SCROLLBAR_BASE = 4,
+    TT_COLOR_SLOT_LIST_READER_SCROLLBAR_BAR = 5,
+    TT_COLOR_SLOT_LIST_READER_SCROLLBAR_HOVER = 6,
+    TT_COLOR_SLOT_LIST_READER_SCROLLBAR_CLICKED = 7,
     /* ribbon */
     TT_COLOR_SLOT_RIBBON_TEXT = 0,
     TT_COLOR_SLOT_RIBBON_TOP = 1,
@@ -47231,6 +47262,19 @@ typedef struct {
 
 extern tt_globals_t tt_globals;
 
+typedef enum {
+    TT_STATUS_IDLE = 0,                  // Not being interacted with
+    TT_STATUS_BLOCKED = 1,               // Blocked from interaction
+    TT_STATUS_HOVER_FIRST_TICK = 2,      // When mouse comes into contact with element this is the status of the element for one tick
+    TT_STATUS_HOVER = 3,                 // Subsequent ticks of an element that the mouse is touching
+    TT_STATUS_CLICK_FIRST_TICK = 4,      // When mouse clicks an element this is the status of the element for one tick
+    TT_STATUS_CLICK = 5,                 // Subsequent ticks of an element that has been clicked (until the mouse is released)
+    TT_STATUS_OPEN_FIRST_TICK = 6,       // On dropdowns, textboxes, and context menus they remain active even after mouse is released
+    TT_STATUS_OPEN = 7,                  // Used to indicate a context menu or dropdown is open, or a textbox is accepting text
+    TT_STATUS_OPEN_CLICK_FIRST_TICK = 8, // used for dropdowns
+    TT_STATUS_OPEN_CLICK = 9,            // used for dropdowns
+} tt_status_t;
+
 #define TT_LABEL_LENGTH_LIMIT 128
 
 typedef enum {
@@ -47257,7 +47301,7 @@ typedef struct {
     double size;
     int8_t *variable; // bound variable (can be NULL)
     char label[TT_LABEL_LENGTH_LIMIT];
-    int32_t status;
+    tt_status_t status;
     tt_button_shape_t shape;
     tt_button_align_t align;
     /* value */
@@ -47289,7 +47333,7 @@ typedef struct {
     double size;
     int8_t *variable; // bound variable (can be NULL)
     char label[TT_LABEL_LENGTH_LIMIT];
-    int32_t status;
+    tt_status_t status;
     tt_switch_style_t style;
     tt_switch_align_t align;
     /* value */
@@ -47313,7 +47357,8 @@ typedef struct {
     double size;
     double *variable; // bound variable (can be NULL)
     char label[TT_LABEL_LENGTH_LIMIT];
-    int32_t status[2];
+    tt_status_t status;
+    double mouseAnchor;
     tt_dial_scale_t scale;
     double range[2];
     double renderNumberFactor; // multiply rendered variable by this amount
@@ -47350,7 +47395,7 @@ typedef struct {
     double size;
     double *variable; // bound variable (can be NULL)
     char label[TT_LABEL_LENGTH_LIMIT];
-    int32_t status;
+    tt_status_t status;
     tt_slider_type_t type;
     tt_slider_align_t align;
     tt_slider_scale_t scale;
@@ -47378,8 +47423,9 @@ typedef struct {
     double y;
     double size;
     char label[TT_LABEL_LENGTH_LIMIT];
-    int32_t status;
+    tt_status_t status;
     int8_t mouseOver;
+    int32_t count;
     tt_textbox_align_t align;
     double length;
     int32_t maxCharacters;
@@ -47388,16 +47434,17 @@ typedef struct {
     int32_t keyTimeout;
     int32_t initialKeyTimeout;
     int32_t heldKeyTimeout;
+    int32_t linePeriod;
     /* render variables */
     double renderPixelOffset;
     int32_t renderStartingIndex;
     int32_t renderNumCharacters;
-    /* value */
-    char *text; // text of textbox
-    char *value; // text of textbox (duplicate name - always equal to text)
     /* whitelist */
     list_t *whitelist;
     list_t *blacklist;
+    /* value */
+    char *text; // text of textbox
+    char *value; // text of textbox (duplicate name - always equal to text)
 } tt_textbox_t;
 
 typedef enum {
@@ -47425,7 +47472,7 @@ typedef struct {
     int32_t *variable; // bound variable (can be NULL)
     char label[TT_LABEL_LENGTH_LIMIT];
     list_t *options;
-    int32_t status;
+    tt_status_t status;
     tt_dropdown_align_t align;
     tt_dropdown_direction_t direction;
     double autoLowerBound;
@@ -47451,7 +47498,7 @@ typedef struct {
     double y;
     double size;
     double *variable; // bound variable (can be NULL)
-    int32_t status;
+    tt_status_t status;
     tt_scrollbar_type_t type;
     double length;
     double barPercentage; // percentage of scrollbar occupied by bar
@@ -47478,7 +47525,7 @@ typedef struct {
     double size;
     int32_t *variable; // bound variable (can be NULL)
     list_t *options;
-    int32_t status;
+    tt_status_t status;
     tt_context_direction_t direction;
     double autoLowerBound;
     double autoRightBound;
@@ -47488,7 +47535,32 @@ typedef struct {
     int32_t value; // index of selected option (duplicate name - always equal to index)
 } tt_context_t;
 
+/* reader */
+typedef struct {
+    tt_element_names_t element;
+    tt_element_enabled_t enabled;
+    tt_element_ignored_t ignored;
+    int32_t color[8];
+    double x;
+    double y;
+    double size;
+    unitype *variable;
+    char label[TT_LABEL_LENGTH_LIMIT];
+    tt_status_t status;
+    char type;
+    double anchorX;
+    double anchorY;
+    double mouseAnchorX;
+    double mouseAnchorY;
+    double width; // only used for list readers
+    double height; // only used for list readers
+    tt_scrollbar_t *scrollbarp; // only used for list readers
+} tt_reader_t;
+
 /* initialise UI elements */
+
+/* this function is automatically called when creating any turtleTools elements, it is not required to be called by the user */
+void turtleToolsInit();
 
 /* create a button */
 tt_button_t *tt_buttonInit(char *label, int8_t *variable, double x, double y, double size);
@@ -47533,6 +47605,11 @@ tt_context_t *tt_contextInit(list_t *options, int32_t *variable, double x, doubl
 
 void tt_contextFree(tt_context_t *contextp);
 
+/* create a reader */
+tt_reader_t *tt_readerInit(char *label, unitype *variable, char type, double x, double y, double size);
+
+void tt_readerFree(tt_reader_t *readerp);
+
 /* update a button */
 void tt_buttonUpdate(tt_button_t *buttonp);
 
@@ -47574,6 +47651,9 @@ void tt_scrollbarUpdate(tt_scrollbar_t *scrollbarp);
 
 /* update a context */
 void tt_contextUpdate(tt_context_t *contextp);
+
+/* update a reader */
+void tt_readerUpdate(tt_reader_t *readerp);
 
 /* update all turtleTools */
 void turtleToolsUpdate();
@@ -59400,7 +59480,55 @@ void unitype_fprint(FILE *fp, unitype item, char type) {
         break;
         default:
             printf("unitype_fprint - type %d not recognized\n", type);
-            return;
+    }
+}
+
+void unitype_sprint(char *str, unitype item, char type) {
+    switch (type) {
+        case LIST_TYPE_CHAR:
+            sprintf(str, "%c", item.c);
+        break;
+        case LIST_TYPE_INT8:
+            sprintf(str, "%hhi", item.b);
+        break;
+        case LIST_TYPE_UINT8: // UINT8 or BOOL
+            sprintf(str, "%hhu", item.b);
+        break;
+        case LIST_TYPE_INT16:
+            sprintf(str, "%hi", item.h);
+        break;
+        case LIST_TYPE_UINT16:
+            sprintf(str, "%hu", item.hu);
+        break;
+        case LIST_TYPE_INT32:
+            sprintf(str, "%d", item.i);
+        break;
+        case LIST_TYPE_UINT32:
+            sprintf(str, "%u", item.u);
+        break;
+        case LIST_TYPE_INT64:
+            sprintf(str, "%lli", item.li);
+        break;
+        case LIST_TYPE_UINT64:
+            sprintf(str, "%llu", item.l);
+        break;
+        case LIST_TYPE_FLOAT:
+            sprintf(str, "%f", item.f);
+        break;
+        case LIST_TYPE_DOUBLE:
+            sprintf(str, "%lf", item.d);
+        break;
+        case LIST_TYPE_STRING:
+            sprintf(str, "%s", item.s);
+        break;
+        case LIST_TYPE_POINTER:
+            sprintf(str, "%p", item.p);
+        break;
+        case LIST_TYPE_LIST:
+            list_sprint(str, item.r);
+        break; 
+        default:
+            printf("unitype_sprint - type %d not recognized\n", type);
     }
 }
 
@@ -59428,8 +59556,8 @@ void list_copy(list_t *dest, list_t *src) {
     }
 }
 
-/* prints the list to a file without brackets */
-void list_fprint_emb(FILE *fp, list_t *list) {
+/* prints the list to a file without brackets (no trailing newline) */
+void list_fprint_no_brackets(FILE *fp, list_t *list) {
     for (int32_t i = 0; i < list -> length; i++) {
         unitype_fprint(fp, list -> data[i], list -> type[i]);
         if (i != list -> length - 1) {
@@ -59438,7 +59566,7 @@ void list_fprint_emb(FILE *fp, list_t *list) {
     }
 }
 
-/* prints the list to a file */
+/* prints the list to a file (no trailing newline) */
 void list_fprint(FILE *fp, list_t *list) {
     fprintf(fp, "[");
     if (list -> length == 0) {
@@ -59451,6 +59579,34 @@ void list_fprint(FILE *fp, list_t *list) {
             fprintf(fp, "]");
         } else {
             fprintf(fp, ", ");
+        }
+    }
+}
+
+/* prints the list to a string without brackets (no trailing newline), it is on you to provide a buffer that is big enough */
+void list_sprint_no_brackets(char *str, list_t *list) {
+    str[0] = '\0';
+    for (int32_t i = 0; i < list -> length; i++) {
+        unitype_sprint(str + strlen(str), list -> data[i], list -> type[i]);
+        if (i != list -> length - 1) {
+            sprintf(str + strlen(str), ", ");
+        }
+    }
+}
+
+/* prints the list to a string (no trailing newline), it is on you to provide a buffer that is big enough */
+void list_sprint(char *str, list_t *list) {
+    sprintf(str, "[");
+    if (list -> length == 0) {
+        sprintf(str + strlen(str), "]");
+        return;
+    }
+    for (int32_t i = 0; i < list -> length; i++) {
+        unitype_sprint(str + strlen(str), list -> data[i], list -> type[i]);
+        if (i == list -> length - 1) {
+            sprintf(str + strlen(str), "]");
+        } else {
+            sprintf(str + strlen(str), ", ");
         }
     }
 }
@@ -60290,6 +60446,11 @@ int8_t turtleMouseDown() {
     return turtle.mousePressed[0];
 }
 
+/* alternate duplicate of turtleMouseDown() */
+int8_t turtleMouseLeft() {
+    return turtle.mousePressed[0];
+}
+
 /* top level boolean output call to check if the right click button is currently being held down */
 int8_t turtleMouseRight() {
     return turtle.mousePressed[1];
@@ -60300,13 +60461,13 @@ int8_t turtleMouseMiddle() {
     return turtle.mousePressed[2];
 }
 
-/* alternate duplicate of top level boolean output call to check if the middle mouse button is currently being held down */
+/* alternate duplicate of turtleMouseMiddle() */
 int8_t turtleMouseMid() {
     return turtle.mousePressed[2];
 }
 
-/* gets the mouse coordinates */
-void turtleGetMouseCoords() {
+/* puts the mouse coordinates in turtle.mouseX and turtle.mouseY */
+void turtleGetMouseCoordinates() {
     glfwGetCursorPos(turtle.window, &turtle.mouseAbsX, &turtle.mouseAbsY); // get mouse positions (absolute)
     if (turtle.resizeMode == TURTLE_RESIZE_MODE_STRETCH) {
         turtle.mouseX = (turtle.mouseAbsX - turtle.screenbounds[0] / 2) / turtle.screenbounds[0] * (turtle.initbounds[2] - turtle.initbounds[0]) + (turtle.bounds[0] + turtle.bounds[2]) / 2;
@@ -61552,7 +61713,7 @@ int32_t turtleTextInit(const char *filename) {
             list_append(fontDataInit, (unitype) savedWidth, 'i');
         } else {
             if (maximums[0] < 0) {
-                list_append(fontDataInit, (unitype) 90, 'i'); // default width of character
+                list_append(fontDataInit, (unitype) 40, 'i'); // default width of character (space)
             } else {
                 list_append(fontDataInit, (unitype) maximums[0], 'i');
             }
@@ -62552,7 +62713,7 @@ void generateDefaultFont(list_t *generatedFont) {
 https://patorjk.com/software/taag/#p=display&f=ANSI%20Shadow
 
 turtleTools library includes:
-ribbon: customisable top bar
+ribbon
 popup
 button
 switch
@@ -62560,7 +62721,9 @@ dial
 slider
 scrollbar
 dropdown
-text box (under development)
+textbox
+context
+reader
 
 TODO:
 using the tab key to select different elements? And allowing them to be changed with the keyboard??
@@ -62597,6 +62760,19 @@ char *strdel(char *dest, int32_t index, int32_t size) {
 tt_theme_name_t tt_theme;
 tt_enabled_t tt_enabled; // all start at 0 (global variable)
 tt_elements_t tt_elements;
+
+/* UI element colours (in order listed in tt_element_names_t) */
+int32_t tt_color_default[] = {
+    /*         none                           button                         switch                            dial                           slider                          textbox                        dropdown                         scrollbar                      context                       variable reader                   list reader                     ribbon                           popup               */
+    0,                              TT_COLOR_TEXT_ALTERNATE,        TT_COLOR_TEXT_BASE,             TT_COLOR_TEXT_BASE,             TT_COLOR_TEXT_BASE,             TT_COLOR_TEXT_ALTERNATE,        TT_COLOR_TEXT_BASE,             0,                              TT_COLOR_TEXT_ALTERNATE,        TT_COLOR_BLACK,                 TT_COLOR_BLACK,                 TT_COLOR_TEXT_ALTERNATE,        TT_COLOR_TEXT_ALTERNATE,        
+    0,                              TT_COLOR_COMPONENT,             TT_COLOR_TEXT_ALTERNATE,        TT_COLOR_TEXT_BASE,             TT_COLOR_COMPONENT_ALTERNATE,   TT_COLOR_COMPONENT_BASE,        TT_COLOR_TEXT_ALTERNATE,        TT_COLOR_COMPONENT_BASE,        TT_COLOR_COMPONENT_BASE,        TT_COLOR_WHITE,                 TT_COLOR_WHITE,                 TT_COLOR_COMPONENT_HIGHLIGHT,   TT_COLOR_COMPONENT_ALTERNATE,   
+    0,                              TT_COLOR_COMPONENT_HIGHLIGHT,   TT_COLOR_COMPONENT_BASE,        TT_COLOR_BACKGROUND_BASE,       TT_COLOR_BACKGROUND_COMPLEMENT, TT_COLOR_TEXT_HIGHLIGHT,        TT_COLOR_COMPONENT_BASE,        TT_COLOR_COMPONENT_COMPLEMENT,  TT_COLOR_COMPONENT_HIGHLIGHT,   TT_COLOR_LIGHT_GREY,            TT_COLOR_LIGHT_GREY,            TT_COLOR_COMPONENT_HIGHLIGHT,   TT_COLOR_COMPONENT_HIGHLIGHT,   
+    0,                              TT_COLOR_TEXT_BASE,             TT_COLOR_COMPONENT_HIGHLIGHT,   0,                              0,                              TT_COLOR_TEXT_ALTERNATE,        TT_COLOR_COMPONENT_HIGHLIGHT,   TT_COLOR_BACKGROUND_ALTERNATE,  0,                              TT_COLOR_ORANGE,                TT_COLOR_RED,                   TT_COLOR_COMPONENT,             TT_COLOR_COMPONENT,             
+    0,                              TT_COLOR_COMPONENT_COMPLEMENT,  TT_COLOR_BACKGROUND_ALTERNATE,  0,                              0,                              TT_COLOR_BLUE,                  TT_COLOR_COMPONENT_HIGHLIGHT,   TT_COLOR_BACKGROUND_HIGHLIGHT,  0,                              0,                              TT_COLOR_COMPONENT_BASE,        TT_COLOR_COMPONENT,             0,                              
+    0,                              0,                              TT_COLOR_TERTIARY_BASE,         0,                              0,                              0,                              TT_COLOR_TEXT_ALTERNATE,        0,                              0,                              0,                              TT_COLOR_COMPONENT_COMPLEMENT,  0,                              0,                              
+    0,                              0,                              0,                              0,                              0,                              0,                              0,                              0,                              0,                              0,                              TT_COLOR_BACKGROUND_ALTERNATE,  0,                              0,                              
+    0,                              0,                              0,                              0,                              0,                              0,                              0,                              0,                              0,                              0,                              TT_COLOR_BACKGROUND_HIGHLIGHT,  0,                              0,                              
+};
 
 /* default colours (light theme) */
 double tt_themeColors[] = {
@@ -62989,7 +63165,7 @@ void tt_ribbonUpdate() {
         turtleTextWriteUnicode(tt_ribbon.options -> data[i].r -> data[0].s, prevCutoff, tt_ribbon.bounds[3] - 5.5 * tt_ribbon.ribbonSize, 7 * tt_ribbon.ribbonSize, 0);
     }
     if (tt_globals.elementLogicTypeOld <= TT_ELEMENT_RIBBON) {
-        if (tt_ribbon.mainselect[2] > -1) {
+        if (tt_ribbon.mainselect[2] > -1 || tt_ribbon.subselect[2] > -1) {
             tt_globals.elementLogicType = TT_ELEMENT_RIBBON;
         }
         if (turtleMouseDown()) { // this is hideous
@@ -63018,8 +63194,8 @@ void tt_ribbonUpdate() {
                     tt_ribbon.output[1] = tt_ribbon.mainselect[2];
                     tt_ribbon.output[2] = tt_ribbon.subselect[2];
                     tt_ribbon.mainselect[2] = -1;
-                    tt_ribbon.subselect[2] = -1;
                 }
+                tt_ribbon.subselect[2] = -1;
             }
             if (tt_ribbon.mainselect[3] == -1 && tt_ribbon.mainselect[0] == tt_ribbon.mainselect[2]) {
                 tt_ribbon.mainselect[2] = -1;
@@ -63154,7 +63330,7 @@ void tt_popupUpdate() {
                         if (tt_popup.output[0] == 0) {
                             tt_popup.output[1] = i;
                         }
-                        tt_globals.elementLogicType = TT_ELEMENT_NONE;
+                        // tt_globals.elementLogicType = TT_ELEMENT_NONE;
                     }
                 } else {
                     if (tt_popup.mouseDown == 1) {
@@ -63162,7 +63338,7 @@ void tt_popupUpdate() {
                         if (tt_popup.output[1] == i) {
                             tt_popup.output[0] = 1;
                         }
-                        tt_globals.elementLogicType = TT_ELEMENT_NONE;
+                        // tt_globals.elementLogicType = TT_ELEMENT_NONE;
                     }
                 }
             } else {
@@ -63177,7 +63353,7 @@ void tt_popupUpdate() {
             tt_popup.mouseDown = 0;
             tt_popup.output[0] = 0;
             tt_popup.output[1] = -1;
-            tt_globals.elementLogicType = TT_ELEMENT_NONE;
+            // tt_globals.elementLogicType = TT_ELEMENT_NONE;
         }
     }
 }
@@ -63189,18 +63365,6 @@ void tt_popupFree() {
 /* UI tools */
 
 tt_globals_t tt_globals;
-
-int32_t tt_color_default[] = {
-    /*         none                           button                         switch                            dial                           slider                          textbox                        dropdown                         scrollbar                      context                          ribbon                           popup               */
-    0,                              TT_COLOR_TEXT_ALTERNATE,        TT_COLOR_TEXT_BASE,             TT_COLOR_TEXT_BASE,             TT_COLOR_TEXT_BASE,             TT_COLOR_TEXT_ALTERNATE,        TT_COLOR_TEXT_BASE,             0,                              TT_COLOR_TEXT_ALTERNATE,        TT_COLOR_TEXT_ALTERNATE,        TT_COLOR_TEXT_ALTERNATE,        
-    0,                              TT_COLOR_COMPONENT,             TT_COLOR_TEXT_ALTERNATE,        TT_COLOR_TEXT_BASE,             TT_COLOR_COMPONENT_ALTERNATE,   TT_COLOR_COMPONENT_BASE,        TT_COLOR_TEXT_ALTERNATE,        TT_COLOR_COMPONENT_BASE,        TT_COLOR_COMPONENT_BASE,        TT_COLOR_COMPONENT_HIGHLIGHT,   TT_COLOR_COMPONENT_ALTERNATE,   
-    0,                              TT_COLOR_COMPONENT_HIGHLIGHT,   TT_COLOR_COMPONENT_BASE,        TT_COLOR_BACKGROUND_BASE,       TT_COLOR_BACKGROUND_COMPLEMENT, TT_COLOR_TEXT_HIGHLIGHT,        TT_COLOR_COMPONENT_BASE,        TT_COLOR_COMPONENT_COMPLEMENT,  TT_COLOR_COMPONENT_HIGHLIGHT,   TT_COLOR_COMPONENT_HIGHLIGHT,   TT_COLOR_COMPONENT_HIGHLIGHT,   
-    0,                              TT_COLOR_TEXT_BASE,             TT_COLOR_COMPONENT_HIGHLIGHT,   0,                              0,                              TT_COLOR_TEXT_ALTERNATE,        TT_COLOR_COMPONENT_HIGHLIGHT,   TT_COLOR_BACKGROUND_ALTERNATE,  0,                              TT_COLOR_COMPONENT,             TT_COLOR_COMPONENT,             
-    0,                              TT_COLOR_COMPONENT_COMPLEMENT,  TT_COLOR_BACKGROUND_ALTERNATE,  0,                              0,                              TT_COLOR_BLUE,                  TT_COLOR_COMPONENT_HIGHLIGHT,   TT_COLOR_BACKGROUND_HIGHLIGHT,  0,                              TT_COLOR_COMPONENT,             0,                              
-    0,                              0,                              TT_COLOR_TERTIARY_BASE,         0,                              0,                              0,                              TT_COLOR_TEXT_ALTERNATE,        0,                              0,                              0,                              0,                              
-    0,                              0,                              0,                              0,                              0,                              0,                              0,                              0,                              0,                              0,                              0,                              
-    0,                              0,                              0,                              0,                              0,                              0,                              0,                              0,                              0,                              0,                              0,                              
-};
 
 void tt_elementResetColor(void *elementp) {
     int32_t elementType = ((tt_button_t *) elementp) -> element;
@@ -63226,17 +63390,21 @@ int32_t tt_elementFree(void *elementp) {
     case TT_ELEMENT_SLIDER:
         tt_sliderFree((tt_slider_t *) elementp);
     break;
+    case TT_ELEMENT_TEXTBOX:
+        tt_textboxFree((tt_textbox_t *) elementp);
+    break;
+    case TT_ELEMENT_DROPDOWN:
+        tt_dropdownFree((tt_dropdown_t *) elementp);
+    break;
     case TT_ELEMENT_SCROLLBAR:
         tt_scrollbarFree((tt_scrollbar_t *) elementp);
     break;
     case TT_ELEMENT_CONTEXT:
         tt_contextFree((tt_context_t *) elementp);
     break;
-    case TT_ELEMENT_DROPDOWN:
-        tt_dropdownFree((tt_dropdown_t *) elementp);
-    break;
-    case TT_ELEMENT_TEXTBOX:
-        tt_textboxFree((tt_textbox_t *) elementp);
+    case TT_ELEMENT_VARIABLE_READER:
+    case TT_ELEMENT_LIST_READER:
+        tt_readerFree((tt_reader_t *) elementp);
     break;
     default:
         return -1;
@@ -63253,12 +63421,7 @@ void tt_hideAllElements() {
 
 /* initialise UI elements */
 
-/* create a button */
-tt_button_t *tt_buttonInit(char *label, int8_t *variable, double x, double y, double size) {
-    if (tt_enabled.buttonEnabled == 0) {
-        tt_enabled.buttonEnabled = 1;
-        tt_elements.buttons = list_init();
-    }
+void turtleToolsInit() {
     if (tt_enabled.turtleToolsEnabled == 0) {
         tt_enabled.turtleToolsEnabled = 1;
         tt_globals.elementLogicType = TT_ELEMENT_NONE;
@@ -63266,6 +63429,15 @@ tt_button_t *tt_buttonInit(char *label, int8_t *variable, double x, double y, do
         tt_globals.elementLogicTemp = -1;
         tt_elements.all = list_init();
     }
+}
+
+/* create a button */
+tt_button_t *tt_buttonInit(char *label, int8_t *variable, double x, double y, double size) {
+    if (tt_enabled.buttonEnabled == 0) {
+        tt_enabled.buttonEnabled = 1;
+        tt_elements.buttons = list_init();
+    }
+    turtleToolsInit();
     tt_button_t *buttonp = calloc(1, sizeof(tt_button_t));
     buttonp -> element = TT_ELEMENT_BUTTON;
     buttonp -> enabled = TT_ELEMENT_ENABLED;
@@ -63276,7 +63448,7 @@ tt_button_t *tt_buttonInit(char *label, int8_t *variable, double x, double y, do
         memcpy(buttonp -> label, label, strlen(label) + 1);
     }
     tt_elementResetColor(buttonp);
-    buttonp -> status = 0;
+    buttonp -> status = TT_STATUS_IDLE;
     buttonp -> x = x;
     buttonp -> y = y;
     buttonp -> size = size;
@@ -63302,13 +63474,7 @@ tt_switch_t *tt_switchInit(char *label, int8_t *variable, double x, double y, do
         tt_enabled.switchEnabled = 1;
         tt_elements.switches = list_init();
     }
-    if (tt_enabled.turtleToolsEnabled == 0) {
-        tt_enabled.turtleToolsEnabled = 1;
-        tt_globals.elementLogicType = TT_ELEMENT_NONE;
-        tt_globals.elementLogicIndex = -1;
-        tt_globals.elementLogicTemp = -1;
-        tt_elements.all = list_init();
-    }
+    turtleToolsInit();
     tt_switch_t *switchp = calloc(1, sizeof(tt_switch_t));
     switchp -> element = TT_ELEMENT_SWITCH;
     switchp -> enabled = TT_ELEMENT_ENABLED;
@@ -63319,7 +63485,7 @@ tt_switch_t *tt_switchInit(char *label, int8_t *variable, double x, double y, do
         memcpy(switchp -> label, label, strlen(label) + 1);
     }
     tt_elementResetColor(switchp);
-    switchp -> status = 0;
+    switchp -> status = TT_STATUS_IDLE;
     switchp -> x = x;
     switchp -> y = y;
     switchp -> size = size;
@@ -63342,13 +63508,7 @@ tt_dial_t *tt_dialInit(char *label, double *variable, tt_dial_scale_t scale, dou
         tt_enabled.dialEnabled = 1;
         tt_elements.dials = list_init();
     }
-    if (tt_enabled.turtleToolsEnabled == 0) {
-        tt_enabled.turtleToolsEnabled = 1;
-        tt_globals.elementLogicType = TT_ELEMENT_NONE;
-        tt_globals.elementLogicIndex = -1;
-        tt_globals.elementLogicTemp = -1;
-        tt_elements.all = list_init();
-    }
+    turtleToolsInit();
     tt_dial_t *dialp = calloc(1, sizeof(tt_dial_t));
     dialp -> element = TT_ELEMENT_DIAL;
     dialp -> enabled = TT_ELEMENT_ENABLED;
@@ -63359,7 +63519,7 @@ tt_dial_t *tt_dialInit(char *label, double *variable, tt_dial_scale_t scale, dou
         memcpy(dialp -> label, label, strlen(label) + 1);
     }
     tt_elementResetColor(dialp);
-    dialp -> status[0] = 0;
+    dialp -> status = TT_STATUS_IDLE;
     dialp -> scale = scale;
     dialp -> x = x;
     dialp -> y = y;
@@ -63389,13 +63549,7 @@ tt_slider_t *tt_sliderInit(char *label, double *variable, tt_slider_type_t type,
         tt_enabled.sliderEnabled = 1;
         tt_elements.sliders = list_init();
     }
-    if (tt_enabled.turtleToolsEnabled == 0) {
-        tt_enabled.turtleToolsEnabled = 1;
-        tt_globals.elementLogicType = TT_ELEMENT_NONE;
-        tt_globals.elementLogicIndex = -1;
-        tt_globals.elementLogicTemp = -1;
-        tt_elements.all = list_init();
-    }
+    turtleToolsInit();
     tt_slider_t *sliderp = calloc(1, sizeof(tt_slider_t));
     sliderp -> element = TT_ELEMENT_SLIDER;
     sliderp -> enabled = TT_ELEMENT_ENABLED;
@@ -63406,7 +63560,7 @@ tt_slider_t *tt_sliderInit(char *label, double *variable, tt_slider_type_t type,
         memcpy(sliderp -> label, label, strlen(label) + 1);
     }
     tt_elementResetColor(sliderp);
-    sliderp -> status = 0;
+    sliderp -> status = TT_STATUS_IDLE;
     sliderp -> type = type;
     sliderp -> align = align;
     sliderp -> scale = TT_SLIDER_SCALE_LINEAR;
@@ -63441,13 +63595,7 @@ tt_textbox_t *tt_textboxInit(char *label, char *variable, int32_t maxCharacters,
         tt_enabled.textboxEnabled = 1;
         tt_elements.textboxes = list_init();
     }
-    if (tt_enabled.turtleToolsEnabled == 0) {
-        tt_enabled.turtleToolsEnabled = 1;
-        tt_globals.elementLogicType = TT_ELEMENT_NONE;
-        tt_globals.elementLogicIndex = -1;
-        tt_globals.elementLogicTemp = -1;
-        tt_elements.all = list_init();
-    }
+    turtleToolsInit();
     tt_textbox_t *textboxp = calloc(1, sizeof(tt_textbox_t));
     textboxp -> element = TT_ELEMENT_TEXTBOX;
     textboxp -> enabled = TT_ELEMENT_ENABLED;
@@ -63458,7 +63606,9 @@ tt_textbox_t *tt_textboxInit(char *label, char *variable, int32_t maxCharacters,
         memcpy(textboxp -> label, label, strlen(label) + 1);
     }
     tt_elementResetColor(textboxp);
-    textboxp -> status = 0;
+    textboxp -> status = TT_STATUS_IDLE;
+    textboxp -> mouseOver = 0;
+    textboxp -> count = 0;
     textboxp -> align = TT_TEXTBOX_ALIGN_LEFT;
     textboxp -> x = x;
     textboxp -> y = y;
@@ -63469,12 +63619,14 @@ tt_textbox_t *tt_textboxInit(char *label, char *variable, int32_t maxCharacters,
     } else {
         textboxp -> text = variable;
     }
+    textboxp -> value = textboxp -> text;
     textboxp -> maxCharacters = maxCharacters;
     textboxp -> editIndex = 0;
     textboxp -> lastKey = 0;
     textboxp -> keyTimeout = 0;
     textboxp -> initialKeyTimeout = 48;
     textboxp -> heldKeyTimeout = 2;
+    textboxp -> linePeriod = 132;
     textboxp -> renderPixelOffset = 0;
     textboxp -> renderStartingIndex = 0;
     textboxp -> renderNumCharacters = 0;
@@ -63506,13 +63658,7 @@ tt_dropdown_t *tt_dropdownInit(char *label, list_t *options, int32_t *variable, 
         tt_enabled.dropdownEnabled = 1;
         tt_elements.dropdowns = list_init();
     }
-    if (tt_enabled.turtleToolsEnabled == 0) {
-        tt_enabled.turtleToolsEnabled = 1;
-        tt_globals.elementLogicType = TT_ELEMENT_NONE;
-        tt_globals.elementLogicIndex = -1;
-        tt_globals.elementLogicTemp = -1;
-        tt_elements.all = list_init();
-    }
+    turtleToolsInit();
     tt_dropdown_t *dropdownp = calloc(1, sizeof(tt_dropdown_t));
     dropdownp -> element = TT_ELEMENT_DROPDOWN;
     dropdownp -> enabled = TT_ELEMENT_ENABLED;
@@ -63530,7 +63676,7 @@ tt_dropdown_t *tt_dropdownInit(char *label, list_t *options, int32_t *variable, 
         dropdownp -> index = *variable;
     }
     dropdownp -> value = dropdownp -> index;
-    dropdownp -> status = 0;
+    dropdownp -> status = TT_STATUS_IDLE;
     dropdownp -> align = align;
     dropdownp -> direction = TT_DROPDOWN_DIRECTION_AUTO;
     dropdownp -> autoLowerBound = turtle.initbounds[1];
@@ -63557,19 +63703,13 @@ tt_scrollbar_t *tt_scrollbarInit(double *variable, tt_scrollbar_type_t type, dou
         tt_enabled.scrollbarEnabled = 1;
         tt_elements.scrollbars = list_init();
     }
-    if (tt_enabled.turtleToolsEnabled == 0) {
-        tt_enabled.turtleToolsEnabled = 1;
-        tt_globals.elementLogicType = TT_ELEMENT_NONE;
-        tt_globals.elementLogicIndex = -1;
-        tt_globals.elementLogicTemp = -1;
-        tt_elements.all = list_init();
-    }
+    turtleToolsInit();
     tt_scrollbar_t *scrollbarp = calloc(1, sizeof(tt_scrollbar_t));
     scrollbarp -> element = TT_ELEMENT_SCROLLBAR;
     scrollbarp -> enabled = TT_ELEMENT_ENABLED;
     scrollbarp -> ignored = TT_ELEMENT_NOT_IGNORED;
     tt_elementResetColor(scrollbarp);
-    scrollbarp -> status = 0;
+    scrollbarp -> status = TT_STATUS_IDLE;
     scrollbarp -> type = type;
     scrollbarp -> x = x;
     scrollbarp -> y = y;
@@ -63603,13 +63743,7 @@ tt_context_t *tt_contextInit(list_t *options, int32_t *variable, double x, doubl
         tt_enabled.contextEnabled = 1;
         tt_elements.contexts = list_init();
     }
-    if (tt_enabled.turtleToolsEnabled == 0) {
-        tt_enabled.turtleToolsEnabled = 1;
-        tt_globals.elementLogicType = TT_ELEMENT_NONE;
-        tt_globals.elementLogicIndex = -1;
-        tt_globals.elementLogicTemp = -1;
-        tt_elements.all = list_init();
-    }
+    turtleToolsInit();
     tt_context_t *contextp = calloc(1, sizeof(tt_context_t));
     contextp -> element = TT_ELEMENT_CONTEXT;
     contextp -> enabled = TT_ELEMENT_ENABLED;
@@ -63618,7 +63752,7 @@ tt_context_t *tt_contextInit(list_t *options, int32_t *variable, double x, doubl
     contextp -> options = options;
     contextp -> index = -1;
     contextp -> value = -1;
-    contextp -> status = 0;
+    contextp -> status = TT_STATUS_IDLE;
     contextp -> x = x;
     contextp -> y = y;
     contextp -> size = size;
@@ -63641,12 +63775,68 @@ void tt_contextFree(tt_context_t *contextp) {
     list_remove(tt_elements.contexts, (unitype) (void *) contextp, 'p');
 }
 
+tt_reader_t *tt_readerInit(char *label, unitype *variable, char type, double x, double y, double size) {
+    if (tt_enabled.readerEnabled == 0) {
+        tt_enabled.readerEnabled = 1;
+        tt_elements.readers = list_init();
+    }
+    turtleToolsInit();
+    tt_reader_t *readerp = calloc(1, sizeof(tt_reader_t));
+    if (type == LIST_TYPE_LIST) {
+        readerp -> element = TT_ELEMENT_LIST_READER;
+    } else {
+        readerp -> element = TT_ELEMENT_VARIABLE_READER;
+    }
+    readerp -> enabled = TT_ELEMENT_ENABLED;
+    readerp -> ignored = TT_ELEMENT_NOT_IGNORED;
+    if (label == NULL) {
+        memcpy(readerp -> label, "", strlen("") + 1);
+    } else {
+        memcpy(readerp -> label, label, strlen(label) + 1);
+    }
+    tt_elementResetColor(readerp);
+    readerp -> x = x;
+    readerp -> y = y;
+    readerp -> size = size;
+    readerp -> status = TT_STATUS_IDLE;
+    readerp -> variable = variable;
+    readerp -> type = type;
+    readerp -> scrollbarp = NULL;
+    if (readerp -> element == TT_ELEMENT_LIST_READER) {
+        readerp -> width = size * 5;
+        readerp -> height = size * 20;
+        list_t *list = (*(readerp -> variable)).r; // insane syntax
+        double percentage = 100;
+        if (list -> length > 20) {
+            percentage = 100.0 / ((list -> length - 20) / 10);
+        }
+        readerp -> scrollbarp = tt_scrollbarInit(NULL, TT_SCROLLBAR_TYPE_VERTICAL, x + size * 5, y, size, size * 10, percentage);
+        readerp -> scrollbarp -> ignored = TT_ELEMENT_IGNORED; // this scrollbar is updated with the list reader to ensure it appears on top of the reader
+    }
+    list_append(tt_elements.readers, (unitype) (void *) readerp, 'p');
+    list_append(tt_elements.all, (unitype) (void *) readerp, 'l');
+    return readerp;
+}
+
+void tt_readerFree(tt_reader_t *readerp) {
+    if (readerp -> element == TT_ELEMENT_VARIABLE_READER) {
+        list_remove(tt_elements.all, (unitype) (uint64_t) readerp, 'l');
+        list_remove(tt_elements.readers, (unitype) (void *) readerp, 'p');
+    } else if (readerp -> element == TT_ELEMENT_LIST_READER) {
+        list_remove(tt_elements.all, (unitype) (uint64_t) readerp -> scrollbarp, 'l');
+        list_remove(tt_elements.scrollbars, (unitype) (void *) readerp -> scrollbarp, 'p');
+        list_remove(tt_elements.all, (unitype) (uint64_t) readerp, 'l');
+        list_remove(tt_elements.readers, (unitype) (void *) readerp, 'p');
+    }
+}
+
 void tt_buttonUpdate(tt_button_t *buttonp) {
     if (buttonp -> variable != NULL) {
         buttonp -> value = *buttonp -> variable;
     }
     if (buttonp -> enabled == TT_ELEMENT_HIDE) {
-        buttonp -> status = 0;
+        buttonp -> status = TT_STATUS_IDLE;
+        buttonp -> value = 0;
         return;
     }
     double buttonLeftX = buttonp -> x;
@@ -63662,12 +63852,18 @@ void tt_buttonUpdate(tt_button_t *buttonp) {
         buttonLeftX -= buttonWidth;
     }
     double buttonHeight = buttonp -> size * 1.75;
-    if (buttonp -> status > 0) {
-        tt_setColor(buttonp -> color[TT_COLOR_SLOT_BUTTON_CLICKED]);
-    } else if (buttonp -> status == 0) {
-        tt_setColor(buttonp -> color[TT_COLOR_SLOT_BUTTON]);
-    } else {
+    switch (buttonp -> status) {
+        case TT_STATUS_HOVER_FIRST_TICK:
+        case TT_STATUS_HOVER:
         tt_setColor(buttonp -> color[TT_COLOR_SLOT_BUTTON_SELECT]);
+        break;
+        case TT_STATUS_CLICK_FIRST_TICK:
+        case TT_STATUS_CLICK:
+        tt_setColor(buttonp -> color[TT_COLOR_SLOT_BUTTON_CLICKED]);
+        break;
+        default:
+        tt_setColor(buttonp -> color[TT_COLOR_SLOT_BUTTON]);
+        break;
     }
     if (buttonp -> shape == TT_BUTTON_SHAPE_RECTANGLE) {
         turtleRectangle(buttonLeftX, buttonY - buttonHeight / 2, buttonRightX, buttonY + buttonHeight / 2);
@@ -63680,7 +63876,7 @@ void tt_buttonUpdate(tt_button_t *buttonp) {
         turtleGoto(buttonLeftX + buttonp -> size / 2, buttonY + buttonHeight / 2 - buttonp -> size / 2);
         turtleGoto(buttonLeftX + buttonp -> size / 2, buttonY - buttonHeight / 2 + buttonp -> size / 2);
         turtlePenUp();
-        turtleRectangle(buttonLeftX + buttonWidth / 4, buttonY - buttonHeight / 4, buttonRightX - buttonWidth / 4, buttonY + buttonHeight / 4);
+        turtleRectangle(buttonLeftX + buttonp -> size / 2, buttonY - buttonHeight / 2 + buttonp -> size / 2, buttonRightX - buttonp -> size / 2, buttonY + buttonHeight / 2 - buttonp -> size / 2);
     } else if (buttonp -> shape == TT_BUTTON_SHAPE_CIRCLE) {
         turtleGoto((buttonLeftX + buttonRightX) / 2, buttonY);
         turtlePenSize(buttonWidth);
@@ -63689,54 +63885,89 @@ void tt_buttonUpdate(tt_button_t *buttonp) {
     }
     tt_setColor(buttonp -> color[TT_COLOR_SLOT_BUTTON_TEXT]);
     if (buttonp -> shape == TT_BUTTON_SHAPE_TEXT) {
-        if (buttonp -> status == 1) {
-            tt_setColor(buttonp -> color[TT_COLOR_SLOT_BUTTON_SELECT]);
-        } else if (buttonp -> status == -1) {
+        switch (buttonp -> status) {
+            case TT_STATUS_HOVER_FIRST_TICK:
+            case TT_STATUS_HOVER:
             tt_setColor(buttonp -> color[TT_COLOR_SLOT_BUTTON_TEXT]);
-        } else {
+            break;
+            case TT_STATUS_CLICK_FIRST_TICK:
+            case TT_STATUS_CLICK:
+            tt_setColor(buttonp -> color[TT_COLOR_SLOT_BUTTON_CLICKED]);
+            break;
+            default:
             tt_setColor(buttonp -> color[TT_COLOR_SLOT_BUTTON_SELECTED_TEXT]);
+            break;
         }
     }
     turtleTextWriteUnicode(buttonp -> label, (buttonLeftX + buttonRightX) / 2, buttonY, buttonp -> size - 1, 50);
     /* mouse */
-    if (buttonp -> enabled == TT_ELEMENT_ENABLED && (tt_globals.elementLogicTypeOld < TT_ELEMENT_BUTTON || (tt_globals.elementLogicTypeOld == TT_ELEMENT_BUTTON && tt_globals.elementLogicIndexOld <= (int32_t) tt_globals.elementLogicTemp))) {
-        if (turtleMouseDown()) {
-            if (buttonp -> status == 2) {
-                buttonp -> status = 1;
-            }
-            if (buttonp -> status == -1) {
-                buttonp -> status = 2;
-            }
-        } else {
-            if (buttonp -> shape == TT_BUTTON_SHAPE_CIRCLE) {
-                if ((turtle.mouseX - (buttonLeftX + buttonRightX) / 2) * (turtle.mouseX - (buttonLeftX + buttonRightX) / 2) + (turtle.mouseY - buttonY) * (turtle.mouseY - buttonY) < buttonWidth * buttonWidth / 4) {
-                    buttonp -> status = -1;
-                    tt_globals.elementLogicType = TT_ELEMENT_BUTTON;
-                    tt_globals.elementLogicIndex = tt_globals.elementLogicTemp;
+    if (buttonp -> enabled != TT_ELEMENT_ENABLED || tt_globals.elementLogicTypeOld > TT_ELEMENT_BUTTON || (tt_globals.elementLogicTypeOld == TT_ELEMENT_BUTTON && tt_globals.elementLogicIndexOld > tt_globals.elementLogicTemp)) {
+        /* button not enabled or higher priority element is being interacted with */
+        buttonp -> status = TT_STATUS_IDLE;
+        buttonp -> value = 0;
+        goto LABEL_BUTTON_END;
+    }
+    LABEL_BUTTON_CHECK_HOVER:
+    if (buttonp -> status != TT_STATUS_CLICK && buttonp -> status != TT_STATUS_BLOCKED && buttonp -> status != TT_STATUS_CLICK_FIRST_TICK) {
+        if (buttonp -> shape == TT_BUTTON_SHAPE_CIRCLE) {
+            /* circle hovering criteria */
+            if ((turtle.mouseX - (buttonLeftX + buttonRightX) / 2) * (turtle.mouseX - (buttonLeftX + buttonRightX) / 2) + (turtle.mouseY - buttonY) * (turtle.mouseY - buttonY) < buttonWidth * buttonWidth / 4) {
+                if (buttonp -> status == TT_STATUS_HOVER || buttonp -> status == TT_STATUS_HOVER_FIRST_TICK) {
+                    /* hovering button */
+                    buttonp -> status = TT_STATUS_HOVER;
                 } else {
-                    buttonp -> status = 0;
+                    /* first tick hover */
+                    buttonp -> status = TT_STATUS_HOVER_FIRST_TICK;
                 }
             } else {
-                if (turtle.mouseX > buttonLeftX && turtle.mouseX < buttonRightX && turtle.mouseY > buttonY - buttonHeight / 2 && turtle.mouseY < buttonY + buttonHeight / 2) {
-                    buttonp -> status = -1;
-                    tt_globals.elementLogicType = TT_ELEMENT_BUTTON;
-                    tt_globals.elementLogicIndex = tt_globals.elementLogicTemp;
+                buttonp -> status = TT_STATUS_IDLE;
+            }
+        } else {
+            /* rectangle and rounded rectangle hovering criteria */
+            if (turtle.mouseX > buttonLeftX && turtle.mouseX < buttonRightX && turtle.mouseY > buttonY - buttonHeight / 2 && turtle.mouseY < buttonY + buttonHeight / 2) {
+                if (buttonp -> status == TT_STATUS_HOVER || buttonp -> status == TT_STATUS_HOVER_FIRST_TICK) {
+                    /* hovering button */
+                    buttonp -> status = TT_STATUS_HOVER;
                 } else {
-                    buttonp -> status = 0;
+                    /* first tick hover */
+                    buttonp -> status = TT_STATUS_HOVER_FIRST_TICK;
                 }
+            } else {
+                buttonp -> status = TT_STATUS_IDLE;
             }
         }
-        if (buttonp -> status > 1) {
-            buttonp -> value = 1;
-            // buttonp -> status = 0;
+    }
+    if (turtleMouseDown()) {
+        if (buttonp -> status == TT_STATUS_HOVER || buttonp -> status == TT_STATUS_HOVER_FIRST_TICK) {
+            /* first tick clicked */
+            buttonp -> status = TT_STATUS_CLICK_FIRST_TICK;
+        } else if (buttonp -> status == TT_STATUS_CLICK || buttonp -> status == TT_STATUS_CLICK_FIRST_TICK) {
+            /* button is being held */
+            buttonp -> status = TT_STATUS_CLICK;
         } else {
-            if (buttonp -> status < 1) {
-                buttonp -> value = 0;
-            }
+            /* button is blocked from interaction until mouse is unclicked */
+            buttonp -> status = TT_STATUS_BLOCKED;
         }
     } else {
-        buttonp -> status = 0;
+        if (buttonp -> status == TT_STATUS_CLICK || buttonp -> status == TT_STATUS_BLOCKED || buttonp -> status == TT_STATUS_CLICK_FIRST_TICK) {
+            /* first tick unclicked */
+            buttonp -> status = TT_STATUS_IDLE;
+            goto LABEL_BUTTON_CHECK_HOVER; // done to avoid a single IDLE tick if mouse is hovering over button when unclicked
+        }
     }
+    if (buttonp -> status == TT_STATUS_CLICK_FIRST_TICK) {
+        /* only set value on first tick so that it is "floating" if being held down */
+        buttonp -> value = 1;
+    } else {
+        if (buttonp -> status != TT_STATUS_CLICK) {
+            buttonp -> value = 0;
+        }
+    }
+    if (buttonp -> status == TT_STATUS_HOVER || buttonp -> status == TT_STATUS_CLICK || buttonp -> status == TT_STATUS_HOVER_FIRST_TICK || buttonp -> status == TT_STATUS_CLICK_FIRST_TICK) {
+        tt_globals.elementLogicType = TT_ELEMENT_BUTTON;
+        tt_globals.elementLogicIndex = tt_globals.elementLogicTemp;
+    }
+    LABEL_BUTTON_END:
     if (buttonp -> variable != NULL) {
         *buttonp -> variable = buttonp -> value;
     }
@@ -63747,6 +63978,7 @@ void tt_switchUpdate(tt_switch_t *switchp) {
         switchp -> value = *switchp -> variable;
     }
     if (switchp -> enabled == TT_ELEMENT_HIDE) {
+        switchp -> status = TT_STATUS_IDLE;
         return;
     }
     double switchX = switchp -> x;
@@ -63809,14 +64041,14 @@ void tt_switchUpdate(tt_switch_t *switchp) {
                 turtleTextWriteUnicode(switchp -> label, switchX + switchp -> size * 1.2, switchY + 1.6 * switchp -> size, switchp -> size - 1, 100);
             }
         } else if (switchp -> style == TT_SWITCH_STYLE_SIDESWIPE_LEFT) {
-            if (switchp -> status == 0) {
+            if (switchp -> status == TT_STATUS_IDLE || switchp -> status == TT_STATUS_BLOCKED) {
                 tt_setColor(switchp -> color[TT_COLOR_SLOT_SWITCH_TEXT]);
             } else {
                 tt_setColor(switchp -> color[TT_COLOR_SLOT_SWITCH_TEXT_HOVER]);
             }
             turtleTextWriteUnicode(switchp -> label, switchX + switchp -> size * 2, switchY, switchp -> size - 1, 0);
         } else if (switchp -> style == TT_SWITCH_STYLE_SIDESWIPE_RIGHT) {
-            if (switchp -> status == 0) {
+            if (switchp -> status == TT_STATUS_IDLE || switchp -> status == TT_STATUS_BLOCKED) {
                 tt_setColor(switchp -> color[TT_COLOR_SLOT_SWITCH_TEXT]);
             } else {
                 tt_setColor(switchp -> color[TT_COLOR_SLOT_SWITCH_TEXT_HOVER]);
@@ -63865,7 +64097,7 @@ void tt_switchUpdate(tt_switch_t *switchp) {
         switchClickDown = switchY - switchp -> size * 0.6;
         switchClickUp = switchY + switchp -> size * 0.6;
         /* render text */
-        if (switchp -> status == 0) {
+        if (switchp -> status == TT_STATUS_IDLE || switchp -> status == TT_STATUS_BLOCKED) {
             tt_setColor(switchp -> color[TT_COLOR_SLOT_SWITCH_TEXT]);
         } else {
             tt_setColor(switchp -> color[TT_COLOR_SLOT_SWITCH_TEXT_HOVER]);
@@ -63873,27 +64105,51 @@ void tt_switchUpdate(tt_switch_t *switchp) {
         turtleTextWriteUnicode(switchp -> label, switchX + switchp -> size, switchY, switchp -> size - 1, 0);
     }
     /* mouse */
-    if (switchp -> enabled == TT_ELEMENT_ENABLED && (tt_globals.elementLogicTypeOld < TT_ELEMENT_SWITCH || (tt_globals.elementLogicTypeOld == TT_ELEMENT_SWITCH && tt_globals.elementLogicIndexOld <= (int32_t) tt_globals.elementLogicTemp))) {
-        if (turtleMouseDown()) {
-            if (switchp -> status < 0) {
-                switchp -> status *= -1;
+    if (switchp -> enabled != TT_ELEMENT_ENABLED || tt_globals.elementLogicTypeOld > TT_ELEMENT_SWITCH || (tt_globals.elementLogicTypeOld == TT_ELEMENT_SWITCH && tt_globals.elementLogicIndexOld > tt_globals.elementLogicTemp)) {
+        /* switch not enabled or higher priority element is being interacted with */
+        switchp -> status = TT_STATUS_IDLE;
+        goto LABEL_SWITCH_END;
+    }
+    LABEL_SWITCH_CHECK_HOVER:
+    if (switchp -> status != TT_STATUS_CLICK && switchp -> status != TT_STATUS_BLOCKED && switchp -> status != TT_STATUS_CLICK_FIRST_TICK) {
+        if (turtle.mouseX > switchClickLeft && turtle.mouseX < switchClickRight && turtle.mouseY > switchClickDown && turtle.mouseY < switchClickUp) {
+            if (switchp -> status == TT_STATUS_HOVER || switchp -> status == TT_STATUS_HOVER_FIRST_TICK) {
+                /* hovering switch */
+                switchp -> status = TT_STATUS_HOVER;
+            } else {
+                /* first tick hover */
+                switchp -> status = TT_STATUS_HOVER_FIRST_TICK;
             }
         } else {
-            if (turtle.mouseX > switchClickLeft && turtle.mouseX < switchClickRight && turtle.mouseY > switchClickDown && turtle.mouseY < switchClickUp) {
-                switchp -> status = -1;
-                tt_globals.elementLogicType = TT_ELEMENT_SWITCH;
-                tt_globals.elementLogicIndex = tt_globals.elementLogicTemp;
-            } else {
-                switchp -> status = 0;
-            }
+            switchp -> status = TT_STATUS_IDLE;
         }
-        if (switchp -> status == 1) {
-            switchp -> value = !switchp -> value;
-            switchp -> status = 2;
+    }
+    if (turtleMouseDown()) {
+        if (switchp -> status == TT_STATUS_HOVER || switchp -> status == TT_STATUS_HOVER_FIRST_TICK) {
+            /* first tick clicked */
+            switchp -> status = TT_STATUS_CLICK_FIRST_TICK;
+        } else if (switchp -> status == TT_STATUS_CLICK || switchp -> status == TT_STATUS_CLICK_FIRST_TICK) {
+            /* switch is being held */
+            switchp -> status = TT_STATUS_CLICK;
+        } else {
+            /* switch is blocked from interaction until mouse is unclicked */
+            switchp -> status = TT_STATUS_BLOCKED;
         }
     } else {
-        switchp -> status = 0;
+        if (switchp -> status == TT_STATUS_CLICK || switchp -> status == TT_STATUS_BLOCKED || switchp -> status == TT_STATUS_CLICK_FIRST_TICK) {
+            /* first tick unclicked */
+            switchp -> status = TT_STATUS_IDLE;
+            goto LABEL_SWITCH_CHECK_HOVER; // done to avoid a single IDLE tick if mouse is hovering over switch when unclicked
+        }
     }
+    if (switchp -> status == TT_STATUS_CLICK_FIRST_TICK) {
+        switchp -> value = !switchp -> value;
+    }
+    if (switchp -> status == TT_STATUS_HOVER || switchp -> status == TT_STATUS_CLICK || switchp -> status == TT_STATUS_HOVER_FIRST_TICK || switchp -> status == TT_STATUS_CLICK_FIRST_TICK) {
+        tt_globals.elementLogicType = TT_ELEMENT_SWITCH;
+        tt_globals.elementLogicIndex = tt_globals.elementLogicTemp;
+    }
+    LABEL_SWITCH_END:
     if (switchp -> variable != NULL) {
         *switchp -> variable = switchp -> value;
     }
@@ -63924,6 +64180,7 @@ void tt_dialUpdate(tt_dial_t *dialp) {
         dialp -> value = *dialp -> variable;
     }
     if (dialp -> enabled == TT_ELEMENT_HIDE) {
+        dialp -> status = TT_STATUS_IDLE;
         return;
     }
     tt_setColor(dialp -> color[TT_COLOR_SLOT_DIAL_TEXT]);
@@ -63953,49 +64210,76 @@ void tt_dialUpdate(tt_dial_t *dialp) {
     turtleGoto(dialX + sin(dialAngle / 57.2958) * dialp -> size, dialY + cos(dialAngle / 57.2958) * dialp -> size);
     turtlePenUp();
     /* mouse */
-    if (dialp -> enabled == TT_ELEMENT_ENABLED && (tt_globals.elementLogicTypeOld < TT_ELEMENT_DIAL || (tt_globals.elementLogicTypeOld == TT_ELEMENT_DIAL && tt_globals.elementLogicIndexOld <= (int32_t) tt_globals.elementLogicTemp))) {
-        if (turtleMouseDown()) {
-            if (dialp -> status[0] < 0) {
-                tt_globals.dialAnchorX = dialX;
-                tt_globals.dialAnchorY = dialY;
-                dialp -> status[0] *= -1;
-                dialp -> status[1] = turtle.mouseX - dialX;
-            }
-        } else if (turtleMouseRight()) {
-            if (dialp -> status[0] < 0) {
-                dialp -> value = dialp -> defaultValue;
+    if (dialp -> enabled != TT_ELEMENT_ENABLED || tt_globals.elementLogicTypeOld > TT_ELEMENT_DIAL || (tt_globals.elementLogicTypeOld == TT_ELEMENT_DIAL && tt_globals.elementLogicIndexOld > tt_globals.elementLogicTemp)) {
+        /* dial not enabled or higher priority element is being interacted with */
+        dialp -> status = TT_STATUS_IDLE;
+        goto LABEL_DIAL_END;
+    }
+    LABEL_DIAL_CHECK_HOVER:
+    if (dialp -> status != TT_STATUS_CLICK && dialp -> status != TT_STATUS_BLOCKED && dialp -> status != TT_STATUS_CLICK_FIRST_TICK) {
+        if (turtle.mouseX > dialX - dialp -> size && turtle.mouseX < dialX + dialp -> size && turtle.mouseY > dialY - dialp -> size && turtle.mouseY < dialY + dialp -> size) {
+            if (dialp -> status == TT_STATUS_HOVER || dialp -> status == TT_STATUS_HOVER_FIRST_TICK) {
+                /* hovering dial */
+                dialp -> status = TT_STATUS_HOVER;
+            } else {
+                /* first tick hover */
+                dialp -> status = TT_STATUS_HOVER_FIRST_TICK;
             }
         } else {
-            if (turtle.mouseX > dialX - dialp -> size && turtle.mouseX < dialX + dialp -> size && turtle.mouseY > dialY - dialp -> size && turtle.mouseY < dialY + dialp -> size) {
-                dialp -> status[0] = -1;
-                tt_globals.elementLogicType = TT_ELEMENT_DIAL;
-                tt_globals.elementLogicIndex = tt_globals.elementLogicTemp;
-            } else {
-                dialp -> status[0] = 0;
-            }
+            dialp -> status = TT_STATUS_IDLE;
         }
-        if (dialp -> status[0] > 0) {
-            dialAngle = tt_angleBetween(tt_globals.dialAnchorX, tt_globals.dialAnchorY, turtle.mouseX, turtle.mouseY);
-            if (turtle.mouseY < tt_globals.dialAnchorY) {
-                dialp -> status[1] = turtle.mouseX - dialX;
-            }
-            if ((dialAngle < 0.000000001 || dialAngle > 180) && turtle.mouseY > tt_globals.dialAnchorY && dialp -> status[1] >= 0) {
-                dialAngle = 0.000000001;
-            }
-            if ((dialAngle > 359.99999999 || dialAngle < 180) && turtle.mouseY > tt_globals.dialAnchorY && dialp -> status[1] < 0) {
-                dialAngle = 359.99999999;
-            }
-            if (dialp -> scale == TT_DIAL_SCALE_LOG) {
-                dialp -> value = round(dialp -> range[0] + (dialp -> range[1] - dialp -> range[0]) * (log(1 + dialAngle) / log(361)));
-            } else if (dialp -> scale == TT_DIAL_SCALE_LINEAR) {
-                dialp -> value = round(dialp -> range[0] + ((dialp -> range[1] - dialp -> range[0]) * dialAngle / 360));
-            } else if (dialp -> scale == TT_DIAL_SCALE_EXP) {
-                dialp -> value = round(dialp -> range[0] + (dialp -> range[1] - dialp -> range[0]) * ((pow(361, dialAngle / 360) - 1) / 360));
-            }
+    }
+    if (turtleMouseDown()) {
+        if (dialp -> status == TT_STATUS_HOVER || dialp -> status == TT_STATUS_HOVER_FIRST_TICK) {
+            /* first tick clicked */
+            dialp -> status = TT_STATUS_CLICK_FIRST_TICK;
+            tt_globals.dialAnchorX = dialX;
+            tt_globals.dialAnchorY = dialY;
+            dialp -> mouseAnchor = turtle.mouseX - dialX;
+        } else if (dialp -> status == TT_STATUS_CLICK || dialp -> status == TT_STATUS_CLICK_FIRST_TICK) {
+            /* dial is being held */
+            dialp -> status = TT_STATUS_CLICK;
+        } else {
+            /* dial is blocked from interaction until mouse is unclicked */
+            dialp -> status = TT_STATUS_BLOCKED;
+        }
+    } else if (turtleMouseRight()) {
+        if (dialp -> status == TT_STATUS_HOVER || dialp -> status == TT_STATUS_HOVER_FIRST_TICK) {
+            /* first tick right clicked */
+            dialp -> value = dialp -> defaultValue;
+            dialp -> status = TT_STATUS_BLOCKED;
         }
     } else {
-        dialp -> status[0] = 0;
+        if (dialp -> status == TT_STATUS_CLICK || dialp -> status == TT_STATUS_BLOCKED || dialp -> status == TT_STATUS_CLICK_FIRST_TICK) {
+            /* first tick unclicked */
+            dialp -> status = TT_STATUS_IDLE;
+            goto LABEL_DIAL_CHECK_HOVER; // done to avoid a single IDLE tick if mouse is hovering over dial when unclicked
+        }
     }
+    if (dialp -> status == TT_STATUS_CLICK || dialp -> status == TT_STATUS_CLICK_FIRST_TICK) {
+        dialAngle = tt_angleBetween(tt_globals.dialAnchorX, tt_globals.dialAnchorY, turtle.mouseX, turtle.mouseY);
+        if (turtle.mouseY < tt_globals.dialAnchorY) {
+            dialp -> mouseAnchor = turtle.mouseX - dialX;
+        }
+        if ((dialAngle < 0.000000001 || dialAngle > 180) && turtle.mouseY > tt_globals.dialAnchorY && dialp -> mouseAnchor >= 0) {
+            dialAngle = 0.000000001;
+        }
+        if ((dialAngle > 359.99999999 || dialAngle < 180) && turtle.mouseY > tt_globals.dialAnchorY && dialp -> mouseAnchor < 0) {
+            dialAngle = 359.99999999;
+        }
+        if (dialp -> scale == TT_DIAL_SCALE_LOG) {
+            dialp -> value = round(dialp -> range[0] + (dialp -> range[1] - dialp -> range[0]) * (log(1 + dialAngle) / log(361)));
+        } else if (dialp -> scale == TT_DIAL_SCALE_LINEAR) {
+            dialp -> value = round(dialp -> range[0] + ((dialp -> range[1] - dialp -> range[0]) * dialAngle / 360));
+        } else if (dialp -> scale == TT_DIAL_SCALE_EXP) {
+            dialp -> value = round(dialp -> range[0] + (dialp -> range[1] - dialp -> range[0]) * ((pow(361, dialAngle / 360) - 1) / 360));
+        }
+    }
+    if (dialp -> status == TT_STATUS_HOVER || dialp -> status == TT_STATUS_CLICK || dialp -> status == TT_STATUS_HOVER_FIRST_TICK || dialp -> status == TT_STATUS_CLICK_FIRST_TICK) {
+        tt_globals.elementLogicType = TT_ELEMENT_DIAL;
+        tt_globals.elementLogicIndex = tt_globals.elementLogicTemp;
+    }
+    LABEL_DIAL_END:
     tt_setColor(dialp -> color[TT_COLOR_SLOT_DIAL_TEXT]);
     double rounded = round(dialp -> value * dialp -> renderNumberFactor);
     turtleTextWriteStringf(dialX + dialp -> size + 3, dialY, 4, 0, "%.0lf", rounded);
@@ -64009,6 +64293,7 @@ void tt_sliderUpdate(tt_slider_t *sliderp) {
         sliderp -> value = *sliderp -> variable;
     }
     if (sliderp -> enabled == TT_ELEMENT_HIDE) {
+        sliderp -> status = TT_STATUS_IDLE;
         return;
     }
     double sliderXLeft = 0;
@@ -64103,60 +64388,87 @@ void tt_sliderUpdate(tt_slider_t *sliderp) {
     turtlePenDown();
     turtlePenUp();
     /* mouse */
-    if (sliderp -> enabled == TT_ELEMENT_ENABLED && (tt_globals.elementLogicTypeOld < TT_ELEMENT_SLIDER || (tt_globals.elementLogicTypeOld == TT_ELEMENT_SLIDER && tt_globals.elementLogicIndexOld <= (int32_t) tt_globals.elementLogicTemp))) {
-        if (turtleMouseDown()) {
-            if (sliderp -> status < 0) {
-                sliderp -> status *= -1;
-            }
-        } else if (turtleMouseRight()) {
-            if (sliderp -> status < 0) {
-                sliderp -> value = sliderp -> defaultValue;
+    if (sliderp -> enabled != TT_ELEMENT_ENABLED || tt_globals.elementLogicTypeOld > TT_ELEMENT_SLIDER || (tt_globals.elementLogicTypeOld == TT_ELEMENT_SLIDER && tt_globals.elementLogicIndexOld > tt_globals.elementLogicTemp)) {
+        /* slider not enabled or higher priority element is being interacted with */
+        sliderp -> status = TT_STATUS_IDLE;
+        goto LABEL_SLIDER_END;
+    }
+    LABEL_SLIDER_CHECK_HOVER:
+    if (sliderp -> status != TT_STATUS_CLICK && sliderp -> status != TT_STATUS_BLOCKED && sliderp -> status != TT_STATUS_CLICK_FIRST_TICK) {
+        if (turtle.mouseX > sliderXLeft - sliderp -> size * 0.6 && turtle.mouseX < sliderXRight + sliderp -> size * 0.6 && turtle.mouseY > sliderYLeft - sliderp -> size * 0.6 && turtle.mouseY < sliderYRight + sliderp -> size * 0.6) {
+            if (sliderp -> status == TT_STATUS_HOVER || sliderp -> status == TT_STATUS_HOVER_FIRST_TICK) {
+                /* hovering slider */
+                sliderp -> status = TT_STATUS_HOVER;
+            } else {
+                /* first tick hover */
+                sliderp -> status = TT_STATUS_HOVER_FIRST_TICK;
             }
         } else {
-            if (turtle.mouseX > sliderXLeft - sliderp -> size * 0.6 && turtle.mouseX < sliderXRight + sliderp -> size * 0.6 && turtle.mouseY > sliderYLeft - sliderp -> size * 0.6 && turtle.mouseY < sliderYRight + sliderp -> size * 0.6) {
-                sliderp -> status = -1;
-                tt_globals.elementLogicType = TT_ELEMENT_SLIDER;
-                tt_globals.elementLogicIndex = tt_globals.elementLogicTemp;
-            } else {
-                sliderp -> status = 0;
-            }
+            sliderp -> status = TT_STATUS_IDLE;
         }
-        if (sliderp -> status > 0) {
-            if (sliderp -> type == TT_SLIDER_TYPE_HORIZONTAL) {
-                if (sliderp -> scale == TT_SLIDER_SCALE_LINEAR) {
-                    sliderp -> value = round(sliderp -> range[0] + (turtle.mouseX - sliderXLeft) / sliderp -> length * (sliderp -> range[1] - sliderp -> range[0]));
-                } else if (sliderp -> scale == TT_SLIDER_SCALE_LOG) {
-                    if (turtle.mouseX - sliderXLeft < 0) {
-                        sliderp -> value = sliderp -> range[0];
-                    } else {
-                        sliderp -> value = round(sliderp -> range[0] + (log(1 + turtle.mouseX - sliderXLeft) / log(sliderp -> length + 1)) * (sliderp -> range[1] - sliderp -> range[0]));
-                    }
-                } else if (sliderp -> scale == TT_SLIDER_SCALE_EXP) {
-                    sliderp -> value = round(sliderp -> range[0] + ((pow(sliderp -> length + 1, (turtle.mouseX - sliderXLeft) / sliderp -> length) - 1) / sliderp -> length) * (sliderp -> range[1] - sliderp -> range[0]));
-                }
-            } else if (sliderp -> type == TT_SLIDER_TYPE_VERTICAL) {
-                if (sliderp -> scale == TT_SLIDER_SCALE_LINEAR) {
-                    sliderp -> value = round(sliderp -> range[0] + (turtle.mouseY - sliderYLeft) / sliderp -> length * (sliderp -> range[1] - sliderp -> range[0]));
-                } else if (sliderp -> scale == TT_SLIDER_SCALE_LOG) {
-                    if (turtle.mouseY - sliderYLeft < 0) {
-                        sliderp -> value = sliderp -> range[0];
-                    } else {
-                        sliderp -> value = round(sliderp -> range[0] + (log(1 + turtle.mouseY - sliderYLeft) / log(sliderp -> length + 1)) * (sliderp -> range[1] - sliderp -> range[0]));
-                    }
-                } else if (sliderp -> scale == TT_SLIDER_SCALE_EXP) {
-                    sliderp -> value = round(sliderp -> range[0] + ((pow(sliderp -> length + 1, (turtle.mouseY - sliderYLeft) / sliderp -> length) - 1) / sliderp -> length) * (sliderp -> range[1] - sliderp -> range[0]));
-                }
-            }
-            if (sliderp -> value >= sliderp -> range[1]) {
-                sliderp -> value = sliderp -> range[1];
-            }
-            if (sliderp -> value <= sliderp -> range[0]) {
-                sliderp -> value = sliderp -> range[0];
-            }
+    }
+    if (turtleMouseDown()) {
+        if (sliderp -> status == TT_STATUS_HOVER || sliderp -> status == TT_STATUS_HOVER_FIRST_TICK) {
+            /* first tick clicked */
+            sliderp -> status = TT_STATUS_CLICK_FIRST_TICK;
+        } else if (sliderp -> status == TT_STATUS_CLICK || sliderp -> status == TT_STATUS_CLICK_FIRST_TICK) {
+            /* slider is being held */
+            sliderp -> status = TT_STATUS_CLICK;
+        } else {
+            /* slider is blocked from interaction until mouse is unclicked */
+            sliderp -> status = TT_STATUS_BLOCKED;
+        }
+    } else if (turtleMouseRight()) {
+        if (sliderp -> status == TT_STATUS_HOVER || sliderp -> status == TT_STATUS_HOVER_FIRST_TICK) {
+            /* first tick right clicked */
+            sliderp -> value = sliderp -> defaultValue;
+            sliderp -> status = TT_STATUS_BLOCKED;
         }
     } else {
-        sliderp -> status = 0;
+        if (sliderp -> status == TT_STATUS_CLICK || sliderp -> status == TT_STATUS_BLOCKED || sliderp -> status == TT_STATUS_CLICK_FIRST_TICK) {
+            /* first tick unclicked */
+            sliderp -> status = TT_STATUS_IDLE;
+            goto LABEL_SLIDER_CHECK_HOVER; // done to avoid a single IDLE tick if mouse is hovering over slider when unclicked
+        }
     }
+    if (sliderp -> status == TT_STATUS_CLICK || sliderp -> status == TT_STATUS_CLICK_FIRST_TICK) {
+        if (sliderp -> type == TT_SLIDER_TYPE_HORIZONTAL) {
+            if (sliderp -> scale == TT_SLIDER_SCALE_LINEAR) {
+                sliderp -> value = round(sliderp -> range[0] + (turtle.mouseX - sliderXLeft) / sliderp -> length * (sliderp -> range[1] - sliderp -> range[0]));
+            } else if (sliderp -> scale == TT_SLIDER_SCALE_LOG) {
+                if (turtle.mouseX - sliderXLeft < 0) {
+                    sliderp -> value = sliderp -> range[0];
+                } else {
+                    sliderp -> value = round(sliderp -> range[0] + (log(1 + turtle.mouseX - sliderXLeft) / log(sliderp -> length + 1)) * (sliderp -> range[1] - sliderp -> range[0]));
+                }
+            } else if (sliderp -> scale == TT_SLIDER_SCALE_EXP) {
+                sliderp -> value = round(sliderp -> range[0] + ((pow(sliderp -> length + 1, (turtle.mouseX - sliderXLeft) / sliderp -> length) - 1) / sliderp -> length) * (sliderp -> range[1] - sliderp -> range[0]));
+            }
+        } else if (sliderp -> type == TT_SLIDER_TYPE_VERTICAL) {
+            if (sliderp -> scale == TT_SLIDER_SCALE_LINEAR) {
+                sliderp -> value = round(sliderp -> range[0] + (turtle.mouseY - sliderYLeft) / sliderp -> length * (sliderp -> range[1] - sliderp -> range[0]));
+            } else if (sliderp -> scale == TT_SLIDER_SCALE_LOG) {
+                if (turtle.mouseY - sliderYLeft < 0) {
+                    sliderp -> value = sliderp -> range[0];
+                } else {
+                    sliderp -> value = round(sliderp -> range[0] + (log(1 + turtle.mouseY - sliderYLeft) / log(sliderp -> length + 1)) * (sliderp -> range[1] - sliderp -> range[0]));
+                }
+            } else if (sliderp -> scale == TT_SLIDER_SCALE_EXP) {
+                sliderp -> value = round(sliderp -> range[0] + ((pow(sliderp -> length + 1, (turtle.mouseY - sliderYLeft) / sliderp -> length) - 1) / sliderp -> length) * (sliderp -> range[1] - sliderp -> range[0]));
+            }
+        }
+        if (sliderp -> value >= sliderp -> range[1]) {
+            sliderp -> value = sliderp -> range[1];
+        }
+        if (sliderp -> value <= sliderp -> range[0]) {
+            sliderp -> value = sliderp -> range[0];
+        }
+    }
+    if (sliderp -> status == TT_STATUS_HOVER || sliderp -> status == TT_STATUS_CLICK || sliderp -> status == TT_STATUS_HOVER_FIRST_TICK || sliderp -> status == TT_STATUS_CLICK_FIRST_TICK) {
+        tt_globals.elementLogicType = TT_ELEMENT_SLIDER;
+        tt_globals.elementLogicIndex = tt_globals.elementLogicTemp;
+    }
+    LABEL_SLIDER_END:
     if (sliderp -> renderNumberFactor != 0) {
         tt_setColor(sliderp -> color[TT_COLOR_SLOT_SLIDER_TEXT]);
         int32_t rounded = (int32_t) round(sliderp -> value * sliderp -> renderNumberFactor);
@@ -64219,7 +64531,7 @@ void tt_textboxAddKey(tt_textbox_t *textboxp, int32_t key) {
 void tt_textboxUnicodeCallback(uint32_t codepoint) {
     for (int32_t i = 0; i < tt_elements.textboxes -> length; i++) {
         tt_textbox_t *textboxp = (tt_textbox_t *) (tt_elements.textboxes -> data[i].p);
-        if (textboxp -> status > 1) {
+        if (textboxp -> status == TT_STATUS_CLICK || textboxp -> status == TT_STATUS_OPEN || textboxp -> status == TT_STATUS_CLICK_FIRST_TICK || textboxp -> status == TT_STATUS_OPEN_FIRST_TICK) {
             tt_textboxAddKey(textboxp, codepoint);
             break;
         }
@@ -64257,9 +64569,9 @@ void tt_textboxHandleOtherKey(tt_textbox_t *textboxp, int32_t key) {
         }
         strdel(textboxp -> text, textboxp -> editIndex, size);
     } else if (key == GLFW_KEY_ENTER) {
-        textboxp -> status = 0;
+        textboxp -> status = TT_STATUS_IDLE;
     } else if (key == GLFW_KEY_LEFT) {
-        textboxp -> status = 2;
+        textboxp -> count = 1;
         if (textboxp -> editIndex <= 0) {
             return;
         }
@@ -64270,7 +64582,7 @@ void tt_textboxHandleOtherKey(tt_textbox_t *textboxp, int32_t key) {
         }
         textboxp -> editIndex--;
     } else if (key == GLFW_KEY_RIGHT) {
-        textboxp -> status = 2;
+        textboxp -> count = 1;
         if (textboxp -> editIndex >= len) {
             return;
         }
@@ -64292,7 +64604,7 @@ void tt_textboxKeyCallback(int32_t key, int32_t scancode, int32_t action) {
     if (action == GLFW_PRESS) {
         for (int32_t i = 0; i < tt_elements.textboxes -> length; i++) {
             tt_textbox_t *textboxp = (tt_textbox_t *) (tt_elements.textboxes -> data[i].p);
-            if (textboxp -> status > 1) {
+            if (textboxp -> status == TT_STATUS_CLICK || textboxp -> status == TT_STATUS_OPEN || textboxp -> status == TT_STATUS_CLICK_FIRST_TICK || textboxp -> status == TT_STATUS_OPEN_FIRST_TICK) {
                 textboxp -> lastKey = key;
                 textboxp -> keyTimeout = textboxp -> initialKeyTimeout;
                 tt_textboxHandleOtherKey(textboxp, key);
@@ -64371,6 +64683,8 @@ int32_t tt_textboxCalculateMaximumCharacters(uint32_t *charlist, int32_t textLen
 
 void tt_textboxUpdate(tt_textbox_t *textboxp) {
     if (textboxp -> enabled == TT_ELEMENT_HIDE) {
+        textboxp -> status = TT_STATUS_IDLE;
+        textboxp -> mouseOver = 0;
         return;
     }
     /* handle keys */
@@ -64387,15 +64701,15 @@ void tt_textboxUpdate(tt_textbox_t *textboxp) {
             textboxp -> lastKey = 0;
         }
     }
-    if (textboxp -> status > 1) {
-        textboxp -> status++;
-        if (textboxp -> status > 128) {
-            textboxp -> status = 2;
+    if (textboxp -> count > 0) {
+        textboxp -> count++;
+        if (textboxp -> count > textboxp -> linePeriod) {
+            textboxp -> count = 1;
         }
     }
     tt_setColor(textboxp -> color[TT_COLOR_SLOT_TEXTBOX_BOX]);
     turtleRectangle(textboxp -> x, textboxp -> y - textboxp -> size, textboxp -> x + textboxp -> length, textboxp -> y + textboxp -> size);
-    if (textboxp -> status <= 0) {
+    if (textboxp -> status == TT_STATUS_IDLE || textboxp -> status == TT_STATUS_BLOCKED || textboxp -> status == TT_STATUS_HOVER || textboxp -> status == TT_STATUS_HOVER_FIRST_TICK) {
         textboxp -> renderPixelOffset = textboxp -> size / 3;
         textboxp -> renderStartingIndex = 0;
         /* textbox idle */
@@ -64417,7 +64731,7 @@ void tt_textboxUpdate(tt_textbox_t *textboxp) {
                 textboxp -> renderNumCharacters = tt_textboxCalculateMaximumCharacters(textConverted, characterLength, textboxp -> size - 1, textboxp -> length - textboxp -> size * 1.2, -1, &dummy);
             }
         }
-    } else if (textboxp -> status > 0) {
+    } else if (textboxp -> status == TT_STATUS_CLICK || textboxp -> status == TT_STATUS_OPEN || textboxp -> status == TT_STATUS_CLICK_FIRST_TICK || textboxp -> status == TT_STATUS_OPEN_FIRST_TICK) {
         /* editing text */
         /* calculate rendered characters */
         double totalTextLength = turtleTextGetUnicodeLength(textboxp -> text, textboxp -> size - 1);
@@ -64460,7 +64774,7 @@ void tt_textboxUpdate(tt_textbox_t *textboxp) {
     tt_setColor(textboxp -> color[TT_COLOR_SLOT_TEXTBOX_BOX]);
     turtleRectangle(textboxp -> x, textboxp -> y - textboxp -> size, textboxp -> x + textboxp -> size / 4, textboxp -> y + textboxp -> size);
     turtleRectangle(textboxp -> x + textboxp -> length, textboxp -> y - textboxp -> size, textboxp -> x + textboxp -> length - textboxp -> size / 4, textboxp -> y + textboxp -> size);
-    if (textboxp -> status > 0 && textboxp -> status < 66) {
+    if ((textboxp -> status == TT_STATUS_CLICK || textboxp -> status == TT_STATUS_OPEN || textboxp -> status == TT_STATUS_CLICK_FIRST_TICK || textboxp -> status == TT_STATUS_OPEN_FIRST_TICK) && textboxp -> count <= textboxp -> linePeriod / 2) {
         char tempHold = textboxp -> text[textboxp -> editIndex];
         textboxp -> text[textboxp -> editIndex] = '\0';
         double textLength = turtleTextGetUnicodeLength(textboxp -> text + textboxp -> renderStartingIndex, textboxp -> size - 1);
@@ -64469,38 +64783,65 @@ void tt_textboxUpdate(tt_textbox_t *textboxp) {
         turtleRectangle(textboxp -> x + textboxp -> renderPixelOffset + textLength, textboxp -> y - textboxp -> size * 0.8, textboxp -> x + textboxp -> renderPixelOffset + textLength + 1, textboxp -> y + textboxp -> size * 0.8);
     }
     /* mouse */
-    if (textboxp -> enabled == TT_ELEMENT_ENABLED && (tt_globals.elementLogicTypeOld < TT_ELEMENT_TEXTBOX || (tt_globals.elementLogicTypeOld == TT_ELEMENT_TEXTBOX && tt_globals.elementLogicIndexOld <= (int32_t) tt_globals.elementLogicTemp) || textboxp -> status > 1)) {
-        if (turtle.mouseX > textboxp -> x && turtle.mouseX < textboxp -> x + textboxp -> length && turtle.mouseY > textboxp -> y - textboxp -> size && turtle.mouseY < textboxp -> y + textboxp -> size) {
-            textboxp -> mouseOver = 1;
-        } else {
-            textboxp -> mouseOver = 0;
+    if (turtle.mouseX > textboxp -> x && turtle.mouseX < textboxp -> x + textboxp -> length && turtle.mouseY > textboxp -> y - textboxp -> size && turtle.mouseY < textboxp -> y + textboxp -> size) {
+        textboxp -> mouseOver = 1;
+    } else {
+        textboxp -> mouseOver = 0;
+    }
+    if (textboxp -> enabled != TT_ELEMENT_ENABLED || tt_globals.elementLogicTypeOld > TT_ELEMENT_TEXTBOX || (tt_globals.elementLogicTypeOld == TT_ELEMENT_TEXTBOX && tt_globals.elementLogicIndexOld > tt_globals.elementLogicTemp)) {
+        /* textbox not enabled or higher priority element is being interacted with */
+        if (textboxp -> status == TT_STATUS_OPEN || textboxp -> status == TT_STATUS_OPEN_FIRST_TICK) {
+            goto LABEL_TEXTBOX_CHECK_HOVER;
         }
-        if (turtleMouseDown()) {
-            if (textboxp -> status < 0) {
-                textboxp -> editIndex = strlen(textboxp -> text);
-                textboxp -> status *= -1;
-            }
-            if (textboxp -> status > 1 && (turtle.mouseX < textboxp -> x || turtle.mouseX > textboxp -> x + textboxp -> length || turtle.mouseY < textboxp -> y - textboxp -> size || turtle.mouseY > textboxp -> y + textboxp -> size)) {
-                textboxp -> status = 0;
+        textboxp -> status = TT_STATUS_IDLE;
+        textboxp -> mouseOver = 0;
+        return;
+    }
+    LABEL_TEXTBOX_CHECK_HOVER:
+    if (textboxp -> status != TT_STATUS_OPEN && textboxp -> status != TT_STATUS_CLICK && textboxp -> status != TT_STATUS_BLOCKED && textboxp -> status != TT_STATUS_OPEN_FIRST_TICK && textboxp -> status != TT_STATUS_CLICK_FIRST_TICK) {
+        if (textboxp -> mouseOver) {
+            if (textboxp -> status == TT_STATUS_HOVER || textboxp -> status == TT_STATUS_HOVER_FIRST_TICK) {
+                /* hovering textbox */
+                textboxp -> status = TT_STATUS_HOVER;
+            } else {
+                /* first tick hover */
+                textboxp -> status = TT_STATUS_HOVER_FIRST_TICK;
             }
         } else {
-            if (textboxp -> status == 1) {
-                textboxp -> status = 2;
-                tt_globals.elementLogicType = TT_ELEMENT_HIGHEST;
-                tt_globals.elementLogicIndex = TT_ELEMENT_TEXTBOX; // subverting expectations
-            } else if (textboxp -> status < 2) {
-                if (textboxp -> mouseOver) {
-                    textboxp -> status = -1;
-                    tt_globals.elementLogicType = TT_ELEMENT_TEXTBOX;
-                    tt_globals.elementLogicIndex = tt_globals.elementLogicTemp;
-                } else {
-                    textboxp -> status = 0;
-                }
-            }
+            textboxp -> status = TT_STATUS_IDLE;
+        }
+    }
+    if (turtleMouseDown()) {
+        if (textboxp -> status == TT_STATUS_HOVER || textboxp -> status == TT_STATUS_HOVER_FIRST_TICK) {
+            /* first tick clicked */
+            textboxp -> count = 1;
+            textboxp -> editIndex = strlen(textboxp -> text);
+            textboxp -> status = TT_STATUS_CLICK_FIRST_TICK;
+        } else if (textboxp -> status == TT_STATUS_CLICK || textboxp -> status == TT_STATUS_CLICK_FIRST_TICK) {
+            /* textbox is being held */
+            textboxp -> status = TT_STATUS_CLICK;
+        } else if (textboxp -> mouseOver && (textboxp -> status == TT_STATUS_OPEN || textboxp -> status == TT_STATUS_OPEN_FIRST_TICK)) {
+            /* textbox is open (affirm) */
+            textboxp -> status = TT_STATUS_OPEN;
+        } else {
+            /* textbox is blocked from interaction until mouse is unclicked */
+            textboxp -> status = TT_STATUS_BLOCKED;
         }
     } else {
-        textboxp -> status = 0;
-        textboxp -> mouseOver = 0;
+        if (textboxp -> status == TT_STATUS_CLICK || textboxp -> status == TT_STATUS_CLICK_FIRST_TICK) {
+            /* first tick unclicked */
+            textboxp -> status = TT_STATUS_OPEN_FIRST_TICK;
+        } else if (textboxp -> status == TT_STATUS_OPEN || textboxp -> status == TT_STATUS_OPEN_FIRST_TICK) {
+            /* textbox is open */
+            textboxp -> status = TT_STATUS_OPEN;
+        } else if (textboxp -> status == TT_STATUS_BLOCKED) {
+            textboxp -> status = TT_STATUS_IDLE;
+            goto LABEL_TEXTBOX_CHECK_HOVER; // done to avoid a single IDLE tick if mouse is hovering over textbox when unclicked
+        }
+    }
+    if (textboxp -> status == TT_STATUS_OPEN || textboxp -> status == TT_STATUS_HOVER || textboxp -> status == TT_STATUS_CLICK || textboxp -> status == TT_STATUS_OPEN_FIRST_TICK || textboxp -> status == TT_STATUS_HOVER_FIRST_TICK || textboxp -> status == TT_STATUS_CLICK_FIRST_TICK) {
+        tt_globals.elementLogicType = TT_ELEMENT_TEXTBOX;
+        tt_globals.elementLogicIndex = tt_globals.elementLogicTemp;
     }
 }
 
@@ -64510,7 +64851,11 @@ void tt_dropdownUpdate(tt_dropdown_t *dropdownp) {
         dropdownp -> value = *dropdownp -> variable;
     }
     if (dropdownp -> enabled == TT_ELEMENT_HIDE) {
+        dropdownp -> status = TT_STATUS_IDLE;
         return;
+    }
+    if (dropdownp -> options -> length == 0) {
+        list_append(dropdownp -> options, (unitype) "None", 's'); // program will crash if dropdown -> options -> length is 0
     }
     /* render dropdown default position */
     double dropdownX = dropdownp -> x;
@@ -64520,7 +64865,8 @@ void tt_dropdownUpdate(tt_dropdown_t *dropdownp) {
     double dropdownXFactor[2];
     double dropdownMaxXFactor[2];
     double dropdownAlignFactor;
-    tt_setColor(dropdownp -> color[TT_COLOR_SLOT_DROPDOWN_TEXT]);
+    /* render dropdown label */
+    tt_setColor(dropdownp -> color[TT_COLOR_SLOT_DROPDOWN_TEXT_LABEL]);
     if (dropdownp -> align == TT_DROPDOWN_ALIGN_LEFT) {
         dropdownXFactor[0] = dropdownX;
         dropdownXFactor[1] = dropdownX + xfactor + dropdownp -> size * 1.2;
@@ -64550,6 +64896,7 @@ void tt_dropdownUpdate(tt_dropdown_t *dropdownp) {
         dropdownAlignFactor = 100;
         turtleTextWriteUnicode(dropdownp -> label, dropdownX - dropdownp -> size / 5, dropdownY + 2 * dropdownp -> size, dropdownp -> size - 1, dropdownAlignFactor);
     }
+    /* determine dropdown direction */
     int32_t dropdownDirection = dropdownp -> direction;
     if (dropdownDirection == TT_DROPDOWN_DIRECTION_AUTO) {
         if (dropdownY - dropdownp -> size * 0.9 - (dropdownp -> options -> length - 1) * itemHeight <= dropdownp -> autoLowerBound) {
@@ -64569,10 +64916,11 @@ void tt_dropdownUpdate(tt_dropdown_t *dropdownp) {
     if (dropdownDirection == TT_DROPDOWN_DIRECTION_UP) {
         directionRender = -1;
     }
-    if (dropdownp -> status == -1) {
+    /* render dropdown */
+    if (dropdownp -> status == TT_STATUS_HOVER || dropdownp -> status == TT_STATUS_HOVER_FIRST_TICK) {
         tt_setColor(dropdownp -> color[TT_COLOR_SLOT_DROPDOWN_SELECT]);
         turtleRectangle(dropdownXFactor[0], dropdownY - dropdownp -> size * 0.9, dropdownXFactor[1] + dropdownp -> size, dropdownY + dropdownp -> size * 0.9);
-    } else if (dropdownp -> status >= 1) {
+    } else if (dropdownp -> status == TT_STATUS_OPEN || dropdownp -> status == TT_STATUS_CLICK || dropdownp -> status == TT_STATUS_OPEN_FIRST_TICK || dropdownp -> status == TT_STATUS_CLICK_FIRST_TICK) {
         tt_setColor(dropdownp -> color[TT_COLOR_SLOT_DROPDOWN_BASE]);
         if (dropdownDirection == TT_DROPDOWN_DIRECTION_UP) {
             turtleRectangle(dropdownMaxXFactor[0], dropdownY + dropdownp -> size * 0.9 + (dropdownp -> options -> length - 1) * itemHeight, dropdownMaxXFactor[1], dropdownY - dropdownp -> size * 0.9);
@@ -64584,103 +64932,128 @@ void tt_dropdownUpdate(tt_dropdown_t *dropdownp) {
         turtleRectangle(dropdownXFactor[0], dropdownY - dropdownp -> size * 0.9, dropdownXFactor[1] + dropdownp -> size, dropdownY + dropdownp -> size * 0.9);
     }
     /* mouse */
-    if (dropdownp -> enabled == TT_ELEMENT_ENABLED && (tt_globals.elementLogicTypeOld < TT_ELEMENT_DROPDOWN || (tt_globals.elementLogicTypeOld == TT_ELEMENT_DROPDOWN && tt_globals.elementLogicIndexOld <= (int32_t) tt_globals.elementLogicTemp) || dropdownp -> status > 0)) {
-        if (dropdownp -> enabled == TT_ELEMENT_ENABLED && tt_ribbon.mainselect[2] == -1) {
-            if (turtle.mouseX > dropdownXFactor[0] && turtle.mouseX < dropdownXFactor[1] + dropdownp -> size && turtle.mouseY >= dropdownY - dropdownp -> size * 0.9 && turtle.mouseY < dropdownY + dropdownp -> size * 0.9) {
-                if (!turtleMouseDown() && dropdownp -> status == 0) {
-                    dropdownp -> status = -1;
-                    tt_globals.elementLogicType = TT_ELEMENT_DROPDOWN;
-                    tt_globals.elementLogicIndex = tt_globals.elementLogicTemp;
+    if (dropdownp -> enabled != TT_ELEMENT_ENABLED || tt_globals.elementLogicTypeOld > TT_ELEMENT_DROPDOWN || (tt_globals.elementLogicTypeOld == TT_ELEMENT_DROPDOWN && tt_globals.elementLogicIndexOld > tt_globals.elementLogicTemp)) {
+        /* dropdown not enabled or higher priority element is being interacted with */
+        if (dropdownp -> status == TT_STATUS_OPEN || dropdownp -> status == TT_STATUS_OPEN_FIRST_TICK) {
+            goto LABEL_DROPDOWN_CHECK_HOVER;
+        }
+        dropdownp -> status = TT_STATUS_IDLE;
+        goto LABEL_DROPDOWN_END;
+    }
+    if (tt_ribbon.mainselect[2] != -1) {
+        /* fixes to dropdown/ribbon interaction */
+        goto LABEL_DROPDOWN_END;
+    }
+    LABEL_DROPDOWN_CHECK_HOVER:
+    if (dropdownp -> status != TT_STATUS_CLICK && dropdownp -> status != TT_STATUS_OPEN && dropdownp -> status != TT_STATUS_OPEN_CLICK && dropdownp -> status != TT_STATUS_BLOCKED && dropdownp -> status != TT_STATUS_CLICK_FIRST_TICK && dropdownp -> status != TT_STATUS_OPEN_FIRST_TICK && dropdownp -> status != TT_STATUS_OPEN_CLICK_FIRST_TICK) {
+        if (turtle.mouseX > dropdownXFactor[0] && turtle.mouseX < dropdownXFactor[1] + dropdownp -> size && turtle.mouseY >= dropdownY - dropdownp -> size * 0.9 && turtle.mouseY < dropdownY + dropdownp -> size * 0.9) {
+            if (dropdownp -> status == TT_STATUS_HOVER || dropdownp -> status == TT_STATUS_HOVER_FIRST_TICK) {
+                /* hovering dropdown */
+                dropdownp -> status = TT_STATUS_HOVER;
+            } else {
+                /* first tick hover */
+                dropdownp -> status = TT_STATUS_HOVER_FIRST_TICK;
+            }
+        } else {
+            dropdownp -> status = TT_STATUS_IDLE;
+        }
+    }
+    if (turtleMouseDown()) {
+        if (dropdownp -> status == TT_STATUS_OPEN || dropdownp -> status == TT_STATUS_OPEN_FIRST_TICK) {
+            /* first tick clicked (open) */
+            int32_t selected = round((dropdownY - turtle.mouseY) / itemHeight);
+            if (directionRender == -1) {
+                selected = dropdownp -> options -> length - round((turtle.mouseY - dropdownY) / itemHeight);
+            }
+            if (turtle.mouseX > dropdownMaxXFactor[0] && turtle.mouseX < dropdownMaxXFactor[1] && selected >= 0 && selected < dropdownp -> options -> length) {
+                if (selected == 0) {
+                    dropdownp -> status = TT_STATUS_OPEN_CLICK_FIRST_TICK;
+                } else {
+                    if (dropdownp -> index >= selected) {
+                        dropdownp -> index = selected - 1;
+                        dropdownp -> value = selected - 1;
+                    } else {
+                        dropdownp -> index = selected;
+                        dropdownp -> value = selected;
+                    }
+                    dropdownp -> status = TT_STATUS_OPEN_CLICK_FIRST_TICK;
                 }
             } else {
-                if (dropdownp -> status == -1) {
-                    dropdownp -> status = 0;
-                }
+                dropdownp -> status = TT_STATUS_IDLE;
+                goto LABEL_DROPDOWN_CHECK_HOVER;
             }
-            if (dropdownp -> status == -1) {
-                if (turtleMouseDown()) {
-                    dropdownp -> status = 1;
-                    tt_globals.elementLogicType = TT_ELEMENT_HIGHEST;
-                    tt_globals.elementLogicIndex = TT_ELEMENT_DROPDOWN; // subverting expectations
-                }
-            }
-            if (dropdownp -> status == 1) {
-                if (!turtleMouseDown()) {
-                    if (turtle.mouseX > dropdownMaxXFactor[0] && turtle.mouseX < dropdownMaxXFactor[1] && ((directionRender == 1 && turtle.mouseY > dropdownY - dropdownp -> size * 0.9 - (dropdownp -> options -> length - 1) * itemHeight && turtle.mouseY <= dropdownY + dropdownp -> size * 0.9 - itemHeight) || (directionRender == -1 && turtle.mouseY < dropdownY + dropdownp -> size * 0.9 + (dropdownp -> options -> length - 1) * itemHeight && turtle.mouseY >= dropdownY - dropdownp -> size * 0.9 + itemHeight))) {
-                        int32_t selected = round((dropdownY - turtle.mouseY) / itemHeight);
-                        if (directionRender == -1) {
-                            selected = round((turtle.mouseY - dropdownY) / itemHeight);
-                        }
-                        if (selected != 0) {
-                            if (dropdownp -> index >= selected) {
-                                dropdownp -> index = selected - 1;
-                                dropdownp -> value = selected - 1;
-                            } else {
-                                dropdownp -> index = selected;
-                                dropdownp -> value = selected;
-                            }
-                        }
-                        dropdownp -> status = -2;
-                    } else {
-                        dropdownp -> status = 2;
-                    }
-                }
-            }
-            if (dropdownp -> status == -2) {
-                if (!turtleMouseDown()) {
-                    dropdownp -> status = 0;
-                }
-            }
-            if (dropdownp -> status == 2 || dropdownp -> status == 1) {
-                tt_globals.elementLogicType = TT_ELEMENT_DROPDOWN;
-                tt_globals.elementLogicIndex = tt_globals.elementLogicTemp;
-                if (turtle.mouseX > dropdownMaxXFactor[0] && turtle.mouseX < dropdownMaxXFactor[1] && ((directionRender == 1 && turtle.mouseY > dropdownY - dropdownp -> size * 0.9 - (dropdownp -> options -> length - 1) * itemHeight && turtle.mouseY <= dropdownY + dropdownp -> size * 0.9) || (directionRender == -1 && turtle.mouseY < dropdownY + dropdownp -> size * 0.9 + (dropdownp -> options -> length - 1) * itemHeight && turtle.mouseY >= dropdownY - dropdownp -> size * 0.9))) {
-                    int32_t selected = round((dropdownY - turtle.mouseY) / itemHeight);
-                    if (directionRender == -1) {
-                        selected = dropdownp -> options -> length - round((turtle.mouseY - dropdownY) / itemHeight);
-                    }
-                    tt_setColor(dropdownp -> color[TT_COLOR_SLOT_DROPDOWN_HOVER]);
-                    turtleRectangle(dropdownMaxXFactor[0], dropdownY - dropdownp -> size * 0.9 - (directionRender - 1) / 2.0 * dropdownp -> options -> length * itemHeight - selected * itemHeight, dropdownMaxXFactor[1], dropdownY + dropdownp -> size * 0.9 - (directionRender - 1) / 2.0 * dropdownp -> options -> length * itemHeight - selected * itemHeight);
-                    if (turtleMouseDown() && dropdownp -> status == 2) {
-                        if (selected >= dropdownp -> options -> length) {
-                            selected = 0;
-                        }
-                        if (selected != 0) {
-                            if (dropdownp -> index >= selected) {
-                                dropdownp -> index = selected - 1;
-                                dropdownp -> value = selected - 1;
-                            } else {
-                                dropdownp -> index = selected;
-                                dropdownp -> value = selected;
-                            }
-                        }
-                        dropdownp -> status = -2;
-                    }
-                } else {
-                    if (turtleMouseDown() && dropdownp -> status == 2) {
-                        dropdownp -> status = 0;
-                    }
-                }
-                tt_setColor(dropdownp -> color[TT_COLOR_SLOT_DROPDOWN_TEXT_HOVER]);
-                int32_t renderIndex = 1;
-                for (int32_t i = 0; i < dropdownp -> options -> length; i++) {
-                    if (i != dropdownp -> index) {
-                        if (dropdownp -> align == TT_DROPDOWN_ALIGN_LEFT) {
-                            turtleTextWriteUnicode(dropdownp -> options -> data[i].s, dropdownMaxXFactor[0] + dropdownp -> size / 2, dropdownY - (directionRender - 1) / 2.0 * dropdownp -> options -> length * itemHeight - renderIndex * itemHeight, dropdownp -> size - 1, dropdownAlignFactor);
-                        } else if (dropdownp -> align == TT_DROPDOWN_ALIGN_CENTER) {
-                            turtleTextWriteUnicode(dropdownp -> options -> data[i].s, (dropdownMaxXFactor[0] + dropdownMaxXFactor[1]) / 2, dropdownY - (directionRender - 1) / 2.0 * dropdownp -> options -> length * itemHeight - renderIndex * itemHeight, dropdownp -> size - 1, dropdownAlignFactor);
-                        } else if (dropdownp -> align == TT_DROPDOWN_ALIGN_RIGHT) {
-                            turtleTextWriteUnicode(dropdownp -> options -> data[i].s, dropdownMaxXFactor[1] - dropdownp -> size * 1.58, dropdownY - (directionRender - 1) / 2.0 * dropdownp -> options -> length * itemHeight - renderIndex * itemHeight, dropdownp -> size - 1, dropdownAlignFactor);
-                        }
-                        renderIndex++;
-                    }
-                }
-            }
+        } else if (dropdownp -> status == TT_STATUS_OPEN_CLICK || dropdownp -> status == TT_STATUS_OPEN_CLICK_FIRST_TICK) {
+            /* dropdown is being held (open) */
+            dropdownp -> status = TT_STATUS_OPEN_CLICK;
+        } else if (dropdownp -> status == TT_STATUS_HOVER || dropdownp -> status == TT_STATUS_HOVER_FIRST_TICK) {
+            /* first tick clicked */
+            dropdownp -> status = TT_STATUS_CLICK_FIRST_TICK;
+        } else if (dropdownp -> status == TT_STATUS_CLICK || dropdownp -> status == TT_STATUS_CLICK_FIRST_TICK) {
+            /* dropdown is being held */
+            dropdownp -> status = TT_STATUS_CLICK;
+        } else {
+            /* dropdown is blocked from interaction until mouse is unclicked */
+            dropdownp -> status = TT_STATUS_BLOCKED;
         }
     } else {
-        dropdownp -> status = 0;
+        if (dropdownp -> status == TT_STATUS_CLICK || dropdownp -> status == TT_STATUS_CLICK_FIRST_TICK) {
+            /* first tick unclicked */
+            int32_t selected = round((dropdownY - turtle.mouseY) / itemHeight);
+            if (directionRender == -1) {
+                selected = dropdownp -> options -> length - round((turtle.mouseY - dropdownY) / itemHeight);
+            }
+            if (turtle.mouseX > dropdownMaxXFactor[0] && turtle.mouseX < dropdownMaxXFactor[1] && selected >= 1 && selected < dropdownp -> options -> length) {
+                if (dropdownp -> index >= selected) {
+                    dropdownp -> index = selected - 1;
+                    dropdownp -> value = selected - 1;
+                } else {
+                    dropdownp -> index = selected;
+                    dropdownp -> value = selected;
+                }
+                dropdownp -> status = TT_STATUS_IDLE;
+                goto LABEL_DROPDOWN_CHECK_HOVER;
+            } else {
+                /* first tick open */
+                dropdownp -> status = TT_STATUS_OPEN_FIRST_TICK;
+            }
+        } else if (dropdownp -> status == TT_STATUS_OPEN || dropdownp -> status == TT_STATUS_OPEN_FIRST_TICK) {
+            /* dropdown is open */
+            dropdownp -> status = TT_STATUS_OPEN;
+        } else if (dropdownp -> status == TT_STATUS_BLOCKED || dropdownp -> status == TT_STATUS_OPEN_CLICK || dropdownp -> status == TT_STATUS_OPEN_CLICK_FIRST_TICK) {
+            dropdownp -> status = TT_STATUS_IDLE; // done to avoid a single IDLE tick if mouse is hovering over dropdown when unclicked
+            goto LABEL_DROPDOWN_CHECK_HOVER;
+        }
     }
-    tt_setColor(dropdownp -> color[TT_COLOR_SLOT_DROPDOWN_TEXT_HOVER]);
+    if (dropdownp -> status == TT_STATUS_OPEN || dropdownp -> status == TT_STATUS_CLICK || dropdownp -> status == TT_STATUS_OPEN_FIRST_TICK || dropdownp -> status == TT_STATUS_CLICK_FIRST_TICK) {
+        int32_t selected = round((dropdownY - turtle.mouseY) / itemHeight);
+        if (directionRender == -1) {
+            selected = dropdownp -> options -> length - round((turtle.mouseY - dropdownY) / itemHeight);
+        }
+        if (turtle.mouseX > dropdownMaxXFactor[0] && turtle.mouseX < dropdownMaxXFactor[1] && selected >= 0 && selected < dropdownp -> options -> length) {
+            tt_setColor(dropdownp -> color[TT_COLOR_SLOT_DROPDOWN_HOVER]);
+            turtleRectangle(dropdownMaxXFactor[0], dropdownY - dropdownp -> size * 0.9 - (directionRender - 1) / 2.0 * dropdownp -> options -> length * itemHeight - selected * itemHeight, dropdownMaxXFactor[1], dropdownY + dropdownp -> size * 0.9 - (directionRender - 1) / 2.0 * dropdownp -> options -> length * itemHeight - selected * itemHeight);
+        }
+        tt_setColor(dropdownp -> color[TT_COLOR_SLOT_DROPDOWN_TEXT]);
+        int32_t renderIndex = 1;
+        for (int32_t i = 0; i < dropdownp -> options -> length; i++) {
+            if (i != dropdownp -> index) {
+                if (dropdownp -> align == TT_DROPDOWN_ALIGN_LEFT) {
+                    turtleTextWriteUnicode(dropdownp -> options -> data[i].s, dropdownMaxXFactor[0] + dropdownp -> size / 2, dropdownY - (directionRender - 1) / 2.0 * dropdownp -> options -> length * itemHeight - renderIndex * itemHeight, dropdownp -> size - 1, dropdownAlignFactor);
+                } else if (dropdownp -> align == TT_DROPDOWN_ALIGN_CENTER) {
+                    turtleTextWriteUnicode(dropdownp -> options -> data[i].s, (dropdownMaxXFactor[0] + dropdownMaxXFactor[1]) / 2, dropdownY - (directionRender - 1) / 2.0 * dropdownp -> options -> length * itemHeight - renderIndex * itemHeight, dropdownp -> size - 1, dropdownAlignFactor);
+                } else if (dropdownp -> align == TT_DROPDOWN_ALIGN_RIGHT) {
+                    turtleTextWriteUnicode(dropdownp -> options -> data[i].s, dropdownMaxXFactor[1] - dropdownp -> size * 1.58, dropdownY - (directionRender - 1) / 2.0 * dropdownp -> options -> length * itemHeight - renderIndex * itemHeight, dropdownp -> size - 1, dropdownAlignFactor);
+                }
+                renderIndex++;
+            }
+        }
+    }
+    if (dropdownp -> status == TT_STATUS_OPEN || dropdownp -> status == TT_STATUS_OPEN_CLICK || dropdownp -> status == TT_STATUS_HOVER || dropdownp -> status == TT_STATUS_CLICK || dropdownp -> status == TT_STATUS_OPEN_FIRST_TICK || dropdownp -> status == TT_STATUS_OPEN_CLICK_FIRST_TICK || dropdownp -> status == TT_STATUS_HOVER_FIRST_TICK) {
+        tt_globals.elementLogicType = TT_ELEMENT_DROPDOWN;
+        tt_globals.elementLogicIndex = tt_globals.elementLogicTemp;
+    }
+    LABEL_DROPDOWN_END:
+    tt_setColor(dropdownp -> color[TT_COLOR_SLOT_DROPDOWN_TEXT]);
     if (dropdownp -> align == TT_DROPDOWN_ALIGN_LEFT) {
         turtleTextWriteUnicode(dropdownp -> options -> data[dropdownp -> index].s, dropdownXFactor[0] + dropdownp -> size / 2, dropdownY, dropdownp -> size - 1, dropdownAlignFactor);
     } else if (dropdownp -> align == TT_DROPDOWN_ALIGN_CENTER) {
@@ -64689,7 +65062,7 @@ void tt_dropdownUpdate(tt_dropdown_t *dropdownp) {
         turtleTextWriteUnicode(dropdownp -> options -> data[dropdownp -> index].s, dropdownXFactor[1] - dropdownp -> size * 0.55, dropdownY, dropdownp -> size - 1, dropdownAlignFactor);
     }
     tt_setColor(dropdownp -> color[TT_COLOR_SLOT_DROPDOWN_TRIANGLE]);
-    if (dropdownp -> status >= 1) {
+    if (dropdownp -> status == TT_STATUS_OPEN || dropdownp -> status == TT_STATUS_CLICK || dropdownp -> status == TT_STATUS_OPEN_FIRST_TICK || dropdownp -> status == TT_STATUS_CLICK_FIRST_TICK) {
         turtleTriangle(dropdownXFactor[1] + dropdownp -> size * 0.4, dropdownY + dropdownp -> size * 0.4, dropdownXFactor[1] + dropdownp -> size * 0.4, dropdownY - dropdownp -> size * 0.4, dropdownXFactor[1] - dropdownp -> size * 0.2, dropdownY);
     } else {
         turtleTriangle(dropdownXFactor[1] + dropdownp -> size * 0.6, dropdownY + dropdownp -> size * 0.3, dropdownXFactor[1] - dropdownp -> size * 0.2, dropdownY + dropdownp -> size * 0.3, dropdownXFactor[1] + dropdownp -> size * 0.2, dropdownY - dropdownp -> size * 0.3);
@@ -64709,13 +65082,17 @@ void tt_scrollbarUpdate(tt_scrollbar_t *scrollbarp) {
         scrollbarp -> value = *scrollbarp -> variable;
     }
     if (scrollbarp -> enabled == TT_ELEMENT_HIDE) {
+        scrollbarp -> status = TT_STATUS_IDLE;
         return;
     }
+    double simulateMouseX = turtle.mouseX;
+    double simulateMouseY = turtle.mouseY;
+    double scrollbarLeft = scrollbarp -> x - scrollbarp -> length / 2;
+    double scrollbarRight = scrollbarp -> x + scrollbarp -> length / 2;
+    double scrollbarY = scrollbarp -> y;
+    double dragLeft = scrollbarLeft + scrollbarp -> value / 100 * (scrollbarp -> length * (1 - scrollbarp -> barPercentage / 100));
+    double dragRight = dragLeft + (scrollbarp -> length * scrollbarp -> barPercentage / 100);
     if (scrollbarp -> type == TT_SCROLLBAR_TYPE_HORIZONTAL) {
-        double scrollbarLeft = scrollbarp -> x - scrollbarp -> length / 2;
-        double scrollbarRight = scrollbarp -> x + scrollbarp -> length / 2;
-        double dragLeft = scrollbarLeft + scrollbarp -> value / 100 * (scrollbarp -> length * (1 - scrollbarp -> barPercentage / 100));
-        double dragRight = dragLeft + (scrollbarp -> length * scrollbarp -> barPercentage / 100);
         turtlePenSize(scrollbarp -> size * 1);
         tt_setColor(scrollbarp -> color[TT_COLOR_SLOT_SCROLLBAR_BASE]);
         turtleGoto(scrollbarLeft, scrollbarp -> y);
@@ -64723,9 +65100,9 @@ void tt_scrollbarUpdate(tt_scrollbar_t *scrollbarp) {
         turtleGoto(scrollbarRight, scrollbarp -> y);
         turtlePenUp();
         turtlePenSize(scrollbarp -> size * 0.8);
-        if (scrollbarp -> status == -1 && turtle.mouseX > dragLeft - scrollbarp -> size * 0.4 && turtle.mouseX < dragRight + scrollbarp -> size * 0.4) {
+        if ((scrollbarp -> status == TT_STATUS_HOVER || scrollbarp -> status == TT_STATUS_HOVER_FIRST_TICK) && turtle.mouseX > dragLeft - scrollbarp -> size * 0.4 && turtle.mouseX < dragRight + scrollbarp -> size * 0.4) {
             tt_setColor(scrollbarp -> color[TT_COLOR_SLOT_SCROLLBAR_HOVER]);
-        } else if (scrollbarp -> status > 0) {
+        } else if (scrollbarp -> status == TT_STATUS_CLICK || scrollbarp -> status == TT_STATUS_CLICK_FIRST_TICK) {
             tt_setColor(scrollbarp -> color[TT_COLOR_SLOT_SCROLLBAR_CLICKED]);
         } else {
             tt_setColor(scrollbarp -> color[TT_COLOR_SLOT_SCROLLBAR_BAR]);
@@ -64734,108 +65111,98 @@ void tt_scrollbarUpdate(tt_scrollbar_t *scrollbarp) {
         turtlePenDown();
         turtleGoto(dragRight, scrollbarp -> y);
         turtlePenUp();
-        /* mouse */
-        if (scrollbarp -> enabled == TT_ELEMENT_ENABLED && (tt_globals.elementLogicTypeOld < TT_ELEMENT_SCROLLBAR || (tt_globals.elementLogicTypeOld == TT_ELEMENT_SCROLLBAR && tt_globals.elementLogicIndexOld <= (int32_t) tt_globals.elementLogicTemp) || scrollbarp -> status > 0)) {
-            if (scrollbarp -> status == 2) {
-                tt_globals.barAnchor = turtle.mouseX - dragLeft;
-                scrollbarp -> status = 1;
-            }
-            if (turtleMouseDown()) {
-                if (scrollbarp -> status < 0) {
-                    if (turtle.mouseX > dragLeft - scrollbarp -> size * 0.4 && turtle.mouseX < dragRight + scrollbarp -> size * 0.4) {
-                        tt_globals.barAnchor = turtle.mouseX - dragLeft;
-                    } else {
-                        tt_globals.barAnchor = (scrollbarp -> length * scrollbarp -> barPercentage / 100) / 2;
-                        scrollbarp -> status = -2;
-                    }
-                    scrollbarp -> status *= -1;
-                    tt_globals.elementLogicType = TT_ELEMENT_HIGHEST;
-                    tt_globals.elementLogicIndex = TT_ELEMENT_SCROLLBAR; // subverting expectations
-                }
-            } else {
-                if (turtle.mouseY > scrollbarp -> y - scrollbarp -> size * 0.5 && turtle.mouseY < scrollbarp -> y + scrollbarp -> size * 0.5 && turtle.mouseX < scrollbarRight + scrollbarp -> size * 0.5 && turtle.mouseX > scrollbarLeft - scrollbarp -> size * 0.5) {
-                    scrollbarp -> status = -1;
-                    tt_globals.elementLogicType = TT_ELEMENT_SCROLLBAR;
-                    tt_globals.elementLogicIndex = tt_globals.elementLogicTemp;
-                } else {
-                    scrollbarp -> status = 0;
-                }
-            }
-            if (scrollbarp -> status > 0) {
-                scrollbarp -> value = (turtle.mouseX - scrollbarLeft - tt_globals.barAnchor) / (scrollbarp -> length * (1 - scrollbarp -> barPercentage / 100)) * 100;
-                if (scrollbarp -> value < 0) {
-                    scrollbarp -> value = 0;
-                }
-                if (scrollbarp -> value > 100) {
-                    scrollbarp -> value = 100;
-                }
-            }
-        } else {
-            scrollbarp -> status = 0;
-        }
     } else if (scrollbarp -> type == TT_SCROLLBAR_TYPE_VERTICAL) {
-        double scrollbarTop = scrollbarp -> y + scrollbarp -> length / 2;
-        double scrollbarBottom = scrollbarp -> y - scrollbarp -> length / 2;
-        double dragTop = scrollbarTop - scrollbarp -> value / 100 * (scrollbarp -> length * (1 - scrollbarp -> barPercentage / 100));
-        double dragBottom = dragTop - (scrollbarp -> length * scrollbarp -> barPercentage / 100);
+        simulateMouseX = turtle.mouseY;
+        simulateMouseY = turtle.mouseX;
+        scrollbarLeft = scrollbarp -> y - scrollbarp -> length / 2;
+        scrollbarRight = scrollbarp -> y + scrollbarp -> length / 2;
+        scrollbarY = scrollbarp -> x;
+        dragRight = scrollbarRight - scrollbarp -> value / 100 * (scrollbarp -> length * (1 - scrollbarp -> barPercentage / 100));
+        dragLeft = dragRight - (scrollbarp -> length * scrollbarp -> barPercentage / 100);
         turtlePenSize(scrollbarp -> size * 1);
         tt_setColor(scrollbarp -> color[TT_COLOR_SLOT_SCROLLBAR_BASE]);
-        turtleGoto(scrollbarp -> x, scrollbarTop);
+        turtleGoto(scrollbarp -> x, scrollbarLeft);
         turtlePenDown();
-        turtleGoto(scrollbarp -> x, scrollbarBottom);
+        turtleGoto(scrollbarp -> x, scrollbarRight);
         turtlePenUp();
         turtlePenSize(scrollbarp -> size * 0.8);
-        if (scrollbarp -> status == -1 && turtle.mouseY > dragBottom - scrollbarp -> size * 0.4 && turtle.mouseY < dragTop + scrollbarp -> size * 0.4) {
+        if ((scrollbarp -> status == TT_STATUS_HOVER || scrollbarp -> status == TT_STATUS_HOVER_FIRST_TICK) && turtle.mouseY > dragLeft - scrollbarp -> size * 0.4 && turtle.mouseY < dragRight + scrollbarp -> size * 0.4) {
             tt_setColor(scrollbarp -> color[TT_COLOR_SLOT_SCROLLBAR_HOVER]);
-        } else if (scrollbarp -> status > 0) {
+        } else if (scrollbarp -> status == TT_STATUS_CLICK || scrollbarp -> status == TT_STATUS_CLICK_FIRST_TICK) {
             tt_setColor(scrollbarp -> color[TT_COLOR_SLOT_SCROLLBAR_CLICKED]);
         } else {
             tt_setColor(scrollbarp -> color[TT_COLOR_SLOT_SCROLLBAR_BAR]);
         }
-        turtleGoto(scrollbarp -> x, dragTop);
+        turtleGoto(scrollbarp -> x, dragLeft);
         turtlePenDown();
-        turtleGoto(scrollbarp -> x, dragBottom);
+        turtleGoto(scrollbarp -> x, dragRight);
         turtlePenUp();
-        /* mouse */
-        if (scrollbarp -> enabled == TT_ELEMENT_ENABLED && (tt_globals.elementLogicTypeOld < TT_ELEMENT_SCROLLBAR || (tt_globals.elementLogicTypeOld == TT_ELEMENT_SCROLLBAR && tt_globals.elementLogicIndexOld <= (int32_t) tt_globals.elementLogicTemp) || scrollbarp -> status > 0)) {
-            if (scrollbarp -> status == 2) {
-                tt_globals.barAnchor = dragTop - turtle.mouseY;
-                scrollbarp -> status = 1;
-            }
-            if (turtleMouseDown()) {
-                if (scrollbarp -> status < 0) {
-                    if (turtle.mouseY > dragBottom - scrollbarp -> size * 0.4 && turtle.mouseY < dragTop + scrollbarp -> size * 0.4) {
-                        tt_globals.barAnchor = dragTop - turtle.mouseY;
-                    } else {
-                        tt_globals.barAnchor = (scrollbarp -> length * scrollbarp -> barPercentage / 100) / 2;
-                        scrollbarp -> status = -2;
-                    }
-                    scrollbarp -> status *= -1;
-                    tt_globals.elementLogicType = TT_ELEMENT_HIGHEST;
-                    tt_globals.elementLogicIndex = TT_ELEMENT_SCROLLBAR; // subverting expectations
-                }
+    }
+    /* mouse */
+    if (scrollbarp -> enabled != TT_ELEMENT_ENABLED || tt_globals.elementLogicTypeOld > TT_ELEMENT_SCROLLBAR || (tt_globals.elementLogicTypeOld == TT_ELEMENT_SCROLLBAR && tt_globals.elementLogicIndexOld > tt_globals.elementLogicTemp)) {
+        /* slider not enabled or higher priority element is being interacted with */
+        scrollbarp -> status = TT_STATUS_IDLE;
+        goto LABEL_SCROLLBAR_END;
+    }
+    LABEL_SCROLLBAR_CHECK_HOVER:
+    if (scrollbarp -> status != TT_STATUS_CLICK && scrollbarp -> status != TT_STATUS_BLOCKED && scrollbarp -> status != TT_STATUS_CLICK_FIRST_TICK) {
+        if (simulateMouseY > scrollbarY - scrollbarp -> size * 0.5 && simulateMouseY < scrollbarY + scrollbarp -> size * 0.5 && simulateMouseX < scrollbarRight + scrollbarp -> size * 0.5 && simulateMouseX > scrollbarLeft - scrollbarp -> size * 0.5) {
+            if (scrollbarp -> status == TT_STATUS_HOVER || scrollbarp -> status == TT_STATUS_HOVER_FIRST_TICK) {
+                /* hovering slider */
+                scrollbarp -> status = TT_STATUS_HOVER;
             } else {
-                if (turtle.mouseX > scrollbarp -> x - scrollbarp -> size * 0.5 && turtle.mouseX < scrollbarp -> x + scrollbarp -> size * 0.5 && turtle.mouseY > scrollbarBottom - scrollbarp -> size * 0.5 && turtle.mouseY < scrollbarTop + scrollbarp -> size * 0.5) {
-                    scrollbarp -> status = -1;
-                    tt_globals.elementLogicType = TT_ELEMENT_SCROLLBAR;
-                    tt_globals.elementLogicIndex = tt_globals.elementLogicTemp;
-                } else {
-                    scrollbarp -> status = 0;
-                }
-            }
-            if (scrollbarp -> status > 0) {
-                scrollbarp -> value = (scrollbarTop - turtle.mouseY - tt_globals.barAnchor) / (scrollbarp -> length * (1 - scrollbarp -> barPercentage / 100)) * 100;
-                if (scrollbarp -> value < 0) {
-                    scrollbarp -> value = 0;
-                }
-                if (scrollbarp -> value > 100) {
-                    scrollbarp -> value = 100;
-                }
+                /* first tick hover */
+                scrollbarp -> status = TT_STATUS_HOVER_FIRST_TICK;
             }
         } else {
-            scrollbarp -> status = 0;
+            scrollbarp -> status = TT_STATUS_IDLE;
         }
     }
+    if (turtleMouseDown()) {
+        if (scrollbarp -> status == TT_STATUS_HOVER || scrollbarp -> status == TT_STATUS_HOVER_FIRST_TICK) {
+            /* first tick clicked */
+            if (simulateMouseX > dragLeft - scrollbarp -> size * 0.4 && simulateMouseX < dragRight + scrollbarp -> size * 0.4) {
+                if (scrollbarp -> type == TT_SCROLLBAR_TYPE_HORIZONTAL) {
+                    tt_globals.barAnchor = simulateMouseX - dragLeft;
+                } else if (scrollbarp -> type == TT_SCROLLBAR_TYPE_VERTICAL) {
+                    tt_globals.barAnchor = dragRight - simulateMouseX;
+                }
+            } else {
+                tt_globals.barAnchor = (scrollbarp -> length * scrollbarp -> barPercentage / 100) / 2;
+            }
+            scrollbarp -> status = TT_STATUS_CLICK_FIRST_TICK;
+        } else if (scrollbarp -> status == TT_STATUS_CLICK || scrollbarp -> status == TT_STATUS_CLICK_FIRST_TICK) {
+            /* slider is being held */
+            scrollbarp -> status = TT_STATUS_CLICK;
+        } else {
+            /* slider is blocked from interaction until mouse is unclicked */
+            scrollbarp -> status = TT_STATUS_BLOCKED;
+        }
+    } else {
+        if (scrollbarp -> status == TT_STATUS_CLICK || scrollbarp -> status == TT_STATUS_BLOCKED || scrollbarp -> status == TT_STATUS_CLICK_FIRST_TICK) {
+            /* first tick unclicked */
+            scrollbarp -> status = TT_STATUS_IDLE;
+            goto LABEL_SCROLLBAR_CHECK_HOVER; // done to avoid a single IDLE tick if mouse is hovering over slider when unclicked
+        }
+    }
+    if (scrollbarp -> status == TT_STATUS_CLICK || scrollbarp -> status == TT_STATUS_CLICK_FIRST_TICK) {
+        if (scrollbarp -> type == TT_SCROLLBAR_TYPE_HORIZONTAL) {
+            scrollbarp -> value = (simulateMouseX - scrollbarLeft - tt_globals.barAnchor) / (scrollbarp -> length * (1 - scrollbarp -> barPercentage / 100)) * 100;
+        } else if (scrollbarp -> type == TT_SCROLLBAR_TYPE_VERTICAL) {
+            scrollbarp -> value = (scrollbarRight - simulateMouseX - tt_globals.barAnchor) / (scrollbarp -> length * (1 - scrollbarp -> barPercentage / 100)) * 100;
+        }
+        if (scrollbarp -> value < 0) {
+            scrollbarp -> value = 0;
+        }
+        if (scrollbarp -> value > 100) {
+            scrollbarp -> value = 100;
+        }
+    }
+    if (scrollbarp -> status == TT_STATUS_HOVER || scrollbarp -> status == TT_STATUS_CLICK || scrollbarp -> status == TT_STATUS_HOVER_FIRST_TICK || scrollbarp -> status == TT_STATUS_CLICK_FIRST_TICK) {
+        tt_globals.elementLogicType = TT_ELEMENT_SCROLLBAR;
+        tt_globals.elementLogicIndex = tt_globals.elementLogicTemp;
+    }
+    LABEL_SCROLLBAR_END:
     if (scrollbarp -> variable != NULL) {
         *scrollbarp -> variable = scrollbarp -> value;
     }
@@ -64892,6 +65259,114 @@ void tt_contextUpdate(tt_context_t *contextp) {
     }
     if (contextp -> variable != NULL) {
         *contextp -> variable = contextp -> index;
+    }
+}
+
+void tt_readerUpdate(tt_reader_t *readerp) {
+    if (readerp -> element == TT_ELEMENT_LIST_READER) {
+        
+    } else if (readerp -> element == TT_ELEMENT_VARIABLE_READER) {
+        char readerString[256];
+        unitype variable = *(readerp -> variable);
+        unitype_sprint(readerString, variable, readerp -> type);
+        double innerWidth = turtleTextGetUnicodeLength(readerString, readerp -> size - 1) + readerp -> size;
+        if (innerWidth < readerp -> size * 4) {
+            innerWidth = readerp -> size * 4;
+        }
+        double readerWidth = turtleTextGetUnicodeLength(readerp -> label, readerp -> size - 1) + innerWidth + readerp -> size * 1.8;
+        double readerLeftX = readerp -> x;
+        double readerRightX = readerp -> x + readerWidth;
+        double readerY = readerp -> y;
+        double readerHeight = readerp -> size * 1.75;
+        /* rounded rectangle (base) */
+        tt_setColor(readerp -> color[TT_COLOR_SLOT_VARIABLE_READER_BASE]);
+        turtlePenSize(readerp -> size);
+        turtleGoto(readerLeftX + readerp -> size / 2, readerY - readerHeight / 2 + readerp -> size / 2);
+        turtlePenDown();
+        turtleGoto(readerRightX - readerp -> size / 2, readerY - readerHeight / 2 + readerp -> size / 2);
+        turtleGoto(readerRightX - readerp -> size / 2, readerY + readerHeight / 2 - readerp -> size / 2);
+        turtleGoto(readerLeftX + readerp -> size / 2, readerY + readerHeight / 2 - readerp -> size / 2);
+        turtleGoto(readerLeftX + readerp -> size / 2, readerY - readerHeight / 2 + readerp -> size / 2);
+        turtlePenUp();
+        turtleRectangle(readerLeftX + readerp -> size / 2, readerY - readerHeight / 2 + readerp -> size / 2, readerRightX - readerp -> size / 2,  readerY + readerHeight / 2 - readerp -> size / 2);
+        /* rounded rectangle (item) */
+        double readerInnerRightX = readerRightX - readerp -> size * 0.6;
+        double readerInnerLeftX = readerInnerRightX - innerWidth;
+        double readerInnerHeight = readerHeight * 0.8;
+        tt_setColor(readerp -> color[TT_COLOR_SLOT_VARIABLE_READER_ITEM]);
+        turtlePenSize(readerp -> size * 0.5);
+        turtleGoto(readerInnerLeftX + readerp -> size / 4, readerY - readerInnerHeight / 2 + readerp -> size / 4);
+        turtlePenDown();
+        turtleGoto(readerInnerRightX - readerp -> size / 4, readerY - readerInnerHeight / 2 + readerp -> size / 4);
+        turtleGoto(readerInnerRightX - readerp -> size / 4, readerY + readerInnerHeight / 2 - readerp -> size / 4);
+        turtleGoto(readerInnerLeftX + readerp -> size / 4, readerY + readerInnerHeight / 2 - readerp -> size / 4);
+        turtleGoto(readerInnerLeftX + readerp -> size / 4, readerY - readerInnerHeight / 2 + readerp -> size / 4);
+        turtlePenUp();
+        turtleRectangle(readerInnerLeftX + readerp -> size / 4, readerY - readerInnerHeight / 2 + readerp -> size / 4, readerInnerRightX - readerp -> size / 4, readerY + readerInnerHeight / 2 - readerp -> size / 4);
+        /* render text */
+        tt_setColor(readerp -> color[TT_COLOR_SLOT_VARIABLE_READER_TEXT]);
+        turtleTextWriteUnicode(readerp -> label, readerp -> x + readerp -> size * 0.6, readerp -> y, readerp -> size - 1, 0);
+        tt_setColor(readerp -> color[TT_COLOR_SLOT_VARIABLE_READER_TEXT_ITEM]);
+        turtleTextWriteUnicode(readerString, (readerInnerLeftX + readerInnerRightX) / 2, readerp -> y, readerp -> size - 1, 50);
+        /* mouse */
+        if (readerp -> enabled != TT_ELEMENT_ENABLED || tt_globals.elementLogicTypeOld > TT_ELEMENT_VARIABLE_READER || (tt_globals.elementLogicTypeOld == TT_ELEMENT_VARIABLE_READER && tt_globals.elementLogicIndexOld > tt_globals.elementLogicTemp)) {
+            /* reader not enabled or higher priority element is being interacted with */
+            if (readerp -> status == TT_STATUS_CLICK || readerp -> status == TT_STATUS_CLICK_FIRST_TICK) {
+                goto LABEL_VARIABLE_READER_CHECK_HOVER;
+            }
+            readerp -> status = TT_STATUS_IDLE;
+            return;
+        }
+        LABEL_VARIABLE_READER_CHECK_HOVER:
+        if (readerp -> status != TT_STATUS_CLICK && readerp -> status != TT_STATUS_BLOCKED && readerp -> status != TT_STATUS_CLICK_FIRST_TICK) {
+            if (turtle.mouseX > readerLeftX && turtle.mouseX < readerRightX && turtle.mouseY > readerY - readerHeight / 2 && turtle.mouseY < readerY + readerHeight / 2) {
+                if (readerp -> status == TT_STATUS_HOVER || readerp -> status == TT_STATUS_HOVER_FIRST_TICK) {
+                    /* hovering reader */
+                    readerp -> status = TT_STATUS_HOVER;
+                } else {
+                    /* first tick hover */
+                    readerp -> status = TT_STATUS_HOVER_FIRST_TICK;
+                }
+            } else {
+                readerp -> status = TT_STATUS_IDLE;
+            }
+        }
+        if (turtleMouseDown()) {
+            if (readerp -> status == TT_STATUS_HOVER || readerp -> status == TT_STATUS_HOVER_FIRST_TICK) {
+                /* first tick clicked */
+                readerp -> anchorX = readerp -> x;
+                readerp -> anchorY = readerp -> y;
+                readerp -> mouseAnchorX = turtle.mouseX;
+                readerp -> mouseAnchorY = turtle.mouseY;
+                int32_t index = list_find(tt_elements.readers, (unitype) (void *) readerp, 'p');
+                if (index != -1) {
+                    tt_elements.readers -> type[index] = 'l'; // switch to l to avoid free
+                    list_delete(tt_elements.readers, index);
+                    list_append(tt_elements.readers, (unitype) (void *) readerp, 'p');
+                }
+                readerp -> status = TT_STATUS_CLICK_FIRST_TICK;
+            } else if (readerp -> status == TT_STATUS_CLICK || readerp -> status == TT_STATUS_CLICK_FIRST_TICK) {
+                /* reader is being held */
+                readerp -> status = TT_STATUS_CLICK;
+            } else {
+                /* reader is blocked from interaction until mouse is unclicked */
+                readerp -> status = TT_STATUS_BLOCKED;
+            }
+        } else {
+            if (readerp -> status == TT_STATUS_CLICK || readerp -> status == TT_STATUS_BLOCKED || readerp -> status == TT_STATUS_CLICK_FIRST_TICK) {
+                /* first tick unclicked */
+                readerp -> status = TT_STATUS_IDLE;
+                goto LABEL_VARIABLE_READER_CHECK_HOVER; // done to avoid a single IDLE tick if mouse is hovering over reader when unclicked
+            }
+        }
+        if (readerp -> status == TT_STATUS_CLICK || readerp -> status == TT_STATUS_CLICK_FIRST_TICK) {
+            readerp -> x = readerp -> anchorX + turtle.mouseX - readerp -> mouseAnchorX;
+            readerp -> y = readerp -> anchorY + turtle.mouseY - readerp -> mouseAnchorY;
+        }
+        if (readerp -> status == TT_STATUS_HOVER || readerp -> status == TT_STATUS_CLICK || readerp -> status == TT_STATUS_HOVER_FIRST_TICK || readerp -> status == TT_STATUS_CLICK_FIRST_TICK) {
+            tt_globals.elementLogicType = TT_ELEMENT_VARIABLE_READER;
+            tt_globals.elementLogicIndex = tt_globals.elementLogicTemp;
+        }
     }
 }
 
@@ -64993,6 +65468,16 @@ void turtleToolsUpdateUI() {
                 continue;
             }
             tt_contextUpdate((tt_context_t *) (tt_elements.contexts -> data[i].p));
+            tt_globals.elementLogicTemp++;
+        }
+    }
+    if (tt_enabled.readerEnabled) {
+        tt_globals.elementLogicTemp = 0;
+        for (int32_t i = 0; i < tt_elements.readers -> length; i++) {
+            if (((tt_reader_t *) (tt_elements.readers -> data[i].p)) -> ignored == TT_ELEMENT_IGNORED) {
+                continue;
+            }
+            tt_readerUpdate((tt_reader_t *) (tt_elements.readers -> data[i].p));
             tt_globals.elementLogicTemp++;
         }
     }
