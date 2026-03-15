@@ -486,6 +486,7 @@ typedef struct {
     double size;
     char label[TT_LABEL_LENGTH_LIMIT];
     tt_status_t status;
+    int8_t mouseOver;
     int32_t count;
     tt_textbox_align_t align;
     double length;

@@ -333,7 +333,7 @@ int main(int argc, char *argv[]) {
         turtleTextWriteStringf(ySlider -> x + ySlider -> length / 2 + xSlider -> size, ySlider -> y, 4, 0, "%.01lf", round(y) / 10);
         turtleTextWriteString("Z", zSlider -> x - zSlider -> length / 2 - xSlider -> size, zSlider -> y, xSlider -> size - 1, 100);
         turtleTextWriteStringf(zSlider -> x + zSlider -> length / 2 + xSlider -> size, zSlider -> y, 4, 0, "%.01lf", round(z) / 10);
-        if (textbox -> status == TT_STATUS_HOVER || textbox -> status == TT_STATUS_HOVER_FIRST_TICK) {
+        if (textbox -> mouseOver) {
             osToolsSetCursor(GLFW_IBEAM_CURSOR);
         } else {
             osToolsSetCursor(GLFW_ARROW_CURSOR);

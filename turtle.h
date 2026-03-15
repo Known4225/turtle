@@ -47424,6 +47424,7 @@ typedef struct {
     double size;
     char label[TT_LABEL_LENGTH_LIMIT];
     tt_status_t status;
+    int8_t mouseOver;
     int32_t count;
     tt_textbox_align_t align;
     double length;
@@ -63605,6 +63606,7 @@ tt_textbox_t *tt_textboxInit(char *label, char *variable, int32_t maxCharacters,
     }
     tt_elementResetColor(textboxp);
     textboxp -> status = TT_STATUS_IDLE;
+    textboxp -> mouseOver = 0;
     textboxp -> count = 0;
     textboxp -> align = TT_TEXTBOX_ALIGN_LEFT;
     textboxp -> x = x;
@@ -64779,14 +64781,22 @@ void tt_textboxUpdate(tt_textbox_t *textboxp) {
         turtleRectangle(textboxp -> x + textboxp -> renderPixelOffset + textLength, textboxp -> y - textboxp -> size * 0.8, textboxp -> x + textboxp -> renderPixelOffset + textLength + 1, textboxp -> y + textboxp -> size * 0.8);
     }
     /* mouse */
+    if (turtle.mouseX > textboxp -> x && turtle.mouseX < textboxp -> x + textboxp -> length && turtle.mouseY > textboxp -> y - textboxp -> size && turtle.mouseY < textboxp -> y + textboxp -> size) {
+        textboxp -> mouseOver = 1;
+    } else {
+        textboxp -> mouseOver = 0;
+    }
     if (textboxp -> enabled != TT_ELEMENT_ENABLED || tt_globals.elementLogicTypeOld > TT_ELEMENT_TEXTBOX || (tt_globals.elementLogicTypeOld == TT_ELEMENT_TEXTBOX && tt_globals.elementLogicIndexOld > tt_globals.elementLogicTemp)) {
         /* textbox not enabled or higher priority element is being interacted with */
+        if (textboxp -> status == TT_STATUS_OPEN || textboxp -> status == TT_STATUS_OPEN_FIRST_TICK) {
+            goto LABEL_TEXTBOX_CHECK_HOVER;
+        }
         textboxp -> status = TT_STATUS_IDLE;
         return;
     }
     LABEL_TEXTBOX_CHECK_HOVER:
     if (textboxp -> status != TT_STATUS_OPEN && textboxp -> status != TT_STATUS_CLICK && textboxp -> status != TT_STATUS_BLOCKED && textboxp -> status != TT_STATUS_OPEN_FIRST_TICK && textboxp -> status != TT_STATUS_CLICK_FIRST_TICK) {
-        if (turtle.mouseX > textboxp -> x && turtle.mouseX < textboxp -> x + textboxp -> length && turtle.mouseY > textboxp -> y - textboxp -> size && turtle.mouseY < textboxp -> y + textboxp -> size) {
+        if (textboxp -> mouseOver) {
             if (textboxp -> status == TT_STATUS_HOVER || textboxp -> status == TT_STATUS_HOVER_FIRST_TICK) {
                 /* hovering textbox */
                 textboxp -> status = TT_STATUS_HOVER;
@@ -64807,6 +64817,9 @@ void tt_textboxUpdate(tt_textbox_t *textboxp) {
         } else if (textboxp -> status == TT_STATUS_CLICK || textboxp -> status == TT_STATUS_CLICK_FIRST_TICK) {
             /* textbox is being held */
             textboxp -> status = TT_STATUS_CLICK;
+        } else if (textboxp -> mouseOver && (textboxp -> status == TT_STATUS_OPEN || textboxp -> status == TT_STATUS_OPEN_FIRST_TICK)) {
+            /* textbox is open (affirm) */
+            textboxp -> status = TT_STATUS_OPEN;
         } else {
             /* textbox is blocked from interaction until mouse is unclicked */
             textboxp -> status = TT_STATUS_BLOCKED;
