@@ -223,13 +223,13 @@ void addVertex(double x, double y, double r, double g, double b, double a, doubl
 void turtleTextureRenderInternal(int32_t textureCode, double x1, double y1, double x2, double y2, double r, double g, double b, double rot, double xcenter, double ycenter, double xfact, double yfact);
 #endif /* TURTLE_ENABLE_TEXTURES */
 
-/* set pixel width and height of textures (determines how blurry pictures are, default 1024, 1024) - must be done BEFORE turtleInit() */
+/* set pixel width and height of textures (determines how much memory textures take in the GPU, default 1024, 1024) - must be done BEFORE turtleInit() */
 void turtleSetTextureSize(int32_t width, int32_t height);
 
 /* set maximum number of textures (default 64) - must be done BEFORE turtleInit() */
 void turtleSetMaxTextures(int32_t maxTextures);
 
-/* set resize mode of turtle (default TURTLE_RESIZE_MODE_PAD) - must be done BEFORE turtleInit() */
+/* set resize mode of turtle (TURTLE_RESIZE_MODE_PAD, TURTLE_RESIZE_MODE_STRETCH, or TURTLE_RESIZE_MODE_PAD_NO_BARS) (default TURTLE_RESIZE_MODE_PAD) - must be done BEFORE turtleInit() */
 void turtleSetResizeMode(turtle_resize_mode_t resizeMode);
 
 /* load a png, jpg, or bmp to GPU memory as a texture */

@@ -345,19 +345,19 @@ void mouseSense(GLFWwindow *window, int32_t button, int32_t action, int32_t mods
         switch(button) {
         case GLFW_MOUSE_BUTTON_LEFT:
             list_append(turtle.keyPressed, (unitype) "m1", 's');
-            if (turtle.mouseX > turtle.initbounds[0] && turtle.mouseX < turtle.initbounds[2] && turtle.mouseY > turtle.initbounds[1] && turtle.mouseY < turtle.initbounds[3]) {
+            if ((turtle.mouseX > turtle.initbounds[0] && turtle.mouseX < turtle.initbounds[2] && turtle.mouseY > turtle.initbounds[1] && turtle.mouseY < turtle.initbounds[3]) || turtle.resizeMode == TURTLE_RESIZE_MODE_PAD_NO_BARS) {
                 turtle.mousePressed[0] = 1;
             }
         break;
         case GLFW_MOUSE_BUTTON_RIGHT:
             list_append(turtle.keyPressed, (unitype) "m2", 's');
-            if (turtle.mouseX > turtle.initbounds[0] && turtle.mouseX < turtle.initbounds[2] && turtle.mouseY > turtle.initbounds[1] && turtle.mouseY < turtle.initbounds[3]) {
+            if ((turtle.mouseX > turtle.initbounds[0] && turtle.mouseX < turtle.initbounds[2] && turtle.mouseY > turtle.initbounds[1] && turtle.mouseY < turtle.initbounds[3]) || turtle.resizeMode == TURTLE_RESIZE_MODE_PAD_NO_BARS) {
                 turtle.mousePressed[1] = 1;
             }
         break;
         case GLFW_MOUSE_BUTTON_MIDDLE:
             list_append(turtle.keyPressed, (unitype) "m3", 's');
-            if (turtle.mouseX > turtle.initbounds[0] && turtle.mouseX < turtle.initbounds[2] && turtle.mouseY > turtle.initbounds[1] && turtle.mouseY < turtle.initbounds[3]) {
+            if ((turtle.mouseX > turtle.initbounds[0] && turtle.mouseX < turtle.initbounds[2] && turtle.mouseY > turtle.initbounds[1] && turtle.mouseY < turtle.initbounds[3]) || turtle.resizeMode == TURTLE_RESIZE_MODE_PAD_NO_BARS) {
                 turtle.mousePressed[2] = 1;
             }
         break;
