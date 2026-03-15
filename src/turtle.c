@@ -74,7 +74,7 @@ static EM_BOOL turtleBrowserWindowResize(int eventType, const EmscriptenUiEvent 
 #endif /* OS_BROWSER */
 
 /* special function that can be called prior to turtleInit - this function condenses the window creation code boilerplate */
-GLFWwindow *turtleCreateWindow(char *windowName) {
+GLFWwindow *turtleCreateWindow(int32_t windowWidth, int32_t windowHeight, char *windowName) {
     /* Initialise glfw */
     if (!glfwInit()) {
         return NULL;
@@ -84,7 +84,7 @@ GLFWwindow *turtleCreateWindow(char *windowName) {
     #ifndef OS_BROWSER
     /* Create a windowed mode window and its OpenGL context */
     const GLFWvidmode *monitorSize = glfwGetVideoMode(glfwGetPrimaryMonitor());
-    int32_t windowHeight = monitorSize -> height;
+    int32_t totalHeight = monitorSize -> height;
     double optimizedScalingFactor = 0.8; // Set this number to 1 on windows and 0.8 on Ubuntu for maximum compatibility (fixes issue with incorrect stretching)
     #ifdef OS_WINDOWS
     optimizedScalingFactor = 1;
@@ -92,9 +92,33 @@ GLFWwindow *turtleCreateWindow(char *windowName) {
     #ifdef OS_LINUX
     optimizedScalingFactor = 0.8;
     #endif
-    GLFWwindow *window = glfwCreateWindow(windowHeight * 16 / 9 * optimizedScalingFactor, windowHeight * optimizedScalingFactor, windowName, NULL, NULL);
+    if (windowWidth == TURTLE_WINDOW_DEFAULT_WIDTH) {
+        windowWidth = totalHeight * 16.0 / 9.0 * optimizedScalingFactor;
+    }
+    if (windowWidth == TURTLE_WINDOW_MONITOR_WIDTH) {
+        windowWidth = totalHeight * 16.0 / 9.0;
+    }
+    if (windowHeight == TURTLE_WINDOW_DEFAULT_HEIGHT) {
+        windowHeight = totalHeight;
+    }
+    if (windowHeight == TURTLE_WINDOW_MONITOR_HEIGHT) {
+        windowHeight = totalHeight * optimizedScalingFactor;
+    }
+    GLFWwindow *window = glfwCreateWindow(windowWidth, windowHeight, windowName, NULL, NULL);
     #else
-    GLFWwindow *window = glfwCreateWindow(1920, 1080, windowName, NULL, NULL);
+    if (windowWidth == TURTLE_WINDOW_DEFAULT_WIDTH) {
+        windowWidth = 3840;
+    }
+    if (windowWidth == TURTLE_WINDOW_MONITOR_WIDTH) {
+        windowWidth = 3840;
+    }
+    if (windowHeight == TURTLE_WINDOW_DEFAULT_HEIGHT) {
+        windowHeight = 2160;
+    }
+    if (windowHeight == TURTLE_WINDOW_MONITOR_HEIGHT) {
+        windowHeight = 2160;
+    }
+    GLFWwindow *window = glfwCreateWindow(windowWidth, windowHeight, windowName, NULL, NULL);
     #endif /* OS_BROWSER */
     if (!window) {
         glfwTerminate();
@@ -104,15 +128,15 @@ GLFWwindow *turtleCreateWindow(char *windowName) {
     #ifdef OS_BROWSER
     emscripten_set_resize_callback(EMSCRIPTEN_EVENT_TARGET_WINDOW, glfwGetCurrentContext(), false, turtleBrowserWindowResize);
     #else
-    glfwSetWindowSizeLimits(window, windowHeight * 16 / 9 * 0.4, windowHeight * 0.4, windowHeight * 16 / 9 * optimizedScalingFactor, windowHeight * optimizedScalingFactor);
+    glfwSetWindowSizeLimits(window, totalHeight * 16 / 9 * 0.4, totalHeight * 0.4, totalHeight * 16 / 9 * optimizedScalingFactor, totalHeight * optimizedScalingFactor);
     #endif /* OS_BROWSER */
     return window;
 }
 
 #ifdef TURTLE_ENABLE_TEXTURES
 /* special function that can be called prior to turtleInit - this function condenses the window creation code with icon boilerplate */
-GLFWwindow *turtleCreateWindowIcon(char *windowName, char *filename) {
-    GLFWwindow *window = turtleCreateWindow(windowName);
+GLFWwindow *turtleCreateWindowIcon(int32_t windowWidth, int32_t windowHeight, char *windowName, char *filename) {
+    GLFWwindow *window = turtleCreateWindow(windowWidth, windowHeight, windowName);
     /* initialise logo */
     GLFWimage icon;
     int32_t iconChannels;
@@ -272,7 +296,7 @@ void turtleInit(GLFWwindow *window, double leftX, double bottomY, double rightX,
     #ifdef OS_WINDOWS
     glfwSetWindowPos(window, 0, 31);
     #endif
-    glfwSetWindowSize(window, turtle.screenbounds[1] * 16 / 9 * 0.865, turtle.screenbounds[1] * 0.85); // doing it this way ensures the window spawns in the top left of the monitor and fixes resizing limits
+    glfwSetWindowSize(window, turtle.screenbounds[1] * turtle.aspect * 0.85, turtle.screenbounds[1] * 0.85); // doing it this way ensures the window spawns in the top left of the monitor and fixes resizing limits
     #ifdef OS_BROWSER
     turtleBrowserWindowResize(0, NULL, NULL);
     #endif
@@ -291,6 +315,7 @@ void turtleSetWorldCoordinates(double leftX, double bottomY, double rightX, doub
     turtle.initbounds[1] = bottomY;
     turtle.initbounds[2] = rightX;
     turtle.initbounds[3] = topY;
+    turtle.aspect = (double) turtle.initscreenbounds[0] / turtle.initscreenbounds[1];
     memcpy(turtle.bounds, turtle.initbounds, 4 * sizeof(double));
 }
 
@@ -408,7 +433,7 @@ void turtleGetMouseCoordinates() {
     if (turtle.resizeMode == TURTLE_RESIZE_MODE_STRETCH) {
         turtle.mouseX = (turtle.mouseAbsX - turtle.screenbounds[0] / 2) / turtle.screenbounds[0] * (turtle.initbounds[2] - turtle.initbounds[0]) + (turtle.bounds[0] + turtle.bounds[2]) / 2;
         turtle.mouseY = (turtle.mouseAbsY - turtle.screenbounds[1] / 2) / turtle.screenbounds[1] * (turtle.initbounds[1] - turtle.initbounds[3]) + (turtle.bounds[1] + turtle.bounds[3]) / 2;
-    } else {
+    } else if (turtle.resizeMode == TURTLE_RESIZE_MODE_PAD || turtle.resizeMode == TURTLE_RESIZE_MODE_PAD_NO_BARS) {
         double originalAspect = (double) turtle.initscreenbounds[0] / turtle.initscreenbounds[1];
         double currentAspect = (double) turtle.screenbounds[0] / turtle.screenbounds[1];
         if (currentAspect > originalAspect) {
@@ -1313,8 +1338,7 @@ void turtleUpdate() {
         turtle.bounds[2] = turtle.centerAndScale[0] + turtle.centerAndScale[2] / turtle.screenbounds[0];
         turtle.bounds[1] = turtle.centerAndScale[1] - turtle.centerAndScale[3] / turtle.screenbounds[1];
         turtle.bounds[3] = turtle.centerAndScale[1] + turtle.centerAndScale[3] / turtle.screenbounds[1];
-        
-    } else {
+    } else if (turtle.resizeMode == TURTLE_RESIZE_MODE_PAD || turtle.resizeMode == TURTLE_RESIZE_MODE_PAD_NO_BARS) {
         double originalAspect = (double) turtle.initscreenbounds[0] / turtle.initscreenbounds[1];
         double currentAspect = (double) turtle.screenbounds[0] / turtle.screenbounds[1];
         if (currentAspect > originalAspect) {
@@ -1440,7 +1464,7 @@ void turtleUpdate() {
                 // }
             }
         }
-        if (turtle.resizeMode != TURTLE_RESIZE_MODE_STRETCH) {
+        if (turtle.resizeMode == TURTLE_RESIZE_MODE_PAD) {
             /* pad sides of window with black bars */
             double originalAspect = (double) turtle.initscreenbounds[0] / turtle.initscreenbounds[1];
             double currentAspect = (double) turtle.screenbounds[0] / turtle.screenbounds[1];
