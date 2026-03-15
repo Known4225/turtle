@@ -94,7 +94,7 @@ void parsePopupOutput(GLFWwindow *window) {
 
 int main(int argc, char *argv[]) {
     /* create window */
-    GLFWwindow *window = turtleCreateWindowIcon("turtle demo", "images/thumbnail.png");
+    GLFWwindow *window = turtleCreateWindowIcon(TURTLE_WINDOW_DEFAULT_WIDTH, TURTLE_WINDOW_DEFAULT_HEIGHT, "turtle demo", "images/thumbnail.png");
     if (window == NULL) {
         return -1; // failed to create window
     }
