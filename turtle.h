@@ -63330,7 +63330,7 @@ void tt_popupUpdate() {
                         if (tt_popup.output[0] == 0) {
                             tt_popup.output[1] = i;
                         }
-                        tt_globals.elementLogicType = TT_ELEMENT_NONE;
+                        // tt_globals.elementLogicType = TT_ELEMENT_NONE;
                     }
                 } else {
                     if (tt_popup.mouseDown == 1) {
@@ -63338,7 +63338,7 @@ void tt_popupUpdate() {
                         if (tt_popup.output[1] == i) {
                             tt_popup.output[0] = 1;
                         }
-                        tt_globals.elementLogicType = TT_ELEMENT_NONE;
+                        // tt_globals.elementLogicType = TT_ELEMENT_NONE;
                     }
                 }
             } else {
@@ -63353,7 +63353,7 @@ void tt_popupUpdate() {
             tt_popup.mouseDown = 0;
             tt_popup.output[0] = 0;
             tt_popup.output[1] = -1;
-            tt_globals.elementLogicType = TT_ELEMENT_NONE;
+            // tt_globals.elementLogicType = TT_ELEMENT_NONE;
         }
     }
 }
