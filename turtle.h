@@ -47498,7 +47498,7 @@ typedef struct {
     double y;
     double size;
     double *variable; // bound variable (can be NULL)
-    int32_t status;
+    tt_status_t status;
     tt_scrollbar_type_t type;
     double length;
     double barPercentage; // percentage of scrollbar occupied by bar
@@ -47525,7 +47525,7 @@ typedef struct {
     double size;
     int32_t *variable; // bound variable (can be NULL)
     list_t *options;
-    int32_t status;
+    tt_status_t status;
     tt_context_direction_t direction;
     double autoLowerBound;
     double autoRightBound;
@@ -47546,7 +47546,7 @@ typedef struct {
     double size;
     unitype *variable;
     char label[TT_LABEL_LENGTH_LIMIT];
-    int32_t status;
+    tt_status_t status;
     char type;
     double anchorX;
     double anchorY;
@@ -62713,7 +62713,7 @@ void generateDefaultFont(list_t *generatedFont) {
 https://patorjk.com/software/taag/#p=display&f=ANSI%20Shadow
 
 turtleTools library includes:
-ribbon: customisable top bar
+ribbon
 popup
 button
 switch
@@ -62723,6 +62723,7 @@ scrollbar
 dropdown
 textbox
 context
+reader
 
 TODO:
 using the tab key to select different elements? And allowing them to be changed with the keyboard??
@@ -64683,6 +64684,7 @@ int32_t tt_textboxCalculateMaximumCharacters(uint32_t *charlist, int32_t textLen
 void tt_textboxUpdate(tt_textbox_t *textboxp) {
     if (textboxp -> enabled == TT_ELEMENT_HIDE) {
         textboxp -> status = TT_STATUS_IDLE;
+        textboxp -> mouseOver = 0;
         return;
     }
     /* handle keys */
@@ -64792,6 +64794,7 @@ void tt_textboxUpdate(tt_textbox_t *textboxp) {
             goto LABEL_TEXTBOX_CHECK_HOVER;
         }
         textboxp -> status = TT_STATUS_IDLE;
+        textboxp -> mouseOver = 0;
         return;
     }
     LABEL_TEXTBOX_CHECK_HOVER:
@@ -64840,35 +64843,6 @@ void tt_textboxUpdate(tt_textbox_t *textboxp) {
         tt_globals.elementLogicType = TT_ELEMENT_TEXTBOX;
         tt_globals.elementLogicIndex = tt_globals.elementLogicTemp;
     }
-
-    // if (turtle.mouseX > textboxp -> x && turtle.mouseX < textboxp -> x + textboxp -> length && turtle.mouseY > textboxp -> y - textboxp -> size && turtle.mouseY < textboxp -> y + textboxp -> size) {
-    //     textboxp -> mouseOver = 1;
-    // } else {
-    //     textboxp -> mouseOver = 0;
-    // }
-    // if (turtleMouseDown()) {
-    //     if (textboxp -> status < 0) {
-    //         textboxp -> editIndex = strlen(textboxp -> text);
-    //         textboxp -> status *= -1;
-    //     }
-    //     if (textboxp -> status > 1 && (turtle.mouseX < textboxp -> x || turtle.mouseX > textboxp -> x + textboxp -> length || turtle.mouseY < textboxp -> y - textboxp -> size || turtle.mouseY > textboxp -> y + textboxp -> size)) {
-    //         textboxp -> status = 0;
-    //     }
-    // } else {
-    //     if (textboxp -> status == 1) {
-    //         textboxp -> status = 2;
-    //         tt_globals.elementLogicType = TT_ELEMENT_HIGHEST;
-    //         tt_globals.elementLogicIndex = TT_ELEMENT_TEXTBOX; // subverting expectations
-    //     } else if (textboxp -> status < 2) {
-    //         if (textboxp -> mouseOver) {
-    //             textboxp -> status = -1;
-    //             tt_globals.elementLogicType = TT_ELEMENT_TEXTBOX;
-    //             tt_globals.elementLogicIndex = tt_globals.elementLogicTemp;
-    //         } else {
-    //             textboxp -> status = 0;
-    //         }
-    //     }
-    // }
 }
 
 void tt_dropdownUpdate(tt_dropdown_t *dropdownp) {
@@ -65112,13 +65086,17 @@ void tt_scrollbarUpdate(tt_scrollbar_t *scrollbarp) {
         scrollbarp -> value = *scrollbarp -> variable;
     }
     if (scrollbarp -> enabled == TT_ELEMENT_HIDE) {
+        scrollbarp -> status = TT_STATUS_IDLE;
         return;
     }
+    double simulateMouseX = turtle.mouseX;
+    double simulateMouseY = turtle.mouseY;
+    double scrollbarLeft = scrollbarp -> x - scrollbarp -> length / 2;
+    double scrollbarRight = scrollbarp -> x + scrollbarp -> length / 2;
+    double scrollbarY = scrollbarp -> y;
+    double dragLeft = scrollbarLeft + scrollbarp -> value / 100 * (scrollbarp -> length * (1 - scrollbarp -> barPercentage / 100));
+    double dragRight = dragLeft + (scrollbarp -> length * scrollbarp -> barPercentage / 100);
     if (scrollbarp -> type == TT_SCROLLBAR_TYPE_HORIZONTAL) {
-        double scrollbarLeft = scrollbarp -> x - scrollbarp -> length / 2;
-        double scrollbarRight = scrollbarp -> x + scrollbarp -> length / 2;
-        double dragLeft = scrollbarLeft + scrollbarp -> value / 100 * (scrollbarp -> length * (1 - scrollbarp -> barPercentage / 100));
-        double dragRight = dragLeft + (scrollbarp -> length * scrollbarp -> barPercentage / 100);
         turtlePenSize(scrollbarp -> size * 1);
         tt_setColor(scrollbarp -> color[TT_COLOR_SLOT_SCROLLBAR_BASE]);
         turtleGoto(scrollbarLeft, scrollbarp -> y);
@@ -65126,9 +65104,9 @@ void tt_scrollbarUpdate(tt_scrollbar_t *scrollbarp) {
         turtleGoto(scrollbarRight, scrollbarp -> y);
         turtlePenUp();
         turtlePenSize(scrollbarp -> size * 0.8);
-        if (scrollbarp -> status == -1 && turtle.mouseX > dragLeft - scrollbarp -> size * 0.4 && turtle.mouseX < dragRight + scrollbarp -> size * 0.4) {
+        if ((scrollbarp -> status == TT_STATUS_HOVER || scrollbarp -> status == TT_STATUS_HOVER_FIRST_TICK) && turtle.mouseX > dragLeft - scrollbarp -> size * 0.4 && turtle.mouseX < dragRight + scrollbarp -> size * 0.4) {
             tt_setColor(scrollbarp -> color[TT_COLOR_SLOT_SCROLLBAR_HOVER]);
-        } else if (scrollbarp -> status > 0) {
+        } else if (scrollbarp -> status == TT_STATUS_CLICK || scrollbarp -> status == TT_STATUS_CLICK_FIRST_TICK) {
             tt_setColor(scrollbarp -> color[TT_COLOR_SLOT_SCROLLBAR_CLICKED]);
         } else {
             tt_setColor(scrollbarp -> color[TT_COLOR_SLOT_SCROLLBAR_BAR]);
@@ -65137,108 +65115,98 @@ void tt_scrollbarUpdate(tt_scrollbar_t *scrollbarp) {
         turtlePenDown();
         turtleGoto(dragRight, scrollbarp -> y);
         turtlePenUp();
-        /* mouse */
-        if (scrollbarp -> enabled == TT_ELEMENT_ENABLED && (tt_globals.elementLogicTypeOld < TT_ELEMENT_SCROLLBAR || (tt_globals.elementLogicTypeOld == TT_ELEMENT_SCROLLBAR && tt_globals.elementLogicIndexOld <= (int32_t) tt_globals.elementLogicTemp) || scrollbarp -> status > 0)) {
-            if (scrollbarp -> status == 2) {
-                tt_globals.barAnchor = turtle.mouseX - dragLeft;
-                scrollbarp -> status = 1;
-            }
-            if (turtleMouseDown()) {
-                if (scrollbarp -> status < 0) {
-                    if (turtle.mouseX > dragLeft - scrollbarp -> size * 0.4 && turtle.mouseX < dragRight + scrollbarp -> size * 0.4) {
-                        tt_globals.barAnchor = turtle.mouseX - dragLeft;
-                    } else {
-                        tt_globals.barAnchor = (scrollbarp -> length * scrollbarp -> barPercentage / 100) / 2;
-                        scrollbarp -> status = -2;
-                    }
-                    scrollbarp -> status *= -1;
-                    tt_globals.elementLogicType = TT_ELEMENT_HIGHEST;
-                    tt_globals.elementLogicIndex = TT_ELEMENT_SCROLLBAR; // subverting expectations
-                }
-            } else {
-                if (turtle.mouseY > scrollbarp -> y - scrollbarp -> size * 0.5 && turtle.mouseY < scrollbarp -> y + scrollbarp -> size * 0.5 && turtle.mouseX < scrollbarRight + scrollbarp -> size * 0.5 && turtle.mouseX > scrollbarLeft - scrollbarp -> size * 0.5) {
-                    scrollbarp -> status = -1;
-                    tt_globals.elementLogicType = TT_ELEMENT_SCROLLBAR;
-                    tt_globals.elementLogicIndex = tt_globals.elementLogicTemp;
-                } else {
-                    scrollbarp -> status = 0;
-                }
-            }
-            if (scrollbarp -> status > 0) {
-                scrollbarp -> value = (turtle.mouseX - scrollbarLeft - tt_globals.barAnchor) / (scrollbarp -> length * (1 - scrollbarp -> barPercentage / 100)) * 100;
-                if (scrollbarp -> value < 0) {
-                    scrollbarp -> value = 0;
-                }
-                if (scrollbarp -> value > 100) {
-                    scrollbarp -> value = 100;
-                }
-            }
-        } else {
-            scrollbarp -> status = 0;
-        }
     } else if (scrollbarp -> type == TT_SCROLLBAR_TYPE_VERTICAL) {
-        double scrollbarTop = scrollbarp -> y + scrollbarp -> length / 2;
-        double scrollbarBottom = scrollbarp -> y - scrollbarp -> length / 2;
-        double dragTop = scrollbarTop - scrollbarp -> value / 100 * (scrollbarp -> length * (1 - scrollbarp -> barPercentage / 100));
-        double dragBottom = dragTop - (scrollbarp -> length * scrollbarp -> barPercentage / 100);
+        simulateMouseX = turtle.mouseY;
+        simulateMouseY = turtle.mouseX;
+        scrollbarLeft = scrollbarp -> y - scrollbarp -> length / 2;
+        scrollbarRight = scrollbarp -> y + scrollbarp -> length / 2;
+        scrollbarY = scrollbarp -> x;
+        dragRight = scrollbarRight - scrollbarp -> value / 100 * (scrollbarp -> length * (1 - scrollbarp -> barPercentage / 100));
+        dragLeft = dragRight - (scrollbarp -> length * scrollbarp -> barPercentage / 100);
         turtlePenSize(scrollbarp -> size * 1);
         tt_setColor(scrollbarp -> color[TT_COLOR_SLOT_SCROLLBAR_BASE]);
-        turtleGoto(scrollbarp -> x, scrollbarTop);
+        turtleGoto(scrollbarp -> x, scrollbarLeft);
         turtlePenDown();
-        turtleGoto(scrollbarp -> x, scrollbarBottom);
+        turtleGoto(scrollbarp -> x, scrollbarRight);
         turtlePenUp();
         turtlePenSize(scrollbarp -> size * 0.8);
-        if (scrollbarp -> status == -1 && turtle.mouseY > dragBottom - scrollbarp -> size * 0.4 && turtle.mouseY < dragTop + scrollbarp -> size * 0.4) {
+        if ((scrollbarp -> status == TT_STATUS_HOVER || scrollbarp -> status == TT_STATUS_HOVER_FIRST_TICK) && turtle.mouseY > dragLeft - scrollbarp -> size * 0.4 && turtle.mouseY < dragRight + scrollbarp -> size * 0.4) {
             tt_setColor(scrollbarp -> color[TT_COLOR_SLOT_SCROLLBAR_HOVER]);
-        } else if (scrollbarp -> status > 0) {
+        } else if (scrollbarp -> status == TT_STATUS_CLICK || scrollbarp -> status == TT_STATUS_CLICK_FIRST_TICK) {
             tt_setColor(scrollbarp -> color[TT_COLOR_SLOT_SCROLLBAR_CLICKED]);
         } else {
             tt_setColor(scrollbarp -> color[TT_COLOR_SLOT_SCROLLBAR_BAR]);
         }
-        turtleGoto(scrollbarp -> x, dragTop);
+        turtleGoto(scrollbarp -> x, dragLeft);
         turtlePenDown();
-        turtleGoto(scrollbarp -> x, dragBottom);
+        turtleGoto(scrollbarp -> x, dragRight);
         turtlePenUp();
-        /* mouse */
-        if (scrollbarp -> enabled == TT_ELEMENT_ENABLED && (tt_globals.elementLogicTypeOld < TT_ELEMENT_SCROLLBAR || (tt_globals.elementLogicTypeOld == TT_ELEMENT_SCROLLBAR && tt_globals.elementLogicIndexOld <= (int32_t) tt_globals.elementLogicTemp) || scrollbarp -> status > 0)) {
-            if (scrollbarp -> status == 2) {
-                tt_globals.barAnchor = dragTop - turtle.mouseY;
-                scrollbarp -> status = 1;
-            }
-            if (turtleMouseDown()) {
-                if (scrollbarp -> status < 0) {
-                    if (turtle.mouseY > dragBottom - scrollbarp -> size * 0.4 && turtle.mouseY < dragTop + scrollbarp -> size * 0.4) {
-                        tt_globals.barAnchor = dragTop - turtle.mouseY;
-                    } else {
-                        tt_globals.barAnchor = (scrollbarp -> length * scrollbarp -> barPercentage / 100) / 2;
-                        scrollbarp -> status = -2;
-                    }
-                    scrollbarp -> status *= -1;
-                    tt_globals.elementLogicType = TT_ELEMENT_HIGHEST;
-                    tt_globals.elementLogicIndex = TT_ELEMENT_SCROLLBAR; // subverting expectations
-                }
+    }
+    /* mouse */
+    if (scrollbarp -> enabled != TT_ELEMENT_ENABLED || tt_globals.elementLogicTypeOld > TT_ELEMENT_SCROLLBAR || (tt_globals.elementLogicTypeOld == TT_ELEMENT_SCROLLBAR && tt_globals.elementLogicIndexOld > tt_globals.elementLogicTemp)) {
+        /* slider not enabled or higher priority element is being interacted with */
+        scrollbarp -> status = TT_STATUS_IDLE;
+        goto LABEL_SCROLLBAR_END;
+    }
+    LABEL_SCROLLBAR_CHECK_HOVER:
+    if (scrollbarp -> status != TT_STATUS_CLICK && scrollbarp -> status != TT_STATUS_BLOCKED && scrollbarp -> status != TT_STATUS_CLICK_FIRST_TICK) {
+        if (simulateMouseY > scrollbarY - scrollbarp -> size * 0.5 && simulateMouseY < scrollbarY + scrollbarp -> size * 0.5 && simulateMouseX < scrollbarRight + scrollbarp -> size * 0.5 && simulateMouseX > scrollbarLeft - scrollbarp -> size * 0.5) {
+            if (scrollbarp -> status == TT_STATUS_HOVER || scrollbarp -> status == TT_STATUS_HOVER_FIRST_TICK) {
+                /* hovering slider */
+                scrollbarp -> status = TT_STATUS_HOVER;
             } else {
-                if (turtle.mouseX > scrollbarp -> x - scrollbarp -> size * 0.5 && turtle.mouseX < scrollbarp -> x + scrollbarp -> size * 0.5 && turtle.mouseY > scrollbarBottom - scrollbarp -> size * 0.5 && turtle.mouseY < scrollbarTop + scrollbarp -> size * 0.5) {
-                    scrollbarp -> status = -1;
-                    tt_globals.elementLogicType = TT_ELEMENT_SCROLLBAR;
-                    tt_globals.elementLogicIndex = tt_globals.elementLogicTemp;
-                } else {
-                    scrollbarp -> status = 0;
-                }
-            }
-            if (scrollbarp -> status > 0) {
-                scrollbarp -> value = (scrollbarTop - turtle.mouseY - tt_globals.barAnchor) / (scrollbarp -> length * (1 - scrollbarp -> barPercentage / 100)) * 100;
-                if (scrollbarp -> value < 0) {
-                    scrollbarp -> value = 0;
-                }
-                if (scrollbarp -> value > 100) {
-                    scrollbarp -> value = 100;
-                }
+                /* first tick hover */
+                scrollbarp -> status = TT_STATUS_HOVER_FIRST_TICK;
             }
         } else {
-            scrollbarp -> status = 0;
+            scrollbarp -> status = TT_STATUS_IDLE;
         }
     }
+    if (turtleMouseDown()) {
+        if (scrollbarp -> status == TT_STATUS_HOVER || scrollbarp -> status == TT_STATUS_HOVER_FIRST_TICK) {
+            /* first tick clicked */
+            if (simulateMouseX > dragLeft - scrollbarp -> size * 0.4 && simulateMouseX < dragRight + scrollbarp -> size * 0.4) {
+                if (scrollbarp -> type == TT_SCROLLBAR_TYPE_HORIZONTAL) {
+                    tt_globals.barAnchor = simulateMouseX - dragLeft;
+                } else if (scrollbarp -> type == TT_SCROLLBAR_TYPE_VERTICAL) {
+                    tt_globals.barAnchor = dragRight - simulateMouseX;
+                }
+            } else {
+                tt_globals.barAnchor = (scrollbarp -> length * scrollbarp -> barPercentage / 100) / 2;
+            }
+            scrollbarp -> status = TT_STATUS_CLICK_FIRST_TICK;
+        } else if (scrollbarp -> status == TT_STATUS_CLICK || scrollbarp -> status == TT_STATUS_CLICK_FIRST_TICK) {
+            /* slider is being held */
+            scrollbarp -> status = TT_STATUS_CLICK;
+        } else {
+            /* slider is blocked from interaction until mouse is unclicked */
+            scrollbarp -> status = TT_STATUS_BLOCKED;
+        }
+    } else {
+        if (scrollbarp -> status == TT_STATUS_CLICK || scrollbarp -> status == TT_STATUS_BLOCKED || scrollbarp -> status == TT_STATUS_CLICK_FIRST_TICK) {
+            /* first tick unclicked */
+            scrollbarp -> status = TT_STATUS_IDLE;
+            goto LABEL_SCROLLBAR_CHECK_HOVER; // done to avoid a single IDLE tick if mouse is hovering over slider when unclicked
+        }
+    }
+    if (scrollbarp -> status == TT_STATUS_CLICK || scrollbarp -> status == TT_STATUS_CLICK_FIRST_TICK) {
+        if (scrollbarp -> type == TT_SCROLLBAR_TYPE_HORIZONTAL) {
+            scrollbarp -> value = (simulateMouseX - scrollbarLeft - tt_globals.barAnchor) / (scrollbarp -> length * (1 - scrollbarp -> barPercentage / 100)) * 100;
+        } else if (scrollbarp -> type == TT_SCROLLBAR_TYPE_VERTICAL) {
+            scrollbarp -> value = (scrollbarRight - simulateMouseX - tt_globals.barAnchor) / (scrollbarp -> length * (1 - scrollbarp -> barPercentage / 100)) * 100;
+        }
+        if (scrollbarp -> value < 0) {
+            scrollbarp -> value = 0;
+        }
+        if (scrollbarp -> value > 100) {
+            scrollbarp -> value = 100;
+        }
+    }
+    if (scrollbarp -> status == TT_STATUS_HOVER || scrollbarp -> status == TT_STATUS_CLICK || scrollbarp -> status == TT_STATUS_HOVER_FIRST_TICK || scrollbarp -> status == TT_STATUS_CLICK_FIRST_TICK) {
+        tt_globals.elementLogicType = TT_ELEMENT_SCROLLBAR;
+        tt_globals.elementLogicIndex = tt_globals.elementLogicTemp;
+    }
+    LABEL_SCROLLBAR_END:
     if (scrollbarp -> variable != NULL) {
         *scrollbarp -> variable = scrollbarp -> value;
     }

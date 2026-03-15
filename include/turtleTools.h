@@ -560,7 +560,7 @@ typedef struct {
     double y;
     double size;
     double *variable; // bound variable (can be NULL)
-    int32_t status;
+    tt_status_t status;
     tt_scrollbar_type_t type;
     double length;
     double barPercentage; // percentage of scrollbar occupied by bar
@@ -587,7 +587,7 @@ typedef struct {
     double size;
     int32_t *variable; // bound variable (can be NULL)
     list_t *options;
-    int32_t status;
+    tt_status_t status;
     tt_context_direction_t direction;
     double autoLowerBound;
     double autoRightBound;
@@ -608,7 +608,7 @@ typedef struct {
     double size;
     unitype *variable;
     char label[TT_LABEL_LENGTH_LIMIT];
-    int32_t status;
+    tt_status_t status;
     char type;
     double anchorX;
     double anchorY;
