@@ -63869,7 +63869,9 @@ void tt_buttonUpdate(tt_button_t *buttonp) {
         buttonp -> value = *buttonp -> variable;
     }
     if (buttonp -> enabled == TT_ELEMENT_HIDE) {
-        buttonp -> status = TT_STATUS_IDLE;
+        if (buttonp -> status != TT_STATUS_BLOCKED) {
+            buttonp -> status = TT_STATUS_IDLE;
+        }
         buttonp -> value = 0;
         return;
     }
@@ -63937,7 +63939,9 @@ void tt_buttonUpdate(tt_button_t *buttonp) {
     /* mouse */
     if (buttonp -> enabled != TT_ELEMENT_ENABLED || tt_globals.elementLogicTypeOld > TT_ELEMENT_BUTTON || (tt_globals.elementLogicTypeOld == TT_ELEMENT_BUTTON && tt_globals.elementLogicIndexOld > tt_globals.elementLogicTemp)) {
         /* button not enabled or higher priority element is being interacted with */
-        buttonp -> status = TT_STATUS_IDLE;
+        if (buttonp -> status != TT_STATUS_BLOCKED) {
+            buttonp -> status = TT_STATUS_IDLE;
+        }
         buttonp -> value = 0;
         goto LABEL_BUTTON_END;
     }
@@ -64012,7 +64016,9 @@ void tt_switchUpdate(tt_switch_t *switchp) {
         switchp -> value = *switchp -> variable;
     }
     if (switchp -> enabled == TT_ELEMENT_HIDE) {
-        switchp -> status = TT_STATUS_IDLE;
+        if (switchp -> status != TT_STATUS_BLOCKED) {
+            switchp -> status = TT_STATUS_IDLE;
+        }
         return;
     }
     double switchX = switchp -> x;
@@ -64141,7 +64147,9 @@ void tt_switchUpdate(tt_switch_t *switchp) {
     /* mouse */
     if (switchp -> enabled != TT_ELEMENT_ENABLED || tt_globals.elementLogicTypeOld > TT_ELEMENT_SWITCH || (tt_globals.elementLogicTypeOld == TT_ELEMENT_SWITCH && tt_globals.elementLogicIndexOld > tt_globals.elementLogicTemp)) {
         /* switch not enabled or higher priority element is being interacted with */
-        switchp -> status = TT_STATUS_IDLE;
+        if (switchp -> status != TT_STATUS_BLOCKED) {
+            switchp -> status = TT_STATUS_IDLE;
+        }
         goto LABEL_SWITCH_END;
     }
     LABEL_SWITCH_CHECK_HOVER:
@@ -64214,7 +64222,9 @@ void tt_dialUpdate(tt_dial_t *dialp) {
         dialp -> value = *dialp -> variable;
     }
     if (dialp -> enabled == TT_ELEMENT_HIDE) {
-        dialp -> status = TT_STATUS_IDLE;
+        if (dialp -> status != TT_STATUS_BLOCKED) {
+            dialp -> status = TT_STATUS_IDLE;
+        }
         return;
     }
     tt_setColor(dialp -> color[TT_COLOR_SLOT_DIAL_TEXT]);
@@ -64246,7 +64256,9 @@ void tt_dialUpdate(tt_dial_t *dialp) {
     /* mouse */
     if (dialp -> enabled != TT_ELEMENT_ENABLED || tt_globals.elementLogicTypeOld > TT_ELEMENT_DIAL || (tt_globals.elementLogicTypeOld == TT_ELEMENT_DIAL && tt_globals.elementLogicIndexOld > tt_globals.elementLogicTemp)) {
         /* dial not enabled or higher priority element is being interacted with */
-        dialp -> status = TT_STATUS_IDLE;
+        if (dialp -> status != TT_STATUS_BLOCKED) {
+            dialp -> status = TT_STATUS_IDLE;
+        }
         goto LABEL_DIAL_END;
     }
     LABEL_DIAL_CHECK_HOVER:
@@ -64327,7 +64339,9 @@ void tt_sliderUpdate(tt_slider_t *sliderp) {
         sliderp -> value = *sliderp -> variable;
     }
     if (sliderp -> enabled == TT_ELEMENT_HIDE) {
-        sliderp -> status = TT_STATUS_IDLE;
+        if (sliderp -> status != TT_STATUS_BLOCKED) {
+            sliderp -> status = TT_STATUS_IDLE;
+        }
         return;
     }
     double sliderXLeft = 0;
@@ -64424,7 +64438,9 @@ void tt_sliderUpdate(tt_slider_t *sliderp) {
     /* mouse */
     if (sliderp -> enabled != TT_ELEMENT_ENABLED || tt_globals.elementLogicTypeOld > TT_ELEMENT_SLIDER || (tt_globals.elementLogicTypeOld == TT_ELEMENT_SLIDER && tt_globals.elementLogicIndexOld > tt_globals.elementLogicTemp)) {
         /* slider not enabled or higher priority element is being interacted with */
-        sliderp -> status = TT_STATUS_IDLE;
+        if (sliderp -> status != TT_STATUS_BLOCKED) {
+            sliderp -> status = TT_STATUS_IDLE;
+        }
         goto LABEL_SLIDER_END;
     }
     LABEL_SLIDER_CHECK_HOVER:
@@ -64717,7 +64733,9 @@ int32_t tt_textboxCalculateMaximumCharacters(uint32_t *charlist, int32_t textLen
 
 void tt_textboxUpdate(tt_textbox_t *textboxp) {
     if (textboxp -> enabled == TT_ELEMENT_HIDE) {
-        textboxp -> status = TT_STATUS_IDLE;
+        if (textboxp -> status != TT_STATUS_BLOCKED) {
+            textboxp -> status = TT_STATUS_IDLE;
+        }
         textboxp -> mouseOver = 0;
         return;
     }
@@ -64827,7 +64845,9 @@ void tt_textboxUpdate(tt_textbox_t *textboxp) {
         if (textboxp -> status == TT_STATUS_OPEN || textboxp -> status == TT_STATUS_OPEN_FIRST_TICK) {
             goto LABEL_TEXTBOX_CHECK_HOVER;
         }
-        textboxp -> status = TT_STATUS_IDLE;
+        if (textboxp -> status != TT_STATUS_BLOCKED) {
+            textboxp -> status = TT_STATUS_IDLE;
+        }
         textboxp -> mouseOver = 0;
         return;
     }
@@ -64885,7 +64905,9 @@ void tt_dropdownUpdate(tt_dropdown_t *dropdownp) {
         dropdownp -> value = *dropdownp -> variable;
     }
     if (dropdownp -> enabled == TT_ELEMENT_HIDE) {
-        dropdownp -> status = TT_STATUS_IDLE;
+        if (dropdownp -> status != TT_STATUS_BLOCKED) {
+            dropdownp -> status = TT_STATUS_IDLE;
+        }
         return;
     }
     if (dropdownp -> options -> length == 0) {
@@ -64971,7 +64993,9 @@ void tt_dropdownUpdate(tt_dropdown_t *dropdownp) {
         if (dropdownp -> status == TT_STATUS_OPEN || dropdownp -> status == TT_STATUS_OPEN_FIRST_TICK) {
             goto LABEL_DROPDOWN_CHECK_HOVER;
         }
-        dropdownp -> status = TT_STATUS_IDLE;
+        if (dropdownp -> status != TT_STATUS_BLOCKED) {
+            dropdownp -> status = TT_STATUS_IDLE;
+        }
         goto LABEL_DROPDOWN_END;
     }
     if (tt_ribbon.mainselect[2] != -1) {
@@ -65116,7 +65140,9 @@ void tt_scrollbarUpdate(tt_scrollbar_t *scrollbarp) {
         scrollbarp -> value = *scrollbarp -> variable;
     }
     if (scrollbarp -> enabled == TT_ELEMENT_HIDE) {
-        scrollbarp -> status = TT_STATUS_IDLE;
+        if (scrollbarp -> status != TT_STATUS_BLOCKED) {
+            scrollbarp -> status = TT_STATUS_IDLE;
+        }
         return;
     }
     double simulateMouseX = turtle.mouseX;
@@ -65175,7 +65201,9 @@ void tt_scrollbarUpdate(tt_scrollbar_t *scrollbarp) {
     /* mouse */
     if (scrollbarp -> enabled != TT_ELEMENT_ENABLED || tt_globals.elementLogicTypeOld > TT_ELEMENT_SCROLLBAR || (tt_globals.elementLogicTypeOld == TT_ELEMENT_SCROLLBAR && tt_globals.elementLogicIndexOld > tt_globals.elementLogicTemp)) {
         /* slider not enabled or higher priority element is being interacted with */
-        scrollbarp -> status = TT_STATUS_IDLE;
+        if (scrollbarp -> status != TT_STATUS_BLOCKED) {
+            scrollbarp -> status = TT_STATUS_IDLE;
+        }
         goto LABEL_SCROLLBAR_END;
     }
     LABEL_SCROLLBAR_CHECK_HOVER:
@@ -65348,7 +65376,9 @@ void tt_readerUpdate(tt_reader_t *readerp) {
             if (readerp -> status == TT_STATUS_CLICK || readerp -> status == TT_STATUS_CLICK_FIRST_TICK) {
                 goto LABEL_VARIABLE_READER_CHECK_HOVER;
             }
-            readerp -> status = TT_STATUS_IDLE;
+            if (readerp -> status != TT_STATUS_BLOCKED) {
+                readerp -> status = TT_STATUS_IDLE;
+            }
             return;
         }
         LABEL_VARIABLE_READER_CHECK_HOVER:
