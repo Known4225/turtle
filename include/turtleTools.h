@@ -237,6 +237,7 @@ void tt_hideAllElements();
 /* ribbon variables */
 typedef struct {
     tt_element_names_t element;
+    tt_element_names_t priority;
     tt_element_enabled_t enabled;
     tt_element_ignored_t ignored;
     int32_t color[8];
@@ -270,6 +271,7 @@ void tt_ribbonUpdate();
 /* popup variables */
 typedef struct {
     tt_element_names_t element;
+    tt_element_names_t priority;
     tt_element_enabled_t enabled;
     tt_element_ignored_t ignored;
     int32_t color[8];
@@ -355,6 +357,7 @@ typedef enum {
 /* button */
 typedef struct {
     tt_element_names_t element;
+    tt_element_names_t priority;
     tt_element_enabled_t enabled;
     tt_element_ignored_t ignored;
     int32_t color[8];
@@ -387,6 +390,7 @@ typedef enum {
 /* switch */
 typedef struct {
     tt_element_names_t element;
+    tt_element_names_t priority;
     tt_element_enabled_t enabled;
     tt_element_ignored_t ignored;
     int32_t color[8];
@@ -411,6 +415,7 @@ typedef enum {
 /* dial */
 typedef struct {
     tt_element_names_t element;
+    tt_element_names_t priority;
     tt_element_enabled_t enabled;
     tt_element_ignored_t ignored;
     int32_t color[8];
@@ -449,6 +454,7 @@ typedef enum {
 /* slider */
 typedef struct {
     tt_element_names_t element;
+    tt_element_names_t priority;
     tt_element_enabled_t enabled;
     tt_element_ignored_t ignored;
     int32_t color[8];
@@ -478,6 +484,7 @@ typedef enum {
 /* textbox */
 typedef struct {
     tt_element_names_t element;
+    tt_element_names_t priority;
     tt_element_enabled_t enabled;
     tt_element_ignored_t ignored;
     int32_t color[8];
@@ -525,6 +532,7 @@ typedef enum {
 /* dropdown */
 typedef struct {
     tt_element_names_t element;
+    tt_element_names_t priority;
     tt_element_enabled_t enabled;
     tt_element_ignored_t ignored;
     int32_t color[8];
@@ -553,6 +561,7 @@ typedef enum {
 /* scrollbar */
 typedef struct {
     tt_element_names_t element;
+    tt_element_names_t priority;
     tt_element_enabled_t enabled;
     tt_element_ignored_t ignored;
     int32_t color[8];
@@ -579,6 +588,7 @@ typedef enum {
 /* context menu */
 typedef struct {
     tt_element_names_t element;
+    tt_element_names_t priority;
     tt_element_enabled_t enabled;
     tt_element_ignored_t ignored;
     int32_t color[8];
@@ -600,6 +610,7 @@ typedef struct {
 /* reader */
 typedef struct {
     tt_element_names_t element;
+    tt_element_names_t priority;
     tt_element_enabled_t enabled;
     tt_element_ignored_t ignored;
     int32_t color[8];

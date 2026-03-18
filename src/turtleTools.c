@@ -350,6 +350,7 @@ int32_t tt_ribbonInitInternal(FILE *configFile, list_t *configList, int8_t fileE
         tt_elements.all = list_init();
     }
     tt_ribbon.element = TT_ELEMENT_RIBBON;
+    tt_ribbon.priority = tt_ribbon.element;
     tt_ribbon.enabled = TT_ELEMENT_ENABLED;
     tt_elementResetColor((void *) &tt_ribbon);
     /* set ribbon parameters */
@@ -539,6 +540,7 @@ int32_t tt_popupInitInternal(FILE *configFile, list_t *configList, int8_t fileEx
         tt_elements.all = list_init();
     }
     tt_popup.element = TT_ELEMENT_POPUP;
+    tt_popup.priority = tt_popup.element;
     tt_popup.enabled = TT_ELEMENT_ENABLED;
     tt_elementResetColor((void *) &tt_popup);
     tt_popup.output[0] = 0;
@@ -736,6 +738,7 @@ tt_button_t *tt_buttonInit(char *label, int8_t *variable, double x, double y, do
     turtleToolsInit();
     tt_button_t *buttonp = calloc(1, sizeof(tt_button_t));
     buttonp -> element = TT_ELEMENT_BUTTON;
+    buttonp -> priority = buttonp -> element;
     buttonp -> enabled = TT_ELEMENT_ENABLED;
     buttonp -> ignored = TT_ELEMENT_NOT_IGNORED;
     if (label == NULL) {
@@ -773,6 +776,7 @@ tt_switch_t *tt_switchInit(char *label, int8_t *variable, double x, double y, do
     turtleToolsInit();
     tt_switch_t *switchp = calloc(1, sizeof(tt_switch_t));
     switchp -> element = TT_ELEMENT_SWITCH;
+    switchp -> priority = switchp -> element;
     switchp -> enabled = TT_ELEMENT_ENABLED;
     switchp -> ignored = TT_ELEMENT_NOT_IGNORED;
     if (label == NULL) {
@@ -807,6 +811,7 @@ tt_dial_t *tt_dialInit(char *label, double *variable, tt_dial_scale_t scale, dou
     turtleToolsInit();
     tt_dial_t *dialp = calloc(1, sizeof(tt_dial_t));
     dialp -> element = TT_ELEMENT_DIAL;
+    dialp -> priority = dialp -> element;
     dialp -> enabled = TT_ELEMENT_ENABLED;
     dialp -> ignored = TT_ELEMENT_NOT_IGNORED;
     if (label == NULL) {
@@ -848,6 +853,7 @@ tt_slider_t *tt_sliderInit(char *label, double *variable, tt_slider_type_t type,
     turtleToolsInit();
     tt_slider_t *sliderp = calloc(1, sizeof(tt_slider_t));
     sliderp -> element = TT_ELEMENT_SLIDER;
+    sliderp -> priority = sliderp -> element;
     sliderp -> enabled = TT_ELEMENT_ENABLED;
     sliderp -> ignored = TT_ELEMENT_NOT_IGNORED;
     if (label == NULL) {
@@ -894,6 +900,7 @@ tt_textbox_t *tt_textboxInit(char *label, char *variable, int32_t maxCharacters,
     turtleToolsInit();
     tt_textbox_t *textboxp = calloc(1, sizeof(tt_textbox_t));
     textboxp -> element = TT_ELEMENT_TEXTBOX;
+    textboxp -> priority = textboxp -> element;
     textboxp -> enabled = TT_ELEMENT_ENABLED;
     textboxp -> ignored = TT_ELEMENT_NOT_IGNORED;
     if (label == NULL) {
@@ -957,6 +964,7 @@ tt_dropdown_t *tt_dropdownInit(char *label, list_t *options, int32_t *variable, 
     turtleToolsInit();
     tt_dropdown_t *dropdownp = calloc(1, sizeof(tt_dropdown_t));
     dropdownp -> element = TT_ELEMENT_DROPDOWN;
+    dropdownp -> priority = dropdownp -> element;
     dropdownp -> enabled = TT_ELEMENT_ENABLED;
     dropdownp -> ignored = TT_ELEMENT_NOT_IGNORED;
     if (label == NULL) {
@@ -1002,6 +1010,7 @@ tt_scrollbar_t *tt_scrollbarInit(double *variable, tt_scrollbar_type_t type, dou
     turtleToolsInit();
     tt_scrollbar_t *scrollbarp = calloc(1, sizeof(tt_scrollbar_t));
     scrollbarp -> element = TT_ELEMENT_SCROLLBAR;
+    scrollbarp -> priority = scrollbarp -> element;
     scrollbarp -> enabled = TT_ELEMENT_ENABLED;
     scrollbarp -> ignored = TT_ELEMENT_NOT_IGNORED;
     tt_elementResetColor(scrollbarp);
@@ -1042,6 +1051,7 @@ tt_context_t *tt_contextInit(list_t *options, int32_t *variable, double x, doubl
     turtleToolsInit();
     tt_context_t *contextp = calloc(1, sizeof(tt_context_t));
     contextp -> element = TT_ELEMENT_CONTEXT;
+    contextp -> priority = contextp -> element;
     contextp -> enabled = TT_ELEMENT_ENABLED;
     contextp -> ignored = TT_ELEMENT_NOT_IGNORED;
     tt_elementResetColor(contextp);
@@ -1083,6 +1093,7 @@ tt_reader_t *tt_readerInit(char *label, unitype *variable, char type, double x, 
     } else {
         readerp -> element = TT_ELEMENT_VARIABLE_READER;
     }
+    readerp -> priority = readerp -> element;
     readerp -> enabled = TT_ELEMENT_ENABLED;
     readerp -> ignored = TT_ELEMENT_NOT_IGNORED;
     if (label == NULL) {
@@ -1199,7 +1210,7 @@ void tt_buttonUpdate(tt_button_t *buttonp) {
     }
     turtleTextWriteUnicode(buttonp -> label, (buttonLeftX + buttonRightX) / 2, buttonY, buttonp -> size - 1, 50);
     /* mouse */
-    if (buttonp -> enabled != TT_ELEMENT_ENABLED || tt_globals.elementLogicTypeOld > TT_ELEMENT_BUTTON || (tt_globals.elementLogicTypeOld == TT_ELEMENT_BUTTON && tt_globals.elementLogicIndexOld > tt_globals.elementLogicTemp)) {
+    if (buttonp -> enabled != TT_ELEMENT_ENABLED || tt_globals.elementLogicTypeOld > buttonp -> priority || (tt_globals.elementLogicTypeOld == buttonp -> priority && tt_globals.elementLogicIndexOld > tt_globals.elementLogicTemp)) {
         /* button not enabled or higher priority element is being interacted with */
         if (buttonp -> status != TT_STATUS_BLOCKED) {
             buttonp -> status = TT_STATUS_IDLE;
@@ -1407,7 +1418,7 @@ void tt_switchUpdate(tt_switch_t *switchp) {
         turtleTextWriteUnicode(switchp -> label, switchX + switchp -> size, switchY, switchp -> size - 1, 0);
     }
     /* mouse */
-    if (switchp -> enabled != TT_ELEMENT_ENABLED || tt_globals.elementLogicTypeOld > TT_ELEMENT_SWITCH || (tt_globals.elementLogicTypeOld == TT_ELEMENT_SWITCH && tt_globals.elementLogicIndexOld > tt_globals.elementLogicTemp)) {
+    if (switchp -> enabled != TT_ELEMENT_ENABLED || tt_globals.elementLogicTypeOld > switchp -> priority || (tt_globals.elementLogicTypeOld == switchp -> priority && tt_globals.elementLogicIndexOld > tt_globals.elementLogicTemp)) {
         /* switch not enabled or higher priority element is being interacted with */
         if (switchp -> status != TT_STATUS_BLOCKED) {
             switchp -> status = TT_STATUS_IDLE;
@@ -1516,7 +1527,7 @@ void tt_dialUpdate(tt_dial_t *dialp) {
     turtleGoto(dialX + sin(dialAngle / 57.2958) * dialp -> size, dialY + cos(dialAngle / 57.2958) * dialp -> size);
     turtlePenUp();
     /* mouse */
-    if (dialp -> enabled != TT_ELEMENT_ENABLED || tt_globals.elementLogicTypeOld > TT_ELEMENT_DIAL || (tt_globals.elementLogicTypeOld == TT_ELEMENT_DIAL && tt_globals.elementLogicIndexOld > tt_globals.elementLogicTemp)) {
+    if (dialp -> enabled != TT_ELEMENT_ENABLED || tt_globals.elementLogicTypeOld > dialp -> priority || (tt_globals.elementLogicTypeOld == dialp -> priority && tt_globals.elementLogicIndexOld > tt_globals.elementLogicTemp)) {
         /* dial not enabled or higher priority element is being interacted with */
         if (dialp -> status != TT_STATUS_BLOCKED) {
             dialp -> status = TT_STATUS_IDLE;
@@ -1698,7 +1709,7 @@ void tt_sliderUpdate(tt_slider_t *sliderp) {
     turtlePenDown();
     turtlePenUp();
     /* mouse */
-    if (sliderp -> enabled != TT_ELEMENT_ENABLED || tt_globals.elementLogicTypeOld > TT_ELEMENT_SLIDER || (tt_globals.elementLogicTypeOld == TT_ELEMENT_SLIDER && tt_globals.elementLogicIndexOld > tt_globals.elementLogicTemp)) {
+    if (sliderp -> enabled != TT_ELEMENT_ENABLED || tt_globals.elementLogicTypeOld > sliderp -> priority || (tt_globals.elementLogicTypeOld == sliderp -> priority && tt_globals.elementLogicIndexOld > tt_globals.elementLogicTemp)) {
         /* slider not enabled or higher priority element is being interacted with */
         if (sliderp -> status != TT_STATUS_BLOCKED) {
             sliderp -> status = TT_STATUS_IDLE;
@@ -2102,7 +2113,7 @@ void tt_textboxUpdate(tt_textbox_t *textboxp) {
     } else {
         textboxp -> mouseOver = 0;
     }
-    if (textboxp -> enabled != TT_ELEMENT_ENABLED || tt_globals.elementLogicTypeOld > TT_ELEMENT_TEXTBOX || (tt_globals.elementLogicTypeOld == TT_ELEMENT_TEXTBOX && tt_globals.elementLogicIndexOld > tt_globals.elementLogicTemp)) {
+    if (textboxp -> enabled != TT_ELEMENT_ENABLED || tt_globals.elementLogicTypeOld > textboxp -> priority || (tt_globals.elementLogicTypeOld == textboxp -> priority && tt_globals.elementLogicIndexOld > tt_globals.elementLogicTemp)) {
         /* textbox not enabled or higher priority element is being interacted with */
         if (textboxp -> status == TT_STATUS_OPEN || textboxp -> status == TT_STATUS_OPEN_FIRST_TICK) {
             goto LABEL_TEXTBOX_CHECK_HOVER;
@@ -2250,7 +2261,7 @@ void tt_dropdownUpdate(tt_dropdown_t *dropdownp) {
         turtleRectangle(dropdownXFactor[0], dropdownY - dropdownp -> size * 0.9, dropdownXFactor[1] + dropdownp -> size, dropdownY + dropdownp -> size * 0.9);
     }
     /* mouse */
-    if (dropdownp -> enabled != TT_ELEMENT_ENABLED || tt_globals.elementLogicTypeOld > TT_ELEMENT_DROPDOWN || (tt_globals.elementLogicTypeOld == TT_ELEMENT_DROPDOWN && tt_globals.elementLogicIndexOld > tt_globals.elementLogicTemp)) {
+    if (dropdownp -> enabled != TT_ELEMENT_ENABLED || tt_globals.elementLogicTypeOld > dropdownp -> priority || (tt_globals.elementLogicTypeOld == dropdownp -> priority && tt_globals.elementLogicIndexOld > tt_globals.elementLogicTemp)) {
         /* dropdown not enabled or higher priority element is being interacted with */
         if (dropdownp -> status == TT_STATUS_OPEN || dropdownp -> status == TT_STATUS_OPEN_FIRST_TICK) {
             goto LABEL_DROPDOWN_CHECK_HOVER;
@@ -2461,7 +2472,7 @@ void tt_scrollbarUpdate(tt_scrollbar_t *scrollbarp) {
         turtlePenUp();
     }
     /* mouse */
-    if (scrollbarp -> enabled != TT_ELEMENT_ENABLED || tt_globals.elementLogicTypeOld > TT_ELEMENT_SCROLLBAR || (tt_globals.elementLogicTypeOld == TT_ELEMENT_SCROLLBAR && tt_globals.elementLogicIndexOld > tt_globals.elementLogicTemp)) {
+    if (scrollbarp -> enabled != TT_ELEMENT_ENABLED || tt_globals.elementLogicTypeOld > scrollbarp -> priority || (tt_globals.elementLogicTypeOld == scrollbarp -> priority && tt_globals.elementLogicIndexOld > tt_globals.elementLogicTemp)) {
         /* slider not enabled or higher priority element is being interacted with */
         if (scrollbarp -> status != TT_STATUS_BLOCKED) {
             scrollbarp -> status = TT_STATUS_IDLE;
@@ -2633,7 +2644,7 @@ void tt_readerUpdate(tt_reader_t *readerp) {
         tt_setColor(readerp -> color[TT_COLOR_SLOT_VARIABLE_READER_TEXT_ITEM]);
         turtleTextWriteUnicode(readerString, (readerInnerLeftX + readerInnerRightX) / 2, readerp -> y, readerp -> size - 1, 50);
         /* mouse */
-        if (readerp -> enabled != TT_ELEMENT_ENABLED || tt_globals.elementLogicTypeOld > TT_ELEMENT_VARIABLE_READER || (tt_globals.elementLogicTypeOld == TT_ELEMENT_VARIABLE_READER && tt_globals.elementLogicIndexOld > tt_globals.elementLogicTemp)) {
+        if (readerp -> enabled != TT_ELEMENT_ENABLED || tt_globals.elementLogicTypeOld > readerp -> priority || (tt_globals.elementLogicTypeOld == readerp -> priority && tt_globals.elementLogicIndexOld > tt_globals.elementLogicTemp)) {
             /* reader not enabled or higher priority element is being interacted with */
             if (readerp -> status == TT_STATUS_CLICK || readerp -> status == TT_STATUS_CLICK_FIRST_TICK) {
                 goto LABEL_VARIABLE_READER_CHECK_HOVER;

@@ -26,6 +26,8 @@ The following build commands are available:
 
 # To Do
 - Build some support for osTools on OS_BROWSER
+- Add some emojis to font
+- Deploy existing font editor to web and allow easy character creation
 - Change `turtle_shell.html`
 - Fix turtleTools UI elements to work better on touch screen (solve behaviour of mouse move + click in the same tick)
 - Write tests
