@@ -62812,7 +62812,7 @@ int32_t tt_color_default[] = {
     0,                              TT_COLOR_TEXT_ALTERNATE,        TT_COLOR_TEXT_BASE,             TT_COLOR_TEXT_BASE,             TT_COLOR_TEXT_BASE,             TT_COLOR_TEXT_ALTERNATE,        TT_COLOR_TEXT_BASE,             0,                              TT_COLOR_TEXT_ALTERNATE,        TT_COLOR_BLACK,                 TT_COLOR_BLACK,                 TT_COLOR_TEXT_ALTERNATE,        TT_COLOR_TEXT_ALTERNATE,        
     0,                              TT_COLOR_COMPONENT,             TT_COLOR_TEXT_ALTERNATE,        TT_COLOR_TEXT_BASE,             TT_COLOR_COMPONENT_ALTERNATE,   TT_COLOR_COMPONENT_BASE,        TT_COLOR_TEXT_ALTERNATE,        TT_COLOR_COMPONENT_BASE,        TT_COLOR_COMPONENT_BASE,        TT_COLOR_WHITE,                 TT_COLOR_WHITE,                 TT_COLOR_COMPONENT_HIGHLIGHT,   TT_COLOR_COMPONENT_ALTERNATE,   
     0,                              TT_COLOR_COMPONENT_HIGHLIGHT,   TT_COLOR_COMPONENT_BASE,        TT_COLOR_BACKGROUND_BASE,       TT_COLOR_BACKGROUND_COMPLEMENT, TT_COLOR_TEXT_HIGHLIGHT,        TT_COLOR_COMPONENT_BASE,        TT_COLOR_COMPONENT_COMPLEMENT,  TT_COLOR_COMPONENT_HIGHLIGHT,   TT_COLOR_LIGHT_GREY,            TT_COLOR_LIGHT_GREY,            TT_COLOR_COMPONENT_HIGHLIGHT,   TT_COLOR_COMPONENT_HIGHLIGHT,   
-    0,                              TT_COLOR_TEXT_BASE,             TT_COLOR_COMPONENT_HIGHLIGHT,   0,                              0,                              TT_COLOR_TEXT_ALTERNATE,        TT_COLOR_COMPONENT_HIGHLIGHT,   TT_COLOR_BACKGROUND_ALTERNATE,  0,                              TT_COLOR_ORANGE,                TT_COLOR_RED,                   TT_COLOR_COMPONENT,             TT_COLOR_COMPONENT,             
+    0,                              TT_COLOR_TEXT_BASE,             TT_COLOR_COMPONENT_HIGHLIGHT,   0,                              0,                              TT_COLOR_TEXT_ALTERNATE,        TT_COLOR_COMPONENT_HIGHLIGHT,   TT_COLOR_BACKGROUND_ALTERNATE,  0,                              TT_COLOR_ORANGE,                TT_COLOR_RED_ALTERNATE,         TT_COLOR_COMPONENT,             TT_COLOR_COMPONENT,             
     0,                              TT_COLOR_COMPONENT_COMPLEMENT,  TT_COLOR_BACKGROUND_ALTERNATE,  0,                              0,                              TT_COLOR_BLUE,                  TT_COLOR_COMPONENT_HIGHLIGHT,   TT_COLOR_BACKGROUND_HIGHLIGHT,  0,                              0,                              TT_COLOR_COMPONENT_BASE,        TT_COLOR_COMPONENT,             0,                              
     0,                              0,                              TT_COLOR_TERTIARY_BASE,         0,                              0,                              0,                              TT_COLOR_TEXT_ALTERNATE,        0,                              0,                              0,                              TT_COLOR_COMPONENT_COMPLEMENT,  0,                              0,                              
     0,                              0,                              0,                              0,                              0,                              0,                              0,                              0,                              0,                              0,                              TT_COLOR_BACKGROUND_ALTERNATE,  0,                              0,                              
@@ -63859,7 +63859,7 @@ tt_reader_t *tt_readerInit(char *label, unitype *variable, char type, double x, 
     readerp -> type = type;
     readerp -> scrollbarp = NULL;
     if (readerp -> element == TT_ELEMENT_LIST_READER) {
-        readerp -> width = size * 5;
+        readerp -> width = size * 13;
         readerp -> height = size * 20;
         list_t *list = (*(readerp -> variable)).r; // insane syntax
         double percentage = 100;
@@ -65348,7 +65348,40 @@ void tt_contextUpdate(tt_context_t *contextp) {
 
 void tt_readerUpdate(tt_reader_t *readerp) {
     if (readerp -> element == TT_ELEMENT_LIST_READER) {
-        
+        /* render rectangle */
+        double readerLeftX = readerp -> x;
+        double readerRightX = readerp -> x + readerp -> width;
+        double readerY = readerp -> y;
+        tt_setColor(readerp -> color[TT_COLOR_SLOT_LIST_READER_BASE]);
+        turtlePenSize(readerp -> size);
+        turtleGoto(readerLeftX + readerp -> size / 2, readerY - readerp -> height + readerp -> size / 2);
+        turtlePenDown();
+        turtleGoto(readerRightX - readerp -> size / 2, readerY - readerp -> height + readerp -> size / 2);
+        turtleGoto(readerRightX - readerp -> size / 2, readerY - readerp -> size / 2);
+        turtleGoto(readerLeftX + readerp -> size / 2, readerY - readerp -> size / 2);
+        turtleGoto(readerLeftX + readerp -> size / 2, readerY - readerp -> height + readerp -> size / 2);
+        turtlePenUp();
+        turtleRectangle(readerLeftX + readerp -> size / 2, readerY - readerp -> height + readerp -> size / 2, readerRightX - readerp -> size / 2, readerY - readerp -> size / 2);
+        /* render label */
+        tt_setColor(readerp -> color[TT_COLOR_SLOT_LIST_READER_TEXT]);
+        turtleTextWriteUnicode(readerp -> label, (readerLeftX + readerRightX) / 2, readerY + readerp -> size / 2 - readerp -> size * 1.6, readerp -> size - 1, 50);
+        /* render items */
+        list_t *list = (*(readerp -> variable)).r;
+        int32_t numItems = list -> length;
+        if (numItems > 20) {
+            numItems = 20;
+        }
+        char itemString[256];
+        for (int32_t i = 0; i < numItems; i++) {
+            double ypos = readerY + readerp -> size / 2 - (i + 1.6) * readerp -> size * 2.2;
+            tt_setColor(readerp -> color[TT_COLOR_SLOT_LIST_READER_TEXT]);
+            // TODO - render number
+            tt_setColor(readerp -> color[TT_COLOR_SLOT_LIST_READER_ITEM]);
+            turtleRectangle(readerLeftX + readerp -> size / 2, ypos + readerp -> size, readerRightX - readerp -> size / 2, ypos - readerp -> size);
+            unitype_sprint(itemString, list -> data[i], list -> type[i]);
+            tt_setColor(readerp -> color[TT_COLOR_SLOT_LIST_READER_TEXT_ITEM]);
+            turtleTextWriteUnicode(itemString, readerLeftX + readerp -> size / 2 + (readerp -> size - 1) / 2, ypos, readerp -> size - 1, 0);
+        }
     } else if (readerp -> element == TT_ELEMENT_VARIABLE_READER) {
         char readerString[256];
         unitype variable = *(readerp -> variable);
@@ -65372,7 +65405,7 @@ void tt_readerUpdate(tt_reader_t *readerp) {
         turtleGoto(readerLeftX + readerp -> size / 2, readerY + readerHeight / 2 - readerp -> size / 2);
         turtleGoto(readerLeftX + readerp -> size / 2, readerY - readerHeight / 2 + readerp -> size / 2);
         turtlePenUp();
-        turtleRectangle(readerLeftX + readerp -> size / 2, readerY - readerHeight / 2 + readerp -> size / 2, readerRightX - readerp -> size / 2,  readerY + readerHeight / 2 - readerp -> size / 2);
+        turtleRectangle(readerLeftX + readerp -> size / 2, readerY - readerHeight / 2 + readerp -> size / 2, readerRightX - readerp -> size / 2, readerY + readerHeight / 2 - readerp -> size / 2);
         /* rounded rectangle (item) */
         double readerInnerRightX = readerRightX - readerp -> size * 0.6;
         double readerInnerLeftX = readerInnerRightX - innerWidth;

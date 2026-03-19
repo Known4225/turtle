@@ -298,6 +298,7 @@ int main(int argc, char *argv[]) {
     tt_readerInit("tick", (unitype *) &tick, 'l', -315, 155, 10);
     tt_readerInit("tt_globals.elementLogicTypeOld", (unitype *) &tt_globals.elementLogicTypeOld, 'i', -315, 135, 10);
     tt_readerInit("tt_globals.elementLogicIndexOld", (unitype *) &tt_globals.elementLogicIndexOld, 'i', -315, 115, 10);
+    tt_readerInit("tt_ribbon.options", (unitype *) &tt_ribbon.options, 'r', -315, 100, 10);
 
     list_t *xPositions = list_init();
     list_t *yPositions = list_init();
