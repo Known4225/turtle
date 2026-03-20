@@ -2602,7 +2602,7 @@ void tt_readerUpdate(tt_reader_t *readerp) {
         /* render rectangle */
         double readerLeftX = readerp -> x;
         double readerRightX = readerp -> x + readerp -> width;
-        double readerY = readerp -> y;
+        double readerY = readerp -> y + readerp -> size * 0.4;
         tt_setColor(readerp -> color[TT_COLOR_SLOT_LIST_READER_BASE]);
         turtlePenSize(readerp -> size);
         turtleGoto(readerLeftX + readerp -> size / 2, readerY - readerp -> height + readerp -> size / 2);
@@ -2619,19 +2619,22 @@ void tt_readerUpdate(tt_reader_t *readerp) {
         /* render items */
         list_t *list = (*(readerp -> variable)).r;
         int32_t numItems = list -> length;
-        if (numItems > 20) {
-            numItems = 20;
+        if (numItems > 10) {
+            numItems = 10;
         }
         char itemString[256];
         for (int32_t i = 0; i < numItems; i++) {
             double ypos = readerY + readerp -> size / 2 - (i + 1.6) * readerp -> size * 2.2;
             tt_setColor(readerp -> color[TT_COLOR_SLOT_LIST_READER_TEXT]);
-            // TODO - render number
+            char numberLabel[32];
+            sprintf(numberLabel, "%d", i);
+            double edgeX = readerLeftX + readerp -> size + strlen(numberLabel) * (readerp -> size - 1) * 0.75;
+            turtleTextWriteString(numberLabel, (readerLeftX + edgeX) / 2, ypos, readerp -> size - 1, 50);
             tt_setColor(readerp -> color[TT_COLOR_SLOT_LIST_READER_ITEM]);
-            turtleRectangle(readerLeftX + readerp -> size / 2, ypos + readerp -> size, readerRightX - readerp -> size / 2, ypos - readerp -> size);
+            turtleRectangle(edgeX, ypos + readerp -> size, readerRightX - readerp -> size, ypos - readerp -> size);
             unitype_sprint(itemString, list -> data[i], list -> type[i]);
             tt_setColor(readerp -> color[TT_COLOR_SLOT_LIST_READER_TEXT_ITEM]);
-            turtleTextWriteUnicode(itemString, readerLeftX + readerp -> size / 2 + (readerp -> size - 1) / 2, ypos, readerp -> size - 1, 0);
+            turtleTextWriteUnicode(itemString, edgeX + (readerp -> size - 1) / 2, ypos, readerp -> size - 1, 0);
         }
     } else if (readerp -> element == TT_ELEMENT_VARIABLE_READER) {
         char readerString[256];
