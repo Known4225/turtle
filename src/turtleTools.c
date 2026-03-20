@@ -64,10 +64,10 @@ int32_t tt_color_default[] = {
     0,                              TT_COLOR_COMPONENT,             TT_COLOR_TEXT_ALTERNATE,        TT_COLOR_TEXT_BASE,             TT_COLOR_COMPONENT_ALTERNATE,   TT_COLOR_COMPONENT_BASE,        TT_COLOR_TEXT_ALTERNATE,        TT_COLOR_COMPONENT_BASE,        TT_COLOR_COMPONENT_BASE,        TT_COLOR_WHITE,                 TT_COLOR_WHITE,                 TT_COLOR_COMPONENT_HIGHLIGHT,   TT_COLOR_COMPONENT_ALTERNATE,   
     0,                              TT_COLOR_COMPONENT_HIGHLIGHT,   TT_COLOR_COMPONENT_BASE,        TT_COLOR_BACKGROUND_BASE,       TT_COLOR_BACKGROUND_COMPLEMENT, TT_COLOR_TEXT_HIGHLIGHT,        TT_COLOR_COMPONENT_BASE,        TT_COLOR_COMPONENT_COMPLEMENT,  TT_COLOR_COMPONENT_HIGHLIGHT,   TT_COLOR_LIGHT_GREY,            TT_COLOR_LIGHT_GREY,            TT_COLOR_COMPONENT_HIGHLIGHT,   TT_COLOR_COMPONENT_HIGHLIGHT,   
     0,                              TT_COLOR_TEXT_BASE,             TT_COLOR_COMPONENT_HIGHLIGHT,   0,                              0,                              TT_COLOR_TEXT_ALTERNATE,        TT_COLOR_COMPONENT_HIGHLIGHT,   TT_COLOR_BACKGROUND_ALTERNATE,  0,                              TT_COLOR_ORANGE,                TT_COLOR_RED_ALTERNATE,         TT_COLOR_COMPONENT,             TT_COLOR_COMPONENT,             
-    0,                              TT_COLOR_COMPONENT_COMPLEMENT,  TT_COLOR_BACKGROUND_ALTERNATE,  0,                              0,                              TT_COLOR_BLUE,                  TT_COLOR_COMPONENT_HIGHLIGHT,   TT_COLOR_BACKGROUND_HIGHLIGHT,  0,                              0,                              TT_COLOR_COMPONENT_BASE,        TT_COLOR_COMPONENT,             0,                              
-    0,                              0,                              TT_COLOR_TERTIARY_BASE,         0,                              0,                              0,                              TT_COLOR_TEXT_ALTERNATE,        0,                              0,                              0,                              TT_COLOR_COMPONENT_COMPLEMENT,  0,                              0,                              
-    0,                              0,                              0,                              0,                              0,                              0,                              0,                              0,                              0,                              0,                              TT_COLOR_BACKGROUND_ALTERNATE,  0,                              0,                              
-    0,                              0,                              0,                              0,                              0,                              0,                              0,                              0,                              0,                              0,                              TT_COLOR_BACKGROUND_HIGHLIGHT,  0,                              0,                              
+    0,                              TT_COLOR_COMPONENT_COMPLEMENT,  TT_COLOR_BACKGROUND_ALTERNATE,  0,                              0,                              TT_COLOR_BLUE,                  TT_COLOR_COMPONENT_HIGHLIGHT,   TT_COLOR_BACKGROUND_HIGHLIGHT,  0,                              0,                              TT_COLOR_WHITE_ALTERNATE,       TT_COLOR_COMPONENT,             0,                              
+    0,                              0,                              TT_COLOR_TERTIARY_BASE,         0,                              0,                              0,                              TT_COLOR_TEXT_ALTERNATE,        0,                              0,                              0,                              TT_COLOR_DARK_GREY_ALTERNATE,   0,                              0,                              
+    0,                              0,                              0,                              0,                              0,                              0,                              0,                              0,                              0,                              0,                              TT_COLOR_DARK_GREY,             0,                              0,                              
+    0,                              0,                              0,                              0,                              0,                              0,                              0,                              0,                              0,                              0,                              TT_COLOR_DARK_GREY,             0,                              0,                              
 };
 
 /* default colours (light theme) */
@@ -1117,8 +1117,9 @@ tt_reader_t *tt_readerInit(char *label, unitype *variable, char type, double x, 
         if (list -> length > 20) {
             percentage = 100.0 / ((list -> length - 20) / 10);
         }
-        readerp -> scrollbarp = tt_scrollbarInit(NULL, TT_SCROLLBAR_TYPE_VERTICAL, x + size * 5, y, size, size * 10, percentage);
+        readerp -> scrollbarp = tt_scrollbarInit(NULL, TT_SCROLLBAR_TYPE_VERTICAL, x + size * 5, y, size * 0.5, size * 10, percentage);
         readerp -> scrollbarp -> ignored = TT_ELEMENT_IGNORED; // this scrollbar is updated with the list reader to ensure it appears on top of the reader
+        readerp -> scrollbarp -> priority = TT_ELEMENT_LIST_READER;
     }
     list_append(tt_elements.readers, (unitype) (void *) readerp, 'p');
     list_append(tt_elements.all, (unitype) (void *) readerp, 'l');
@@ -2636,6 +2637,16 @@ void tt_readerUpdate(tt_reader_t *readerp) {
             tt_setColor(readerp -> color[TT_COLOR_SLOT_LIST_READER_TEXT_ITEM]);
             turtleTextWriteUnicode(itemString, edgeX + (readerp -> size - 1) / 2, ypos, readerp -> size - 1, 0);
         }
+        readerp -> scrollbarp -> x = readerp -> x + readerp -> width - readerp -> size / 2;
+        readerp -> scrollbarp -> y = readerY - readerp -> size / 2 - readerp -> height / 2;
+        readerp -> scrollbarp -> color[TT_COLOR_SLOT_SCROLLBAR_BASE] = readerp -> color[TT_COLOR_SLOT_LIST_READER_SCROLLBAR_BASE];
+        readerp -> scrollbarp -> color[TT_COLOR_SLOT_SCROLLBAR_BAR] = readerp -> color[TT_COLOR_SLOT_LIST_READER_SCROLLBAR_BAR];
+        readerp -> scrollbarp -> color[TT_COLOR_SLOT_SCROLLBAR_HOVER] = readerp -> color[TT_COLOR_SLOT_LIST_READER_SCROLLBAR_HOVER];
+        readerp -> scrollbarp -> color[TT_COLOR_SLOT_SCROLLBAR_CLICKED] = readerp -> color[TT_COLOR_SLOT_LIST_READER_SCROLLBAR_CLICKED];
+        readerp -> scrollbarp -> barPercentage = 90;
+        readerp -> scrollbarp -> length = readerp -> height * 0.85;
+        tt_globals.elementLogicTemp++;
+        tt_scrollbarUpdate(readerp -> scrollbarp);
     } else if (readerp -> element == TT_ELEMENT_VARIABLE_READER) {
         char readerString[256];
         unitype variable = *(readerp -> variable);
@@ -2851,7 +2862,7 @@ void turtleToolsUpdateUI() {
                 continue;
             }
             tt_readerUpdate((tt_reader_t *) (tt_elements.readers -> data[i].p));
-            tt_globals.elementLogicTemp++;
+            tt_globals.elementLogicTemp += 2;
         }
     }
     turtle.penshape = shapeSave;
