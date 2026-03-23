@@ -580,6 +580,7 @@ int32_t osToolsFileDialogPrompt(ost_file_dialog_save_t openOrSave, ost_file_dial
             CoUninitialize();
             return -1;
         }
+        list_clear(osToolsFileDialog.selectedFilenames);
         hr = psiResult -> lpVtbl -> GetDisplayName(psiResult, SIGDN_FILESYSPATH, &pszFilePath); // extracts path name
         if (FAILED(hr)) {
             psiResult -> lpVtbl -> Release(psiResult);
