@@ -121,7 +121,7 @@ int main(int argc, char *argv[]) {
     tt_ribbonInit(constructedFilepath);
 
     // list_t *ribbonConfig = list_init();
-    // list_append(ribbonConfig, (unitype) "File, New, Save, Save As..., Open", 's');
+    // list_append(ribbonConfig, (unitype) "File, 📄 New, 📄 Save, 📄 Save As..., 📄 Open", 's');
     // list_append(ribbonConfig, (unitype) "Edit, Undo, Redo, Cut, Copy, Paste", 's');
     // list_append(ribbonConfig, (unitype) "View, Change Theme, GLFW", 's');
     // tt_ribbonInitList(ribbonConfig);

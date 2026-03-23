@@ -63073,7 +63073,7 @@ int32_t tt_ribbonInit(const char *filename) {
     /* load from config file */
     char fileExists = 1;
     list_t *defaultRibbonFile = list_init();
-    list_append(defaultRibbonFile, (unitype) "File, New, Save, Save As..., Open", 's');
+    list_append(defaultRibbonFile, (unitype) "File, 📄 New, 📄 Save, 📄 Save As..., 📄 Open", 's');
     list_append(defaultRibbonFile, (unitype) "Edit, Undo, Redo, Cut, Copy, Paste", 's');
     list_append(defaultRibbonFile, (unitype) "View, Change Theme, GLFW", 's');
     FILE *configFile = fopen(filename, "r");
