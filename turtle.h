@@ -65352,7 +65352,8 @@ void tt_readerUpdate(tt_reader_t *readerp) {
         /* render rectangle */
         double readerLeftX = readerp -> x;
         double readerRightX = readerp -> x + readerp -> width;
-        double readerY = readerp -> y + readerp -> size * 0.4;
+        double readerY = readerp -> y + readerp -> size * 0.8;
+        double readerTopHeight = readerp -> size * 2;
         tt_setColor(readerp -> color[TT_COLOR_SLOT_LIST_READER_BASE]);
         turtlePenSize(readerp -> size);
         turtleGoto(readerLeftX + readerp -> size / 2, readerY - readerp -> height + readerp -> size / 2);
@@ -65369,8 +65370,11 @@ void tt_readerUpdate(tt_reader_t *readerp) {
         /* render items */
         list_t *list = (*(readerp -> variable)).r;
         int32_t numItems = list -> length;
-        if (numItems > 10) {
-            numItems = 10;
+        double contentTopY = readerY + readerp -> size / 2 - 1.6 * readerp -> size * 2.2;
+        double contentBottomY = readerY - readerp -> height + readerp -> size / 2;
+        int32_t maxItems = (int) ((contentTopY - contentBottomY) / (readerp -> size * 2.2) + 1); // TODO - calculate
+        if (numItems > maxItems) {
+            numItems = maxItems;
         }
         char itemString[256];
         for (int32_t i = 0; i < numItems; i++) {
@@ -65386,16 +65390,79 @@ void tt_readerUpdate(tt_reader_t *readerp) {
             tt_setColor(readerp -> color[TT_COLOR_SLOT_LIST_READER_TEXT_ITEM]);
             turtleTextWriteUnicode(itemString, edgeX + (readerp -> size - 1) / 2, ypos, readerp -> size - 1, 0);
         }
-        readerp -> scrollbarp -> x = readerp -> x + readerp -> width - readerp -> size / 2;
-        readerp -> scrollbarp -> y = readerY - readerp -> size / 2 - readerp -> height / 2;
-        readerp -> scrollbarp -> color[TT_COLOR_SLOT_SCROLLBAR_BASE] = readerp -> color[TT_COLOR_SLOT_LIST_READER_SCROLLBAR_BASE];
-        readerp -> scrollbarp -> color[TT_COLOR_SLOT_SCROLLBAR_BAR] = readerp -> color[TT_COLOR_SLOT_LIST_READER_SCROLLBAR_BAR];
-        readerp -> scrollbarp -> color[TT_COLOR_SLOT_SCROLLBAR_HOVER] = readerp -> color[TT_COLOR_SLOT_LIST_READER_SCROLLBAR_HOVER];
-        readerp -> scrollbarp -> color[TT_COLOR_SLOT_SCROLLBAR_CLICKED] = readerp -> color[TT_COLOR_SLOT_LIST_READER_SCROLLBAR_CLICKED];
-        readerp -> scrollbarp -> barPercentage = 90;
-        readerp -> scrollbarp -> length = readerp -> height * 0.85;
-        tt_globals.elementLogicTemp++;
-        tt_scrollbarUpdate(readerp -> scrollbarp);
+        if (list -> length >= maxItems) {
+            readerp -> scrollbarp -> x = readerp -> x + readerp -> width - readerp -> size / 2;
+            readerp -> scrollbarp -> y = readerY - readerp -> size / 2 - readerp -> height / 2;
+            readerp -> scrollbarp -> color[TT_COLOR_SLOT_SCROLLBAR_BASE] = readerp -> color[TT_COLOR_SLOT_LIST_READER_SCROLLBAR_BASE];
+            readerp -> scrollbarp -> color[TT_COLOR_SLOT_SCROLLBAR_BAR] = readerp -> color[TT_COLOR_SLOT_LIST_READER_SCROLLBAR_BAR];
+            readerp -> scrollbarp -> color[TT_COLOR_SLOT_SCROLLBAR_HOVER] = readerp -> color[TT_COLOR_SLOT_LIST_READER_SCROLLBAR_HOVER];
+            readerp -> scrollbarp -> color[TT_COLOR_SLOT_SCROLLBAR_CLICKED] = readerp -> color[TT_COLOR_SLOT_LIST_READER_SCROLLBAR_CLICKED];
+            readerp -> scrollbarp -> barPercentage = 100.0 / (list -> length - maxItems + 1);
+            readerp -> scrollbarp -> length = readerp -> height * 0.85;
+            tt_globals.elementLogicTemp++;
+            tt_scrollbarUpdate(readerp -> scrollbarp);
+        }
+        /* mouse */
+        if (readerp -> enabled != TT_ELEMENT_ENABLED || tt_globals.elementLogicTypeOld > readerp -> priority || (tt_globals.elementLogicTypeOld == readerp -> priority && tt_globals.elementLogicIndexOld > tt_globals.elementLogicTemp)) {
+            /* reader not enabled or higher priority element is being interacted with */
+            if (readerp -> status == TT_STATUS_CLICK || readerp -> status == TT_STATUS_CLICK_FIRST_TICK) {
+                goto LABEL_LIST_READER_CHECK_HOVER;
+            }
+            if (readerp -> status != TT_STATUS_BLOCKED) {
+                readerp -> status = TT_STATUS_IDLE;
+            }
+            return;
+        }
+        LABEL_LIST_READER_CHECK_HOVER:
+        if (readerp -> status != TT_STATUS_CLICK && readerp -> status != TT_STATUS_BLOCKED && readerp -> status != TT_STATUS_CLICK_FIRST_TICK) {
+            if (turtle.mouseX > readerLeftX && turtle.mouseX < readerRightX && turtle.mouseY > readerY - readerTopHeight && turtle.mouseY < readerY) {
+                if (readerp -> status == TT_STATUS_HOVER || readerp -> status == TT_STATUS_HOVER_FIRST_TICK) {
+                    /* hovering reader */
+                    readerp -> status = TT_STATUS_HOVER;
+                } else {
+                    /* first tick hover */
+                    readerp -> status = TT_STATUS_HOVER_FIRST_TICK;
+                }
+            } else {
+                readerp -> status = TT_STATUS_IDLE;
+            }
+        }
+        if (turtleMouseDown()) {
+            if (readerp -> status == TT_STATUS_HOVER || readerp -> status == TT_STATUS_HOVER_FIRST_TICK) {
+                /* first tick clicked */
+                readerp -> anchorX = readerp -> x;
+                readerp -> anchorY = readerp -> y;
+                readerp -> mouseAnchorX = turtle.mouseX;
+                readerp -> mouseAnchorY = turtle.mouseY;
+                int32_t index = list_find(tt_elements.readers, (unitype) (void *) readerp, 'p');
+                if (index != -1) {
+                    tt_elements.readers -> type[index] = 'l'; // switch to l to avoid free
+                    list_delete(tt_elements.readers, index);
+                    list_append(tt_elements.readers, (unitype) (void *) readerp, 'p');
+                }
+                readerp -> status = TT_STATUS_CLICK_FIRST_TICK;
+            } else if (readerp -> status == TT_STATUS_CLICK || readerp -> status == TT_STATUS_CLICK_FIRST_TICK) {
+                /* reader is being held */
+                readerp -> status = TT_STATUS_CLICK;
+            } else {
+                /* reader is blocked from interaction until mouse is unclicked */
+                readerp -> status = TT_STATUS_BLOCKED;
+            }
+        } else {
+            if (readerp -> status == TT_STATUS_CLICK || readerp -> status == TT_STATUS_BLOCKED || readerp -> status == TT_STATUS_CLICK_FIRST_TICK) {
+                /* first tick unclicked */
+                readerp -> status = TT_STATUS_IDLE;
+                goto LABEL_LIST_READER_CHECK_HOVER; // done to avoid a single IDLE tick if mouse is hovering over reader when unclicked
+            }
+        }
+        if (readerp -> status == TT_STATUS_CLICK || readerp -> status == TT_STATUS_CLICK_FIRST_TICK) {
+            readerp -> x = readerp -> anchorX + turtle.mouseX - readerp -> mouseAnchorX;
+            readerp -> y = readerp -> anchorY + turtle.mouseY - readerp -> mouseAnchorY;
+        }
+        if (readerp -> status == TT_STATUS_HOVER || readerp -> status == TT_STATUS_CLICK || readerp -> status == TT_STATUS_HOVER_FIRST_TICK || readerp -> status == TT_STATUS_CLICK_FIRST_TICK) {
+            tt_globals.elementLogicType = TT_ELEMENT_LIST_READER;
+            tt_globals.elementLogicIndex = tt_globals.elementLogicTemp;
+        }
     } else if (readerp -> element == TT_ELEMENT_VARIABLE_READER) {
         char readerString[256];
         unitype variable = *(readerp -> variable);

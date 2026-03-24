@@ -298,7 +298,7 @@ int main(int argc, char *argv[]) {
     tt_readerInit("tick", (unitype *) &tick, 'l', -315, 155, 10);
     tt_readerInit("tt_globals.elementLogicTypeOld", (unitype *) &tt_globals.elementLogicTypeOld, 'i', -315, 135, 10);
     tt_readerInit("tt_globals.elementLogicIndexOld", (unitype *) &tt_globals.elementLogicIndexOld, 'i', -315, 115, 10);
-    tt_readerInit("Sources", (unitype *) &sources, 'r', -315, 100, 10);
+    tt_reader_t *listReader = tt_readerInit("Sources", (unitype *) &sources, 'r', -315, 95, 10);
 
     list_t *xPositions = list_init();
     list_t *yPositions = list_init();
@@ -318,10 +318,10 @@ int main(int argc, char *argv[]) {
         start = clock();
         turtleGetMouseCoordinates();
         turtleClear();
-        /* update element positions */
+        /* update element positions (scrollbar) */
         for (int32_t i = 0; i < tt_elements.all -> length; i++) {
             if (((tt_button_t *) tt_elements.all -> data[i].p) -> element != TT_ELEMENT_SCROLLBAR && ((tt_button_t *) tt_elements.all -> data[i].p) -> element != TT_ELEMENT_CONTEXT) {
-                if (((tt_button_t *) tt_elements.all -> data[i].p) -> element == TT_ELEMENT_VARIABLE_READER && (((tt_reader_t *) tt_elements.all -> data[i].p) -> status == TT_STATUS_CLICK || ((tt_reader_t *) tt_elements.all -> data[i].p) -> status == TT_STATUS_CLICK_FIRST_TICK)) {
+                if ((((tt_button_t *) tt_elements.all -> data[i].p) -> element == TT_ELEMENT_VARIABLE_READER || ((tt_button_t *) tt_elements.all -> data[i].p) -> element == TT_ELEMENT_LIST_READER) && (((tt_reader_t *) tt_elements.all -> data[i].p) -> status == TT_STATUS_CLICK || ((tt_reader_t *) tt_elements.all -> data[i].p) -> status == TT_STATUS_CLICK_FIRST_TICK)) {
                     xPositions -> data[i].d = ((tt_button_t *) tt_elements.all -> data[i].p) -> x + scrollbarX -> value * 5;
                     yPositions -> data[i].d = ((tt_button_t *) tt_elements.all -> data[i].p) -> y - scrollbarY -> value * 3.3;
                     continue;
