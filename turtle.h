@@ -47573,6 +47573,7 @@ typedef struct {
     double anchorY;
     double mouseAnchorX;
     double mouseAnchorY;
+    int8_t resizing; // only used for list readers
     double width; // only used for list readers
     double height; // only used for list readers
     tt_scrollbar_t *scrollbarp; // only used for list readers
@@ -65422,6 +65423,16 @@ void tt_readerUpdate(tt_reader_t *readerp) {
                 } else {
                     /* first tick hover */
                     readerp -> status = TT_STATUS_HOVER_FIRST_TICK;
+                    readerp -> resizing = 0;
+                }
+            } else if (turtle.mouseX > readerRightX - readerp -> size && turtle.mouseX < readerRightX && turtle.mouseY > readerY - readerp -> height && turtle.mouseY < readerY - readerp -> height + readerp -> size) {
+                if (readerp -> status == TT_STATUS_HOVER || readerp -> status == TT_STATUS_HOVER_FIRST_TICK) {
+                    /* hovering reader */
+                    readerp -> status = TT_STATUS_HOVER;
+                } else {
+                    /* first tick hover */
+                    readerp -> status = TT_STATUS_HOVER_FIRST_TICK;
+                    readerp -> resizing = 1;
                 }
             } else {
                 readerp -> status = TT_STATUS_IDLE;
@@ -65430,8 +65441,13 @@ void tt_readerUpdate(tt_reader_t *readerp) {
         if (turtleMouseDown()) {
             if (readerp -> status == TT_STATUS_HOVER || readerp -> status == TT_STATUS_HOVER_FIRST_TICK) {
                 /* first tick clicked */
-                readerp -> anchorX = readerp -> x;
-                readerp -> anchorY = readerp -> y;
+                if (readerp -> resizing == 0) {
+                    readerp -> anchorX = readerp -> x;
+                    readerp -> anchorY = readerp -> y;
+                } else {
+                    readerp -> anchorX = readerp -> width;
+                    readerp -> anchorY = readerp -> height;
+                }
                 readerp -> mouseAnchorX = turtle.mouseX;
                 readerp -> mouseAnchorY = turtle.mouseY;
                 int32_t index = list_find(tt_elements.readers, (unitype) (void *) readerp, 'p');
@@ -65456,8 +65472,19 @@ void tt_readerUpdate(tt_reader_t *readerp) {
             }
         }
         if (readerp -> status == TT_STATUS_CLICK || readerp -> status == TT_STATUS_CLICK_FIRST_TICK) {
-            readerp -> x = readerp -> anchorX + turtle.mouseX - readerp -> mouseAnchorX;
-            readerp -> y = readerp -> anchorY + turtle.mouseY - readerp -> mouseAnchorY;
+            if (readerp -> resizing == 0) {
+                readerp -> x = readerp -> anchorX + turtle.mouseX - readerp -> mouseAnchorX;
+                readerp -> y = readerp -> anchorY + turtle.mouseY - readerp -> mouseAnchorY;
+            } else {
+                readerp -> width = readerp -> anchorX + turtle.mouseX - readerp -> mouseAnchorX;
+                readerp -> height = readerp -> anchorY + readerp -> mouseAnchorY - turtle.mouseY;
+                if (readerp -> width < readerp -> size * 10) {
+                    readerp -> width = readerp -> size * 10;
+                }
+                if (readerp -> height < readerp -> size * 10) {
+                    readerp -> height = readerp -> size * 10;
+                }
+            }
         }
         if (readerp -> status == TT_STATUS_HOVER || readerp -> status == TT_STATUS_CLICK || readerp -> status == TT_STATUS_HOVER_FIRST_TICK || readerp -> status == TT_STATUS_CLICK_FIRST_TICK) {
             tt_globals.elementLogicType = TT_ELEMENT_LIST_READER;

@@ -625,6 +625,7 @@ typedef struct {
     double anchorY;
     double mouseAnchorX;
     double mouseAnchorY;
+    int8_t resizing; // only used for list readers
     double width; // only used for list readers
     double height; // only used for list readers
     tt_scrollbar_t *scrollbarp; // only used for list readers
