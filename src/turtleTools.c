@@ -2617,9 +2617,6 @@ void tt_readerUpdate(tt_reader_t *readerp) {
         turtleGoto(readerLeftX + readerp -> size / 2, readerY - readerp -> height + readerp -> size / 2);
         turtlePenUp();
         turtleRectangle(readerLeftX + readerp -> size / 2, readerY - readerp -> height + readerp -> size / 2, readerRightX - readerp -> size / 2, readerY - readerp -> size / 2);
-        /* render label */
-        tt_setColor(readerp -> color[TT_COLOR_SLOT_LIST_READER_TEXT]);
-        turtleTextWriteUnicode(readerp -> label, (readerLeftX + readerRightX) / 2, readerY + readerp -> size / 2 - readerp -> size * 1.6, readerp -> size - 1, 50);
         /* render items */
         list_t *list = (*(readerp -> variable)).r;
         int32_t numItems = list -> length;
@@ -2647,6 +2644,14 @@ void tt_readerUpdate(tt_reader_t *readerp) {
             }
             turtleTextWriteUnicode(readerString, edgeX + (readerp -> size - 1) / 2, ypos, readerp -> size - 1, 0);
         }
+        /* draw top and bottom boxes */
+        tt_setColor(readerp -> color[TT_COLOR_SLOT_LIST_READER_SCROLLBAR_BASE]);
+        turtleRectangle(readerLeftX + readerp -> size / 4, readerY - readerp -> size / 4, readerRightX - readerp -> size / 4, readerY - (readerp -> size / 4) * 8);
+        turtleRectangle(readerLeftX + readerp -> size / 4, readerY + readerp -> size / 4 - readerp -> height, readerRightX - readerp -> size / 4, readerY + (readerp -> size / 4) * 8 - readerp -> height);
+        /* render label */
+        tt_setColor(readerp -> color[TT_COLOR_SLOT_LIST_READER_TEXT]);
+        turtleTextWriteUnicode(readerp -> label, (readerLeftX + readerRightX) / 2, readerY + readerp -> size / 2 - readerp -> size * 1.6, readerp -> size - 1, 50);
+        /* scrollbar */
         if (list -> length >= maxItems) {
             readerp -> scrollbarp -> x = readerp -> x + readerp -> width - readerp -> size / 2;
             readerp -> scrollbarp -> y = readerY - readerp -> size / 2 - readerp -> height / 2;
