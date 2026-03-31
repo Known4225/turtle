@@ -270,6 +270,7 @@ int main(int argc, char *argv[]) {
     list_append(sources, (unitype) "SP928", 's');
     list_append(sources, (unitype) "SP1203", 's');
     list_append(sources, (unitype) "SP-1550M", 's');
+    list_append(sources, (unitype) "Very Long Item Name", 's');
     tt_dialInit("Power", NULL, TT_DIAL_SCALE_LINEAR, -150, -210, 10, 0, 100, 1);
     tt_dialInit("Speed", NULL, TT_DIAL_SCALE_LINEAR, -100, -210, 10, 0, 1000, 1);
     tt_dialInit("Exposure", NULL, TT_DIAL_SCALE_EXP, -50, -210, 10, 0, 1000, 1);

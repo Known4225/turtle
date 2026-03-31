@@ -65348,6 +65348,8 @@ void tt_contextUpdate(tt_context_t *contextp) {
     }
 }
 
+static char readerString[4096]; // global memory for efficiency
+
 void tt_readerUpdate(tt_reader_t *readerp) {
     if (readerp -> element == TT_ELEMENT_LIST_READER) {
         /* render rectangle */
@@ -65377,7 +65379,6 @@ void tt_readerUpdate(tt_reader_t *readerp) {
         if (numItems > maxItems) {
             numItems = maxItems;
         }
-        char itemString[256];
         for (int32_t i = 0; i < numItems; i++) {
             double ypos = readerY + readerp -> size / 2 - (i + 1.6) * readerp -> size * 2.2;
             tt_setColor(readerp -> color[TT_COLOR_SLOT_LIST_READER_TEXT]);
@@ -65387,9 +65388,14 @@ void tt_readerUpdate(tt_reader_t *readerp) {
             turtleTextWriteString(numberLabel, (readerLeftX + edgeX) / 2, ypos, readerp -> size - 1, 50);
             tt_setColor(readerp -> color[TT_COLOR_SLOT_LIST_READER_ITEM]);
             turtleRectangle(edgeX, ypos + readerp -> size, readerRightX - readerp -> size, ypos - readerp -> size);
-            unitype_sprint(itemString, list -> data[i], list -> type[i]);
+            unitype_sprint(readerString, list -> data[i], list -> type[i]);
             tt_setColor(readerp -> color[TT_COLOR_SLOT_LIST_READER_TEXT_ITEM]);
-            turtleTextWriteUnicode(itemString, edgeX + (readerp -> size - 1) / 2, ypos, readerp -> size - 1, 0);
+            if (turtleTextGetUnicodeLength(readerString, readerp -> size - 1) > (readerRightX - readerp -> size) - edgeX - (readerp -> size - 1)) {
+                /* text is too long to fit */
+                turtleTextTruncateString(readerString, readerp -> size - 1, (readerRightX - readerp -> size) - edgeX - (readerp -> size - 1) * 1.5, 1);
+                strcat(readerString, "...");
+            }
+            turtleTextWriteUnicode(readerString, edgeX + (readerp -> size - 1) / 2, ypos, readerp -> size - 1, 0);
         }
         if (list -> length >= maxItems) {
             readerp -> scrollbarp -> x = readerp -> x + readerp -> width - readerp -> size / 2;
@@ -65491,7 +65497,6 @@ void tt_readerUpdate(tt_reader_t *readerp) {
             tt_globals.elementLogicIndex = tt_globals.elementLogicTemp;
         }
     } else if (readerp -> element == TT_ELEMENT_VARIABLE_READER) {
-        char readerString[256];
         unitype variable = *(readerp -> variable);
         unitype_sprint(readerString, variable, readerp -> type);
         double innerWidth = turtleTextGetUnicodeLength(readerString, readerp -> size - 1) + readerp -> size;
