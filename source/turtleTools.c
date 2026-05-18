@@ -2671,6 +2671,20 @@ void tt_readerUpdate(tt_reader_t *readerp) {
         tt_setColor(readerp -> color[TT_COLOR_SLOT_LIST_READER_TEXT]);
         turtleTextWriteUnicode(readerp -> label, (readerLeftX + readerRightX) / 2, readerY - readerp -> size, readerp -> size - 1, 50);
         turtleTextWriteStringf((readerLeftX + readerRightX) / 2, readerY - readerp -> height + readerp -> size, readerp -> size - 1, 50, "Items: %d", list -> length);
+        turtlePenSize(readerp -> size / 12);
+        tt_setColor(readerp -> color[TT_COLOR_SLOT_LIST_READER_SCROLLBAR_BAR]);
+        turtleGoto(readerRightX - readerp -> size * 0.5, readerY - readerp -> height);
+        turtlePenDown();
+        turtleGoto(readerRightX, readerY - readerp -> height + readerp -> size * 0.5);
+        turtlePenUp();
+        turtleGoto(readerRightX - readerp -> size * 0.75, readerY - readerp -> height);
+        turtlePenDown();
+        turtleGoto(readerRightX, readerY - readerp -> height + readerp -> size * 0.75);
+        turtlePenUp();
+        turtleGoto(readerRightX - readerp -> size * 1.0, readerY - readerp -> height);
+        turtlePenDown();
+        turtleGoto(readerRightX, readerY - readerp -> height + readerp -> size * 1.0);
+        turtlePenUp();
         /* scrollbar */
         if (list -> length >= maxItems - 1) {
             readerp -> scrollbarp -> x = readerp -> x + readerp -> width - readerp -> size / 2;
@@ -2708,7 +2722,7 @@ void tt_readerUpdate(tt_reader_t *readerp) {
                     readerp -> status = TT_STATUS_HOVER_FIRST_TICK;
                     readerp -> resizing = 0;
                 }
-            } else if (turtle.mouseX > readerRightX - readerp -> size && turtle.mouseX < readerRightX && turtle.mouseY > readerY - readerp -> height && turtle.mouseY < readerY - readerp -> height + readerp -> size) {
+            } else if (turtle.mouseX > readerRightX - readerp -> size && turtle.mouseX < readerRightX && turtle.mouseY > readerY - readerp -> height && turtle.mouseY < readerY - readerp -> height + readerp -> size && (turtle.mouseY - (readerY - readerp -> height)) + (readerRightX - turtle.mouseX) <= readerp -> size * 1.2) {
                 if (readerp -> status == TT_STATUS_HOVER || readerp -> status == TT_STATUS_HOVER_FIRST_TICK) {
                     /* hovering reader */
                     readerp -> status = TT_STATUS_HOVER;

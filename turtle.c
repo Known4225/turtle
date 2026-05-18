@@ -315,6 +315,8 @@ int main(int argc, char *argv[]) {
 
     uint32_t tps = 120; // ticks per second (locked to fps in this case)
     clock_t start, end;
+
+    // turtleBackgroundColor(13, 17, 23);
     
     while (turtle.popupClose == 0) {
         start = clock();
