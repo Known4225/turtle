@@ -121,7 +121,7 @@ int main(int argc, char *argv[]) {
     tt_ribbonInit(constructedFilepath);
 
     // list_t *ribbonConfig = list_init();
-    // list_append(ribbonConfig, (unitype) "File, New, Save, Save As..., Open", 's');
+    // list_append(ribbonConfig, (unitype) "File, 📄 New, 📄 Save, 📄 Save As..., 📄 Open", 's');
     // list_append(ribbonConfig, (unitype) "Edit, Undo, Redo, Cut, Copy, Paste", 's');
     // list_append(ribbonConfig, (unitype) "View, Change Theme, GLFW", 's');
     // tt_ribbonInitList(ribbonConfig);
@@ -273,7 +273,7 @@ int main(int argc, char *argv[]) {
     tt_dialInit("Power", NULL, TT_DIAL_SCALE_LINEAR, -150, -210, 10, 0, 100, 1);
     tt_dialInit("Speed", NULL, TT_DIAL_SCALE_LINEAR, -100, -210, 10, 0, 1000, 1);
     tt_dialInit("Exposure", NULL, TT_DIAL_SCALE_EXP, -50, -210, 10, 0, 1000, 1);
-    tt_dropdownInit("Source", sources, NULL, TT_DROPDOWN_ALIGN_LEFT, -10, -207, 10);
+    tt_dropdownInit("Source", sources, NULL, TT_DROPDOWN_ALIGN_LEFT, -10, -211.2, 10);
     tt_slider_t *xSlider = tt_sliderInit("", &x, TT_SLIDER_TYPE_HORIZONTAL, TT_SLIDER_ALIGN_CENTER, -100, -240, 10, 100, -300, 300, 0);
     tt_slider_t *ySlider = tt_sliderInit("", &y, TT_SLIDER_TYPE_HORIZONTAL, TT_SLIDER_ALIGN_CENTER, -100, -260, 10, 100, -300, 300, 0);
     tt_slider_t *zSlider = tt_sliderInit("", &z, TT_SLIDER_TYPE_HORIZONTAL, TT_SLIDER_ALIGN_CENTER, -100, -280, 10, 100, -300, 300, 0);
@@ -298,6 +298,9 @@ int main(int argc, char *argv[]) {
     tt_readerInit("tick", (unitype *) &tick, 'l', -315, 155, 10);
     tt_readerInit("tt_globals.elementLogicTypeOld", (unitype *) &tt_globals.elementLogicTypeOld, 'i', -315, 135, 10);
     tt_readerInit("tt_globals.elementLogicIndexOld", (unitype *) &tt_globals.elementLogicIndexOld, 'i', -315, 115, 10);
+    tt_reader_t *listReader = tt_readerInit("Sources", (unitype *) &sources, 'r', -315, 95, 10);
+    listReader -> height = 175;
+    listReader -> width = 100;
 
     list_t *xPositions = list_init();
     list_t *yPositions = list_init();
@@ -317,10 +320,10 @@ int main(int argc, char *argv[]) {
         start = clock();
         turtleGetMouseCoordinates();
         turtleClear();
-        /* update element positions */
+        /* update element positions (scrollbar) */
         for (int32_t i = 0; i < tt_elements.all -> length; i++) {
             if (((tt_button_t *) tt_elements.all -> data[i].p) -> element != TT_ELEMENT_SCROLLBAR && ((tt_button_t *) tt_elements.all -> data[i].p) -> element != TT_ELEMENT_CONTEXT) {
-                if (((tt_button_t *) tt_elements.all -> data[i].p) -> element == TT_ELEMENT_VARIABLE_READER && (((tt_reader_t *) tt_elements.all -> data[i].p) -> status == TT_STATUS_CLICK || ((tt_reader_t *) tt_elements.all -> data[i].p) -> status == TT_STATUS_CLICK_FIRST_TICK)) {
+                if ((((tt_button_t *) tt_elements.all -> data[i].p) -> element == TT_ELEMENT_VARIABLE_READER || ((tt_button_t *) tt_elements.all -> data[i].p) -> element == TT_ELEMENT_LIST_READER) && (((tt_reader_t *) tt_elements.all -> data[i].p) -> status == TT_STATUS_CLICK || ((tt_reader_t *) tt_elements.all -> data[i].p) -> status == TT_STATUS_CLICK_FIRST_TICK)) {
                     xPositions -> data[i].d = ((tt_button_t *) tt_elements.all -> data[i].p) -> x + scrollbarX -> value * 5;
                     yPositions -> data[i].d = ((tt_button_t *) tt_elements.all -> data[i].p) -> y - scrollbarY -> value * 3.3;
                     continue;
