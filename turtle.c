@@ -270,7 +270,6 @@ int main(int argc, char *argv[]) {
     list_append(sources, (unitype) "SP928", 's');
     list_append(sources, (unitype) "SP1203", 's');
     list_append(sources, (unitype) "SP-1550M", 's');
-    list_append(sources, (unitype) "Very Long Item Name", 's');
     tt_dialInit("Power", NULL, TT_DIAL_SCALE_LINEAR, -150, -210, 10, 0, 100, 1);
     tt_dialInit("Speed", NULL, TT_DIAL_SCALE_LINEAR, -100, -210, 10, 0, 1000, 1);
     tt_dialInit("Exposure", NULL, TT_DIAL_SCALE_EXP, -50, -210, 10, 0, 1000, 1);
@@ -300,6 +299,8 @@ int main(int argc, char *argv[]) {
     tt_readerInit("tt_globals.elementLogicTypeOld", (unitype *) &tt_globals.elementLogicTypeOld, 'i', -315, 135, 10);
     tt_readerInit("tt_globals.elementLogicIndexOld", (unitype *) &tt_globals.elementLogicIndexOld, 'i', -315, 115, 10);
     tt_reader_t *listReader = tt_readerInit("Sources", (unitype *) &sources, 'r', -315, 95, 10);
+    listReader -> height = 175;
+    listReader -> width = 100;
 
     list_t *xPositions = list_init();
     list_t *yPositions = list_init();

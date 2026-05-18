@@ -63867,7 +63867,7 @@ tt_reader_t *tt_readerInit(char *label, unitype *variable, char type, double x, 
         if (list -> length > 20) {
             percentage = 100.0 / ((list -> length - 20) / 10);
         }
-        readerp -> scrollbarp = tt_scrollbarInit(NULL, TT_SCROLLBAR_TYPE_VERTICAL, x + size * 5, y, size * 0.5, size * 10, percentage);
+        readerp -> scrollbarp = tt_scrollbarInit(NULL, TT_SCROLLBAR_TYPE_VERTICAL, x + size * 5, y, size * 0.75, size * 10, percentage);
         readerp -> scrollbarp -> ignored = TT_ELEMENT_IGNORED; // this scrollbar is updated with the list reader to ensure it appears on top of the reader
         readerp -> scrollbarp -> priority = TT_ELEMENT_LIST_READER;
     }
@@ -65370,49 +65370,71 @@ void tt_readerUpdate(tt_reader_t *readerp) {
         /* render items */
         list_t *list = (*(readerp -> variable)).r;
         int32_t numItems = list -> length;
-        double contentTopY = readerY + readerp -> size / 2 - 1.6 * readerp -> size * 2.2;
-        double contentBottomY = readerY - readerp -> height + readerp -> size / 2;
-        int32_t maxItems = (int) ((contentTopY - contentBottomY) / (readerp -> size * 2.2) + 1); // TODO - calculate
+        int32_t maxItems = (int) ((readerp -> height - readerp -> size * 4) / (readerp -> size * 2.2) + 2);
         if (numItems > maxItems) {
             numItems = maxItems;
         }
-        for (int32_t i = 0; i < numItems; i++) {
-            double ypos = readerY + readerp -> size / 2 - (i + 1.6) * readerp -> size * 2.2;
+        double itemsInWindow = (readerp -> height - readerp -> size * 4) / (readerp -> size * 2.2);
+        double ypos = readerY + readerp -> size / 2 - 1.6 * readerp -> size * 2.2 + readerp -> scrollbarp -> value / 100.0 * readerp -> size * 2.2 * (list -> length - itemsInWindow);
+        int32_t startingItem = (ypos + readerp -> size - (readerY - readerp -> size * 2)) / (readerp -> size * 2.2);
+        ypos -= startingItem * readerp -> size * 2.2;
+        if (numItems + startingItem > list -> length) {
+            numItems = list -> length - startingItem;
+        }
+        for (int32_t i = startingItem; i < numItems + startingItem; i++) {
             tt_setColor(readerp -> color[TT_COLOR_SLOT_LIST_READER_TEXT]);
             char numberLabel[32];
             sprintf(numberLabel, "%d", i);
             double edgeX = readerLeftX + readerp -> size + strlen(numberLabel) * (readerp -> size - 1) * 0.75;
-            turtleTextWriteString(numberLabel, (readerLeftX + edgeX) / 2, ypos, readerp -> size - 1, 50);
-            tt_setColor(readerp -> color[TT_COLOR_SLOT_LIST_READER_ITEM]);
-            turtleRectangle(edgeX, ypos + readerp -> size, readerRightX - readerp -> size, ypos - readerp -> size);
-            unitype_sprint(readerString, list -> data[i], list -> type[i]);
-            tt_setColor(readerp -> color[TT_COLOR_SLOT_LIST_READER_TEXT_ITEM]);
-            if (turtleTextGetUnicodeLength(readerString, readerp -> size - 1) > (readerRightX - readerp -> size) - edgeX - (readerp -> size - 1)) {
-                /* text is too long to fit */
-                turtleTextTruncateString(readerString, readerp -> size - 1, (readerRightX - readerp -> size) - edgeX - (readerp -> size - 1) * 1.5, 1);
-                strcat(readerString, "...");
+            if (i == startingItem && ypos > readerY - readerp -> size * 1.5) {
+                /* exception - don't draw top of box */
+                tt_setColor(readerp -> color[TT_COLOR_SLOT_LIST_READER_ITEM]);
+                turtleRectangle(edgeX, ypos, readerRightX - readerp -> size, ypos - readerp -> size);
+            } else if (ypos < readerY - readerp -> height + readerp -> size) {
+                /* exception - box is entirely below reader */
+                break;
+            } else if (ypos < readerY - readerp -> height + readerp -> size * 1.5) {
+                /* exception - don't draw bottom of box */
+                tt_setColor(readerp -> color[TT_COLOR_SLOT_LIST_READER_ITEM]);
+                turtleRectangle(edgeX, ypos + readerp -> size, readerRightX - readerp -> size, ypos);
+                break;
+            } else {
+                turtleTextWriteString(numberLabel, (readerLeftX + edgeX) / 2, ypos, readerp -> size - 1, 50);
+                tt_setColor(readerp -> color[TT_COLOR_SLOT_LIST_READER_ITEM]);
+                turtleRectangle(edgeX, ypos + readerp -> size, readerRightX - readerp -> size, ypos - readerp -> size);
+                unitype_sprint(readerString, list -> data[i], list -> type[i]);
+                tt_setColor(readerp -> color[TT_COLOR_SLOT_LIST_READER_TEXT_ITEM]);
+                if (turtleTextGetUnicodeLength(readerString, readerp -> size - 1) > (readerRightX - readerp -> size) - edgeX - (readerp -> size - 1)) {
+                    /* text is too long to fit */
+                    turtleTextTruncateString(readerString, readerp -> size - 1, (readerRightX - readerp -> size) - edgeX - (readerp -> size - 1) * 1.5, 1);
+                    strcat(readerString, "...");
+                }
+                turtleTextWriteUnicode(readerString, edgeX + (readerp -> size - 1) / 2, ypos, readerp -> size - 1, 0);
             }
-            turtleTextWriteUnicode(readerString, edgeX + (readerp -> size - 1) / 2, ypos, readerp -> size - 1, 0);
+            ypos -= readerp -> size * 2.2;
         }
         /* draw top and bottom boxes */
-        tt_setColor(readerp -> color[TT_COLOR_SLOT_LIST_READER_SCROLLBAR_BASE]);
-        turtleRectangle(readerLeftX + readerp -> size / 4, readerY - readerp -> size / 4, readerRightX - readerp -> size / 4, readerY - (readerp -> size / 4) * 8);
-        turtleRectangle(readerLeftX + readerp -> size / 4, readerY + readerp -> size / 4 - readerp -> height, readerRightX - readerp -> size / 4, readerY + (readerp -> size / 4) * 8 - readerp -> height);
+        tt_setColor(readerp -> color[TT_COLOR_SLOT_LIST_READER_BASE]); // TT_COLOR_SLOT_LIST_READER_BASE, TT_COLOR_SLOT_LIST_READER_SCROLLBAR_BASE
+        turtleRectangle(readerLeftX + readerp -> size / 4, readerY - readerp -> size / 4, readerRightX - readerp -> size / 4, readerY - readerp -> size * 2);
+        turtleRectangle(readerLeftX + readerp -> size / 4, readerY + readerp -> size / 4 - readerp -> height, readerRightX - readerp -> size / 4, readerY + readerp -> size * 2 - readerp -> height);
         /* render label */
         tt_setColor(readerp -> color[TT_COLOR_SLOT_LIST_READER_TEXT]);
-        turtleTextWriteUnicode(readerp -> label, (readerLeftX + readerRightX) / 2, readerY + readerp -> size / 2 - readerp -> size * 1.6, readerp -> size - 1, 50);
+        turtleTextWriteUnicode(readerp -> label, (readerLeftX + readerRightX) / 2, readerY - readerp -> size, readerp -> size - 1, 50);
+        turtleTextWriteStringf((readerLeftX + readerRightX) / 2, readerY - readerp -> height + readerp -> size, readerp -> size - 1, 50, "Items: %d", list -> length);
         /* scrollbar */
-        if (list -> length >= maxItems) {
+        if (list -> length >= maxItems - 1) {
             readerp -> scrollbarp -> x = readerp -> x + readerp -> width - readerp -> size / 2;
-            readerp -> scrollbarp -> y = readerY - readerp -> size / 2 - readerp -> height / 2;
+            readerp -> scrollbarp -> y = readerY - readerp -> height / 2;
             readerp -> scrollbarp -> color[TT_COLOR_SLOT_SCROLLBAR_BASE] = readerp -> color[TT_COLOR_SLOT_LIST_READER_SCROLLBAR_BASE];
             readerp -> scrollbarp -> color[TT_COLOR_SLOT_SCROLLBAR_BAR] = readerp -> color[TT_COLOR_SLOT_LIST_READER_SCROLLBAR_BAR];
             readerp -> scrollbarp -> color[TT_COLOR_SLOT_SCROLLBAR_HOVER] = readerp -> color[TT_COLOR_SLOT_LIST_READER_SCROLLBAR_HOVER];
             readerp -> scrollbarp -> color[TT_COLOR_SLOT_SCROLLBAR_CLICKED] = readerp -> color[TT_COLOR_SLOT_LIST_READER_SCROLLBAR_CLICKED];
-            readerp -> scrollbarp -> barPercentage = 100.0 / (list -> length - maxItems + 1);
-            readerp -> scrollbarp -> length = readerp -> height * 0.85;
+            readerp -> scrollbarp -> barPercentage = 100.0 / (log((list -> length - itemsInWindow) / 2.0 + 1) + 1);
+            readerp -> scrollbarp -> length = readerp -> height - readerp -> size * 4.75;
             tt_globals.elementLogicTemp++;
             tt_scrollbarUpdate(readerp -> scrollbarp);
+        } else {
+            readerp -> scrollbarp -> value = 0;
         }
         /* mouse */
         if (readerp -> enabled != TT_ELEMENT_ENABLED || tt_globals.elementLogicTypeOld > readerp -> priority || (tt_globals.elementLogicTypeOld == readerp -> priority && tt_globals.elementLogicIndexOld > tt_globals.elementLogicTemp)) {

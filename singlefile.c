@@ -34,12 +34,12 @@ const char headerFiles[][128] = {
 
 /* define source files in order from top to bottom of output file */
 const char sourceFiles[][128] = {
-    "src/list.c",
-    "src/bufferList.c",
-    "src/turtle.c",
-    "src/turtleText.c",
-    "src/turtleTools.c",
-    "src/osTools.c",
+    "source/list.c",
+    "source/bufferList.c",
+    "source/turtle.c",
+    "source/turtleText.c",
+    "source/turtleTools.c",
+    "source/osTools.c",
 };
 
 /* these macros correspond to the source files */
