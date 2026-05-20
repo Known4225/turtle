@@ -39,7 +39,6 @@ The following build commands are available:
 - Audio support
 - Update wiki/documentation
 - Linux COM support
-- Reduce size of turtle.h, find a building solution that doesn't involve 26936 lines of duplicate code (`stb_image_resize2.h` macro `STBIR__HEADER_FILENAME` presents a problems when this file does not exist)
 - I think there is a way to increase performance for texture enabled turtle - I think it is possible to remove penpos entirely and just write straight to bufferList - this would probably only increase CPU performance which has not, in my experience, been the bottleneck for most machines
 - increase performance by reverting the GPU always dying update (special handling for cases that would not otherwise mutate the penpos list)
 
