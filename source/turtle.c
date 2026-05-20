@@ -834,11 +834,12 @@ uint8_t *turtleImageResize(uint8_t *dest, uint32_t destWidth, uint32_t destHeigh
     } else if (method == TURTLE_IMAGE_RESIZE_LINEAR) {
         double strideWidth = (double) srcWidth / destWidth;
         double strideHeight = (double) srcHeight / destHeight;
+        // printf("w: %lf h: %lf\n", strideWidth, strideHeight);
         double runningWidth = 0;
         double runningHeight = 0;
         double totalArea = strideWidth * strideHeight;
-        double *widths = malloc((ceil(strideWidth) + 1) * sizeof(double));
-        double *heights = malloc((ceil(strideHeight) + 1) * sizeof(double));
+        double *widths = malloc((floor(strideWidth + 1) + 1) * sizeof(double));
+        double *heights = malloc((floor(strideHeight + 1) + 1) * sizeof(double));
         double pixels[destChannels];
         int32_t widthsLen = 0;
         int32_t heightsLen = 0;
@@ -851,7 +852,7 @@ uint8_t *turtleImageResize(uint8_t *dest, uint32_t destWidth, uint32_t destHeigh
             } else {
                 heights[0] = acruH;
                 heightsLen = 1;
-                while (strideHeight - acruH >= 1) {
+                while (strideHeight - acruH > 1) {
                     heights[heightsLen] = 1;
                     acruH += 1;
                     heightsLen++;
