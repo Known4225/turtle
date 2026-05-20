@@ -107,37 +107,11 @@ typedef enum {
     TURTLE_RESIZE_MODE_PAD_NO_BARS = 2,
 } turtle_resize_mode_t;
 
-/* stb_image_resize2 pixel_layout enum */
-#ifndef STBIRDEF
 typedef enum {
-    STBIR_1CHANNEL = 1,
-    STBIR_2CHANNEL = 2,
-    STBIR_RGB      = 3,               // 3-chan, with order specified (for channel flipping)
-    STBIR_BGR      = 0,               // 3-chan, with order specified (for channel flipping)
-    STBIR_4CHANNEL = 5,
-
-    STBIR_RGBA = 4,                   // alpha formats, where alpha is NOT premultiplied into color channels
-    STBIR_BGRA = 6,
-    STBIR_ARGB = 7,
-    STBIR_ABGR = 8,
-    STBIR_RA   = 9,
-    STBIR_AR   = 10,
-
-    STBIR_RGBA_PM = 11,               // alpha formats, where alpha is premultiplied into color channels
-    STBIR_BGRA_PM = 12,
-    STBIR_ARGB_PM = 13,
-    STBIR_ABGR_PM = 14,
-    STBIR_RA_PM   = 15,
-    STBIR_AR_PM   = 16,
-
-    STBIR_RGBA_NO_AW = 11,            // alpha formats, where NO alpha weighting is applied at all!
-    STBIR_BGRA_NO_AW = 12,            //   these are just synonyms for the _PM flags (which also do
-    STBIR_ARGB_NO_AW = 13,            //   no alpha weighting). These names just make it more clear
-    STBIR_ABGR_NO_AW = 14,            //   for some folks).
-    STBIR_RA_NO_AW   = 15,
-    STBIR_AR_NO_AW   = 16,
-} stbir_pixel_layout;
-#endif
+    TURTLE_IMAGE_RESIZE_SRGB = 0,
+    TURTLE_IMAGE_RESIZE_LINEAR = 1,
+    TURTLE_IMAGE_RESIZE_NEAREST = 2,
+} turtle_image_resize_t;
 
 extern turtle_t turtle;
 
@@ -231,6 +205,9 @@ void turtleSetMaxTextures(int32_t maxTextures);
 
 /* set resize mode of turtle (TURTLE_RESIZE_MODE_PAD, TURTLE_RESIZE_MODE_STRETCH, or TURTLE_RESIZE_MODE_PAD_NO_BARS) (default TURTLE_RESIZE_MODE_PAD) - must be done BEFORE turtleInit() */
 void turtleSetResizeMode(turtle_resize_mode_t resizeMode);
+
+/* resize an image - supported encodings: GL_RGB, GL_RGBA, GL_BGR, GL_BGRA, GL_RED, GL_GREEN, GL_BLUE, GL_ALPHA, supported methods: TURTLE_IMAGE_RESIZE_SRGB, TURTLE_IMAGE_RESIZE_LINEAR, TURTLE_IMAGE_RESIZE_NEAREST */
+uint8_t *turtleImageResize(uint8_t *dest, uint32_t destWidth, uint32_t destHeight, uint32_t destEncoding, uint8_t *src, uint32_t srcWidth, uint32_t srcHeight, uint32_t srcEncoding, turtle_image_resize_t method);
 
 /* load a png, jpg, or bmp to GPU memory as a texture */
 turtle_texture_t turtleTextureLoad(char *filename);

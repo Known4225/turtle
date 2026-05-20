@@ -769,31 +769,185 @@ void turtleTextureRenderInternal(int32_t textureCode, double x1, double y1, doub
     addVertex(x3 * xfact + xcenter, y3 * yfact + ycenter, r, g, b, 1.0, 1, 1, textureCode);
 }
 
+void printList(double *list, int32_t len) {
+    printf("[");
+    for (int32_t i = 0; i < len; i++) {
+        if (i == len - 1) {
+            printf("%lf]\n", list[i]);
+        } else {
+            printf("%lf ", list[i]);
+        }
+    }
+}
+
+uint8_t *turtleImageResize(uint8_t *dest, uint32_t destWidth, uint32_t destHeight, uint32_t destEncoding, uint8_t *src, uint32_t srcWidth, uint32_t srcHeight, uint32_t srcEncoding, turtle_image_resize_t method) {
+    /* determine encoding */
+    uint8_t destChannels = 0;
+    if (destEncoding == GL_RGB) {
+        destChannels = 3;
+    } else if (destEncoding == GL_BGR) {
+        destChannels = 3;
+    } else if (destEncoding == GL_RGBA) {
+        destChannels = 4;
+    } else if (destEncoding == GL_BGRA) {
+        destChannels = 4;
+    } else if (destEncoding == GL_RED || destEncoding == GL_GREEN || destEncoding == GL_BLUE || destEncoding == GL_ALPHA) {
+        destChannels = 1;
+    } else {
+        printf("turtleImageResize: Unsupported destination encoding %d\n", destEncoding);
+        return NULL;
+    }
+    uint8_t srcChannels = 0;
+    if (srcEncoding == GL_RGB) {
+        srcChannels = 3;
+    } else if (srcEncoding == GL_BGR) {
+        srcChannels = 3;
+    } else if (srcEncoding == GL_RGBA) {
+        srcChannels = 4;
+    } else if (srcEncoding == GL_BGRA) {
+        srcChannels = 4;
+    } else if (srcEncoding == GL_RED || srcEncoding == GL_GREEN || srcEncoding == GL_BLUE || srcEncoding == GL_ALPHA) {
+        srcChannels = 1;
+    } else {
+        printf("turtleImageResize: Unsupported source encoding %d\n", srcEncoding);
+        return NULL;
+    }
+    if (srcEncoding != destEncoding) {
+        printf("turtleImageResize: Source encoding must match destination encoding (TODO)\n");
+        return NULL;
+    }
+    int8_t freeDest = 0;
+    if (dest == NULL) {
+        freeDest = 1;
+        dest = malloc(destWidth * destHeight * destChannels);
+    }
+    uint8_t *destAlt = dest;
+    if (method == TURTLE_IMAGE_RESIZE_SRGB) {
+        for (int32_t i = 0; i < destHeight; i++) {
+            for (int32_t j = 0; j < destWidth; j++) {
+                uint8_t *srcAlt = src + ((int32_t) ((double) i / destHeight * srcHeight) * srcWidth + (int32_t) ((double) j / destWidth * srcWidth)) * srcChannels;
+                for (int32_t k = 0; k < destChannels; k++) {
+                    *destAlt++ = *srcAlt++;
+                }
+            }
+        }
+    } else if (method == TURTLE_IMAGE_RESIZE_LINEAR) {
+        double strideWidth = (double) srcWidth / destWidth;
+        double strideHeight = (double) srcHeight / destHeight;
+        double runningWidth = 0;
+        double runningHeight = 0;
+        double totalArea = strideWidth * strideHeight;
+        double *widths = malloc((ceil(strideWidth) + 1) * sizeof(double));
+        double *heights = malloc((ceil(strideHeight) + 1) * sizeof(double));
+        double pixels[destChannels];
+        int32_t widthsLen = 0;
+        int32_t heightsLen = 0;
+        for (int32_t i = 0; i < destHeight; i++) {
+            double acruH = floor(runningWidth + 1) - runningHeight;
+            if (strideHeight < acruH) {
+                acruH = strideHeight;
+                heights[0] = acruH;
+                heightsLen = 1;
+            } else {
+                heights[0] = acruH;
+                heightsLen = 1;
+                while (strideHeight - acruH >= 1) {
+                    heights[heightsLen] = 1;
+                    acruH += 1;
+                    heightsLen++;
+                }
+                heights[heightsLen] = strideHeight - acruH;
+                heightsLen++;
+            }
+            // printf("heights: ");
+            // printList(heights, heightsLen);
+            runningWidth = 0;
+            for (int32_t j = 0; j < destWidth; j++) {
+                double acruW = floor(runningWidth + 1) - runningWidth;
+                if (strideWidth < acruW) {
+                    acruW = strideWidth;
+                    widths[0] = acruW;
+                    widthsLen = 1;
+                } else {
+                    widths[0] = acruW;
+                    widthsLen = 1;
+                    while (strideWidth - acruW >= 1) {
+                        widths[widthsLen] = 1;
+                        acruW += 1;
+                        widthsLen++;
+                    }
+                    widths[widthsLen] = strideWidth - acruW;
+                    widthsLen++;
+                }
+                // printList(widths, widthsLen);
+                for (int32_t k = 0; k < destChannels; k++) {
+                    pixels[k] = 0;
+                }
+                double extraHeight = 0;
+                for (int32_t h = 0; h < heightsLen; h++) {
+                    if (h > 0) {
+                        extraHeight += heights[h - 1];
+                    }
+                    uint8_t *srcAlt = src + ((int32_t) floor(runningHeight + extraHeight + 0.00001) * srcWidth + (int32_t) floor(runningWidth)) * srcChannels;
+                    for (int32_t w = 0; w < widthsLen; w++) {
+                        for (int32_t k = 0; k < destChannels; k++) {
+                            pixels[k] += heights[h] * widths[w] * (*srcAlt++);
+                        }
+                    }
+                }
+                for (int32_t k = 0; k < destChannels; k++) {
+                    *destAlt++ = pixels[k] / totalArea;
+                }
+                runningWidth += strideWidth;
+            }
+            runningHeight += strideHeight;
+        }
+    } else if (method == TURTLE_IMAGE_RESIZE_NEAREST) {
+        int32_t precalculatedWidths[destWidth];
+        int32_t precalculatedHeights[destHeight];
+        for (int32_t i = 0; i < destHeight; i++) {
+            precalculatedHeights[i] = (int32_t) ((double) i / destHeight * srcHeight) * srcWidth * srcChannels;
+        }
+        for (int32_t j = 0; j < destWidth; j++) {
+            precalculatedWidths[j] = (int32_t) ((double) j / destWidth * srcWidth) * srcChannels;
+        }
+        for (int32_t i = 0; i < destHeight; i++) {
+            for (int32_t j = 0; j < destWidth; j++) {
+                uint8_t *srcAlt = src + precalculatedHeights[i] + precalculatedWidths[j];
+                for (int32_t k = 0; k < destChannels; k++) {
+                    *destAlt++ = *srcAlt++;
+                }
+            }
+        }
+    } else {
+        if (freeDest) {
+            free(dest);
+        }
+        printf("turtleImageResize: Unsupported method %d\n", method);
+        return NULL;
+    }
+    return dest;
+}
+
 turtle_texture_t turtleTextureLoad(char *filename) {
     /* load image */
     int width;
     int height;
     int channels;
-    unsigned char *image = stbi_load(filename, &width, &height, &channels, 0);
+    uint8_t *image = stbi_load(filename, &width, &height, &channels, 0);
     if (image == NULL) {
         printf("turtleTextureLoad: Could not load image %s\n", filename);
         return -1;
     }
     uint32_t encoding = GL_RGB;
-    uint32_t stb_encoding = STBIR_RGB;
-    uint8_t stride = 3;
     if (channels == 4) {
         encoding = GL_RGBA;
-        stb_encoding = STBIR_RGBA;
-        stride = 4;
     }
     if (channels == 1) {
         encoding = GL_RED;
-        stb_encoding = STBIR_1CHANNEL;
-        stride = 1;
     }
-    unsigned char *resized = malloc(stride * turtle.textureWidth * turtle.textureHeight);
-    stbir_resize_uint8_linear(image, width, height, stride * width, resized, turtle.textureWidth, turtle.textureHeight, stride * turtle.textureWidth, stb_encoding);
+    uint8_t *resized = malloc(channels * turtle.textureWidth * turtle.textureHeight);
+    turtleImageResize(resized, turtle.textureWidth, turtle.textureHeight, encoding, image, width, height, encoding, TURTLE_IMAGE_RESIZE_LINEAR);
     free(image);
     if (resized == NULL) {
         printf("turtleTextureLoad: Could not resize image %s\n", filename);
@@ -807,7 +961,7 @@ turtle_texture_t turtleTextureLoad(char *filename) {
             turtle.textureList -> data[i].s = strdup(filename);
             turtle.textureList -> data[i + 1].i = width;
             turtle.textureList -> data[i + 2].i = height;
-            turtle.textureList -> data[i + 3].i = stride;
+            turtle.textureList -> data[i + 3].i = channels;
             texture = i;
             break;
         }
@@ -836,23 +990,17 @@ turtle_texture_t turtleTextureLoadList(list_t *list, uint32_t width, uint32_t he
 
 turtle_texture_t turtleTextureLoadListArrayInternal(list_t *list, uint8_t *array, uint32_t width, uint32_t height, uint32_t encoding) {
     /* determine encoding */
-    uint8_t stride = 0;
-    uint32_t stb_encoding = 0;
+    uint8_t channels = 0;
     if (encoding == GL_RGB) {
-        stride = 3;
-        stb_encoding = STBIR_RGB;
+        channels = 3;
     } else if (encoding == GL_BGR) {
-        stride = 3;
-        stb_encoding = STBIR_BGR;
+        channels = 3;
     } else if (encoding == GL_RGBA) {
-        stride = 4;
-        stb_encoding = STBIR_RGBA;
+        channels = 4;
     } else if (encoding == GL_BGRA) {
-        stride = 4;
-        stb_encoding = STBIR_BGRA;
+        channels = 4;
     } else if (encoding == GL_RED || encoding == GL_GREEN || encoding == GL_BLUE || encoding == GL_ALPHA) {
-        stride = 1;
-        stb_encoding = STBIR_1CHANNEL;
+        channels = 1;
     } else {
         printf("turtleTextureLoadListArrayInternal: Unsupported encoding %d\n", encoding);
         return -1;
@@ -869,8 +1017,8 @@ turtle_texture_t turtleTextureLoadListArrayInternal(list_t *list, uint8_t *array
         }
         freeArrayFlag = 1;
     }
-    unsigned char *resized = malloc(stride * turtle.textureWidth * turtle.textureHeight);
-    stbir_resize_uint8_linear(array, width, height, stride * width, resized, turtle.textureWidth, turtle.textureHeight, stride * turtle.textureWidth, stb_encoding);
+    uint8_t *resized = malloc(channels * turtle.textureWidth * turtle.textureHeight);
+    turtleImageResize(resized, turtle.textureWidth, turtle.textureHeight, encoding, array, width, height, encoding, TURTLE_IMAGE_RESIZE_LINEAR);
     if (freeArrayFlag) {
         free(array);
     }
@@ -892,7 +1040,7 @@ turtle_texture_t turtleTextureLoadListArrayInternal(list_t *list, uint8_t *array
             turtle.textureList -> data[i].s = strdup(pointerValue);
             turtle.textureList -> data[i + 1].i = width;
             turtle.textureList -> data[i + 2].i = height;
-            turtle.textureList -> data[i + 3].i = stride;
+            turtle.textureList -> data[i + 3].i = channels;
             texture = i;
             break;
         }
@@ -902,7 +1050,7 @@ turtle_texture_t turtleTextureLoadListArrayInternal(list_t *list, uint8_t *array
         list_append(turtle.textureList, (unitype) pointerValue, 's');
         list_append(turtle.textureList, (unitype) width, 'i');
         list_append(turtle.textureList, (unitype) height, 'i');
-        list_append(turtle.textureList, (unitype) stride, 'i');
+        list_append(turtle.textureList, (unitype) channels, 'i');
     }
     glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, texture / 4, turtle.textureWidth, turtle.textureHeight, 1, encoding, GL_UNSIGNED_BYTE, resized);
     glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
@@ -945,26 +1093,20 @@ int32_t turtleTextureReplace(turtle_texture_t texture, char *filename) {
     int width;
     int height;
     int channels;
-    unsigned char *image = stbi_load(filename, &width, &height, &channels, 0);
+    uint8_t *image = stbi_load(filename, &width, &height, &channels, 0);
     if (image == NULL) {
         printf("turtleTextureReplace: Could not load image %s\n", filename);
         return -1;
     }
     uint32_t encoding = GL_RGB;
-    uint32_t stb_encoding = STBIR_RGB;
-    uint8_t stride = 3;
     if (channels == 4) {
         encoding = GL_RGBA;
-        stb_encoding = STBIR_RGBA;
-        stride = 4;
     }
     if (channels == 1) {
         encoding = GL_RED;
-        stb_encoding = STBIR_1CHANNEL;
-        stride = 1;
     }
-    unsigned char *resized = malloc(stride * turtle.textureWidth * turtle.textureHeight);
-    stbir_resize_uint8_linear(image, width, height, stride * width, resized, turtle.textureWidth, turtle.textureHeight, stride * turtle.textureWidth, stb_encoding);
+    uint8_t *resized = malloc(channels * turtle.textureWidth * turtle.textureHeight);
+    turtleImageResize(resized, turtle.textureWidth, turtle.textureHeight, encoding, image, width, height, encoding, TURTLE_IMAGE_RESIZE_LINEAR);
     free(image);
     if (resized == NULL) {
         printf("turtleTextureReplace: Could not resize image %s\n", filename);
@@ -989,23 +1131,17 @@ int32_t turtleTextureReplaceList(turtle_texture_t texture, list_t *list, uint32_
 
 int32_t turtleTextureReplaceListArrayInternal(turtle_texture_t texture, list_t *list, uint8_t *array, uint32_t width, uint32_t height, uint32_t encoding) {
     /* determine encoding */
-    uint8_t stride = 0;
-    uint32_t stb_encoding = 0;
+    uint8_t channels = 0;
     if (encoding == GL_RGB) {
-        stride = 3;
-        stb_encoding = STBIR_RGB;
+        channels = 3;
     } else if (encoding == GL_BGR) {
-        stride = 3;
-        stb_encoding = STBIR_BGR;
+        channels = 3;
     } else if (encoding == GL_RGBA) {
-        stride = 4;
-        stb_encoding = STBIR_RGBA;
+        channels = 4;
     } else if (encoding == GL_BGRA) {
-        stride = 4;
-        stb_encoding = STBIR_BGRA;
+        channels = 4;
     } else if (encoding == GL_RED || encoding == GL_GREEN || encoding == GL_BLUE || encoding == GL_ALPHA) {
-        stride = 1;
-        stb_encoding = STBIR_1CHANNEL;
+        channels = 1;
     } else {
         printf("turtleTextureReplaceListArrayInternal: Unsupported encoding %d\n", encoding);
         return -1;
@@ -1022,8 +1158,8 @@ int32_t turtleTextureReplaceListArrayInternal(turtle_texture_t texture, list_t *
         }
         freeArrayFlag = 1;
     }
-    unsigned char *resized = malloc(stride * turtle.textureWidth * turtle.textureHeight);
-    stbir_resize_uint8_linear(array, width, height, stride * width, resized, turtle.textureWidth, turtle.textureHeight, stride * turtle.textureWidth, stb_encoding);
+    uint8_t *resized = malloc(channels * turtle.textureWidth * turtle.textureHeight);
+    turtleImageResize(resized, turtle.textureWidth, turtle.textureHeight, encoding, array, width, height, encoding, TURTLE_IMAGE_RESIZE_LINEAR);
     if (freeArrayFlag) {
         free(array);
     }

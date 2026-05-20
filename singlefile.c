@@ -19,7 +19,6 @@ const char headerFiles[][128] = {
     "include/list.h",
     "include/bufferList.h",
     "include/stb_image.h",
-    "include/stb_image_resize2.h",
     "include/stb_image_write.h",
     "include/turtle.h",
     "include/turtleText.h",
@@ -85,19 +84,11 @@ int32_t lineBlacklist(char *line) {
         sprintf(blacklisted[i + headerLength * 4], "#include \"../%s\"\r\n", headerFiles[i]);
         sprintf(blacklisted[i + headerLength * 5], "#include \"../%s\"\n", headerFiles[i]);
     }
-    sprintf(blacklisted[headerLength * permutations], "#include STBIR__HEADER_FILENAME\r\n");
-    sprintf(blacklisted[headerLength * permutations + 1], "#include STBIR__HEADER_FILENAME\n");
     for (int32_t i = 0; i < headerLength * permutations; i++) {
         // printf("%s%s %d\n", blacklisted[i], line, strcmp(blacklisted[i], line));
         if (strcmp(blacklisted[i], line) == 0) {
             // printf("found %s", blacklisted[i]);
             return 1;
-        }
-    }
-    /* special: replace #include STBIR__HEADER_FILENAME with the contents of include/stb_image_resize2_reinclude.h */
-    for (int32_t i = headerLength * permutations; i < headerLength * permutations + 2; i++) {
-        if (strcmp(blacklisted[i], line) == 0) {
-            return 2;
         }
     }
     return 0;
@@ -138,15 +129,6 @@ int main(int argc, char *argv[]) {
             int32_t blacklist = lineBlacklist(buffer);
             if (!blacklist) {
                 fprintf(outputfp, "%s", buffer);
-            } else if (blacklist == 2) {
-                /* replace line with contents of stb_image_resize2_reinclude.h */
-                uint8_t reincludeBuffer[4096];
-                FILE *reincludefp = fopen("include/stb_image_resize2_reinclude.h", "r");
-                while (fgets(reincludeBuffer, 4096, reincludefp) != NULL) {
-                    fprintf(outputfp, "%s", reincludeBuffer);
-                }
-                fwrite("\n", 1, 1, outputfp);
-                fclose(reincludefp);
             }
         }
         fwrite("\n", 1, 1, outputfp);
