@@ -24417,16 +24417,9 @@ uint8_t *turtleImageResize(uint8_t *dest, uint32_t destWidth, uint32_t destHeigh
         dest = malloc(destWidth * destHeight * destChannels);
     }
     uint8_t *destAlt = dest;
-    if (method == TURTLE_IMAGE_RESIZE_SRGB) {
-        for (int32_t i = 0; i < destHeight; i++) {
-            for (int32_t j = 0; j < destWidth; j++) {
-                uint8_t *srcAlt = src + ((int32_t) ((double) i / destHeight * srcHeight) * srcWidth + (int32_t) ((double) j / destWidth * srcWidth)) * srcChannels;
-                for (int32_t k = 0; k < destChannels; k++) {
-                    *destAlt++ = *srcAlt++;
-                }
-            }
-        }
-    } else if (method == TURTLE_IMAGE_RESIZE_LINEAR) {
+    if (method == TURTLE_IMAGE_RESIZE_SRGB || method == TURTLE_IMAGE_RESIZE_LINEAR) {
+        /* TODO - make TURTLE_IMAGE_RESIZE_SRGB distinct from linear */
+        /* TODO - validate that linear resize is consistent and doesn't crash */
         double strideWidth = (double) srcWidth / destWidth;
         double strideHeight = (double) srcHeight / destHeight;
         // printf("w: %lf h: %lf\n", strideWidth, strideHeight);
@@ -24502,10 +24495,18 @@ uint8_t *turtleImageResize(uint8_t *dest, uint32_t destWidth, uint32_t destHeigh
         int32_t precalculatedWidths[destWidth];
         int32_t precalculatedHeights[destHeight];
         for (int32_t i = 0; i < destHeight; i++) {
-            precalculatedHeights[i] = (int32_t) ((double) i / destHeight * srcHeight) * srcWidth * srcChannels;
+            precalculatedHeights[i] = (int32_t) ((double) (i + 0.5) / destHeight * srcHeight) * srcWidth * srcChannels;
+            if (precalculatedHeights[i] >= srcHeight * srcWidth * srcChannels) {
+                printf("ruh roh raggy\n");
+                precalculatedHeights[i] = srcHeight * srcWidth * srcChannels - srcWidth * srcChannels;
+            }
         }
         for (int32_t j = 0; j < destWidth; j++) {
-            precalculatedWidths[j] = (int32_t) ((double) j / destWidth * srcWidth) * srcChannels;
+            precalculatedWidths[j] = (int32_t) ((double) (j + 0.5) / destWidth * srcWidth) * srcChannels;
+            if (precalculatedWidths[j] >= srcWidth * srcChannels) {
+                printf("rejavik\n");
+                precalculatedWidths[j] = srcWidth * srcChannels - srcChannels;
+            }
         }
         for (int32_t i = 0; i < destHeight; i++) {
             for (int32_t j = 0; j < destWidth; j++) {
