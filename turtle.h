@@ -10233,7 +10233,7 @@ void turtleTextureRenderInternal(int32_t textureCode, double x1, double y1, doub
 /* set pixel width and height of textures (determines how much memory textures take in the GPU, default 1024, 1024) - must be done BEFORE turtleInit() */
 void turtleSetTextureSize(int32_t width, int32_t height);
 
-/* set maximum number of textures (default 64) - must be done BEFORE turtleInit() */
+/* set maximum number of textures (default 32) - must be done BEFORE turtleInit() */
 void turtleSetMaxTextures(int32_t maxTextures);
 
 /* set resize mode of turtle (TURTLE_RESIZE_MODE_PAD, TURTLE_RESIZE_MODE_STRETCH, or TURTLE_RESIZE_MODE_PAD_NO_BARS) (default TURTLE_RESIZE_MODE_PAD) - must be done BEFORE turtleInit() */
@@ -23837,7 +23837,7 @@ void turtleInit(GLFWwindow *window, double leftX, double bottomY, double rightX,
         turtle.textureHeight = 1024; // default
     }
     if (turtle.maxTextures == 0) {
-        turtle.maxTextures = 64; // default
+        turtle.maxTextures = 32; // default
     }
     glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA, turtle.textureWidth, turtle.textureHeight, turtle.maxTextures, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL); // textures at 1024x1024
     #endif /* TURTLE_ENABLE_TEXTURES */

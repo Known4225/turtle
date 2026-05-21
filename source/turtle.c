@@ -242,7 +242,7 @@ void turtleInit(GLFWwindow *window, double leftX, double bottomY, double rightX,
         turtle.textureHeight = 1024; // default
     }
     if (turtle.maxTextures == 0) {
-        turtle.maxTextures = 64; // default
+        turtle.maxTextures = 32; // default
     }
     glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA, turtle.textureWidth, turtle.textureHeight, turtle.maxTextures, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL); // textures at 1024x1024
     #endif /* TURTLE_ENABLE_TEXTURES */
