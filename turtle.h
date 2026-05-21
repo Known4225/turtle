@@ -24375,6 +24375,17 @@ void printList(double *list, int32_t len) {
     }
 }
 
+void printListInt(int32_t *list, int32_t len) {
+    printf("[");
+    for (int32_t i = 0; i < len; i++) {
+        if (i == len - 1) {
+            printf("%d]\n", list[i]);
+        } else {
+            printf("%d ", list[i]);
+        }
+    }
+}
+
 uint8_t *turtleImageResize(uint8_t *dest, uint32_t destWidth, uint32_t destHeight, uint32_t destEncoding, uint8_t *src, uint32_t srcWidth, uint32_t srcHeight, uint32_t srcEncoding, turtle_image_resize_t method) {
     /* determine encoding */
     uint8_t destChannels = 0;
@@ -24426,13 +24437,41 @@ uint8_t *turtleImageResize(uint8_t *dest, uint32_t destWidth, uint32_t destHeigh
         double runningWidth = 0;
         double runningHeight = 0;
         double totalArea = strideWidth * strideHeight;
-        double *widths = malloc((floor(strideWidth + 1) + 1) * sizeof(double));
+        int32_t widthOne = floor(strideWidth + 1) + 1;
+        double *widths = malloc(widthOne * destWidth * sizeof(double));
+        int32_t *extraWidths = malloc(destWidth * 2 * sizeof(int32_t)); // extraWidth, widthLen
         double *heights = malloc((floor(strideHeight + 1) + 1) * sizeof(double));
+        int32_t *heightsPrecalc = malloc((floor(strideHeight + 1) + 1) * sizeof(int32_t));
         double pixels[destChannels];
         int32_t widthsLen = 0;
+        for (int32_t j = 0; j < destWidth; j++) {
+            double acruW = floor(runningWidth + 1) - runningWidth;
+            if (strideWidth < acruW) {
+                acruW = strideWidth;
+                widths[j * widthOne] = acruW;
+                widthsLen = j * widthOne + 1;
+            } else {
+                widths[j * widthOne] = acruW;
+                widthsLen = j * widthOne + 1;
+                while (strideWidth - acruW >= 1) {
+                    widths[widthsLen] = 1;
+                    acruW += 1;
+                    widthsLen++;
+                }
+                if (strideWidth - acruW > 0.00001) { // TODO remove if statement
+                    widths[widthsLen] = strideWidth - acruW;
+                    widthsLen++;
+                }
+            }
+            extraWidths[j * 2] = (int32_t) floor(runningWidth) * srcChannels;
+            extraWidths[j * 2 + 1] = widthsLen - j * widthOne;
+            runningWidth += strideWidth;
+            // printList(widths, widthsLen);
+        }
+        // printListInt(extraWidths, destWidth * 2);
         int32_t heightsLen = 0;
         for (int32_t i = 0; i < destHeight; i++) {
-            double acruH = floor(runningWidth + 1) - runningHeight;
+            double acruH = floor(runningHeight + 1) - runningHeight;
             if (strideHeight < acruH) {
                 acruH = strideHeight;
                 heights[0] = acruH;
@@ -24445,42 +24484,29 @@ uint8_t *turtleImageResize(uint8_t *dest, uint32_t destWidth, uint32_t destHeigh
                     acruH += 1;
                     heightsLen++;
                 }
-                heights[heightsLen] = strideHeight - acruH;
-                heightsLen++;
+                if (strideHeight - acruH > 0.00001) { // TODO remove if statement
+                    heights[heightsLen] = strideHeight - acruH;
+                    heightsLen++;
+                }
             }
-            // printf("heights: ");
+            heightsPrecalc[0] = (int32_t) floor(runningHeight + 0.00001) * srcWidth * srcChannels;
+            double heightSum = 0;
+            for (int32_t j = 0; j < heightsLen - 1; j++) {
+                heightSum += heights[j];
+                heightsPrecalc[j + 1] = (int32_t) floor(runningHeight + heightSum + 0.00001) * srcWidth * srcChannels;
+            }
+            // printf("%d %d heights: ", i, destHeight);
             // printList(heights, heightsLen);
             runningWidth = 0;
             for (int32_t j = 0; j < destWidth; j++) {
-                double acruW = floor(runningWidth + 1) - runningWidth;
-                if (strideWidth < acruW) {
-                    acruW = strideWidth;
-                    widths[0] = acruW;
-                    widthsLen = 1;
-                } else {
-                    widths[0] = acruW;
-                    widthsLen = 1;
-                    while (strideWidth - acruW >= 1) {
-                        widths[widthsLen] = 1;
-                        acruW += 1;
-                        widthsLen++;
-                    }
-                    widths[widthsLen] = strideWidth - acruW;
-                    widthsLen++;
-                }
-                // printList(widths, widthsLen);
                 for (int32_t k = 0; k < destChannels; k++) {
                     pixels[k] = 0;
                 }
-                double extraHeight = 0;
                 for (int32_t h = 0; h < heightsLen; h++) {
-                    if (h > 0) {
-                        extraHeight += heights[h - 1];
-                    }
-                    uint8_t *srcAlt = src + ((int32_t) floor(runningHeight + extraHeight + 0.00001) * srcWidth + (int32_t) floor(runningWidth)) * srcChannels;
-                    for (int32_t w = 0; w < widthsLen; w++) {
+                    uint8_t *srcAlt = src + heightsPrecalc[h] + extraWidths[j * 2];
+                    for (int32_t w = 0; w < extraWidths[j * 2 + 1]; w++) {
                         for (int32_t k = 0; k < destChannels; k++) {
-                            pixels[k] += heights[h] * widths[w] * (*srcAlt++);
+                            pixels[k] += heights[h] * widths[j * widthOne + w] * (*srcAlt++);
                         }
                     }
                 }
@@ -24491,6 +24517,10 @@ uint8_t *turtleImageResize(uint8_t *dest, uint32_t destWidth, uint32_t destHeigh
             }
             runningHeight += strideHeight;
         }
+        free(widths);
+        free(extraWidths);
+        free(heights);
+        free(heightsPrecalc);
     } else if (method == TURTLE_IMAGE_RESIZE_NEAREST) {
         int32_t precalculatedWidths[destWidth];
         int32_t precalculatedHeights[destHeight];
@@ -24504,7 +24534,7 @@ uint8_t *turtleImageResize(uint8_t *dest, uint32_t destWidth, uint32_t destHeigh
         for (int32_t j = 0; j < destWidth; j++) {
             precalculatedWidths[j] = (int32_t) ((double) (j + 0.5) / destWidth * srcWidth) * srcChannels;
             if (precalculatedWidths[j] >= srcWidth * srcChannels) {
-                printf("rejavik\n");
+                printf("reykjavik\n");
                 precalculatedWidths[j] = srcWidth * srcChannels - srcChannels;
             }
         }
