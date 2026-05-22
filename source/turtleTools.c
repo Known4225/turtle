@@ -26,6 +26,19 @@ using the tab key to select different elements? And allowing them to be changed 
 
 #include "../include/turtleTools.h"
 
+/* UI element colours (in order listed in tt_element_names_t) */
+int32_t tt_color_default[] = {
+    /*         none                           button                         switch                            dial                           slider                          textbox                        dropdown                         scrollbar                      context                       variable reader                   list reader                     ribbon                           popup               */
+    0,                              TT_COLOR_TEXT_ALTERNATE,        TT_COLOR_TEXT_BASE,             TT_COLOR_TEXT_BASE,             TT_COLOR_TEXT_BASE,             TT_COLOR_TEXT_ALTERNATE,        TT_COLOR_TEXT_BASE,             0,                              TT_COLOR_TEXT_ALTERNATE,        TT_COLOR_BLACK,                 TT_COLOR_BLACK,                 TT_COLOR_TEXT_ALTERNATE,        TT_COLOR_TEXT_ALTERNATE,        
+    0,                              TT_COLOR_COMPONENT,             TT_COLOR_TEXT_ALTERNATE,        TT_COLOR_TEXT_BASE,             TT_COLOR_COMPONENT_ALTERNATE,   TT_COLOR_COMPONENT_BASE,        TT_COLOR_TEXT_ALTERNATE,        TT_COLOR_COMPONENT_BASE,        TT_COLOR_COMPONENT_BASE,        TT_COLOR_WHITE,                 TT_COLOR_WHITE,                 TT_COLOR_COMPONENT_HIGHLIGHT,   TT_COLOR_COMPONENT_ALTERNATE,   
+    0,                              TT_COLOR_COMPONENT_HIGHLIGHT,   TT_COLOR_COMPONENT_BASE,        TT_COLOR_BACKGROUND_BASE,       TT_COLOR_BACKGROUND_COMPLEMENT, TT_COLOR_TEXT_HIGHLIGHT,        TT_COLOR_COMPONENT_BASE,        TT_COLOR_COMPONENT_COMPLEMENT,  TT_COLOR_COMPONENT_HIGHLIGHT,   TT_COLOR_LIGHT_GREY,            TT_COLOR_LIGHT_GREY,            TT_COLOR_COMPONENT_HIGHLIGHT,   TT_COLOR_COMPONENT_HIGHLIGHT,   
+    0,                              TT_COLOR_TEXT_BASE,             TT_COLOR_COMPONENT_HIGHLIGHT,   0,                              0,                              TT_COLOR_TEXT_ALTERNATE,        TT_COLOR_COMPONENT_HIGHLIGHT,   TT_COLOR_BACKGROUND_ALTERNATE,  0,                              TT_COLOR_ORANGE,                TT_COLOR_RED_ALTERNATE,         TT_COLOR_COMPONENT,             TT_COLOR_COMPONENT,             
+    0,                              TT_COLOR_COMPONENT_COMPLEMENT,  TT_COLOR_BACKGROUND_ALTERNATE,  0,                              0,                              TT_COLOR_BLUE,                  TT_COLOR_COMPONENT_HIGHLIGHT,   TT_COLOR_BACKGROUND_HIGHLIGHT,  0,                              0,                              TT_COLOR_WHITE_ALTERNATE,       TT_COLOR_COMPONENT,             0,                              
+    0,                              0,                              TT_COLOR_TERTIARY_BASE,         0,                              0,                              0,                              TT_COLOR_TEXT_ALTERNATE,        0,                              0,                              0,                              TT_COLOR_DARK_GREY_ALTERNATE,   0,                              0,                              
+    0,                              0,                              0,                              0,                              0,                              0,                              0,                              0,                              0,                              0,                              TT_COLOR_DARK_GREY,             0,                              0,                              
+    0,                              0,                              0,                              0,                              0,                              0,                              0,                              0,                              0,                              0,                              TT_COLOR_DARK_GREY,             0,                              0,                              
+};
+
 int randomInt(int lowerBound, int upperBound) { // random integer between lower and upper bound (inclusive)
     return (rand() % (upperBound - lowerBound + 1) + lowerBound);
 }
@@ -56,19 +69,6 @@ char *strdel(char *dest, int32_t index, int32_t size) {
 tt_theme_name_t tt_theme;
 tt_enabled_t tt_enabled; // all start at 0 (global variable)
 tt_elements_t tt_elements;
-
-/* UI element colours (in order listed in tt_element_names_t) */
-int32_t tt_color_default[] = {
-    /*         none                           button                         switch                            dial                           slider                          textbox                        dropdown                         scrollbar                      context                       variable reader                   list reader                     ribbon                           popup               */
-    0,                              TT_COLOR_TEXT_ALTERNATE,        TT_COLOR_TEXT_BASE,             TT_COLOR_TEXT_BASE,             TT_COLOR_TEXT_BASE,             TT_COLOR_TEXT_ALTERNATE,        TT_COLOR_TEXT_BASE,             0,                              TT_COLOR_TEXT_ALTERNATE,        TT_COLOR_BLACK,                 TT_COLOR_BLACK,                 TT_COLOR_TEXT_ALTERNATE,        TT_COLOR_TEXT_ALTERNATE,        
-    0,                              TT_COLOR_COMPONENT,             TT_COLOR_TEXT_ALTERNATE,        TT_COLOR_TEXT_BASE,             TT_COLOR_COMPONENT_ALTERNATE,   TT_COLOR_COMPONENT_BASE,        TT_COLOR_TEXT_ALTERNATE,        TT_COLOR_COMPONENT_BASE,        TT_COLOR_COMPONENT_BASE,        TT_COLOR_WHITE,                 TT_COLOR_WHITE,                 TT_COLOR_COMPONENT_HIGHLIGHT,   TT_COLOR_COMPONENT_ALTERNATE,   
-    0,                              TT_COLOR_COMPONENT_HIGHLIGHT,   TT_COLOR_COMPONENT_BASE,        TT_COLOR_BACKGROUND_BASE,       TT_COLOR_BACKGROUND_COMPLEMENT, TT_COLOR_TEXT_HIGHLIGHT,        TT_COLOR_COMPONENT_BASE,        TT_COLOR_COMPONENT_COMPLEMENT,  TT_COLOR_COMPONENT_HIGHLIGHT,   TT_COLOR_LIGHT_GREY,            TT_COLOR_LIGHT_GREY,            TT_COLOR_COMPONENT_HIGHLIGHT,   TT_COLOR_COMPONENT_HIGHLIGHT,   
-    0,                              TT_COLOR_TEXT_BASE,             TT_COLOR_COMPONENT_HIGHLIGHT,   0,                              0,                              TT_COLOR_TEXT_ALTERNATE,        TT_COLOR_COMPONENT_HIGHLIGHT,   TT_COLOR_BACKGROUND_ALTERNATE,  0,                              TT_COLOR_ORANGE,                TT_COLOR_RED_ALTERNATE,         TT_COLOR_COMPONENT,             TT_COLOR_COMPONENT,             
-    0,                              TT_COLOR_COMPONENT_COMPLEMENT,  TT_COLOR_BACKGROUND_ALTERNATE,  0,                              0,                              TT_COLOR_BLUE,                  TT_COLOR_COMPONENT_HIGHLIGHT,   TT_COLOR_BACKGROUND_HIGHLIGHT,  0,                              0,                              TT_COLOR_WHITE_ALTERNATE,       TT_COLOR_COMPONENT,             0,                              
-    0,                              0,                              TT_COLOR_TERTIARY_BASE,         0,                              0,                              0,                              TT_COLOR_TEXT_ALTERNATE,        0,                              0,                              0,                              TT_COLOR_DARK_GREY_ALTERNATE,   0,                              0,                              
-    0,                              0,                              0,                              0,                              0,                              0,                              0,                              0,                              0,                              0,                              TT_COLOR_DARK_GREY,             0,                              0,                              
-    0,                              0,                              0,                              0,                              0,                              0,                              0,                              0,                              0,                              0,                              TT_COLOR_DARK_GREY,             0,                              0,                              
-};
 
 /* default colours (light theme) */
 double tt_themeColors[] = {
@@ -2041,6 +2041,26 @@ int32_t tt_textboxCalculateMaximumCharacters(uint32_t *charlist, int32_t textLen
     return 0;
 }
 
+int32_t tt_textboxCalculateIndexFromPosition(tt_textbox_t *textboxp, double position) {
+    uint32_t textConverted[strlen(textboxp -> text) + 1];
+    uint32_t characterLength = turtleTextConvertUnicode(textboxp -> text + textboxp -> renderStartingIndex, textConverted);
+    int32_t index;
+    double startingPx = position - (textboxp -> x + textboxp -> renderPixelOffset + 1 + turtleTextGetLength(textConverted, 1, textboxp -> size - 1) / 2);
+    if (startingPx > 0) {
+        double dummy;
+        index = tt_textboxCalculateMaximumCharacters(textConverted, characterLength, textboxp -> size - 1, startingPx, -1, &dummy) + textboxp -> renderStartingIndex;
+    } else {
+        index = textboxp -> renderStartingIndex;
+    }
+    if (index < 0) {
+        index = 0;
+    }
+    if (index > strlen(textboxp -> text)) {
+        index = strlen(textboxp -> text);
+    }
+    return index;
+}
+
 void tt_textboxUpdate(tt_textbox_t *textboxp) {
     if (textboxp -> enabled == TT_ELEMENT_HIDE) {
         if (textboxp -> status != TT_STATUS_BLOCKED) {
@@ -2176,10 +2196,10 @@ void tt_textboxUpdate(tt_textbox_t *textboxp) {
         }
     }
     if (turtleMouseDown()) {
-        if (textboxp -> status == TT_STATUS_HOVER || textboxp -> status == TT_STATUS_HOVER_FIRST_TICK) {
+        if (textboxp -> status == TT_STATUS_HOVER || (textboxp -> status == TT_STATUS_OPEN && textboxp -> mouseOver) || textboxp -> status == TT_STATUS_HOVER_FIRST_TICK || (textboxp -> status == TT_STATUS_OPEN_FIRST_TICK && textboxp -> mouseOver)) {
             /* first tick clicked */
             textboxp -> count = 1;
-            textboxp -> editIndex = strlen(textboxp -> text);
+            textboxp -> editIndex = tt_textboxCalculateIndexFromPosition(textboxp, turtle.mouseX);
             textboxp -> status = TT_STATUS_CLICK_FIRST_TICK;
         } else if (textboxp -> status == TT_STATUS_CLICK || textboxp -> status == TT_STATUS_CLICK_FIRST_TICK) {
             /* textbox is being held */
