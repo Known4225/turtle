@@ -2811,11 +2811,11 @@ void tt_readerUpdate(tt_reader_t *readerp) {
             } else {
                 readerp -> width = readerp -> anchorX + turtle.mouseX - readerp -> mouseAnchorX;
                 readerp -> height = readerp -> anchorY + readerp -> mouseAnchorY - turtle.mouseY;
-                if (readerp -> width < readerp -> size * 10) {
-                    readerp -> width = readerp -> size * 10;
+                if (readerp -> width < readerp -> size * 8) {
+                    readerp -> width = readerp -> size * 8;
                 }
-                if (readerp -> height < readerp -> size * 10) {
-                    readerp -> height = readerp -> size * 10;
+                if (readerp -> height < readerp -> size * 8) {
+                    readerp -> height = readerp -> size * 8;
                 }
             }
         }
