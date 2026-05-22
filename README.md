@@ -29,12 +29,12 @@ The following build commands are available:
 - Build some support for osTools on OS_BROWSER
 - Add some emojis to font
 - Write tests
-- Vertical switches
 - Fix flipped world coordinates
 - Mouse interactions with textbox (highlight, index select)
 - Text-only textbox
 - 3D support
 - Audio support (PortAudio?)
+- SVG support (NanoSVG?)
 - Update wiki/documentation
 - Linux COM support
 - I think there is a way to increase performance for texture enabled turtle - I think it is possible to remove penpos entirely and just write straight to bufferList

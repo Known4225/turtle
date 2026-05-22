@@ -1369,6 +1369,42 @@ void tt_switchUpdate(tt_switch_t *switchp) {
             }
             turtleTextWriteUnicode(switchp -> label, switchX - switchp -> size * 2, switchY, switchp -> size - 1, 100);
         }
+    } else if (switchp -> style == TT_SWITCH_STYLE_VERTICAL) {
+        /* render switch */
+        if (switchp -> value) {
+            tt_setColor(switchp -> color[TT_COLOR_SLOT_SWITCH_ON]);
+        } else {
+            tt_setColor(switchp -> color[TT_COLOR_SLOT_SWITCH_OFF]);
+        }
+        turtlePenSize(switchp -> size * 1.2);
+        turtleGoto(switchX, switchY - switchp -> size * 0.8);
+        turtlePenDown();
+        turtleGoto(switchX, switchY + switchp -> size * 0.8);
+        turtlePenUp();
+        turtlePenSize(switchp -> size);
+        if (switchp -> value) {
+            tt_setColor(switchp -> color[TT_COLOR_SLOT_CIRCLE_ON]);
+            turtleGoto(switchX, switchY + switchp -> size * 0.8);
+        } else {
+            tt_setColor(switchp -> color[TT_COLOR_SLOT_CIRCLE_OFF]);
+            turtleGoto(switchX, switchY - switchp -> size * 0.8);
+        }
+        turtlePenDown();
+        turtlePenUp();
+        /* mouse parameters */
+        switchClickLeft = switchX - switchp -> size * 0.6;
+        switchClickRight = switchX + switchp -> size * 0.6;
+        switchClickDown = switchY - switchp -> size * 1.35;
+        switchClickUp = switchY + switchp -> size * 1.35;
+        /* render text */
+        tt_setColor(switchp -> color[TT_COLOR_SLOT_SWITCH_TEXT]);
+        if (switchp -> align == TT_SWITCH_ALIGN_CENTER) {
+            turtleTextWriteUnicode(switchp -> label, switchX, switchY + 2.2 * switchp -> size, switchp -> size - 1, 50);
+        } else if (switchp -> align == TT_SWITCH_ALIGN_LEFT) {
+            turtleTextWriteUnicode(switchp -> label, switchX - switchp -> size * 1.2, switchY + 2.2 * switchp -> size, switchp -> size - 1, 0);
+        } else if (switchp -> align == TT_SWITCH_ALIGN_RIGHT) {
+            turtleTextWriteUnicode(switchp -> label, switchX + switchp -> size * 1.2, switchY + 2.2 * switchp -> size, switchp -> size - 1, 100);
+        }
     } else if (switchp -> style == TT_SWITCH_STYLE_CHECKBOX || switchp -> style == TT_SWITCH_STYLE_XBOX) {
         /* render box */
         tt_setColor(switchp -> color[TT_COLOR_SLOT_SWITCH_ON]);

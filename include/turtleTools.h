@@ -375,10 +375,11 @@ typedef struct {
 
 typedef enum {
     TT_SWITCH_STYLE_CLASSIC = 0,
-    TT_SWITCH_STYLE_SIDESWIPE_LEFT = 1,
-    TT_SWITCH_STYLE_SIDESWIPE_RIGHT = 2,
-    TT_SWITCH_STYLE_CHECKBOX = 3,
-    TT_SWITCH_STYLE_XBOX = 4,
+    TT_SWITCH_STYLE_VERTICAL = 1,
+    TT_SWITCH_STYLE_SIDESWIPE_LEFT = 2,
+    TT_SWITCH_STYLE_SIDESWIPE_RIGHT = 3,
+    TT_SWITCH_STYLE_CHECKBOX = 4,
+    TT_SWITCH_STYLE_XBOX = 5,
 } tt_switch_style_t;
 
 typedef enum {
@@ -639,26 +640,31 @@ void turtleToolsInit();
 /* create a button */
 tt_button_t *tt_buttonInit(char *label, int8_t *variable, double x, double y, double size);
 
+/* delete button */
 void tt_buttonFree(tt_button_t *buttonp);
 
 /* create a switch */
 tt_switch_t *tt_switchInit(char *label, int8_t *variable, double x, double y, double size);
 
+/* delete switch */
 void tt_switchFree(tt_switch_t *switchp);
 
 /* create a dial - make renderNumberFactor 0 to hide dial number */
 tt_dial_t *tt_dialInit(char *label, double *variable, tt_dial_scale_t scale, double x, double y, double size, double bottom, double top, double renderNumberFactor);
 
+/* delete dial */
 void tt_dialFree(tt_dial_t *dialp);
 
 /* create a slider - make renderNumberFactor 0 to hide slider number */
 tt_slider_t *tt_sliderInit(char *label, double *variable, tt_slider_type_t type, tt_slider_align_t align, double x, double y, double size, double length, double bottom, double top, double renderNumberFactor);
 
+/* delete slider */
 void tt_sliderFree(tt_slider_t *sliderp);
 
 /* create a textbox */
 tt_textbox_t *tt_textboxInit(char *label, char *variable, int32_t maxCharacters, double x, double y, double size, double length);
 
+/* delete textbox */
 void tt_textboxFree(tt_textbox_t *textboxp);
 
 void tt_dropdownCalculateMax(tt_dropdown_t *dropdownp);
@@ -666,22 +672,27 @@ void tt_dropdownCalculateMax(tt_dropdown_t *dropdownp);
 /* create a dropdown - use a list of strings for options (options must have at least one string) */
 tt_dropdown_t *tt_dropdownInit(char *label, list_t *options, int32_t *variable, tt_dropdown_align_t align, double x, double y, double size);
 
+/* delete dropdown */
 void tt_dropdownFree(tt_dropdown_t *dropdownp);
 
 /* create a scrollbar */
 tt_scrollbar_t *tt_scrollbarInit(double *variable, tt_scrollbar_type_t type, double x, double y, double size, double length, double barPercentage);
 
+/* delete scrollbar */
 void tt_scrollbarFree(tt_scrollbar_t *scrollbarp);
 
 void tt_contextCalculateMax(tt_context_t *contextp);
 
+/* create a context */
 tt_context_t *tt_contextInit(list_t *options, int32_t *variable, double x, double y, double size);
 
+/* delete context */
 void tt_contextFree(tt_context_t *contextp);
 
 /* create a reader */
 tt_reader_t *tt_readerInit(char *label, unitype *variable, char type, double x, double y, double size);
 
+/* delete reader */
 void tt_readerFree(tt_reader_t *readerp);
 
 /* update a button */
