@@ -501,6 +501,7 @@ typedef struct {
     double length;
     int32_t maxCharacters;
     int32_t editIndex;
+    int32_t editIndexLength;
     int32_t lastKey;
     int32_t keyTimeout;
     int32_t initialKeyTimeout;

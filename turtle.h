@@ -10958,6 +10958,7 @@ typedef struct {
     double length;
     int32_t maxCharacters;
     int32_t editIndex;
+    int32_t editIndexLength;
     int32_t lastKey;
     int32_t keyTimeout;
     int32_t initialKeyTimeout;
@@ -27357,6 +27358,7 @@ tt_textbox_t *tt_textboxInit(char *label, char *variable, int32_t maxCharacters,
     textboxp -> value = textboxp -> text;
     textboxp -> maxCharacters = maxCharacters;
     textboxp -> editIndex = 0;
+    textboxp -> editIndexLength = 0;
     textboxp -> lastKey = 0;
     textboxp -> keyTimeout = 0;
     textboxp -> initialKeyTimeout = 48;
@@ -28315,6 +28317,14 @@ void tt_textboxAddKey(tt_textbox_t *textboxp, int32_t key) {
                 return;
             }
         }
+        if (textboxp -> editIndexLength != 0) {
+            if (textboxp -> editIndexLength < 0) {
+                textboxp -> editIndex += textboxp -> editIndexLength;
+                textboxp -> editIndexLength *= -1;
+            }
+            strdel(textboxp -> text, textboxp -> editIndex, textboxp -> editIndexLength);
+            textboxp -> editIndexLength = 0;
+        }
         strins(textboxp -> text, (char *) buffer, textboxp -> editIndex);
         textboxp -> editIndex += size;
     }
@@ -28336,58 +28346,119 @@ void tt_textboxHandleOtherKey(tt_textbox_t *textboxp, int32_t key) {
         if (textboxp -> editIndex <= 0) {
             return;
         }
-        int32_t size = 1;
-        if (textboxp -> text[textboxp -> editIndex - 1] & 0b10000000) {
-            while ((textboxp -> text[textboxp -> editIndex - 1] & 0b01000000) == 0) {
-                textboxp -> editIndex--;
-                size++;
+        if (textboxp -> editIndexLength == 0) {
+            int32_t size = 1;
+            if (textboxp -> text[textboxp -> editIndex - 1] & 0b10000000) {
+                while ((textboxp -> text[textboxp -> editIndex - 1] & 0b01000000) == 0) {
+                    textboxp -> editIndex--;
+                    size++;
+                }
             }
+            textboxp -> editIndex--;
+            strdel(textboxp -> text, textboxp -> editIndex, size);
+        } else {
+            if (textboxp -> editIndexLength < 0) {
+                textboxp -> editIndex += textboxp -> editIndexLength;
+                textboxp -> editIndexLength *= -1;
+            }
+            printf("%s %d %d\n", textboxp -> text, textboxp -> editIndex, textboxp -> editIndexLength);
+            strdel(textboxp -> text, textboxp -> editIndex, textboxp -> editIndexLength);
+            textboxp -> editIndexLength = 0;
         }
-        textboxp -> editIndex--;
-        strdel(textboxp -> text, textboxp -> editIndex, size);
     } else if (key == GLFW_KEY_DELETE) {
         if (textboxp -> editIndex >= len) {
             return;
         }
-        int32_t size = 1;
-        if (textboxp -> text[textboxp -> editIndex] & 0b10000000) {
-            if (textboxp -> text[textboxp -> editIndex] & 0b00100000) {
-                if (textboxp -> text[textboxp -> editIndex] & 0b00010000) {
+        if (textboxp -> editIndexLength == 0) {
+            int32_t size = 1;
+            if (textboxp -> text[textboxp -> editIndex] & 0b10000000) {
+                if (textboxp -> text[textboxp -> editIndex] & 0b00100000) {
+                    if (textboxp -> text[textboxp -> editIndex] & 0b00010000) {
+                        size++;
+                    }
                     size++;
                 }
                 size++;
             }
-            size++;
-        }
-        strdel(textboxp -> text, textboxp -> editIndex, size);
+            strdel(textboxp -> text, textboxp -> editIndex, size);
+        } else {
+            if (textboxp -> editIndexLength < 0) {
+                textboxp -> editIndex += textboxp -> editIndexLength;
+                textboxp -> editIndexLength *= -1;
+            }
+            strdel(textboxp -> text, textboxp -> editIndex, textboxp -> editIndexLength);
+            textboxp -> editIndexLength = 0;
+            }
     } else if (key == GLFW_KEY_ENTER) {
         textboxp -> status = TT_STATUS_IDLE;
     } else if (key == GLFW_KEY_LEFT) {
         textboxp -> count = 1;
         if (textboxp -> editIndex <= 0) {
+            textboxp -> editIndexLength = 0;
             return;
         }
-        if (textboxp -> text[textboxp -> editIndex - 1] & 0b10000000) {
-            while ((textboxp -> text[textboxp -> editIndex - 1] & 0b01000000) == 0) {
+        if (turtleKeyPressed(GLFW_KEY_LEFT_SHIFT) || turtleKeyPressed(GLFW_KEY_RIGHT_SHIFT)) {
+            if (textboxp -> editIndex + textboxp -> editIndexLength > 0) {
+                if (textboxp -> text[textboxp -> editIndex + textboxp -> editIndexLength - 1] & 0b10000000) {
+                    while ((textboxp -> text[textboxp -> editIndex + textboxp -> editIndexLength - 1] & 0b01000000) == 0) {
+                        textboxp -> editIndexLength--;
+                    }
+                }
+                textboxp -> editIndexLength--;
+            }
+        } else {
+            if (textboxp -> editIndexLength != 0) {
+                if (textboxp -> editIndexLength < 0) {
+                    textboxp -> editIndex += textboxp -> editIndexLength;
+                }
+                textboxp -> editIndexLength = 0;
+            } else {
+                if (textboxp -> text[textboxp -> editIndex - 1] & 0b10000000) {
+                    while ((textboxp -> text[textboxp -> editIndex - 1] & 0b01000000) == 0) {
+                        textboxp -> editIndex--;
+                    }
+                }
                 textboxp -> editIndex--;
             }
         }
-        textboxp -> editIndex--;
     } else if (key == GLFW_KEY_RIGHT) {
         textboxp -> count = 1;
         if (textboxp -> editIndex >= len) {
+            textboxp -> editIndexLength = 0;
             return;
         }
-        if (textboxp -> text[textboxp -> editIndex] & 0b10000000) {
-            if (textboxp -> text[textboxp -> editIndex] & 0b00100000) {
-                if (textboxp -> text[textboxp -> editIndex] & 0b00010000) {
+        if (turtleKeyPressed(GLFW_KEY_LEFT_SHIFT) || turtleKeyPressed(GLFW_KEY_RIGHT_SHIFT)) {
+            if (textboxp -> editIndex + textboxp -> editIndexLength < strlen(textboxp -> text)) {
+                if (textboxp -> text[textboxp -> editIndex + textboxp -> editIndexLength] & 0b10000000) {
+                    if (textboxp -> text[textboxp -> editIndex + textboxp -> editIndexLength] & 0b00100000) {
+                        if (textboxp -> text[textboxp -> editIndex + textboxp -> editIndexLength] & 0b00010000) {
+                            textboxp -> editIndexLength++;
+                        }
+                        textboxp -> editIndexLength++;
+                    }
+                    textboxp -> editIndexLength++;
+                }
+                textboxp -> editIndexLength++;
+            }
+        } else {
+            if (textboxp -> editIndexLength != 0) {
+                if (textboxp -> editIndexLength > 0) {
+                    textboxp -> editIndex += textboxp -> editIndexLength;
+                }
+                textboxp -> editIndexLength = 0;
+            } else {
+                if (textboxp -> text[textboxp -> editIndex] & 0b10000000) {
+                    if (textboxp -> text[textboxp -> editIndex] & 0b00100000) {
+                        if (textboxp -> text[textboxp -> editIndex] & 0b00010000) {
+                            textboxp -> editIndex++;
+                        }
+                        textboxp -> editIndex++;
+                    }
                     textboxp -> editIndex++;
                 }
                 textboxp -> editIndex++;
             }
-            textboxp -> editIndex++;
         }
-        textboxp -> editIndex++;
     }
 }
 
@@ -28477,7 +28548,7 @@ int32_t tt_textboxCalculateIndexFromPosition(tt_textbox_t *textboxp, double posi
     uint32_t textConverted[strlen(textboxp -> text) + 1];
     uint32_t characterLength = turtleTextConvertUnicode(textboxp -> text + textboxp -> renderStartingIndex, textConverted);
     int32_t index;
-    double startingPx = position - (textboxp -> x + textboxp -> renderPixelOffset + 1 + turtleTextGetLength(textConverted, 1, textboxp -> size - 1) / 2);
+    double startingPx = position - (textboxp -> x + textboxp -> renderPixelOffset + textboxp -> size / 10 + turtleTextGetLength(textConverted, 1, textboxp -> size - 1) / 2);
     if (startingPx > 0) {
         double dummy;
         index = tt_textboxCalculateMaximumCharacters(textConverted, characterLength, textboxp -> size - 1, startingPx, -1, &dummy) + textboxp -> renderStartingIndex;
@@ -28579,6 +28650,30 @@ void tt_textboxUpdate(tt_textbox_t *textboxp) {
         }
     }
     /* draw text and occluding boxes */
+    if (textboxp -> editIndexLength != 0) {
+        double highlightLeft;
+        double highlightRight;
+        char tempHold;
+        if (textboxp -> editIndex == textboxp -> renderStartingIndex) {
+            highlightLeft = -textboxp -> size / 10; // i dont know why this is necessary
+        } else {
+            tempHold = textboxp -> text[textboxp -> editIndex];
+            textboxp -> text[textboxp -> editIndex] = '\0';
+            highlightLeft = turtleTextGetUnicodeLength(textboxp -> text + textboxp -> renderStartingIndex, textboxp -> size - 1) + (textboxp -> editIndexLength > 0) * textboxp -> size / 10;
+            textboxp -> text[textboxp -> editIndex] = tempHold;
+        }
+        
+        if (textboxp -> editIndex + textboxp -> editIndexLength == textboxp -> renderStartingIndex) {
+            highlightRight = -textboxp -> size / 10; // i dont know why this is necessary
+        } else {
+            tempHold = textboxp -> text[textboxp -> editIndex + textboxp -> editIndexLength];
+            textboxp -> text[textboxp -> editIndex + textboxp -> editIndexLength] = '\0';
+            highlightRight = turtleTextGetUnicodeLength(textboxp -> text + textboxp -> renderStartingIndex, textboxp -> size - 1) + (textboxp -> editIndexLength < 0) * textboxp -> size / 10;
+            textboxp -> text[textboxp -> editIndex + textboxp -> editIndexLength] = tempHold;
+        }
+        tt_setColor(textboxp -> color[TT_COLOR_SLOT_TEXTBOX_HIGHLIGHT]);
+        turtleRectangle(textboxp -> x + textboxp -> renderPixelOffset + highlightLeft, textboxp -> y - textboxp -> size * 0.8, textboxp -> x + textboxp -> renderPixelOffset + highlightRight, textboxp -> y + textboxp -> size * 0.8);
+    }
     char tempHold;
     tempHold = textboxp -> text[textboxp -> renderStartingIndex + textboxp -> renderNumCharacters];
     textboxp -> text[textboxp -> renderStartingIndex + textboxp -> renderNumCharacters] = '\0';
@@ -28588,13 +28683,13 @@ void tt_textboxUpdate(tt_textbox_t *textboxp) {
     tt_setColor(textboxp -> color[TT_COLOR_SLOT_TEXTBOX_BOX]);
     turtleRectangle(textboxp -> x, textboxp -> y - textboxp -> size, textboxp -> x + textboxp -> size / 4, textboxp -> y + textboxp -> size);
     turtleRectangle(textboxp -> x + textboxp -> length, textboxp -> y - textboxp -> size, textboxp -> x + textboxp -> length - textboxp -> size / 4, textboxp -> y + textboxp -> size);
-    if ((textboxp -> status == TT_STATUS_CLICK || textboxp -> status == TT_STATUS_OPEN || textboxp -> status == TT_STATUS_CLICK_FIRST_TICK || textboxp -> status == TT_STATUS_OPEN_FIRST_TICK) && textboxp -> count <= textboxp -> linePeriod / 2) {
+    if ((textboxp -> status == TT_STATUS_CLICK || textboxp -> status == TT_STATUS_OPEN || textboxp -> status == TT_STATUS_CLICK_FIRST_TICK || textboxp -> status == TT_STATUS_OPEN_FIRST_TICK) && textboxp -> count <= textboxp -> linePeriod / 2 && textboxp -> editIndexLength == 0) {
         char tempHold = textboxp -> text[textboxp -> editIndex];
         textboxp -> text[textboxp -> editIndex] = '\0';
         double textLength = turtleTextGetUnicodeLength(textboxp -> text + textboxp -> renderStartingIndex, textboxp -> size - 1);
         textboxp -> text[textboxp -> editIndex] = tempHold;
         tt_setColor(textboxp -> color[TT_COLOR_SLOT_TEXTBOX_LINE]);
-        turtleRectangle(textboxp -> x + textboxp -> renderPixelOffset + textLength, textboxp -> y - textboxp -> size * 0.8, textboxp -> x + textboxp -> renderPixelOffset + textLength + 1, textboxp -> y + textboxp -> size * 0.8);
+        turtleRectangle(textboxp -> x + textboxp -> renderPixelOffset + textLength, textboxp -> y - textboxp -> size * 0.8, textboxp -> x + textboxp -> renderPixelOffset + textLength + textboxp -> size / 10, textboxp -> y + textboxp -> size * 0.8);
     }
     /* mouse */
     if (turtle.mouseX > textboxp -> x && turtle.mouseX < textboxp -> x + textboxp -> length && turtle.mouseY > textboxp -> y - textboxp -> size && turtle.mouseY < textboxp -> y + textboxp -> size) {
@@ -28632,15 +28727,21 @@ void tt_textboxUpdate(tt_textbox_t *textboxp) {
             /* first tick clicked */
             textboxp -> count = 1;
             textboxp -> editIndex = tt_textboxCalculateIndexFromPosition(textboxp, turtle.mouseX);
+            textboxp -> editIndexLength = 0;
             textboxp -> status = TT_STATUS_CLICK_FIRST_TICK;
         } else if (textboxp -> status == TT_STATUS_CLICK || textboxp -> status == TT_STATUS_CLICK_FIRST_TICK) {
             /* textbox is being held */
             textboxp -> status = TT_STATUS_CLICK;
+            int32_t boundIndex = tt_textboxCalculateIndexFromPosition(textboxp, turtle.mouseX);
+            if (boundIndex != textboxp -> editIndex) {
+                textboxp -> editIndexLength = boundIndex - textboxp -> editIndex;
+            }
         } else if (textboxp -> mouseOver && (textboxp -> status == TT_STATUS_OPEN || textboxp -> status == TT_STATUS_OPEN_FIRST_TICK)) {
             /* textbox is open (affirm) */
             textboxp -> status = TT_STATUS_OPEN;
         } else {
             /* textbox is blocked from interaction until mouse is unclicked */
+            textboxp -> editIndexLength = 0;
             textboxp -> status = TT_STATUS_BLOCKED;
         }
     } else {
