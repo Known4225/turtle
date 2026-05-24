@@ -2250,10 +2250,15 @@ void tt_textboxUpdate(tt_textbox_t *textboxp) {
     turtleRectangle(textboxp -> x, textboxp -> y - textboxp -> size, textboxp -> x + textboxp -> size / 4, textboxp -> y + textboxp -> size);
     turtleRectangle(textboxp -> x + textboxp -> length, textboxp -> y - textboxp -> size, textboxp -> x + textboxp -> length - textboxp -> size / 4, textboxp -> y + textboxp -> size);
     if ((textboxp -> status == TT_STATUS_CLICK || textboxp -> status == TT_STATUS_OPEN || textboxp -> status == TT_STATUS_CLICK_FIRST_TICK || textboxp -> status == TT_STATUS_OPEN_FIRST_TICK) && textboxp -> count <= textboxp -> linePeriod / 2 && textboxp -> editIndexLength == 0) {
-        char tempHold = textboxp -> text[textboxp -> editIndex];
-        textboxp -> text[textboxp -> editIndex] = '\0';
-        double textLength = turtleTextGetUnicodeLength(textboxp -> text + textboxp -> renderStartingIndex, textboxp -> size - 1);
-        textboxp -> text[textboxp -> editIndex] = tempHold;
+        double textLength;
+        if (textboxp -> editIndex + textboxp -> editIndexLength == textboxp -> renderStartingIndex) {
+            textLength = -textboxp -> size / 10; // i dont know why this is necessary
+        } else {
+            char tempHold = textboxp -> text[textboxp -> editIndex];
+            textboxp -> text[textboxp -> editIndex] = '\0';
+            textLength = turtleTextGetUnicodeLength(textboxp -> text + textboxp -> renderStartingIndex, textboxp -> size - 1);
+            textboxp -> text[textboxp -> editIndex] = tempHold;
+        }
         tt_setColor(textboxp -> color[TT_COLOR_SLOT_TEXTBOX_LINE]);
         turtleRectangle(textboxp -> x + textboxp -> renderPixelOffset + textLength, textboxp -> y - textboxp -> size * 0.8, textboxp -> x + textboxp -> renderPixelOffset + textLength + textboxp -> size / 10, textboxp -> y + textboxp -> size * 0.8);
     }
