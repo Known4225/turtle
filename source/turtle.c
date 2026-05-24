@@ -85,15 +85,8 @@ GLFWwindow *turtleCreateWindow(int32_t windowWidth, int32_t windowHeight, char *
     /* Create a windowed mode window and its OpenGL context */
     const GLFWvidmode *monitorSize = glfwGetVideoMode(glfwGetPrimaryMonitor());
     int32_t totalHeight = monitorSize -> height;
-    double optimizedScalingFactor = 0.8; // Set this number to 1 on windows and 0.8 on Ubuntu for maximum compatibility (fixes issue with incorrect stretching)
-    #ifdef OS_WINDOWS
-    optimizedScalingFactor = 1;
-    #endif
-    #ifdef OS_LINUX
-    optimizedScalingFactor = 0.8;
-    #endif
     if (windowWidth == TURTLE_WINDOW_DEFAULT_WIDTH) {
-        windowWidth = totalHeight * 16.0 / 9.0 * optimizedScalingFactor;
+        windowWidth = totalHeight * 16.0 / 9.0;
     }
     if (windowWidth == TURTLE_WINDOW_MONITOR_WIDTH) {
         windowWidth = totalHeight * 16.0 / 9.0;
@@ -102,7 +95,7 @@ GLFWwindow *turtleCreateWindow(int32_t windowWidth, int32_t windowHeight, char *
         windowHeight = totalHeight;
     }
     if (windowHeight == TURTLE_WINDOW_MONITOR_HEIGHT) {
-        windowHeight = totalHeight * optimizedScalingFactor;
+        windowHeight = totalHeight;
     }
     GLFWwindow *window = glfwCreateWindow(windowWidth, windowHeight, windowName, NULL, NULL);
     #else
@@ -128,7 +121,7 @@ GLFWwindow *turtleCreateWindow(int32_t windowWidth, int32_t windowHeight, char *
     #ifdef OS_BROWSER
     emscripten_set_resize_callback(EMSCRIPTEN_EVENT_TARGET_WINDOW, glfwGetCurrentContext(), false, turtleBrowserWindowResize);
     #else
-    glfwSetWindowSizeLimits(window, totalHeight * 16 / 9 * 0.4, totalHeight * 0.4, totalHeight * 16 / 9 * optimizedScalingFactor, totalHeight * optimizedScalingFactor);
+    glfwSetWindowSizeLimits(window, totalHeight * 16 / 9 * 0.4, totalHeight * 0.4, totalHeight * 16 / 9, totalHeight);
     #endif /* OS_BROWSER */
     return window;
 }
