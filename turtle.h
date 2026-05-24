@@ -23891,7 +23891,7 @@ void turtleInit(GLFWwindow *window, double leftX, double bottomY, double rightX,
 
     /* adjust window position and size */
     #ifdef OS_LINUX
-    glfwSetWindowPos(window, 0, 0);
+    glfwSetWindowPos(window, 0, 36);
     #endif
     #ifdef OS_WINDOWS
     glfwSetWindowPos(window, 0, 31);
