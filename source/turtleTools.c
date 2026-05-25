@@ -1928,7 +1928,6 @@ void tt_textboxHandleOtherKey(tt_textbox_t *textboxp, int32_t key) {
                 textboxp -> editIndex += textboxp -> editIndexLength;
                 textboxp -> editIndexLength *= -1;
             }
-            printf("%s %d %d\n", textboxp -> text, textboxp -> editIndex, textboxp -> editIndexLength);
             strdel(textboxp -> text, textboxp -> editIndex, textboxp -> editIndexLength);
             textboxp -> editIndexLength = 0;
         }
@@ -2304,8 +2303,9 @@ void tt_textboxUpdate(tt_textbox_t *textboxp) {
             /* textbox is being held */
             textboxp -> status = TT_STATUS_CLICK;
             int32_t boundIndex = tt_textboxCalculateIndexFromPosition(textboxp, turtle.mouseX);
-            if (boundIndex != textboxp -> editIndex) {
-                textboxp -> editIndexLength = boundIndex - textboxp -> editIndex;
+            textboxp -> editIndexLength = boundIndex - textboxp -> editIndex;
+            if (textboxp -> editIndex + textboxp -> editIndexLength > textboxp -> renderStartingIndex + textboxp -> renderNumCharacters) {
+                textboxp -> editIndexLength = textboxp -> renderStartingIndex + textboxp -> renderNumCharacters - textboxp -> editIndex;
             }
         } else if (textboxp -> mouseOver && (textboxp -> status == TT_STATUS_OPEN || textboxp -> status == TT_STATUS_OPEN_FIRST_TICK)) {
             /* textbox is open (affirm) */

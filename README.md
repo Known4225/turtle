@@ -25,12 +25,12 @@ The following build commands are available:
 - `make winsource` - Used for development for faster binary production by not compiling the library.
 
 # To Do
+- Allow textbox selecting off the ends of the visible content
 - Handrolled linear resizing is not only at least 2x slower than stbir, it is also worse (box size is only what box takes up instead of larger)
 - Build some support for osTools on OS_BROWSER
 - Add some emojis to font
 - Write tests
 - Fix flipped world coordinates
-- Mouse interactions with textbox (highlight, index select)
 - Text-only textbox
 - 3D support
 - Audio support (PortAudio?)
