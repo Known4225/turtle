@@ -26,6 +26,7 @@ The following build commands are available:
 
 # To Do
 - Allow textbox selecting off the ends of the visible content
+- Bug: When deploying turtle.html to firebase it did not work on the internet when using three file server setup (even though emrun worked). Standalone singlefile version did work - perhaps emscripten needs to be updated?
 - Handrolled linear resizing is not only at least 2x slower than stbir, it is also worse (box size is only what box takes up instead of larger)
 - Build some support for osTools on OS_BROWSER
 - Add some emojis to font
