@@ -207,6 +207,9 @@ void list_append_element(list_t *list, char *element, char type);
 /* reads list from a file that was written to with list_write() - ensure file pointer is located at the start of the list */
 list_t *list_read(FILE *fp);
 
+/* read a large list from a file */
+list_t *list_read_large(FILE *fp, int32_t maximumLineSize);
+
 /* frees the list's data but not the list itself */
 void list_free_lite(list_t *list);
 

@@ -801,6 +801,11 @@ void list_append_element(list_t *list, char *element, char type) {
 
 /* reads list from a file that was written to with list_write() - ensure file pointer is located at the start of the list */
 list_t *list_read(FILE *fp) {
+    return list_read_large(fp, 2048);
+}
+
+/* read a large list from a file */
+list_t *list_read_large(FILE *fp, int32_t maximumLineSize) {
     list_t *output = list_init();
     /* locate start of list */
     char checkChar;
@@ -815,13 +820,13 @@ list_t *list_read(FILE *fp) {
         printf("list_read: ERROR - Could not locate start of list\n");
         return output;
     }
-    char *item = malloc(2048); // no string can exceed 2048 characters
+    char *item = malloc(maximumLineSize); // no string can exceed maximumLineSize characters
     while (status == 1) {
         /* read item */
         int32_t writePointer = 0;
         int8_t backslashFound = 0;
         list_t *embeddedList = NULL;
-        while (writePointer < 2047 && status == 1) {
+        while (writePointer < maximumLineSize - 1 && status == 1) {
             status = fread(item + writePointer, 1, 1, fp);
             if (!backslashFound && item[writePointer] == ',') {
                 /* end of element */
@@ -830,7 +835,7 @@ list_t *list_read(FILE *fp) {
             if (!backslashFound && item[writePointer] == '[') {
                 /* embedded list */
                 fseek(fp, -1, SEEK_CUR); // move filepointer back one
-                embeddedList = list_read(fp);
+                embeddedList = list_read_large(fp, maximumLineSize);
                 status = fread(&checkChar, 1, 1, fp); // skip comma
                 if (checkChar != ',') {
                     /* expected comma here - fail */
