@@ -1324,7 +1324,7 @@ int32_t osToolsSocketReceive(char *socketName, uint8_t *data, int32_t length, in
         if (WSAGetLastError() == WSAETIMEDOUT) {
             /* timeout */
             printf("osToolsSocketReceive ERROR: Failed to receive (timeout)\n");
-            return 0;
+            return -1;
         }
         printf("osToolsSocketReceive ERROR: Failed to receive\n");
         return -1;

@@ -86,6 +86,7 @@ GLFWwindow *turtleCreateWindow(int32_t windowWidth, int32_t windowHeight, char *
     const GLFWvidmode *monitorSize = glfwGetVideoMode(glfwGetPrimaryMonitor());
     int32_t totalHeight = monitorSize -> height;
     double optimizedScalingFactor = 1; // Set this number to 1 on windows and 0.8 on Ubuntu for maximum compatibility (fixes issue with incorrect stretching)
+    turtle.windowSpecial = 0;
     #ifdef OS_WINDOWS
     optimizedScalingFactor = 1;
     #endif
@@ -94,17 +95,20 @@ GLFWwindow *turtleCreateWindow(int32_t windowWidth, int32_t windowHeight, char *
     #endif
     if (windowWidth == TURTLE_WINDOW_DEFAULT_WIDTH) {
         windowWidth = totalHeight * 16.0 / 9.0 * optimizedScalingFactor;
+        turtle.windowSpecial |= 1;
     }
     if (windowWidth == TURTLE_WINDOW_MONITOR_WIDTH) {
         windowWidth = totalHeight * 16.0 / 9.0 * optimizedScalingFactor;
+        turtle.windowSpecial |= 4;
     }
     if (windowHeight == TURTLE_WINDOW_DEFAULT_HEIGHT) {
         windowHeight = totalHeight * optimizedScalingFactor;
+        turtle.windowSpecial |= 2;
     }
     if (windowHeight == TURTLE_WINDOW_MONITOR_HEIGHT) {
         windowHeight = totalHeight * optimizedScalingFactor;
+        turtle.windowSpecial |= 8;
     }
-    GLFWwindow *window = glfwCreateWindow(windowWidth, windowHeight, windowName, NULL, NULL);
     #else
     if (windowWidth == TURTLE_WINDOW_DEFAULT_WIDTH) {
         windowWidth = 3840;
@@ -118,8 +122,8 @@ GLFWwindow *turtleCreateWindow(int32_t windowWidth, int32_t windowHeight, char *
     if (windowHeight == TURTLE_WINDOW_MONITOR_HEIGHT) {
         windowHeight = 2160;
     }
-    GLFWwindow *window = glfwCreateWindow(windowWidth, windowHeight, windowName, NULL, NULL);
     #endif /* OS_BROWSER */
+    GLFWwindow *window = glfwCreateWindow(windowWidth, windowHeight, windowName, NULL, NULL);
     if (!window) {
         glfwTerminate();
         return NULL;
@@ -296,7 +300,21 @@ void turtleInit(GLFWwindow *window, double leftX, double bottomY, double rightX,
     #ifdef OS_WINDOWS
     glfwSetWindowPos(window, 0, 31);
     #endif
-    glfwSetWindowSize(window, turtle.screenbounds[1] * turtle.aspect * 0.85, turtle.screenbounds[1] * 0.85); // doing it this way ensures the window spawns in the top left of the monitor and fixes resizing limits
+    double width = turtle.screenbounds[1] * turtle.aspect;
+    double height = turtle.screenbounds[1];
+    if (turtle.windowSpecial & 1) {
+        width *= 0.85;
+    }
+    if (turtle.windowSpecial & 2) {
+        height *= 0.85;
+    }
+    if (turtle.windowSpecial & 4) {
+        width *= 0.92;
+    }
+    if (turtle.windowSpecial & 8) {
+        height *= 0.92;
+    }
+    glfwSetWindowSize(window, width, height); // doing it this way ensures the window spawns in the top left of the monitor and fixes resizing limits
     #ifdef OS_BROWSER
     turtleBrowserWindowResize(0, NULL, NULL);
     #endif
