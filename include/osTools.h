@@ -120,6 +120,7 @@ typedef enum {
     OSTOOLS_BAUD_115200 = 115200, // common high speed baud rate
     OSTOOLS_BAUD_128000 = 128000,
     OSTOOLS_BAUD_256000 = 256000,
+    OSTOOLS_BAUD_921600 = 921600,
 } osToolsSerialBaud_t;
 
 typedef struct {
