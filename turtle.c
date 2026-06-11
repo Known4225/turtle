@@ -249,8 +249,8 @@ int main(int argc, char *argv[]) {
     list_append(dropdownOptions, (unitype) "P15 Pin", 's');
     list_append(dropdownOptions, (unitype) "K50 Touch", 's');
     tt_dropdown_t *dropdown = tt_dropdownInit("Dropdown", dropdownOptions, NULL, TT_DROPDOWN_ALIGN_CENTER, 0, 70, 10);
-    tt_textbox_t *textbox = tt_textboxInit("Textbox", NULL, 128, -50, -110, 10, 100);
-    tt_textbox_t *tb = tt_textboxInit("Textbox", NULL, 128, -50, -135, 10, 100);
+    tt_textbox_t *textbox = tt_textboxInit("Username", NULL, 128, -50, -110, 10, 100);
+    tt_textboxInit("Password", NULL, 128, -50, -135, 10, 100);
     list_t *contextOptions = list_init();
     list_append(contextOptions, (unitype) "Button", 's');
     list_append(contextOptions, (unitype) "Switch", 's');

@@ -229,12 +229,12 @@ void sublist_free(sublist_t *sublist);
 
 #ifdef TURTLE_ENABLE_TEXTURES
 /*
-██████╗ ██╗   ██╗███████╗███████╗███████╗██████╗ ██╗     ██╗███████╗████████╗██╗  ██╗
-██╔══██╗██║   ██║██╔════╝██╔════╝██╔════╝██╔══██╗██║     ██║██╔════╝╚══██╔══╝██║  ██║
-██████╔╝██║   ██║█████╗  █████╗  █████╗  ██████╔╝██║     ██║███████╗   ██║   ███████║
-██╔══██╗██║   ██║██╔══╝  ██╔══╝  ██╔══╝  ██╔══██╗██║     ██║╚════██║   ██║   ██╔══██║
-██████╔╝╚██████╔╝██║     ██║     ███████╗██║  ██║███████╗██║███████║   ██║██╗██║  ██║
-╚═════╝  ╚═════╝ ╚═╝     ╚═╝     ╚══════╝╚═╝  ╚═╝╚══════╝╚═╝╚══════╝   ╚═╝╚═╝╚═╝  ╚═╝
+███████╗██╗      ██████╗  █████╗ ████████╗██╗     ██╗███████╗████████╗██╗  ██╗
+██╔════╝██║     ██╔═══██╗██╔══██╗╚══██╔══╝██║     ██║██╔════╝╚══██╔══╝██║  ██║
+█████╗  ██║     ██║   ██║███████║   ██║   ██║     ██║███████╗   ██║   ███████║
+██╔══╝  ██║     ██║   ██║██╔══██║   ██║   ██║     ██║╚════██║   ██║   ██╔══██║
+██║     ███████╗╚██████╔╝██║  ██║   ██║   ███████╗██║███████║   ██║██╗██║  ██║
+╚═╝     ╚══════╝ ╚═════╝ ╚═╝  ╚═╝   ╚═╝   ╚══════╝╚═╝╚══════╝   ╚═╝╚═╝╚═╝  ╚═╝
 https://patorjk.com/software/taag/#p=display&f=ANSI%20Shadow
 */
 
@@ -249,59 +249,59 @@ https://patorjk.com/software/taag/#p=display&f=ANSI%20Shadow
 
 /*
 28.03.24:
-bufferList - like a normal list but only supports floats
+floatList - like a normal list but only supports floats
 */
 
 typedef struct {
     int32_t length;
     int32_t realLength;
     float *data;
-} bufferList_t;
+} floatList_t;
 
-/* create a bufferList */
-bufferList_t* bufferList_init();
+/* create a floatList */
+floatList_t* floatList_init();
 
 /* append to list */
-void bufferList_append(bufferList_t *list, float data);
+void floatList_append(floatList_t *list, float data);
 
 /* delete all contents of a list */
-void bufferList_clear(bufferList_t *list);
+void floatList_clear(floatList_t *list);
 
 /* pops the last item of the list off and returns it */
-float bufferList_pop(bufferList_t *list);
+float floatList_pop(floatList_t *list);
 
 /* deletes the item at list[index] of the list and returns it */
-float bufferList_delete(bufferList_t *list, int32_t index);
+float floatList_delete(floatList_t *list, int32_t index);
 
 /* deletes many items from the list spanning from [indexMin] to [indexMax - 1] */
-void bufferList_delete_range(bufferList_t* list, int32_t indexMin, int32_t indexMax);
+void floatList_delete_range(floatList_t* list, int32_t indexMin, int32_t indexMax);
 
 /* returns the index of the first instance of the item in the list, returns -1 if not found (python) */
-int32_t bufferList_find(bufferList_t *list, float item);
+int32_t floatList_find(floatList_t *list, float item);
 
 /* duplicate of list_find */
-int32_t bufferList_index(bufferList_t *list, float item);
+int32_t floatList_index(floatList_t *list, float item);
 
 /* counts how many instances of an item is found in the list */
-int32_t bufferList_count(bufferList_t *list, float item);
+int32_t floatList_count(floatList_t *list, float item);
 
 /* deletes the first instance of the item from the list, returns the index the item was at, returns -1 and doesn't modify the list if not found (python but without ValueError) */
-int32_t bufferList_remove(bufferList_t *list, float item);
+int32_t floatList_remove(floatList_t *list, float item);
 
 /* copies one list to another */
-void bufferList_copy(bufferList_t *dest, bufferList_t *src);
+void floatList_copy(floatList_t *dest, floatList_t *src);
 
 /* prints the list */
-void bufferList_print(bufferList_t *list);
+void floatList_print(floatList_t *list);
 
 /* prints the list but without closing \n */
-void bufferList_print_emb(bufferList_t *list);
+void floatList_print_emb(floatList_t *list);
 
 /* frees the list's data but not the list itself */
-void bufferList_free_lite(bufferList_t *list);
+void floatList_free_lite(floatList_t *list);
 
 /* frees the data used by the list */
-void bufferList_free(bufferList_t *list);
+void floatList_free(floatList_t *list);
 
 #endif /* FLOAT_LIST_H */
 #endif /* TURTLE_ENABLE_TEXTURES */
@@ -10102,7 +10102,7 @@ typedef struct {
     double x; // coordinate x position of turtle
     double y; // coordinate y position of turtle
     #ifdef TURTLE_ENABLE_TEXTURES
-    bufferList_t *bufferList; // resizable list to donate to GPU
+    floatList_t *bufferList; // resizable list to donate to GPU
     #else
     /* this bit exists so that there is no size difference between compiled and linked struct (in case you compile without textures but link library with textures) */
     void *bufferList;
@@ -23426,14 +23426,19 @@ void sublist_free(sublist_t *sublist) {
 
 #endif /* UNITYPE_LIST_IMPLEMENTATION */
 #ifdef FLOAT_LIST_IMPLEMENTATION
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdbool.h>
-#include <stdint.h>
+/*
+███████╗██╗      ██████╗  █████╗ ████████╗██╗     ██╗███████╗████████╗ ██████╗
+██╔════╝██║     ██╔═══██╗██╔══██╗╚══██╔══╝██║     ██║██╔════╝╚══██╔══╝██╔════╝
+█████╗  ██║     ██║   ██║███████║   ██║   ██║     ██║███████╗   ██║   ██║     
+██╔══╝  ██║     ██║   ██║██╔══██║   ██║   ██║     ██║╚════██║   ██║   ██║     
+██║     ███████╗╚██████╔╝██║  ██║   ██║   ███████╗██║███████║   ██║██╗╚██████╗
+╚═╝     ╚══════╝ ╚═════╝ ╚═╝  ╚═╝   ╚═╝   ╚══════╝╚═╝╚══════╝   ╚═╝╚═╝ ╚═════╝
+https://patorjk.com/software/taag/#p=display&f=ANSI%20Shadow
+*/
 
-bufferList_t* bufferList_init() {
-    bufferList_t *list = malloc(sizeof(bufferList_t));
+
+floatList_t* floatList_init() {
+    floatList_t *list = malloc(sizeof(floatList_t));
     list -> length = 0;
     list -> realLength = 1;
     list -> data = calloc(1, sizeof(float));
@@ -23441,7 +23446,7 @@ bufferList_t* bufferList_init() {
 }
 
 /* append to list */
-void bufferList_append(bufferList_t *list, float data) {
+void floatList_append(floatList_t *list, float data) {
     if (list -> realLength  <= list -> length) {
         list -> realLength *= 2;
         list -> data = realloc(list -> data, list -> realLength * sizeof(float));
@@ -23450,15 +23455,15 @@ void bufferList_append(bufferList_t *list, float data) {
     list -> length += 1;
 }
 
-void bufferList_clear(bufferList_t *list) {
-    bufferList_free_lite(list);
+void floatList_clear(floatList_t *list) {
+    floatList_free_lite(list);
     list -> length = 0;
     list -> realLength = 1;
     list -> data = calloc(1, sizeof(float));
 }
 
 /* pops the last item of the list off and returns it */
-float bufferList_pop(bufferList_t *list) {
+float floatList_pop(floatList_t *list) {
     if (list -> length > 0) {
         list -> length -= 1;
         float ret = list -> data[list -> length];
@@ -23474,7 +23479,7 @@ float bufferList_pop(bufferList_t *list) {
 }
 
 /* deletes the item at list[index] of the list and returns it */
-float bufferList_delete(bufferList_t *list, int32_t index) {
+float floatList_delete(floatList_t *list, int32_t index) {
     while (index < 0) {index += list -> length;}
     index %= list -> length;
     float ret = list -> data[index];
@@ -23491,7 +23496,7 @@ float bufferList_delete(bufferList_t *list, int32_t index) {
 }
 
 /* deletes many items from the list spanning from [indexMin] to [indexMax - 1] */
-void bufferList_delete_range(bufferList_t* list, int32_t indexMin, int32_t indexMax) {
+void floatList_delete_range(floatList_t* list, int32_t indexMin, int32_t indexMax) {
     if (indexMin > indexMax) {
         int32_t swap = indexMin;
         indexMin = indexMax;
@@ -23520,7 +23525,7 @@ void bufferList_delete_range(bufferList_t* list, int32_t indexMin, int32_t index
 }
 
 /* returns the index of the first instance of the item in the list, returns -1 if not found (python) */
-int32_t bufferList_find(bufferList_t *list, float item) {
+int32_t floatList_find(floatList_t *list, float item) {
     for (int32_t i = 0; i < list -> length; i++) {
         if (list -> data[i] == item) {
             return i;
@@ -23530,7 +23535,7 @@ int32_t bufferList_find(bufferList_t *list, float item) {
 }
 
 /* duplicate of list_find */
-int32_t bufferList_index(bufferList_t *list, float item) {
+int32_t floatList_index(floatList_t *list, float item) {
     for (int32_t i = 0; i < list -> length; i++) {
         if (list -> data[i] == item) {
             return i;
@@ -23540,7 +23545,7 @@ int32_t bufferList_index(bufferList_t *list, float item) {
 }
 
 /* counts how many instances of an item is found in the list */
-int32_t bufferList_count(bufferList_t *list, float item) {
+int32_t floatList_count(floatList_t *list, float item) {
     int32_t count = 0;
     for (int32_t i = 0; i < list -> length; i++) {
         count += (list -> data[i] == item);
@@ -23549,10 +23554,10 @@ int32_t bufferList_count(bufferList_t *list, float item) {
 }
 
 /* deletes the first instance of the item from the list, returns the index the item was at, returns -1 and doesn't modify the list if not found (python but without ValueError) */
-int32_t bufferList_remove(bufferList_t *list, float item) {
+int32_t floatList_remove(floatList_t *list, float item) {
     for (int32_t i = 0; i < list -> length; i++) {
         if (list -> data[i] == item) {
-            bufferList_delete(list, i);
+            floatList_delete(list, i);
             return i;
         }
     }
@@ -23560,8 +23565,8 @@ int32_t bufferList_remove(bufferList_t *list, float item) {
 }
 
 /* copies one list to another */
-void bufferList_copy(bufferList_t *dest, bufferList_t *src) {
-    bufferList_free_lite(dest);
+void floatList_copy(floatList_t *dest, floatList_t *src) {
+    floatList_free_lite(dest);
     dest -> data = calloc(src -> realLength, sizeof(float));
     int32_t len = src -> length;
     dest -> length = len;
@@ -23572,7 +23577,7 @@ void bufferList_copy(bufferList_t *dest, bufferList_t *src) {
 }
 
 /* prints the list (like python would) */
-void bufferList_print(bufferList_t *list) {
+void floatList_print(floatList_t *list) {
     printf("[");
     if (list -> length == 0) {
         printf("]\n");
@@ -23589,7 +23594,7 @@ void bufferList_print(bufferList_t *list) {
 }
 
 /* prints the list but without closing \n */
-void bufferList_print_emb(bufferList_t *list) {
+void floatList_print_emb(floatList_t *list) {
     printf("[");
     if (list -> length == 0) {
         printf("]");
@@ -23606,13 +23611,13 @@ void bufferList_print_emb(bufferList_t *list) {
 }
 
 /* frees the list's data but not the list itself */
-void bufferList_free_lite(bufferList_t *list) {
+void floatList_free_lite(floatList_t *list) {
     free(list -> data);
 }
 
 /* frees the data used by the list */
-void bufferList_free(bufferList_t *list) {
-    bufferList_free_lite(list);
+void floatList_free(floatList_t *list) {
+    floatList_free_lite(list);
     free(list);
 }
 #endif /* FLOAT_LIST_IMPLEMENTATION */
@@ -23845,7 +23850,7 @@ void turtleInit(GLFWwindow *window, double leftX, double bottomY, double rightX,
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
     glDeleteProgram(shaderProgram);
-    turtle.bufferList = bufferList_init();
+    turtle.bufferList = floatList_init();
     turtle.textureList = list_init();
     list_append(turtle.textureList, (unitype) "null", 's'); // cannot have texture code of 0 because of shader using 0 as the non-texture code
     list_append(turtle.textureList, (unitype) 0, 'i');
@@ -24322,15 +24327,15 @@ void turtleQuadRenderInternal(double x1, double y1, double x2, double y2, double
 #ifdef TURTLE_ENABLE_TEXTURES
 /* function to add a vertex to the turtle.bufferList */
 void addVertex(double x, double y, double r, double g, double b, double a, double tx, double ty, double useTexture) {
-    bufferList_append(turtle.bufferList, x);
-    bufferList_append(turtle.bufferList, y);
-    bufferList_append(turtle.bufferList, r);
-    bufferList_append(turtle.bufferList, g);
-    bufferList_append(turtle.bufferList, b);
-    bufferList_append(turtle.bufferList, a);
-    bufferList_append(turtle.bufferList, tx);
-    bufferList_append(turtle.bufferList, ty);
-    bufferList_append(turtle.bufferList, useTexture);
+    floatList_append(turtle.bufferList, x);
+    floatList_append(turtle.bufferList, y);
+    floatList_append(turtle.bufferList, r);
+    floatList_append(turtle.bufferList, g);
+    floatList_append(turtle.bufferList, b);
+    floatList_append(turtle.bufferList, a);
+    floatList_append(turtle.bufferList, tx);
+    floatList_append(turtle.bufferList, ty);
+    floatList_append(turtle.bufferList, useTexture);
 }
 
 /* draws a circle at the specified x and y (coordinates) */
@@ -25316,7 +25321,7 @@ void turtleFree() {
     list_free(turtle.keyPressed);
     list_free(turtle.penPos);
     #ifdef TURTLE_ENABLE_TEXTURES
-    bufferList_free(turtle.bufferList);
+    floatList_free(turtle.bufferList);
     #endif /* TURTLE_ENABLE_TEXTURES */
 }
 
