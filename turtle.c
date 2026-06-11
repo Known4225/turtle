@@ -363,7 +363,7 @@ int main(int argc, char *argv[]) {
         turtleTextWriteUnicode("ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩ", scrollbarX -> value * -5 + 260, scrollbarY -> value * 3.3 - 315, 10, 0);
         turtleTextWriteUnicode("αβγδεζηθικλμνξοπρσςτυφχψω", scrollbarX -> value * -5 + 260, scrollbarY -> value * 3.3 - 330, 10, 0);
         turtleTextWriteUnicode("1234567890!@#$£€₺₽¥₩₹₣฿%^&*()`~-_=+[", scrollbarX -> value * -5 + 260, scrollbarY -> value * 3.3 - 345, 10, 0);
-        turtleTextWriteUnicode("{]}\\|;:‘'’“\"”,<.>/?½¨", scrollbarX -> value * -5 + 260, scrollbarY -> value * 3.3 - 360, 10, 0);
+        turtleTextWriteUnicode("{]}\\|;:‘'’“\"”,<.>/?½¨°︘📷📄📁😊", scrollbarX -> value * -5 + 260, scrollbarY -> value * 3.3 - 360, 10, 0);
         
         turtleTextWriteStringRotated("Rotated Text", scrollbarX -> value * -5 - 100, scrollbarY -> value * 3.3 + 75, 9, 50, -15);
         
