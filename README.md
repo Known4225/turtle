@@ -49,7 +49,7 @@ turtleTools contains many different UI elements including buttons, switches, dia
 
 ## osTools
 
-osTools contains file dialog, clipboard, and other operating system integration tools. Additionally, support for serial ports and tcp/ip is included for windows only.
+osTools contains file dialog, clipboard, and other operating system integration tools. Additionally, support for serial ports, tcp/ip, and camera streaming is included for windows only.
 
 # Example project
 
