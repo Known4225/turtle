@@ -242,7 +242,7 @@ void turtleTextRenderChar(int32_t index, double x, double y, double size) {
             turtlePenUp();
         }
         int32_t len2 = turtleText.fontData[index];
-        if (len2 == 1) {
+        if (len2 == 1 && turtleText.fontData[index + 1] != 140894115) {
             turtle.pensize = sizeSave * 1.5; // dots on is are a bit bigger
         } else {
             turtle.pensize = sizeSave;
