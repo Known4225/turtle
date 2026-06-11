@@ -43,7 +43,7 @@ turtleText extends the functionality of turtle to allow text to be drawn to the 
 
 ## TurtleTools
 
-turtleTools contains many different UI elements including dropdowns, dials, sliders, switches, and buttons.
+turtleTools contains many different UI elements including buttons, switches, dials, sliders, texboxes, dropdowns, scrollbars, and context menus.
 
 ![turtleTools](images/turtleTools.png)
 
