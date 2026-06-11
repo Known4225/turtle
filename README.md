@@ -39,7 +39,6 @@ The following build commands are available:
 - Update wiki/documentation
 - Linux COM support
 - I think there is a way to increase performance for texture enabled turtle - I think it is possible to remove penpos entirely and just write straight to bufferList
-- Increase performance by reverting the GPU always dying update (special handling for cases that would not otherwise mutate the penpos list)
 
 # Limitations of web deployment
 - Must osTools features will not work

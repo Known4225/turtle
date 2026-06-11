@@ -1027,6 +1027,7 @@ turtle_texture_t turtleTextureLoad(char *filename) {
     glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, texture / 4, turtle.textureWidth, turtle.textureHeight, 1, encoding, GL_UNSIGNED_BYTE, resized);
     glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
     free(resized);
+    turtle.forceUpdate = 1;
     return texture;
 }
 
@@ -1105,6 +1106,7 @@ turtle_texture_t turtleTextureLoadListArrayInternal(list_t *list, uint8_t *array
     glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, texture / 4, turtle.textureWidth, turtle.textureHeight, 1, encoding, GL_UNSIGNED_BYTE, resized);
     glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
     free(resized);
+    turtle.forceUpdate = 1;
     return texture;
 }
 
@@ -1166,6 +1168,7 @@ int32_t turtleTextureReplace(turtle_texture_t texture, char *filename) {
     glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, texture / 4, turtle.textureWidth, turtle.textureHeight, 1, encoding, GL_UNSIGNED_BYTE, resized);
     glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
     free(resized);
+    turtle.forceUpdate = 1;
     return texture;
 }
 
@@ -1220,6 +1223,7 @@ int32_t turtleTextureReplaceListArrayInternal(turtle_texture_t texture, list_t *
     glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, texture / 4, turtle.textureWidth, turtle.textureHeight, 1, encoding, GL_UNSIGNED_BYTE, resized);
     glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
     free(resized);
+    turtle.forceUpdate = 1;
     return texture;
 }
 
@@ -1230,6 +1234,7 @@ int32_t turtleTextureUnload(turtle_texture_t texture) {
     }
     free(turtle.textureList -> data[texture].s);
     turtle.textureList -> data[texture].s = strdup("");
+    turtle.forceUpdate = 1;
     return 0;
 }
 
@@ -1239,6 +1244,7 @@ int32_t turtleTextureUnloadAll() {
     list_append(turtle.textureList, (unitype) 0, 'i'); // width
     list_append(turtle.textureList, (unitype) 0, 'i'); // height
     list_append(turtle.textureList, (unitype) 0, 'i'); // channels
+    turtle.forceUpdate = 1;
     return 0;
 }
 
@@ -1512,12 +1518,29 @@ void turtleUpdate() {
     int32_t len = turtle.penPos -> length;
     unitype *ren = turtle.penPos -> data;
     int8_t *renType = turtle.penPos -> type;
-    changed = 1;
+    if (turtle.forceUpdate) {
+        turtle.forceUpdate = 0;
+        changed = 1;
+    }
     glfwGetWindowSize(turtle.window, &turtle.screenbounds[0], &turtle.screenbounds[1]);
     if (turtle.screenbounds[0] != turtle.lastscreenbounds[0] || turtle.screenbounds[1] != turtle.lastscreenbounds[1]) {
         changed = 1;
         turtle.lastscreenbounds[0] = turtle.screenbounds[0];
         turtle.lastscreenbounds[1] = turtle.screenbounds[1];
+    }
+    if (len != turtle.lastLength) {
+        changed = 1;
+        turtle.lastLength = len;
+    }
+    if (changed == 0) {
+        uint64_t oldHash = turtle.penHash;
+        turtle.penHash = 0; // I don't use this but it's an idea: https://stackoverflow.com/questions/57455444/very-low-collision-non-cryptographic-hashing-function
+        for (uint32_t i = 0; i < len; i++) {
+            turtle.penHash += (uint64_t) turtle.penPos -> data[i].p; // simple addition hash. I know not technically safe since i cast all sizes to 8 byte, but it should still work
+        }
+        if (oldHash != turtle.penHash) {
+            changed = 1;
+        }
     }
     if (turtle.resizeMode == TURTLE_RESIZE_MODE_STRETCH) {
         turtle.bounds[0] = turtle.centerAndScale[0] - turtle.centerAndScale[2] / turtle.screenbounds[0];

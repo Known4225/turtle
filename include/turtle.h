@@ -85,6 +85,7 @@ typedef struct {
     uint8_t close; // close changes to 1 when the user clicks the x on the window
     uint8_t popupClose; // controls whether the window terminates on turtle.close
     uint8_t windowSpecial; // special features of window creation
+    uint8_t forceUpdate; // toggle to skip check to see if screen has changed
     double circleprez; // how precise circles are (specifically, the number of sides of a circle with diameter e, default: 9)
     double pensize; // turtle pen size
     double penr; // pen red (0 to 1)
