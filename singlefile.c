@@ -17,7 +17,7 @@ const char sourceMacro[] = "TURTLE_IMPLEMENTATION"; // this macro enables all so
 /* define header files in order from top to bottom of output file */
 const char headerFiles[][128] = {
     "include/list.h",
-    "include/bufferList.h",
+    "include/floatList.h",
     "include/stb_image.h",
     "include/stb_image_write.h",
     "include/turtle.h",
@@ -34,7 +34,7 @@ const char headerFiles[][128] = {
 /* define source files in order from top to bottom of output file */
 const char sourceFiles[][128] = {
     "source/list.c",
-    "source/bufferList.c",
+    "source/floatList.c",
     "source/turtle.c",
     "source/turtleText.c",
     "source/turtleTools.c",
@@ -120,7 +120,7 @@ int main(int argc, char *argv[]) {
     fprintf(outputfp, "#ifndef %s\n#define %s\n\n", wrappingMacro, wrappingMacro);
     /* add headers */
     for (int32_t i = 0; i < headerLength; i++) {
-        if (strcmp(headerFiles[i], "include/bufferList.h") == 0) {
+        if (strcmp(headerFiles[i], "include/floatList.h") == 0) {
             fprintf(outputfp, "#ifdef TURTLE_ENABLE_TEXTURES\n");
         }
         FILE *headerfp = fopen(headerFiles[i], "r");
@@ -133,7 +133,7 @@ int main(int argc, char *argv[]) {
         }
         fwrite("\n", 1, 1, outputfp);
         fclose(headerfp);
-        if (strcmp(headerFiles[i], "include/bufferList.h") == 0) {
+        if (strcmp(headerFiles[i], "include/floatList.h") == 0) {
             fprintf(outputfp, "#endif /* TURTLE_ENABLE_TEXTURES */\n");
         }
     }

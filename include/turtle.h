@@ -19,7 +19,7 @@ https://patorjk.com/software/taag/#p=display&f=ANSI%20Shadow
 #include "glfw3.h"
 #include "list.h"
 #ifdef TURTLE_ENABLE_TEXTURES
-#include "bufferList.h"
+#include "floatList.h"
 #define BUFFER_OBJECT_SIZE 9
 #endif /* TURTLE_ENABLE_TEXTURES */
 
@@ -66,7 +66,7 @@ typedef struct {
     double x; // coordinate x position of turtle
     double y; // coordinate y position of turtle
     #ifdef TURTLE_ENABLE_TEXTURES
-    bufferList_t *bufferList; // resizable list to donate to GPU
+    floatList_t *bufferList; // resizable list to donate to GPU
     #else
     /* this bit exists so that there is no size difference between compiled and linked struct (in case you compile without textures but link library with textures) */
     void *bufferList;

@@ -227,7 +227,7 @@ void turtleInit(GLFWwindow *window, double leftX, double bottomY, double rightX,
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
     glDeleteProgram(shaderProgram);
-    turtle.bufferList = bufferList_init();
+    turtle.bufferList = floatList_init();
     turtle.textureList = list_init();
     list_append(turtle.textureList, (unitype) "null", 's'); // cannot have texture code of 0 because of shader using 0 as the non-texture code
     list_append(turtle.textureList, (unitype) 0, 'i');
@@ -704,15 +704,15 @@ void turtleQuadRenderInternal(double x1, double y1, double x2, double y2, double
 #ifdef TURTLE_ENABLE_TEXTURES
 /* function to add a vertex to the turtle.bufferList */
 void addVertex(double x, double y, double r, double g, double b, double a, double tx, double ty, double useTexture) {
-    bufferList_append(turtle.bufferList, x);
-    bufferList_append(turtle.bufferList, y);
-    bufferList_append(turtle.bufferList, r);
-    bufferList_append(turtle.bufferList, g);
-    bufferList_append(turtle.bufferList, b);
-    bufferList_append(turtle.bufferList, a);
-    bufferList_append(turtle.bufferList, tx);
-    bufferList_append(turtle.bufferList, ty);
-    bufferList_append(turtle.bufferList, useTexture);
+    floatList_append(turtle.bufferList, x);
+    floatList_append(turtle.bufferList, y);
+    floatList_append(turtle.bufferList, r);
+    floatList_append(turtle.bufferList, g);
+    floatList_append(turtle.bufferList, b);
+    floatList_append(turtle.bufferList, a);
+    floatList_append(turtle.bufferList, tx);
+    floatList_append(turtle.bufferList, ty);
+    floatList_append(turtle.bufferList, useTexture);
 }
 
 /* draws a circle at the specified x and y (coordinates) */
@@ -1698,6 +1698,6 @@ void turtleFree() {
     list_free(turtle.keyPressed);
     list_free(turtle.penPos);
     #ifdef TURTLE_ENABLE_TEXTURES
-    bufferList_free(turtle.bufferList);
+    floatList_free(turtle.bufferList);
     #endif /* TURTLE_ENABLE_TEXTURES */
 }
