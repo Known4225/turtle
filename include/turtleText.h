@@ -58,13 +58,13 @@ int32_t turtleTextInit(const char *filename);
 /* render functions */
 
 /* renders a quadratic bezier curve on the screen */
-void renderBezier(double x1, double y1, double x2, double y2, double x3, double y3, int32_t prez);
+void turtleTextRenderBezier(double x1, double y1, double x2, double y2, double x3, double y3, int32_t prez);
 
 /* renders a single character - INTERNAL */
-void renderChar(int32_t index, double x, double y, double size);
+void turtleTextRenderChar(int32_t index, double x, double y, double size);
 
-/* special version of renderChar with rotation - INTERNAL */
-void renderCharRotated(int32_t index, double x, double y, double size, double sinR, double cosR);
+/* special version of turtleTextRenderChar with rotation - INTERNAL */
+void turtleTextRenderCharRotated(int32_t index, double x, double y, double size, double sinR, double cosR);
 
 /* gets the length of a string in coordinates on the screen */
 double turtleTextGetLength(const uint32_t *text, int32_t textLength, double size);
@@ -118,6 +118,6 @@ void turtleTextWriteUnicodefRotated(double x, double y, double size, double alig
 int32_t turtleTextConvertUnicode(const char *str, uint32_t *converted);
 
 /* if the font file is not found, use the default font (kept here) */
-void generateDefaultFont(list_t *generatedFont);
+void turtleTextGenerateDefaultFont(list_t *generatedFont);
 
 #endif /* TURTLE_TEXT_H */

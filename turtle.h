@@ -10397,13 +10397,13 @@ int32_t turtleTextInit(const char *filename);
 /* render functions */
 
 /* renders a quadratic bezier curve on the screen */
-void renderBezier(double x1, double y1, double x2, double y2, double x3, double y3, int32_t prez);
+void turtleTextRenderBezier(double x1, double y1, double x2, double y2, double x3, double y3, int32_t prez);
 
 /* renders a single character - INTERNAL */
-void renderChar(int32_t index, double x, double y, double size);
+void turtleTextRenderChar(int32_t index, double x, double y, double size);
 
-/* special version of renderChar with rotation - INTERNAL */
-void renderCharRotated(int32_t index, double x, double y, double size, double sinR, double cosR);
+/* special version of turtleTextRenderChar with rotation - INTERNAL */
+void turtleTextRenderCharRotated(int32_t index, double x, double y, double size, double sinR, double cosR);
 
 /* gets the length of a string in coordinates on the screen */
 double turtleTextGetLength(const uint32_t *text, int32_t textLength, double size);
@@ -10457,7 +10457,7 @@ void turtleTextWriteUnicodefRotated(double x, double y, double size, double alig
 int32_t turtleTextConvertUnicode(const char *str, uint32_t *converted);
 
 /* if the font file is not found, use the default font (kept here) */
-void generateDefaultFont(list_t *generatedFont);
+void turtleTextGenerateDefaultFont(list_t *generatedFont);
 
 #endif /* TURTLE_TEXT_H */
 
@@ -25377,7 +25377,7 @@ int32_t turtleTextInit(const char *filename) {
     FILE *tgl = fopen(filename, "r");
     if (tgl == NULL) {
         printf("Error: could not open file %s, using default\n", filename);
-        generateDefaultFont(generatedFont);
+        turtleTextGenerateDefaultFont(generatedFont);
         fileExists = 0;
     }
 
@@ -25567,7 +25567,7 @@ int32_t turtleTextInit(const char *filename) {
 /* render functions */
 
 /* renders a quadratic bezier curve on the screen */
-void renderBezier(double x1, double y1, double x2, double y2, double x3, double y3, int32_t prez) {
+void turtleTextRenderBezier(double x1, double y1, double x2, double y2, double x3, double y3, int32_t prez) {
     turtleGoto(x1, y1);
     turtlePenDown();
     double iter1 = 1;
@@ -25584,7 +25584,7 @@ void renderBezier(double x1, double y1, double x2, double y2, double x3, double 
 }
 
 /* renders a single character - INTERNAL */
-void renderChar(int32_t index, double x, double y, double size) {
+void turtleTextRenderChar(int32_t index, double x, double y, double size) {
     double sizeSave = turtle.pensize;
     index += 1;
     int32_t len1 = turtleText.fontData[index];
@@ -25604,10 +25604,10 @@ void renderChar(int32_t index, double x, double y, double size) {
             if (turtleText.fontData[index] == 140894115) { // 140894115 is the b value (reserved)
                 index += 4;
                 if (turtleText.fontData[index + 1] != 140894115) {
-                    renderBezier(x + turtleText.fontData[index - 3] * size, y + turtleText.fontData[index - 2] * size, x + turtleText.fontData[index - 1] * size, y + turtleText.fontData[index] * size, x + turtleText.fontData[index + 1] * size, y + turtleText.fontData[index + 2] * size, turtleText.bezierPrezCurrent);
+                    turtleTextRenderBezier(x + turtleText.fontData[index - 3] * size, y + turtleText.fontData[index - 2] * size, x + turtleText.fontData[index - 1] * size, y + turtleText.fontData[index] * size, x + turtleText.fontData[index + 1] * size, y + turtleText.fontData[index + 2] * size, turtleText.bezierPrezCurrent);
                     index += 2;
                 } else {
-                    renderBezier(x + turtleText.fontData[index - 3] * size, y + turtleText.fontData[index - 2] * size, x + turtleText.fontData[index - 1] * size, y + turtleText.fontData[index] * size, x + turtleText.fontData[index + 2] * size, y + turtleText.fontData[index + 3] * size, turtleText.bezierPrezCurrent);
+                    turtleTextRenderBezier(x + turtleText.fontData[index - 3] * size, y + turtleText.fontData[index - 2] * size, x + turtleText.fontData[index - 1] * size, y + turtleText.fontData[index] * size, x + turtleText.fontData[index + 2] * size, y + turtleText.fontData[index + 3] * size, turtleText.bezierPrezCurrent);
                 }
             } else {
                 index += 1;
@@ -25620,8 +25620,8 @@ void renderChar(int32_t index, double x, double y, double size) {
     turtle.pensize = sizeSave;
 }
 
-/* special version of renderChar with rotation - INTERNAL */
-void renderCharRotated(int32_t index, double x, double y, double size, double sinR, double cosR) {
+/* special version of turtleTextRenderChar with rotation - INTERNAL */
+void turtleTextRenderCharRotated(int32_t index, double x, double y, double size, double sinR, double cosR) {
     index += 1;
     int32_t len1 = turtleText.fontData[index];
     for (int32_t i = 0; i < len1; i++) {
@@ -25635,12 +25635,12 @@ void renderCharRotated(int32_t index, double x, double y, double size, double si
             if (turtleText.fontData[index] == 140894115) { // 140894115 is the b value (reserved)
                 index += 4;
                 if (turtleText.fontData[index + 1] != 140894115) {
-                    renderBezier(x + turtleText.fontData[index - 3] * size * cosR + turtleText.fontData[index - 2] * size * sinR, y - turtleText.fontData[index - 3] * size * sinR + turtleText.fontData[index - 2] * size * cosR,
+                    turtleTextRenderBezier(x + turtleText.fontData[index - 3] * size * cosR + turtleText.fontData[index - 2] * size * sinR, y - turtleText.fontData[index - 3] * size * sinR + turtleText.fontData[index - 2] * size * cosR,
                                  x + turtleText.fontData[index - 1] * size * cosR + turtleText.fontData[index] * size * sinR, y - turtleText.fontData[index - 1] * size * sinR + turtleText.fontData[index] * size * cosR,
                                  x + turtleText.fontData[index + 1] * size * cosR + turtleText.fontData[index + 2] * size * sinR, y - turtleText.fontData[index + 1] * size * sinR + turtleText.fontData[index + 2] * size * cosR, turtleText.bezierPrezCurrent);
                     index += 2;
                 } else {
-                    renderBezier(x + turtleText.fontData[index - 3] * size * cosR + turtleText.fontData[index - 2] * size * sinR, y - turtleText.fontData[index - 3] * size * sinR + turtleText.fontData[index - 2] * size * cosR,
+                    turtleTextRenderBezier(x + turtleText.fontData[index - 3] * size * cosR + turtleText.fontData[index - 2] * size * sinR, y - turtleText.fontData[index - 3] * size * sinR + turtleText.fontData[index - 2] * size * cosR,
                                  x + turtleText.fontData[index - 1] * size * cosR + turtleText.fontData[index] * size * sinR, y - turtleText.fontData[index - 1] * size * sinR + turtleText.fontData[index] * size * cosR,
                                  x + turtleText.fontData[index + 2] * size * cosR + turtleText.fontData[index + 3] * size * sinR, y - turtleText.fontData[index + 2] * size * sinR + turtleText.fontData[index + 3] * size * cosR, turtleText.bezierPrezCurrent);
                 }
@@ -25831,7 +25831,7 @@ void turtleTextWrite(const uint32_t *text, int32_t textLength, double x, double 
     y -= 80 * size;
     #endif
     for (int32_t i = 0; i < textLength; i++) {
-        renderChar(turtleText.fontPointer[dataIndStored -> data[i].i], xvals -> data[i].d - ((xTrack - x) * (align / 100)), y, size);
+        turtleTextRenderChar(turtleText.fontPointer[dataIndStored -> data[i].i], xvals -> data[i].d - ((xTrack - x) * (align / 100)), y, size);
     }
     list_free(dataIndStored);
     list_free(xvals);
@@ -25891,7 +25891,7 @@ void turtleTextWriteRotated(const uint32_t *text, int32_t textLength, double x, 
     double cosR = cos(rotate / 57.2958);
     double sinR = sin(rotate / 57.2958);
     for (int32_t i = 0; i < textLength; i++) {
-        renderCharRotated(turtleText.fontPointer[dataIndStored -> data[i].i], x + (xvals -> data[i].d - (xTrack * (align / 100))) * cosR, y - (xvals -> data[i].d - (xTrack * (align / 100))) * sinR, size, sinR, cosR);
+        turtleTextRenderCharRotated(turtleText.fontPointer[dataIndStored -> data[i].i], x + (xvals -> data[i].d - (xTrack * (align / 100))) * cosR, y - (xvals -> data[i].d - (xTrack * (align / 100))) * sinR, size, sinR, cosR);
     }
     list_free(dataIndStored);
     list_free(xvals);
@@ -26061,7 +26061,7 @@ int32_t turtleTextConvertUnicode(const char *str, uint32_t *converted) {
 }
 
 /* if the font file is not found, use the default font (kept here) */
-void generateDefaultFont(list_t *generatedFont) {
+void turtleTextGenerateDefaultFont(list_t *generatedFont) {
     list_append(generatedFont, (unitype) " , 0", 's');
     list_append(generatedFont, (unitype) "A, 2, 3, -160, -100, -100, 60, -40, -100, 2, -137, -40, -63, -40", 's');
     list_append(generatedFont, (unitype) "À, 3, 3, -160, -100, -100, 60, -40, -100, 2, -137, -40, -63, -40, 2, -100, 85, -120, 105", 's');

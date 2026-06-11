@@ -12,7 +12,7 @@ The following build commands are available:
 
 - `make rel` - The release build command, this builds the example project with optimisations turned on (the library is always built with optimisations on)
 
-- `make lib` - This command will package and build the `Linux/turtle.a` library.
+- `make lib` - Packages and builds the `Linux/turtle.a` library.
 
 - `make source` - Used for development for faster binary production by not compiling the library.
 
@@ -20,9 +20,17 @@ The following build commands are available:
 
 - `make winrel` - The release build command for windows.
 
+- `make winlib` - Packages and builds the `Windows/turtle.lib` library.
+
 - `make singlefile` - This will package the turtle headers and source files into a single `turtle.h` file.
 
 - `make winsource` - Used for development for faster binary production by not compiling the library.
+
+- `make html` - The build command for standalone html file
+
+- `make htmlserver` - The build command for three-file html (.wasm, .js, .html, for servers)
+
+- `make runserver` - For testing the server build on browser
 
 # To Do
 - Allow textbox selecting off the ends of the visible content
