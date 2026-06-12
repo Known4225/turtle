@@ -336,8 +336,8 @@ typedef enum {
     TT_STATUS_CLICK = 5,                 // Subsequent ticks of an element that has been clicked (until the mouse is released)
     TT_STATUS_OPEN_FIRST_TICK = 6,       // On dropdowns, textboxes, and context menus they remain active even after mouse is released
     TT_STATUS_OPEN = 7,                  // Used to indicate a context menu or dropdown is open, or a textbox is accepting text
-    TT_STATUS_OPEN_CLICK_FIRST_TICK = 8, // used for dropdowns
-    TT_STATUS_OPEN_CLICK = 9,            // used for dropdowns
+    TT_STATUS_OPEN_CLICK_FIRST_TICK = 8, // Used for dropdowns and context menus when an option is clicked (first tick)
+    TT_STATUS_OPEN_CLICK = 9,            // Used for dropdowns and context menus when an option is clicked
 } tt_status_t;
 
 #define TT_LABEL_LENGTH_LIMIT 128

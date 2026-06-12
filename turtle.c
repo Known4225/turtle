@@ -256,10 +256,10 @@ int main(int argc, char *argv[]) {
     list_append(contextOptions, (unitype) "Switch", 's');
     list_append(contextOptions, (unitype) "Dial", 's');
     list_append(contextOptions, (unitype) "Slider", 's');
+    list_append(contextOptions, (unitype) "Textbox", 's');
+    list_append(contextOptions, (unitype) "Dropdown", 's');
     list_append(contextOptions, (unitype) "Scrollbar", 's');
     list_append(contextOptions, (unitype) "Context", 's');
-    list_append(contextOptions, (unitype) "Dropdown", 's');
-    list_append(contextOptions, (unitype) "Textbox", 's');
     tt_context_t *context = tt_contextInit(contextOptions, NULL, 0, 0, 10);
     context -> enabled = TT_ELEMENT_HIDE;
 
