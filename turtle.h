@@ -10798,8 +10798,8 @@ typedef enum {
     TT_STATUS_CLICK = 5,                 // Subsequent ticks of an element that has been clicked (until the mouse is released)
     TT_STATUS_OPEN_FIRST_TICK = 6,       // On dropdowns, textboxes, and context menus they remain active even after mouse is released
     TT_STATUS_OPEN = 7,                  // Used to indicate a context menu or dropdown is open, or a textbox is accepting text
-    TT_STATUS_OPEN_CLICK_FIRST_TICK = 8, // used for dropdowns
-    TT_STATUS_OPEN_CLICK = 9,            // used for dropdowns
+    TT_STATUS_OPEN_CLICK_FIRST_TICK = 8, // Used for dropdowns and context menus when an option is clicked (first tick)
+    TT_STATUS_OPEN_CLICK = 9,            // Used for dropdowns and context menus when an option is clicked
 } tt_status_t;
 
 #define TT_LABEL_LENGTH_LIMIT 128
@@ -10958,6 +10958,7 @@ typedef struct {
     char label[TT_LABEL_LENGTH_LIMIT];
     tt_status_t status;
     int8_t mouseOver;
+    int8_t moveToTop;
     int32_t count;
     tt_textbox_align_t align;
     double length;
@@ -11010,6 +11011,7 @@ typedef struct {
     tt_status_t status;
     tt_dropdown_align_t align;
     tt_dropdown_direction_t direction;
+    int8_t moveToTop;
     double autoLowerBound;
     double autoUpperBound;
     double maxXfactor;
@@ -11090,6 +11092,7 @@ typedef struct {
     double anchorY;
     double mouseAnchorX;
     double mouseAnchorY;
+    int8_t moveToTop;
     int8_t resizing; // only used for list readers
     double width; // only used for list readers
     double height; // only used for list readers
@@ -27204,7 +27207,7 @@ int32_t tt_elementFree(void *elementp) {
         tt_contextFree((tt_context_t *) elementp);
     break;
     case TT_ELEMENT_VARIABLE_READER:
-    case TT_ELEMENT_LIST_READER:
+    // case TT_ELEMENT_LIST_READER:
         tt_readerFree((tt_reader_t *) elementp);
     break;
     default:
@@ -27414,6 +27417,7 @@ tt_textbox_t *tt_textboxInit(char *label, char *variable, int32_t maxCharacters,
     tt_elementResetColor(textboxp);
     textboxp -> status = TT_STATUS_IDLE;
     textboxp -> mouseOver = 0;
+    textboxp -> moveToTop = 0;
     textboxp -> count = 0;
     textboxp -> align = TT_TEXTBOX_ALIGN_LEFT;
     textboxp -> x = x;
@@ -27487,6 +27491,7 @@ tt_dropdown_t *tt_dropdownInit(char *label, list_t *options, int32_t *variable, 
     dropdownp -> status = TT_STATUS_IDLE;
     dropdownp -> align = align;
     dropdownp -> direction = TT_DROPDOWN_DIRECTION_AUTO;
+    dropdownp -> moveToTop = 0;
     dropdownp -> autoLowerBound = turtle.initbounds[1];
     dropdownp -> autoUpperBound = turtle.initbounds[3];
     dropdownp -> x = x;
@@ -27597,7 +27602,7 @@ tt_reader_t *tt_readerInit(char *label, unitype *variable, char type, double x, 
     } else {
         readerp -> element = TT_ELEMENT_VARIABLE_READER;
     }
-    readerp -> priority = readerp -> element;
+    readerp -> priority = TT_ELEMENT_LIST_READER; // list and variable readers use the same priority
     readerp -> enabled = TT_ELEMENT_ENABLED;
     readerp -> ignored = TT_ELEMENT_NOT_IGNORED;
     if (label == NULL) {
@@ -27612,6 +27617,8 @@ tt_reader_t *tt_readerInit(char *label, unitype *variable, char type, double x, 
     readerp -> status = TT_STATUS_IDLE;
     readerp -> variable = variable;
     readerp -> type = type;
+    readerp -> resizing = 0;
+    readerp -> moveToTop = 0;
     readerp -> scrollbarp = NULL;
     if (readerp -> element == TT_ELEMENT_LIST_READER) {
         readerp -> width = size * 13;
@@ -27717,9 +27724,9 @@ void tt_buttonUpdate(tt_button_t *buttonp) {
     /* mouse */
     if (buttonp -> enabled != TT_ELEMENT_ENABLED || tt_globals.elementLogicTypeOld > buttonp -> priority || (tt_globals.elementLogicTypeOld == buttonp -> priority && tt_globals.elementLogicIndexOld > tt_globals.elementLogicTemp)) {
         /* button not enabled or higher priority element is being interacted with */
-        // if (buttonp -> status != TT_STATUS_BLOCKED) {
+        if (buttonp -> status != TT_STATUS_BLOCKED) {
             buttonp -> status = TT_STATUS_IDLE;
-        // }
+        }
         buttonp -> value = 0;
         goto LABEL_BUTTON_END;
     }
@@ -27780,7 +27787,7 @@ void tt_buttonUpdate(tt_button_t *buttonp) {
         }
     }
     if (buttonp -> status == TT_STATUS_HOVER || buttonp -> status == TT_STATUS_CLICK || buttonp -> status == TT_STATUS_HOVER_FIRST_TICK || buttonp -> status == TT_STATUS_CLICK_FIRST_TICK) {
-        tt_globals.elementLogicType = TT_ELEMENT_BUTTON;
+        tt_globals.elementLogicType = buttonp -> priority;
         tt_globals.elementLogicIndex = tt_globals.elementLogicTemp;
     }
     LABEL_BUTTON_END:
@@ -27961,9 +27968,9 @@ void tt_switchUpdate(tt_switch_t *switchp) {
     /* mouse */
     if (switchp -> enabled != TT_ELEMENT_ENABLED || tt_globals.elementLogicTypeOld > switchp -> priority || (tt_globals.elementLogicTypeOld == switchp -> priority && tt_globals.elementLogicIndexOld > tt_globals.elementLogicTemp)) {
         /* switch not enabled or higher priority element is being interacted with */
-        // if (switchp -> status != TT_STATUS_BLOCKED) {
+        if (switchp -> status != TT_STATUS_BLOCKED) {
             switchp -> status = TT_STATUS_IDLE;
-        // }
+        }
         goto LABEL_SWITCH_END;
     }
     LABEL_SWITCH_CHECK_HOVER:
@@ -28002,7 +28009,7 @@ void tt_switchUpdate(tt_switch_t *switchp) {
         switchp -> value = !switchp -> value;
     }
     if (switchp -> status == TT_STATUS_HOVER || switchp -> status == TT_STATUS_CLICK || switchp -> status == TT_STATUS_HOVER_FIRST_TICK || switchp -> status == TT_STATUS_CLICK_FIRST_TICK) {
-        tt_globals.elementLogicType = TT_ELEMENT_SWITCH;
+        tt_globals.elementLogicType = switchp -> priority;
         tt_globals.elementLogicIndex = tt_globals.elementLogicTemp;
     }
     LABEL_SWITCH_END:
@@ -28070,9 +28077,9 @@ void tt_dialUpdate(tt_dial_t *dialp) {
     /* mouse */
     if (dialp -> enabled != TT_ELEMENT_ENABLED || tt_globals.elementLogicTypeOld > dialp -> priority || (tt_globals.elementLogicTypeOld == dialp -> priority && tt_globals.elementLogicIndexOld > tt_globals.elementLogicTemp)) {
         /* dial not enabled or higher priority element is being interacted with */
-        // if (dialp -> status != TT_STATUS_BLOCKED) {
+        if (dialp -> status != TT_STATUS_BLOCKED) {
             dialp -> status = TT_STATUS_IDLE;
-        // }
+        }
         goto LABEL_DIAL_END;
     }
     LABEL_DIAL_CHECK_HOVER:
@@ -28136,7 +28143,7 @@ void tt_dialUpdate(tt_dial_t *dialp) {
         }
     }
     if (dialp -> status == TT_STATUS_HOVER || dialp -> status == TT_STATUS_CLICK || dialp -> status == TT_STATUS_HOVER_FIRST_TICK || dialp -> status == TT_STATUS_CLICK_FIRST_TICK) {
-        tt_globals.elementLogicType = TT_ELEMENT_DIAL;
+        tt_globals.elementLogicType = dialp -> priority;
         tt_globals.elementLogicIndex = tt_globals.elementLogicTemp;
     }
     LABEL_DIAL_END:
@@ -28252,9 +28259,9 @@ void tt_sliderUpdate(tt_slider_t *sliderp) {
     /* mouse */
     if (sliderp -> enabled != TT_ELEMENT_ENABLED || tt_globals.elementLogicTypeOld > sliderp -> priority || (tt_globals.elementLogicTypeOld == sliderp -> priority && tt_globals.elementLogicIndexOld > tt_globals.elementLogicTemp)) {
         /* slider not enabled or higher priority element is being interacted with */
-        // if (sliderp -> status != TT_STATUS_BLOCKED) {
+        if (sliderp -> status != TT_STATUS_BLOCKED) {
             sliderp -> status = TT_STATUS_IDLE;
-        // }
+        }
         goto LABEL_SLIDER_END;
     }
     LABEL_SLIDER_CHECK_HOVER:
@@ -28329,7 +28336,7 @@ void tt_sliderUpdate(tt_slider_t *sliderp) {
         }
     }
     if (sliderp -> status == TT_STATUS_HOVER || sliderp -> status == TT_STATUS_CLICK || sliderp -> status == TT_STATUS_HOVER_FIRST_TICK || sliderp -> status == TT_STATUS_CLICK_FIRST_TICK) {
-        tt_globals.elementLogicType = TT_ELEMENT_SLIDER;
+        tt_globals.elementLogicType = sliderp -> priority;
         tt_globals.elementLogicIndex = tt_globals.elementLogicTemp;
     }
     LABEL_SLIDER_END:
@@ -28801,10 +28808,18 @@ void tt_textboxUpdate(tt_textbox_t *textboxp) {
             textboxp -> count = 1;
             textboxp -> editIndex = tt_textboxCalculateIndexFromPosition(textboxp, turtle.mouseX);
             textboxp -> editIndexLength = 0;
+            int32_t index = list_find(tt_elements.textboxes, (unitype) (void *) textboxp, 'p');
+            if (index != -1 && index != tt_elements.textboxes -> length - 1) {
+                tt_elements.textboxes -> type[index] = 'l'; // switch to l to avoid free
+                list_delete(tt_elements.textboxes, index);
+                list_append(tt_elements.textboxes, (unitype) (void *) textboxp, 'p');
+                textboxp -> moveToTop = 1;
+            }
             textboxp -> status = TT_STATUS_CLICK_FIRST_TICK;
         } else if (textboxp -> status == TT_STATUS_CLICK || textboxp -> status == TT_STATUS_CLICK_FIRST_TICK) {
             /* textbox is being held */
             textboxp -> status = TT_STATUS_CLICK;
+            textboxp -> moveToTop = 0;
             int32_t boundIndex = tt_textboxCalculateIndexFromPosition(textboxp, turtle.mouseX);
             textboxp -> editIndexLength = boundIndex - textboxp -> editIndex;
             if (textboxp -> editIndex + textboxp -> editIndexLength > textboxp -> renderStartingIndex + textboxp -> renderNumCharacters) {
@@ -28831,7 +28846,7 @@ void tt_textboxUpdate(tt_textbox_t *textboxp) {
         }
     }
     if (textboxp -> status == TT_STATUS_OPEN || textboxp -> status == TT_STATUS_HOVER || textboxp -> status == TT_STATUS_CLICK || textboxp -> status == TT_STATUS_OPEN_FIRST_TICK || textboxp -> status == TT_STATUS_HOVER_FIRST_TICK || textboxp -> status == TT_STATUS_CLICK_FIRST_TICK) {
-        tt_globals.elementLogicType = TT_ELEMENT_TEXTBOX;
+        tt_globals.elementLogicType = textboxp -> priority;
         tt_globals.elementLogicIndex = tt_globals.elementLogicTemp;
     }
 }
@@ -28930,9 +28945,9 @@ void tt_dropdownUpdate(tt_dropdown_t *dropdownp) {
         if (dropdownp -> status == TT_STATUS_OPEN || dropdownp -> status == TT_STATUS_OPEN_FIRST_TICK) {
             goto LABEL_DROPDOWN_CHECK_HOVER;
         }
-        // if (dropdownp -> status != TT_STATUS_BLOCKED) {
+        if (dropdownp -> status != TT_STATUS_BLOCKED) {
             dropdownp -> status = TT_STATUS_IDLE;
-        // }
+        }
         goto LABEL_DROPDOWN_END;
     }
     if (tt_ribbon.mainselect[2] != -1) {
@@ -28982,10 +28997,18 @@ void tt_dropdownUpdate(tt_dropdown_t *dropdownp) {
             dropdownp -> status = TT_STATUS_OPEN_CLICK;
         } else if (dropdownp -> status == TT_STATUS_HOVER || dropdownp -> status == TT_STATUS_HOVER_FIRST_TICK) {
             /* first tick clicked */
+            int32_t index = list_find(tt_elements.dropdowns, (unitype) (void *) dropdownp, 'p');
+            if (index != -1 && index != tt_elements.dropdowns -> length - 1) {
+                tt_elements.dropdowns -> type[index] = 'l'; // switch to l to avoid free
+                list_delete(tt_elements.dropdowns, index);
+                list_append(tt_elements.dropdowns, (unitype) (void *) dropdownp, 'p');
+                dropdownp -> moveToTop = 1;
+            }
             dropdownp -> status = TT_STATUS_CLICK_FIRST_TICK;
         } else if (dropdownp -> status == TT_STATUS_CLICK || dropdownp -> status == TT_STATUS_CLICK_FIRST_TICK) {
             /* dropdown is being held */
             dropdownp -> status = TT_STATUS_CLICK;
+            dropdownp -> moveToTop = 0;
         } else {
             /* dropdown is blocked from interaction until mouse is unclicked */
             dropdownp -> status = TT_STATUS_BLOCKED;
@@ -29044,7 +29067,7 @@ void tt_dropdownUpdate(tt_dropdown_t *dropdownp) {
         }
     }
     if (dropdownp -> status == TT_STATUS_OPEN || dropdownp -> status == TT_STATUS_OPEN_CLICK || dropdownp -> status == TT_STATUS_HOVER || dropdownp -> status == TT_STATUS_CLICK || dropdownp -> status == TT_STATUS_OPEN_FIRST_TICK || dropdownp -> status == TT_STATUS_OPEN_CLICK_FIRST_TICK || dropdownp -> status == TT_STATUS_HOVER_FIRST_TICK) {
-        tt_globals.elementLogicType = TT_ELEMENT_DROPDOWN;
+        tt_globals.elementLogicType = dropdownp -> priority;
         tt_globals.elementLogicIndex = tt_globals.elementLogicTemp;
     }
     LABEL_DROPDOWN_END:
@@ -29138,9 +29161,9 @@ void tt_scrollbarUpdate(tt_scrollbar_t *scrollbarp) {
     /* mouse */
     if (scrollbarp -> enabled != TT_ELEMENT_ENABLED || tt_globals.elementLogicTypeOld > scrollbarp -> priority || (tt_globals.elementLogicTypeOld == scrollbarp -> priority && tt_globals.elementLogicIndexOld > tt_globals.elementLogicTemp)) {
         /* slider not enabled or higher priority element is being interacted with */
-        // if (scrollbarp -> status != TT_STATUS_BLOCKED) {
+        if (scrollbarp -> status != TT_STATUS_BLOCKED) {
             scrollbarp -> status = TT_STATUS_IDLE;
-        // }
+        }
         goto LABEL_SCROLLBAR_END;
     }
     LABEL_SCROLLBAR_CHECK_HOVER:
@@ -29198,7 +29221,7 @@ void tt_scrollbarUpdate(tt_scrollbar_t *scrollbarp) {
         }
     }
     if (scrollbarp -> status == TT_STATUS_HOVER || scrollbarp -> status == TT_STATUS_CLICK || scrollbarp -> status == TT_STATUS_HOVER_FIRST_TICK || scrollbarp -> status == TT_STATUS_CLICK_FIRST_TICK) {
-        tt_globals.elementLogicType = TT_ELEMENT_SCROLLBAR;
+        tt_globals.elementLogicType = scrollbarp -> priority;
         tt_globals.elementLogicIndex = tt_globals.elementLogicTemp;
     }
     LABEL_SCROLLBAR_END:
@@ -29213,6 +29236,13 @@ void tt_contextUpdate(tt_context_t *contextp) {
         contextp -> value = *contextp -> variable;
     }
     if (contextp -> enabled == TT_ELEMENT_HIDE) {
+        if (contextp -> status == TT_STATUS_OPEN_CLICK) {
+            tt_globals.elementLogicType = contextp -> priority;
+            tt_globals.elementLogicIndex = tt_globals.elementLogicTemp;
+            if (!turtleMouseDown()) {
+                contextp -> status = TT_STATUS_IDLE;
+            }
+        }
         return;
     }
     double itemHeight = (contextp -> size * 1.8);
@@ -29249,10 +29279,13 @@ void tt_contextUpdate(tt_context_t *contextp) {
         }
         turtleTextWriteUnicode(contextp -> options -> data[i].s, contextTextX + contextp -> size / 2.5, contextTextY - i * itemHeight, contextp -> size - 1, 0);
     }
-    if (contextp -> enabled == TT_ELEMENT_ENABLED && (tt_globals.elementLogicTypeOld < TT_ELEMENT_CONTEXT || (tt_globals.elementLogicTypeOld == TT_ELEMENT_CONTEXT && tt_globals.elementLogicIndexOld <= (int32_t) tt_globals.elementLogicTemp))) {
-        tt_globals.elementLogicType = TT_ELEMENT_CONTEXT;
+    if (contextp -> enabled == TT_ELEMENT_ENABLED && (tt_globals.elementLogicTypeOld < contextp -> priority || (tt_globals.elementLogicTypeOld == contextp -> priority && tt_globals.elementLogicIndexOld <= (int32_t) tt_globals.elementLogicTemp))) {
+        tt_globals.elementLogicType = contextp -> priority;
         tt_globals.elementLogicIndex = tt_globals.elementLogicTemp;
         if (turtleMouseDown()) {
+            if (contextp -> index != -1) {
+                contextp -> status = TT_STATUS_OPEN_CLICK;
+            }
             contextp -> enabled = TT_ELEMENT_HIDE;
         }
     }
@@ -29369,9 +29402,9 @@ void tt_readerUpdate(tt_reader_t *readerp) {
             if (readerp -> status == TT_STATUS_CLICK || readerp -> status == TT_STATUS_CLICK_FIRST_TICK) {
                 goto LABEL_LIST_READER_CHECK_HOVER;
             }
-            // if (readerp -> status != TT_STATUS_BLOCKED) {
+            if (readerp -> status != TT_STATUS_BLOCKED) {
                 readerp -> status = TT_STATUS_IDLE;
-            // }
+            }
             return;
         }
         LABEL_LIST_READER_CHECK_HOVER:
@@ -29411,15 +29444,17 @@ void tt_readerUpdate(tt_reader_t *readerp) {
                 readerp -> mouseAnchorX = turtle.mouseX;
                 readerp -> mouseAnchorY = turtle.mouseY;
                 int32_t index = list_find(tt_elements.readers, (unitype) (void *) readerp, 'p');
-                if (index != -1) {
+                if (index != -1 && index != tt_elements.readers -> length - 1) {
                     tt_elements.readers -> type[index] = 'l'; // switch to l to avoid free
                     list_delete(tt_elements.readers, index);
                     list_append(tt_elements.readers, (unitype) (void *) readerp, 'p');
+                    readerp -> moveToTop = 1;
                 }
                 readerp -> status = TT_STATUS_CLICK_FIRST_TICK;
             } else if (readerp -> status == TT_STATUS_CLICK || readerp -> status == TT_STATUS_CLICK_FIRST_TICK) {
                 /* reader is being held */
                 readerp -> status = TT_STATUS_CLICK;
+                readerp -> moveToTop = 0;
             } else {
                 /* reader is blocked from interaction until mouse is unclicked */
                 readerp -> status = TT_STATUS_BLOCKED;
@@ -29447,7 +29482,7 @@ void tt_readerUpdate(tt_reader_t *readerp) {
             }
         }
         if (readerp -> status == TT_STATUS_HOVER || readerp -> status == TT_STATUS_CLICK || readerp -> status == TT_STATUS_HOVER_FIRST_TICK || readerp -> status == TT_STATUS_CLICK_FIRST_TICK) {
-            tt_globals.elementLogicType = TT_ELEMENT_LIST_READER;
+            tt_globals.elementLogicType = readerp -> priority;
             tt_globals.elementLogicIndex = tt_globals.elementLogicTemp;
         }
     } else if (readerp -> element == TT_ELEMENT_VARIABLE_READER) {
@@ -29498,9 +29533,9 @@ void tt_readerUpdate(tt_reader_t *readerp) {
             if (readerp -> status == TT_STATUS_CLICK || readerp -> status == TT_STATUS_CLICK_FIRST_TICK) {
                 goto LABEL_VARIABLE_READER_CHECK_HOVER;
             }
-            // if (readerp -> status != TT_STATUS_BLOCKED) {
+            if (readerp -> status != TT_STATUS_BLOCKED) {
                 readerp -> status = TT_STATUS_IDLE;
-            // }
+            }
             return;
         }
         LABEL_VARIABLE_READER_CHECK_HOVER:
@@ -29525,15 +29560,17 @@ void tt_readerUpdate(tt_reader_t *readerp) {
                 readerp -> mouseAnchorX = turtle.mouseX;
                 readerp -> mouseAnchorY = turtle.mouseY;
                 int32_t index = list_find(tt_elements.readers, (unitype) (void *) readerp, 'p');
-                if (index != -1) {
+                if (index != -1 && index != tt_elements.readers -> length - 1) {
                     tt_elements.readers -> type[index] = 'l'; // switch to l to avoid free
                     list_delete(tt_elements.readers, index);
                     list_append(tt_elements.readers, (unitype) (void *) readerp, 'p');
+                    readerp -> moveToTop = 1;
                 }
                 readerp -> status = TT_STATUS_CLICK_FIRST_TICK;
             } else if (readerp -> status == TT_STATUS_CLICK || readerp -> status == TT_STATUS_CLICK_FIRST_TICK) {
                 /* reader is being held */
                 readerp -> status = TT_STATUS_CLICK;
+                readerp -> moveToTop = 0;
             } else {
                 /* reader is blocked from interaction until mouse is unclicked */
                 readerp -> status = TT_STATUS_BLOCKED;
@@ -29550,7 +29587,7 @@ void tt_readerUpdate(tt_reader_t *readerp) {
             readerp -> y = readerp -> anchorY + turtle.mouseY - readerp -> mouseAnchorY;
         }
         if (readerp -> status == TT_STATUS_HOVER || readerp -> status == TT_STATUS_CLICK || readerp -> status == TT_STATUS_HOVER_FIRST_TICK || readerp -> status == TT_STATUS_CLICK_FIRST_TICK) {
-            tt_globals.elementLogicType = TT_ELEMENT_VARIABLE_READER;
+            tt_globals.elementLogicType = readerp -> priority;
             tt_globals.elementLogicIndex = tt_globals.elementLogicTemp;
         }
     }
@@ -29558,17 +29595,7 @@ void tt_readerUpdate(tt_reader_t *readerp) {
 
 void turtleToolsUpdate() {
     turtleToolsUpdateUI();
-    char shapeSave = turtle.penshape;
-    turtlePenShape("circle");
-    if (tt_enabled.ribbonEnabled) {
-        tt_ribbonUpdate();
-    }
-    if (tt_enabled.popupEnabled) {
-        tt_popupUpdate();
-    }
-    turtle.penshape = shapeSave;
-    tt_globals.elementLogicTypeOld = tt_globals.elementLogicType;
-    tt_globals.elementLogicIndexOld = tt_globals.elementLogicIndex;
+    turtleToolsUpdateRibbonPopup();
 }
 
 void turtleToolsUpdateUI() {
@@ -29623,8 +29650,13 @@ void turtleToolsUpdateUI() {
             if (((tt_textbox_t *) (tt_elements.textboxes -> data[i].p)) -> ignored == TT_ELEMENT_IGNORED) {
                 continue;
             }
-            tt_textboxUpdate((tt_textbox_t *) (tt_elements.textboxes -> data[i].p));
-            tt_globals.elementLogicTemp++;
+            tt_textbox_t *textboxp = (tt_textbox_t *) (tt_elements.textboxes -> data[i].p);
+            tt_textboxUpdate(textboxp);
+            if (textboxp -> moveToTop) {
+                i--;
+            } else {
+                tt_globals.elementLogicTemp++;
+            }
         }
     }
     if (tt_enabled.dropdownEnabled) {
@@ -29633,8 +29665,13 @@ void turtleToolsUpdateUI() {
             if (((tt_dropdown_t *) (tt_elements.dropdowns -> data[i].p)) -> ignored == TT_ELEMENT_IGNORED) {
                 continue;
             }
-            tt_dropdownUpdate((tt_dropdown_t *) (tt_elements.dropdowns -> data[i].p));
-            tt_globals.elementLogicTemp++;
+            tt_dropdown_t *dropdownp = (tt_dropdown_t *) (tt_elements.dropdowns -> data[i].p);
+            tt_dropdownUpdate(dropdownp);
+            if (dropdownp -> moveToTop) {
+                i--;
+            } else {
+                tt_globals.elementLogicTemp++;
+            }
         }
     }
     if (tt_enabled.scrollbarEnabled) {
@@ -29663,8 +29700,13 @@ void turtleToolsUpdateUI() {
             if (((tt_reader_t *) (tt_elements.readers -> data[i].p)) -> ignored == TT_ELEMENT_IGNORED) {
                 continue;
             }
-            tt_readerUpdate((tt_reader_t *) (tt_elements.readers -> data[i].p));
-            tt_globals.elementLogicTemp += 2;
+            tt_reader_t *readerp = (tt_reader_t *) (tt_elements.readers -> data[i].p);
+            tt_readerUpdate(readerp);
+            if (readerp -> moveToTop) {
+                i--;
+            } else {
+                tt_globals.elementLogicTemp += 2;
+            }
         }
     }
     turtle.penshape = shapeSave;
