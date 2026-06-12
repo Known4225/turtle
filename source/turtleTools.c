@@ -701,7 +701,7 @@ int32_t tt_elementFree(void *elementp) {
         tt_contextFree((tt_context_t *) elementp);
     break;
     case TT_ELEMENT_VARIABLE_READER:
-    case TT_ELEMENT_LIST_READER:
+    // case TT_ELEMENT_LIST_READER:
         tt_readerFree((tt_reader_t *) elementp);
     break;
     default:
@@ -1094,7 +1094,7 @@ tt_reader_t *tt_readerInit(char *label, unitype *variable, char type, double x, 
     } else {
         readerp -> element = TT_ELEMENT_VARIABLE_READER;
     }
-    readerp -> priority = readerp -> element;
+    readerp -> priority = TT_ELEMENT_LIST_READER; // list and variable readers use the same priority
     readerp -> enabled = TT_ELEMENT_ENABLED;
     readerp -> ignored = TT_ELEMENT_NOT_IGNORED;
     if (label == NULL) {
@@ -1109,6 +1109,8 @@ tt_reader_t *tt_readerInit(char *label, unitype *variable, char type, double x, 
     readerp -> status = TT_STATUS_IDLE;
     readerp -> variable = variable;
     readerp -> type = type;
+    readerp -> resizing = 0;
+    readerp -> clickedFlag = 0;
     readerp -> scrollbarp = NULL;
     if (readerp -> element == TT_ELEMENT_LIST_READER) {
         readerp -> width = size * 13;
@@ -1277,7 +1279,7 @@ void tt_buttonUpdate(tt_button_t *buttonp) {
         }
     }
     if (buttonp -> status == TT_STATUS_HOVER || buttonp -> status == TT_STATUS_CLICK || buttonp -> status == TT_STATUS_HOVER_FIRST_TICK || buttonp -> status == TT_STATUS_CLICK_FIRST_TICK) {
-        tt_globals.elementLogicType = TT_ELEMENT_BUTTON;
+        tt_globals.elementLogicType = buttonp -> priority;
         tt_globals.elementLogicIndex = tt_globals.elementLogicTemp;
     }
     LABEL_BUTTON_END:
@@ -1499,7 +1501,7 @@ void tt_switchUpdate(tt_switch_t *switchp) {
         switchp -> value = !switchp -> value;
     }
     if (switchp -> status == TT_STATUS_HOVER || switchp -> status == TT_STATUS_CLICK || switchp -> status == TT_STATUS_HOVER_FIRST_TICK || switchp -> status == TT_STATUS_CLICK_FIRST_TICK) {
-        tt_globals.elementLogicType = TT_ELEMENT_SWITCH;
+        tt_globals.elementLogicType = switchp -> priority;
         tt_globals.elementLogicIndex = tt_globals.elementLogicTemp;
     }
     LABEL_SWITCH_END:
@@ -1633,7 +1635,7 @@ void tt_dialUpdate(tt_dial_t *dialp) {
         }
     }
     if (dialp -> status == TT_STATUS_HOVER || dialp -> status == TT_STATUS_CLICK || dialp -> status == TT_STATUS_HOVER_FIRST_TICK || dialp -> status == TT_STATUS_CLICK_FIRST_TICK) {
-        tt_globals.elementLogicType = TT_ELEMENT_DIAL;
+        tt_globals.elementLogicType = dialp -> priority;
         tt_globals.elementLogicIndex = tt_globals.elementLogicTemp;
     }
     LABEL_DIAL_END:
@@ -1826,7 +1828,7 @@ void tt_sliderUpdate(tt_slider_t *sliderp) {
         }
     }
     if (sliderp -> status == TT_STATUS_HOVER || sliderp -> status == TT_STATUS_CLICK || sliderp -> status == TT_STATUS_HOVER_FIRST_TICK || sliderp -> status == TT_STATUS_CLICK_FIRST_TICK) {
-        tt_globals.elementLogicType = TT_ELEMENT_SLIDER;
+        tt_globals.elementLogicType = sliderp -> priority;
         tt_globals.elementLogicIndex = tt_globals.elementLogicTemp;
     }
     LABEL_SLIDER_END:
@@ -2328,7 +2330,7 @@ void tt_textboxUpdate(tt_textbox_t *textboxp) {
         }
     }
     if (textboxp -> status == TT_STATUS_OPEN || textboxp -> status == TT_STATUS_HOVER || textboxp -> status == TT_STATUS_CLICK || textboxp -> status == TT_STATUS_OPEN_FIRST_TICK || textboxp -> status == TT_STATUS_HOVER_FIRST_TICK || textboxp -> status == TT_STATUS_CLICK_FIRST_TICK) {
-        tt_globals.elementLogicType = TT_ELEMENT_TEXTBOX;
+        tt_globals.elementLogicType = textboxp -> priority;
         tt_globals.elementLogicIndex = tt_globals.elementLogicTemp;
     }
 }
@@ -2541,7 +2543,7 @@ void tt_dropdownUpdate(tt_dropdown_t *dropdownp) {
         }
     }
     if (dropdownp -> status == TT_STATUS_OPEN || dropdownp -> status == TT_STATUS_OPEN_CLICK || dropdownp -> status == TT_STATUS_HOVER || dropdownp -> status == TT_STATUS_CLICK || dropdownp -> status == TT_STATUS_OPEN_FIRST_TICK || dropdownp -> status == TT_STATUS_OPEN_CLICK_FIRST_TICK || dropdownp -> status == TT_STATUS_HOVER_FIRST_TICK) {
-        tt_globals.elementLogicType = TT_ELEMENT_DROPDOWN;
+        tt_globals.elementLogicType = dropdownp -> priority;
         tt_globals.elementLogicIndex = tt_globals.elementLogicTemp;
     }
     LABEL_DROPDOWN_END:
@@ -2695,7 +2697,7 @@ void tt_scrollbarUpdate(tt_scrollbar_t *scrollbarp) {
         }
     }
     if (scrollbarp -> status == TT_STATUS_HOVER || scrollbarp -> status == TT_STATUS_CLICK || scrollbarp -> status == TT_STATUS_HOVER_FIRST_TICK || scrollbarp -> status == TT_STATUS_CLICK_FIRST_TICK) {
-        tt_globals.elementLogicType = TT_ELEMENT_SCROLLBAR;
+        tt_globals.elementLogicType = scrollbarp -> priority;
         tt_globals.elementLogicIndex = tt_globals.elementLogicTemp;
     }
     LABEL_SCROLLBAR_END:
@@ -2711,7 +2713,7 @@ void tt_contextUpdate(tt_context_t *contextp) {
     }
     if (contextp -> enabled == TT_ELEMENT_HIDE) {
         if (contextp -> status == TT_STATUS_OPEN_CLICK) {
-            tt_globals.elementLogicType = TT_ELEMENT_CONTEXT;
+            tt_globals.elementLogicType = contextp -> priority;
             tt_globals.elementLogicIndex = tt_globals.elementLogicTemp;
             if (!turtleMouseDown()) {
                 contextp -> status = TT_STATUS_IDLE;
@@ -2753,8 +2755,8 @@ void tt_contextUpdate(tt_context_t *contextp) {
         }
         turtleTextWriteUnicode(contextp -> options -> data[i].s, contextTextX + contextp -> size / 2.5, contextTextY - i * itemHeight, contextp -> size - 1, 0);
     }
-    if (contextp -> enabled == TT_ELEMENT_ENABLED && (tt_globals.elementLogicTypeOld < TT_ELEMENT_CONTEXT || (tt_globals.elementLogicTypeOld == TT_ELEMENT_CONTEXT && tt_globals.elementLogicIndexOld <= (int32_t) tt_globals.elementLogicTemp))) {
-        tt_globals.elementLogicType = TT_ELEMENT_CONTEXT;
+    if (contextp -> enabled == TT_ELEMENT_ENABLED && (tt_globals.elementLogicTypeOld < contextp -> priority || (tt_globals.elementLogicTypeOld == contextp -> priority && tt_globals.elementLogicIndexOld <= (int32_t) tt_globals.elementLogicTemp))) {
+        tt_globals.elementLogicType = contextp -> priority;
         tt_globals.elementLogicIndex = tt_globals.elementLogicTemp;
         if (turtleMouseDown()) {
             if (contextp -> index != -1) {
@@ -2918,15 +2920,17 @@ void tt_readerUpdate(tt_reader_t *readerp) {
                 readerp -> mouseAnchorX = turtle.mouseX;
                 readerp -> mouseAnchorY = turtle.mouseY;
                 int32_t index = list_find(tt_elements.readers, (unitype) (void *) readerp, 'p');
-                if (index != -1) {
+                if (index != -1 && index != tt_elements.readers -> length - 1) {
                     tt_elements.readers -> type[index] = 'l'; // switch to l to avoid free
                     list_delete(tt_elements.readers, index);
                     list_append(tt_elements.readers, (unitype) (void *) readerp, 'p');
+                    readerp -> clickedFlag = 1;
                 }
                 readerp -> status = TT_STATUS_CLICK_FIRST_TICK;
             } else if (readerp -> status == TT_STATUS_CLICK || readerp -> status == TT_STATUS_CLICK_FIRST_TICK) {
                 /* reader is being held */
                 readerp -> status = TT_STATUS_CLICK;
+                readerp -> clickedFlag = 0;
             } else {
                 /* reader is blocked from interaction until mouse is unclicked */
                 readerp -> status = TT_STATUS_BLOCKED;
@@ -2954,7 +2958,7 @@ void tt_readerUpdate(tt_reader_t *readerp) {
             }
         }
         if (readerp -> status == TT_STATUS_HOVER || readerp -> status == TT_STATUS_CLICK || readerp -> status == TT_STATUS_HOVER_FIRST_TICK || readerp -> status == TT_STATUS_CLICK_FIRST_TICK) {
-            tt_globals.elementLogicType = TT_ELEMENT_LIST_READER;
+            tt_globals.elementLogicType = readerp -> priority;
             tt_globals.elementLogicIndex = tt_globals.elementLogicTemp;
         }
     } else if (readerp -> element == TT_ELEMENT_VARIABLE_READER) {
@@ -3032,15 +3036,17 @@ void tt_readerUpdate(tt_reader_t *readerp) {
                 readerp -> mouseAnchorX = turtle.mouseX;
                 readerp -> mouseAnchorY = turtle.mouseY;
                 int32_t index = list_find(tt_elements.readers, (unitype) (void *) readerp, 'p');
-                if (index != -1) {
+                if (index != -1 && index != tt_elements.readers -> length - 1) {
                     tt_elements.readers -> type[index] = 'l'; // switch to l to avoid free
                     list_delete(tt_elements.readers, index);
                     list_append(tt_elements.readers, (unitype) (void *) readerp, 'p');
+                    readerp -> clickedFlag = 1;
                 }
                 readerp -> status = TT_STATUS_CLICK_FIRST_TICK;
             } else if (readerp -> status == TT_STATUS_CLICK || readerp -> status == TT_STATUS_CLICK_FIRST_TICK) {
                 /* reader is being held */
                 readerp -> status = TT_STATUS_CLICK;
+                readerp -> clickedFlag = 0;
             } else {
                 /* reader is blocked from interaction until mouse is unclicked */
                 readerp -> status = TT_STATUS_BLOCKED;
@@ -3057,7 +3063,7 @@ void tt_readerUpdate(tt_reader_t *readerp) {
             readerp -> y = readerp -> anchorY + turtle.mouseY - readerp -> mouseAnchorY;
         }
         if (readerp -> status == TT_STATUS_HOVER || readerp -> status == TT_STATUS_CLICK || readerp -> status == TT_STATUS_HOVER_FIRST_TICK || readerp -> status == TT_STATUS_CLICK_FIRST_TICK) {
-            tt_globals.elementLogicType = TT_ELEMENT_VARIABLE_READER;
+            tt_globals.elementLogicType = readerp -> priority;
             tt_globals.elementLogicIndex = tt_globals.elementLogicTemp;
         }
     }
@@ -3065,17 +3071,7 @@ void tt_readerUpdate(tt_reader_t *readerp) {
 
 void turtleToolsUpdate() {
     turtleToolsUpdateUI();
-    char shapeSave = turtle.penshape;
-    turtlePenShape("circle");
-    if (tt_enabled.ribbonEnabled) {
-        tt_ribbonUpdate();
-    }
-    if (tt_enabled.popupEnabled) {
-        tt_popupUpdate();
-    }
-    turtle.penshape = shapeSave;
-    tt_globals.elementLogicTypeOld = tt_globals.elementLogicType;
-    tt_globals.elementLogicIndexOld = tt_globals.elementLogicIndex;
+    turtleToolsUpdateRibbonPopup();
 }
 
 void turtleToolsUpdateUI() {
@@ -3170,8 +3166,13 @@ void turtleToolsUpdateUI() {
             if (((tt_reader_t *) (tt_elements.readers -> data[i].p)) -> ignored == TT_ELEMENT_IGNORED) {
                 continue;
             }
-            tt_readerUpdate((tt_reader_t *) (tt_elements.readers -> data[i].p));
-            tt_globals.elementLogicTemp += 2;
+            tt_reader_t *readerp = (tt_reader_t *) (tt_elements.readers -> data[i].p);
+            tt_readerUpdate(readerp);
+            if (readerp -> clickedFlag) {
+                i--;
+            } else {
+                tt_globals.elementLogicTemp += 2;
+            }
         }
     }
     turtle.penshape = shapeSave;

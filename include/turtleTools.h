@@ -628,6 +628,7 @@ typedef struct {
     double anchorY;
     double mouseAnchorX;
     double mouseAnchorY;
+    int8_t clickedFlag;
     int8_t resizing; // only used for list readers
     double width; // only used for list readers
     double height; // only used for list readers
