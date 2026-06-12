@@ -2276,9 +2276,9 @@ void tt_textboxUpdate(tt_textbox_t *textboxp) {
         if (textboxp -> status == TT_STATUS_OPEN || textboxp -> status == TT_STATUS_OPEN_FIRST_TICK) {
             goto LABEL_TEXTBOX_CHECK_HOVER;
         }
-        if (textboxp -> status != TT_STATUS_BLOCKED) {
+        // if (textboxp -> status != TT_STATUS_BLOCKED) {
             textboxp -> status = TT_STATUS_IDLE;
-        }
+        // }
         textboxp -> mouseOver = 0;
         return;
     }
