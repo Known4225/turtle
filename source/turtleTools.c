@@ -2468,6 +2468,12 @@ void tt_dropdownUpdate(tt_dropdown_t *dropdownp) {
             int32_t selected = round((dropdownY - turtle.mouseY) / itemHeight);
             if (directionRender == -1) {
                 selected = dropdownp -> options -> length - round((turtle.mouseY - dropdownY) / itemHeight);
+                if (selected == 0) {
+                    selected = -1;
+                }
+                if (selected == dropdownp -> options -> length) {
+                    selected = 0;
+                }
             }
             if (turtle.mouseX > dropdownMaxXFactor[0] && turtle.mouseX < dropdownMaxXFactor[1] && selected >= 0 && selected < dropdownp -> options -> length) {
                 if (selected == 0) {
@@ -2513,6 +2519,12 @@ void tt_dropdownUpdate(tt_dropdown_t *dropdownp) {
             int32_t selected = round((dropdownY - turtle.mouseY) / itemHeight);
             if (directionRender == -1) {
                 selected = dropdownp -> options -> length - round((turtle.mouseY - dropdownY) / itemHeight);
+                if (selected == 0) {
+                    selected = -1;
+                }
+                if (selected == dropdownp -> options -> length) {
+                    selected = 0;
+                }
             }
             if (turtle.mouseX > dropdownMaxXFactor[0] && turtle.mouseX < dropdownMaxXFactor[1] && selected >= 1 && selected < dropdownp -> options -> length) {
                 if (dropdownp -> index >= selected) {
@@ -2540,10 +2552,20 @@ void tt_dropdownUpdate(tt_dropdown_t *dropdownp) {
         int32_t selected = round((dropdownY - turtle.mouseY) / itemHeight);
         if (directionRender == -1) {
             selected = dropdownp -> options -> length - round((turtle.mouseY - dropdownY) / itemHeight);
+            if (selected == 0) {
+                selected = -1;
+            }
+            if (selected == dropdownp -> options -> length) {
+                selected = 0;
+            }
         }
         if (turtle.mouseX > dropdownMaxXFactor[0] && turtle.mouseX < dropdownMaxXFactor[1] && selected >= 0 && selected < dropdownp -> options -> length) {
             tt_setColor(dropdownp -> color[TT_COLOR_SLOT_DROPDOWN_HOVER]);
-            turtleRectangle(dropdownMaxXFactor[0], dropdownY - dropdownp -> size * 0.9 - (directionRender - 1) / 2.0 * dropdownp -> options -> length * itemHeight - selected * itemHeight, dropdownMaxXFactor[1], dropdownY + dropdownp -> size * 0.9 - (directionRender - 1) / 2.0 * dropdownp -> options -> length * itemHeight - selected * itemHeight);
+            if (directionRender == -1 && selected == 0) {
+                turtleRectangle(dropdownMaxXFactor[0], dropdownY - dropdownp -> size * 0.9 - (directionRender - 1) / 2.0 * dropdownp -> options -> length * itemHeight - dropdownp -> options -> length * itemHeight, dropdownMaxXFactor[1], dropdownY + dropdownp -> size * 0.9 - (directionRender - 1) / 2.0 * dropdownp -> options -> length * itemHeight - dropdownp -> options -> length * itemHeight);
+            } else {
+                turtleRectangle(dropdownMaxXFactor[0], dropdownY - dropdownp -> size * 0.9 - (directionRender - 1) / 2.0 * dropdownp -> options -> length * itemHeight - selected * itemHeight, dropdownMaxXFactor[1], dropdownY + dropdownp -> size * 0.9 - (directionRender - 1) / 2.0 * dropdownp -> options -> length * itemHeight - selected * itemHeight);
+            }
         }
         tt_setColor(dropdownp -> color[TT_COLOR_SLOT_DROPDOWN_TEXT]);
         int32_t renderIndex = 1;
