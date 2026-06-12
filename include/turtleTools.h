@@ -496,6 +496,7 @@ typedef struct {
     char label[TT_LABEL_LENGTH_LIMIT];
     tt_status_t status;
     int8_t mouseOver;
+    int8_t moveToTop;
     int32_t count;
     tt_textbox_align_t align;
     double length;
@@ -548,6 +549,7 @@ typedef struct {
     tt_status_t status;
     tt_dropdown_align_t align;
     tt_dropdown_direction_t direction;
+    int8_t moveToTop;
     double autoLowerBound;
     double autoUpperBound;
     double maxXfactor;
@@ -628,7 +630,7 @@ typedef struct {
     double anchorY;
     double mouseAnchorX;
     double mouseAnchorY;
-    int8_t clickedFlag;
+    int8_t moveToTop;
     int8_t resizing; // only used for list readers
     double width; // only used for list readers
     double height; // only used for list readers

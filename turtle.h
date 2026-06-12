@@ -10958,6 +10958,7 @@ typedef struct {
     char label[TT_LABEL_LENGTH_LIMIT];
     tt_status_t status;
     int8_t mouseOver;
+    int8_t moveToTop;
     int32_t count;
     tt_textbox_align_t align;
     double length;
@@ -11010,6 +11011,7 @@ typedef struct {
     tt_status_t status;
     tt_dropdown_align_t align;
     tt_dropdown_direction_t direction;
+    int8_t moveToTop;
     double autoLowerBound;
     double autoUpperBound;
     double maxXfactor;
@@ -11090,7 +11092,7 @@ typedef struct {
     double anchorY;
     double mouseAnchorX;
     double mouseAnchorY;
-    int8_t clickedFlag;
+    int8_t moveToTop;
     int8_t resizing; // only used for list readers
     double width; // only used for list readers
     double height; // only used for list readers
@@ -27415,6 +27417,7 @@ tt_textbox_t *tt_textboxInit(char *label, char *variable, int32_t maxCharacters,
     tt_elementResetColor(textboxp);
     textboxp -> status = TT_STATUS_IDLE;
     textboxp -> mouseOver = 0;
+    textboxp -> moveToTop = 0;
     textboxp -> count = 0;
     textboxp -> align = TT_TEXTBOX_ALIGN_LEFT;
     textboxp -> x = x;
@@ -27488,6 +27491,7 @@ tt_dropdown_t *tt_dropdownInit(char *label, list_t *options, int32_t *variable, 
     dropdownp -> status = TT_STATUS_IDLE;
     dropdownp -> align = align;
     dropdownp -> direction = TT_DROPDOWN_DIRECTION_AUTO;
+    dropdownp -> moveToTop = 0;
     dropdownp -> autoLowerBound = turtle.initbounds[1];
     dropdownp -> autoUpperBound = turtle.initbounds[3];
     dropdownp -> x = x;
@@ -27614,7 +27618,7 @@ tt_reader_t *tt_readerInit(char *label, unitype *variable, char type, double x, 
     readerp -> variable = variable;
     readerp -> type = type;
     readerp -> resizing = 0;
-    readerp -> clickedFlag = 0;
+    readerp -> moveToTop = 0;
     readerp -> scrollbarp = NULL;
     if (readerp -> element == TT_ELEMENT_LIST_READER) {
         readerp -> width = size * 13;
@@ -28804,10 +28808,18 @@ void tt_textboxUpdate(tt_textbox_t *textboxp) {
             textboxp -> count = 1;
             textboxp -> editIndex = tt_textboxCalculateIndexFromPosition(textboxp, turtle.mouseX);
             textboxp -> editIndexLength = 0;
+            int32_t index = list_find(tt_elements.textboxes, (unitype) (void *) textboxp, 'p');
+            if (index != -1 && index != tt_elements.textboxes -> length - 1) {
+                tt_elements.textboxes -> type[index] = 'l'; // switch to l to avoid free
+                list_delete(tt_elements.textboxes, index);
+                list_append(tt_elements.textboxes, (unitype) (void *) textboxp, 'p');
+                textboxp -> moveToTop = 1;
+            }
             textboxp -> status = TT_STATUS_CLICK_FIRST_TICK;
         } else if (textboxp -> status == TT_STATUS_CLICK || textboxp -> status == TT_STATUS_CLICK_FIRST_TICK) {
             /* textbox is being held */
             textboxp -> status = TT_STATUS_CLICK;
+            textboxp -> moveToTop = 0;
             int32_t boundIndex = tt_textboxCalculateIndexFromPosition(textboxp, turtle.mouseX);
             textboxp -> editIndexLength = boundIndex - textboxp -> editIndex;
             if (textboxp -> editIndex + textboxp -> editIndexLength > textboxp -> renderStartingIndex + textboxp -> renderNumCharacters) {
@@ -28985,10 +28997,18 @@ void tt_dropdownUpdate(tt_dropdown_t *dropdownp) {
             dropdownp -> status = TT_STATUS_OPEN_CLICK;
         } else if (dropdownp -> status == TT_STATUS_HOVER || dropdownp -> status == TT_STATUS_HOVER_FIRST_TICK) {
             /* first tick clicked */
+            int32_t index = list_find(tt_elements.dropdowns, (unitype) (void *) dropdownp, 'p');
+            if (index != -1 && index != tt_elements.dropdowns -> length - 1) {
+                tt_elements.dropdowns -> type[index] = 'l'; // switch to l to avoid free
+                list_delete(tt_elements.dropdowns, index);
+                list_append(tt_elements.dropdowns, (unitype) (void *) dropdownp, 'p');
+                dropdownp -> moveToTop = 1;
+            }
             dropdownp -> status = TT_STATUS_CLICK_FIRST_TICK;
         } else if (dropdownp -> status == TT_STATUS_CLICK || dropdownp -> status == TT_STATUS_CLICK_FIRST_TICK) {
             /* dropdown is being held */
             dropdownp -> status = TT_STATUS_CLICK;
+            dropdownp -> moveToTop = 0;
         } else {
             /* dropdown is blocked from interaction until mouse is unclicked */
             dropdownp -> status = TT_STATUS_BLOCKED;
@@ -29428,13 +29448,13 @@ void tt_readerUpdate(tt_reader_t *readerp) {
                     tt_elements.readers -> type[index] = 'l'; // switch to l to avoid free
                     list_delete(tt_elements.readers, index);
                     list_append(tt_elements.readers, (unitype) (void *) readerp, 'p');
-                    readerp -> clickedFlag = 1;
+                    readerp -> moveToTop = 1;
                 }
                 readerp -> status = TT_STATUS_CLICK_FIRST_TICK;
             } else if (readerp -> status == TT_STATUS_CLICK || readerp -> status == TT_STATUS_CLICK_FIRST_TICK) {
                 /* reader is being held */
                 readerp -> status = TT_STATUS_CLICK;
-                readerp -> clickedFlag = 0;
+                readerp -> moveToTop = 0;
             } else {
                 /* reader is blocked from interaction until mouse is unclicked */
                 readerp -> status = TT_STATUS_BLOCKED;
@@ -29544,13 +29564,13 @@ void tt_readerUpdate(tt_reader_t *readerp) {
                     tt_elements.readers -> type[index] = 'l'; // switch to l to avoid free
                     list_delete(tt_elements.readers, index);
                     list_append(tt_elements.readers, (unitype) (void *) readerp, 'p');
-                    readerp -> clickedFlag = 1;
+                    readerp -> moveToTop = 1;
                 }
                 readerp -> status = TT_STATUS_CLICK_FIRST_TICK;
             } else if (readerp -> status == TT_STATUS_CLICK || readerp -> status == TT_STATUS_CLICK_FIRST_TICK) {
                 /* reader is being held */
                 readerp -> status = TT_STATUS_CLICK;
-                readerp -> clickedFlag = 0;
+                readerp -> moveToTop = 0;
             } else {
                 /* reader is blocked from interaction until mouse is unclicked */
                 readerp -> status = TT_STATUS_BLOCKED;
@@ -29630,8 +29650,13 @@ void turtleToolsUpdateUI() {
             if (((tt_textbox_t *) (tt_elements.textboxes -> data[i].p)) -> ignored == TT_ELEMENT_IGNORED) {
                 continue;
             }
-            tt_textboxUpdate((tt_textbox_t *) (tt_elements.textboxes -> data[i].p));
-            tt_globals.elementLogicTemp++;
+            tt_textbox_t *textboxp = (tt_textbox_t *) (tt_elements.textboxes -> data[i].p);
+            tt_textboxUpdate(textboxp);
+            if (textboxp -> moveToTop) {
+                i--;
+            } else {
+                tt_globals.elementLogicTemp++;
+            }
         }
     }
     if (tt_enabled.dropdownEnabled) {
@@ -29640,8 +29665,13 @@ void turtleToolsUpdateUI() {
             if (((tt_dropdown_t *) (tt_elements.dropdowns -> data[i].p)) -> ignored == TT_ELEMENT_IGNORED) {
                 continue;
             }
-            tt_dropdownUpdate((tt_dropdown_t *) (tt_elements.dropdowns -> data[i].p));
-            tt_globals.elementLogicTemp++;
+            tt_dropdown_t *dropdownp = (tt_dropdown_t *) (tt_elements.dropdowns -> data[i].p);
+            tt_dropdownUpdate(dropdownp);
+            if (dropdownp -> moveToTop) {
+                i--;
+            } else {
+                tt_globals.elementLogicTemp++;
+            }
         }
     }
     if (tt_enabled.scrollbarEnabled) {
@@ -29672,7 +29702,7 @@ void turtleToolsUpdateUI() {
             }
             tt_reader_t *readerp = (tt_reader_t *) (tt_elements.readers -> data[i].p);
             tt_readerUpdate(readerp);
-            if (readerp -> clickedFlag) {
+            if (readerp -> moveToTop) {
                 i--;
             } else {
                 tt_globals.elementLogicTemp += 2;
