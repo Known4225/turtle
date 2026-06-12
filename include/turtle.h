@@ -251,7 +251,7 @@ int32_t turtleTextureUnload(turtle_texture_t texture);
 int32_t turtleTextureUnloadAll();
 
 /* adds a (blit) rectangular texture */
-void turtleTexture(turtle_texture_t texture, double x1, double y1, double x2, double y2, double rot, uint8_t r, uint8_t g, uint8_t b);
+void turtleTexture(turtle_texture_t texture, double x1, double y1, double x2, double y2, double rot);
 
 /* draws a circle at the specified x and y (coordinates) */
 void turtleCircleRenderInternal(double x, double y, double rad, double r, double g, double b, double a, double xcenter, double ycenter, double xfact, double yfact, double prez);
