@@ -10957,20 +10957,22 @@ typedef struct {
     double size;
     char label[TT_LABEL_LENGTH_LIMIT];
     tt_status_t status;
-    int8_t mouseOver;
+    int8_t mouseOver; // whether mouse is hovering over textbox
     int8_t moveToTop;
-    int32_t count;
+    int32_t count; // counts updates for line flashing animation
     tt_textbox_align_t align;
-    double length;
-    int32_t maxCharacters;
-    int32_t editIndex;
-    int32_t editIndexLength;
-    int32_t lastKey;
-    int32_t keyTimeout;
-    int32_t initialKeyTimeout;
-    int32_t heldKeyTimeout;
-    int32_t linePeriod;
-    int8_t controlHeld;
+    double length; // length of textbox in coordinates
+    int32_t maxCharacters; // maximum characters of textbox text
+    int32_t editIndex; // index of editing (index of text)
+    int32_t editIndexLength; // length of text editing for highlighted bits of text (can be negative)
+    int32_t lastKey; // keep track of last key pressed for spamming key behaviour
+    int32_t keyTimeout; // counts updates of key timeouts
+    int32_t initialKeyTimeout; // initial timeout in updates to determine when key switches to spamming
+    int32_t heldKeyTimeout; // timeout in updates of key held down spamming behaviour
+    int32_t linePeriod; // period in updates of flashing bar to indicate text is being updated (1 full cycle)
+    int16_t doubleClickCount; // counts updates for double click timer
+    int16_t doubleClickTimeout; // timeout in updates of how long between clicks for double click to register
+    int8_t editingMode; // mode 0 for editing characters, mode 1 for editing words, mode 2 for editing all
     /* render variables */
     double renderPixelOffset;
     int32_t renderStartingIndex;
@@ -27439,7 +27441,9 @@ tt_textbox_t *tt_textboxInit(char *label, char *variable, int32_t maxCharacters,
     textboxp -> initialKeyTimeout = 48;
     textboxp -> heldKeyTimeout = 2;
     textboxp -> linePeriod = 132;
-    textboxp -> controlHeld = 0;
+    textboxp -> doubleClickCount = -1;
+    textboxp -> doubleClickTimeout = 24;
+    textboxp -> editingMode = 0;
     textboxp -> renderPixelOffset = 0;
     textboxp -> renderStartingIndex = 0;
     textboxp -> renderNumCharacters = 0;
@@ -28421,18 +28425,14 @@ void tt_textboxUnicodeCallback(uint32_t codepoint) {
 
 void tt_textboxHandleOtherKey(tt_textbox_t *textboxp, int32_t key) {
     int32_t len = strlen(textboxp -> text);
-    if (key == GLFW_KEY_A && textboxp -> controlHeld) {
+    if (key == GLFW_KEY_A && turtleKeyPressed(GLFW_KEY_LEFT_CONTROL)) {
         /* select all */
         textboxp -> editIndex = 0;
         textboxp -> editIndexLength = strlen(textboxp -> text);
         return;
     }
-    if (key == GLFW_KEY_LEFT_CONTROL) {
-        textboxp -> controlHeld = 1;
-        return;
-    }
     if (key == GLFW_KEY_BACKSPACE) {
-        if (textboxp -> editIndex <= 0) {
+        if (textboxp -> editIndex < 0 || (textboxp -> editIndex == 0 && textboxp -> editIndexLength == 0)) {
             return;
         }
         if (textboxp -> editIndexLength == 0) {
@@ -28559,16 +28559,6 @@ void tt_textboxKeyCallback(int32_t key, int32_t scancode, int32_t action) {
                 textboxp -> keyTimeout = textboxp -> initialKeyTimeout;
                 tt_textboxHandleOtherKey(textboxp, key);
                 break;
-            }
-        }
-    } else if (action == GLFW_RELEASE) {
-        if (key == GLFW_KEY_LEFT_CONTROL) {
-            for (int32_t i = 0; i < tt_elements.textboxes -> length; i++) {
-                tt_textbox_t *textboxp = (tt_textbox_t *) (tt_elements.textboxes -> data[i].p);
-                if (textboxp -> status == TT_STATUS_CLICK || textboxp -> status == TT_STATUS_OPEN || textboxp -> status == TT_STATUS_CLICK_FIRST_TICK || textboxp -> status == TT_STATUS_OPEN_FIRST_TICK) {
-                    textboxp -> controlHeld = 0;
-                    break;
-                }
             }
         }
     }
@@ -28838,14 +28828,19 @@ void tt_textboxUpdate(tt_textbox_t *textboxp) {
                 textboxp -> moveToTop = 1;
             }
             textboxp -> status = TT_STATUS_CLICK_FIRST_TICK;
+            if (textboxp -> doubleClickCount == -1) {
+                textboxp -> doubleClickCount = 0;
+            }
         } else if (textboxp -> status == TT_STATUS_CLICK || textboxp -> status == TT_STATUS_CLICK_FIRST_TICK) {
             /* textbox is being held */
             textboxp -> status = TT_STATUS_CLICK;
             textboxp -> moveToTop = 0;
-            int32_t boundIndex = tt_textboxCalculateIndexFromPosition(textboxp, turtle.mouseX);
-            textboxp -> editIndexLength = boundIndex - textboxp -> editIndex;
-            if (textboxp -> editIndex + textboxp -> editIndexLength > textboxp -> renderStartingIndex + textboxp -> renderNumCharacters) {
-                textboxp -> editIndexLength = textboxp -> renderStartingIndex + textboxp -> renderNumCharacters - textboxp -> editIndex;
+            if (textboxp -> editingMode == 0) {
+                int32_t boundIndex = tt_textboxCalculateIndexFromPosition(textboxp, turtle.mouseX);
+                textboxp -> editIndexLength = boundIndex - textboxp -> editIndex;
+                if (textboxp -> editIndex + textboxp -> editIndexLength > textboxp -> renderStartingIndex + textboxp -> renderNumCharacters) {
+                    textboxp -> editIndexLength = textboxp -> renderStartingIndex + textboxp -> renderNumCharacters - textboxp -> editIndex;
+                }
             }
         } else if (textboxp -> mouseOver && (textboxp -> status == TT_STATUS_OPEN || textboxp -> status == TT_STATUS_OPEN_FIRST_TICK)) {
             /* textbox is open (affirm) */
@@ -28854,6 +28849,19 @@ void tt_textboxUpdate(tt_textbox_t *textboxp) {
             /* textbox is blocked from interaction until mouse is unclicked */
             textboxp -> editIndexLength = 0;
             textboxp -> status = TT_STATUS_BLOCKED;
+        }
+        if (textboxp -> doubleClickCount > textboxp -> doubleClickTimeout && textboxp -> doubleClickCount <= textboxp -> doubleClickTimeout * 2) {
+            /* double clicked */
+            textboxp -> editIndex = 0;
+            textboxp -> editIndexLength = strlen(textboxp -> text);
+            textboxp -> doubleClickCount = -1;
+            textboxp -> editingMode = 2;
+        }
+        if (textboxp -> doubleClickCount >= 0) {
+            textboxp -> doubleClickCount++;
+            if (textboxp -> doubleClickCount > textboxp -> doubleClickTimeout) {
+                textboxp -> doubleClickCount = -1;
+            }
         }
     } else {
         if (textboxp -> status == TT_STATUS_CLICK || textboxp -> status == TT_STATUS_CLICK_FIRST_TICK) {
@@ -28866,6 +28874,15 @@ void tt_textboxUpdate(tt_textbox_t *textboxp) {
             textboxp -> status = TT_STATUS_IDLE;
             goto LABEL_TEXTBOX_CHECK_HOVER; // done to avoid a single IDLE tick if mouse is hovering over textbox when unclicked
         }
+        if (textboxp -> doubleClickCount >= 0 && textboxp -> doubleClickCount <= textboxp -> doubleClickTimeout) {
+            textboxp -> doubleClickCount = textboxp -> doubleClickTimeout;
+        } else if (textboxp -> doubleClickCount > textboxp -> doubleClickTimeout * 2) {
+            textboxp -> doubleClickCount = -1;
+        }
+        if (textboxp -> doubleClickCount >= 0) {
+            textboxp -> doubleClickCount++;
+        }
+        textboxp -> editingMode = 0;
     }
     if (textboxp -> status == TT_STATUS_OPEN || textboxp -> status == TT_STATUS_HOVER || textboxp -> status == TT_STATUS_CLICK || textboxp -> status == TT_STATUS_OPEN_FIRST_TICK || textboxp -> status == TT_STATUS_HOVER_FIRST_TICK || textboxp -> status == TT_STATUS_CLICK_FIRST_TICK) {
         tt_globals.elementLogicType = textboxp -> priority;

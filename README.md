@@ -33,6 +33,8 @@ The following build commands are available:
 - `make runserver` - For testing the server build on browser
 
 # To Do
+- Double click and drag highlights words in normal textboxes
+- In normal textboxes you can drag highlighted text out of the text box and into another textbox or program like a pseudo-copy-and-paste (but it doesn't actually use the clipboard)
 - Fix textboxes and dropdown priority system by emulating readers "always on top" behaviour (but first fix reader flickering)
 - Allow textbox selecting off the ends of the visible content
 - Bug: When deploying turtle.html to firebase it did not work on the internet when using three file server setup (even though emrun worked). Standalone singlefile version did work - perhaps emscripten needs to be updated?

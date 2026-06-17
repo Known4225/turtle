@@ -495,20 +495,22 @@ typedef struct {
     double size;
     char label[TT_LABEL_LENGTH_LIMIT];
     tt_status_t status;
-    int8_t mouseOver;
+    int8_t mouseOver; // whether mouse is hovering over textbox
     int8_t moveToTop;
-    int32_t count;
+    int32_t count; // counts updates for line flashing animation
     tt_textbox_align_t align;
-    double length;
-    int32_t maxCharacters;
-    int32_t editIndex;
-    int32_t editIndexLength;
-    int32_t lastKey;
-    int32_t keyTimeout;
-    int32_t initialKeyTimeout;
-    int32_t heldKeyTimeout;
-    int32_t linePeriod;
-    int8_t controlHeld;
+    double length; // length of textbox in coordinates
+    int32_t maxCharacters; // maximum characters of textbox text
+    int32_t editIndex; // index of editing (index of text)
+    int32_t editIndexLength; // length of text editing for highlighted bits of text (can be negative)
+    int32_t lastKey; // keep track of last key pressed for spamming key behaviour
+    int32_t keyTimeout; // counts updates of key timeouts
+    int32_t initialKeyTimeout; // initial timeout in updates to determine when key switches to spamming
+    int32_t heldKeyTimeout; // timeout in updates of key held down spamming behaviour
+    int32_t linePeriod; // period in updates of flashing bar to indicate text is being updated (1 full cycle)
+    int16_t doubleClickCount; // counts updates for double click timer
+    int16_t doubleClickTimeout; // timeout in updates of how long between clicks for double click to register
+    int8_t editingMode; // mode 0 for editing characters, mode 1 for editing words, mode 2 for editing all
     /* render variables */
     double renderPixelOffset;
     int32_t renderStartingIndex;
