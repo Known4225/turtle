@@ -932,6 +932,7 @@ tt_textbox_t *tt_textboxInit(char *label, char *variable, int32_t maxCharacters,
     textboxp -> initialKeyTimeout = 48;
     textboxp -> heldKeyTimeout = 2;
     textboxp -> linePeriod = 132;
+    textboxp -> controlHeld = 0;
     textboxp -> renderPixelOffset = 0;
     textboxp -> renderStartingIndex = 0;
     textboxp -> renderNumCharacters = 0;
@@ -1913,6 +1914,16 @@ void tt_textboxUnicodeCallback(uint32_t codepoint) {
 
 void tt_textboxHandleOtherKey(tt_textbox_t *textboxp, int32_t key) {
     int32_t len = strlen(textboxp -> text);
+    if (key == GLFW_KEY_A && textboxp -> controlHeld) {
+        /* select all */
+        textboxp -> editIndex = 0;
+        textboxp -> editIndexLength = strlen(textboxp -> text);
+        return;
+    }
+    if (key == GLFW_KEY_LEFT_CONTROL) {
+        textboxp -> controlHeld = 1;
+        return;
+    }
     if (key == GLFW_KEY_BACKSPACE) {
         if (textboxp -> editIndex <= 0) {
             return;
@@ -2041,6 +2052,16 @@ void tt_textboxKeyCallback(int32_t key, int32_t scancode, int32_t action) {
                 textboxp -> keyTimeout = textboxp -> initialKeyTimeout;
                 tt_textboxHandleOtherKey(textboxp, key);
                 break;
+            }
+        }
+    } else if (action == GLFW_RELEASE) {
+        if (key == GLFW_KEY_LEFT_CONTROL) {
+            for (int32_t i = 0; i < tt_elements.textboxes -> length; i++) {
+                tt_textbox_t *textboxp = (tt_textbox_t *) (tt_elements.textboxes -> data[i].p);
+                if (textboxp -> status == TT_STATUS_CLICK || textboxp -> status == TT_STATUS_OPEN || textboxp -> status == TT_STATUS_CLICK_FIRST_TICK || textboxp -> status == TT_STATUS_OPEN_FIRST_TICK) {
+                    textboxp -> controlHeld = 0;
+                    break;
+                }
             }
         }
     }
