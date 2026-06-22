@@ -24751,7 +24751,7 @@ int32_t turtleTextureGetHeight(turtle_texture_t texture) {
     if (texture < 0 || texture >= turtle.textureList -> length) {
         return -1;
     }
-    return turtle.textureList -> data[texture + 1].i;
+    return turtle.textureList -> data[texture + 2].i;
 }
 
 void turtleTexturePrint(turtle_texture_t texture) {
