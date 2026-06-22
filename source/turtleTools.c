@@ -932,6 +932,7 @@ tt_textbox_t *tt_textboxInit(char *label, char *variable, int32_t maxCharacters,
     textboxp -> initialKeyTimeout = 48;
     textboxp -> heldKeyTimeout = 2;
     textboxp -> linePeriod = 132;
+    textboxp -> doubleClickEditIndex = -1;
     textboxp -> doubleClickCount = -1;
     textboxp -> doubleClickTimeout = 24;
     textboxp -> editingMode = 0;
@@ -2321,6 +2322,7 @@ void tt_textboxUpdate(tt_textbox_t *textboxp) {
             textboxp -> status = TT_STATUS_CLICK_FIRST_TICK;
             if (textboxp -> doubleClickCount == -1) {
                 textboxp -> doubleClickCount = 0;
+                textboxp -> doubleClickEditIndex = textboxp -> editIndex;
             }
         } else if (textboxp -> status == TT_STATUS_CLICK || textboxp -> status == TT_STATUS_CLICK_FIRST_TICK) {
             /* textbox is being held */
@@ -2333,6 +2335,9 @@ void tt_textboxUpdate(tt_textbox_t *textboxp) {
                     textboxp -> editIndexLength = textboxp -> renderStartingIndex + textboxp -> renderNumCharacters - textboxp -> editIndex;
                 }
             }
+            if (textboxp -> editIndexLength != 0) {
+                textboxp -> doubleClickCount = -1;
+            }
         } else if (textboxp -> mouseOver && (textboxp -> status == TT_STATUS_OPEN || textboxp -> status == TT_STATUS_OPEN_FIRST_TICK)) {
             /* textbox is open (affirm) */
             textboxp -> status = TT_STATUS_OPEN;
@@ -2341,7 +2346,7 @@ void tt_textboxUpdate(tt_textbox_t *textboxp) {
             textboxp -> editIndexLength = 0;
             textboxp -> status = TT_STATUS_BLOCKED;
         }
-        if (textboxp -> doubleClickCount > textboxp -> doubleClickTimeout && textboxp -> doubleClickCount <= textboxp -> doubleClickTimeout * 2) {
+        if (textboxp -> doubleClickCount > textboxp -> doubleClickTimeout && textboxp -> doubleClickCount <= textboxp -> doubleClickTimeout * 2 && textboxp -> doubleClickEditIndex == textboxp -> editIndex && textboxp -> status != TT_STATUS_BLOCKED) {
             /* double clicked */
             textboxp -> editIndex = 0;
             textboxp -> editIndexLength = strlen(textboxp -> text);

@@ -508,6 +508,7 @@ typedef struct {
     int32_t initialKeyTimeout; // initial timeout in updates to determine when key switches to spamming
     int32_t heldKeyTimeout; // timeout in updates of key held down spamming behaviour
     int32_t linePeriod; // period in updates of flashing bar to indicate text is being updated (1 full cycle)
+    int32_t doubleClickEditIndex; // keep track of edit index when attempting double click (invalidate if second click has different edit index)
     int16_t doubleClickCount; // counts updates for double click timer
     int16_t doubleClickTimeout; // timeout in updates of how long between clicks for double click to register
     int8_t editingMode; // mode 0 for editing characters, mode 1 for editing words, mode 2 for editing all
