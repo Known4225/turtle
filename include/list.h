@@ -25,7 +25,7 @@ unitype list, supports a variety of types
 example usage:
 list_t *newList = list_init();
 list_append(newList, (unitype) "hello", 's'); // add to list
-list_append(newList, (unitype) "test", LIST_TYPE_STRING); // add to list using enum
+list_append(newList, (unitype) "test", UNITYPE_STRING); // add to list using enum
 list_print(newList);
 > [hello, test]
 list_insert(newList, (unitype) 128, 'i', 1);
@@ -51,23 +51,23 @@ list_copy will make a copy of all strings, pointers, and lists - it will not use
 You must call list_init() when intending to copy a list - all lists must be initialised before any functions can be called on them (if your program is crashing - check to make sure you initialised all your lists)
 */
 
-typedef enum {
-    LIST_TYPE_BOOL = 'b',
-    LIST_TYPE_CHAR = 'c',
-    LIST_TYPE_INT8 = 'e',
-    LIST_TYPE_UINT8 = 'b',
-    LIST_TYPE_INT16 = 'j',
-    LIST_TYPE_UINT16 = 'h',
-    LIST_TYPE_INT32 = 'i',
-    LIST_TYPE_UINT32 = 'u',
-    LIST_TYPE_INT64 = 'm',
-    LIST_TYPE_UINT64 = 'l',
-    LIST_TYPE_FLOAT = 'f',
-    LIST_TYPE_DOUBLE = 'd',
-    LIST_TYPE_STRING = 's',
-    LIST_TYPE_POINTER = 'p',
-    LIST_TYPE_LIST = 'r',
-} list_type_t;
+enum {
+    UNITYPE_BOOL = 'b',
+    UNITYPE_CHAR = 'c',
+    UNITYPE_INT8 = 'e',
+    UNITYPE_UINT8 = 'b',
+    UNITYPE_INT16 = 'j',
+    UNITYPE_UINT16 = 'h',
+    UNITYPE_INT32 = 'i',
+    UNITYPE_UINT32 = 'u',
+    UNITYPE_INT64 = 'm',
+    UNITYPE_UINT64 = 'l',
+    UNITYPE_FLOAT = 'f',
+    UNITYPE_DOUBLE = 'd',
+    UNITYPE_STRING = 's',
+    UNITYPE_POINTER = 'p',
+    UNITYPE_LIST = 'r',
+};
 
 struct list_f; // so basically im a good programmer
 typedef struct list_f list_t;

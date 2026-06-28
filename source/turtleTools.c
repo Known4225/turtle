@@ -1095,7 +1095,7 @@ tt_reader_t *tt_readerInit(char *label, unitype *variable, char type, double x, 
     }
     turtleToolsInit();
     tt_reader_t *readerp = calloc(1, sizeof(tt_reader_t));
-    if (type == LIST_TYPE_LIST) {
+    if (type == UNITYPE_LIST) {
         readerp -> element = TT_ELEMENT_LIST_READER;
     } else {
         readerp -> element = TT_ELEMENT_VARIABLE_READER;

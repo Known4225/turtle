@@ -690,11 +690,11 @@ list_t *osToolsFileAndFolderList(char *directory) {
         list_append(output, (unitype) findData.cFileName, 's'); // add filename
         if (findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
             /* directory */
-            list_append(output, (unitype) (int64_t) -1, LIST_TYPE_INT64);
+            list_append(output, (unitype) (int64_t) -1, UNITYPE_INT64);
         } else {
             filesize.LowPart = findData.nFileSizeLow;
             filesize.HighPart = findData.nFileSizeHigh;
-            list_append(output, (unitype) (int64_t) filesize.QuadPart, LIST_TYPE_INT64);
+            list_append(output, (unitype) (int64_t) filesize.QuadPart, UNITYPE_INT64);
         }
     } while (FindNextFile(fileHandle, &findData) != 0);
     return output;
@@ -722,7 +722,7 @@ list_t *osToolsFileList(char *directory) {
             filesize.LowPart = findData.nFileSizeLow;
             filesize.HighPart = findData.nFileSizeHigh;
             list_append(output, (unitype) findData.cFileName, 's'); // add filename
-            list_append(output, (unitype) (int64_t) filesize.QuadPart, LIST_TYPE_INT64);
+            list_append(output, (unitype) (int64_t) filesize.QuadPart, UNITYPE_INT64);
         }
     } while (FindNextFile(fileHandle, &findData) != 0);
     /* sort list https://stackoverflow.com/questions/39048747/how-in-the-world-does-windows-file-explorer-sort-by-name 
