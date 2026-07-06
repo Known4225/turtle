@@ -28,7 +28,7 @@ unitype list, supports a variety of types
 example usage:
 list_t *newList = list_init();
 list_append(newList, (unitype) "hello", 's'); // add to list
-list_append(newList, (unitype) "test", LIST_TYPE_STRING); // add to list using enum
+list_append(newList, (unitype) "test", UNITYPE_STRING); // add to list using enum
 list_print(newList);
 > [hello, test]
 list_insert(newList, (unitype) 128, 'i', 1);
@@ -54,23 +54,23 @@ list_copy will make a copy of all strings, pointers, and lists - it will not use
 You must call list_init() when intending to copy a list - all lists must be initialised before any functions can be called on them (if your program is crashing - check to make sure you initialised all your lists)
 */
 
-typedef enum {
-    LIST_TYPE_BOOL = 'b',
-    LIST_TYPE_CHAR = 'c',
-    LIST_TYPE_INT8 = 'e',
-    LIST_TYPE_UINT8 = 'b',
-    LIST_TYPE_INT16 = 'j',
-    LIST_TYPE_UINT16 = 'h',
-    LIST_TYPE_INT32 = 'i',
-    LIST_TYPE_UINT32 = 'u',
-    LIST_TYPE_INT64 = 'm',
-    LIST_TYPE_UINT64 = 'l',
-    LIST_TYPE_FLOAT = 'f',
-    LIST_TYPE_DOUBLE = 'd',
-    LIST_TYPE_STRING = 's',
-    LIST_TYPE_POINTER = 'p',
-    LIST_TYPE_LIST = 'r',
-} list_type_t;
+enum {
+    UNITYPE_BOOL = 'b',
+    UNITYPE_CHAR = 'c',
+    UNITYPE_INT8 = 'e',
+    UNITYPE_UINT8 = 'b',
+    UNITYPE_INT16 = 'j',
+    UNITYPE_UINT16 = 'h',
+    UNITYPE_INT32 = 'i',
+    UNITYPE_UINT32 = 'u',
+    UNITYPE_INT64 = 'm',
+    UNITYPE_UINT64 = 'l',
+    UNITYPE_FLOAT = 'f',
+    UNITYPE_DOUBLE = 'd',
+    UNITYPE_STRING = 's',
+    UNITYPE_POINTER = 'p',
+    UNITYPE_LIST = 'r',
+};
 
 struct list_f; // so basically im a good programmer
 typedef struct list_f list_t;
@@ -22510,7 +22510,7 @@ unitype list, supports a variety of types
 example usage:
 list_t *newList = list_init();
 list_append(newList, (unitype) "hello", 's'); // add to list
-list_append(newList, (unitype) "test", LIST_TYPE_STRING); // add to list using enum
+list_append(newList, (unitype) "test", UNITYPE_STRING); // add to list using enum
 list_print(newList);
 > [hello, test]
 list_insert(newList, (unitype) 128, 'i', 1);
@@ -22702,38 +22702,38 @@ int32_t unitype_check_equal(unitype item1, unitype item2, int8_t typeItem1, int8
         return 0;
     }
     switch (typeItem1) {
-        case LIST_TYPE_CHAR:
+        case UNITYPE_CHAR:
             if (item1.c == item2.c) {return 1;}
             return 0;
-        case LIST_TYPE_INT8:
-        case LIST_TYPE_UINT8: // UINT8 or BOOL
+        case UNITYPE_INT8:
+        case UNITYPE_UINT8: // UINT8 or BOOL
             if (item1.b == item2.b) {return 1;}
             return 0;
-        case LIST_TYPE_INT16:
-        case LIST_TYPE_UINT16:
+        case UNITYPE_INT16:
+        case UNITYPE_UINT16:
             if (item1.hu == item2.hu) {return 1;}
             return 0;
-        case LIST_TYPE_INT32:
-        case LIST_TYPE_UINT32:
+        case UNITYPE_INT32:
+        case UNITYPE_UINT32:
             if (item1.u == item2.u) {return 1;}
             return 0;
-        case LIST_TYPE_INT64:
-        case LIST_TYPE_UINT64:
+        case UNITYPE_INT64:
+        case UNITYPE_UINT64:
             if (item1.l == item2.l) {return 1;}
             return 0;
-        case LIST_TYPE_FLOAT:
+        case UNITYPE_FLOAT:
             if (item1.f == item2.f) {return 1;}
             return 0;
-        case LIST_TYPE_DOUBLE:
+        case UNITYPE_DOUBLE:
             if (item1.d == item2.d) {return 1;}
             return 0;
-        case LIST_TYPE_STRING:
+        case UNITYPE_STRING:
             if (strcmp(item1.s, item2.s) == 0) {return 1;}
             return 0;
-        case LIST_TYPE_POINTER:
+        case UNITYPE_POINTER:
             if (item1.p == item2.p) {return 1;} // questionable
             return 0;
-        case LIST_TYPE_LIST:
+        case UNITYPE_LIST:
             if (item1.r == item2.r) {return 1;} // questionable^2 (doesn't check if lists are equivalent/congruent, just compares memory location)
             return 0;
         default:
@@ -22993,46 +22993,46 @@ int32_t list_remove(list_t *list, unitype item, char type) {
 /* prints a unitype item */
 void unitype_fprint(FILE *fp, unitype item, char type) {
     switch (type) {
-        case LIST_TYPE_CHAR:
+        case UNITYPE_CHAR:
             fprintf(fp, "%c", item.c);
         break;
-        case LIST_TYPE_INT8:
+        case UNITYPE_INT8:
             fprintf(fp, "%hhi", item.b);
         break;
-        case LIST_TYPE_UINT8: // UINT8 or BOOL
+        case UNITYPE_UINT8: // UINT8 or BOOL
             fprintf(fp, "%hhu", item.b);
         break;
-        case LIST_TYPE_INT16:
+        case UNITYPE_INT16:
             fprintf(fp, "%hi", item.h);
         break;
-        case LIST_TYPE_UINT16:
+        case UNITYPE_UINT16:
             fprintf(fp, "%hu", item.hu);
         break;
-        case LIST_TYPE_INT32:
+        case UNITYPE_INT32:
             fprintf(fp, "%d", item.i);
         break;
-        case LIST_TYPE_UINT32:
+        case UNITYPE_UINT32:
             fprintf(fp, "%u", item.u);
         break;
-        case LIST_TYPE_INT64:
+        case UNITYPE_INT64:
             fprintf(fp, "%lli", item.li);
         break;
-        case LIST_TYPE_UINT64:
+        case UNITYPE_UINT64:
             fprintf(fp, "%llu", item.l);
         break;
-        case LIST_TYPE_FLOAT:
+        case UNITYPE_FLOAT:
             fprintf(fp, "%f", item.f);
         break;
-        case LIST_TYPE_DOUBLE:
+        case UNITYPE_DOUBLE:
             fprintf(fp, "%lf", item.d);
         break;
-        case LIST_TYPE_STRING:
+        case UNITYPE_STRING:
             fprintf(fp, "%s", item.s);
         break;
-        case LIST_TYPE_POINTER:
+        case UNITYPE_POINTER:
             fprintf(fp, "%p", item.p);
         break;
-        case LIST_TYPE_LIST:
+        case UNITYPE_LIST:
             list_fprint(fp, item.r);
         break;
         default:
@@ -23042,46 +23042,46 @@ void unitype_fprint(FILE *fp, unitype item, char type) {
 
 void unitype_sprint(char *str, unitype item, char type) {
     switch (type) {
-        case LIST_TYPE_CHAR:
+        case UNITYPE_CHAR:
             sprintf(str, "%c", item.c);
         break;
-        case LIST_TYPE_INT8:
+        case UNITYPE_INT8:
             sprintf(str, "%hhi", item.b);
         break;
-        case LIST_TYPE_UINT8: // UINT8 or BOOL
+        case UNITYPE_UINT8: // UINT8 or BOOL
             sprintf(str, "%hhu", item.b);
         break;
-        case LIST_TYPE_INT16:
+        case UNITYPE_INT16:
             sprintf(str, "%hi", item.h);
         break;
-        case LIST_TYPE_UINT16:
+        case UNITYPE_UINT16:
             sprintf(str, "%hu", item.hu);
         break;
-        case LIST_TYPE_INT32:
+        case UNITYPE_INT32:
             sprintf(str, "%d", item.i);
         break;
-        case LIST_TYPE_UINT32:
+        case UNITYPE_UINT32:
             sprintf(str, "%u", item.u);
         break;
-        case LIST_TYPE_INT64:
+        case UNITYPE_INT64:
             sprintf(str, "%lli", item.li);
         break;
-        case LIST_TYPE_UINT64:
+        case UNITYPE_UINT64:
             sprintf(str, "%llu", item.l);
         break;
-        case LIST_TYPE_FLOAT:
+        case UNITYPE_FLOAT:
             sprintf(str, "%f", item.f);
         break;
-        case LIST_TYPE_DOUBLE:
+        case UNITYPE_DOUBLE:
             sprintf(str, "%lf", item.d);
         break;
-        case LIST_TYPE_STRING:
+        case UNITYPE_STRING:
             sprintf(str, "%s", item.s);
         break;
-        case LIST_TYPE_POINTER:
+        case UNITYPE_POINTER:
             sprintf(str, "%p", item.p);
         break;
-        case LIST_TYPE_LIST:
+        case UNITYPE_LIST:
             list_sprint(str, item.r);
         break; 
         default:
@@ -23238,54 +23238,54 @@ void list_write(FILE *fp, list_t *list) {
 /* a list_append that takes a string and parses it to the appropriate type */
 void list_append_element(list_t *list, char *element, char type) {
     switch (type) {
-        case LIST_TYPE_CHAR:;
+        case UNITYPE_CHAR:;
             int8_t itemChar;
             sscanf(element, "%c", &itemChar);
             list_append(list, (unitype) itemChar, type);
             return;
-        case LIST_TYPE_INT8:
-        case LIST_TYPE_UINT8:; // UINT8 or BOOL
+        case UNITYPE_INT8:
+        case UNITYPE_UINT8:; // UINT8 or BOOL
             int8_t itemByte;
             sscanf(element, "%hhd", &itemByte);
             list_append(list, (unitype) itemByte, type);
             return;
-        case LIST_TYPE_INT16:
-        case LIST_TYPE_UINT16:;
+        case UNITYPE_INT16:
+        case UNITYPE_UINT16:;
             int16_t itemShort;
             sscanf(element, "%hd", &itemShort);
             list_append(list, (unitype) itemShort, type);
             return;
-        case LIST_TYPE_INT32:
-        case LIST_TYPE_UINT32:;
+        case UNITYPE_INT32:
+        case UNITYPE_UINT32:;
             int32_t itemInt;
             sscanf(element, "%d", &itemInt);
             list_append(list, (unitype) itemInt, type);
             return;
-        case LIST_TYPE_INT64:
-        case LIST_TYPE_UINT64:;
+        case UNITYPE_INT64:
+        case UNITYPE_UINT64:;
             int64_t itemLong;
             sscanf(element, "%lld", &itemLong);
             list_append(list, (unitype) itemLong, type);
             return;
-        case LIST_TYPE_FLOAT:;
+        case UNITYPE_FLOAT:;
             float itemFloat;
             sscanf(element, "%f", &itemFloat);
             list_append(list, (unitype) itemFloat, type);
             return;
-        case LIST_TYPE_DOUBLE:;
+        case UNITYPE_DOUBLE:;
             double itemDouble;
             sscanf(element, "%lf", &itemDouble);
             list_append(list, (unitype) itemDouble, type);
             return;
-        case LIST_TYPE_STRING:;
+        case UNITYPE_STRING:;
             list_append(list, (unitype) element, type);
             return;
-        case LIST_TYPE_POINTER:;
+        case UNITYPE_POINTER:;
             void *itemPointer;
             sscanf(element, "%p", &itemPointer); // i honestly don't know if this will work
             list_append(list, (unitype) itemPointer, type);
             return;
-        case LIST_TYPE_LIST:
+        case UNITYPE_LIST:
             printf("list_append_element - no support for list\n");
             return;
         default:
@@ -23367,7 +23367,7 @@ list_t *list_read_large(FILE *fp, int32_t maximumLineSize) {
         /* read type */
         status = fread(&checkChar, 1, 1, fp); // skip space
         status = fread(&checkChar, 1, 1, fp);
-        if (checkChar == LIST_TYPE_LIST) {
+        if (checkChar == UNITYPE_LIST) {
             if (embeddedList == NULL) {
                 /* type indicated list but no list was found - fail */
                 free(item);
@@ -27605,7 +27605,7 @@ tt_reader_t *tt_readerInit(char *label, unitype *variable, char type, double x, 
     }
     turtleToolsInit();
     tt_reader_t *readerp = calloc(1, sizeof(tt_reader_t));
-    if (type == LIST_TYPE_LIST) {
+    if (type == UNITYPE_LIST) {
         readerp -> element = TT_ELEMENT_LIST_READER;
     } else {
         readerp -> element = TT_ELEMENT_VARIABLE_READER;
@@ -30488,11 +30488,11 @@ list_t *osToolsFileAndFolderList(char *directory) {
         list_append(output, (unitype) findData.cFileName, 's'); // add filename
         if (findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
             /* directory */
-            list_append(output, (unitype) (int64_t) -1, LIST_TYPE_INT64);
+            list_append(output, (unitype) (int64_t) -1, UNITYPE_INT64);
         } else {
             filesize.LowPart = findData.nFileSizeLow;
             filesize.HighPart = findData.nFileSizeHigh;
-            list_append(output, (unitype) (int64_t) filesize.QuadPart, LIST_TYPE_INT64);
+            list_append(output, (unitype) (int64_t) filesize.QuadPart, UNITYPE_INT64);
         }
     } while (FindNextFile(fileHandle, &findData) != 0);
     return output;
@@ -30520,7 +30520,7 @@ list_t *osToolsFileList(char *directory) {
             filesize.LowPart = findData.nFileSizeLow;
             filesize.HighPart = findData.nFileSizeHigh;
             list_append(output, (unitype) findData.cFileName, 's'); // add filename
-            list_append(output, (unitype) (int64_t) filesize.QuadPart, LIST_TYPE_INT64);
+            list_append(output, (unitype) (int64_t) filesize.QuadPart, UNITYPE_INT64);
         }
     } while (FindNextFile(fileHandle, &findData) != 0);
     /* sort list https://stackoverflow.com/questions/39048747/how-in-the-world-does-windows-file-explorer-sort-by-name 
