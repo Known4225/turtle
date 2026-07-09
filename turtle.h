@@ -28157,7 +28157,7 @@ void tt_dialUpdate(tt_dial_t *dialp) {
     LABEL_DIAL_END:
     tt_setColor(dialp -> color[TT_COLOR_SLOT_DIAL_TEXT]);
     double rounded = round(dialp -> value * dialp -> renderNumberFactor);
-    turtleTextWriteStringf(dialX + dialp -> size + 3, dialY, 4, 0, "%.0lf", rounded);
+    turtleTextWriteStringf(dialX + dialp -> size + 3, dialY, dialp -> size / 2, 0, "%.0lf", rounded);
     if (dialp -> variable != NULL) {
         *dialp -> variable = dialp -> value;
     }
@@ -28351,7 +28351,7 @@ void tt_sliderUpdate(tt_slider_t *sliderp) {
     if (sliderp -> renderNumberFactor != 0) {
         tt_setColor(sliderp -> color[TT_COLOR_SLOT_SLIDER_TEXT]);
         int32_t rounded = (int32_t) round(sliderp -> value * sliderp -> renderNumberFactor);
-        turtleTextWriteStringf(sliderp -> x + sliderOffsetXFactorSmall, sliderp -> y + sliderOffsetYFactorSmall, 4, sliderAlignFactor, "%d", rounded);
+        turtleTextWriteStringf(sliderp -> x + sliderOffsetXFactorSmall, sliderp -> y + sliderOffsetYFactorSmall, sliderp -> size / 2, sliderAlignFactor, "%d", rounded);
     }
     if (sliderp -> variable != NULL) {
         *sliderp -> variable = sliderp -> value;
