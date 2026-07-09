@@ -1436,7 +1436,7 @@ void tt_switchUpdate(tt_switch_t *switchp) {
                 turtleGoto(switchX, switchY - switchp -> size / 2.5);
                 turtleGoto(switchX + switchp -> size / 2.5, switchY + switchp -> size / 2.5);
                 turtlePenUp();
-            } else {
+            } else if (switchp -> style == TT_SWITCH_STYLE_XBOX) {
                 /* render X */
                 tt_setColor(switchp -> color[TT_COLOR_SLOT_CIRCLE_ON]);
                 turtleGoto(switchX + switchp -> size / 2.5, switchY + switchp -> size / 2.5);
@@ -1462,6 +1462,18 @@ void tt_switchUpdate(tt_switch_t *switchp) {
             tt_setColor(switchp -> color[TT_COLOR_SLOT_SWITCH_TEXT_HOVER]);
         }
         turtleTextWriteUnicode(switchp -> label, switchX + switchp -> size, switchY, switchp -> size - 1, 0);
+    } else if (switchp -> style == TT_SWITCH_STYLE_TRIANGLE) {
+        if (switchp -> value) {
+            tt_setColor(switchp -> color[TT_COLOR_SLOT_SWITCH_ON]);
+            turtleTriangle(switchX - switchp -> size * 0.5, switchY - switchp -> size * 0.5, switchX + switchp -> size * 0.5, switchY - switchp -> size * 0.5, switchX + switchp -> size * 0.5, switchY + switchp -> size * 0.5);
+        } else {
+            tt_setColor(switchp -> color[TT_COLOR_SLOT_SWITCH_OFF]);
+            turtleTriangle(switchX - switchp -> size * 0.5, switchY - switchp -> size * 0.5, switchX + switchp -> size * 0.3, switchY, switchX - switchp -> size * 0.5, switchY + switchp -> size * 0.5);
+        }
+        switchClickLeft = switchX - switchp -> size * 0.6;
+        switchClickRight = switchX + switchp -> size * 0.6;
+        switchClickDown = switchY - switchp -> size * 0.6;
+        switchClickUp = switchY + switchp -> size * 0.6;
     }
     /* mouse */
     if (switchp -> enabled != TT_ELEMENT_ENABLED || tt_globals.elementLogicTypeOld > switchp -> priority || (tt_globals.elementLogicTypeOld == switchp -> priority && tt_globals.elementLogicIndexOld > tt_globals.elementLogicTemp)) {
