@@ -71,10 +71,10 @@ void parseRibbonOutput() {
                 turtleBackgroundColor(30, 30, 30);
                 turtleToolsSetTheme(TT_THEME_DARK);
             }
-        } 
+        }
         if (tt_ribbon.output[2] == 2) { // GLFW
             printf("GLFW settings\n");
-        } 
+        }
     }
 }
 
