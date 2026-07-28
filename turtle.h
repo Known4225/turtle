@@ -10843,6 +10843,7 @@ typedef enum {
     TT_SWITCH_STYLE_SIDESWIPE_RIGHT = 3,
     TT_SWITCH_STYLE_CHECKBOX = 4,
     TT_SWITCH_STYLE_XBOX = 5,
+    TT_SWITCH_STYLE_TRIANGLE = 6,
 } tt_switch_style_t;
 
 typedef enum {
@@ -27946,7 +27947,7 @@ void tt_switchUpdate(tt_switch_t *switchp) {
                 turtleGoto(switchX, switchY - switchp -> size / 2.5);
                 turtleGoto(switchX + switchp -> size / 2.5, switchY + switchp -> size / 2.5);
                 turtlePenUp();
-            } else {
+            } else if (switchp -> style == TT_SWITCH_STYLE_XBOX) {
                 /* render X */
                 tt_setColor(switchp -> color[TT_COLOR_SLOT_CIRCLE_ON]);
                 turtleGoto(switchX + switchp -> size / 2.5, switchY + switchp -> size / 2.5);
@@ -27972,6 +27973,18 @@ void tt_switchUpdate(tt_switch_t *switchp) {
             tt_setColor(switchp -> color[TT_COLOR_SLOT_SWITCH_TEXT_HOVER]);
         }
         turtleTextWriteUnicode(switchp -> label, switchX + switchp -> size, switchY, switchp -> size - 1, 0);
+    } else if (switchp -> style == TT_SWITCH_STYLE_TRIANGLE) {
+        if (switchp -> value) {
+            tt_setColor(switchp -> color[TT_COLOR_SLOT_SWITCH_ON]);
+            turtleTriangle(switchX - switchp -> size * 0.5, switchY - switchp -> size * 0.5, switchX + switchp -> size * 0.5, switchY - switchp -> size * 0.5, switchX + switchp -> size * 0.5, switchY + switchp -> size * 0.5);
+        } else {
+            tt_setColor(switchp -> color[TT_COLOR_SLOT_SWITCH_OFF]);
+            turtleTriangle(switchX - switchp -> size * 0.5, switchY - switchp -> size * 0.5, switchX + switchp -> size * 0.3, switchY, switchX - switchp -> size * 0.5, switchY + switchp -> size * 0.5);
+        }
+        switchClickLeft = switchX - switchp -> size * 0.6;
+        switchClickRight = switchX + switchp -> size * 0.6;
+        switchClickDown = switchY - switchp -> size * 0.6;
+        switchClickUp = switchY + switchp -> size * 0.6;
     }
     /* mouse */
     if (switchp -> enabled != TT_ELEMENT_ENABLED || tt_globals.elementLogicTypeOld > switchp -> priority || (tt_globals.elementLogicTypeOld == switchp -> priority && tt_globals.elementLogicIndexOld > tt_globals.elementLogicTemp)) {
@@ -28157,7 +28170,7 @@ void tt_dialUpdate(tt_dial_t *dialp) {
     LABEL_DIAL_END:
     tt_setColor(dialp -> color[TT_COLOR_SLOT_DIAL_TEXT]);
     double rounded = round(dialp -> value * dialp -> renderNumberFactor);
-    turtleTextWriteStringf(dialX + dialp -> size + 3, dialY, 4, 0, "%.0lf", rounded);
+    turtleTextWriteStringf(dialX + dialp -> size + 3, dialY, dialp -> size / 2, 0, "%.0lf", rounded);
     if (dialp -> variable != NULL) {
         *dialp -> variable = dialp -> value;
     }
@@ -28351,7 +28364,7 @@ void tt_sliderUpdate(tt_slider_t *sliderp) {
     if (sliderp -> renderNumberFactor != 0) {
         tt_setColor(sliderp -> color[TT_COLOR_SLOT_SLIDER_TEXT]);
         int32_t rounded = (int32_t) round(sliderp -> value * sliderp -> renderNumberFactor);
-        turtleTextWriteStringf(sliderp -> x + sliderOffsetXFactorSmall, sliderp -> y + sliderOffsetYFactorSmall, 4, sliderAlignFactor, "%d", rounded);
+        turtleTextWriteStringf(sliderp -> x + sliderOffsetXFactorSmall, sliderp -> y + sliderOffsetYFactorSmall, sliderp -> size / 2, sliderAlignFactor, "%d", rounded);
     }
     if (sliderp -> variable != NULL) {
         *sliderp -> variable = sliderp -> value;
@@ -30739,12 +30752,12 @@ int32_t osToolsGetIP(char *address, uint8_t *buffer, int32_t maxSegments) {
     int32_t segments = 0;
     while (check != NULL) {
         if (segments > maxSegments - 1) {
-            printf("osToolsGetIP ERROR: invalid ip address\n");
+            // printf("osToolsGetIP ERROR: invalid ip address\n");
             return -1;
         }
         int32_t segmentValue = atoi(check);
         if (segmentValue > 255 || segmentValue < 0) {
-            printf("osToolsGetIP ERROR: invalid ip address\n");
+            // printf("osToolsGetIP ERROR: invalid ip address\n");
             return -1;
         }
         buffer[segments] = segmentValue;
@@ -30756,16 +30769,16 @@ int32_t osToolsGetIP(char *address, uint8_t *buffer, int32_t maxSegments) {
 
 int32_t osToolsGetSocketAddress(char *socketName, char *address, int32_t length) {
     if (!socketName) {
-        printf("osToolsGetSocketAddress ERROR: socketName is NULL\n");
+        // printf("osToolsGetSocketAddress ERROR: socketName is NULL\n");
         return -1;
     }
     if (!address) {
-        printf("osToolsGetSocketAddress ERROR: address is NULL\n");
+        // printf("osToolsGetSocketAddress ERROR: address is NULL\n");
         return -1;
     }
     int32_t socketIndex = list_find(osToolsSocket.socket, (unitype) socketName, 's');
     if (socketIndex == -1) {
-        printf("osToolsGetSocketAddress ERROR: Could not find socket %s\n", socketName);
+        // printf("osToolsGetSocketAddress ERROR: Could not find socket %s\n", socketName);
         return -1;
     }
     /* only IPv4 */
@@ -30778,16 +30791,16 @@ int32_t osToolsGetSocketAddress(char *socketName, char *address, int32_t length)
 
 int32_t osToolsGetPort(char *socketName, char *port, int32_t length) {
     if (!socketName) {
-        printf("osToolsGetSocketAddress ERROR: socketName is NULL\n");
+        // printf("osToolsGetSocketAddress ERROR: socketName is NULL\n");
         return -1;
     }
     if (!port) {
-        printf("osToolsGetSocketAddress ERROR: port is NULL\n");
+        // printf("osToolsGetSocketAddress ERROR: port is NULL\n");
         return -1;
     }
     int32_t socketIndex = list_find(osToolsSocket.socket, (unitype) socketName, 's');
     if (socketIndex == -1) {
-        printf("osToolsGetPort ERROR: Could not find socket %s\n", socketName);
+        // printf("osToolsGetPort ERROR: Could not find socket %s\n", socketName);
         return -1;
     }
     char portA[8];
@@ -30801,11 +30814,11 @@ int32_t osToolsGetPort(char *socketName, char *port, int32_t length) {
 
 int32_t osToolsServerSocketCreate(char *serverName, osToolsSocketProtocol_t protocol, char *serverPort) {
     if (!serverName) {
-        printf("osToolsServerSocketCreate ERROR: serverName is NULL\n");
+        // printf("osToolsServerSocketCreate ERROR: serverName is NULL\n");
         return -1;
     }
     if (!serverPort) {
-        printf("osToolsServerSocketCreate ERROR: port is NULL\n");
+        // printf("osToolsServerSocketCreate ERROR: port is NULL\n");
         return -1;
     }
     int32_t status;
@@ -30814,7 +30827,7 @@ int32_t osToolsServerSocketCreate(char *serverName, osToolsSocketProtocol_t prot
         WSADATA wsaData;
         status = WSAStartup(MAKEWORD(2, 2), &wsaData);
         if (status != 0) {
-            printf("osToolsServerSocketCreate ERROR: Could not initialise Winsock\n");
+            // printf("osToolsServerSocketCreate ERROR: Could not initialise Winsock\n");
             return -1;
         }
         osToolsSocket.win32wsaActive = 1;
@@ -30835,14 +30848,14 @@ int32_t osToolsServerSocketCreate(char *serverName, osToolsSocketProtocol_t prot
     char hostName[128];
     status = gethostname(hostName, sizeof(hostName));
     if (status == SOCKET_ERROR) {
-        printf("osToolsServerSocketCreate ERROR: Could not gethostname\n");
+        // printf("osToolsServerSocketCreate ERROR: Could not gethostname\n");
         return -1;
     }
     printf("Host Name: %s\n", hostName);
 
     struct hostent *host = gethostbyname(hostName);
     if (host == NULL) {
-        printf("osToolsServerSocketCreate ERROR: Could not gethostbyname\n");
+        // printf("osToolsServerSocketCreate ERROR: Could not gethostbyname\n");
         return -1;
     }
 
@@ -30855,27 +30868,27 @@ int32_t osToolsServerSocketCreate(char *serverName, osToolsSocketProtocol_t prot
     }
     char *serverAddress = inet_ntoa(address);
     if (serverAddress == NULL) {
-        printf("osToolsServerSocketCreate ERROR: No addresses to create server on\n");
+        // printf("osToolsServerSocketCreate ERROR: No addresses to create server on\n");
         return -1;
     }
     uint8_t ipAddress[4] = {0};
     if (osToolsGetIP(serverAddress, ipAddress, 4) != 4) {
-        printf("osToolsServerSocketCreate ERROR: Invalid ip address\n");
+        // printf("osToolsServerSocketCreate ERROR: Invalid ip address\n");
     }
 
     /* Resolve the server address and port */
     status = getaddrinfo(serverAddress, serverPort, &hints, &result);
     if (status != 0) {
-        printf("osToolsServerSocketCreate ERROR: Could not getaddrinfo\n");
+        // printf("osToolsServerSocketCreate ERROR: Could not getaddrinfo\n");
         return -1;
     }
     struct addrinfo *resultElement = result;
     while (resultElement) {
-        printf("Hosting a server on address %s:%s\n", serverAddress, serverPort);
+        // printf("Hosting a server on address %s:%s\n", serverAddress, serverPort);
         resultElement = resultElement -> ai_next;
     }
     if (result == NULL) {
-        printf("osToolsServerSocketCreate ERROR: getaddrinfo returned NULL\n");
+        // printf("osToolsServerSocketCreate ERROR: getaddrinfo returned NULL\n");
         return -1;
     }
 
@@ -30883,7 +30896,7 @@ int32_t osToolsServerSocketCreate(char *serverName, osToolsSocketProtocol_t prot
     SOCKET winsocket = socket(result -> ai_family, result -> ai_socktype, result -> ai_protocol);
     if (winsocket == INVALID_SOCKET) {
         freeaddrinfo(result);
-        printf("osToolsServerSocketCreate ERROR: Could not create socket\n");
+        // printf("osToolsServerSocketCreate ERROR: Could not create socket\n");
         return -1;
     }
 
@@ -30891,7 +30904,7 @@ int32_t osToolsServerSocketCreate(char *serverName, osToolsSocketProtocol_t prot
     status = bind(winsocket, result -> ai_addr, result -> ai_addrlen);
     if (status == SOCKET_ERROR) {
         freeaddrinfo(result);
-        printf("osToolsServerSocketCreate ERROR: Could not bind socket %s to address %s\n", serverName, serverAddress);
+        // printf("osToolsServerSocketCreate ERROR: Could not bind socket %s to address %s\n", serverName, serverAddress);
         return -1;
     }
     freeaddrinfo(result);
@@ -30919,16 +30932,16 @@ int32_t osToolsServerSocketCreate(char *serverName, osToolsSocketProtocol_t prot
 
 int32_t osToolsServerSocketListen(char *serverName, char *clientName) {
     if (!serverName) {
-        printf("osToolsServerSocketListen ERROR: serverName is NULL\n");
+        // printf("osToolsServerSocketListen ERROR: serverName is NULL\n");
         return -1;
     }
     if (!clientName) {
-        printf("osToolsServerSocketListen ERROR: clientName is NULL\n");
+        // printf("osToolsServerSocketListen ERROR: clientName is NULL\n");
         return -1;
     }
     int32_t socketIndex = list_find(osToolsSocket.socket, (unitype) serverName, 's');
     if (socketIndex == -1) {
-        printf("osToolsServerSocketListen ERROR: Could not find socket %s\n", serverName);
+        // printf("osToolsServerSocketListen ERROR: Could not find socket %s\n", serverName);
         return -1;
     }
     int32_t status;
@@ -30936,19 +30949,19 @@ int32_t osToolsServerSocketListen(char *serverName, char *clientName) {
 
     status = listen(winsocket, SOMAXCONN);
     if (status == SOCKET_ERROR) {
-        printf("osToolsServerSocketListen ERROR: Listen failed\n");
+        // printf("osToolsServerSocketListen ERROR: Listen failed\n");
         return -1;
     }
     struct sockaddr_in address;
     int32_t addressLen = sizeof(address);
     SOCKET connection = accept(winsocket, (struct sockaddr *) &address, &addressLen);
     if (connection == INVALID_SOCKET) {
-        printf("osToolsServerSocketListen ERROR: Accept failed\n");
+        // printf("osToolsServerSocketListen ERROR: Accept failed\n");
         return -1;
     }
     uint8_t ipAddress[4] = {0};
     if (osToolsGetIP(inet_ntoa(address.sin_addr), ipAddress, 4) != 4) {
-        printf("osToolsServerSocketListen ERROR: Invalid ip address\n");
+        // printf("osToolsServerSocketListen ERROR: Invalid ip address\n");
     }
     printf("Incoming connection from %s:%d\n", inet_ntoa(address.sin_addr), address.sin_port);
     list_append(osToolsSocket.socket, (unitype) clientName, 's');
@@ -30972,20 +30985,20 @@ int32_t osToolsServerSocketListen(char *serverName, char *clientName) {
 
 int32_t osToolsClientSocketCreate(char *clientName, osToolsSocketProtocol_t protocol, char *serverAddress, char *serverPort, int32_t timeoutMilliseconds) {
     if (!clientName) {
-        printf("osToolsClientSocketCreate ERROR: clientName is NULL\n");
+        // printf("osToolsClientSocketCreate ERROR: clientName is NULL\n");
         return -1;
     }
     if (!serverAddress) {
-        printf("osToolsClientSocketCreate ERROR: serverAddress is NULL\n");
+        // printf("osToolsClientSocketCreate ERROR: serverAddress is NULL\n");
         return -1;
     }
     if (!serverPort) {
-        printf("osToolsClientSocketCreate ERROR: port is NULL\n");
+        // printf("osToolsClientSocketCreate ERROR: port is NULL\n");
         return -1;
     }
     uint8_t ipAddress[4] = {0};
     if (osToolsGetIP(serverAddress, ipAddress, 4) != 4) {
-        printf("osToolsClientSocketCreate ERROR: Invalid ip address\n");
+        // printf("osToolsClientSocketCreate ERROR: Invalid ip address\n");
         return -1;
     }
     int32_t status;
@@ -30994,7 +31007,7 @@ int32_t osToolsClientSocketCreate(char *clientName, osToolsSocketProtocol_t prot
         WSADATA wsaData;
         status = WSAStartup(MAKEWORD(2, 2), &wsaData);
         if (status != 0) {
-            printf("osToolsClientSocketCreate ERROR: Could not initialise Winsock\n");
+            // printf("osToolsClientSocketCreate ERROR: Could not initialise Winsock\n");
             return -1;
         }
         osToolsSocket.win32wsaActive = 1;
@@ -31013,7 +31026,7 @@ int32_t osToolsClientSocketCreate(char *clientName, osToolsSocketProtocol_t prot
 
     status = getaddrinfo(serverAddress, serverPort, &hints, &result);
     if (status != 0) {
-        printf("osToolsClientSocketCreate ERROR: Could not getaddrinfo of %s:%s, failed with %d\n", serverAddress, serverPort, status);
+        // printf("osToolsClientSocketCreate ERROR: Could not getaddrinfo of %s:%s, failed with %d\n", serverAddress, serverPort, status);
         return -1;
     }
 
@@ -31023,27 +31036,27 @@ int32_t osToolsClientSocketCreate(char *clientName, osToolsSocketProtocol_t prot
         resultElement = resultElement -> ai_next;
     }
     if (result == NULL) {
-        printf("osToolsClientSocketCreate ERROR: getaddrinfo returned NULL\n");
+        // printf("osToolsClientSocketCreate ERROR: getaddrinfo returned NULL\n");
         return -1;
     }
     /* Use the first element of linked list returned by getaddrinfo */
     SOCKET winsocket = socket(result -> ai_family, result -> ai_socktype, result -> ai_protocol);
     if (winsocket == INVALID_SOCKET) {
         freeaddrinfo(result);
-        printf("osToolsClientSocketCreate ERROR: Could not create socket\n");
+        // printf("osToolsClientSocketCreate ERROR: Could not create socket\n");
         return -1;
     }
     /* set socket to non blocking mode while connecting */
     u_long nonblocking = 1;
     status = ioctlsocket(winsocket, FIONBIO, &nonblocking);
     if (status != NO_ERROR) {
-        printf("osToolsClientSocketCreate ERROR: Could not set socket to non-blocking mode\n");
+        // printf("osToolsClientSocketCreate ERROR: Could not set socket to non-blocking mode\n");
         return -1;
     }
     status = connect(winsocket, result -> ai_addr, (int32_t) result -> ai_addrlen);
     if (status == SOCKET_ERROR) {
         if (WSAGetLastError() != WSAEWOULDBLOCK) {
-            printf("osToolsClientSocketCreate ERROR: Could not connect socket %d\n", WSAGetLastError());
+            // printf("osToolsClientSocketCreate ERROR: Could not connect socket %d\n", WSAGetLastError());
             return -1;
         }
         struct timeval timeout;
@@ -31055,7 +31068,7 @@ int32_t osToolsClientSocketCreate(char *clientName, osToolsSocketProtocol_t prot
         winsockArray.fd_array[0] = winsocket;
         status = select(0, NULL, &winsockArray, NULL, &timeout);
         if (status != 1) {
-            printf("osToolsClientSocketCreate ERROR: Could not connect socket (timeout)\n");
+            // printf("osToolsClientSocketCreate ERROR: Could not connect socket (timeout)\n");
             return -1;
         }
     }
@@ -31063,7 +31076,7 @@ int32_t osToolsClientSocketCreate(char *clientName, osToolsSocketProtocol_t prot
     u_long blocking = 0;
     status = ioctlsocket(winsocket, FIONBIO, &blocking);
     if (status != NO_ERROR) {
-        printf("osToolsClientSocketCreate ERROR: Could not set socket to blocking mode\n");
+        // printf("osToolsClientSocketCreate ERROR: Could not set socket to blocking mode\n");
         return -1;
     }
     printf("Connected to %s:%s\n", serverAddress, serverPort);
@@ -31090,17 +31103,17 @@ int32_t osToolsClientSocketCreate(char *clientName, osToolsSocketProtocol_t prot
 
 int32_t osToolsSocketSend(char *socketName, uint8_t *data, int32_t length) {
     if (!socketName) {
-        printf("osToolsSocketSend ERROR: socketName is NULL\n");
+        // printf("osToolsSocketSend ERROR: socketName is NULL\n");
         return -1;
     }
     int32_t socketIndex = list_find(osToolsSocket.socket, (unitype) socketName, 's');
     if (socketIndex == -1) {
-        printf("osToolsSocketSend ERROR: Could not find socket %s\n", socketName);
+        // printf("osToolsSocketSend ERROR: Could not find socket %s\n", socketName);
         return -1;
     }
     int32_t status = send((SOCKET) osToolsSocket.socket -> data[socketIndex + OSI_SOCKET].p, (char *) data, length, 0);
     if (status == SOCKET_ERROR) {
-        printf("osToolsSocketSend ERROR: Failed to send\n");
+        // printf("osToolsSocketSend ERROR: Failed to send\n");
         return -1;
     }
     return status;
@@ -31108,12 +31121,12 @@ int32_t osToolsSocketSend(char *socketName, uint8_t *data, int32_t length) {
 
 int32_t osToolsSocketReceive(char *socketName, uint8_t *data, int32_t length, int32_t timeoutMilliseconds) {
     if (!socketName) {
-        printf("osToolsSocketReceive ERROR: socketName is NULL\n");
+        // printf("osToolsSocketReceive ERROR: socketName is NULL\n");
         return -1;
     }
     int32_t socketIndex = list_find(osToolsSocket.socket, (unitype) socketName, 's');
     if (socketIndex == -1) {
-        printf("osToolsSocketReceive ERROR: Could not find socket %s\n", socketName);
+        // printf("osToolsSocketReceive ERROR: Could not find socket %s\n", socketName);
         return -1;
     }
     setsockopt((SOCKET) osToolsSocket.socket -> data[socketIndex + OSI_SOCKET].p, SOL_SOCKET, SO_RCVTIMEO, (char *) &timeoutMilliseconds, sizeof(timeoutMilliseconds)); // https://stackoverflow.com/questions/2876024/linux-is-there-a-read-or-recv-from-socket-with-timeout
@@ -31121,10 +31134,10 @@ int32_t osToolsSocketReceive(char *socketName, uint8_t *data, int32_t length, in
     if (status == SOCKET_ERROR) {
         if (WSAGetLastError() == WSAETIMEDOUT) {
             /* timeout */
-            printf("osToolsSocketReceive ERROR: Failed to receive (timeout)\n");
+            // printf("osToolsSocketReceive ERROR: Failed to receive (timeout)\n");
             return -1;
         }
-        printf("osToolsSocketReceive ERROR: Failed to receive\n");
+        // printf("osToolsSocketReceive ERROR: Failed to receive\n");
         return -1;
     }
     return status;
@@ -31132,18 +31145,18 @@ int32_t osToolsSocketReceive(char *socketName, uint8_t *data, int32_t length, in
 
 int32_t osToolsSocketDestroy(char *socketName) {
     if (!socketName) {
-        printf("osToolsSocketDestroy ERROR: socketName is NULL\n");
+        // printf("osToolsSocketDestroy ERROR: socketName is NULL\n");
         return -1;
     }
     int32_t socketIndex = list_find(osToolsSocket.socket, (unitype) socketName, 's');
     if (socketIndex == -1) {
-        printf("osToolsSocketDestroy ERROR: Could not find socket %s\n", socketName);
+        // printf("osToolsSocketDestroy ERROR: Could not find socket %s\n", socketName);
         return -1;
     }
     /* shutdown and close socket */
-    int32_t status = shutdown((SOCKET) osToolsSocket.socket -> data[socketIndex + OSI_SOCKET].p, SD_SEND);
+    int32_t status = shutdown((SOCKET) osToolsSocket.socket -> data[socketIndex + OSI_SOCKET].p, SD_BOTH);
     if (status == SOCKET_ERROR) {
-        printf("osToolsSocketDestroy WARN: Shutdown not successful\n");
+        // printf("osToolsSocketDestroy WARN: Shutdown not successful\n");
     }
     closesocket((SOCKET) osToolsSocket.socket -> data[socketIndex + OSI_SOCKET].p);
     list_delete_range(osToolsSocket.socket, socketIndex, socketIndex + OSI_NUMBER_OF_FIELDS);
@@ -32016,12 +32029,12 @@ int32_t osToolsGetIP(char *address, uint8_t *buffer, int32_t maxSegments) {
     int32_t segments = 0;
     while (check != NULL) {
         if (segments > maxSegments - 1) {
-            printf("osToolsGetIP ERROR: invalid ip address\n");
+            // printf("osToolsGetIP ERROR: invalid ip address\n");
             return -1;
         }
         int32_t segmentValue = atoi(check);
         if (segmentValue > 255 || segmentValue < 0) {
-            printf("osToolsGetIP ERROR: invalid ip address\n");
+            // printf("osToolsGetIP ERROR: invalid ip address\n");
             return -1;
         }
         buffer[segments] = segmentValue;
@@ -32033,16 +32046,16 @@ int32_t osToolsGetIP(char *address, uint8_t *buffer, int32_t maxSegments) {
 
 int32_t osToolsGetSocketAddress(char *socketName, char *address, int32_t length) {
     if (!socketName) {
-        printf("osToolsGetSocketAddress ERROR: socketName is NULL\n");
+        // printf("osToolsGetSocketAddress ERROR: socketName is NULL\n");
         return -1;
     }
     if (!address) {
-        printf("osToolsGetSocketAddress ERROR: address is NULL\n");
+        // printf("osToolsGetSocketAddress ERROR: address is NULL\n");
         return -1;
     }
     int32_t socketIndex = list_find(osToolsSocket.socket, (unitype) socketName, 's');
     if (socketIndex == -1) {
-        printf("osToolsGetSocketAddress ERROR: Could not find socket %s\n", socketName);
+        // printf("osToolsGetSocketAddress ERROR: Could not find socket %s\n", socketName);
         return -1;
     }
     /* only IPv4 */
@@ -32055,16 +32068,16 @@ int32_t osToolsGetSocketAddress(char *socketName, char *address, int32_t length)
 
 int32_t osToolsGetPort(char *socketName, char *port, int32_t length) {
     if (!socketName) {
-        printf("osToolsGetSocketAddress ERROR: socketName is NULL\n");
+        // printf("osToolsGetSocketAddress ERROR: socketName is NULL\n");
         return -1;
     }
     if (!port) {
-        printf("osToolsGetSocketAddress ERROR: port is NULL\n");
+        // printf("osToolsGetSocketAddress ERROR: port is NULL\n");
         return -1;
     }
     int32_t socketIndex = list_find(osToolsSocket.socket, (unitype) socketName, 's');
     if (socketIndex == -1) {
-        printf("osToolsGetPort ERROR: Could not find socket %s\n", socketName);
+        // printf("osToolsGetPort ERROR: Could not find socket %s\n", socketName);
         return -1;
     }
     char portA[8];
@@ -32078,11 +32091,11 @@ int32_t osToolsGetPort(char *socketName, char *port, int32_t length) {
 
 int32_t osToolsServerSocketCreate(char *serverName, osToolsSocketProtocol_t protocol, char *serverPort) {
     if (!serverName) {
-        printf("osToolsServerSocketCreate ERROR: serverName is NULL\n");
+        // printf("osToolsServerSocketCreate ERROR: serverName is NULL\n");
         return -1;
     }
     if (!serverPort) {
-        printf("osToolsServerSocketCreate ERROR: port is NULL\n");
+        // printf("osToolsServerSocketCreate ERROR: port is NULL\n");
         return -1;
     }
     int32_t status;
@@ -32104,14 +32117,14 @@ int32_t osToolsServerSocketCreate(char *serverName, osToolsSocketProtocol_t prot
     char hostName[128];
     status = gethostname(hostName, sizeof(hostName));
     if (status == -1) {
-        printf("osToolsServerSocketCreate ERROR: Could not gethostname\n");
+        // printf("osToolsServerSocketCreate ERROR: Could not gethostname\n");
         return -1;
     }
     printf("Host Name: %s\n", hostName);
 
     struct hostent *host = gethostbyname(hostName);
     if (host == NULL) {
-        printf("osToolsServerSocketCreate ERROR: Could not gethostbyname\n");
+        // printf("osToolsServerSocketCreate ERROR: Could not gethostbyname\n");
         return -1;
     }
 
@@ -32124,27 +32137,27 @@ int32_t osToolsServerSocketCreate(char *serverName, osToolsSocketProtocol_t prot
     }
     char *serverAddress = inet_ntoa(address);
     if (serverAddress == NULL) {
-        printf("osToolsServerSocketCreate ERROR: No addresses to create server on\n");
+        // printf("osToolsServerSocketCreate ERROR: No addresses to create server on\n");
         return -1;
     }
     uint8_t ipAddress[4] = {0};
     if (osToolsGetIP(serverAddress, ipAddress, 4) != 4) {
-        printf("osToolsServerSocketCreate ERROR: Invalid ip address\n");
+        // printf("osToolsServerSocketCreate ERROR: Invalid ip address\n");
     }
 
     /* Resolve the server address and port */
     status = getaddrinfo(serverAddress, serverPort, &hints, &result);
     if (status != 0) {
-        printf("osToolsServerSocketCreate ERROR: Could not getaddrinfo\n");
+        // printf("osToolsServerSocketCreate ERROR: Could not getaddrinfo\n");
         return -1;
     }
     struct addrinfo *resultElement = result;
     while (resultElement) {
-        printf("Hosting a server on address %s:%s\n", serverAddress, serverPort);
+        // printf("Hosting a server on address %s:%s\n", serverAddress, serverPort);
         resultElement = resultElement -> ai_next;
     }
     if (result == NULL) {
-        printf("osToolsServerSocketCreate ERROR: getaddrinfo returned NULL\n");
+        // printf("osToolsServerSocketCreate ERROR: getaddrinfo returned NULL\n");
         return -1;
     }
 
@@ -32152,7 +32165,7 @@ int32_t osToolsServerSocketCreate(char *serverName, osToolsSocketProtocol_t prot
     int32_t sockfd = socket(result -> ai_family, result -> ai_socktype, result -> ai_protocol);
     if (sockfd == -1) {
         freeaddrinfo(result);
-        printf("osToolsServerSocketCreate ERROR: Could not create socket\n");
+        // printf("osToolsServerSocketCreate ERROR: Could not create socket\n");
         return -1;
     }
 
@@ -32160,7 +32173,7 @@ int32_t osToolsServerSocketCreate(char *serverName, osToolsSocketProtocol_t prot
     status = bind(sockfd, result -> ai_addr, result -> ai_addrlen);
     if (status == -1) {
         freeaddrinfo(result);
-        printf("osToolsServerSocketCreate ERROR: Could not bind socket %s to address %s\n", serverName, serverAddress);
+        // printf("osToolsServerSocketCreate ERROR: Could not bind socket %s to address %s\n", serverName, serverAddress);
         return -1;
     }
     freeaddrinfo(result);
@@ -32188,16 +32201,16 @@ int32_t osToolsServerSocketCreate(char *serverName, osToolsSocketProtocol_t prot
 
 int32_t osToolsServerSocketListen(char *serverName, char *clientName) {
     if (!serverName) {
-        printf("osToolsServerSocketListen ERROR: serverName is NULL\n");
+        // printf("osToolsServerSocketListen ERROR: serverName is NULL\n");
         return -1;
     }
     if (!clientName) {
-        printf("osToolsServerSocketListen ERROR: clientName is NULL\n");
+        // printf("osToolsServerSocketListen ERROR: clientName is NULL\n");
         return -1;
     }
     int32_t socketIndex = list_find(osToolsSocket.socket, (unitype) serverName, 's');
     if (socketIndex == -1) {
-        printf("osToolsServerSocketListen ERROR: Could not find socket %s\n", serverName);
+        // printf("osToolsServerSocketListen ERROR: Could not find socket %s\n", serverName);
         return -1;
     }
     int32_t status;
@@ -32205,19 +32218,19 @@ int32_t osToolsServerSocketListen(char *serverName, char *clientName) {
 
     status = listen(sockfd, SOMAXCONN);
     if (status == -1) {
-        printf("osToolsServerSocketListen ERROR: Listen failed\n");
+        // printf("osToolsServerSocketListen ERROR: Listen failed\n");
         return -1;
     }
     struct sockaddr_in address;
     uint32_t addressLen = sizeof(address);
     int32_t connectionfd = accept(sockfd, (struct sockaddr *) &address, &addressLen);
     if (connectionfd == -1) {
-        printf("osToolsServerSocketListen ERROR: Accept failed\n");
+        // printf("osToolsServerSocketListen ERROR: Accept failed\n");
         return -1;
     }
     uint8_t ipAddress[4] = {0};
     if (osToolsGetIP(inet_ntoa(address.sin_addr), ipAddress, 4) != 4) {
-        printf("osToolsServerSocketListen ERROR: Invalid ip address\n");
+        // printf("osToolsServerSocketListen ERROR: Invalid ip address\n");
     }
     printf("Incoming connection from %s:%d\n", inet_ntoa(address.sin_addr), address.sin_port);
     list_append(osToolsSocket.socket, (unitype) clientName, 's');
@@ -32241,20 +32254,20 @@ int32_t osToolsServerSocketListen(char *serverName, char *clientName) {
 
 int32_t osToolsClientSocketCreate(char *clientName, osToolsSocketProtocol_t protocol, char *serverAddress, char *serverPort, int32_t timeoutMilliseconds) {
     if (!clientName) {
-        printf("osToolsClientSocketCreate ERROR: clientName is NULL\n");
+        // printf("osToolsClientSocketCreate ERROR: clientName is NULL\n");
         return -1;
     }
     if (!serverAddress) {
-        printf("osToolsClientSocketCreate ERROR: serverAddress is NULL\n");
+        // printf("osToolsClientSocketCreate ERROR: serverAddress is NULL\n");
         return -1;
     }
     if (!serverPort) {
-        printf("osToolsClientSocketCreate ERROR: port is NULL\n");
+        // printf("osToolsClientSocketCreate ERROR: port is NULL\n");
         return -1;
     }
     uint8_t ipAddress[4] = {0};
     if (osToolsGetIP(serverAddress, ipAddress, 4) != 4) {
-        printf("osToolsClientSocketCreate ERROR: Invalid ip address\n");
+        // printf("osToolsClientSocketCreate ERROR: Invalid ip address\n");
         return -1;
     }
     int32_t status;
@@ -32274,7 +32287,7 @@ int32_t osToolsClientSocketCreate(char *clientName, osToolsSocketProtocol_t prot
 
     status = getaddrinfo(serverAddress, serverPort, &hints, &result);
     if (status != 0) {
-        printf("osToolsClientSocketCreate ERROR: Could not getaddrinfo of %s:%s, failed with %d\n", serverAddress, serverPort, status);
+        // printf("osToolsClientSocketCreate ERROR: Could not getaddrinfo of %s:%s, failed with %d\n", serverAddress, serverPort, status);
         return -1;
     }
 
@@ -32284,32 +32297,32 @@ int32_t osToolsClientSocketCreate(char *clientName, osToolsSocketProtocol_t prot
         resultElement = resultElement -> ai_next;
     }
     if (result == NULL) {
-        printf("osToolsClientSocketCreate ERROR: getaddrinfo returned NULL\n");
+        // printf("osToolsClientSocketCreate ERROR: getaddrinfo returned NULL\n");
         return -1;
     }
     /* Use the first element of linked list returned by getaddrinfo */
     int32_t sockfd = socket(result -> ai_family, result -> ai_socktype, result -> ai_protocol);
     if (sockfd == -1) {
         freeaddrinfo(result);
-        printf("osToolsClientSocketCreate ERROR: Could not create socket\n");
+        // printf("osToolsClientSocketCreate ERROR: Could not create socket\n");
         return -1;
     }
     /* set socket to non blocking mode while connecting - https://stackoverflow.com/questions/1543466/how-do-i-change-a-tcp-socket-to-be-non-blocking */
     status = fcntl(sockfd, F_GETFL, 0);
     if (status == -1) {
-        printf("osToolsClientSocketCreate ERROR: Could not get fcntl flags\n");
+        // printf("osToolsClientSocketCreate ERROR: Could not get fcntl flags\n");
         return -1;
     }
     status &= O_NONBLOCK;
     status = fcntl(sockfd, F_SETFL, status);
     if (status != 0) {
-        printf("osToolsClientSocketCreate ERROR: Could not set socket to non-blocking mode\n");
+        // printf("osToolsClientSocketCreate ERROR: Could not set socket to non-blocking mode\n");
         return -1;
     }
     status = connect(sockfd, result -> ai_addr, (int32_t) result -> ai_addrlen);
     if (status == -1) {
         if (errno != EINPROGRESS) {
-            printf("osToolsClientSocketCreate ERROR: Could not connect socket %d (%s)\n", errno, strerror(errno));
+            // printf("osToolsClientSocketCreate ERROR: Could not connect socket %d (%s)\n", errno, strerror(errno));
             return -1;
         }
         struct timeval timeout;
@@ -32320,20 +32333,20 @@ int32_t osToolsClientSocketCreate(char *clientName, osToolsSocketProtocol_t prot
         fdsockArray.__fds_bits[0] = sockfd;
         status = select(sockfd + 1, NULL, &fdsockArray, NULL, &timeout);
         if (status != 1) {
-            printf("osToolsClientSocketCreate ERROR: Could not connect socket (timeout)\n");
+            // printf("osToolsClientSocketCreate ERROR: Could not connect socket (timeout)\n");
             return -1;
         }
     }
     /* set socket back to blocking mode */
     status = fcntl(sockfd, F_GETFL, 0);
     if (status == -1) {
-        printf("osToolsClientSocketCreate ERROR: Could not get fcntl flags\n");
+        // printf("osToolsClientSocketCreate ERROR: Could not get fcntl flags\n");
         return -1;
     }
     status &= ~O_NONBLOCK;
     status = fcntl(sockfd, F_SETFL, status);
     if (status != 0) {
-        printf("osToolsClientSocketCreate ERROR: Could not set socket to blocking mode\n");
+        // printf("osToolsClientSocketCreate ERROR: Could not set socket to blocking mode\n");
         return -1;
     }
     printf("Connected to %s:%s\n", serverAddress, serverPort);
@@ -32360,17 +32373,17 @@ int32_t osToolsClientSocketCreate(char *clientName, osToolsSocketProtocol_t prot
 
 int32_t osToolsSocketSend(char *socketName, uint8_t *data, int32_t length) {
     if (!socketName) {
-        printf("osToolsSocketSend ERROR: socketName is NULL\n");
+        // printf("osToolsSocketSend ERROR: socketName is NULL\n");
         return -1;
     }
     int32_t socketIndex = list_find(osToolsSocket.socket, (unitype) socketName, 's');
     if (socketIndex == -1) {
-        printf("osToolsSocketSend ERROR: Could not find socket %s\n", socketName);
+        // printf("osToolsSocketSend ERROR: Could not find socket %s\n", socketName);
         return -1;
     }
     int32_t status = send(osToolsSocket.socket -> data[socketIndex + OSI_SOCKET].i, (char *) data, length, 0);
     if (status == -1) {
-        printf("osToolsSocketSend ERROR: Failed to send\n");
+        // printf("osToolsSocketSend ERROR: Failed to send\n");
         return -1;
     }
     return status;
@@ -32378,12 +32391,12 @@ int32_t osToolsSocketSend(char *socketName, uint8_t *data, int32_t length) {
 
 int32_t osToolsSocketReceive(char *socketName, uint8_t *data, int32_t length, int32_t timeoutMilliseconds) {
     if (!socketName) {
-        printf("osToolsSocketReceive ERROR: socketName is NULL\n");
+        // printf("osToolsSocketReceive ERROR: socketName is NULL\n");
         return -1;
     }
     int32_t socketIndex = list_find(osToolsSocket.socket, (unitype) socketName, 's');
     if (socketIndex == -1) {
-        printf("osToolsSocketReceive ERROR: Could not find socket %s\n", socketName);
+        // printf("osToolsSocketReceive ERROR: Could not find socket %s\n", socketName);
         return -1;
     }
     setsockopt(osToolsSocket.socket -> data[socketIndex + OSI_SOCKET].i, SOL_SOCKET, SO_RCVTIMEO, (char *) &timeoutMilliseconds, sizeof(timeoutMilliseconds)); // https://stackoverflow.com/questions/2876024/linux-is-there-a-read-or-recv-from-socket-with-timeout
@@ -32391,10 +32404,10 @@ int32_t osToolsSocketReceive(char *socketName, uint8_t *data, int32_t length, in
     if (status == -1) {
         if (errno == EAGAIN || errno == EWOULDBLOCK) {
             /* timeout */
-            printf("osToolsSocketReceive ERROR: Failed to receive (timeout)\n");
+            // printf("osToolsSocketReceive ERROR: Failed to receive (timeout)\n");
             return 0;
         }
-        printf("osToolsSocketReceive ERROR: Failed to receive\n");
+        // printf("osToolsSocketReceive ERROR: Failed to receive\n");
         return -1;
     }
     return status;
@@ -32402,18 +32415,18 @@ int32_t osToolsSocketReceive(char *socketName, uint8_t *data, int32_t length, in
 
 int32_t osToolsSocketDestroy(char *socketName) {
     if (!socketName) {
-        printf("osToolsSocketDestroy ERROR: socketName is NULL\n");
+        // printf("osToolsSocketDestroy ERROR: socketName is NULL\n");
         return -1;
     }
     int32_t socketIndex = list_find(osToolsSocket.socket, (unitype) socketName, 's');
     if (socketIndex == -1) {
-        printf("osToolsSocketDestroy ERROR: Could not find socket %s\n", socketName);
+        // printf("osToolsSocketDestroy ERROR: Could not find socket %s\n", socketName);
         return -1;
     }
     /* shutdown and close socket */
     int32_t status = shutdown(osToolsSocket.socket -> data[socketIndex + OSI_SOCKET].i, SHUT_RDWR);
     if (status == -1) {
-        printf("osToolsSocketDestroy WARN: Shutdown not successful\n");
+        // printf("osToolsSocketDestroy WARN: Shutdown not successful\n");
     }
     close(osToolsSocket.socket -> data[socketIndex + OSI_SOCKET].i);
     list_delete_range(osToolsSocket.socket, socketIndex, socketIndex + OSI_NUMBER_OF_FIELDS);
@@ -32632,12 +32645,12 @@ int32_t osToolsGetIP(char *address, uint8_t *buffer, int32_t maxSegments) {
     int32_t segments = 0;
     while (check != NULL) {
         if (segments > maxSegments - 1) {
-            printf("osToolsGetIP ERROR: invalid ip address\n");
+            // printf("osToolsGetIP ERROR: invalid ip address\n");
             return -1;
         }
         int32_t segmentValue = atoi(check);
         if (segmentValue > 255 || segmentValue < 0) {
-            printf("osToolsGetIP ERROR: invalid ip address\n");
+            // printf("osToolsGetIP ERROR: invalid ip address\n");
             return -1;
         }
         buffer[segments] = segmentValue;
@@ -32649,16 +32662,16 @@ int32_t osToolsGetIP(char *address, uint8_t *buffer, int32_t maxSegments) {
 
 int32_t osToolsGetSocketAddress(char *socketName, char *address, int32_t length) {
     if (!socketName) {
-        printf("osToolsGetSocketAddress ERROR: socketName is NULL\n");
+        // printf("osToolsGetSocketAddress ERROR: socketName is NULL\n");
         return -1;
     }
     if (!address) {
-        printf("osToolsGetSocketAddress ERROR: address is NULL\n");
+        // printf("osToolsGetSocketAddress ERROR: address is NULL\n");
         return -1;
     }
     int32_t socketIndex = list_find(osToolsSocket.socket, (unitype) socketName, 's');
     if (socketIndex == -1) {
-        printf("osToolsGetSocketAddress ERROR: Could not find socket %s\n", socketName);
+        // printf("osToolsGetSocketAddress ERROR: Could not find socket %s\n", socketName);
         return -1;
     }
     /* only IPv4 */
@@ -32671,16 +32684,16 @@ int32_t osToolsGetSocketAddress(char *socketName, char *address, int32_t length)
 
 int32_t osToolsGetPort(char *socketName, char *port, int32_t length) {
     if (!socketName) {
-        printf("osToolsGetSocketAddress ERROR: socketName is NULL\n");
+        // printf("osToolsGetSocketAddress ERROR: socketName is NULL\n");
         return -1;
     }
     if (!port) {
-        printf("osToolsGetSocketAddress ERROR: port is NULL\n");
+        // printf("osToolsGetSocketAddress ERROR: port is NULL\n");
         return -1;
     }
     int32_t socketIndex = list_find(osToolsSocket.socket, (unitype) socketName, 's');
     if (socketIndex == -1) {
-        printf("osToolsGetPort ERROR: Could not find socket %s\n", socketName);
+        // printf("osToolsGetPort ERROR: Could not find socket %s\n", socketName);
         return -1;
     }
     char portA[8];
@@ -32694,11 +32707,11 @@ int32_t osToolsGetPort(char *socketName, char *port, int32_t length) {
 
 int32_t osToolsServerSocketCreate(char *serverName, osToolsSocketProtocol_t protocol, char *serverPort) {
     if (!serverName) {
-        printf("osToolsServerSocketCreate ERROR: serverName is NULL\n");
+        // printf("osToolsServerSocketCreate ERROR: serverName is NULL\n");
         return -1;
     }
     if (!serverPort) {
-        printf("osToolsServerSocketCreate ERROR: port is NULL\n");
+        // printf("osToolsServerSocketCreate ERROR: port is NULL\n");
         return -1;
     }
     int32_t status;
@@ -32720,14 +32733,14 @@ int32_t osToolsServerSocketCreate(char *serverName, osToolsSocketProtocol_t prot
     char hostName[128];
     status = gethostname(hostName, sizeof(hostName));
     if (status == -1) {
-        printf("osToolsServerSocketCreate ERROR: Could not gethostname\n");
+        // printf("osToolsServerSocketCreate ERROR: Could not gethostname\n");
         return -1;
     }
     printf("Host Name: %s\n", hostName);
 
     struct hostent *host = gethostbyname(hostName);
     if (host == NULL) {
-        printf("osToolsServerSocketCreate ERROR: Could not gethostbyname\n");
+        // printf("osToolsServerSocketCreate ERROR: Could not gethostbyname\n");
         return -1;
     }
 
@@ -32740,18 +32753,18 @@ int32_t osToolsServerSocketCreate(char *serverName, osToolsSocketProtocol_t prot
     }
     char *serverAddress = inet_ntoa(address);
     if (serverAddress == NULL) {
-        printf("osToolsServerSocketCreate ERROR: No addresses to create server on\n");
+        // printf("osToolsServerSocketCreate ERROR: No addresses to create server on\n");
         return -1;
     }
     uint8_t ipAddress[4] = {0};
     if (osToolsGetIP(serverAddress, ipAddress, 4) != 4) {
-        printf("osToolsServerSocketCreate ERROR: Invalid ip address\n");
+        // printf("osToolsServerSocketCreate ERROR: Invalid ip address\n");
     }
 
     /* Resolve the server address and port */
     status = getaddrinfo(serverAddress, serverPort, &hints, &result);
     if (status != 0) {
-        printf("osToolsServerSocketCreate ERROR: Could not getaddrinfo\n");
+        // printf("osToolsServerSocketCreate ERROR: Could not getaddrinfo\n");
         return -1;
     }
     struct addrinfo *resultElement = result;
@@ -32760,7 +32773,7 @@ int32_t osToolsServerSocketCreate(char *serverName, osToolsSocketProtocol_t prot
         resultElement = resultElement -> ai_next;
     }
     if (result == NULL) {
-        printf("osToolsServerSocketCreate ERROR: getaddrinfo returned NULL\n");
+        // printf("osToolsServerSocketCreate ERROR: getaddrinfo returned NULL\n");
         return -1;
     }
 
@@ -32768,7 +32781,7 @@ int32_t osToolsServerSocketCreate(char *serverName, osToolsSocketProtocol_t prot
     int32_t sockfd = socket(result -> ai_family, result -> ai_socktype, result -> ai_protocol);
     if (sockfd == -1) {
         freeaddrinfo(result);
-        printf("osToolsServerSocketCreate ERROR: Could not create socket\n");
+        // printf("osToolsServerSocketCreate ERROR: Could not create socket\n");
         return -1;
     }
 
@@ -32776,7 +32789,7 @@ int32_t osToolsServerSocketCreate(char *serverName, osToolsSocketProtocol_t prot
     status = bind(sockfd, result -> ai_addr, result -> ai_addrlen);
     if (status == -1) {
         freeaddrinfo(result);
-        printf("osToolsServerSocketCreate ERROR: Could not bind socket %s to address %s\n", serverName, serverAddress);
+        // printf("osToolsServerSocketCreate ERROR: Could not bind socket %s to address %s\n", serverName, serverAddress);
         return -1;
     }
     freeaddrinfo(result);
@@ -32804,16 +32817,16 @@ int32_t osToolsServerSocketCreate(char *serverName, osToolsSocketProtocol_t prot
 
 int32_t osToolsServerSocketListen(char *serverName, char *clientName) {
     if (!serverName) {
-        printf("osToolsServerSocketListen ERROR: serverName is NULL\n");
+        // printf("osToolsServerSocketListen ERROR: serverName is NULL\n");
         return -1;
     }
     if (!clientName) {
-        printf("osToolsServerSocketListen ERROR: clientName is NULL\n");
+        // printf("osToolsServerSocketListen ERROR: clientName is NULL\n");
         return -1;
     }
     int32_t socketIndex = list_find(osToolsSocket.socket, (unitype) serverName, 's');
     if (socketIndex == -1) {
-        printf("osToolsServerSocketListen ERROR: Could not find socket %s\n", serverName);
+        // printf("osToolsServerSocketListen ERROR: Could not find socket %s\n", serverName);
         return -1;
     }
     int32_t status;
@@ -32821,19 +32834,19 @@ int32_t osToolsServerSocketListen(char *serverName, char *clientName) {
 
     status = listen(sockfd, SOMAXCONN);
     if (status == -1) {
-        printf("osToolsServerSocketListen ERROR: Listen failed\n");
+        // printf("osToolsServerSocketListen ERROR: Listen failed\n");
         return -1;
     }
     struct sockaddr_in address;
     uint32_t addressLen = sizeof(address);
     int32_t connectionfd = accept(sockfd, (struct sockaddr *) &address, &addressLen);
     if (connectionfd == -1) {
-        printf("osToolsServerSocketListen ERROR: Accept failed\n");
+        // printf("osToolsServerSocketListen ERROR: Accept failed\n");
         return -1;
     }
     uint8_t ipAddress[4] = {0};
     if (osToolsGetIP(inet_ntoa(address.sin_addr), ipAddress, 4) != 4) {
-        printf("osToolsServerSocketListen ERROR: Invalid ip address\n");
+        // printf("osToolsServerSocketListen ERROR: Invalid ip address\n");
     }
     printf("Incoming connection from %s:%d\n", inet_ntoa(address.sin_addr), address.sin_port);
     list_append(osToolsSocket.socket, (unitype) clientName, 's');
@@ -32857,20 +32870,20 @@ int32_t osToolsServerSocketListen(char *serverName, char *clientName) {
 
 int32_t osToolsClientSocketCreate(char *clientName, osToolsSocketProtocol_t protocol, char *serverAddress, char *serverPort, int32_t timeoutMilliseconds) {
     if (!clientName) {
-        printf("osToolsClientSocketCreate ERROR: clientName is NULL\n");
+        // printf("osToolsClientSocketCreate ERROR: clientName is NULL\n");
         return -1;
     }
     if (!serverAddress) {
-        printf("osToolsClientSocketCreate ERROR: serverAddress is NULL\n");
+        // printf("osToolsClientSocketCreate ERROR: serverAddress is NULL\n");
         return -1;
     }
     if (!serverPort) {
-        printf("osToolsClientSocketCreate ERROR: port is NULL\n");
+        // printf("osToolsClientSocketCreate ERROR: port is NULL\n");
         return -1;
     }
     uint8_t ipAddress[4] = {0};
     if (osToolsGetIP(serverAddress, ipAddress, 4) != 4) {
-        printf("osToolsClientSocketCreate ERROR: Invalid ip address\n");
+        // printf("osToolsClientSocketCreate ERROR: Invalid ip address\n");
         return -1;
     }
     int32_t status;
@@ -32890,7 +32903,7 @@ int32_t osToolsClientSocketCreate(char *clientName, osToolsSocketProtocol_t prot
 
     status = getaddrinfo(serverAddress, serverPort, &hints, &result);
     if (status != 0) {
-        printf("osToolsClientSocketCreate ERROR: Could not getaddrinfo of %s:%s, failed with %d\n", serverAddress, serverPort, status);
+        // printf("osToolsClientSocketCreate ERROR: Could not getaddrinfo of %s:%s, failed with %d\n", serverAddress, serverPort, status);
         return -1;
     }
 
@@ -32900,32 +32913,32 @@ int32_t osToolsClientSocketCreate(char *clientName, osToolsSocketProtocol_t prot
         resultElement = resultElement -> ai_next;
     }
     if (result == NULL) {
-        printf("osToolsClientSocketCreate ERROR: getaddrinfo returned NULL\n");
+        // printf("osToolsClientSocketCreate ERROR: getaddrinfo returned NULL\n");
         return -1;
     }
     /* Use the first element of linked list returned by getaddrinfo */
     int32_t sockfd = socket(result -> ai_family, result -> ai_socktype, result -> ai_protocol);
     if (sockfd == -1) {
         freeaddrinfo(result);
-        printf("osToolsClientSocketCreate ERROR: Could not create socket\n");
+        // printf("osToolsClientSocketCreate ERROR: Could not create socket\n");
         return -1;
     }
     /* set socket to non blocking mode while connecting - https://stackoverflow.com/questions/1543466/how-do-i-change-a-tcp-socket-to-be-non-blocking */
     status = fcntl(sockfd, F_GETFL, 0);
     if (status == -1) {
-        printf("osToolsClientSocketCreate ERROR: Could not get fcntl flags\n");
+        // printf("osToolsClientSocketCreate ERROR: Could not get fcntl flags\n");
         return -1;
     }
     status &= O_NONBLOCK;
     status = fcntl(sockfd, F_SETFL, status);
     if (status != 0) {
-        printf("osToolsClientSocketCreate ERROR: Could not set socket to non-blocking mode\n");
+        // printf("osToolsClientSocketCreate ERROR: Could not set socket to non-blocking mode\n");
         return -1;
     }
     status = connect(sockfd, result -> ai_addr, (int32_t) result -> ai_addrlen);
     if (status == -1) {
         if (errno != EINPROGRESS) {
-            printf("osToolsClientSocketCreate ERROR: Could not connect socket %d (%s)\n", errno, strerror(errno));
+            // printf("osToolsClientSocketCreate ERROR: Could not connect socket %d (%s)\n", errno, strerror(errno));
             return -1;
         }
         struct timeval timeout;
@@ -32936,20 +32949,20 @@ int32_t osToolsClientSocketCreate(char *clientName, osToolsSocketProtocol_t prot
         fdsockArray.fds_bits[0] = sockfd;
         status = select(sockfd + 1, NULL, &fdsockArray, NULL, &timeout);
         if (status != 1) {
-            printf("osToolsClientSocketCreate ERROR: Could not connect socket (timeout)\n");
+            // printf("osToolsClientSocketCreate ERROR: Could not connect socket (timeout)\n");
             return -1;
         }
     }
     /* set socket back to blocking mode */
     status = fcntl(sockfd, F_GETFL, 0);
     if (status == -1) {
-        printf("osToolsClientSocketCreate ERROR: Could not get fcntl flags\n");
+        // printf("osToolsClientSocketCreate ERROR: Could not get fcntl flags\n");
         return -1;
     }
     status &= ~O_NONBLOCK;
     status = fcntl(sockfd, F_SETFL, status);
     if (status != 0) {
-        printf("osToolsClientSocketCreate ERROR: Could not set socket to blocking mode\n");
+        // printf("osToolsClientSocketCreate ERROR: Could not set socket to blocking mode\n");
         return -1;
     }
     printf("Connected to %s:%s\n", serverAddress, serverPort);
@@ -32976,17 +32989,17 @@ int32_t osToolsClientSocketCreate(char *clientName, osToolsSocketProtocol_t prot
 
 int32_t osToolsSocketSend(char *socketName, uint8_t *data, int32_t length) {
     if (!socketName) {
-        printf("osToolsSocketSend ERROR: socketName is NULL\n");
+        // printf("osToolsSocketSend ERROR: socketName is NULL\n");
         return -1;
     }
     int32_t socketIndex = list_find(osToolsSocket.socket, (unitype) socketName, 's');
     if (socketIndex == -1) {
-        printf("osToolsSocketSend ERROR: Could not find socket %s\n", socketName);
+        // printf("osToolsSocketSend ERROR: Could not find socket %s\n", socketName);
         return -1;
     }
     int32_t status = send(osToolsSocket.socket -> data[socketIndex + OSI_SOCKET].i, (char *) data, length, 0);
     if (status == -1) {
-        printf("osToolsSocketSend ERROR: Failed to send\n");
+        // printf("osToolsSocketSend ERROR: Failed to send\n");
         return -1;
     }
     return status;
@@ -32994,12 +33007,12 @@ int32_t osToolsSocketSend(char *socketName, uint8_t *data, int32_t length) {
 
 int32_t osToolsSocketReceive(char *socketName, uint8_t *data, int32_t length, int32_t timeoutMilliseconds) {
     if (!socketName) {
-        printf("osToolsSocketReceive ERROR: socketName is NULL\n");
+        // printf("osToolsSocketReceive ERROR: socketName is NULL\n");
         return -1;
     }
     int32_t socketIndex = list_find(osToolsSocket.socket, (unitype) socketName, 's');
     if (socketIndex == -1) {
-        printf("osToolsSocketReceive ERROR: Could not find socket %s\n", socketName);
+        // printf("osToolsSocketReceive ERROR: Could not find socket %s\n", socketName);
         return -1;
     }
     setsockopt(osToolsSocket.socket -> data[socketIndex + OSI_SOCKET].i, SOL_SOCKET, SO_RCVTIMEO, (char *) &timeoutMilliseconds, sizeof(timeoutMilliseconds)); // https://stackoverflow.com/questions/2876024/linux-is-there-a-read-or-recv-from-socket-with-timeout
@@ -33007,10 +33020,10 @@ int32_t osToolsSocketReceive(char *socketName, uint8_t *data, int32_t length, in
     if (status == -1) {
         if (errno == EAGAIN || errno == EWOULDBLOCK) {
             /* timeout */
-            printf("osToolsSocketReceive ERROR: Failed to receive (timeout)\n");
+            // printf("osToolsSocketReceive ERROR: Failed to receive (timeout)\n");
             return 0;
         }
-        printf("osToolsSocketReceive ERROR: Failed to receive\n");
+        // printf("osToolsSocketReceive ERROR: Failed to receive\n");
         return -1;
     }
     return status;
@@ -33018,18 +33031,18 @@ int32_t osToolsSocketReceive(char *socketName, uint8_t *data, int32_t length, in
 
 int32_t osToolsSocketDestroy(char *socketName) {
     if (!socketName) {
-        printf("osToolsSocketDestroy ERROR: socketName is NULL\n");
+        // printf("osToolsSocketDestroy ERROR: socketName is NULL\n");
         return -1;
     }
     int32_t socketIndex = list_find(osToolsSocket.socket, (unitype) socketName, 's');
     if (socketIndex == -1) {
-        printf("osToolsSocketDestroy ERROR: Could not find socket %s\n", socketName);
+        // printf("osToolsSocketDestroy ERROR: Could not find socket %s\n", socketName);
         return -1;
     }
     /* shutdown and close socket */
     int32_t status = shutdown(osToolsSocket.socket -> data[socketIndex + OSI_SOCKET].i, SHUT_RDWR);
     if (status == -1) {
-        printf("osToolsSocketDestroy WARN: Shutdown not successful\n");
+        // printf("osToolsSocketDestroy WARN: Shutdown not successful\n");
     }
     close(osToolsSocket.socket -> data[socketIndex + OSI_SOCKET].i);
     list_delete_range(osToolsSocket.socket, socketIndex, socketIndex + OSI_NUMBER_OF_FIELDS);

@@ -381,6 +381,7 @@ typedef enum {
     TT_SWITCH_STYLE_SIDESWIPE_RIGHT = 3,
     TT_SWITCH_STYLE_CHECKBOX = 4,
     TT_SWITCH_STYLE_XBOX = 5,
+    TT_SWITCH_STYLE_TRIANGLE = 6,
 } tt_switch_style_t;
 
 typedef enum {
