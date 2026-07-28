@@ -1,5 +1,6 @@
-Using glfw version: 3.3.8. Find the latest release https://www.glfw.org/download.html - use the 64-bit windows binaries
+Using glfw version: 3.3.8. Find it https://github.com/glfw/glfw/releases/tag/3.3.8
 Using glad version: 3.3 Core profile. Find it https://glad.dav1d.de/#profile=core&language=c&specification=gl&loader=on&api=gl%3D3.3
+Using openal-soft commit hash: dd4e07d from June 18th, 2026
 
 glad documentation:
 

@@ -1,5 +1,6 @@
-Using glfw version: 3.3.8. Find the latest release https://www.glfw.org/download.html
+Using glfw version: 3.3.8. Find it https://github.com/glfw/glfw/releases/tag/3.3.8
 Using glad version: 3.3 Core profile. Find it https://glad.dav1d.de/#profile=core&language=c&specification=gl&loader=on&api=gl%3D3.3
+Using openal-soft commit hash: dd4e07d from June 18th, 2026
 
 glad documentation:
 
@@ -23,12 +24,10 @@ glad documentation:
 
 
 Compile GLFW to binary: https://www.glfw.org/docs/3.3/compile.html#:~:text=GLFW%20uses%20CMake%20to%20generate,download%20CMake%20from%20their%20site
-sudo apt install xorg-dev
-sudo apt install libwayland-dev libxkbcommon-dev wayland-protocols extra-cmake-modules
+sudo apt install xorg-dev libwayland-dev libxkbcommon-dev wayland-protocols extra-cmake-modules
 sudo apt install cmake
 cmake -S . -B build
-cd build
-make
+build/make
 the binary will be glfw-3.3.8/src/libglfw3.a
 
 Compile glad to binary: gcc glad.c -O3 -I./../include -c -o libglad.a
