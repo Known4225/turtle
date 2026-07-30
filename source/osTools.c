@@ -2112,7 +2112,18 @@ list_t *osToolsFileAndFolderList(char *directory) {
             dstream = readdir(dir);
             continue;
         }
+        char fullpath[5000] = "";
+        strcat(fullpath, directory);
+        strcat(fullpath, "/");
+        strcat(fullpath, dstream -> d_name);
+        struct stat checkType;
+        stat(fullpath, &checkType);
         list_append(output, (unitype) dstream -> d_name, 's');
+        if (S_ISREG(checkType.st_mode)) {
+            list_append(output, (unitype) (int64_t) checkType.st_size, UNITYPE_INT64);
+        } else {
+            list_append(output, (unitype) (int64_t) -1, UNITYPE_INT64);
+        }
         dstream = readdir(dir);
     }
     closedir(dir);
@@ -2135,6 +2146,7 @@ list_t *osToolsFileList(char *directory) {
         stat(fullpath, &checkType);
         if (S_ISREG(checkType.st_mode)) {
             list_append(output, (unitype) dstream -> d_name, 's');
+            list_append(output, (unitype) (int64_t) checkType.st_size, UNITYPE_INT64);
         }
         dstream = readdir(dir);
     }
@@ -2728,7 +2740,18 @@ list_t *osToolsFileAndFolderList(char *directory) {
             dstream = readdir(dir);
             continue;
         }
+        char fullpath[5000] = "";
+        strcat(fullpath, directory);
+        strcat(fullpath, "/");
+        strcat(fullpath, dstream -> d_name);
+        struct stat checkType;
+        stat(fullpath, &checkType);
         list_append(output, (unitype) dstream -> d_name, 's');
+        if (S_ISREG(checkType.st_mode)) {
+            list_append(output, (unitype) (int64_t) checkType.st_size, UNITYPE_INT64);
+        } else {
+            list_append(output, (unitype) (int64_t) -1, UNITYPE_INT64);
+        }
         dstream = readdir(dir);
     }
     closedir(dir);
@@ -2751,6 +2774,7 @@ list_t *osToolsFileList(char *directory) {
         stat(fullpath, &checkType);
         if (S_ISREG(checkType.st_mode)) {
             list_append(output, (unitype) dstream -> d_name, 's');
+            list_append(output, (unitype) (int64_t) checkType.st_size, UNITYPE_INT64);
         }
         dstream = readdir(dir);
     }
