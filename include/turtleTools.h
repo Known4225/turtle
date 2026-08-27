@@ -456,7 +456,7 @@ typedef enum {
 typedef enum {
     TT_SLIDER_STYLE_CLASSIC = 0,
     TT_SLIDER_STYLE_SIDESWIPE = 1,
-    TT_SLIDER_COMPACT = 2,
+    TT_SLIDER_STYLE_COMPACT = 2,
 } tt_slider_style_t;
 
 /* slider */

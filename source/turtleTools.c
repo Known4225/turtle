@@ -1744,6 +1744,12 @@ void tt_sliderUpdate(tt_slider_t *sliderp) {
                 sliderRotateFactor = 90;
                 sliderOffsetYFactor = sliderp -> length / 2 + sliderp -> size;
                 sliderOffsetYFactorSmall = -sliderp -> length / 2 - sliderp -> size;
+            } else if (sliderp -> style == TT_SLIDER_STYLE_COMPACT) {
+                sliderAlignFactor = 50;
+                sliderRotateFactor = -90;
+                sliderOffsetYFactor = 0;
+                sliderOffsetXFactor = -sliderp -> size * 1.4;
+                sliderOffsetYFactorSmall = -1.2 * sliderp -> size - sliderp -> length / 2;
             } else {
                 sliderAlignFactor = 0;
                 sliderOffsetXFactor = -sliderp -> size * 0.4;
@@ -1759,6 +1765,12 @@ void tt_sliderUpdate(tt_slider_t *sliderp) {
                 sliderRotateFactor = 90;
                 sliderOffsetYFactor = sliderp -> length / 2 + sliderp -> size;
                 sliderOffsetYFactorSmall = -sliderp -> length / 2 - sliderp -> size;
+            } else if (sliderp -> style == TT_SLIDER_STYLE_COMPACT) {
+                sliderAlignFactor = 50;
+                sliderRotateFactor = -90;
+                sliderOffsetYFactor = 0;
+                sliderOffsetXFactor = -sliderp -> size * 1.4;
+                sliderOffsetYFactorSmall = -1.2 * sliderp -> size - sliderp -> length / 2;
             } else {
                 sliderAlignFactor = 50;
                 sliderOffsetYFactorSmall = -1.2 * sliderp -> size - sliderp -> length / 2;
@@ -1768,25 +1780,35 @@ void tt_sliderUpdate(tt_slider_t *sliderp) {
             sliderYLeft = sliderp -> y - sliderp -> length / 2;
             sliderXRight = sliderp -> x;
             sliderYRight = sliderp -> y + sliderp -> length / 2;
-            sliderAlignFactor = 100;
             if (sliderp -> style == TT_SLIDER_STYLE_SIDESWIPE) {
-                sliderRotateFactor = -90;
+                sliderAlignFactor = 0;
+                sliderRotateFactor = 90; // -90
                 sliderOffsetYFactor = -sliderp -> length / 2 - sliderp -> size;
                 sliderOffsetYFactorSmall = sliderp -> length / 2 + sliderp -> size;
+            } else if (sliderp -> style == TT_SLIDER_STYLE_COMPACT) {
+                sliderAlignFactor = 50;
+                sliderRotateFactor = 90;
+                sliderOffsetYFactor = 0;
+                sliderOffsetXFactor = sliderp -> size * 1.4;
+                sliderOffsetYFactorSmall = -1.2 * sliderp -> size - sliderp -> length / 2;
             } else {
+                sliderAlignFactor = 100;
                 sliderOffsetXFactor = sliderp -> size * 0.4;
                 sliderOffsetXFactorSmall = -sliderp -> size * 1;
             }
         }
     }
     tt_setColor(sliderp -> color[TT_COLOR_SLOT_SLIDER_TEXT]);
-    if (sliderp -> style == TT_SLIDER_STYLE_SIDESWIPE && sliderp -> type == TT_SLIDER_TYPE_VERTICAL) {
+    if (sliderRotateFactor != 0) {
         turtleTextWriteUnicodeRotated(sliderp -> label, sliderp -> x + sliderOffsetXFactor, sliderp -> y + sliderOffsetYFactor, sliderp -> size - 1, sliderAlignFactor, sliderRotateFactor);
     } else {
         turtleTextWriteUnicode(sliderp -> label, sliderp -> x + sliderOffsetXFactor, sliderp -> y + sliderOffsetYFactor, sliderp -> size - 1, sliderAlignFactor);
     }
     if (sliderp -> style == TT_SLIDER_STYLE_SIDESWIPE) {
         sliderAlignFactor = 100 - sliderAlignFactor;
+    }
+    if (sliderp -> style == TT_SLIDER_STYLE_COMPACT) {
+        sliderRotateFactor = 0;
     }
     turtlePenSize(sliderp -> size * 1.2);
     turtleGoto(sliderXLeft, sliderYLeft);
@@ -1902,7 +1924,7 @@ void tt_sliderUpdate(tt_slider_t *sliderp) {
     if (sliderp -> renderNumberFactor != 0) {
         tt_setColor(sliderp -> color[TT_COLOR_SLOT_SLIDER_TEXT]);
         int32_t rounded = (int32_t) round(sliderp -> value * sliderp -> renderNumberFactor);
-        if (sliderp -> style == TT_SLIDER_STYLE_SIDESWIPE && sliderp -> type == TT_SLIDER_TYPE_VERTICAL) {
+        if (sliderRotateFactor != 0) {
             turtleTextWriteStringfRotated(sliderp -> x + sliderOffsetXFactorSmall, sliderp -> y + sliderOffsetYFactorSmall, sliderp -> size / 2, sliderAlignFactor, sliderRotateFactor, "%d", rounded);
         } else {
             turtleTextWriteStringf(sliderp -> x + sliderOffsetXFactorSmall, sliderp -> y + sliderOffsetYFactorSmall, sliderp -> size / 2, sliderAlignFactor, "%d", rounded);
