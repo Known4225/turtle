@@ -10289,6 +10289,8 @@ int32_t turtleTextureUnloadAll();
 /* adds a (blit) rectangular texture */
 void turtleTexture(turtle_texture_t texture, double x1, double y1, double x2, double y2, double rot);
 
+void turtleTextureColor(turtle_texture_t texture, double x1, double y1, double x2, double y2, double rot, uint8_t r, uint8_t g, uint8_t b);
+
 /* draws a circle at the specified x and y (coordinates) */
 void turtleCircleRenderInternal(double x, double y, double rad, double r, double g, double b, double a, double xcenter, double ycenter, double xfact, double yfact, double prez);
 
@@ -10839,8 +10841,7 @@ typedef struct {
 typedef enum {
     TT_SWITCH_STYLE_CLASSIC = 0,
     TT_SWITCH_STYLE_VERTICAL = 1,
-    TT_SWITCH_STYLE_SIDESWIPE_LEFT = 2,
-    TT_SWITCH_STYLE_SIDESWIPE_RIGHT = 3,
+    TT_SWITCH_STYLE_SIDESWIPE = 2,
     TT_SWITCH_STYLE_CHECKBOX = 4,
     TT_SWITCH_STYLE_XBOX = 5,
     TT_SWITCH_STYLE_TRIANGLE = 6,
@@ -10916,6 +10917,12 @@ typedef enum {
     TT_SLIDER_SCALE_EXP = 2,
 } tt_slider_scale_t;
 
+typedef enum {
+    TT_SLIDER_STYLE_CLASSIC = 0,
+    TT_SLIDER_STYLE_SIDESWIPE = 1,
+    TT_SLIDER_STYLE_COMPACT = 2,
+} tt_slider_style_t;
+
 /* slider */
 typedef struct {
     tt_element_names_t element;
@@ -10932,6 +10939,7 @@ typedef struct {
     tt_slider_type_t type;
     tt_slider_align_t align;
     tt_slider_scale_t scale;
+    tt_slider_style_t style;
     double length;
     double range[2];
     double renderNumberFactor; // multiply rendered variable by this amount
@@ -24892,6 +24900,18 @@ void turtleTexture(turtle_texture_t texture, double x1, double y1, double x2, do
     list_append(turtle.penPos, (unitype) 1.0, 'd');
 }
 
+void turtleTextureColor(turtle_texture_t texture, double x1, double y1, double x2, double y2, double rot, uint8_t r, uint8_t g, uint8_t b) {
+    list_append(turtle.penPos, (unitype) x1, 'd');
+    list_append(turtle.penPos, (unitype) y1, 'd');
+    list_append(turtle.penPos, (unitype) x2, 'd');
+    list_append(turtle.penPos, (unitype) y2, 'd');
+    list_append(turtle.penPos, (unitype) rot, 'd'); // rotation (degrees, bearing)
+    list_append(turtle.penPos, (unitype) (r / 255.0), 'd');
+    list_append(turtle.penPos, (unitype) (g / 255.0), 'd');
+    list_append(turtle.penPos, (unitype) (128 + texture / 4), 'h'); // blit texture signifier + texture code - limited to 32639 textures
+    list_append(turtle.penPos, (unitype) (b / 255.0), 'd');
+}
+
 void turtleSetTextureSize(int32_t width, int32_t height) {
     turtle.textureWidth = width;
     turtle.textureHeight = height;
@@ -25868,6 +25888,8 @@ void turtleTextWriteRotated(const uint32_t *text, int32_t textLength, double x, 
     turtlePenShape("text"); // dedicated setting that blends circle and connected
     #endif
     #endif
+    double cosR = cos(rotate / 57.2958);
+    double sinR = sin(rotate / 57.2958);
     list_t *xvals = list_init();
     list_t *dataIndStored = list_init();
     for (int32_t i = 0; i < textLength; i++) {
@@ -25892,12 +25914,12 @@ void turtleTextWriteRotated(const uint32_t *text, int32_t textLength, double x, 
     }
     xTrack -= 40 * size;
     #ifdef TURTLE_TEXT_DO_DYNAMIC_Y_CENTERING
-    y -= (maxY + minY) / 2 * size;
+    y -= (maxY + minY) / 2 * size * cosR;
+    x -= (maxY + minY) / 2 * size * sinR;
     #else
-    y -= 80 * size;
+    x -= 80 * size * sinR;
+    y -= 80 * size * cosR;
     #endif
-    double cosR = cos(rotate / 57.2958);
-    double sinR = sin(rotate / 57.2958);
     for (int32_t i = 0; i < textLength; i++) {
         turtleTextRenderCharRotated(turtleText.fontPointer[dataIndStored -> data[i].i], x + (xvals -> data[i].d - (xTrack * (align / 100))) * cosR, y - (xvals -> data[i].d - (xTrack * (align / 100))) * sinR, size, sinR, cosR);
     }
@@ -27377,6 +27399,7 @@ tt_slider_t *tt_sliderInit(char *label, double *variable, tt_slider_type_t type,
     sliderp -> type = type;
     sliderp -> align = align;
     sliderp -> scale = TT_SLIDER_SCALE_LINEAR;
+    sliderp -> style = TT_SLIDER_STYLE_CLASSIC;
     sliderp -> x = x;
     sliderp -> y = y;
     sliderp -> size = size;
@@ -27827,7 +27850,7 @@ void tt_switchUpdate(tt_switch_t *switchp) {
     double switchClickRight = switchX;
     double switchClickDown = switchY;
     double switchClickUp = switchY;
-    if (switchp -> style == TT_SWITCH_STYLE_CLASSIC || switchp -> style == TT_SWITCH_STYLE_SIDESWIPE_LEFT || switchp -> style == TT_SWITCH_STYLE_SIDESWIPE_RIGHT) {
+    if (switchp -> style == TT_SWITCH_STYLE_CLASSIC || switchp -> style == TT_SWITCH_STYLE_SIDESWIPE) {
         /* render switch */
         if (switchp -> value) {
             tt_setColor(switchp -> color[TT_COLOR_SLOT_SWITCH_ON]);
@@ -27853,11 +27876,11 @@ void tt_switchUpdate(tt_switch_t *switchp) {
         if (switchp -> style == TT_SWITCH_STYLE_CLASSIC) {
             switchClickLeft = switchX - switchp -> size * 1.35;
             switchClickRight = switchX + switchp -> size * 1.35;
-        } else if (switchp -> style == TT_SWITCH_STYLE_SIDESWIPE_LEFT) {
+        } else if (switchp -> style == TT_SWITCH_STYLE_SIDESWIPE && (switchp -> align == TT_SWITCH_ALIGN_LEFT || switchp -> align == TT_SWITCH_ALIGN_CENTER)) {
             double textLength = turtleTextGetUnicodeLength(switchp -> label, switchp -> size - 1);
             switchClickLeft = switchX - switchp -> size * 1.35;
             switchClickRight = switchX + switchp -> size * 2.2 + textLength;
-        } else if (switchp -> style == TT_SWITCH_STYLE_SIDESWIPE_RIGHT) {
+        } else if (switchp -> style == TT_SWITCH_STYLE_SIDESWIPE && switchp -> align == TT_SWITCH_ALIGN_RIGHT) {
             double textLength = turtleTextGetUnicodeLength(switchp -> label, switchp -> size - 1);
             switchClickLeft = switchX - switchp -> size * 2 - textLength;
             switchClickRight = switchX + switchp -> size * 1.35;
@@ -27874,14 +27897,14 @@ void tt_switchUpdate(tt_switch_t *switchp) {
             } else if (switchp -> align == TT_SWITCH_ALIGN_RIGHT) {
                 turtleTextWriteUnicode(switchp -> label, switchX + switchp -> size * 1.2, switchY + 1.6 * switchp -> size, switchp -> size - 1, 100);
             }
-        } else if (switchp -> style == TT_SWITCH_STYLE_SIDESWIPE_LEFT) {
+        } else if (switchp -> style == TT_SWITCH_STYLE_SIDESWIPE && (switchp -> align == TT_SWITCH_ALIGN_LEFT || switchp -> align == TT_SWITCH_ALIGN_CENTER)) {
             if (switchp -> status == TT_STATUS_IDLE || switchp -> status == TT_STATUS_BLOCKED) {
                 tt_setColor(switchp -> color[TT_COLOR_SLOT_SWITCH_TEXT]);
             } else {
                 tt_setColor(switchp -> color[TT_COLOR_SLOT_SWITCH_TEXT_HOVER]);
             }
             turtleTextWriteUnicode(switchp -> label, switchX + switchp -> size * 2, switchY, switchp -> size - 1, 0);
-        } else if (switchp -> style == TT_SWITCH_STYLE_SIDESWIPE_RIGHT) {
+        } else if (switchp -> style == TT_SWITCH_STYLE_SIDESWIPE && switchp -> align == TT_SWITCH_ALIGN_RIGHT) {
             if (switchp -> status == TT_STATUS_IDLE || switchp -> status == TT_STATUS_BLOCKED) {
                 tt_setColor(switchp -> color[TT_COLOR_SLOT_SWITCH_TEXT]);
             } else {
@@ -28191,35 +28214,56 @@ void tt_sliderUpdate(tt_slider_t *sliderp) {
     double sliderXRight = 0;
     double sliderYRight = 0;
     double sliderAlignFactor = 0;
+    double sliderRotateFactor = 0;
     double sliderOffsetXFactor = 0;
     double sliderOffsetYFactor = 0;
     double sliderOffsetXFactorSmall = 0;
     double sliderOffsetYFactorSmall = 0;
     if (sliderp -> type == TT_SLIDER_TYPE_HORIZONTAL) {
-        sliderOffsetYFactor = 1.4 * sliderp -> size;
-        sliderOffsetYFactorSmall = -sliderp -> size * 1.2;
+        if (sliderp -> style != TT_SLIDER_STYLE_SIDESWIPE) {
+            sliderOffsetYFactor = 1.4 * sliderp -> size;
+            sliderOffsetYFactorSmall = -sliderp -> size * 1.2;
+        }
         if (sliderp -> align == TT_SLIDER_ALIGN_LEFT) {
             sliderXLeft = sliderp -> x;
             sliderYLeft = sliderp -> y;
             sliderXRight = sliderp -> x + sliderp -> length;
             sliderYRight = sliderp -> y;
-            sliderAlignFactor = 0;
-            sliderOffsetXFactor = -sliderp -> size * 0.4;
-            sliderOffsetXFactorSmall = -sliderp -> size * 0.25;
+            if (sliderp -> style == TT_SLIDER_STYLE_SIDESWIPE) {
+                sliderAlignFactor = 100;
+                sliderOffsetXFactor = -sliderp -> size;
+                sliderOffsetXFactorSmall = sliderp -> length + sliderp -> size;
+            } else {
+                sliderAlignFactor = 0;
+                sliderOffsetXFactor = -sliderp -> size * 0.4;
+                sliderOffsetXFactorSmall = -sliderp -> size * 0.25;
+            }
         } else if (sliderp -> align == TT_SLIDER_ALIGN_CENTER) {
             sliderXLeft = sliderp -> x - sliderp -> length / 2;
             sliderYLeft = sliderp -> y;
             sliderXRight = sliderp -> x + sliderp -> length / 2;
             sliderYRight = sliderp -> y;
-            sliderAlignFactor = 50;
+            if (sliderp -> style == TT_SLIDER_STYLE_SIDESWIPE) {
+                sliderAlignFactor = 100;
+                sliderOffsetXFactor = -sliderp -> length / 2 - sliderp -> size;
+                sliderOffsetXFactorSmall = sliderp -> length / 2 + sliderp -> size;
+            } else {
+                sliderAlignFactor = 50;
+            }
         } else if (sliderp -> align == TT_SLIDER_ALIGN_RIGHT) {
             sliderXLeft = sliderp -> x - sliderp -> length;
             sliderYLeft = sliderp -> y;
             sliderXRight = sliderp -> x;
             sliderYRight = sliderp -> y;
-            sliderAlignFactor = 100;
-            sliderOffsetXFactor = sliderp -> size * 0.4;
-            sliderOffsetXFactorSmall = sliderp -> size * 0.25;
+            if (sliderp -> style == TT_SLIDER_STYLE_SIDESWIPE) {
+                sliderAlignFactor = 0;
+                sliderOffsetXFactor = sliderp -> size;
+                sliderOffsetXFactorSmall = -sliderp -> length - sliderp -> size;
+            } else {
+                sliderAlignFactor = 100;
+                sliderOffsetXFactor = sliderp -> size * 0.4;
+                sliderOffsetXFactorSmall = sliderp -> size * 0.25;
+            }
         }
     } else if (sliderp -> type == TT_SLIDER_TYPE_VERTICAL) {
         sliderOffsetYFactor = 1.4 * sliderp -> size + sliderp -> length / 2;
@@ -28228,28 +28272,77 @@ void tt_sliderUpdate(tt_slider_t *sliderp) {
             sliderYLeft = sliderp -> y - sliderp -> length / 2;
             sliderXRight = sliderp -> x;
             sliderYRight = sliderp -> y + sliderp -> length / 2;
-            sliderAlignFactor = 0;
-            sliderOffsetXFactor = -sliderp -> size * 0.4;
-            sliderOffsetXFactorSmall = sliderp -> size * 1;
+            if (sliderp -> style == TT_SLIDER_STYLE_SIDESWIPE) {
+                sliderAlignFactor = 100;
+                sliderRotateFactor = 90;
+                sliderOffsetYFactor = sliderp -> length / 2 + sliderp -> size;
+                sliderOffsetYFactorSmall = -sliderp -> length / 2 - sliderp -> size;
+            } else if (sliderp -> style == TT_SLIDER_STYLE_COMPACT) {
+                sliderAlignFactor = 50;
+                sliderRotateFactor = -90;
+                sliderOffsetYFactor = 0;
+                sliderOffsetXFactor = -sliderp -> size * 1.4;
+                sliderOffsetYFactorSmall = -1.2 * sliderp -> size - sliderp -> length / 2;
+            } else {
+                sliderAlignFactor = 0;
+                sliderOffsetXFactor = -sliderp -> size * 0.4;
+                sliderOffsetXFactorSmall = sliderp -> size * 1;
+            }
         } else if (sliderp -> align == TT_SLIDER_ALIGN_CENTER) {
             sliderXLeft = sliderp -> x;
             sliderYLeft = sliderp -> y - sliderp -> length / 2;
             sliderXRight = sliderp -> x;
             sliderYRight = sliderp -> y + sliderp -> length / 2;
-            sliderAlignFactor = 50;
-            sliderOffsetYFactorSmall = -1.2 * sliderp -> size - sliderp -> length / 2;
+            if (sliderp -> style == TT_SLIDER_STYLE_SIDESWIPE) {
+                sliderAlignFactor = 100;
+                sliderRotateFactor = 90;
+                sliderOffsetYFactor = sliderp -> length / 2 + sliderp -> size;
+                sliderOffsetYFactorSmall = -sliderp -> length / 2 - sliderp -> size;
+            } else if (sliderp -> style == TT_SLIDER_STYLE_COMPACT) {
+                sliderAlignFactor = 50;
+                sliderRotateFactor = -90;
+                sliderOffsetYFactor = 0;
+                sliderOffsetXFactor = -sliderp -> size * 1.4;
+                sliderOffsetYFactorSmall = -1.2 * sliderp -> size - sliderp -> length / 2;
+            } else {
+                sliderAlignFactor = 50;
+                sliderOffsetYFactorSmall = -1.2 * sliderp -> size - sliderp -> length / 2;
+            }
         } else if (sliderp -> align == TT_SLIDER_ALIGN_RIGHT) {
             sliderXLeft = sliderp -> x;
             sliderYLeft = sliderp -> y - sliderp -> length / 2;
             sliderXRight = sliderp -> x;
             sliderYRight = sliderp -> y + sliderp -> length / 2;
-            sliderAlignFactor = 100;
-            sliderOffsetXFactor = sliderp -> size * 0.4;
-            sliderOffsetXFactorSmall = -sliderp -> size * 1;
+            if (sliderp -> style == TT_SLIDER_STYLE_SIDESWIPE) {
+                sliderAlignFactor = 0;
+                sliderRotateFactor = 90; // -90
+                sliderOffsetYFactor = -sliderp -> length / 2 - sliderp -> size;
+                sliderOffsetYFactorSmall = sliderp -> length / 2 + sliderp -> size;
+            } else if (sliderp -> style == TT_SLIDER_STYLE_COMPACT) {
+                sliderAlignFactor = 50;
+                sliderRotateFactor = 90;
+                sliderOffsetYFactor = 0;
+                sliderOffsetXFactor = sliderp -> size * 1.4;
+                sliderOffsetYFactorSmall = -1.2 * sliderp -> size - sliderp -> length / 2;
+            } else {
+                sliderAlignFactor = 100;
+                sliderOffsetXFactor = sliderp -> size * 0.4;
+                sliderOffsetXFactorSmall = -sliderp -> size * 1;
+            }
         }
     }
     tt_setColor(sliderp -> color[TT_COLOR_SLOT_SLIDER_TEXT]);
-    turtleTextWriteUnicode(sliderp -> label, sliderp -> x + sliderOffsetXFactor, sliderp -> y + sliderOffsetYFactor, sliderp -> size - 1, sliderAlignFactor);
+    if (sliderRotateFactor != 0) {
+        turtleTextWriteUnicodeRotated(sliderp -> label, sliderp -> x + sliderOffsetXFactor, sliderp -> y + sliderOffsetYFactor, sliderp -> size - 1, sliderAlignFactor, sliderRotateFactor);
+    } else {
+        turtleTextWriteUnicode(sliderp -> label, sliderp -> x + sliderOffsetXFactor, sliderp -> y + sliderOffsetYFactor, sliderp -> size - 1, sliderAlignFactor);
+    }
+    if (sliderp -> style == TT_SLIDER_STYLE_SIDESWIPE) {
+        sliderAlignFactor = 100 - sliderAlignFactor;
+    }
+    if (sliderp -> style == TT_SLIDER_STYLE_COMPACT) {
+        sliderRotateFactor = 0;
+    }
     turtlePenSize(sliderp -> size * 1.2);
     turtleGoto(sliderXLeft, sliderYLeft);
     tt_setColor(sliderp -> color[TT_COLOR_SLOT_SLIDER_BAR]);
@@ -28364,7 +28457,11 @@ void tt_sliderUpdate(tt_slider_t *sliderp) {
     if (sliderp -> renderNumberFactor != 0) {
         tt_setColor(sliderp -> color[TT_COLOR_SLOT_SLIDER_TEXT]);
         int32_t rounded = (int32_t) round(sliderp -> value * sliderp -> renderNumberFactor);
-        turtleTextWriteStringf(sliderp -> x + sliderOffsetXFactorSmall, sliderp -> y + sliderOffsetYFactorSmall, sliderp -> size / 2, sliderAlignFactor, "%d", rounded);
+        if (sliderRotateFactor != 0) {
+            turtleTextWriteStringfRotated(sliderp -> x + sliderOffsetXFactorSmall, sliderp -> y + sliderOffsetYFactorSmall, sliderp -> size / 2, sliderAlignFactor, sliderRotateFactor, "%d", rounded);
+        } else {
+            turtleTextWriteStringf(sliderp -> x + sliderOffsetXFactorSmall, sliderp -> y + sliderOffsetYFactorSmall, sliderp -> size / 2, sliderAlignFactor, "%d", rounded);
+        }
     }
     if (sliderp -> variable != NULL) {
         *sliderp -> variable = sliderp -> value;
