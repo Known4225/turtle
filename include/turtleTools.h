@@ -377,8 +377,7 @@ typedef struct {
 typedef enum {
     TT_SWITCH_STYLE_CLASSIC = 0,
     TT_SWITCH_STYLE_VERTICAL = 1,
-    TT_SWITCH_STYLE_SIDESWIPE_LEFT = 2,
-    TT_SWITCH_STYLE_SIDESWIPE_RIGHT = 3,
+    TT_SWITCH_STYLE_SIDESWIPE = 2,
     TT_SWITCH_STYLE_CHECKBOX = 4,
     TT_SWITCH_STYLE_XBOX = 5,
     TT_SWITCH_STYLE_TRIANGLE = 6,
@@ -454,6 +453,12 @@ typedef enum {
     TT_SLIDER_SCALE_EXP = 2,
 } tt_slider_scale_t;
 
+typedef enum {
+    TT_SLIDER_STYLE_CLASSIC = 0,
+    TT_SLIDER_STYLE_SIDESWIPE = 1,
+    TT_SLIDER_COMPACT = 2,
+} tt_slider_style_t;
+
 /* slider */
 typedef struct {
     tt_element_names_t element;
@@ -470,6 +475,7 @@ typedef struct {
     tt_slider_type_t type;
     tt_slider_align_t align;
     tt_slider_scale_t scale;
+    tt_slider_style_t style;
     double length;
     double range[2];
     double renderNumberFactor; // multiply rendered variable by this amount
