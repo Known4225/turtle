@@ -10289,6 +10289,8 @@ int32_t turtleTextureUnloadAll();
 /* adds a (blit) rectangular texture */
 void turtleTexture(turtle_texture_t texture, double x1, double y1, double x2, double y2, double rot);
 
+void turtleTextureColor(turtle_texture_t texture, double x1, double y1, double x2, double y2, double rot, uint8_t r, uint8_t g, uint8_t b);
+
 /* draws a circle at the specified x and y (coordinates) */
 void turtleCircleRenderInternal(double x, double y, double rad, double r, double g, double b, double a, double xcenter, double ycenter, double xfact, double yfact, double prez);
 
@@ -24892,6 +24894,18 @@ void turtleTexture(turtle_texture_t texture, double x1, double y1, double x2, do
     list_append(turtle.penPos, (unitype) 1.0, 'd');
 }
 
+void turtleTextureColor(turtle_texture_t texture, double x1, double y1, double x2, double y2, double rot, uint8_t r, uint8_t g, uint8_t b) {
+    list_append(turtle.penPos, (unitype) x1, 'd');
+    list_append(turtle.penPos, (unitype) y1, 'd');
+    list_append(turtle.penPos, (unitype) x2, 'd');
+    list_append(turtle.penPos, (unitype) y2, 'd');
+    list_append(turtle.penPos, (unitype) rot, 'd'); // rotation (degrees, bearing)
+    list_append(turtle.penPos, (unitype) (r / 255.0), 'd');
+    list_append(turtle.penPos, (unitype) (g / 255.0), 'd');
+    list_append(turtle.penPos, (unitype) (128 + texture / 4), 'h'); // blit texture signifier + texture code - limited to 32639 textures
+    list_append(turtle.penPos, (unitype) (b / 255.0), 'd');
+}
+
 void turtleSetTextureSize(int32_t width, int32_t height) {
     turtle.textureWidth = width;
     turtle.textureHeight = height;
@@ -26506,6 +26520,7 @@ void turtleTextGenerateDefaultFont(list_t *generatedFont) {
     list_append(generatedFont, (unitype) "📄, 5, 6, b, -160, -80, -160, -100, -140, -100, b, -60, -100, -40, -100, -40, -80, -40, 10, -90, 60, b, -140, 60, -160, 60, -160, 40, -160, -80, 3, -90, 60, b, -90, 30, -90, 10, -70, 10, -40, 10, 2, -140, -10, -60, -10, 2, -140, -40, -60, -40, 2, -140, -70, -90, -70", 's');
     list_append(generatedFont, (unitype) "📁, 2, 7, b, -160, -70, -160, -90, -140, -90, b, -40, -90, -20, -90, -20, -70, b, -20, 10, -20, 30, -40, 30, -90, 30, -110, 50, b, -140, 50, -160, 50, -160, 30, -160, -70, 2, b, -20, -20, -20, 10, -40, 10, b, -140, 10, -160, 10, -160, -20", 's');
     list_append(generatedFont, (unitype) "😊, 4, 4, b, -80, -100, 0, -100, b, 0, -20, 0, 60, b, -80, 60, -160, 60, b, -160, -20, -160, -100, -80, -100, 2, b, -120, 5, -120, 15, b, -110, 15, -100, 15, -100, 5, 2, b, -60, 5, -60, 15, b, -50, 15, -40, 15, -40, 5, 2, b, -115, -45, -110, -65, b, -80, -65, -50, -65, -45, -45", 's');
+    list_append(generatedFont, (unitype) "♖, 6, 5, -40, -100, -160, -100, -160, -85, -40, -85, -40, -100, 4, -50, -85, -50, -70, -150, -70, -150, -85, 2, -145, -70, -135, -55, 6, -55, -70, -65, -55, -135, -55, -135, 15, -65, 15, -65, -55, 15, -65, 15, -55, 30, -50, 30, -50, 55, -65, 55, -65, 45, -90, 45, -90, 55, -110, 55, -110, 45, -135, 45, -135, 55, -150, 55, -150, 30, -55, 30, 2, -135, 15, -145, 30", 's');
 }
 
 #endif /* TURTLE_TEXT_IMPLEMENTATION */
