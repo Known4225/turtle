@@ -275,9 +275,12 @@ int main(int argc, char *argv[]) {
     tt_dialInit("Speed", NULL, TT_DIAL_SCALE_LINEAR, -100, -210, 10, 0, 1000, 1);
     tt_dialInit("Exposure", NULL, TT_DIAL_SCALE_EXP, -50, -210, 10, 0, 1000, 1);
     tt_dropdownInit("Source", sources, NULL, TT_DROPDOWN_ALIGN_LEFT, -10, -211.2, 10);
-    tt_slider_t *xSlider = tt_sliderInit("", &x, TT_SLIDER_TYPE_HORIZONTAL, TT_SLIDER_ALIGN_CENTER, -100, -240, 10, 100, -300, 300, 0);
-    tt_slider_t *ySlider = tt_sliderInit("", &y, TT_SLIDER_TYPE_HORIZONTAL, TT_SLIDER_ALIGN_CENTER, -100, -260, 10, 100, -300, 300, 0);
-    tt_slider_t *zSlider = tt_sliderInit("", &z, TT_SLIDER_TYPE_HORIZONTAL, TT_SLIDER_ALIGN_CENTER, -100, -280, 10, 100, -300, 300, 0);
+    tt_slider_t *xSlider = tt_sliderInit("X", &x, TT_SLIDER_TYPE_HORIZONTAL, TT_SLIDER_ALIGN_CENTER, -100, -240, 10, 100, -300, 300, 0);
+    tt_slider_t *ySlider = tt_sliderInit("Y", &y, TT_SLIDER_TYPE_HORIZONTAL, TT_SLIDER_ALIGN_CENTER, -100, -260, 10, 100, -300, 300, 0);
+    tt_slider_t *zSlider = tt_sliderInit("Z", &z, TT_SLIDER_TYPE_HORIZONTAL, TT_SLIDER_ALIGN_CENTER, -100, -280, 10, 100, -300, 300, 0);
+    xSlider -> style = TT_SLIDER_STYLE_SIDESWIPE;
+    ySlider -> style = TT_SLIDER_STYLE_SIDESWIPE;
+    zSlider -> style = TT_SLIDER_STYLE_SIDESWIPE;
     tt_switchInit("", NULL, -10, -240, 10);
     tt_switchInit("", NULL, -10, -260, 10);
     tt_switchInit("", NULL, -10, -280, 10);
@@ -285,7 +288,7 @@ int main(int argc, char *argv[]) {
     tt_switch_t *sideswipe = tt_switchInit("Side Swipe", NULL, 305, 15, 10);
     tt_switch_t *checkbox = tt_switchInit("Checkbox", NULL, 300, 0, 10);
     tt_switch_t *xbox = tt_switchInit("Xbox", NULL, 300, -15, 10);
-    sideswipe -> style = TT_SWITCH_STYLE_SIDESWIPE_LEFT;
+    sideswipe -> style = TT_SWITCH_STYLE_SIDESWIPE;
     checkbox -> value = 1;
     checkbox -> style = TT_SWITCH_STYLE_CHECKBOX;
     xbox -> value = 1;
@@ -338,11 +341,11 @@ int main(int argc, char *argv[]) {
 
         /* write element annotations */
         tt_setColor(TT_COLOR_TEXT);
-        turtleTextWriteString("X", xSlider -> x - xSlider -> length / 2 - xSlider -> size, xSlider -> y, xSlider -> size - 1, 100);
+        // turtleTextWriteString("X", xSlider -> x - xSlider -> length / 2 - xSlider -> size, xSlider -> y, xSlider -> size - 1, 100);
         turtleTextWriteStringf(ySlider -> x + xSlider -> length / 2 + xSlider -> size, xSlider -> y, 4, 0, "%.01lf", round(x) / 10);
-        turtleTextWriteString("Y", xSlider -> x - ySlider -> length / 2 - xSlider -> size, ySlider -> y, xSlider -> size - 1, 100);
+        // turtleTextWriteString("Y", xSlider -> x - ySlider -> length / 2 - xSlider -> size, ySlider -> y, xSlider -> size - 1, 100);
         turtleTextWriteStringf(ySlider -> x + ySlider -> length / 2 + xSlider -> size, ySlider -> y, 4, 0, "%.01lf", round(y) / 10);
-        turtleTextWriteString("Z", zSlider -> x - zSlider -> length / 2 - xSlider -> size, zSlider -> y, xSlider -> size - 1, 100);
+        // turtleTextWriteString("Z", zSlider -> x - zSlider -> length / 2 - xSlider -> size, zSlider -> y, xSlider -> size - 1, 100);
         turtleTextWriteStringf(zSlider -> x + zSlider -> length / 2 + xSlider -> size, zSlider -> y, 4, 0, "%.01lf", round(z) / 10);
         if (username -> mouseOver || password -> mouseOver) {
             osToolsSetCursor(GLFW_IBEAM_CURSOR);
@@ -363,7 +366,7 @@ int main(int argc, char *argv[]) {
         turtleTextWriteUnicode("ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩ", scrollbarX -> value * -5 + 260, scrollbarY -> value * 3.3 - 315, 10, 0);
         turtleTextWriteUnicode("αβγδεζηθικλμνξοπρσςτυφχψω", scrollbarX -> value * -5 + 260, scrollbarY -> value * 3.3 - 330, 10, 0);
         turtleTextWriteUnicode("1234567890!@#$£€₺₽¥₩₹₣฿%^&*()`~-_=+[", scrollbarX -> value * -5 + 260, scrollbarY -> value * 3.3 - 345, 10, 0);
-        turtleTextWriteUnicode("{]}\\|;:‘'’“\"”,<.>/?½¨°︘📷📄📁😊", scrollbarX -> value * -5 + 260, scrollbarY -> value * 3.3 - 360, 10, 0);
+        turtleTextWriteUnicode("{]}\\|;:‘'’“\"”,<.>/?½¨°︘📷📄📁😊♖🔄", scrollbarX -> value * -5 + 260, scrollbarY -> value * 3.3 - 360, 10, 0);
         
         turtleTextWriteStringRotated("Rotated Text", scrollbarX -> value * -5 - 100, scrollbarY -> value * 3.3 + 75, 9, 50, -15);
         
