@@ -173,7 +173,6 @@ typedef enum {
     /* dial */
     TT_COLOR_SLOT_DIAL_TEXT = 0,
     TT_COLOR_SLOT_DIAL = 1,
-    TT_COLOR_SLOT_DIAL_INNER = 2,
     /* slider */
     TT_COLOR_SLOT_SLIDER_TEXT = 0,
     TT_COLOR_SLOT_SLIDER_BAR = 1,
@@ -414,6 +413,11 @@ typedef enum {
     TT_DIAL_SCALE_EXP = 2,
 } tt_dial_scale_t;
 
+typedef enum {
+    TT_DIAL_STYLE_CLASSIC = 0,
+    TT_DIAL_STYLE_SPEEDOMETER = 1,
+} tt_dial_style_t;
+
 /* dial */
 typedef struct {
     tt_element_names_t element;
@@ -429,6 +433,7 @@ typedef struct {
     tt_status_t status;
     double mouseAnchor;
     tt_dial_scale_t scale;
+    tt_dial_style_t style;
     double range[2];
     double renderNumberFactor; // multiply rendered variable by this amount
     double defaultValue;

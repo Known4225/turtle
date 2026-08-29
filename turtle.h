@@ -10637,7 +10637,6 @@ typedef enum {
     /* dial */
     TT_COLOR_SLOT_DIAL_TEXT = 0,
     TT_COLOR_SLOT_DIAL = 1,
-    TT_COLOR_SLOT_DIAL_INNER = 2,
     /* slider */
     TT_COLOR_SLOT_SLIDER_TEXT = 0,
     TT_COLOR_SLOT_SLIDER_BAR = 1,
@@ -10878,6 +10877,11 @@ typedef enum {
     TT_DIAL_SCALE_EXP = 2,
 } tt_dial_scale_t;
 
+typedef enum {
+    TT_DIAL_STYLE_CLASSIC = 0,
+    TT_DIAL_STYLE_SPEEDOMETER = 1,
+} tt_dial_style_t;
+
 /* dial */
 typedef struct {
     tt_element_names_t element;
@@ -10893,6 +10897,7 @@ typedef struct {
     tt_status_t status;
     double mouseAnchor;
     tt_dial_scale_t scale;
+    tt_dial_style_t style;
     double range[2];
     double renderNumberFactor; // multiply rendered variable by this amount
     double defaultValue;
@@ -26529,6 +26534,7 @@ void turtleTextGenerateDefaultFont(list_t *generatedFont) {
     list_append(generatedFont, (unitype) "📁, 2, 7, b, -160, -70, -160, -90, -140, -90, b, -40, -90, -20, -90, -20, -70, b, -20, 10, -20, 30, -40, 30, -90, 30, -110, 50, b, -140, 50, -160, 50, -160, 30, -160, -70, 2, b, -20, -20, -20, 10, -40, 10, b, -140, 10, -160, 10, -160, -20", 's');
     list_append(generatedFont, (unitype) "😊, 4, 4, b, -80, -100, 0, -100, b, 0, -20, 0, 60, b, -80, 60, -160, 60, b, -160, -20, -160, -100, -80, -100, 2, b, -120, 5, -120, 15, b, -110, 15, -100, 15, -100, 5, 2, b, -60, 5, -60, 15, b, -50, 15, -40, 15, -40, 5, 2, b, -115, -45, -110, -65, b, -80, -65, -50, -65, -45, -45", 's');
     list_append(generatedFont, (unitype) "♖, 6, 5, -40, -100, -160, -100, -160, -85, -40, -85, -40, -100, 4, -50, -85, -50, -70, -150, -70, -150, -85, 2, -145, -70, -135, -55, 6, -55, -70, -65, -55, -135, -55, -135, 15, -65, 15, -65, -55, 15, -65, 15, -55, 30, -50, 30, -50, 55, -65, 55, -65, 45, -90, 45, -90, 55, -110, 55, -110, 45, -135, 45, -135, 55, -150, 55, -150, 30, -55, 30, 2, -135, 15, -145, 30", 's');
+    list_append(generatedFont, (unitype) "🔄, 4, 2, b, -140, -50, -130, -100, b, -80, -100, -20, -100, -20, -30, 3, -55, -50, -20, -30, 5, -65, 2, b, -20, 20, -30, 60, b, -80, 60, -140, 60, -140, 0, 3, -105, 20, -140, 0, -165, 35", 's');
 }
 
 #endif /* TURTLE_TEXT_IMPLEMENTATION */
@@ -26565,7 +26571,7 @@ int32_t tt_color_default[] = {
     /*         none                           button                         switch                            dial                           slider                          textbox                        dropdown                         scrollbar                      context                       variable reader                   list reader                     ribbon                           popup               */
     0,                              TT_COLOR_TEXT_ALTERNATE,        TT_COLOR_TEXT_BASE,             TT_COLOR_TEXT_BASE,             TT_COLOR_TEXT_BASE,             TT_COLOR_TEXT_ALTERNATE,        TT_COLOR_TEXT_BASE,             0,                              TT_COLOR_TEXT_ALTERNATE,        TT_COLOR_BLACK,                 TT_COLOR_BLACK,                 TT_COLOR_TEXT_ALTERNATE,        TT_COLOR_TEXT_ALTERNATE,        
     0,                              TT_COLOR_COMPONENT,             TT_COLOR_TEXT_ALTERNATE,        TT_COLOR_TEXT_BASE,             TT_COLOR_COMPONENT_ALTERNATE,   TT_COLOR_COMPONENT_BASE,        TT_COLOR_TEXT_ALTERNATE,        TT_COLOR_COMPONENT_BASE,        TT_COLOR_COMPONENT_BASE,        TT_COLOR_WHITE,                 TT_COLOR_WHITE,                 TT_COLOR_COMPONENT_HIGHLIGHT,   TT_COLOR_COMPONENT_ALTERNATE,   
-    0,                              TT_COLOR_COMPONENT_HIGHLIGHT,   TT_COLOR_COMPONENT_BASE,        TT_COLOR_BACKGROUND_BASE,       TT_COLOR_BACKGROUND_COMPLEMENT, TT_COLOR_TEXT_HIGHLIGHT,        TT_COLOR_COMPONENT_BASE,        TT_COLOR_COMPONENT_COMPLEMENT,  TT_COLOR_COMPONENT_HIGHLIGHT,   TT_COLOR_LIGHT_GREY,            TT_COLOR_LIGHT_GREY,            TT_COLOR_COMPONENT_HIGHLIGHT,   TT_COLOR_COMPONENT_HIGHLIGHT,   
+    0,                              TT_COLOR_COMPONENT_HIGHLIGHT,   TT_COLOR_COMPONENT_BASE,        0,                              TT_COLOR_BACKGROUND_COMPLEMENT, TT_COLOR_TEXT_HIGHLIGHT,        TT_COLOR_COMPONENT_BASE,        TT_COLOR_COMPONENT_COMPLEMENT,  TT_COLOR_COMPONENT_HIGHLIGHT,   TT_COLOR_LIGHT_GREY,            TT_COLOR_LIGHT_GREY,            TT_COLOR_COMPONENT_HIGHLIGHT,   TT_COLOR_COMPONENT_HIGHLIGHT,   
     0,                              TT_COLOR_TEXT_BASE,             TT_COLOR_COMPONENT_HIGHLIGHT,   0,                              0,                              TT_COLOR_TEXT_ALTERNATE,        TT_COLOR_COMPONENT_HIGHLIGHT,   TT_COLOR_BACKGROUND_ALTERNATE,  0,                              TT_COLOR_ORANGE,                TT_COLOR_RED_ALTERNATE,         TT_COLOR_COMPONENT,             TT_COLOR_COMPONENT,             
     0,                              TT_COLOR_COMPONENT_COMPLEMENT,  TT_COLOR_BACKGROUND_ALTERNATE,  0,                              0,                              TT_COLOR_BLUE,                  TT_COLOR_COMPONENT_HIGHLIGHT,   TT_COLOR_BACKGROUND_HIGHLIGHT,  0,                              0,                              TT_COLOR_WHITE_ALTERNATE,       TT_COLOR_COMPONENT,             0,                              
     0,                              0,                              TT_COLOR_TERTIARY_BASE,         0,                              0,                              0,                              TT_COLOR_TEXT_ALTERNATE,        0,                              0,                              0,                              TT_COLOR_DARK_GREY_ALTERNATE,   0,                              0,                              
@@ -28095,19 +28101,24 @@ void tt_dialUpdate(tt_dial_t *dialp) {
     }
     tt_setColor(dialp -> color[TT_COLOR_SLOT_DIAL_TEXT]);
     turtleTextWriteUnicode(dialp -> label, dialp -> x, dialp -> y + 1.9 * dialp -> size, dialp -> size - 1, 50);
-    turtlePenSize(dialp -> size * 2);
     double dialX = dialp -> x;
     double dialY = dialp -> y;
+    turtlePenSize(dialp -> size / 10);
+    double circleSize = dialp -> size * 0.9;
+    turtleGoto(dialX, dialY + circleSize);
+    tt_setColor(dialp -> color[TT_COLOR_SLOT_DIAL]);
+    turtlePenDown();
+    /* draw circle */
+    int32_t bezierPrezCurrent = (int32_t) ceil(sqrt(dialp -> size * turtleText.bezierPrez * 3));
+    double theta = 0;
+    for (int32_t i = 0; i < bezierPrezCurrent; i++) {
+        turtleGoto(dialX + circleSize * sin(theta), dialY + circleSize * cos(theta));
+        theta += M_PI * 2 / bezierPrezCurrent;
+    }
+    turtleGoto(dialX, dialY + circleSize);
+    turtlePenUp();
     turtleGoto(dialX, dialY);
     tt_setColor(dialp -> color[TT_COLOR_SLOT_DIAL]);
-    turtlePenDown();
-    turtlePenUp();
-    turtlePenSize(dialp -> size * 2 * 0.8);
-    tt_setColor(dialp -> color[TT_COLOR_SLOT_DIAL_INNER]);
-    turtlePenDown();
-    turtlePenUp();
-    tt_setColor(dialp -> color[TT_COLOR_SLOT_DIAL]);
-    turtlePenSize(1);
     turtlePenDown();
     double dialAngle = 0.0;
     if (dialp -> scale == TT_DIAL_SCALE_LOG) {
