@@ -33,12 +33,11 @@ The following build commands are available:
 - `make runserver` - For testing the server build on browser
 
 # To Do
+- Remove renderNumberFactor and make a better way to handle sliders and dials with decimal numbers
 - Turn glfw and glad libraries into source code
 - Double click and drag highlights words in normal textboxes
 - In normal textboxes you can drag highlighted text out of the text box and into another textbox or program like a pseudo-copy-and-paste (but it doesn't actually use the clipboard)
-- Fix textboxes and dropdown priority system by emulating readers "always on top" behaviour (but first fix reader flickering)
 - Allow textbox selecting off the ends of the visible content
-- Bug: When deploying turtle.html to firebase it did not work on the internet when using three file server setup (even though emrun worked). Standalone singlefile version did work - perhaps emscripten needs to be updated?
 - Handrolled linear resizing is not only at least 2x slower than stbir, it is also worse (box size is only what box takes up instead of larger)
 - Build some support for osTools on OS_BROWSER
 - Add some emojis to font
@@ -51,9 +50,10 @@ The following build commands are available:
 - Update wiki/documentation
 - Linux COM support
 - I think there is a way to increase performance for texture enabled turtle - I think it is possible to remove penpos entirely and just write straight to bufferList
+- Possibility of using turtle to make auto-hotkey-like scripts? But in C.
 
 # Limitations of web deployment
-- Must osTools features will not work
+- Most osTools features will not work
 - Must compile with TURTLE_ENABLE_TEXTURES (fixed function pipeline like `glBegin` are not supported in WebGL)
 - Cannot compile using static library (must use TURTLE_IMPLEMENTATION macro in source)
 - Textures must be loaded with GL_RGBA (this is a bug that I can't figure out how to fix)

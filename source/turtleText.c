@@ -508,6 +508,8 @@ void turtleTextWriteRotated(const uint32_t *text, int32_t textLength, double x, 
     turtlePenShape("text"); // dedicated setting that blends circle and connected
     #endif
     #endif
+    double cosR = cos(rotate / 57.2958);
+    double sinR = sin(rotate / 57.2958);
     list_t *xvals = list_init();
     list_t *dataIndStored = list_init();
     for (int32_t i = 0; i < textLength; i++) {
@@ -532,12 +534,12 @@ void turtleTextWriteRotated(const uint32_t *text, int32_t textLength, double x, 
     }
     xTrack -= 40 * size;
     #ifdef TURTLE_TEXT_DO_DYNAMIC_Y_CENTERING
-    y -= (maxY + minY) / 2 * size;
+    y -= (maxY + minY) / 2 * size * cosR;
+    x -= (maxY + minY) / 2 * size * sinR;
     #else
-    y -= 80 * size;
+    x -= 80 * size * sinR;
+    y -= 80 * size * cosR;
     #endif
-    double cosR = cos(rotate / 57.2958);
-    double sinR = sin(rotate / 57.2958);
     for (int32_t i = 0; i < textLength; i++) {
         turtleTextRenderCharRotated(turtleText.fontPointer[dataIndStored -> data[i].i], x + (xvals -> data[i].d - (xTrack * (align / 100))) * cosR, y - (xvals -> data[i].d - (xTrack * (align / 100))) * sinR, size, sinR, cosR);
     }
