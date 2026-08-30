@@ -228,19 +228,19 @@ int main(int argc, char *argv[]) {
     tt_dropdown_t *imageDropdown = tt_dropdownInit("Source", imageDropdownOptions, NULL, TT_DROPDOWN_ALIGN_RIGHT, 700, 36, 8);
     int32_t oldImageDropdown = imageDropdown -> value;
 
-    double sliderVar, dialVar;
+    int32_t sliderVar = 0, dialVar = 0;
     tt_button_t *button = tt_buttonInit("Button", NULL, 150, 20, 10);
     button -> shape = TT_BUTTON_SHAPE_ROUNDED_RECTANGLE;
     tt_switchInit("Switch", NULL, 150, -20, 10);
-    tt_dialInit("Exp", &dialVar, TT_DIAL_SCALE_EXP, -150, 20, 10, 0, 1000, 1);
-    tt_dialInit("Linear", &dialVar, TT_DIAL_SCALE_LINEAR, -150, -20, 10, 0, 1000, 1);
-    tt_dialInit("Log", &dialVar, TT_DIAL_SCALE_LOG, -150, -60, 10, 0, 1000, 1);
-    tt_sliderInit("Slider", NULL, TT_SLIDER_TYPE_HORIZONTAL, TT_SLIDER_ALIGN_LEFT, -100, 35, 10, 50, 0, 255, 1);
-    tt_sliderInit("Slider", NULL, TT_SLIDER_TYPE_HORIZONTAL, TT_SLIDER_ALIGN_CENTER, 0, 35, 10, 50, 0, 255, 1);
-    tt_sliderInit("Slider", NULL, TT_SLIDER_TYPE_HORIZONTAL, TT_SLIDER_ALIGN_RIGHT, 100, 35, 10, 50, 0, 255, 1);
-    tt_sliderInit("Log", &sliderVar, TT_SLIDER_TYPE_VERTICAL, TT_SLIDER_ALIGN_LEFT, -100, -35, 10, 50, 0, 255, 1) -> scale = TT_SLIDER_SCALE_LOG;
-    tt_sliderInit("Linear", &sliderVar, TT_SLIDER_TYPE_VERTICAL, TT_SLIDER_ALIGN_CENTER, 0, -35, 10, 50, 0, 255, 1) -> scale = TT_SLIDER_SCALE_LINEAR;
-    tt_sliderInit("Exp", &sliderVar, TT_SLIDER_TYPE_VERTICAL, TT_SLIDER_ALIGN_RIGHT, 100, -35, 10, 50, 0, 255, 1) -> scale = TT_SLIDER_SCALE_EXP;
+    tt_dialInit("Exp", &dialVar, TT_DIAL_SCALE_EXP, -150, 20, 10, 0, 1000, NULL, 1);
+    tt_dialInit("Linear", &dialVar, TT_DIAL_SCALE_LINEAR, -150, -20, 10, 0, 1000, NULL, 1);
+    tt_dialInit("Log", &dialVar, TT_DIAL_SCALE_LOG, -150, -60, 10, 0, 1000, NULL, 1);
+    tt_sliderInit("Slider", NULL, TT_SLIDER_TYPE_HORIZONTAL, TT_SLIDER_ALIGN_LEFT, -100, 35, 10, 50, 0, 255, NULL, 1);
+    tt_sliderInit("Slider", NULL, TT_SLIDER_TYPE_HORIZONTAL, TT_SLIDER_ALIGN_CENTER, 0, 35, 10, 50, 0, 255, NULL, 1);
+    tt_sliderInit("Slider", NULL, TT_SLIDER_TYPE_HORIZONTAL, TT_SLIDER_ALIGN_RIGHT, 100, 35, 10, 50, 0, 255, NULL, 1);
+    tt_sliderInit("Log", &sliderVar, TT_SLIDER_TYPE_VERTICAL, TT_SLIDER_ALIGN_LEFT, -100, -35, 10, 50, 0, 255, NULL, 1) -> scale = TT_SLIDER_SCALE_LOG;
+    tt_sliderInit("Linear", &sliderVar, TT_SLIDER_TYPE_VERTICAL, TT_SLIDER_ALIGN_CENTER, 0, -35, 10, 50, 0, 255, NULL, 1) -> scale = TT_SLIDER_SCALE_LINEAR;
+    tt_sliderInit("Exp", &sliderVar, TT_SLIDER_TYPE_VERTICAL, TT_SLIDER_ALIGN_RIGHT, 100, -35, 10, 50, 0, 255, NULL, 1) -> scale = TT_SLIDER_SCALE_EXP;
     tt_scrollbar_t *scrollbarX = tt_scrollbarInit(NULL, TT_SCROLLBAR_TYPE_HORIZONTAL, 20, -170, 10, 550, 50);
     tt_scrollbar_t *scrollbarY = tt_scrollbarInit(NULL, TT_SCROLLBAR_TYPE_VERTICAL, 310, 0, 10, 320, 33);
     list_t *dropdownOptions = list_init();
@@ -263,7 +263,7 @@ int main(int argc, char *argv[]) {
     tt_context_t *context = tt_contextInit(contextOptions, NULL, 0, 0, 10);
     context -> enabled = TT_ELEMENT_HIDE;
 
-    double x = 103, y = 95, z = 215;
+    int32_t x = 103, y = 95, z = 215;
     list_t *sources = list_init();
     list_append(sources, (unitype) "None", 's');
     list_append(sources, (unitype) "SP932", 's');
@@ -271,19 +271,19 @@ int main(int argc, char *argv[]) {
     list_append(sources, (unitype) "SP928", 's');
     list_append(sources, (unitype) "SP1203", 's');
     list_append(sources, (unitype) "SP-1550M", 's');
-    tt_dialInit("Power", NULL, TT_DIAL_SCALE_LINEAR, -150, -210, 10, 0, 100, 1);
-    tt_dialInit("Speed", NULL, TT_DIAL_SCALE_LINEAR, -100, -210, 10, 0, 1000, 1);
-    tt_dialInit("Exposure", NULL, TT_DIAL_SCALE_EXP, -50, -210, 10, 0, 1000, 1);
+    tt_dialInit("Power", NULL, TT_DIAL_SCALE_LINEAR, -150, -210, 10, 0, 100, NULL, 1);
+    tt_dialInit("Speed", NULL, TT_DIAL_SCALE_LINEAR, -100, -210, 10, 0, 1000, NULL, 1);
+    tt_dialInit("Exposure", NULL, TT_DIAL_SCALE_EXP, -50, -210, 10, 0, 1000, NULL, 1);
     tt_dropdownInit("Source", sources, NULL, TT_DROPDOWN_ALIGN_LEFT, -10, -211.2, 10);
-    tt_slider_t *xSlider = tt_sliderInit("X", &x, TT_SLIDER_TYPE_HORIZONTAL, TT_SLIDER_ALIGN_CENTER, -100, -240, 10, 100, -300, 300, 0);
-    tt_slider_t *ySlider = tt_sliderInit("Y", &y, TT_SLIDER_TYPE_HORIZONTAL, TT_SLIDER_ALIGN_CENTER, -100, -260, 10, 100, -300, 300, 0);
-    tt_slider_t *zSlider = tt_sliderInit("Z", &z, TT_SLIDER_TYPE_HORIZONTAL, TT_SLIDER_ALIGN_CENTER, -100, -280, 10, 100, -300, 300, 0);
+    tt_slider_t *xSlider = tt_sliderInit("X", &x, TT_SLIDER_TYPE_HORIZONTAL, TT_SLIDER_ALIGN_CENTER, -100, -240, 10, 100, -300, 300, "%.1lfmm", 0.1);
+    tt_slider_t *ySlider = tt_sliderInit("Y", &y, TT_SLIDER_TYPE_HORIZONTAL, TT_SLIDER_ALIGN_CENTER, -100, -260, 10, 100, -300, 300, "%.1lfmm", 0.1);
+    tt_slider_t *zSlider = tt_sliderInit("Z", &z, TT_SLIDER_TYPE_HORIZONTAL, TT_SLIDER_ALIGN_CENTER, -100, -280, 10, 100, -300, 300, "%.1lfmm", 0.1);
     xSlider -> style = TT_SLIDER_STYLE_SIDESWIPE;
     ySlider -> style = TT_SLIDER_STYLE_SIDESWIPE;
     zSlider -> style = TT_SLIDER_STYLE_SIDESWIPE;
-    tt_switchInit("", NULL, -10, -240, 10);
-    tt_switchInit("", NULL, -10, -260, 10);
-    tt_switchInit("", NULL, -10, -280, 10);
+    tt_switchInit("", NULL, 3, -240, 10);
+    tt_switchInit("", NULL, 3, -260, 10);
+    tt_switchInit("", NULL, 3, -280, 10);
 
     tt_switch_t *sideswipe = tt_switchInit("Side Swipe", NULL, 305, 15, 10);
     tt_switch_t *checkbox = tt_switchInit("Checkbox", NULL, 300, 0, 10);
@@ -339,14 +339,6 @@ int main(int argc, char *argv[]) {
             }
         }
 
-        /* write element annotations */
-        tt_setColor(TT_COLOR_TEXT);
-        // turtleTextWriteString("X", xSlider -> x - xSlider -> length / 2 - xSlider -> size, xSlider -> y, xSlider -> size - 1, 100);
-        turtleTextWriteStringf(ySlider -> x + xSlider -> length / 2 + xSlider -> size, xSlider -> y, 4, 0, "%.01lf", round(x) / 10);
-        // turtleTextWriteString("Y", xSlider -> x - ySlider -> length / 2 - xSlider -> size, ySlider -> y, xSlider -> size - 1, 100);
-        turtleTextWriteStringf(ySlider -> x + ySlider -> length / 2 + xSlider -> size, ySlider -> y, 4, 0, "%.01lf", round(y) / 10);
-        // turtleTextWriteString("Z", zSlider -> x - zSlider -> length / 2 - xSlider -> size, zSlider -> y, xSlider -> size - 1, 100);
-        turtleTextWriteStringf(zSlider -> x + zSlider -> length / 2 + xSlider -> size, zSlider -> y, 4, 0, "%.01lf", round(z) / 10);
         if (username -> mouseOver || password -> mouseOver) {
             osToolsSetCursor(GLFW_IBEAM_CURSOR);
         } else {
@@ -354,6 +346,7 @@ int main(int argc, char *argv[]) {
         }
 
         /* write all characters supported */
+        tt_setColor(TT_COLOR_TEXT);
         turtleTextWriteUnicode("AÀÁĂÄÃÅĀĄÆBCĆČĊÇDĎĐÐEÈÉĚÊËĒĖĘƏFGĞĠHĦ", scrollbarX -> value * -5 + 260, scrollbarY -> value * 3.3 - 180, 10, 0);
         turtleTextWriteUnicode("IÌÍÎÏĪİĮJKĶLĹĽĻŁĿMNŃŇÑŅOÒÓÔÖÕŐØŒPQRŔ", scrollbarX -> value * -5 + 260, scrollbarY -> value * 3.3 - 195, 10, 0);
         turtleTextWriteUnicode("ŘSŚŠŞȘẞTŤȚÞUÙÚÛÜŮŰŪŲVWXYÝZŹŽŻaàáâăäã", scrollbarX -> value * -5 + 260, scrollbarY -> value * 3.3 - 210, 10, 0);
@@ -449,9 +442,11 @@ int main(int argc, char *argv[]) {
         if (turtleMouseRight()) {
             if (keys[1] == 0) {
                 keys[1] = 1;
-                context -> enabled = TT_ELEMENT_ENABLED;
-                context -> x = turtle.mouseX;
-                context -> y = turtle.mouseY;
+                if (tt_globals.elementLogicType == TT_ELEMENT_CONTEXT || tt_globals.elementLogicType == TT_ELEMENT_NONE) {
+                    context -> enabled = TT_ELEMENT_ENABLED;
+                    context -> x = turtle.mouseX;
+                    context -> y = turtle.mouseY;
+                }
             }
         } else {
             keys[1] = 0;
