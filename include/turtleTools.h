@@ -428,17 +428,18 @@ typedef struct {
     double x;
     double y;
     double size;
-    double *variable; // bound variable (can be NULL)
+    int32_t *variable; // bound variable (can be NULL)
     char label[TT_LABEL_LENGTH_LIMIT];
     tt_status_t status;
     double mouseAnchor;
     tt_dial_scale_t scale;
     tt_dial_style_t style;
-    double range[2];
-    double renderNumberFactor; // multiply rendered variable by this amount
-    double defaultValue;
+    int32_t range[2];
+    char render[32];
+    double renderMultiplier;
+    int32_t defaultValue;
     /* value */
-    double value; // value of dial
+    int32_t value; // value of dial
 } tt_dial_t;
 
 typedef enum {
@@ -474,7 +475,7 @@ typedef struct {
     double x;
     double y;
     double size;
-    double *variable; // bound variable (can be NULL)
+    int32_t *variable; // bound variable (can be NULL)
     char label[TT_LABEL_LENGTH_LIMIT];
     tt_status_t status;
     tt_slider_type_t type;
@@ -482,11 +483,12 @@ typedef struct {
     tt_slider_scale_t scale;
     tt_slider_style_t style;
     double length;
-    double range[2];
-    double renderNumberFactor; // multiply rendered variable by this amount
-    double defaultValue;
+    int32_t range[2];
+    char render[32];
+    double renderMultiplier;
+    int32_t defaultValue;
     /* value */
-    double value; // value of slider
+    int32_t value; // value of slider
 } tt_slider_t;
 
 typedef enum {
@@ -671,13 +673,13 @@ tt_switch_t *tt_switchInit(char *label, int8_t *variable, double x, double y, do
 void tt_switchFree(tt_switch_t *switchp);
 
 /* create a dial - make renderNumberFactor 0 to hide dial number */
-tt_dial_t *tt_dialInit(char *label, double *variable, tt_dial_scale_t scale, double x, double y, double size, double bottom, double top, double renderNumberFactor);
+tt_dial_t *tt_dialInit(char *label, int32_t *variable, tt_dial_scale_t scale, double x, double y, double size, int32_t bottom, int32_t top, char *render, double renderMultiplier);
 
 /* delete dial */
 void tt_dialFree(tt_dial_t *dialp);
 
 /* create a slider - make renderNumberFactor 0 to hide slider number */
-tt_slider_t *tt_sliderInit(char *label, double *variable, tt_slider_type_t type, tt_slider_align_t align, double x, double y, double size, double length, double bottom, double top, double renderNumberFactor);
+tt_slider_t *tt_sliderInit(char *label, int32_t *variable, tt_slider_type_t type, tt_slider_align_t align, double x, double y, double size, double length, int32_t bottom, int32_t top, char *render, double renderMultiplier);
 
 /* delete slider */
 void tt_sliderFree(tt_slider_t *sliderp);
