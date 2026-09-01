@@ -271,9 +271,9 @@ int main(int argc, char *argv[]) {
     list_append(sources, (unitype) "SP928", 's');
     list_append(sources, (unitype) "SP1203", 's');
     list_append(sources, (unitype) "SP-1550M", 's');
-    tt_dialInit("Power", NULL, TT_DIAL_SCALE_LINEAR, -150, -210, 10, 0, 100, NULL, 1);
-    tt_dialInit("Speed", NULL, TT_DIAL_SCALE_LINEAR, -100, -210, 10, 0, 1000, NULL, 1);
-    tt_dialInit("Exposure", NULL, TT_DIAL_SCALE_EXP, -50, -210, 10, 0, 1000, NULL, 1);
+    tt_dialInit("Power", NULL, TT_DIAL_SCALE_LINEAR, -150, -210, 10, 0, 100, NULL, 1) -> style = TT_DIAL_STYLE_SPEEDOMETER;
+    tt_dialInit("Speed", NULL, TT_DIAL_SCALE_LINEAR, -100, -210, 10, 0, 1000, NULL, 1) -> style = TT_DIAL_STYLE_SPEEDOMETER;
+    tt_dialInit("Shutter", NULL, TT_DIAL_SCALE_EXP, -50, -210, 10, 0, 1000, NULL, 1) -> style = TT_DIAL_STYLE_SPEEDOMETER;
     tt_dropdownInit("Source", sources, NULL, TT_DROPDOWN_ALIGN_LEFT, -10, -211.2, 10);
     tt_slider_t *xSlider = tt_sliderInit("X", &x, TT_SLIDER_TYPE_HORIZONTAL, TT_SLIDER_ALIGN_CENTER, -100, -240, 10, 100, -300, 300, "%.1lfmm", 0.1);
     tt_slider_t *ySlider = tt_sliderInit("Y", &y, TT_SLIDER_TYPE_HORIZONTAL, TT_SLIDER_ALIGN_CENTER, -100, -260, 10, 100, -300, 300, "%.1lfmm", 0.1);

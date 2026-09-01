@@ -857,13 +857,27 @@ tt_dial_t *tt_dialInit(char *label, int32_t *variable, tt_dial_scale_t scale, do
     if (render == NULL) {
         memcpy(dialp -> render, "%.0lf", strlen("%.0lf") + 1);
     } else {
-        int32_t stringLength = strlen(render) + 1;
+        char renderEdited[sizeof(dialp -> render) * 5];
+        int32_t initialLength = strlen(render);
+        int32_t editedIndex = 0;
+        for (int32_t i = 0; i < initialLength; i++) {
+            if (i < initialLength - 1 && render[i] == '%' && (render[i + 1] == 'd' || render[i + 1] == 'i' || render[i + 1] == 'u' || render[i + 1] == 'h')) {
+                strcat(renderEdited, "%0.lf");
+                editedIndex = strlen(renderEdited);
+                i++;
+            } else {
+                renderEdited[editedIndex] = render[i];
+                editedIndex++;
+            }
+        }
+        renderEdited[editedIndex] = '\0';
+        int32_t stringLength = strlen(renderEdited) + 1;
         if (stringLength > sizeof(dialp -> render)) {
             stringLength = sizeof(dialp -> render) - 1;
-            memcpy(dialp -> render, render, stringLength);
+            memcpy(dialp -> render, renderEdited, stringLength);
             dialp -> render[stringLength] = '\0';
         } else {
-            memcpy(dialp -> render, render, stringLength);
+            memcpy(dialp -> render, renderEdited, stringLength);
         }
     }
     dialp -> renderMultiplier = renderMultiplier;
@@ -923,13 +937,27 @@ tt_slider_t *tt_sliderInit(char *label, int32_t *variable, tt_slider_type_t type
     if (render == NULL) {
         memcpy(sliderp -> render, "%.0lf", strlen("%.0lf") + 1);
     } else {
-        int32_t stringLength = strlen(render) + 1;
+        char renderEdited[sizeof(sliderp -> render) * 5];
+        int32_t initialLength = strlen(render);
+        int32_t editedIndex = 0;
+        for (int32_t i = 0; i < initialLength; i++) {
+            if (i < initialLength - 1 && render[i] == '%' && (render[i + 1] == 'd' || render[i + 1] == 'i' || render[i + 1] == 'u' || render[i + 1] == 'h')) {
+                strcat(renderEdited, "%0.lf");
+                editedIndex = strlen(renderEdited);
+                i++;
+            } else {
+                renderEdited[editedIndex] = render[i];
+                editedIndex++;
+            }
+        }
+        renderEdited[editedIndex] = '\0';
+        int32_t stringLength = strlen(renderEdited) + 1;
         if (stringLength > sizeof(sliderp -> render)) {
             stringLength = sizeof(sliderp -> render) - 1;
-            memcpy(sliderp -> render, render, stringLength);
+            memcpy(sliderp -> render, renderEdited, stringLength);
             sliderp -> render[stringLength] = '\0';
         } else {
-            memcpy(sliderp -> render, render, stringLength);
+            memcpy(sliderp -> render, renderEdited, stringLength);
         }
     }
     sliderp -> renderMultiplier = renderMultiplier;
@@ -1645,28 +1673,49 @@ void tt_dialUpdate(tt_dial_t *dialp) {
     double dialY = dialp -> y;
     turtlePenSize(dialp -> size / 10);
     double circleSize = dialp -> size * 0.9;
-    turtleGoto(dialX, dialY + circleSize);
     tt_setColor(dialp -> color[TT_COLOR_SLOT_DIAL]);
-    turtlePenDown();
     /* draw circle */
     int32_t bezierPrezCurrent = (int32_t) ceil(sqrt(dialp -> size * turtleText.bezierPrez * 3));
-    double theta = 0;
-    for (int32_t i = 0; i < bezierPrezCurrent; i++) {
+    if (dialp -> style == TT_DIAL_STYLE_CLASSIC) {
+        turtleGoto(dialX, dialY + circleSize);
+        turtlePenDown();
+        double theta = 0;
+        for (int32_t i = 0; i < bezierPrezCurrent; i++) {
+            turtleGoto(dialX + circleSize * sin(theta), dialY + circleSize * cos(theta));
+            theta += M_PI * 2 / bezierPrezCurrent;
+        }
+        turtleGoto(dialX, dialY + circleSize);
+    } else if (dialp -> style == TT_DIAL_STYLE_SPEEDOMETER) {
+        double theta = -135 / 57.2958;
         turtleGoto(dialX + circleSize * sin(theta), dialY + circleSize * cos(theta));
-        theta += M_PI * 2 / bezierPrezCurrent;
+        turtlePenDown();
+        for (int32_t i = 0; i < bezierPrezCurrent; i++) {
+            turtleGoto(dialX + circleSize * sin(theta), dialY + circleSize * cos(theta));
+            theta += M_PI * 2 / bezierPrezCurrent * 0.75;
+        }
+        turtleGoto(dialX + circleSize * sin(theta), dialY + circleSize * cos(theta));
     }
-    turtleGoto(dialX, dialY + circleSize);
     turtlePenUp();
     turtleGoto(dialX, dialY);
     tt_setColor(dialp -> color[TT_COLOR_SLOT_DIAL]);
     turtlePenDown();
     double dialAngle = 0.0;
-    if (dialp -> scale == TT_DIAL_SCALE_LOG) {
-        dialAngle = pow(361, ((double) dialp -> value - dialp -> range[0]) / (dialp -> range[1] - dialp -> range[0])) - 1;
-    } else if (dialp -> scale == TT_DIAL_SCALE_LINEAR) {
-        dialAngle = ((double) dialp -> value - dialp -> range[0]) / (dialp -> range[1] - dialp -> range[0]) * 360;
-    } else if (dialp -> scale == TT_DIAL_SCALE_EXP) {
-        dialAngle = 360 * (log((((double) dialp -> value - dialp -> range[0]) / (dialp -> range[1] - dialp -> range[0])) * 360 + 1) / log(361));
+    if (dialp -> style == TT_DIAL_STYLE_CLASSIC) {
+        if (dialp -> scale == TT_DIAL_SCALE_LOG) {
+            dialAngle = pow(361, ((double) dialp -> value - dialp -> range[0]) / (dialp -> range[1] - dialp -> range[0])) - 1;
+        } else if (dialp -> scale == TT_DIAL_SCALE_LINEAR) {
+            dialAngle = ((double) dialp -> value - dialp -> range[0]) / (dialp -> range[1] - dialp -> range[0]) * 360;
+        } else if (dialp -> scale == TT_DIAL_SCALE_EXP) {
+            dialAngle = 360 * (log((((double) dialp -> value - dialp -> range[0]) / (dialp -> range[1] - dialp -> range[0])) * 360 + 1) / log(361));
+        }
+    } else if (dialp -> style == TT_DIAL_STYLE_SPEEDOMETER) {
+        if (dialp -> scale == TT_DIAL_SCALE_LOG) {
+            dialAngle = pow(271, ((double) dialp -> value - dialp -> range[0]) / (dialp -> range[1] - dialp -> range[0])) - 1 - 135;
+        } else if (dialp -> scale == TT_DIAL_SCALE_LINEAR) {
+            dialAngle = ((double) dialp -> value - dialp -> range[0]) / (dialp -> range[1] - dialp -> range[0]) * 270 - 135;
+        } else if (dialp -> scale == TT_DIAL_SCALE_EXP) {
+            dialAngle = 270 * (log((((double) dialp -> value - dialp -> range[0]) / (dialp -> range[1] - dialp -> range[0])) * 270 + 1) / log(271)) - 135;
+        }
     }
     turtleGoto(dialX + sin(dialAngle / 57.2958) * dialp -> size, dialY + cos(dialAngle / 57.2958) * dialp -> size);
     turtlePenUp();
@@ -1721,21 +1770,44 @@ void tt_dialUpdate(tt_dial_t *dialp) {
     }
     if (dialp -> status == TT_STATUS_CLICK || dialp -> status == TT_STATUS_CLICK_FIRST_TICK) {
         dialAngle = tt_angleBetween(tt_globals.dialAnchorX, tt_globals.dialAnchorY, turtle.mouseX, turtle.mouseY);
-        if (turtle.mouseY < tt_globals.dialAnchorY) {
-            dialp -> mouseAnchor = turtle.mouseX - dialX;
-        }
-        if ((dialAngle < 0.000000001 || dialAngle > 180) && turtle.mouseY > tt_globals.dialAnchorY && dialp -> mouseAnchor >= 0) {
-            dialAngle = 0.000000001;
-        }
-        if ((dialAngle > 359.99999999 || dialAngle < 180) && turtle.mouseY > tt_globals.dialAnchorY && dialp -> mouseAnchor < 0) {
-            dialAngle = 359.99999999;
-        }
-        if (dialp -> scale == TT_DIAL_SCALE_LOG) {
-            dialp -> value = round(dialp -> range[0] + (dialp -> range[1] - dialp -> range[0]) * (log(1 + dialAngle) / log(361)));
-        } else if (dialp -> scale == TT_DIAL_SCALE_LINEAR) {
-            dialp -> value = round(dialp -> range[0] + ((dialp -> range[1] - dialp -> range[0]) * dialAngle / 360));
-        } else if (dialp -> scale == TT_DIAL_SCALE_EXP) {
-            dialp -> value = round(dialp -> range[0] + (dialp -> range[1] - dialp -> range[0]) * ((pow(361, dialAngle / 360) - 1) / 360));
+        if (dialp -> style == TT_DIAL_STYLE_CLASSIC) {
+            if (turtle.mouseY < tt_globals.dialAnchorY) {
+                dialp -> mouseAnchor = turtle.mouseX - dialX;
+            }
+            if ((dialAngle < 0.000000001 || dialAngle > 180) && turtle.mouseY > tt_globals.dialAnchorY && dialp -> mouseAnchor >= 0) {
+                dialAngle = 0.000000001;
+            }
+            if ((dialAngle > 359.99999999 || dialAngle < 180) && turtle.mouseY > tt_globals.dialAnchorY && dialp -> mouseAnchor < 0) {
+                dialAngle = 359.99999999;
+            }
+            if (dialp -> scale == TT_DIAL_SCALE_LOG) {
+                dialp -> value = round(dialp -> range[0] + (dialp -> range[1] - dialp -> range[0]) * (log(1 + dialAngle) / log(361)));
+            } else if (dialp -> scale == TT_DIAL_SCALE_LINEAR) {
+                dialp -> value = round(dialp -> range[0] + ((dialp -> range[1] - dialp -> range[0]) * dialAngle / 360));
+            } else if (dialp -> scale == TT_DIAL_SCALE_EXP) {
+                dialp -> value = round(dialp -> range[0] + (dialp -> range[1] - dialp -> range[0]) * ((pow(361, dialAngle / 360) - 1) / 360));
+            }
+        } else if (dialp -> style == TT_DIAL_STYLE_SPEEDOMETER) {
+            if (turtle.mouseY > tt_globals.dialAnchorY) {
+                dialp -> mouseAnchor = turtle.mouseX - dialX;
+            }
+            if (dialAngle < 225 && turtle.mouseY < tt_globals.dialAnchorY && dialp -> mouseAnchor < 0) {
+                dialAngle = 225.000000001;
+            }
+            if (dialAngle > 135 && turtle.mouseY < tt_globals.dialAnchorY && dialp -> mouseAnchor >= 0) {
+                dialAngle = 134.99999999;
+            }
+            dialAngle += 135;
+            if (dialAngle > 360) {
+                dialAngle -= 360;
+            }
+            if (dialp -> scale == TT_DIAL_SCALE_LOG) {
+                dialp -> value = round(dialp -> range[0] + (dialp -> range[1] - dialp -> range[0]) * (log(1 + dialAngle) / log(271)));
+            } else if (dialp -> scale == TT_DIAL_SCALE_LINEAR) {
+                dialp -> value = round(dialp -> range[0] + ((dialp -> range[1] - dialp -> range[0]) * dialAngle / 270));
+            } else if (dialp -> scale == TT_DIAL_SCALE_EXP) {
+                dialp -> value = round(dialp -> range[0] + (dialp -> range[1] - dialp -> range[0]) * ((pow(271, dialAngle / 270) - 1) / 270));
+            }
         }
     }
     if (dialp -> status == TT_STATUS_HOVER || dialp -> status == TT_STATUS_CLICK || dialp -> status == TT_STATUS_HOVER_FIRST_TICK || dialp -> status == TT_STATUS_CLICK_FIRST_TICK) {
