@@ -28357,8 +28357,14 @@ void tt_dialUpdate(tt_dial_t *dialp) {
         tt_globals.elementLogicIndex = tt_globals.elementLogicTemp;
     }
     LABEL_DIAL_END:
-    tt_setColor(dialp -> color[TT_COLOR_SLOT_DIAL_TEXT]);
-    turtleTextWriteStringf(dialX + dialp -> size + 3, dialY, dialp -> size / 2, 0, dialp -> render, dialp -> value * dialp -> renderMultiplier);
+    if (dialp -> renderMultiplier != 0) {
+        tt_setColor(dialp -> color[TT_COLOR_SLOT_DIAL_TEXT]);
+        if (dialp -> style == TT_DIAL_STYLE_CLASSIC) {
+            turtleTextWriteStringf(dialX + dialp -> size * 1.3, dialY, dialp -> size / 2, 0, dialp -> render, dialp -> value * dialp -> renderMultiplier);
+        } else if (dialp -> style == TT_DIAL_STYLE_SPEEDOMETER) {
+            turtleTextWriteStringf(dialX, dialY - dialp -> size * 1.2, dialp -> size / 2, 50, dialp -> render, dialp -> value * dialp -> renderMultiplier);
+        }
+    }
     if (dialp -> variable != NULL) {
         *dialp -> variable = dialp -> value;
     }
