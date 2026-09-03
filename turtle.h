@@ -28639,7 +28639,6 @@ void tt_sliderUpdate(tt_slider_t *sliderp) {
 }
 
 void tt_textboxAddKey(tt_textbox_t *textboxp, int32_t key) {
-    int32_t len = strlen(textboxp -> text);
     /* https://stackoverflow.com/questions/42012563/convert-unicode-code-points-to-utf-8-and-utf-32 */
     uint32_t uKey = key;
     uint8_t buffer[5] = {0};
@@ -28662,34 +28661,35 @@ void tt_textboxAddKey(tt_textbox_t *textboxp, int32_t key) {
         buffer[3] = 0x80 | (uKey & 0x3F);          /* 10xxxxxx */
         size = 4;
     }
-    if (len < textboxp -> maxCharacters) {
-        if (textboxp -> blacklist != NULL) {
-            for (int32_t i = 0; i < textboxp -> blacklist -> length; i++) {
-                if (strcmp((char *) buffer, textboxp -> blacklist -> data[i].s) == 0) {
-                    return;
-                }
-            }
-        }
-        if (textboxp -> whitelist != NULL) {
-            int32_t onWhitelist = 0;
-            for (int32_t i = 0; i < textboxp -> whitelist -> length; i++) {
-                if (strcmp((char *) buffer, textboxp -> whitelist -> data[i].s) == 0) {
-                    onWhitelist = 1;
-                    break;
-                }
-            }
-            if (onWhitelist == 0) {
+    if (textboxp -> blacklist != NULL) {
+        for (int32_t i = 0; i < textboxp -> blacklist -> length; i++) {
+            if (strcmp((char *) buffer, textboxp -> blacklist -> data[i].s) == 0) {
                 return;
             }
         }
-        if (textboxp -> editIndexLength != 0) {
-            if (textboxp -> editIndexLength < 0) {
-                textboxp -> editIndex += textboxp -> editIndexLength;
-                textboxp -> editIndexLength *= -1;
+    }
+    if (textboxp -> whitelist != NULL) {
+        int32_t onWhitelist = 0;
+        for (int32_t i = 0; i < textboxp -> whitelist -> length; i++) {
+            if (strcmp((char *) buffer, textboxp -> whitelist -> data[i].s) == 0) {
+                onWhitelist = 1;
+                break;
             }
-            strdel(textboxp -> text, textboxp -> editIndex, textboxp -> editIndexLength);
-            textboxp -> editIndexLength = 0;
         }
+        if (onWhitelist == 0) {
+            return;
+        }
+    }
+    if (textboxp -> editIndexLength != 0) {
+        if (textboxp -> editIndexLength < 0) {
+            textboxp -> editIndex += textboxp -> editIndexLength;
+            textboxp -> editIndexLength *= -1;
+        }
+        strdel(textboxp -> text, textboxp -> editIndex, textboxp -> editIndexLength);
+        textboxp -> editIndexLength = 0;
+    }
+    int32_t len = strlen(textboxp -> text);
+    if (len < textboxp -> maxCharacters) {
         strins(textboxp -> text, (char *) buffer, textboxp -> editIndex);
         textboxp -> editIndex += size;
     }
