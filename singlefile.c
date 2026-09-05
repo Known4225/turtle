@@ -28,11 +28,12 @@ const char headerFiles[][128] = {
     "include/glad.h",
     "include/gl3.h",
     "include/emscripten.h",
-    "include/glfw3.h",
+    "include/glfw.h",
 };
 
 /* define source files in order from top to bottom of output file */
 const char sourceFiles[][128] = {
+    "source/glfw.c",
     "source/list.c",
     "source/floatList.c",
     "source/turtle.c",
@@ -43,12 +44,13 @@ const char sourceFiles[][128] = {
 
 /* these macros correspond to the source files */
 const char implementationMacros[][128] = {
+    "GLFW_IMPLEMENTATION",
     "UNITYPE_LIST_IMPLEMENTATION",
     "FLOAT_LIST_IMPLEMENTATION",
     "TURTLE_INTERNAL_IMPLEMENTATION",
     "TURTLE_TEXT_IMPLEMENTATION",
     "TURTLE_TOOLS_IMPLEMENTATION",
-    "OS_TOOLS_IMPLEMENTATION"
+    "OS_TOOLS_IMPLEMENTATION",
 };
 
 int32_t headerLength = sizeof(headerFiles) / 128;
@@ -56,12 +58,13 @@ int32_t sourceLength = sizeof(sourceFiles) / 128;
 int32_t macrosLength = sizeof(implementationMacros) / 128;
 
 const int32_t dependencyTree[] = {
-    0, 0, 0, 0, 0, 0, // list has no dependencies
-    0, 0, 0, 0, 0, 0, // buffer list has no dependencies
-    1, 0, 0, 0, 0, 0, // turtle internal requires list
-    0, 0, 1, 0, 0, 0, // turtle text requires turtle internal
-    0, 0, 0, 1, 0, 0, // turtle tools requires turtle text
-    1, 0, 0, 0, 0, 0, // os tools requires list
+    0, 0, 0, 0, 0, 0, 0, // glfw has no dependencies
+    0, 0, 0, 0, 0, 0, 0, // list has no dependencies
+    0, 0, 0, 0, 0, 0, 0, // float list has no dependencies
+    1, 1, 0, 0, 0, 0, 0, // turtle internal requires list and glfw
+    0, 0, 0, 1, 0, 0, 0, // turtle text requires turtle internal
+    0, 0, 0, 0, 1, 0, 0, // turtle tools requires turtle text
+    1, 1, 0, 0, 0, 0, 0, // os tools requires list and glfw
 };
 
 /* check if this line of code should not be included in the final output, return 1 if the line is blacklisted */
@@ -121,7 +124,7 @@ int main(int argc, char *argv[]) {
     /* add headers */
     for (int32_t i = 0; i < headerLength; i++) {
         if (strcmp(headerFiles[i], "include/floatList.h") == 0) {
-            fprintf(outputfp, "#ifdef TURTLE_ENABLE_TEXTURES\n");
+            fprintf(outputfp, "#ifdef TURTLE_ENABLE_TEXTURES\n"); // special case: floatList only used if textures are enabled
         }
         FILE *headerfp = fopen(headerFiles[i], "r");
         uint8_t buffer[4096]; // line cannot exceed 4096 characters, my longest line is 446 characters so I think we're safe

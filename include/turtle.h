@@ -16,7 +16,7 @@ https://patorjk.com/software/taag/#p=display&f=ANSI%20Shadow
     #define M_PI 3.14159265358979323846
 #endif
 #include "glad.h"
-#include "glfw3.h"
+#include "glfw.h"
 #include "list.h"
 #ifdef TURTLE_ENABLE_TEXTURES
 #include "floatList.h"

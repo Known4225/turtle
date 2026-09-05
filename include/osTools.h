@@ -13,7 +13,7 @@ https://patorjk.com/software/taag/#p=display&f=ANSI%20Shadow
 
 #include "list.h"
 #include "glad.h"
-#include "glfw3.h"
+#include "glfw.h"
 
 /* required forward declarations (for packaging) */
 typedef struct GLFWcursor GLFWcursor;
