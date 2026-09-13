@@ -77,7 +77,7 @@ typedef struct list_f list_t;
 
 /* unitype - a union of many supported types to the list */
 typedef union {
-    signed char ch;
+    char ch;
     bool bo;
     int8_t c;
     uint8_t b;
@@ -159,17 +159,11 @@ void list_sort(list_t *list);
 /* return a list of indices that would sort the list (biggest to smallest) */
 list_t *list_sort_index(list_t *list);
 
-/* return a list of indices that would sort the list (for a list of doubles) */
-list_t *list_sort_index_double(list_t *list);
-
 /* sort list (stride) (biggest to smallest) */
 void list_sort_stride(list_t *list, int32_t stride, int32_t offset);
 
 /* return a list of indices that would sort the list (stride) (biggest to smallest) */
 list_t *list_sort_stride_index(list_t *list, int32_t stride, int32_t offset);
-
-/* return a list of indices that would sort the list (stride) (for a list of doubles) */
-list_t *list_sort_stride_index_double(list_t *list, int32_t stride, int32_t offset);
 
 /* deletes the first instance of the item from the list, returns the index the item was at, returns -1 and doesn't modify the list if not found */
 int32_t list_remove(list_t *list, unitype item, char type);
@@ -22787,47 +22781,151 @@ int32_t list_count(list_t *list, unitype item, char type) {
     return count;
 }
 
-/* sort list */
+/* sort list (polymorphic), also insane */
+#define list_sort_polymorph(list, LIST_SORT_TYPE) ({\
+    /* create min heap */\
+    unitype temp;\
+    int8_t tempType;\
+    for (int32_t i = 2; i < list -> length + 1; i++) {\
+        int32_t j = i;\
+        while (j > 1 && list -> data[j / 2 - 1].LIST_SORT_TYPE > list -> data[j - 1].LIST_SORT_TYPE) {\
+            temp = list -> data[j / 2 - 1];\
+            tempType = list -> type[j / 2 - 1];\
+            list -> data[j / 2 - 1] = list -> data[j - 1];\
+            list -> type[j / 2 - 1] = list -> type[j - 1];\
+            list -> data[j - 1] = temp;\
+            list -> type[j - 1] = tempType;\
+            j /= 2;\
+        }\
+    }\
+    /* heapsort */\
+    for (int32_t i = list -> length - 1; i > 0; i--) {\
+        temp = list -> data[0];\
+        tempType = list -> type[0];\
+        list -> data[0] = list -> data[i];\
+        list -> type[0] = list -> type[i];\
+        list -> data[i] = temp;\
+        list -> type[i] = tempType;\
+        int32_t j = 1;\
+        while ((j * 2 - 1 < i && list -> data[j - 1].LIST_SORT_TYPE > list -> data[j * 2 - 1].LIST_SORT_TYPE) || (j * 2 < i && list -> data[j - 1].LIST_SORT_TYPE > list -> data[j * 2].LIST_SORT_TYPE)) {\
+            temp = list -> data[j - 1];\
+            tempType = list -> type[j - 1];\
+            if (list -> data[j * 2].LIST_SORT_TYPE > list -> data[j * 2 - 1].LIST_SORT_TYPE || j * 2 == i) {\
+                list -> data[j - 1] = list -> data[j * 2 - 1];\
+                list -> type[j - 1] = list -> type[j * 2 - 1];\
+                list -> data[j * 2 - 1] = temp;\
+                list -> type[j * 2 - 1] = tempType;\
+                j *= 2;\
+            } else {\
+                list -> data[j - 1] = list -> data[j * 2];\
+                list -> type[j - 1] = list -> type[j * 2];\
+                list -> data[j * 2] = temp;\
+                list -> type[j * 2] = tempType;\
+                j = j * 2 + 1;\
+            }\
+        }\
+    }\
+})
+
+int8_t list_sort_compare(list_t *list, int32_t i, int32_t j) {
+    /* greater than */
+    if (list -> type[i] != UNITYPE_FLOAT && list -> type[i] != UNITYPE_DOUBLE && list -> type[j] != UNITYPE_FLOAT && list -> type[j] != UNITYPE_DOUBLE) {
+        return list -> data[i].l > list -> data[j].l;
+    }
+    if (list -> type[i] != UNITYPE_FLOAT && list -> type[i] != UNITYPE_DOUBLE && list -> type[j] == UNITYPE_FLOAT) {
+        return list -> data[i].l > list -> data[j].f;
+    }
+    if (list -> type[i] != UNITYPE_FLOAT && list -> type[i] != UNITYPE_DOUBLE && list -> type[j] == UNITYPE_DOUBLE) {
+        return list -> data[i].l > list -> data[j].d;
+    }
+    if (list -> type[i] == UNITYPE_FLOAT && list -> type[j] != UNITYPE_FLOAT && list -> type[j] != UNITYPE_DOUBLE) {
+        return list -> data[i].f > list -> data[j].l;
+    }
+    if (list -> type[i] == UNITYPE_FLOAT && list -> type[j] == UNITYPE_FLOAT) {
+        return list -> data[i].f > list -> data[j].f;
+    }
+    if (list -> type[i] == UNITYPE_FLOAT && list -> type[j] == UNITYPE_DOUBLE) {
+        return list -> data[i].f > list -> data[j].d;
+    }
+    if (list -> type[i] == UNITYPE_DOUBLE && list -> type[j] != UNITYPE_FLOAT && list -> type[j] != UNITYPE_DOUBLE) {
+        return list -> data[i].d > list -> data[j].l;
+    }
+    if (list -> type[i] == UNITYPE_DOUBLE && list -> type[j] == UNITYPE_FLOAT) {
+        return list -> data[i].d > list -> data[j].f;
+    }
+    if (list -> type[i] == UNITYPE_DOUBLE && list -> type[j] == UNITYPE_DOUBLE) {
+        return list -> data[i].d > list -> data[j].d;
+    }
+    return 0;
+}
+
+/* sort list (biggest to smallest) */
 void list_sort(list_t *list) {
+    int32_t type = -1;
+    for (int32_t i = 0; i < list -> length; i++) {
+        int32_t localType = 0;
+        if (list -> type[i] == UNITYPE_FLOAT) {
+            localType = 1;
+        }
+        if (list -> type[i] == UNITYPE_DOUBLE) {
+            localType = 2;
+        }
+        if (type == -1) {
+            type = localType;
+        } else if (type != localType) {
+            type = 3;
+        }
+    }
+    if (type == 0) {
+        list_sort_polymorph(list, l);
+        return;
+    } else if (type == 1) {
+        list_sort_polymorph(list, f);
+        return;
+    } else if (type == 2) {
+        list_sort_polymorph(list, d);
+        return;
+    }
+    /* hybrid type sort */
     /* create min heap */
-    int64_t temp;
+    unitype temp;
     int8_t tempType;
     for (int32_t i = 2; i < list -> length + 1; i++) {
         int32_t j = i;
-        while (j > 1 && list -> data[j / 2 - 1].l > list -> data[j - 1].l) {
-            temp = list -> data[j / 2 - 1].l;
+        while (j > 1 && list_sort_compare(list, j / 2 - 1, j - 1)) {
+            temp = list -> data[j / 2 - 1];
             tempType = list -> type[j / 2 - 1];
-            list -> data[j / 2 - 1].l = list -> data[j - 1].l;
+            list -> data[j / 2 - 1] = list -> data[j - 1];
             list -> type[j / 2 - 1] = list -> type[j - 1];
-            list -> data[j - 1].l = temp;
+            list -> data[j - 1] = temp;
             list -> type[j - 1] = tempType;
             j /= 2;
         }
     }
     /* heapsort */
     for (int32_t i = list -> length - 1; i > 0; i--) {
-        temp = list -> data[0].l;
+        temp = list -> data[0];
         tempType = list -> type[0];
-        list -> data[0].l = list -> data[i].l;
+        list -> data[0] = list -> data[i];
         list -> type[0] = list -> type[i];
-        list -> data[i].l = temp;
+        list -> data[i] = temp;
         list -> type[i] = tempType;
         int32_t j = 1;
-        while ((j * 2 - 1 < i && list -> data[j - 1].i > list -> data[j * 2 - 1].i) || (j * 2 < i && list -> data[j - 1].i > list -> data[j * 2].i)) {
-            temp = list -> data[j - 1].l;
+        while ((j * 2 - 1 < i && list_sort_compare(list, j - 1, j * 2 - 1)) || (j * 2 < i && list_sort_compare(list, j - 1, j * 2))) {
+            temp = list -> data[j - 1];
             tempType = list -> type[j - 1];
-            if (list -> data[j * 2 - 1].i < list -> data[j * 2].i || j * 2 == i) {
+            if (list_sort_compare(list, j * 2, j * 2 - 1) || j * 2 == i) {
                 list -> data[j - 1] = list -> data[j * 2 - 1];
                 list -> type[j - 1] = list -> type[j * 2 - 1];
-                list -> data[j * 2 - 1].l = temp;
+                list -> data[j * 2 - 1] = temp;
                 list -> type[j * 2 - 1] = tempType;
-                j = j * 2;
+                j *= 2;
             } else {
-                list -> data[j - 1].l = list -> data[j * 2].l;
+                list -> data[j - 1] = list -> data[j * 2];
                 list -> type[j - 1] = list -> type[j * 2];
-                list -> data[j * 2].l = temp;
+                list -> data[j * 2] = temp;
                 list -> type[j * 2] = tempType;
-                j *= 2 + 1;
+                j = j * 2 + 1;
             }
         }
     }
