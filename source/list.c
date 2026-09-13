@@ -310,13 +310,13 @@ int32_t list_count(list_t *list, unitype item, char type) {
                 list -> type[j - 1] = list -> type[j * 2 - 1];\
                 list -> data[j * 2 - 1] = temp;\
                 list -> type[j * 2 - 1] = tempType;\
-                j = j * 2;\
+                j *= 2;\
             } else {\
                 list -> data[j - 1] = list -> data[j * 2];\
                 list -> type[j - 1] = list -> type[j * 2];\
                 list -> data[j * 2] = temp;\
                 list -> type[j * 2] = tempType;\
-                j *= 2 + 1;\
+                j = j * 2 + 1;\
             }\
         }\
     }\
@@ -351,6 +351,7 @@ int8_t list_sort_compare(list_t *list, int32_t i, int32_t j) {
     if (list -> type[i] == UNITYPE_DOUBLE && list -> type[j] == UNITYPE_DOUBLE) {
         return list -> data[i].d > list -> data[j].d;
     }
+    return 0;
 }
 
 /* sort list (biggest to smallest) */
@@ -371,7 +372,6 @@ void list_sort(list_t *list) {
         }
     }
     if (type == 0) {
-        printf("integer sort\n");
         list_sort_polymorph(list, l);
         return;
     } else if (type == 1) {
@@ -414,13 +414,13 @@ void list_sort(list_t *list) {
                 list -> type[j - 1] = list -> type[j * 2 - 1];
                 list -> data[j * 2 - 1] = temp;
                 list -> type[j * 2 - 1] = tempType;
-                j = j * 2;
+                j *= 2;
             } else {
                 list -> data[j - 1] = list -> data[j * 2];
                 list -> type[j - 1] = list -> type[j * 2];
                 list -> data[j * 2] = temp;
                 list -> type[j * 2] = tempType;
-                j *= 2 + 1;
+                j = j * 2 + 1;
             }
         }
     }
