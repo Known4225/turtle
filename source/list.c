@@ -325,16 +325,16 @@ int32_t list_count(list_t *list, unitype item, char type) {
 int8_t list_sort_compare(list_t *list, int32_t i, int32_t j) {
     /* greater than */
     if (list -> type[i] != UNITYPE_FLOAT && list -> type[i] != UNITYPE_DOUBLE && list -> type[j] != UNITYPE_FLOAT && list -> type[j] != UNITYPE_DOUBLE) {
-        return list -> data[i].l > list -> data[j].l;
+        return list -> data[i].li > list -> data[j].li;
     }
     if (list -> type[i] != UNITYPE_FLOAT && list -> type[i] != UNITYPE_DOUBLE && list -> type[j] == UNITYPE_FLOAT) {
-        return list -> data[i].l > list -> data[j].f;
+        return list -> data[i].li > list -> data[j].f;
     }
     if (list -> type[i] != UNITYPE_FLOAT && list -> type[i] != UNITYPE_DOUBLE && list -> type[j] == UNITYPE_DOUBLE) {
-        return list -> data[i].l > list -> data[j].d;
+        return list -> data[i].li > list -> data[j].d;
     }
     if (list -> type[i] == UNITYPE_FLOAT && list -> type[j] != UNITYPE_FLOAT && list -> type[j] != UNITYPE_DOUBLE) {
-        return list -> data[i].f > list -> data[j].l;
+        return list -> data[i].f > list -> data[j].li;
     }
     if (list -> type[i] == UNITYPE_FLOAT && list -> type[j] == UNITYPE_FLOAT) {
         return list -> data[i].f > list -> data[j].f;
@@ -343,7 +343,7 @@ int8_t list_sort_compare(list_t *list, int32_t i, int32_t j) {
         return list -> data[i].f > list -> data[j].d;
     }
     if (list -> type[i] == UNITYPE_DOUBLE && list -> type[j] != UNITYPE_FLOAT && list -> type[j] != UNITYPE_DOUBLE) {
-        return list -> data[i].d > list -> data[j].l;
+        return list -> data[i].d > list -> data[j].li;
     }
     if (list -> type[i] == UNITYPE_DOUBLE && list -> type[j] == UNITYPE_FLOAT) {
         return list -> data[i].d > list -> data[j].f;
@@ -372,7 +372,7 @@ void list_sort(list_t *list) {
         }
     }
     if (type == 0) {
-        list_sort_polymorph(list, l);
+        list_sort_polymorph(list, li);
         return;
     } else if (type == 1) {
         list_sort_polymorph(list, f);
@@ -473,9 +473,6 @@ list_t *list_sort_index_double(list_t *list) {
     }
     return output;
 }
-
-/* Note on double sorts - it may be possible to use uint64_t consistent comparison for doubles - however i am not sure if setting the integer portion of the unitype union will fill the top four bytes with 0s.
-If it doesn't then the scheme will not work */
 
 /* sort list (stride) */
 void list_sort_stride(list_t *list, int32_t stride, int32_t offset) {

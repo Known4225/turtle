@@ -22,13 +22,71 @@ int32_t list_upcast_test() {
 }
 
 int32_t list_sort_test() {
+    int32_t index;
     list_t *test = list_init();
+    /* integer sort */
+    list_clear(test);
     for (int32_t i = 0; i < 100; i++) {
         list_append(test, (unitype) i, 'i');
+        list_append(test, (unitype) i, 'i');
     }
-    list_print(test);
     list_sort(test);
-    list_print(test);
+    index = 0;
+    for (int32_t i = 99; i >= 0; i--) {
+        if (test -> data[index].i != i) {
+            return -1;
+        }
+        if (test -> data[index + 1].i != i) {
+            return -1;
+        }
+        index += 2;
+    }
+    /* double sort */
+    list_clear(test);
+    for (int32_t i = 0; i < 100; i++) {
+        list_append(test, (unitype) (double) i, 'd');
+        list_append(test, (unitype) (double) i, 'd');
+    }
+    list_sort(test);
+    index = 0;
+    for (int32_t i = 99; i >= 0; i--) {
+        if (test -> data[index].d != i) {
+            return -1;
+        }
+        if (test -> data[index + 1].d != i) {
+            return -1;
+        }
+        index += 2;
+    }
+    /* hybrid sort */
+    list_clear(test);
+    for (int32_t i = 0; i < 100; i++) {
+        list_append(test, (unitype) i, 'i');
+        list_append(test, (unitype) (double) i, 'd');
+    }
+    list_sort(test);
+    index = 0;
+    for (int32_t i = 99; i >= 0; i--) {
+        if (test -> type[index] == 'i') {
+            if (test -> data[index].i != i) {
+                return -1;
+            }
+        } else if (test -> type[index] == 'd') {
+            if (test -> data[index].d != i) {
+                return -1;
+            }
+        }
+        if (test -> type[index + 1] == 'i') {
+            if (test -> data[index + 1].i != i) {
+                return -1;
+            }
+        } else if (test -> type[index + 1] == 'd') {
+            if (test -> data[index + 1].d != i) {
+                return -1;
+            }
+        }
+        index += 2;
+    }
     return 0;
 }
 
