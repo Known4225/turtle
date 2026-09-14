@@ -45,8 +45,9 @@ You must call list_init() when intending to copy a list - all lists must be init
 /* create a list */
 list_t *list_init() {
     list_t *list = malloc(sizeof(list_t));
+    list -> lock = 0;
     list -> length = 0;
-    list -> realLength = 1;
+    list -> capacity = 1;
     list -> type = calloc(1, sizeof(char));
     list -> data = calloc(1, sizeof(unitype));
     return list;
@@ -67,10 +68,10 @@ void list_release(list_t *list) {
 
 /* append to list, must specify type */
 void list_append(list_t *list, unitype data, char type) {
-    if (list -> realLength  <= list -> length) {
-        list -> realLength *= 2;
-        list -> type = realloc(list -> type, list -> realLength);
-        list -> data = realloc(list -> data, list -> realLength * sizeof(unitype));
+    if (list -> capacity  <= list -> length) {
+        list -> capacity *= 2;
+        list -> type = realloc(list -> type, list -> capacity);
+        list -> data = realloc(list -> data, list -> capacity * sizeof(unitype));
     }
     if (type == 'z') {
         list -> type[list -> length] = 's';
@@ -111,7 +112,7 @@ void list_insert(list_t *list, int32_t index, unitype value, char type) {
 void list_clear(list_t *list) {
     list_free_lite(list);
     list -> length = 0;
-    list -> realLength = 1;
+    list -> capacity = 1;
     list -> type = calloc(1, sizeof(char));
     list -> data = calloc(1, sizeof(unitype));
 }
@@ -129,10 +130,10 @@ unitype list_pop(list_t *list) {
         }
         list -> type[list -> length] = (char) 0;
         list -> data[list -> length] = (unitype) 0;
-        if (list -> length <= list -> realLength / 2 && list -> realLength > 1) {
-            list -> realLength /= 2;
-            list -> type = realloc(list -> type, list -> realLength);
-            list -> data = realloc(list -> data, list -> realLength * sizeof(unitype));
+        if (list -> length <= list -> capacity / 2 && list -> capacity > 1) {
+            list -> capacity /= 2;
+            list -> type = realloc(list -> type, list -> capacity);
+            list -> data = realloc(list -> data, list -> capacity * sizeof(unitype));
         }
         return ret;
     } else {
@@ -158,10 +159,10 @@ unitype list_delete(list_t *list, int32_t index) {
     list -> length -= 1;
     list -> type[list -> length] = (char) 0;
     list -> data[list -> length] = (unitype) 0;
-    if (list -> length <= list -> realLength / 2 && list -> realLength > 1) {
-        list -> realLength /= 2;
-        list -> type = realloc(list -> type, list -> realLength);
-        list -> data = realloc(list -> data, list -> realLength * sizeof(unitype));
+    if (list -> length <= list -> capacity / 2 && list -> capacity > 1) {
+        list -> capacity /= 2;
+        list -> type = realloc(list -> type, list -> capacity);
+        list -> data = realloc(list -> data, list -> capacity * sizeof(unitype));
     }
     return ret;
 }
@@ -175,14 +176,14 @@ void list_delete_range(list_t *list, int32_t indexMin, int32_t indexMax) {
     }
     int8_t zerod = 0; // edge case: "should've used list_clear"
     int32_t difference = (indexMax - indexMin);
-    list -> realLength = list -> length - difference;
-    if (list -> realLength <= 1) {
+    list -> capacity = list -> length - difference;
+    if (list -> capacity <= 1) {
         zerod = 1;
-        list -> realLength = 1;
+        list -> capacity = 1;
     }
     
-    int8_t *newType = malloc(list -> realLength * sizeof(int8_t)); // no need to calloc we're gonna fill it all up anyway
-    unitype *newData = malloc(list -> realLength * sizeof(unitype));
+    int8_t *newType = malloc(list -> capacity * sizeof(int8_t)); // no need to calloc we're gonna fill it all up anyway
+    unitype *newData = malloc(list -> capacity * sizeof(unitype));
     for (int32_t i = 0; i < indexMin; i++) {
         newType[i] = list -> type[i];
         newData[i] = list -> data[i];
@@ -191,7 +192,7 @@ void list_delete_range(list_t *list, int32_t indexMin, int32_t indexMax) {
         newType[i - difference] = list -> type[i];
         newData[i - difference] = list -> data[i];
     }
-    list -> length = list -> realLength;
+    list -> length = list -> capacity;
     if (zerod) {
         list -> length = 0;
     }
@@ -1361,11 +1362,11 @@ void unitype_sprint(char *str, unitype item, char type) {
 /* copies one list to another (duplicates strings or pointers) */
 void list_copy(list_t *dest, list_t *src) {
     list_free_lite(dest);
-    dest -> type = calloc(src -> realLength, sizeof(int32_t));
-    dest -> data = calloc(src -> realLength, sizeof(unitype));
+    dest -> type = calloc(src -> capacity, sizeof(int32_t));
+    dest -> data = calloc(src -> capacity, sizeof(unitype));
     int32_t len = src -> length;
     dest -> length = len;
-    dest -> realLength = src -> realLength;
+    dest -> capacity = src -> capacity;
     for (int32_t i = 0; i < len; i++) {
         dest -> type[i] = src -> type[i];
         if (src -> type[i] == 'r') {

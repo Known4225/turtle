@@ -95,16 +95,14 @@ typedef union {
 
 struct list_f {
     _Atomic volatile int8_t lock;
-    int32_t ID;
     int32_t length;
-    int32_t realLength;
+    int32_t capacity;
     int8_t *type;
     unitype *data;
 };
 
 typedef struct {
     _Atomic volatile int8_t lock;
-    int32_t ID;
     int32_t length;
     int32_t dummy;
     int8_t *type;
