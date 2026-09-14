@@ -210,7 +210,7 @@ void list_free_lite(list_t *list);
 /* frees the data used by the list */
 void list_free(list_t *list);
 
-/* creates a sublist (from bottom to top - 1) out of an existing list, do not modify a parent list while a sublist exist */
+/* creates a sublist (from bottom to top - 1) out of an existing list, do not modify a parent list while a sublist exists */
 sublist_t *sublist_init(list_t *list, int32_t bottom, int32_t top);
 
 /* delete a sublist */
