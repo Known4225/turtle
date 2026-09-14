@@ -748,13 +748,13 @@ int8_t list_sort_compare(list_t *list, int32_t i, int32_t j) {
 }
 
 /* sort list (polymorphic), also insane */
-#define list_sort_polymorph(list, LIST_SORT_TYPE) ({\
+#define list_sort_polymorph(list, LIST_TYPE) ({\
     /* create min heap */\
     unitype temp;\
     int8_t tempType;\
     for (int32_t i = 2; i < list -> length + 1; i++) {\
         int32_t j = i;\
-        while (j > 1 && list -> data[j / 2 - 1].LIST_SORT_TYPE > list -> data[j - 1].LIST_SORT_TYPE) {\
+        while (j > 1 && list -> data[j / 2 - 1].LIST_TYPE > list -> data[j - 1].LIST_TYPE) {\
             temp = list -> data[j / 2 - 1];\
             tempType = list -> type[j / 2 - 1];\
             list -> data[j / 2 - 1] = list -> data[j - 1];\
@@ -773,10 +773,10 @@ int8_t list_sort_compare(list_t *list, int32_t i, int32_t j) {
         list -> data[i] = temp;\
         list -> type[i] = tempType;\
         int32_t j = 1;\
-        while ((j * 2 - 1 < i && list -> data[j - 1].LIST_SORT_TYPE > list -> data[j * 2 - 1].LIST_SORT_TYPE) || (j * 2 < i && list -> data[j - 1].LIST_SORT_TYPE > list -> data[j * 2].LIST_SORT_TYPE)) {\
+        while ((j * 2 - 1 < i && list -> data[j - 1].LIST_TYPE > list -> data[j * 2 - 1].LIST_TYPE) || (j * 2 < i && list -> data[j - 1].LIST_TYPE > list -> data[j * 2].LIST_TYPE)) {\
             temp = list -> data[j - 1];\
             tempType = list -> type[j - 1];\
-            if (list -> data[j * 2].LIST_SORT_TYPE > list -> data[j * 2 - 1].LIST_SORT_TYPE || j * 2 == i) {\
+            if (list -> data[j * 2].LIST_TYPE > list -> data[j * 2 - 1].LIST_TYPE || j * 2 == i) {\
                 list -> data[j - 1] = list -> data[j * 2 - 1];\
                 list -> type[j - 1] = list -> type[j * 2 - 1];\
                 list -> data[j * 2 - 1] = temp;\
@@ -791,6 +791,7 @@ int8_t list_sort_compare(list_t *list, int32_t i, int32_t j) {
             }\
         }\
     }\
+    return;\
 })
 
 /* sort list (biggest to smallest) */
@@ -807,46 +808,32 @@ void list_sort(list_t *list) {
     switch (type) {
         case UNITYPE_CHAR:
             list_sort_polymorph(list, ch);
-        return;
         case UNITYPE_INT8:
             list_sort_polymorph(list, c);
-        return;
         case UNITYPE_UINT8: // UINT8 or BOOL
             list_sort_polymorph(list, b);
-        return;
         case UNITYPE_INT16:
             list_sort_polymorph(list, hi);
-        return;
         case UNITYPE_UINT16:
             list_sort_polymorph(list, hu);
-        return;
         case UNITYPE_INT32:
             list_sort_polymorph(list, i);
-        return;
         case UNITYPE_UINT32:
             list_sort_polymorph(list, u);
-        return;
         case UNITYPE_INT64:
             list_sort_polymorph(list, li);
-        return;
         case UNITYPE_UINT64:
             list_sort_polymorph(list, lu);
-        return;
         case UNITYPE_FLOAT:
             list_sort_polymorph(list, f);
-        return;
         case UNITYPE_DOUBLE:
             list_sort_polymorph(list, d);
-        return;
         case UNITYPE_STRING:
             list_sort_polymorph(list, s);
-        return;
         case UNITYPE_POINTER:
             list_sort_polymorph(list, p);
-        return;
         case UNITYPE_LIST:
             list_sort_polymorph(list, r);
-        return;
     }
     /* hybrid type sort */
     /* create min heap */
@@ -921,14 +908,14 @@ list_t *list_sort_index(list_t *list) {
     return output;
 }
 
-#define list_sort_stride_polymorph(list, stride, offset, LIST_SORT_TYPE) ({\
+#define list_sort_stride_polymorph(list, stride, offset, LIST_TYPE) ({\
     offset %= stride;\
     /* create min heap */\
     unitype temp;\
     int8_t tempType;\
     for (int32_t i = 2; i < list -> length / stride + 1; i++) {\
         int32_t j = i;\
-        while (j > 1 && list -> data[(j / 2 - 1) * stride + offset].i > list -> data[(j - 1) * stride + offset].i) {\
+        while (j > 1 && list -> data[(j / 2 - 1) * stride + offset].LIST_TYPE > list -> data[(j - 1) * stride + offset].LIST_TYPE) {\
             for (int32_t k = 0; k < stride; k++) {\
                 temp = list -> data[(j / 2 - 1) * stride + k];\
                 tempType = list -> type[(j / 2 - 1) * stride + k];\
@@ -951,8 +938,8 @@ list_t *list_sort_index(list_t *list) {
             list -> type[i * stride + k] = tempType;\
         }\
         int32_t j = 1;\
-        while ((j * 2 - 1 < i && list -> data[(j - 1) * stride + offset].i > list -> data[(j * 2 - 1) * stride + offset].i) || (j * 2 < i && list -> data[(j - 1) * stride + offset].i > list -> data[(j * 2) * stride + offset].i)) {\
-            if (list -> data[(j * 2) * stride + offset].i > list -> data[(j * 2 - 1) * stride + offset].i || j * 2 == i) {\
+        while ((j * 2 - 1 < i && list -> data[(j - 1) * stride + offset].LIST_TYPE > list -> data[(j * 2 - 1) * stride + offset].LIST_TYPE) || (j * 2 < i && list -> data[(j - 1) * stride + offset].LIST_TYPE > list -> data[(j * 2) * stride + offset].LIST_TYPE)) {\
+            if (list -> data[(j * 2) * stride + offset].LIST_TYPE > list -> data[(j * 2 - 1) * stride + offset].LIST_TYPE || j * 2 == i) {\
                 for (int32_t k = 0; k < stride; k++) {\
                     temp = list -> data[(j - 1) * stride + k];\
                     tempType = list -> type[(j - 1) * stride + k];\
@@ -975,6 +962,7 @@ list_t *list_sort_index(list_t *list) {
             }\
         }\
     }\
+    return;\
 })
 
 /* sort list (stride) (biggest to smallest) */
@@ -991,46 +979,32 @@ void list_sort_stride(list_t *list, int32_t stride, int32_t offset) {
     switch (type) {
         case UNITYPE_CHAR:
             list_sort_stride_polymorph(list, stride, offset, ch);
-        return;
         case UNITYPE_INT8:
             list_sort_stride_polymorph(list, stride, offset, c);
-        return;
         case UNITYPE_UINT8: // UINT8 or BOOL
             list_sort_stride_polymorph(list, stride, offset, b);
-        return;
         case UNITYPE_INT16:
             list_sort_stride_polymorph(list, stride, offset, hi);
-        return;
         case UNITYPE_UINT16:
             list_sort_stride_polymorph(list, stride, offset, hu);
-        return;
         case UNITYPE_INT32:
             list_sort_stride_polymorph(list, stride, offset, i);
-        return;
         case UNITYPE_UINT32:
             list_sort_stride_polymorph(list, stride, offset, u);
-        return;
         case UNITYPE_INT64:
             list_sort_stride_polymorph(list, stride, offset, li);
-        return;
         case UNITYPE_UINT64:
             list_sort_stride_polymorph(list, stride, offset, lu);
-        return;
         case UNITYPE_FLOAT:
             list_sort_stride_polymorph(list, stride, offset, f);
-        return;
         case UNITYPE_DOUBLE:
             list_sort_stride_polymorph(list, stride, offset, d);
-        return;
         case UNITYPE_STRING:
             list_sort_stride_polymorph(list, stride, offset, s);
-        return;
         case UNITYPE_POINTER:
             list_sort_stride_polymorph(list, stride, offset, p);
-        return;
         case UNITYPE_LIST:
             list_sort_stride_polymorph(list, stride, offset, r);
-        return;
     }
     /* hybrid type stride sort */
     offset %= stride;
@@ -1118,18 +1092,112 @@ list_t *list_sort_stride_index(list_t *list, int32_t stride, int32_t offset) {
     return output;
 }
 
+#define list_select_polymorph(list, k, LIST_TYPE) {\
+    /* quickselect */\
+    list_t *copy = list_init();\
+    list_copy(copy, list);\
+    int32_t start = 0;\
+    int32_t end = copy -> length;\
+    while (1) {\
+        int32_t pivot = start;\
+        int32_t pointer = end;\
+        for (int32_t i = start + 1; i < end; i++) {\
+            if (copy -> data[pivot].LIST_TYPE > copy -> data[i].LIST_TYPE) {\
+                if (pointer != end) {\
+                    /* swap pointer with i */\
+                    unitype temp = copy -> data[i];\
+                    int8_t tempType = copy -> type[i];\
+                    copy -> data[i] = copy -> data[pointer];\
+                    copy -> type[i] = copy -> type[pointer];\
+                    copy -> data[pointer] = temp;\
+                    copy -> type[pointer] = tempType;\
+                    pointer++;\
+                }\
+            } else {\
+                if (pointer == end) {\
+                    pointer = i;\
+                }\
+            }\
+        }\
+        /* swap pivot with pointer */\
+        pointer--;\
+        unitype temp = copy -> data[pivot];\
+        int8_t tempType = copy -> type[pivot];\
+        copy -> data[pivot] = copy -> data[pointer];\
+        copy -> type[pivot] = copy -> type[pointer];\
+        copy -> data[pointer] = temp;\
+        copy -> type[pointer] = tempType;\
+        if (pointer == k) {\
+            list_free(copy);\
+            for (int32_t i = 0; i < list -> length; i++) {\
+                if (list -> type[i] == tempType && list -> data[i].lu == temp.lu) {\
+                    return i;\
+                }\
+            }\
+            return 0;\
+        } else if (pointer < k) {\
+            start = pointer + 1;\
+        } else {\
+            end = pointer;\
+        }\
+    }\
+    list_free(copy);\
+    return 0;\
+}
+
+/* return the index of the kth smallest element of the list */
 int32_t list_select(list_t *list, int32_t k) {
+    int8_t type = -1;
+    for (int32_t i = 0; i < list -> length; i++) {
+        int8_t localType = list -> type[i];
+        if (type == -1) {
+            type = localType;
+        } else if (type != localType) {
+            type = -2;
+        }
+    }
+    switch (type) {
+        case UNITYPE_CHAR:
+            list_select_polymorph(list, k, ch);
+        case UNITYPE_INT8:
+            list_select_polymorph(list, k, c);
+        case UNITYPE_UINT8: // UINT8 or BOOL
+            list_select_polymorph(list, k, b);
+        case UNITYPE_INT16:
+            list_select_polymorph(list, k, hi);
+        case UNITYPE_UINT16:
+            list_select_polymorph(list, k, hu);
+        case UNITYPE_INT32:
+            list_select_polymorph(list, k, i);
+        case UNITYPE_UINT32:
+            list_select_polymorph(list, k, u);
+        case UNITYPE_INT64:
+            list_select_polymorph(list, k, li);
+        case UNITYPE_UINT64:
+            list_select_polymorph(list, k, lu);
+        case UNITYPE_FLOAT:
+            list_select_polymorph(list, k, f);
+        case UNITYPE_DOUBLE:
+            list_select_polymorph(list, k, d);
+        case UNITYPE_STRING:
+            list_select_polymorph(list, k, s);
+        case UNITYPE_POINTER:
+            list_select_polymorph(list, k, p);
+        case UNITYPE_LIST:
+            list_select_polymorph(list, k, r);
+    }
+    /* hybrid type select */
     /* quickselect */
     list_t *copy = list_init();
     list_copy(copy, list);
     int32_t start = 0;
-    int32_t length = copy -> length;
+    int32_t end = copy -> length;
     while (1) {
         int32_t pivot = start;
-        int32_t pointer = start + length;
-        for (int32_t i = start + 1; i < length; i++) {
-            if (copy -> data[pivot].i > copy -> data[i].i) {
-                if (pointer != start + length) {
+        int32_t pointer = end;
+        for (int32_t i = start + 1; i < end; i++) {
+            if (list_sort_compare(copy, pivot, i)) {
+                if (pointer != end) {
                     /* swap pointer with i */
                     unitype temp = copy -> data[i];
                     int8_t tempType = copy -> type[i];
@@ -1140,7 +1208,7 @@ int32_t list_select(list_t *list, int32_t k) {
                     pointer++;
                 }
             } else {
-                if (pointer == start + length) {
+                if (pointer == end) {
                     pointer = i;
                 }
             }
@@ -1153,9 +1221,6 @@ int32_t list_select(list_t *list, int32_t k) {
         copy -> type[pivot] = copy -> type[pointer];
         copy -> data[pointer] = temp;
         copy -> type[pointer] = tempType;
-        // printf("pivot: %d\n", temp.i);
-        // printf("pointer: %d\n", pointer);
-        // list_print(copy);
         if (pointer == k) {
             list_free(copy);
             for (int32_t i = 0; i < list -> length; i++) {
@@ -1167,17 +1232,20 @@ int32_t list_select(list_t *list, int32_t k) {
         } else if (pointer < k) {
             start = pointer + 1;
         } else {
-            length = pointer - start;
+            end = pointer;
         }
-        // printf("start: %d\n", start);
-        // printf("length: %d\n", length);
     }
     list_free(copy);
     return 0;
 }
 
+/* return the index of the median of the list (picks lower number if length of list is even) */
 int32_t list_median(list_t *list) {
-    return list_select(list, list -> length / 2);
+    int32_t index = list -> length / 2;
+    if (list -> length % 2 == 0) {
+        index--;
+    }
+    return list_select(list, index);
 }
 
 /* deletes the first instance of the item from the list, returns the index the item was at, returns -1 and doesn't modify the list if not found */

@@ -165,7 +165,7 @@ list_t *list_sort_stride_index(list_t *list, int32_t stride, int32_t offset);
 /* return the index of the kth smallest element of the list */
 int32_t list_select(list_t *list, int32_t k);
 
-/* return the index of the median of the list */
+/* return the index of the median of the list (picks lower number if length of list is even) */
 int32_t list_median(list_t *list);
 
 /* deletes the first instance of the item from the list, returns the index the item was at, returns -1 and doesn't modify the list if not found */

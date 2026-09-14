@@ -176,15 +176,46 @@ int32_t list_sort_test() {
 
 int32_t list_select_test() {
     list_t *test = list_init();
-    for (int32_t i = 0; i < 16; i++) {
-        list_append(test, (unitype) randomInt(0, 20), 'i');
+    /* integer select test */
+    for (int32_t j = 0; j < 100; j++) {
+        list_clear(test);
+        for (int32_t i = 0; i < 64; i++) {
+            list_append(test, (unitype) randomInt(-100, 100), 'i');
+        }
+        int32_t medianIndex = list_median(test);
+        int32_t median = test -> data[medianIndex].i;
+        list_sort(test);
+        if (test -> data[test -> length / 2].i != median) {
+            return -1;
+        }
     }
-    list_print(test);
-    int32_t medianIndex = list_median(test);
-    printf("median: %d\n", test -> data[medianIndex].i);
-    list_sort(test);
-    list_print(test);
-    printf("median: %d\n", test -> data[test -> length / 2].i);
+    /* double select test */
+    for (int32_t j = 0; j < 100; j++) {
+        list_clear(test);
+        for (int32_t i = 0; i < 64; i++) {
+            list_append(test, (unitype) randomDouble(-100, 100), 'd');
+        }
+        int32_t medianIndex = list_median(test);
+        double median = test -> data[medianIndex].d;
+        list_sort(test);
+        if (test -> data[test -> length / 2].d != median) {
+            return -2;
+        }
+    }
+    /* hybrid select test */
+    for (int32_t j = 0; j < 100; j++) {
+        list_clear(test);
+        for (int32_t i = 0; i < 64; i++) {
+            list_append(test, (unitype) randomInt(-100, 100), 'i');
+            list_append(test, (unitype) randomDouble(-100, 100), 'd');
+        }
+        int32_t medianIndex = list_median(test);
+        unitype median = test -> data[medianIndex];
+        list_sort(test);
+        if (test -> data[test -> length / 2].lu != median.lu) {
+            return -3;
+        }
+    }
     return 0;
 }
 
