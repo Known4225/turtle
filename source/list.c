@@ -224,7 +224,7 @@ int32_t unitype_check_equal(unitype item1, unitype item2, int8_t typeItem1, int8
             return 0;
         case UNITYPE_INT64:
         case UNITYPE_UINT64:
-            if (item1.l == item2.l) {return 1;}
+            if (item1.lu == item2.lu) {return 1;}
             return 0;
         case UNITYPE_FLOAT:
             if (item1.f == item2.f) {return 1;}
@@ -276,6 +276,477 @@ int32_t list_count(list_t *list, unitype item, char type) {
     return count;
 }
 
+int8_t list_sort_compare(list_t *list, int32_t i, int32_t j) {
+    /* meta-programming in C be like */
+    switch (list -> type[i]) {
+        case UNITYPE_CHAR:
+        switch (list -> type[j]) {
+            case UNITYPE_CHAR:
+                return list -> data[i].ch > list -> data[j].ch;
+            case UNITYPE_INT8:
+                return list -> data[i].ch > list -> data[j].c;
+            case UNITYPE_UINT8:
+                return list -> data[i].ch > list -> data[j].b;
+            case UNITYPE_INT16:
+                return list -> data[i].ch > list -> data[j].hi;
+            case UNITYPE_UINT16:
+                return list -> data[i].ch > list -> data[j].hu;
+            case UNITYPE_INT32:
+                return list -> data[i].ch > list -> data[j].i;
+            case UNITYPE_UINT32:
+                return list -> data[i].ch > list -> data[j].u;
+            case UNITYPE_INT64:
+                return list -> data[i].ch > list -> data[j].li;
+            case UNITYPE_UINT64:
+                return list -> data[i].ch > list -> data[j].lu;
+            case UNITYPE_FLOAT:
+                return list -> data[i].ch > list -> data[j].f;
+            case UNITYPE_DOUBLE:
+                return list -> data[i].ch > list -> data[j].d;
+            case UNITYPE_STRING:
+                return list -> data[i].ch > (uint64_t) list -> data[j].s;
+            case UNITYPE_POINTER:
+                return list -> data[i].ch > (uint64_t) list -> data[j].p;
+            case UNITYPE_LIST:
+                return list -> data[i].ch > (uint64_t) list -> data[j].r;
+            default:
+                return 0;
+        }
+        case UNITYPE_INT8:
+        switch (list -> type[j]) {
+            case UNITYPE_CHAR:
+                return list -> data[i].c > list -> data[j].ch;
+            case UNITYPE_INT8:
+                return list -> data[i].c > list -> data[j].c;
+            case UNITYPE_UINT8:
+                return list -> data[i].c > list -> data[j].b;
+            case UNITYPE_INT16:
+                return list -> data[i].c > list -> data[j].hi;
+            case UNITYPE_UINT16:
+                return list -> data[i].c > list -> data[j].hu;
+            case UNITYPE_INT32:
+                return list -> data[i].c > list -> data[j].i;
+            case UNITYPE_UINT32:
+                return list -> data[i].c > list -> data[j].u;
+            case UNITYPE_INT64:
+                return list -> data[i].c > list -> data[j].li;
+            case UNITYPE_UINT64:
+                return list -> data[i].c > list -> data[j].lu;
+            case UNITYPE_FLOAT:
+                return list -> data[i].c > list -> data[j].f;
+            case UNITYPE_DOUBLE:
+                return list -> data[i].c > list -> data[j].d;
+            case UNITYPE_STRING:
+                return list -> data[i].c > (uint64_t) list -> data[j].s;
+            case UNITYPE_POINTER:
+                return list -> data[i].c > (uint64_t) list -> data[j].p;
+            case UNITYPE_LIST:
+                return list -> data[i].c > (uint64_t) list -> data[j].r;
+            default:
+                return 0;
+        }
+        case UNITYPE_UINT8:
+        switch (list -> type[j]) {
+            case UNITYPE_CHAR:
+                return list -> data[i].b > list -> data[j].ch;
+            case UNITYPE_INT8:
+                return list -> data[i].b > list -> data[j].c;
+            case UNITYPE_UINT8:
+                return list -> data[i].b > list -> data[j].b;
+            case UNITYPE_INT16:
+                return list -> data[i].b > list -> data[j].hi;
+            case UNITYPE_UINT16:
+                return list -> data[i].b > list -> data[j].hu;
+            case UNITYPE_INT32:
+                return list -> data[i].b > list -> data[j].i;
+            case UNITYPE_UINT32:
+                return list -> data[i].b > list -> data[j].u;
+            case UNITYPE_INT64:
+                return list -> data[i].b > list -> data[j].li;
+            case UNITYPE_UINT64:
+                return list -> data[i].b > list -> data[j].lu;
+            case UNITYPE_FLOAT:
+                return list -> data[i].b > list -> data[j].f;
+            case UNITYPE_DOUBLE:
+                return list -> data[i].b > list -> data[j].d;
+            case UNITYPE_STRING:
+                return list -> data[i].b > (uint64_t) list -> data[j].s;
+            case UNITYPE_POINTER:
+                return list -> data[i].b > (uint64_t) list -> data[j].p;
+            case UNITYPE_LIST:
+                return list -> data[i].b > (uint64_t) list -> data[j].r;
+            default:
+                return 0;
+        }
+        case UNITYPE_INT16:
+        switch (list -> type[j]) {
+            case UNITYPE_CHAR:
+                return list -> data[i].hi > list -> data[j].ch;
+            case UNITYPE_INT8:
+                return list -> data[i].hi > list -> data[j].c;
+            case UNITYPE_UINT8:
+                return list -> data[i].hi > list -> data[j].b;
+            case UNITYPE_INT16:
+                return list -> data[i].hi > list -> data[j].hi;
+            case UNITYPE_UINT16:
+                return list -> data[i].hi > list -> data[j].hu;
+            case UNITYPE_INT32:
+                return list -> data[i].hi > list -> data[j].i;
+            case UNITYPE_UINT32:
+                return list -> data[i].hi > list -> data[j].u;
+            case UNITYPE_INT64:
+                return list -> data[i].hi > list -> data[j].li;
+            case UNITYPE_UINT64:
+                return list -> data[i].hi > list -> data[j].lu;
+            case UNITYPE_FLOAT:
+                return list -> data[i].hi > list -> data[j].f;
+            case UNITYPE_DOUBLE:
+                return list -> data[i].hi > list -> data[j].d;
+            case UNITYPE_STRING:
+                return list -> data[i].hi > (uint64_t) list -> data[j].s;
+            case UNITYPE_POINTER:
+                return list -> data[i].hi > (uint64_t) list -> data[j].p;
+            case UNITYPE_LIST:
+                return list -> data[i].hi > (uint64_t) list -> data[j].r;
+            default:
+                return 0;
+        }
+        case UNITYPE_UINT16:
+        switch (list -> type[j]) {
+            case UNITYPE_CHAR:
+                return list -> data[i].hu > list -> data[j].ch;
+            case UNITYPE_INT8:
+                return list -> data[i].hu > list -> data[j].c;
+            case UNITYPE_UINT8:
+                return list -> data[i].hu > list -> data[j].b;
+            case UNITYPE_INT16:
+                return list -> data[i].hu > list -> data[j].hi;
+            case UNITYPE_UINT16:
+                return list -> data[i].hu > list -> data[j].hu;
+            case UNITYPE_INT32:
+                return list -> data[i].hu > list -> data[j].i;
+            case UNITYPE_UINT32:
+                return list -> data[i].hu > list -> data[j].u;
+            case UNITYPE_INT64:
+                return list -> data[i].hu > list -> data[j].li;
+            case UNITYPE_UINT64:
+                return list -> data[i].hu > list -> data[j].lu;
+            case UNITYPE_FLOAT:
+                return list -> data[i].hu > list -> data[j].f;
+            case UNITYPE_DOUBLE:
+                return list -> data[i].hu > list -> data[j].d;
+            case UNITYPE_STRING:
+                return list -> data[i].hu > (uint64_t) list -> data[j].s;
+            case UNITYPE_POINTER:
+                return list -> data[i].hu > (uint64_t) list -> data[j].p;
+            case UNITYPE_LIST:
+                return list -> data[i].hu > (uint64_t) list -> data[j].r;
+            default:
+                return 0;
+        }
+        case UNITYPE_INT32:
+        switch (list -> type[j]) {
+            case UNITYPE_CHAR:
+                return list -> data[i].i > list -> data[j].ch;
+            case UNITYPE_INT8:
+                return list -> data[i].i > list -> data[j].c;
+            case UNITYPE_UINT8:
+                return list -> data[i].i > list -> data[j].b;
+            case UNITYPE_INT16:
+                return list -> data[i].i > list -> data[j].hi;
+            case UNITYPE_UINT16:
+                return list -> data[i].i > list -> data[j].hu;
+            case UNITYPE_INT32:
+                return list -> data[i].i > list -> data[j].i;
+            case UNITYPE_UINT32:
+                return list -> data[i].i > list -> data[j].u;
+            case UNITYPE_INT64:
+                return list -> data[i].i > list -> data[j].li;
+            case UNITYPE_UINT64:
+                return list -> data[i].i > list -> data[j].lu;
+            case UNITYPE_FLOAT:
+                return list -> data[i].i > list -> data[j].f;
+            case UNITYPE_DOUBLE:
+                return list -> data[i].i > list -> data[j].d;
+            case UNITYPE_STRING:
+                return list -> data[i].i > (uint64_t) list -> data[j].s;
+            case UNITYPE_POINTER:
+                return list -> data[i].i > (uint64_t) list -> data[j].p;
+            case UNITYPE_LIST:
+                return list -> data[i].i > (uint64_t) list -> data[j].r;
+            default:
+                return 0;
+        }
+        case UNITYPE_UINT32:
+        switch (list -> type[j]) {
+            case UNITYPE_CHAR:
+                return list -> data[i].u > list -> data[j].ch;
+            case UNITYPE_INT8:
+                return list -> data[i].u > list -> data[j].c;
+            case UNITYPE_UINT8:
+                return list -> data[i].u > list -> data[j].b;
+            case UNITYPE_INT16:
+                return list -> data[i].u > list -> data[j].hi;
+            case UNITYPE_UINT16:
+                return list -> data[i].u > list -> data[j].hu;
+            case UNITYPE_INT32:
+                return list -> data[i].u > list -> data[j].i;
+            case UNITYPE_UINT32:
+                return list -> data[i].u > list -> data[j].u;
+            case UNITYPE_INT64:
+                return list -> data[i].u > list -> data[j].li;
+            case UNITYPE_UINT64:
+                return list -> data[i].u > list -> data[j].lu;
+            case UNITYPE_FLOAT:
+                return list -> data[i].u > list -> data[j].f;
+            case UNITYPE_DOUBLE:
+                return list -> data[i].u > list -> data[j].d;
+            case UNITYPE_STRING:
+                return list -> data[i].u > (uint64_t) list -> data[j].s;
+            case UNITYPE_POINTER:
+                return list -> data[i].u > (uint64_t) list -> data[j].p;
+            case UNITYPE_LIST:
+                return list -> data[i].u > (uint64_t) list -> data[j].r;
+            default:
+                return 0;
+        }
+        case UNITYPE_INT64:
+        switch (list -> type[j]) {
+            case UNITYPE_CHAR:
+                return list -> data[i].li > list -> data[j].ch;
+            case UNITYPE_INT8:
+                return list -> data[i].li > list -> data[j].c;
+            case UNITYPE_UINT8:
+                return list -> data[i].li > list -> data[j].b;
+            case UNITYPE_INT16:
+                return list -> data[i].li > list -> data[j].hi;
+            case UNITYPE_UINT16:
+                return list -> data[i].li > list -> data[j].hu;
+            case UNITYPE_INT32:
+                return list -> data[i].li > list -> data[j].i;
+            case UNITYPE_UINT32:
+                return list -> data[i].li > list -> data[j].u;
+            case UNITYPE_INT64:
+                return list -> data[i].li > list -> data[j].li;
+            case UNITYPE_UINT64:
+                return list -> data[i].li > list -> data[j].lu;
+            case UNITYPE_FLOAT:
+                return list -> data[i].li > list -> data[j].f;
+            case UNITYPE_DOUBLE:
+                return list -> data[i].li > list -> data[j].d;
+            case UNITYPE_STRING:
+                return list -> data[i].li > (uint64_t) list -> data[j].s;
+            case UNITYPE_POINTER:
+                return list -> data[i].li > (uint64_t) list -> data[j].p;
+            case UNITYPE_LIST:
+                return list -> data[i].li > (uint64_t) list -> data[j].r;
+            default:
+                return 0;
+        }
+        case UNITYPE_UINT64:
+        switch (list -> type[j]) {
+            case UNITYPE_CHAR:
+                return list -> data[i].lu > list -> data[j].ch;
+            case UNITYPE_INT8:
+                return list -> data[i].lu > list -> data[j].c;
+            case UNITYPE_UINT8:
+                return list -> data[i].lu > list -> data[j].b;
+            case UNITYPE_INT16:
+                return list -> data[i].lu > list -> data[j].hi;
+            case UNITYPE_UINT16:
+                return list -> data[i].lu > list -> data[j].hu;
+            case UNITYPE_INT32:
+                return list -> data[i].lu > list -> data[j].i;
+            case UNITYPE_UINT32:
+                return list -> data[i].lu > list -> data[j].u;
+            case UNITYPE_INT64:
+                return list -> data[i].lu > list -> data[j].li;
+            case UNITYPE_UINT64:
+                return list -> data[i].lu > list -> data[j].lu;
+            case UNITYPE_FLOAT:
+                return list -> data[i].lu > list -> data[j].f;
+            case UNITYPE_DOUBLE:
+                return list -> data[i].lu > list -> data[j].d;
+            case UNITYPE_STRING:
+                return list -> data[i].lu > (uint64_t) list -> data[j].s;
+            case UNITYPE_POINTER:
+                return list -> data[i].lu > (uint64_t) list -> data[j].p;
+            case UNITYPE_LIST:
+                return list -> data[i].lu > (uint64_t) list -> data[j].r;
+            default:
+                return 0;
+        }
+        case UNITYPE_FLOAT:
+        switch (list -> type[j]) {
+            case UNITYPE_CHAR:
+                return list -> data[i].f > list -> data[j].ch;
+            case UNITYPE_INT8:
+                return list -> data[i].f > list -> data[j].c;
+            case UNITYPE_UINT8:
+                return list -> data[i].f > list -> data[j].b;
+            case UNITYPE_INT16:
+                return list -> data[i].f > list -> data[j].hi;
+            case UNITYPE_UINT16:
+                return list -> data[i].f > list -> data[j].hu;
+            case UNITYPE_INT32:
+                return list -> data[i].f > list -> data[j].i;
+            case UNITYPE_UINT32:
+                return list -> data[i].f > list -> data[j].u;
+            case UNITYPE_INT64:
+                return list -> data[i].f > list -> data[j].li;
+            case UNITYPE_UINT64:
+                return list -> data[i].f > list -> data[j].lu;
+            case UNITYPE_FLOAT:
+                return list -> data[i].f > list -> data[j].f;
+            case UNITYPE_DOUBLE:
+                return list -> data[i].f > list -> data[j].d;
+            case UNITYPE_STRING:
+                return list -> data[i].f > (uint64_t) list -> data[j].s;
+            case UNITYPE_POINTER:
+                return list -> data[i].f > (uint64_t) list -> data[j].p;
+            case UNITYPE_LIST:
+                return list -> data[i].f > (uint64_t) list -> data[j].r;
+            default:
+                return 0;
+        }
+        case UNITYPE_DOUBLE:
+        switch (list -> type[j]) {
+            case UNITYPE_CHAR:
+                return list -> data[i].d > list -> data[j].ch;
+            case UNITYPE_INT8:
+                return list -> data[i].d > list -> data[j].c;
+            case UNITYPE_UINT8:
+                return list -> data[i].d > list -> data[j].b;
+            case UNITYPE_INT16:
+                return list -> data[i].d > list -> data[j].hi;
+            case UNITYPE_UINT16:
+                return list -> data[i].d > list -> data[j].hu;
+            case UNITYPE_INT32:
+                return list -> data[i].d > list -> data[j].i;
+            case UNITYPE_UINT32:
+                return list -> data[i].d > list -> data[j].u;
+            case UNITYPE_INT64:
+                return list -> data[i].d > list -> data[j].li;
+            case UNITYPE_UINT64:
+                return list -> data[i].d > list -> data[j].lu;
+            case UNITYPE_FLOAT:
+                return list -> data[i].d > list -> data[j].f;
+            case UNITYPE_DOUBLE:
+                return list -> data[i].d > list -> data[j].d;
+            case UNITYPE_STRING:
+                return list -> data[i].d > (uint64_t) list -> data[j].s;
+            case UNITYPE_POINTER:
+                return list -> data[i].d > (uint64_t) list -> data[j].p;
+            case UNITYPE_LIST:
+                return list -> data[i].d > (uint64_t) list -> data[j].r;
+            default:
+                return 0;
+        }
+        case UNITYPE_STRING:
+        switch (list -> type[j]) {
+            case UNITYPE_CHAR:
+                return (uint64_t) list -> data[i].s > list -> data[j].ch;
+            case UNITYPE_INT8:
+                return (uint64_t) list -> data[i].s > list -> data[j].c;
+            case UNITYPE_UINT8:
+                return (uint64_t) list -> data[i].s > list -> data[j].b;
+            case UNITYPE_INT16:
+                return (uint64_t) list -> data[i].s > list -> data[j].hi;
+            case UNITYPE_UINT16:
+                return (uint64_t) list -> data[i].s > list -> data[j].hu;
+            case UNITYPE_INT32:
+                return (uint64_t) list -> data[i].s > list -> data[j].i;
+            case UNITYPE_UINT32:
+                return (uint64_t) list -> data[i].s > list -> data[j].u;
+            case UNITYPE_INT64:
+                return (uint64_t) list -> data[i].s > list -> data[j].li;
+            case UNITYPE_UINT64:
+                return (uint64_t) list -> data[i].s > list -> data[j].lu;
+            case UNITYPE_FLOAT:
+                return (uint64_t) list -> data[i].s > list -> data[j].f;
+            case UNITYPE_DOUBLE:
+                return (uint64_t) list -> data[i].s > list -> data[j].d;
+            case UNITYPE_STRING:
+                return (uint64_t) list -> data[i].s > (uint64_t) list -> data[j].s;
+            case UNITYPE_POINTER:
+                return (uint64_t) list -> data[i].s > (uint64_t) list -> data[j].p;
+            case UNITYPE_LIST:
+                return (uint64_t) list -> data[i].s > (uint64_t) list -> data[j].r;
+            default:
+                return 0;
+        }
+        case UNITYPE_POINTER:
+        switch (list -> type[j]) {
+            case UNITYPE_CHAR:
+                return (uint64_t) list -> data[i].p > list -> data[j].ch;
+            case UNITYPE_INT8:
+                return (uint64_t) list -> data[i].p > list -> data[j].c;
+            case UNITYPE_UINT8:
+                return (uint64_t) list -> data[i].p > list -> data[j].b;
+            case UNITYPE_INT16:
+                return (uint64_t) list -> data[i].p > list -> data[j].hi;
+            case UNITYPE_UINT16:
+                return (uint64_t) list -> data[i].p > list -> data[j].hu;
+            case UNITYPE_INT32:
+                return (uint64_t) list -> data[i].p > list -> data[j].i;
+            case UNITYPE_UINT32:
+                return (uint64_t) list -> data[i].p > list -> data[j].u;
+            case UNITYPE_INT64:
+                return (uint64_t) list -> data[i].p > list -> data[j].li;
+            case UNITYPE_UINT64:
+                return (uint64_t) list -> data[i].p > list -> data[j].lu;
+            case UNITYPE_FLOAT:
+                return (uint64_t) list -> data[i].p > list -> data[j].f;
+            case UNITYPE_DOUBLE:
+                return (uint64_t) list -> data[i].p > list -> data[j].d;
+            case UNITYPE_STRING:
+                return (uint64_t) list -> data[i].p > (uint64_t) list -> data[j].s;
+            case UNITYPE_POINTER:
+                return (uint64_t) list -> data[i].p > (uint64_t) list -> data[j].p;
+            case UNITYPE_LIST:
+                return (uint64_t) list -> data[i].p > (uint64_t) list -> data[j].r;
+            default:
+                return 0;
+        }
+        case UNITYPE_LIST:
+        switch (list -> type[j]) {
+            case UNITYPE_CHAR:
+                return (uint64_t) list -> data[i].r > list -> data[j].ch;
+            case UNITYPE_INT8:
+                return (uint64_t) list -> data[i].r > list -> data[j].c;
+            case UNITYPE_UINT8:
+                return (uint64_t) list -> data[i].r > list -> data[j].b;
+            case UNITYPE_INT16:
+                return (uint64_t) list -> data[i].r > list -> data[j].hi;
+            case UNITYPE_UINT16:
+                return (uint64_t) list -> data[i].r > list -> data[j].hu;
+            case UNITYPE_INT32:
+                return (uint64_t) list -> data[i].r > list -> data[j].i;
+            case UNITYPE_UINT32:
+                return (uint64_t) list -> data[i].r > list -> data[j].u;
+            case UNITYPE_INT64:
+                return (uint64_t) list -> data[i].r > list -> data[j].li;
+            case UNITYPE_UINT64:
+                return (uint64_t) list -> data[i].r > list -> data[j].lu;
+            case UNITYPE_FLOAT:
+                return (uint64_t) list -> data[i].r > list -> data[j].f;
+            case UNITYPE_DOUBLE:
+                return (uint64_t) list -> data[i].r > list -> data[j].d;
+            case UNITYPE_STRING:
+                return (uint64_t) list -> data[i].r > (uint64_t) list -> data[j].s;
+            case UNITYPE_POINTER:
+                return (uint64_t) list -> data[i].r > (uint64_t) list -> data[j].p;
+            case UNITYPE_LIST:
+                return (uint64_t) list -> data[i].r > (uint64_t) list -> data[j].r;
+            default:
+                return 0;
+        }
+        default:
+            return 0;
+    }
+    return 0;
+}
+
 /* sort list (polymorphic), also insane */
 #define list_sort_polymorph(list, LIST_SORT_TYPE) ({\
     /* create min heap */\
@@ -322,63 +793,59 @@ int32_t list_count(list_t *list, unitype item, char type) {
     }\
 })
 
-int8_t list_sort_compare(list_t *list, int32_t i, int32_t j) {
-    /* greater than */
-    if (list -> type[i] != UNITYPE_FLOAT && list -> type[i] != UNITYPE_DOUBLE && list -> type[j] != UNITYPE_FLOAT && list -> type[j] != UNITYPE_DOUBLE) {
-        return list -> data[i].li > list -> data[j].li;
-    }
-    if (list -> type[i] != UNITYPE_FLOAT && list -> type[i] != UNITYPE_DOUBLE && list -> type[j] == UNITYPE_FLOAT) {
-        return list -> data[i].li > list -> data[j].f;
-    }
-    if (list -> type[i] != UNITYPE_FLOAT && list -> type[i] != UNITYPE_DOUBLE && list -> type[j] == UNITYPE_DOUBLE) {
-        return list -> data[i].li > list -> data[j].d;
-    }
-    if (list -> type[i] == UNITYPE_FLOAT && list -> type[j] != UNITYPE_FLOAT && list -> type[j] != UNITYPE_DOUBLE) {
-        return list -> data[i].f > list -> data[j].li;
-    }
-    if (list -> type[i] == UNITYPE_FLOAT && list -> type[j] == UNITYPE_FLOAT) {
-        return list -> data[i].f > list -> data[j].f;
-    }
-    if (list -> type[i] == UNITYPE_FLOAT && list -> type[j] == UNITYPE_DOUBLE) {
-        return list -> data[i].f > list -> data[j].d;
-    }
-    if (list -> type[i] == UNITYPE_DOUBLE && list -> type[j] != UNITYPE_FLOAT && list -> type[j] != UNITYPE_DOUBLE) {
-        return list -> data[i].d > list -> data[j].li;
-    }
-    if (list -> type[i] == UNITYPE_DOUBLE && list -> type[j] == UNITYPE_FLOAT) {
-        return list -> data[i].d > list -> data[j].f;
-    }
-    if (list -> type[i] == UNITYPE_DOUBLE && list -> type[j] == UNITYPE_DOUBLE) {
-        return list -> data[i].d > list -> data[j].d;
-    }
-    return 0;
-}
-
 /* sort list (biggest to smallest) */
 void list_sort(list_t *list) {
-    int32_t type = -1;
+    int8_t type = -1;
     for (int32_t i = 0; i < list -> length; i++) {
-        int32_t localType = 0;
-        if (list -> type[i] == UNITYPE_FLOAT) {
-            localType = 1;
-        }
-        if (list -> type[i] == UNITYPE_DOUBLE) {
-            localType = 2;
-        }
+        int8_t localType = list -> type[i];
         if (type == -1) {
             type = localType;
         } else if (type != localType) {
-            type = 3;
+            type = -2;
         }
     }
-    if (type == 0) {
-        list_sort_polymorph(list, li);
+    switch (type) {
+        case UNITYPE_CHAR:
+            list_sort_polymorph(list, ch);
         return;
-    } else if (type == 1) {
-        list_sort_polymorph(list, f);
+        case UNITYPE_INT8:
+            list_sort_polymorph(list, c);
         return;
-    } else if (type == 2) {
-        list_sort_polymorph(list, d);
+        case UNITYPE_UINT8: // UINT8 or BOOL
+            list_sort_polymorph(list, b);
+        return;
+        case UNITYPE_INT16:
+            list_sort_polymorph(list, hi);
+        return;
+        case UNITYPE_UINT16:
+            list_sort_polymorph(list, hu);
+        return;
+        case UNITYPE_INT32:
+            list_sort_polymorph(list, i);
+        return;
+        case UNITYPE_UINT32:
+            list_sort_polymorph(list, u);
+        return;
+        case UNITYPE_INT64:
+            list_sort_polymorph(list, li);
+        return;
+        case UNITYPE_UINT64:
+            list_sort_polymorph(list, lu);
+        return;
+        case UNITYPE_FLOAT:
+            list_sort_polymorph(list, f);
+        return;
+        case UNITYPE_DOUBLE:
+            list_sort_polymorph(list, d);
+        return;
+        case UNITYPE_STRING:
+            list_sort_polymorph(list, s);
+        return;
+        case UNITYPE_POINTER:
+            list_sort_polymorph(list, p);
+        return;
+        case UNITYPE_LIST:
+            list_sort_polymorph(list, r);
         return;
     }
     /* hybrid type sort */
@@ -426,7 +893,7 @@ void list_sort(list_t *list) {
     }
 }
 
-/* return a list of indices that would sort the list */
+/* return a list of indices that would sort the list (biggest to smallest) */
 list_t *list_sort_index(list_t *list) {
     int8_t *marked = calloc(list -> length, 1);
     list_t *output = list_init();
@@ -510,31 +977,59 @@ list_t *list_sort_index(list_t *list) {
     }\
 })
 
-/* sort list (biggest to smallest) (stride) */
+/* sort list (stride) (biggest to smallest) */
 void list_sort_stride(list_t *list, int32_t stride, int32_t offset) {
-    int32_t type = -1;
-    for (int32_t i = 0; i < list -> length; i++) {
-        int32_t localType = 0;
-        if (list -> type[i] == UNITYPE_FLOAT) {
-            localType = 1;
-        }
-        if (list -> type[i] == UNITYPE_DOUBLE) {
-            localType = 2;
-        }
+    int8_t type = -1;
+    for (int32_t i = offset; i < list -> length; i += stride) {
+        int8_t localType = list -> type[i];
         if (type == -1) {
             type = localType;
         } else if (type != localType) {
-            type = 3;
+            type = -2;
         }
     }
-    if (type == 0) {
-        list_sort_stride_polymorph(list, stride, offset, li);
+    switch (type) {
+        case UNITYPE_CHAR:
+            list_sort_stride_polymorph(list, stride, offset, ch);
         return;
-    } else if (type == 1) {
-        list_sort_stride_polymorph(list, stride, offset, f);
+        case UNITYPE_INT8:
+            list_sort_stride_polymorph(list, stride, offset, c);
         return;
-    } else if (type == 2) {
-        list_sort_stride_polymorph(list, stride, offset, d);
+        case UNITYPE_UINT8: // UINT8 or BOOL
+            list_sort_stride_polymorph(list, stride, offset, b);
+        return;
+        case UNITYPE_INT16:
+            list_sort_stride_polymorph(list, stride, offset, hi);
+        return;
+        case UNITYPE_UINT16:
+            list_sort_stride_polymorph(list, stride, offset, hu);
+        return;
+        case UNITYPE_INT32:
+            list_sort_stride_polymorph(list, stride, offset, i);
+        return;
+        case UNITYPE_UINT32:
+            list_sort_stride_polymorph(list, stride, offset, u);
+        return;
+        case UNITYPE_INT64:
+            list_sort_stride_polymorph(list, stride, offset, li);
+        return;
+        case UNITYPE_UINT64:
+            list_sort_stride_polymorph(list, stride, offset, lu);
+        return;
+        case UNITYPE_FLOAT:
+            list_sort_stride_polymorph(list, stride, offset, f);
+        return;
+        case UNITYPE_DOUBLE:
+            list_sort_stride_polymorph(list, stride, offset, d);
+        return;
+        case UNITYPE_STRING:
+            list_sort_stride_polymorph(list, stride, offset, s);
+        return;
+        case UNITYPE_POINTER:
+            list_sort_stride_polymorph(list, stride, offset, p);
+        return;
+        case UNITYPE_LIST:
+            list_sort_stride_polymorph(list, stride, offset, r);
         return;
     }
     /* hybrid type stride sort */
@@ -593,7 +1088,7 @@ void list_sort_stride(list_t *list, int32_t stride, int32_t offset) {
     }
 }
 
-/* return a list of indices that would sort the list (stride) */
+/* return a list of indices that would sort the list (stride) (biggest to smallest) */
 list_t *list_sort_stride_index(list_t *list, int32_t stride, int32_t offset) {
     offset %= stride;
     int8_t *marked = calloc(list -> length / stride, 1);
@@ -623,6 +1118,14 @@ list_t *list_sort_stride_index(list_t *list, int32_t stride, int32_t offset) {
     return output;
 }
 
+int32_t list_select(list_t *list, int32_t k) {
+    return 0;
+}
+
+int32_t list_median(list_t *list) {
+    return list_select(list, list -> length / 2);
+}
+
 /* deletes the first instance of the item from the list, returns the index the item was at, returns -1 and doesn't modify the list if not found */
 int32_t list_remove(list_t *list, unitype item, char type) {
     for (int32_t i = 0; i < list -> length; i++) {
@@ -647,7 +1150,7 @@ void unitype_fprint(FILE *fp, unitype item, char type) {
             fprintf(fp, "%hhu", item.b);
         break;
         case UNITYPE_INT16:
-            fprintf(fp, "%hi", item.h);
+            fprintf(fp, "%hi", item.hi);
         break;
         case UNITYPE_UINT16:
             fprintf(fp, "%hu", item.hu);
@@ -662,7 +1165,7 @@ void unitype_fprint(FILE *fp, unitype item, char type) {
             fprintf(fp, "%lli", item.li);
         break;
         case UNITYPE_UINT64:
-            fprintf(fp, "%llu", item.l);
+            fprintf(fp, "%llu", item.lu);
         break;
         case UNITYPE_FLOAT:
             fprintf(fp, "%f", item.f);
@@ -696,7 +1199,7 @@ void unitype_sprint(char *str, unitype item, char type) {
             sprintf(str, "%hhu", item.b);
         break;
         case UNITYPE_INT16:
-            sprintf(str, "%hi", item.h);
+            sprintf(str, "%hi", item.hi);
         break;
         case UNITYPE_UINT16:
             sprintf(str, "%hu", item.hu);
@@ -711,7 +1214,7 @@ void unitype_sprint(char *str, unitype item, char type) {
             sprintf(str, "%lli", item.li);
         break;
         case UNITYPE_UINT64:
-            sprintf(str, "%llu", item.l);
+            sprintf(str, "%llu", item.lu);
         break;
         case UNITYPE_FLOAT:
             sprintf(str, "%f", item.f);
@@ -938,13 +1441,13 @@ void list_append_element(list_t *list, char *element, char type) {
     }
 }
 
-/* reads list from a file that was written to with list_write() - ensure file pointer is located at the start of the list */
+/* reads list from a file that was written to with list_write() - ensure file pointer is open and located at the start of the list */
 list_t *list_read(FILE *fp) {
     return list_read_large(fp, 2048);
 }
 
-/* read a large list from a file */
-list_t *list_read_large(FILE *fp, int32_t maximumLineSize) {
+/* read a large list from a file - ensure file pointer is open and located at the start of the list */
+list_t *list_read_large(FILE *fp, int32_t maximumStringSize) {
     list_t *output = list_init();
     /* locate start of list */
     char checkChar;
@@ -959,13 +1462,13 @@ list_t *list_read_large(FILE *fp, int32_t maximumLineSize) {
         printf("list_read: ERROR - Could not locate start of list\n");
         return output;
     }
-    char *item = malloc(maximumLineSize); // no string can exceed maximumLineSize characters
+    char *item = malloc(maximumStringSize); // no string can exceed maximumStringSize characters
     while (status == 1) {
         /* read item */
         int32_t writePointer = 0;
         int8_t backslashFound = 0;
         list_t *embeddedList = NULL;
-        while (writePointer < maximumLineSize - 1 && status == 1) {
+        while (writePointer < maximumStringSize - 1 && status == 1) {
             status = fread(item + writePointer, 1, 1, fp);
             if (!backslashFound && item[writePointer] == ',') {
                 /* end of element */
@@ -974,7 +1477,7 @@ list_t *list_read_large(FILE *fp, int32_t maximumLineSize) {
             if (!backslashFound && item[writePointer] == '[') {
                 /* embedded list */
                 fseek(fp, -1, SEEK_CUR); // move filepointer back one
-                embeddedList = list_read_large(fp, maximumLineSize);
+                embeddedList = list_read_large(fp, maximumStringSize);
                 status = fread(&checkChar, 1, 1, fp); // skip comma
                 if (checkChar != ',') {
                     /* expected comma here - fail */

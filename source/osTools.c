@@ -290,7 +290,7 @@ list_t *osToolsLoadInternal(char *filename, ost_csv_t rowOrColumn, char delimete
             /* case: comma */
             mappedFile[rightIndex] = '\0';
             unitype field;
-            field.l = 0;
+            field.lu = 0;
             if (fieldType == OSTOOLS_CSV_FIELD_DOUBLE) {
                 sscanf((char *) (mappedFile + leftIndex), "%lf", (double *) &field);
             } else if (fieldType == OSTOOLS_CSV_FIELD_INT) {
@@ -322,7 +322,7 @@ list_t *osToolsLoadInternal(char *filename, ost_csv_t rowOrColumn, char delimete
                 char tempHold = mappedFile[rightIndex];
                 mappedFile[rightIndex] = '\0';
                 unitype field;
-                field.l = 0;
+                field.lu = 0;
                 if (fieldType == OSTOOLS_CSV_FIELD_DOUBLE) {
                     sscanf((char *) (mappedFile + leftIndex), "%lf", (double *) &field);
                 } else if (fieldType == OSTOOLS_CSV_FIELD_INT) {
@@ -362,7 +362,7 @@ list_t *osToolsLoadInternal(char *filename, ost_csv_t rowOrColumn, char delimete
         }
     } else {
         unitype field;
-        field.l = 0;
+        field.lu = 0;
         if (fieldType == OSTOOLS_CSV_FIELD_DOUBLE) {
             sscanf((char *) (mappedFile + leftIndex), "%lf", (double *) &field);
         } else if (fieldType == OSTOOLS_CSV_FIELD_INT) {
@@ -817,7 +817,7 @@ int32_t osToolsSerialOpen(char *name, osToolsSerialBaud_t baudRate) {
     /* check if this port is already open */
     int32_t index = list_find(osToolsSerial.serial, (unitype) name, 's');
     if (index != -1) {
-        if (CloseHandle((HANDLE) (osToolsSerial.serial -> data[index + 1].l)) == 0) {
+        if (CloseHandle((HANDLE) (osToolsSerial.serial -> data[index + 1].lu)) == 0) {
             printf("osToolsSerialOpen failed with error %ld\n", GetLastError());
             return -1;
         }
@@ -884,7 +884,7 @@ int32_t osToolsSerialSend(char *name, uint8_t *data, int32_t length) {
     }
     /* https://www.codeproject.com/Articles/3061/Creating-a-Serial-communication-on-Win32#sending */
     DWORD bytes;
-    if (WriteFile((HANDLE) (osToolsSerial.serial -> data[index + 1].l), data, length, &bytes, NULL) == 0) {
+    if (WriteFile((HANDLE) (osToolsSerial.serial -> data[index + 1].lu), data, length, &bytes, NULL) == 0) {
         printf("osToolsSerialSend failed with error %ld\n", GetLastError());
         return 0;
     }
@@ -900,10 +900,10 @@ int32_t osToolsSerialReceive(char *name, uint8_t *buffer, int32_t length, int32_
     }
     /* Set comm timeout */
     COMMTIMEOUTS timeout = {0, 0, timeoutMilliseconds, 0, 0};
-    SetCommTimeouts((HANDLE) (osToolsSerial.serial -> data[index + 1].l), &timeout);
+    SetCommTimeouts((HANDLE) (osToolsSerial.serial -> data[index + 1].lu), &timeout);
     /* read from COM */
     DWORD bytes;
-    if (ReadFile((HANDLE) (osToolsSerial.serial -> data[index + 1].l), buffer, length, &bytes, NULL) == 0) {
+    if (ReadFile((HANDLE) (osToolsSerial.serial -> data[index + 1].lu), buffer, length, &bytes, NULL) == 0) {
         printf("osToolsSerialReceive failed with error %ld\n", GetLastError());
         return 0;
     }
@@ -914,7 +914,7 @@ int32_t osToolsSerialClose(char *name) {
     /* check if this port is already open */
     int32_t index = list_find(osToolsSerial.serial, (unitype) name, 's');
     if (index != -1) {
-        if (CloseHandle((HANDLE) (osToolsSerial.serial -> data[index + 1].l)) == 0) {
+        if (CloseHandle((HANDLE) (osToolsSerial.serial -> data[index + 1].lu)) == 0) {
             printf("osToolsSerialClose failed with error %ld\n", GetLastError());
             return -1;
         }

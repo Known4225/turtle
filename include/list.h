@@ -78,12 +78,12 @@ typedef union {
     bool bo;
     int8_t c;
     uint8_t b;
-    int16_t h;
+    int16_t hi;
     uint16_t hu;
     int32_t i;
     uint32_t u;
     int64_t li;
-    uint64_t l;
+    uint64_t lu;
     float f;
     double d; // i will stand by it. d should be double
     double lf;
@@ -162,6 +162,12 @@ void list_sort_stride(list_t *list, int32_t stride, int32_t offset);
 /* return a list of indices that would sort the list (stride) (biggest to smallest) */
 list_t *list_sort_stride_index(list_t *list, int32_t stride, int32_t offset);
 
+/* return the index of the kth smallest element of the list */
+int32_t list_select(list_t *list, int32_t k);
+
+/* return the index of the median of the list */
+int32_t list_median(list_t *list);
+
 /* deletes the first instance of the item from the list, returns the index the item was at, returns -1 and doesn't modify the list if not found */
 int32_t list_remove(list_t *list, unitype item, char type);
 
@@ -198,11 +204,11 @@ void list_write(FILE *fp, list_t *list);
 /* a list_append that takes a string and parses it to the appropriate type */
 void list_append_element(list_t *list, char *element, char type);
 
-/* reads list from a file that was written to with list_write() - ensure file pointer is located at the start of the list */
+/* reads list from a file that was written to with list_write() - ensure file pointer is open and located at the start of the list */
 list_t *list_read(FILE *fp);
 
-/* read a large list from a file */
-list_t *list_read_large(FILE *fp, int32_t maximumLineSize);
+/* read a large list from a file - ensure file pointer is open and located at the start of the list */
+list_t *list_read_large(FILE *fp, int32_t maximumStringSize);
 
 /* frees the list's data but not the list itself */
 void list_free_lite(list_t *list);

@@ -512,7 +512,7 @@ void turtlePenDown() {
             if (ren[len - 5].d != turtle.peng) {changed = 1;}
             if (ren[len - 4].d != turtle.penb) {changed = 1;}
             if (ren[len - 3].d != turtle.pena) {changed = 1;}
-            if (ren[len - 2].h != turtle.penshape) {changed = 1;}
+            if (ren[len - 2].hu != turtle.penshape) {changed = 1;}
             if (ren[len - 1].d != turtle.circleprez) {changed = 1;}
         } else {
             changed = 1;
@@ -593,7 +593,7 @@ void turtleGoto(double x, double y) {
                 if (ren[len - 5].d != turtle.peng) {changed = 1;}
                 if (ren[len - 4].d != turtle.penb) {changed = 1;}
                 if (ren[len - 3].d != turtle.pena) {changed = 1;}
-                if (ren[len - 2].h != turtle.penshape) {changed = 1;}
+                if (ren[len - 2].hu != turtle.penshape) {changed = 1;}
                 if (ren[len - 1].d != turtle.circleprez) {changed = 1;}
             } else {
                 changed = 1;
@@ -1588,7 +1588,7 @@ void turtleUpdate() {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         for (int32_t i = 0; i < len; i += 9) {
             if (renType[i] == 'd') {
-                switch (ren[i + 7].h) {
+                switch (ren[i + 7].hu) {
                 case 0: // penshape circle
                     if (lastSize != ren[i + 2].d || lastPrez != ren[i + 8].d) {
                         precomputedLog = ren[i + 8].d * log(2.71 + ren[i + 2].d);
@@ -1604,7 +1604,7 @@ void turtleUpdate() {
                     turtleTriangleRenderInternal(ren[i].d - ren[i + 2].d, ren[i + 1].d - ren[i + 2].d, ren[i].d + ren[i + 2].d, ren[i + 1].d - ren[i + 2].d, ren[i].d, ren[i + 1].d + ren[i + 2].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xcenter, ycenter, xfact, yfact);
                 break;
                 case 5: // penshape text
-                    if (i - 9 < 0 || i + 9 >= len || renType[i - 1] == 'c' || ren[i - 2].h > 5) {
+                    if (i - 9 < 0 || i + 9 >= len || renType[i - 1] == 'c' || ren[i - 2].hu > 5) {
                         if (lastSize != ren[i + 2].d || lastPrez != ren[i + 8].d) {
                             precomputedLog = ren[i + 8].d * log(2.71 + ren[i + 2].d);
                         }
@@ -1616,12 +1616,12 @@ void turtleUpdate() {
                 default:
                 break;
                 }
-                if (i + 18 < len && renType[i + 9] == 'd' && ren[i + 7].h < 64 && (ren[i + 7].h == 4 || ren[i + 7].h == 5 || (fabs(ren[i].d - ren[i + 9].d) > ren[i + 2].d / 2 || fabs(ren[i + 1].d - ren[i + 10].d) > ren[i + 2].d / 2))) { // tests for next point continuity and also ensures that the next point is at sufficiently different coordinates
+                if (i + 18 < len && renType[i + 9] == 'd' && ren[i + 7].hu < 64 && (ren[i + 7].hu == 4 || ren[i + 7].hu == 5 || (fabs(ren[i].d - ren[i + 9].d) > ren[i + 2].d / 2 || fabs(ren[i + 1].d - ren[i + 10].d) > ren[i + 2].d / 2))) { // tests for next point continuity and also ensures that the next point is at sufficiently different coordinates
                     double dir = atan((ren[i + 9].d - ren[i].d) / (ren[i + 1].d - ren[i + 10].d));
                     double sinn = sin(dir + M_PI / 2);
                     double coss = cos(dir + M_PI / 2);
                     turtleQuadRenderInternal(ren[i].d + ren[i + 2].d * sinn, ren[i + 1].d - ren[i + 2].d * coss, ren[i + 9].d + ren[i + 2].d * sinn, ren[i + 10].d - ren[i + 2].d * coss, ren[i + 9].d - ren[i + 2].d * sinn, ren[i + 10].d + ren[i + 2].d * coss, ren[i].d - ren[i + 2].d * sinn, ren[i + 1].d + ren[i + 2].d * coss, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xcenter, ycenter, xfact, yfact);
-                    if ((ren[i + 7].h == 4 || ren[i + 7].h == 5) && i + 18 < len && renType[i + 18] == 'd') {
+                    if ((ren[i + 7].hu == 4 || ren[i + 7].hu == 5) && i + 18 < len && renType[i + 18] == 'd') {
                         double dir2 = atan((ren[i + 18].d - ren[i + 9].d) / (ren[i + 10].d - ren[i + 19].d));
                         double sinn2 = sin(dir2 + M_PI / 2);
                         double coss2 = cos(dir2 + M_PI / 2);
@@ -1629,7 +1629,7 @@ void turtleUpdate() {
                         turtleTriangleRenderInternal(ren[i + 9].d + ren[i + 2].d * sinn, ren[i + 10].d - ren[i + 2].d * coss, ren[i + 9].d - ren[i + 2].d * sinn, ren[i + 10].d + ren[i + 2].d * coss, ren[i + 9].d - ren[i + 11].d * sinn2, ren[i + 10].d + ren[i + 11].d * coss2, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xcenter, ycenter, xfact, yfact); // however we live in a world where i am bad at math, so it just renders both no matter what (one has no effect)
                     }
                 } else {
-                    if (ren[i + 7].h == 4 && i > 8 && renType[i - 8] == 'c') {
+                    if (ren[i + 7].hu == 4 && i > 8 && renType[i - 8] == 'c') {
                         if (!(lastSize == ren[i + 2].d) || !(lastPrez != ren[i + 8].d)) {
                             precomputedLog = ren[i + 8].d * log(2.71 + ren[i + 2].d);
                         }
@@ -1637,7 +1637,7 @@ void turtleUpdate() {
                         lastPrez = ren[i + 8].d;
                         turtleCircleRenderInternal(ren[i].d, ren[i + 1].d, ren[i + 2].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xcenter, ycenter, xfact, yfact, precomputedLog);
                     }
-                    if (ren[i + 7].h == 5 && i > 8) {
+                    if (ren[i + 7].hu == 5 && i > 8) {
                         if (!(lastSize == ren[i + 2].d) || !(lastPrez != ren[i + 8].d)) {
                             precomputedLog = ren[i + 8].d * log(2.71 + ren[i + 2].d);
                         }
@@ -1646,7 +1646,7 @@ void turtleUpdate() {
                         turtleCircleRenderInternal(ren[i].d, ren[i + 1].d, ren[i + 2].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xcenter, ycenter, xfact, yfact, precomputedLog);
                     }
                 }
-                if (ren[i + 7].h == 64) { // blit circle
+                if (ren[i + 7].hu == 64) { // blit circle
                     if (!(lastSize == ren[i + 2].d) || !(lastPrez != ren[i + 8].d)) {
                         precomputedLog = ren[i + 8].d * log(2.71 + ren[i + 2].d);
                     }
@@ -1654,33 +1654,33 @@ void turtleUpdate() {
                     lastPrez = ren[i + 8].d;
                     turtleCircleRenderInternal(ren[i].d, ren[i + 1].d, ren[i + 2].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xcenter, ycenter, xfact, yfact, precomputedLog);
                 }
-                if (ren[i + 7].h == 66) { // blit triangle
+                if (ren[i + 7].hu == 66) { // blit triangle
                     turtleTriangleRenderInternal(ren[i].d, ren[i + 1].d, ren[i + 2].d, ren[i + 8].d, ren[i + 9].d, ren[i + 10].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xcenter, ycenter, xfact, yfact);
                     i += 9;
                 }
-                if (ren[i + 7].h == 67) { // blit quad
+                if (ren[i + 7].hu == 67) { // blit quad
                     turtleQuadRenderInternal(ren[i].d, ren[i + 1].d, ren[i + 2].d, ren[i + 8].d, ren[i + 9].d, ren[i + 10].d, ren[i + 11].d, ren[i + 17].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xcenter, ycenter, xfact, yfact);
                     i += 9;
                 }
                 #ifdef TURTLE_ENABLE_TEXTURES
-                if (ren[i + 7].h >= 128) { // blit texture (rectangle)
-                    turtleTextureRenderInternal(ren[i + 7].h - 128, ren[i].d, ren[i + 1].d, ren[i + 2].d, ren[i + 3].d, ren[i + 5].d, ren[i + 6].d, ren[i + 8].d, ren[i + 4].d / 57.2958, xcenter, ycenter, xfact, yfact);
+                if (ren[i + 7].hu >= 128) { // blit texture (rectangle)
+                    turtleTextureRenderInternal(ren[i + 7].hu - 128, ren[i].d, ren[i + 1].d, ren[i + 2].d, ren[i + 3].d, ren[i + 5].d, ren[i + 6].d, ren[i + 8].d, ren[i + 4].d / 57.2958, xcenter, ycenter, xfact, yfact);
                 }
                 #endif /* TURTLE_ENABLE_TEXTURES */
-                // if (ren[i + 7].h == 256) { // blit 3D sphere
+                // if (ren[i + 7].hu == 256) { // blit 3D sphere
 
                 // }
-                // if (ren[i + 7].h == 257) { // blit 3D circle
+                // if (ren[i + 7].hu == 257) { // blit 3D circle
 
                 // }
-                // if (ren[i + 7].h == 258) { // blit 3D triangle
+                // if (ren[i + 7].hu == 258) { // blit 3D triangle
                 //     turtlePerspective(ren[i].d, ren[i + 1].d, ren[i + 2].d, &ren[i].d, &ren[i + 1].d);
                 //     turtlePerspective(ren[i + 8].d, ren[i + 9].d, ren[i + 10].d, &ren[i + 8].d, &ren[i + 9].d);
                 //     turtlePerspective(ren[i + 11].d, ren[i + 12].d, ren[i + 13].d, &ren[i + 11].d, &ren[i + 12].d);
                 //     turtleTriangleRenderInternal(ren[i].d, ren[i + 1].d, ren[i + 8].d, ren[i + 9].d, ren[i + 11].d, ren[i + 12].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xcenter, ycenter, xfact, yfact);
                 //     i += 9;
                 // }
-                // if (ren[i + 7].h == 259) { // blit 3D quad
+                // if (ren[i + 7].hu == 259) { // blit 3D quad
 
                 // }
             }

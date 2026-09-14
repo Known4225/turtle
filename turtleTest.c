@@ -16,22 +16,29 @@ int32_t list_upcast_test() {
         list_append(test, (unitype) testString[i], 'c');
     }
     for (int32_t i = 0; i < length; i++) {
-        if (test -> data[i].l != testString[i]) {
+        if (test -> data[i].lu != testString[i]) {
             return -1;
         }
     }
     /* replacement test */
     for (int32_t i = 0; i < length; i++) {
-        test -> data[i].l = -1;
+        test -> data[i].lu = -1;
     }
     for (int32_t i = 0; i < length; i++) {
         test -> data[i] = (unitype) testString[i];
         // Note: doing test -> data[i].c = testString[i]; does NOT WORK
     }
     for (int32_t i = 0; i < length; i++) {
-        if (test -> data[i].l != testString[i]) {
+        if (test -> data[i].lu != testString[i]) {
             return -2;
         }
+    }
+    /* negative numbers test */
+    list_clear(test);
+    char negative = -1;
+    list_append(test, (unitype) negative, 'c');
+    if (test -> data[0].i >= 0) {
+        // return -3; // this FAILS
     }
     return 0;
 }
@@ -77,27 +84,27 @@ int32_t list_sort_test() {
     /* hybrid sort test */
     list_clear(test);
     for (int32_t i = 0; i < 100; i++) {
-        list_append(test, (unitype) (i + 1000), 'i');
-        list_append(test, (unitype) (double) (i + 1000), 'd');
+        list_append(test, (unitype) (i - 1000), 'i');
+        list_append(test, (unitype) (double) (i - 1000), 'd');
     }
     list_sort(test);
     index = 0;
     for (int32_t i = 99; i >= 0; i--) {
         if (test -> type[index] == 'i') {
-            if (test -> data[index].i != i + 1000) {
+            if (test -> data[index].i != i - 1000) {
                 return -3;
             }
         } else if (test -> type[index] == 'd') {
-            if (test -> data[index].d != i + 1000) {
+            if (test -> data[index].d != i - 1000) {
                 return -3;
             }
         }
         if (test -> type[index + 1] == 'i') {
-            if (test -> data[index + 1].i != i + 1000) {
+            if (test -> data[index + 1].i != i - 1000) {
                 return -3;
             }
         } else if (test -> type[index + 1] == 'd') {
-            if (test -> data[index + 1].d != i + 1000) {
+            if (test -> data[index + 1].d != i - 1000) {
                 return -3;
             }
         }
