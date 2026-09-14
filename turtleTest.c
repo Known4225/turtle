@@ -5,6 +5,15 @@ Tests for turtle libraries
 */
 
 #include "turtle.h"
+#include <time.h>
+
+int randomInt(int lowerBound, int upperBound) { // random integer between lower and upper bound (inclusive)
+    return (rand() % (upperBound - lowerBound + 1) + lowerBound);
+}
+
+double randomDouble(double lowerBound, double upperBound) { // random double between lower and upper bound
+    return (rand() * (upperBound - lowerBound) / RAND_MAX + lowerBound); // probably works idk
+}
 
 /* list upcast */
 int32_t list_upcast_test() {
@@ -25,7 +34,7 @@ int32_t list_upcast_test() {
         test -> data[i].lu = -1;
     }
     for (int32_t i = 0; i < length; i++) {
-        test -> data[i] = (unitype) testString[i];
+        test -> data[i] = (unitype) testString[i]; // it seems like upcasting to unitype does pad the rest with 0s
         // Note: doing test -> data[i].c = testString[i]; does NOT WORK
     }
     for (int32_t i = 0; i < length; i++) {
@@ -165,10 +174,26 @@ int32_t list_sort_test() {
     return 0;
 }
 
+int32_t list_select_test() {
+    list_t *test = list_init();
+    for (int32_t i = 0; i < 16; i++) {
+        list_append(test, (unitype) randomInt(0, 20), 'i');
+    }
+    list_print(test);
+    int32_t medianIndex = list_median(test);
+    printf("median: %d\n", test -> data[medianIndex].i);
+    list_sort(test);
+    list_print(test);
+    printf("median: %d\n", test -> data[test -> length / 2].i);
+    return 0;
+}
+
 int main(int argc, char *argv[]) {
+    srand(time(NULL));
     printf("\n\n\n\n");
     printf("list_upcast_test: %d\n", list_upcast_test());
     printf("list_sort_test: %d\n", list_sort_test());
+    printf("list_select_test: %d\n", list_select_test());
     printf("==========================================\n");
     printf("Tests completed\n");
     printf("==========================================\n");

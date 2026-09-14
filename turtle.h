@@ -23630,6 +23630,60 @@ list_t *list_sort_stride_index(list_t *list, int32_t stride, int32_t offset) {
 }
 
 int32_t list_select(list_t *list, int32_t k) {
+    /* quickselect */
+    list_t *copy = list_init();
+    list_copy(copy, list);
+    int32_t start = 0;
+    int32_t length = copy -> length;
+    while (1) {
+        int32_t pivot = start;
+        int32_t pointer = start + length;
+        for (int32_t i = start + 1; i < length; i++) {
+            if (copy -> data[pivot].i > copy -> data[i].i) {
+                if (pointer != start + length) {
+                    /* swap pointer with i */
+                    unitype temp = copy -> data[i];
+                    int8_t tempType = copy -> type[i];
+                    copy -> data[i] = copy -> data[pointer];
+                    copy -> type[i] = copy -> type[pointer];
+                    copy -> data[pointer] = temp;
+                    copy -> type[pointer] = tempType;
+                    pointer++;
+                }
+            } else {
+                if (pointer == start + length) {
+                    pointer = i;
+                }
+            }
+        }
+        /* swap pivot with pointer */
+        pointer--;
+        unitype temp = copy -> data[pivot];
+        int8_t tempType = copy -> type[pivot];
+        copy -> data[pivot] = copy -> data[pointer];
+        copy -> type[pivot] = copy -> type[pointer];
+        copy -> data[pointer] = temp;
+        copy -> type[pointer] = tempType;
+        // printf("pivot: %d\n", temp.i);
+        // printf("pointer: %d\n", pointer);
+        // list_print(copy);
+        if (pointer == k) {
+            list_free(copy);
+            for (int32_t i = 0; i < list -> length; i++) {
+                if (list -> type[i] == tempType && list -> data[i].lu == temp.lu) {
+                    return i;
+                }
+            }
+            return 0;
+        } else if (pointer < k) {
+            start = pointer + 1;
+        } else {
+            length = pointer - start;
+        }
+        // printf("start: %d\n", start);
+        // printf("length: %d\n", length);
+    }
+    list_free(copy);
     return 0;
 }
 
@@ -31514,14 +31568,15 @@ https://learn.microsoft.com/en-us/windows/win32/devio/configuring-a-communicatio
 list_t *osToolsSerialList() {
     list_t *output = list_init();
     char comName[8] = "COM";
-    char pathInfo[128];
+    char pathInfo[1024];
     for (int32_t i = 0; i < 255; i++) {
         sprintf(comName + 3, "%d", i);
-        DWORD deviceExist = QueryDosDeviceA(comName, pathInfo, 128);
+        DWORD deviceExist = QueryDosDeviceA(comName, pathInfo, 1024);
         if (deviceExist != 0) {
             list_append(output, (unitype) comName, 's');
         }
         if (GetLastError() == ERROR_INSUFFICIENT_BUFFER) {
+            
             printf("osToolsSerialList: Unusual COM device detected on %s\n", comName);
         }
     }

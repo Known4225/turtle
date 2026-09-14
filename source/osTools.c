@@ -794,14 +794,15 @@ https://learn.microsoft.com/en-us/windows/win32/devio/configuring-a-communicatio
 list_t *osToolsSerialList() {
     list_t *output = list_init();
     char comName[8] = "COM";
-    char pathInfo[128];
+    char pathInfo[1024];
     for (int32_t i = 0; i < 255; i++) {
         sprintf(comName + 3, "%d", i);
-        DWORD deviceExist = QueryDosDeviceA(comName, pathInfo, 128);
+        DWORD deviceExist = QueryDosDeviceA(comName, pathInfo, 1024);
         if (deviceExist != 0) {
             list_append(output, (unitype) comName, 's');
         }
         if (GetLastError() == ERROR_INSUFFICIENT_BUFFER) {
+            
             printf("osToolsSerialList: Unusual COM device detected on %s\n", comName);
         }
     }
