@@ -14,10 +14,10 @@ https://patorjk.com/software/taag/#p=display&f=ANSI%20Shadow
 #include "turtle_text.h"
 
 /* random integer between lower and upper bound (inclusive) */
-int randomInt(int lowerBound, int upperBound);
+int random_int(int lowerBound, int upperBound);
 
 /* random double between lower and upper bound */
-double randomDouble(double lowerBound, double upperBound);
+double random_double(double lowerBound, double upperBound);
 
 /* insert a string to an index in to string */
 char *strins(char *dest, char *source, int32_t index);
@@ -30,9 +30,9 @@ typedef enum {
     TT_THEME_DARK = 1,
     TT_THEME_COLT = 2,
     TT_THEME_NAVY = 3,
-} tt_theme_name_t;
+} turtle_tools_theme_t;
 
-extern tt_theme_name_t tt_theme;
+extern turtle_tools_theme_t turtleToolsTheme;
 
 typedef struct {
     int8_t turtleToolsEnabled;
@@ -47,9 +47,9 @@ typedef struct {
     int8_t readerEnabled;
     int8_t ribbonEnabled;
     int8_t popupEnabled;
-} tt_enabled_t;
+} turtle_tools_enabled_t;
 
-extern tt_enabled_t tt_enabled; // all start at 0 (global variable)
+extern turtle_tools_enabled_t turtleToolsEnabled; // all start at 0 (global variable)
 
 typedef enum {
     TT_ELEMENT_NONE = 0, // lowest priority
@@ -67,7 +67,7 @@ typedef enum {
     TT_ELEMENT_POPUP = 12,
     TT_ELEMENT_HIGHEST = 13, // highest priority
     TT_NUMBER_OF_ELEMENTS = 13,
-} tt_element_names_t;
+} turtle_tools_element_names_t;
 
 typedef struct {
     list_t *all;
@@ -80,9 +80,9 @@ typedef struct {
     list_t *scrollbars;
     list_t *contexts;
     list_t *readers;
-} tt_elements_t;
+} turtle_tools_elements_t;
 
-extern tt_elements_t tt_elements;
+extern turtle_tools_elements_t turtleToolsElements;
 
 /* display setting of the element */
 typedef enum {
@@ -90,13 +90,13 @@ typedef enum {
     TT_ELEMENT_NO_MOUSE = 1,
     TT_ELEMENT_HIDE = 2,
     TT_ELEMENT_DISABLED = 2,
-} tt_element_enabled_t;
+} turtle_tools_element_enabled_t;
 
 /* if an element is ignored then it is not updated with turtleToolsUpdate() and must be updated separately */
 typedef enum {
     TT_ELEMENT_NOT_IGNORED = 0,
     TT_ELEMENT_IGNORED = 1,
-} tt_element_ignored_t;
+} turtle_tools_element_ignored_t;
 
 typedef enum {
     TT_COLOR_BACKGROUND = 0,
@@ -145,16 +145,16 @@ typedef enum {
     TT_COLOR_DARK_GREY_ALTERNATE = 117,
     TT_COLOR_LIGHT_GREY = 120,
     TT_COLOR_LIGHT_GREY_ALTERNATE = 123,
-} tt_theme_internal_t;
+} turtle_tools_color_t;
 
 /* default colours (light theme) */
-extern double tt_themeColors[];
+extern double turtleToolsThemeColors[];
 
-void tt_setColor(int32_t index);
+void turtle_tools_set_color(turtle_tools_color_t color);
 
-void turtleToolsSetTheme(tt_theme_name_t theme);
+void turtle_tools_set_theme(turtle_tools_theme_t theme);
 
-extern int32_t tt_color_default[];
+extern int32_t turtleToolsColorDefault[];
 
 typedef enum {
     /* button */
@@ -224,22 +224,22 @@ typedef enum {
     TT_COLOR_SLOT_POPUP_BOX = 1,
     TT_COLOR_SLOT_POPUP_BUTTON_SELECT = 2,
     TT_COLOR_SLOT_POPUP_BUTTON = 3,
-} tt_color_slots_t;
+} turtle_tools_color_slots_t;
 
-void tt_elementResetColor(void *elementp);
+void turtle_tools_element_reset_color(void *elementp);
 
-int32_t tt_elementFree(void *elementp);
+int32_t turtle_tools_element_free(void *elementp);
 
-void tt_hideAllElements();
+void turtle_tools_hide_all_elements();
 
 /* ribbon */
 
 /* ribbon variables */
 typedef struct {
-    tt_element_names_t element;
-    tt_element_names_t priority;
-    tt_element_enabled_t enabled;
-    tt_element_ignored_t ignored;
+    turtle_tools_element_names_t element;
+    turtle_tools_element_names_t priority;
+    turtle_tools_element_enabled_t enabled;
+    turtle_tools_element_ignored_t ignored;
     int32_t color[8];
     uint8_t marginSize;
     int8_t mainselect[4]; // 0 - select, 1 - mouseHover, 2 - selected, 3 - premove close dropdown
@@ -250,30 +250,30 @@ typedef struct {
     double ribbonSize;
     list_t *options;
     list_t *lengths;
-} tt_ribbon_t;
+} turtle_tools_ribbon_t;
 
-extern tt_ribbon_t tt_ribbon;
+extern turtle_tools_ribbon_t turtleToolsRibbon;
 
 /* initialise ribbon */
-int32_t tt_ribbonInit(const char *filename);
+int32_t turtle_tools_ribbon_init(const char *filename);
 
 /* initialise ribbon with a list instead of a config file - this function frees the list so you don't have to */
-int32_t tt_ribbonInitList(list_t *config);
+int32_t turtle_tools_ribbon_init_list(list_t *config);
 
 /* internal */
-int32_t tt_ribbonInitInternal(FILE *configFile, list_t *configList, int8_t fileExists);
+int32_t turtle_tools_ribbon_init_internal(FILE *configFile, list_t *configList, int8_t fileExists);
 
 /* render ribbon */
-void tt_ribbonUpdate();
+void turtle_tools_ribbon_update();
 
 /* popup */
 
 /* popup variables */
 typedef struct {
-    tt_element_names_t element;
-    tt_element_names_t priority;
-    tt_element_enabled_t enabled;
-    tt_element_ignored_t ignored;
+    turtle_tools_element_names_t element;
+    turtle_tools_element_names_t priority;
+    turtle_tools_element_enabled_t enabled;
+    turtle_tools_element_ignored_t ignored;
     int32_t color[8];
     char *message; // message displayed on the popup
     double minX; // left edge of box
@@ -292,24 +292,24 @@ typedef struct {
     int8_t style;
     int8_t output[2]; // [toggle, select]
     int8_t mouseDown;
-} tt_popup_t;
+} turtle_tools_popup_t;
 
-extern tt_popup_t tt_popup;
+extern turtle_tools_popup_t turtleToolsPopup;
 
 /* initialise popup */
-int32_t tt_popupInit(char *filename);
+int32_t turtle_tools_popup_init(char *filename);
 
 /* initialise popup with a list instead of a config file - this function frees the list so you don't have to */
-int32_t tt_popupInitList(list_t *config);
+int32_t turtle_tools_popup_init_list(list_t *config);
 
 /* internal */
-int32_t tt_popupInitInternal(FILE *configFile, list_t *configList, int8_t fileExists);
+int32_t turtle_tools_popup_init_internal(FILE *configFile, list_t *configList, int8_t fileExists);
 
 /* render popup */
-void tt_popupUpdate();
+void turtle_tools_popup_update();
 
 /* free popup */
-void tt_popupFree();
+void turtle_tools_popup_free();
 
 /* UI tools */
 
@@ -318,13 +318,13 @@ typedef struct {
     double dialAnchorY;
     double barAnchor;
     int32_t elementLogicTemp;
-    tt_element_names_t elementLogicType;
+    turtle_tools_element_names_t elementLogicType;
     int32_t elementLogicIndex;
-    tt_element_names_t elementLogicTypeOld;
+    turtle_tools_element_names_t elementLogicTypeOld;
     int32_t elementLogicIndexOld;
-} tt_globals_t;
+} turtle_tools_globals_t;
 
-extern tt_globals_t tt_globals;
+extern turtle_tools_globals_t turtleToolsGlobals;
 
 typedef enum {
     TT_STATUS_IDLE = 0,                  // Not being interacted with
@@ -337,7 +337,7 @@ typedef enum {
     TT_STATUS_OPEN = 7,                  // Used to indicate a context menu or dropdown is open, or a textbox is accepting text
     TT_STATUS_OPEN_CLICK_FIRST_TICK = 8, // Used for dropdowns and context menus when an option is clicked (first tick)
     TT_STATUS_OPEN_CLICK = 9,            // Used for dropdowns and context menus when an option is clicked
-} tt_status_t;
+} turtle_status_t;
 
 #define TT_LABEL_LENGTH_LIMIT 128
 
@@ -346,32 +346,32 @@ typedef enum {
     TT_BUTTON_SHAPE_ROUNDED_RECTANGLE = 1,
     TT_BUTTON_SHAPE_CIRCLE = 2,
     TT_BUTTON_SHAPE_TEXT = 3,
-} tt_button_shape_t;
+} turtle_tools_button_shape_t;
 
 typedef enum {
     TT_BUTTON_ALIGN_LEFT = 0,
     TT_BUTTON_ALIGN_CENTER = 1,
     TT_BUTTON_ALIGN_RIGHT = 2,
-} tt_button_align_t;
+} turtle_tools_button_align_t;
 
 /* button */
 typedef struct {
-    tt_element_names_t element;
-    tt_element_names_t priority;
-    tt_element_enabled_t enabled;
-    tt_element_ignored_t ignored;
+    turtle_tools_element_names_t element;
+    turtle_tools_element_names_t priority;
+    turtle_tools_element_enabled_t enabled;
+    turtle_tools_element_ignored_t ignored;
     int32_t color[8];
     double x;
     double y;
     double size;
     int8_t *variable; // bound variable (can be NULL)
     char label[TT_LABEL_LENGTH_LIMIT];
-    tt_status_t status;
-    tt_button_shape_t shape;
-    tt_button_align_t align;
+    turtle_status_t status;
+    turtle_tools_button_shape_t shape;
+    turtle_tools_button_align_t align;
     /* value */
     int8_t value; // 1 if button is being pressed, 0 otherwise
-} tt_button_t;
+} turtle_tools_button_t;
 
 typedef enum {
     TT_SWITCH_STYLE_CLASSIC = 0,
@@ -380,29 +380,29 @@ typedef enum {
     TT_SWITCH_STYLE_CHECKBOX = 4,
     TT_SWITCH_STYLE_XBOX = 5,
     TT_SWITCH_STYLE_TRIANGLE = 6,
-} tt_switch_style_t;
+} turtle_tools_switch_style_t;
 
 typedef enum {
     TT_SWITCH_ALIGN_LEFT = 0,
     TT_SWITCH_ALIGN_CENTER = 1,
     TT_SWITCH_ALIGN_RIGHT = 2,
-} tt_switch_align_t;
+} turtle_tools_switch_align_t;
 
 /* switch */
 typedef struct {
-    tt_element_names_t element;
-    tt_element_names_t priority;
-    tt_element_enabled_t enabled;
-    tt_element_ignored_t ignored;
+    turtle_tools_element_names_t element;
+    turtle_tools_element_names_t priority;
+    turtle_tools_element_enabled_t enabled;
+    turtle_tools_element_ignored_t ignored;
     int32_t color[8];
     double x;
     double y;
     double size;
     int8_t *variable; // bound variable (can be NULL)
     char label[TT_LABEL_LENGTH_LIMIT];
-    tt_status_t status;
-    tt_switch_style_t style;
-    tt_switch_align_t align;
+    turtle_status_t status;
+    turtle_tools_switch_style_t style;
+    turtle_tools_switch_align_t align;
     /* value */
     int8_t value; // 1 if switch is flipped, 0 otherwise
 } tt_switch_t;
@@ -420,17 +420,17 @@ typedef enum {
 
 /* dial */
 typedef struct {
-    tt_element_names_t element;
-    tt_element_names_t priority;
-    tt_element_enabled_t enabled;
-    tt_element_ignored_t ignored;
+    turtle_tools_element_names_t element;
+    turtle_tools_element_names_t priority;
+    turtle_tools_element_enabled_t enabled;
+    turtle_tools_element_ignored_t ignored;
     int32_t color[8];
     double x;
     double y;
     double size;
     int32_t *variable; // bound variable (can be NULL)
     char label[TT_LABEL_LENGTH_LIMIT];
-    tt_status_t status;
+    turtle_status_t status;
     double mouseAnchor;
     tt_dial_scale_t scale;
     tt_dial_style_t style;
@@ -467,17 +467,17 @@ typedef enum {
 
 /* slider */
 typedef struct {
-    tt_element_names_t element;
-    tt_element_names_t priority;
-    tt_element_enabled_t enabled;
-    tt_element_ignored_t ignored;
+    turtle_tools_element_names_t element;
+    turtle_tools_element_names_t priority;
+    turtle_tools_element_enabled_t enabled;
+    turtle_tools_element_ignored_t ignored;
     int32_t color[8];
     double x;
     double y;
     double size;
     int32_t *variable; // bound variable (can be NULL)
     char label[TT_LABEL_LENGTH_LIMIT];
-    tt_status_t status;
+    turtle_status_t status;
     tt_slider_type_t type;
     tt_slider_align_t align;
     tt_slider_scale_t scale;
@@ -499,16 +499,16 @@ typedef enum {
 
 /* textbox */
 typedef struct {
-    tt_element_names_t element;
-    tt_element_names_t priority;
-    tt_element_enabled_t enabled;
-    tt_element_ignored_t ignored;
+    turtle_tools_element_names_t element;
+    turtle_tools_element_names_t priority;
+    turtle_tools_element_enabled_t enabled;
+    turtle_tools_element_ignored_t ignored;
     int32_t color[8];
     double x;
     double y;
     double size;
     char label[TT_LABEL_LENGTH_LIMIT];
-    tt_status_t status;
+    turtle_status_t status;
     int8_t mouseOver; // whether mouse is hovering over textbox
     int8_t moveToTop;
     int32_t count; // counts updates for line flashing animation
@@ -553,10 +553,10 @@ typedef enum {
 
 /* dropdown */
 typedef struct {
-    tt_element_names_t element;
-    tt_element_names_t priority;
-    tt_element_enabled_t enabled;
-    tt_element_ignored_t ignored;
+    turtle_tools_element_names_t element;
+    turtle_tools_element_names_t priority;
+    turtle_tools_element_enabled_t enabled;
+    turtle_tools_element_ignored_t ignored;
     int32_t color[8];
     double x;
     double y;
@@ -564,7 +564,7 @@ typedef struct {
     int32_t *variable; // bound variable (can be NULL)
     char label[TT_LABEL_LENGTH_LIMIT];
     list_t *options;
-    tt_status_t status;
+    turtle_status_t status;
     tt_dropdown_align_t align;
     tt_dropdown_direction_t direction;
     int8_t moveToTop;
@@ -583,16 +583,16 @@ typedef enum {
 
 /* scrollbar */
 typedef struct {
-    tt_element_names_t element;
-    tt_element_names_t priority;
-    tt_element_enabled_t enabled;
-    tt_element_ignored_t ignored;
+    turtle_tools_element_names_t element;
+    turtle_tools_element_names_t priority;
+    turtle_tools_element_enabled_t enabled;
+    turtle_tools_element_ignored_t ignored;
     int32_t color[8];
     double x;
     double y;
     double size;
     double *variable; // bound variable (can be NULL)
-    tt_status_t status;
+    turtle_status_t status;
     tt_scrollbar_type_t type;
     double length;
     double barPercentage; // percentage of scrollbar occupied by bar
@@ -610,17 +610,17 @@ typedef enum {
 
 /* context menu */
 typedef struct {
-    tt_element_names_t element;
-    tt_element_names_t priority;
-    tt_element_enabled_t enabled;
-    tt_element_ignored_t ignored;
+    turtle_tools_element_names_t element;
+    turtle_tools_element_names_t priority;
+    turtle_tools_element_enabled_t enabled;
+    turtle_tools_element_ignored_t ignored;
     int32_t color[8];
     double x;
     double y;
     double size;
     int32_t *variable; // bound variable (can be NULL)
     list_t *options;
-    tt_status_t status;
+    turtle_status_t status;
     tt_context_direction_t direction;
     double autoLowerBound;
     double autoRightBound;
@@ -632,17 +632,17 @@ typedef struct {
 
 /* reader */
 typedef struct {
-    tt_element_names_t element;
-    tt_element_names_t priority;
-    tt_element_enabled_t enabled;
-    tt_element_ignored_t ignored;
+    turtle_tools_element_names_t element;
+    turtle_tools_element_names_t priority;
+    turtle_tools_element_enabled_t enabled;
+    turtle_tools_element_ignored_t ignored;
     int32_t color[8];
     double x;
     double y;
     double size;
     unitype *variable;
     char label[TT_LABEL_LENGTH_LIMIT];
-    tt_status_t status;
+    turtle_status_t status;
     char type;
     double anchorX;
     double anchorY;
@@ -661,10 +661,10 @@ typedef struct {
 void turtleToolsInit();
 
 /* create a button */
-tt_button_t *tt_buttonInit(char *label, int8_t *variable, double x, double y, double size);
+turtle_tools_button_t *tt_buttonInit(char *label, int8_t *variable, double x, double y, double size);
 
 /* delete button */
-void tt_buttonFree(tt_button_t *buttonp);
+void tt_buttonFree(turtle_tools_button_t *buttonp);
 
 /* create a switch */
 tt_switch_t *tt_switchInit(char *label, int8_t *variable, double x, double y, double size);
@@ -719,7 +719,7 @@ tt_reader_t *tt_readerInit(char *label, unitype *variable, char type, double x, 
 void tt_readerFree(tt_reader_t *readerp);
 
 /* update a button */
-void tt_buttonUpdate(tt_button_t *buttonp);
+void tt_buttonUpdate(turtle_tools_button_t *buttonp);
 
 /* update a switch */
 void tt_switchUpdate(tt_switch_t *switchp);

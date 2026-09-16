@@ -7,11 +7,11 @@ Tests for turtle libraries
 #include "turtle.h"
 #include <time.h>
 
-int randomInt(int lowerBound, int upperBound) { // random integer between lower and upper bound (inclusive)
+int random_int(int lowerBound, int upperBound) { // random integer between lower and upper bound (inclusive)
     return (rand() % (upperBound - lowerBound + 1) + lowerBound);
 }
 
-double randomDouble(double lowerBound, double upperBound) { // random double between lower and upper bound
+double random_double(double lowerBound, double upperBound) { // random double between lower and upper bound
     return (rand() * (upperBound - lowerBound) / RAND_MAX + lowerBound); // probably works idk
 }
 
@@ -180,7 +180,7 @@ int32_t list_select_test() {
     for (int32_t j = 0; j < 100; j++) {
         list_clear(test);
         for (int32_t i = 0; i < 64; i++) {
-            list_append(test, (unitype) randomInt(-100, 100), 'i');
+            list_append(test, (unitype) random_int(-100, 100), 'i');
         }
         int32_t medianIndex = list_median(test);
         int32_t median = test -> data[medianIndex].i;
@@ -193,7 +193,7 @@ int32_t list_select_test() {
     for (int32_t j = 0; j < 100; j++) {
         list_clear(test);
         for (int32_t i = 0; i < 64; i++) {
-            list_append(test, (unitype) randomDouble(-100, 100), 'd');
+            list_append(test, (unitype) random_double(-100, 100), 'd');
         }
         int32_t medianIndex = list_median(test);
         double median = test -> data[medianIndex].d;
@@ -206,8 +206,8 @@ int32_t list_select_test() {
     for (int32_t j = 0; j < 100; j++) {
         list_clear(test);
         for (int32_t i = 0; i < 64; i++) {
-            list_append(test, (unitype) randomInt(-100, 100), 'i');
-            list_append(test, (unitype) randomDouble(-100, 100), 'd');
+            list_append(test, (unitype) random_int(-100, 100), 'i');
+            list_append(test, (unitype) random_double(-100, 100), 'd');
         }
         int32_t medianIndex = list_median(test);
         unitype median = test -> data[medianIndex];

@@ -227,7 +227,7 @@ void turtle_init(GLFWwindow *window, double leftX, double bottomY, double rightX
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
     glDeleteProgram(shaderProgram);
-    turtle.bufferList = floatList_init();
+    turtle.bufferList = float_list_init();
     turtle.textureList = list_init();
     list_append(turtle.textureList, (unitype) "null", 's'); // cannot have texture code of 0 because of shader using 0 as the non-texture code
     list_append(turtle.textureList, (unitype) 0, 'i');
@@ -687,15 +687,15 @@ void turtle_quad_render_internal(double x1, double y1, double x2, double y2, dou
 #ifdef TURTLE_ENABLE_TEXTURES
 /* function to add a vertex to the turtle.bufferList */
 void turtle_add_vertex(double x, double y, double r, double g, double b, double a, double tx, double ty, double useTexture) {
-    floatList_append(turtle.bufferList, x);
-    floatList_append(turtle.bufferList, y);
-    floatList_append(turtle.bufferList, r);
-    floatList_append(turtle.bufferList, g);
-    floatList_append(turtle.bufferList, b);
-    floatList_append(turtle.bufferList, a);
-    floatList_append(turtle.bufferList, tx);
-    floatList_append(turtle.bufferList, ty);
-    floatList_append(turtle.bufferList, useTexture);
+    float_list_append(turtle.bufferList, x);
+    float_list_append(turtle.bufferList, y);
+    float_list_append(turtle.bufferList, r);
+    float_list_append(turtle.bufferList, g);
+    float_list_append(turtle.bufferList, b);
+    float_list_append(turtle.bufferList, a);
+    float_list_append(turtle.bufferList, tx);
+    float_list_append(turtle.bufferList, ty);
+    float_list_append(turtle.bufferList, useTexture);
 }
 
 /* draws a circle at the specified x and y (coordinates) */
@@ -1716,7 +1716,7 @@ void turtle_free() {
     list_free(turtle.keyPressed);
     list_free(turtle.penPos);
     #ifdef TURTLE_ENABLE_TEXTURES
-    floatList_free(turtle.bufferList);
+    float_list_free(turtle.bufferList);
     #endif /* TURTLE_ENABLE_TEXTURES */
     glfwTerminate();
 }

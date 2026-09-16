@@ -247,59 +247,59 @@ https://patorjk.com/software/taag/#p=display&f=ANSI%20Shadow
 
 /*
 28.03.24:
-floatList - like a normal list but only supports floats
+float_list - like a normal list but only supports floats
 */
 
 typedef struct {
     int32_t length;
     int32_t realLength;
     float *data;
-} floatList_t;
+} float_list_t;
 
-/* create a floatList */
-floatList_t* floatList_init();
+/* create a float_list */
+float_list_t* float_list_init();
 
 /* append to list */
-void floatList_append(floatList_t *list, float data);
+void float_list_append(float_list_t *list, float data);
 
 /* delete all contents of a list */
-void floatList_clear(floatList_t *list);
+void float_list_clear(float_list_t *list);
 
 /* pops the last item of the list off and returns it */
-float floatList_pop(floatList_t *list);
+float float_list_pop(float_list_t *list);
 
 /* deletes the item at list[index] of the list and returns it */
-float floatList_delete(floatList_t *list, int32_t index);
+float float_list_delete(float_list_t *list, int32_t index);
 
 /* deletes many items from the list spanning from [indexMin] to [indexMax - 1] */
-void floatList_delete_range(floatList_t* list, int32_t indexMin, int32_t indexMax);
+void float_list_delete_range(float_list_t *list, int32_t indexMin, int32_t indexMax);
 
 /* returns the index of the first instance of the item in the list, returns -1 if not found (python) */
-int32_t floatList_find(floatList_t *list, float item);
+int32_t float_list_find(float_list_t *list, float item);
 
 /* duplicate of list_find */
-int32_t floatList_index(floatList_t *list, float item);
+int32_t float_list_index(float_list_t *list, float item);
 
 /* counts how many instances of an item is found in the list */
-int32_t floatList_count(floatList_t *list, float item);
+int32_t float_list_count(float_list_t *list, float item);
 
 /* deletes the first instance of the item from the list, returns the index the item was at, returns -1 and doesn't modify the list if not found (python but without ValueError) */
-int32_t floatList_remove(floatList_t *list, float item);
+int32_t float_list_remove(float_list_t *list, float item);
 
 /* copies one list to another */
-void floatList_copy(floatList_t *dest, floatList_t *src);
+void float_list_copy(float_list_t *dest, float_list_t *src);
 
 /* prints the list */
-void floatList_print(floatList_t *list);
+void float_list_print(float_list_t *list);
 
 /* prints the list but without closing \n */
-void floatList_print_emb(floatList_t *list);
+void float_list_print_emb(float_list_t *list);
 
 /* frees the list's data but not the list itself */
-void floatList_free_lite(floatList_t *list);
+void float_list_free_lite(float_list_t *list);
 
 /* frees the data used by the list */
-void floatList_free(floatList_t *list);
+void float_list_free(float_list_t *list);
 
 #endif /* FLOAT_LIST_H */
 #endif /* TURTLE_ENABLE_TEXTURES */
@@ -10101,7 +10101,7 @@ typedef struct {
     double x; // coordinate x position of turtle
     double y; // coordinate y position of turtle
     #ifdef TURTLE_ENABLE_TEXTURES
-    floatList_t *bufferList; // resizable list to donate to GPU
+    float_list_t *bufferList; // resizable list to donate to GPU
     #else
     /* this bit exists so that there is no size difference between compiled and linked struct (in case you compile without textures but link library with textures) */
     void *bufferList;
@@ -10486,10 +10486,10 @@ https://patorjk.com/software/taag/#p=display&f=ANSI%20Shadow
 
 
 /* random integer between lower and upper bound (inclusive) */
-int randomInt(int lowerBound, int upperBound);
+int random_int(int lowerBound, int upperBound);
 
 /* random double between lower and upper bound */
-double randomDouble(double lowerBound, double upperBound);
+double random_double(double lowerBound, double upperBound);
 
 /* insert a string to an index in to string */
 char *strins(char *dest, char *source, int32_t index);
@@ -10502,9 +10502,9 @@ typedef enum {
     TT_THEME_DARK = 1,
     TT_THEME_COLT = 2,
     TT_THEME_NAVY = 3,
-} tt_theme_name_t;
+} turtle_tools_theme_t;
 
-extern tt_theme_name_t tt_theme;
+extern turtle_tools_theme_t turtleToolsTheme;
 
 typedef struct {
     int8_t turtleToolsEnabled;
@@ -10519,9 +10519,9 @@ typedef struct {
     int8_t readerEnabled;
     int8_t ribbonEnabled;
     int8_t popupEnabled;
-} tt_enabled_t;
+} turtle_tools_enabled_t;
 
-extern tt_enabled_t tt_enabled; // all start at 0 (global variable)
+extern turtle_tools_enabled_t turtleToolsEnabled; // all start at 0 (global variable)
 
 typedef enum {
     TT_ELEMENT_NONE = 0, // lowest priority
@@ -10539,7 +10539,7 @@ typedef enum {
     TT_ELEMENT_POPUP = 12,
     TT_ELEMENT_HIGHEST = 13, // highest priority
     TT_NUMBER_OF_ELEMENTS = 13,
-} tt_element_names_t;
+} turtle_tools_element_names_t;
 
 typedef struct {
     list_t *all;
@@ -10552,9 +10552,9 @@ typedef struct {
     list_t *scrollbars;
     list_t *contexts;
     list_t *readers;
-} tt_elements_t;
+} turtle_tools_elements_t;
 
-extern tt_elements_t tt_elements;
+extern turtle_tools_elements_t turtleToolsElements;
 
 /* display setting of the element */
 typedef enum {
@@ -10562,13 +10562,13 @@ typedef enum {
     TT_ELEMENT_NO_MOUSE = 1,
     TT_ELEMENT_HIDE = 2,
     TT_ELEMENT_DISABLED = 2,
-} tt_element_enabled_t;
+} turtle_tools_element_enabled_t;
 
 /* if an element is ignored then it is not updated with turtleToolsUpdate() and must be updated separately */
 typedef enum {
     TT_ELEMENT_NOT_IGNORED = 0,
     TT_ELEMENT_IGNORED = 1,
-} tt_element_ignored_t;
+} turtle_tools_element_ignored_t;
 
 typedef enum {
     TT_COLOR_BACKGROUND = 0,
@@ -10617,16 +10617,16 @@ typedef enum {
     TT_COLOR_DARK_GREY_ALTERNATE = 117,
     TT_COLOR_LIGHT_GREY = 120,
     TT_COLOR_LIGHT_GREY_ALTERNATE = 123,
-} tt_theme_internal_t;
+} turtle_tools_color_t;
 
 /* default colours (light theme) */
-extern double tt_themeColors[];
+extern double turtleToolsThemeColors[];
 
-void tt_setColor(int32_t index);
+void turtle_tools_set_color(turtle_tools_color_t color);
 
-void turtleToolsSetTheme(tt_theme_name_t theme);
+void turtle_tools_set_theme(turtle_tools_theme_t theme);
 
-extern int32_t tt_color_default[];
+extern int32_t turtleToolsColorDefault[];
 
 typedef enum {
     /* button */
@@ -10696,22 +10696,22 @@ typedef enum {
     TT_COLOR_SLOT_POPUP_BOX = 1,
     TT_COLOR_SLOT_POPUP_BUTTON_SELECT = 2,
     TT_COLOR_SLOT_POPUP_BUTTON = 3,
-} tt_color_slots_t;
+} turtle_tools_color_slots_t;
 
-void tt_elementResetColor(void *elementp);
+void turtle_tools_element_reset_color(void *elementp);
 
-int32_t tt_elementFree(void *elementp);
+int32_t turtle_tools_element_free(void *elementp);
 
-void tt_hideAllElements();
+void turtle_tools_hide_all_elements();
 
 /* ribbon */
 
 /* ribbon variables */
 typedef struct {
-    tt_element_names_t element;
-    tt_element_names_t priority;
-    tt_element_enabled_t enabled;
-    tt_element_ignored_t ignored;
+    turtle_tools_element_names_t element;
+    turtle_tools_element_names_t priority;
+    turtle_tools_element_enabled_t enabled;
+    turtle_tools_element_ignored_t ignored;
     int32_t color[8];
     uint8_t marginSize;
     int8_t mainselect[4]; // 0 - select, 1 - mouseHover, 2 - selected, 3 - premove close dropdown
@@ -10722,30 +10722,30 @@ typedef struct {
     double ribbonSize;
     list_t *options;
     list_t *lengths;
-} tt_ribbon_t;
+} turtle_tools_ribbon_t;
 
-extern tt_ribbon_t tt_ribbon;
+extern turtle_tools_ribbon_t turtleToolsRibbon;
 
 /* initialise ribbon */
-int32_t tt_ribbonInit(const char *filename);
+int32_t turtle_tools_ribbon_init(const char *filename);
 
 /* initialise ribbon with a list instead of a config file - this function frees the list so you don't have to */
-int32_t tt_ribbonInitList(list_t *config);
+int32_t turtle_tools_ribbon_init_list(list_t *config);
 
 /* internal */
-int32_t tt_ribbonInitInternal(FILE *configFile, list_t *configList, int8_t fileExists);
+int32_t turtle_tools_ribbon_init_internal(FILE *configFile, list_t *configList, int8_t fileExists);
 
 /* render ribbon */
-void tt_ribbonUpdate();
+void turtle_tools_ribbon_update();
 
 /* popup */
 
 /* popup variables */
 typedef struct {
-    tt_element_names_t element;
-    tt_element_names_t priority;
-    tt_element_enabled_t enabled;
-    tt_element_ignored_t ignored;
+    turtle_tools_element_names_t element;
+    turtle_tools_element_names_t priority;
+    turtle_tools_element_enabled_t enabled;
+    turtle_tools_element_ignored_t ignored;
     int32_t color[8];
     char *message; // message displayed on the popup
     double minX; // left edge of box
@@ -10764,24 +10764,24 @@ typedef struct {
     int8_t style;
     int8_t output[2]; // [toggle, select]
     int8_t mouseDown;
-} tt_popup_t;
+} turtle_tools_popup_t;
 
-extern tt_popup_t tt_popup;
+extern turtle_tools_popup_t turtleToolsPopup;
 
 /* initialise popup */
-int32_t tt_popupInit(char *filename);
+int32_t turtle_tools_popup_init(char *filename);
 
 /* initialise popup with a list instead of a config file - this function frees the list so you don't have to */
-int32_t tt_popupInitList(list_t *config);
+int32_t turtle_tools_popup_init_list(list_t *config);
 
 /* internal */
-int32_t tt_popupInitInternal(FILE *configFile, list_t *configList, int8_t fileExists);
+int32_t turtle_tools_popup_init_internal(FILE *configFile, list_t *configList, int8_t fileExists);
 
 /* render popup */
-void tt_popupUpdate();
+void turtle_tools_popup_update();
 
 /* free popup */
-void tt_popupFree();
+void turtle_tools_popup_free();
 
 /* UI tools */
 
@@ -10790,13 +10790,13 @@ typedef struct {
     double dialAnchorY;
     double barAnchor;
     int32_t elementLogicTemp;
-    tt_element_names_t elementLogicType;
+    turtle_tools_element_names_t elementLogicType;
     int32_t elementLogicIndex;
-    tt_element_names_t elementLogicTypeOld;
+    turtle_tools_element_names_t elementLogicTypeOld;
     int32_t elementLogicIndexOld;
-} tt_globals_t;
+} turtle_tools_globals_t;
 
-extern tt_globals_t tt_globals;
+extern turtle_tools_globals_t turtleToolsGlobals;
 
 typedef enum {
     TT_STATUS_IDLE = 0,                  // Not being interacted with
@@ -10809,7 +10809,7 @@ typedef enum {
     TT_STATUS_OPEN = 7,                  // Used to indicate a context menu or dropdown is open, or a textbox is accepting text
     TT_STATUS_OPEN_CLICK_FIRST_TICK = 8, // Used for dropdowns and context menus when an option is clicked (first tick)
     TT_STATUS_OPEN_CLICK = 9,            // Used for dropdowns and context menus when an option is clicked
-} tt_status_t;
+} turtle_status_t;
 
 #define TT_LABEL_LENGTH_LIMIT 128
 
@@ -10818,32 +10818,32 @@ typedef enum {
     TT_BUTTON_SHAPE_ROUNDED_RECTANGLE = 1,
     TT_BUTTON_SHAPE_CIRCLE = 2,
     TT_BUTTON_SHAPE_TEXT = 3,
-} tt_button_shape_t;
+} turtle_tools_button_shape_t;
 
 typedef enum {
     TT_BUTTON_ALIGN_LEFT = 0,
     TT_BUTTON_ALIGN_CENTER = 1,
     TT_BUTTON_ALIGN_RIGHT = 2,
-} tt_button_align_t;
+} turtle_tools_button_align_t;
 
 /* button */
 typedef struct {
-    tt_element_names_t element;
-    tt_element_names_t priority;
-    tt_element_enabled_t enabled;
-    tt_element_ignored_t ignored;
+    turtle_tools_element_names_t element;
+    turtle_tools_element_names_t priority;
+    turtle_tools_element_enabled_t enabled;
+    turtle_tools_element_ignored_t ignored;
     int32_t color[8];
     double x;
     double y;
     double size;
     int8_t *variable; // bound variable (can be NULL)
     char label[TT_LABEL_LENGTH_LIMIT];
-    tt_status_t status;
-    tt_button_shape_t shape;
-    tt_button_align_t align;
+    turtle_status_t status;
+    turtle_tools_button_shape_t shape;
+    turtle_tools_button_align_t align;
     /* value */
     int8_t value; // 1 if button is being pressed, 0 otherwise
-} tt_button_t;
+} turtle_tools_button_t;
 
 typedef enum {
     TT_SWITCH_STYLE_CLASSIC = 0,
@@ -10852,29 +10852,29 @@ typedef enum {
     TT_SWITCH_STYLE_CHECKBOX = 4,
     TT_SWITCH_STYLE_XBOX = 5,
     TT_SWITCH_STYLE_TRIANGLE = 6,
-} tt_switch_style_t;
+} turtle_tools_switch_style_t;
 
 typedef enum {
     TT_SWITCH_ALIGN_LEFT = 0,
     TT_SWITCH_ALIGN_CENTER = 1,
     TT_SWITCH_ALIGN_RIGHT = 2,
-} tt_switch_align_t;
+} turtle_tools_switch_align_t;
 
 /* switch */
 typedef struct {
-    tt_element_names_t element;
-    tt_element_names_t priority;
-    tt_element_enabled_t enabled;
-    tt_element_ignored_t ignored;
+    turtle_tools_element_names_t element;
+    turtle_tools_element_names_t priority;
+    turtle_tools_element_enabled_t enabled;
+    turtle_tools_element_ignored_t ignored;
     int32_t color[8];
     double x;
     double y;
     double size;
     int8_t *variable; // bound variable (can be NULL)
     char label[TT_LABEL_LENGTH_LIMIT];
-    tt_status_t status;
-    tt_switch_style_t style;
-    tt_switch_align_t align;
+    turtle_status_t status;
+    turtle_tools_switch_style_t style;
+    turtle_tools_switch_align_t align;
     /* value */
     int8_t value; // 1 if switch is flipped, 0 otherwise
 } tt_switch_t;
@@ -10892,17 +10892,17 @@ typedef enum {
 
 /* dial */
 typedef struct {
-    tt_element_names_t element;
-    tt_element_names_t priority;
-    tt_element_enabled_t enabled;
-    tt_element_ignored_t ignored;
+    turtle_tools_element_names_t element;
+    turtle_tools_element_names_t priority;
+    turtle_tools_element_enabled_t enabled;
+    turtle_tools_element_ignored_t ignored;
     int32_t color[8];
     double x;
     double y;
     double size;
     int32_t *variable; // bound variable (can be NULL)
     char label[TT_LABEL_LENGTH_LIMIT];
-    tt_status_t status;
+    turtle_status_t status;
     double mouseAnchor;
     tt_dial_scale_t scale;
     tt_dial_style_t style;
@@ -10939,17 +10939,17 @@ typedef enum {
 
 /* slider */
 typedef struct {
-    tt_element_names_t element;
-    tt_element_names_t priority;
-    tt_element_enabled_t enabled;
-    tt_element_ignored_t ignored;
+    turtle_tools_element_names_t element;
+    turtle_tools_element_names_t priority;
+    turtle_tools_element_enabled_t enabled;
+    turtle_tools_element_ignored_t ignored;
     int32_t color[8];
     double x;
     double y;
     double size;
     int32_t *variable; // bound variable (can be NULL)
     char label[TT_LABEL_LENGTH_LIMIT];
-    tt_status_t status;
+    turtle_status_t status;
     tt_slider_type_t type;
     tt_slider_align_t align;
     tt_slider_scale_t scale;
@@ -10971,16 +10971,16 @@ typedef enum {
 
 /* textbox */
 typedef struct {
-    tt_element_names_t element;
-    tt_element_names_t priority;
-    tt_element_enabled_t enabled;
-    tt_element_ignored_t ignored;
+    turtle_tools_element_names_t element;
+    turtle_tools_element_names_t priority;
+    turtle_tools_element_enabled_t enabled;
+    turtle_tools_element_ignored_t ignored;
     int32_t color[8];
     double x;
     double y;
     double size;
     char label[TT_LABEL_LENGTH_LIMIT];
-    tt_status_t status;
+    turtle_status_t status;
     int8_t mouseOver; // whether mouse is hovering over textbox
     int8_t moveToTop;
     int32_t count; // counts updates for line flashing animation
@@ -11025,10 +11025,10 @@ typedef enum {
 
 /* dropdown */
 typedef struct {
-    tt_element_names_t element;
-    tt_element_names_t priority;
-    tt_element_enabled_t enabled;
-    tt_element_ignored_t ignored;
+    turtle_tools_element_names_t element;
+    turtle_tools_element_names_t priority;
+    turtle_tools_element_enabled_t enabled;
+    turtle_tools_element_ignored_t ignored;
     int32_t color[8];
     double x;
     double y;
@@ -11036,7 +11036,7 @@ typedef struct {
     int32_t *variable; // bound variable (can be NULL)
     char label[TT_LABEL_LENGTH_LIMIT];
     list_t *options;
-    tt_status_t status;
+    turtle_status_t status;
     tt_dropdown_align_t align;
     tt_dropdown_direction_t direction;
     int8_t moveToTop;
@@ -11055,16 +11055,16 @@ typedef enum {
 
 /* scrollbar */
 typedef struct {
-    tt_element_names_t element;
-    tt_element_names_t priority;
-    tt_element_enabled_t enabled;
-    tt_element_ignored_t ignored;
+    turtle_tools_element_names_t element;
+    turtle_tools_element_names_t priority;
+    turtle_tools_element_enabled_t enabled;
+    turtle_tools_element_ignored_t ignored;
     int32_t color[8];
     double x;
     double y;
     double size;
     double *variable; // bound variable (can be NULL)
-    tt_status_t status;
+    turtle_status_t status;
     tt_scrollbar_type_t type;
     double length;
     double barPercentage; // percentage of scrollbar occupied by bar
@@ -11082,17 +11082,17 @@ typedef enum {
 
 /* context menu */
 typedef struct {
-    tt_element_names_t element;
-    tt_element_names_t priority;
-    tt_element_enabled_t enabled;
-    tt_element_ignored_t ignored;
+    turtle_tools_element_names_t element;
+    turtle_tools_element_names_t priority;
+    turtle_tools_element_enabled_t enabled;
+    turtle_tools_element_ignored_t ignored;
     int32_t color[8];
     double x;
     double y;
     double size;
     int32_t *variable; // bound variable (can be NULL)
     list_t *options;
-    tt_status_t status;
+    turtle_status_t status;
     tt_context_direction_t direction;
     double autoLowerBound;
     double autoRightBound;
@@ -11104,17 +11104,17 @@ typedef struct {
 
 /* reader */
 typedef struct {
-    tt_element_names_t element;
-    tt_element_names_t priority;
-    tt_element_enabled_t enabled;
-    tt_element_ignored_t ignored;
+    turtle_tools_element_names_t element;
+    turtle_tools_element_names_t priority;
+    turtle_tools_element_enabled_t enabled;
+    turtle_tools_element_ignored_t ignored;
     int32_t color[8];
     double x;
     double y;
     double size;
     unitype *variable;
     char label[TT_LABEL_LENGTH_LIMIT];
-    tt_status_t status;
+    turtle_status_t status;
     char type;
     double anchorX;
     double anchorY;
@@ -11133,10 +11133,10 @@ typedef struct {
 void turtleToolsInit();
 
 /* create a button */
-tt_button_t *tt_buttonInit(char *label, int8_t *variable, double x, double y, double size);
+turtle_tools_button_t *tt_buttonInit(char *label, int8_t *variable, double x, double y, double size);
 
 /* delete button */
-void tt_buttonFree(tt_button_t *buttonp);
+void tt_buttonFree(turtle_tools_button_t *buttonp);
 
 /* create a switch */
 tt_switch_t *tt_switchInit(char *label, int8_t *variable, double x, double y, double size);
@@ -11191,7 +11191,7 @@ tt_reader_t *tt_readerInit(char *label, unitype *variable, char type, double x, 
 void tt_readerFree(tt_reader_t *readerp);
 
 /* update a button */
-void tt_buttonUpdate(tt_button_t *buttonp);
+void tt_buttonUpdate(turtle_tools_button_t *buttonp);
 
 /* update a switch */
 void tt_switchUpdate(tt_switch_t *switchp);
@@ -24234,8 +24234,8 @@ https://patorjk.com/software/taag/#p=display&f=ANSI%20Shadow
 */
 
 
-floatList_t* floatList_init() {
-    floatList_t *list = malloc(sizeof(floatList_t));
+float_list_t* float_list_init() {
+    float_list_t *list = malloc(sizeof(float_list_t));
     list -> length = 0;
     list -> realLength = 1;
     list -> data = calloc(1, sizeof(float));
@@ -24243,7 +24243,7 @@ floatList_t* floatList_init() {
 }
 
 /* append to list */
-void floatList_append(floatList_t *list, float data) {
+void float_list_append(float_list_t *list, float data) {
     if (list -> realLength  <= list -> length) {
         list -> realLength *= 2;
         list -> data = realloc(list -> data, list -> realLength * sizeof(float));
@@ -24252,15 +24252,15 @@ void floatList_append(floatList_t *list, float data) {
     list -> length += 1;
 }
 
-void floatList_clear(floatList_t *list) {
-    floatList_free_lite(list);
+void float_list_clear(float_list_t *list) {
+    float_list_free_lite(list);
     list -> length = 0;
     list -> realLength = 1;
     list -> data = calloc(1, sizeof(float));
 }
 
 /* pops the last item of the list off and returns it */
-float floatList_pop(floatList_t *list) {
+float float_list_pop(float_list_t *list) {
     if (list -> length > 0) {
         list -> length -= 1;
         float ret = list -> data[list -> length];
@@ -24276,7 +24276,7 @@ float floatList_pop(floatList_t *list) {
 }
 
 /* deletes the item at list[index] of the list and returns it */
-float floatList_delete(floatList_t *list, int32_t index) {
+float float_list_delete(float_list_t *list, int32_t index) {
     while (index < 0) {index += list -> length;}
     index %= list -> length;
     float ret = list -> data[index];
@@ -24293,7 +24293,7 @@ float floatList_delete(floatList_t *list, int32_t index) {
 }
 
 /* deletes many items from the list spanning from [indexMin] to [indexMax - 1] */
-void floatList_delete_range(floatList_t* list, int32_t indexMin, int32_t indexMax) {
+void float_list_delete_range(float_list_t* list, int32_t indexMin, int32_t indexMax) {
     if (indexMin > indexMax) {
         int32_t swap = indexMin;
         indexMin = indexMax;
@@ -24322,7 +24322,7 @@ void floatList_delete_range(floatList_t* list, int32_t indexMin, int32_t indexMa
 }
 
 /* returns the index of the first instance of the item in the list, returns -1 if not found (python) */
-int32_t floatList_find(floatList_t *list, float item) {
+int32_t float_list_find(float_list_t *list, float item) {
     for (int32_t i = 0; i < list -> length; i++) {
         if (list -> data[i] == item) {
             return i;
@@ -24332,7 +24332,7 @@ int32_t floatList_find(floatList_t *list, float item) {
 }
 
 /* duplicate of list_find */
-int32_t floatList_index(floatList_t *list, float item) {
+int32_t float_list_index(float_list_t *list, float item) {
     for (int32_t i = 0; i < list -> length; i++) {
         if (list -> data[i] == item) {
             return i;
@@ -24342,7 +24342,7 @@ int32_t floatList_index(floatList_t *list, float item) {
 }
 
 /* counts how many instances of an item is found in the list */
-int32_t floatList_count(floatList_t *list, float item) {
+int32_t float_list_count(float_list_t *list, float item) {
     int32_t count = 0;
     for (int32_t i = 0; i < list -> length; i++) {
         count += (list -> data[i] == item);
@@ -24351,10 +24351,10 @@ int32_t floatList_count(floatList_t *list, float item) {
 }
 
 /* deletes the first instance of the item from the list, returns the index the item was at, returns -1 and doesn't modify the list if not found (python but without ValueError) */
-int32_t floatList_remove(floatList_t *list, float item) {
+int32_t float_list_remove(float_list_t *list, float item) {
     for (int32_t i = 0; i < list -> length; i++) {
         if (list -> data[i] == item) {
-            floatList_delete(list, i);
+            float_list_delete(list, i);
             return i;
         }
     }
@@ -24362,8 +24362,8 @@ int32_t floatList_remove(floatList_t *list, float item) {
 }
 
 /* copies one list to another */
-void floatList_copy(floatList_t *dest, floatList_t *src) {
-    floatList_free_lite(dest);
+void float_list_copy(float_list_t *dest, float_list_t *src) {
+    float_list_free_lite(dest);
     dest -> data = calloc(src -> realLength, sizeof(float));
     int32_t len = src -> length;
     dest -> length = len;
@@ -24374,7 +24374,7 @@ void floatList_copy(floatList_t *dest, floatList_t *src) {
 }
 
 /* prints the list (like python would) */
-void floatList_print(floatList_t *list) {
+void float_list_print(float_list_t *list) {
     printf("[");
     if (list -> length == 0) {
         printf("]\n");
@@ -24391,7 +24391,7 @@ void floatList_print(floatList_t *list) {
 }
 
 /* prints the list but without closing \n */
-void floatList_print_emb(floatList_t *list) {
+void float_list_print_emb(float_list_t *list) {
     printf("[");
     if (list -> length == 0) {
         printf("]");
@@ -24408,13 +24408,13 @@ void floatList_print_emb(floatList_t *list) {
 }
 
 /* frees the list's data but not the list itself */
-void floatList_free_lite(floatList_t *list) {
+void float_list_free_lite(float_list_t *list) {
     free(list -> data);
 }
 
 /* frees the data used by the list */
-void floatList_free(floatList_t *list) {
-    floatList_free_lite(list);
+void float_list_free(float_list_t *list) {
+    float_list_free_lite(list);
     free(list);
 }
 #endif /* FLOAT_LIST_IMPLEMENTATION */
@@ -24647,7 +24647,7 @@ void turtle_init(GLFWwindow *window, double leftX, double bottomY, double rightX
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
     glDeleteProgram(shaderProgram);
-    turtle.bufferList = floatList_init();
+    turtle.bufferList = float_list_init();
     turtle.textureList = list_init();
     list_append(turtle.textureList, (unitype) "null", 's'); // cannot have texture code of 0 because of shader using 0 as the non-texture code
     list_append(turtle.textureList, (unitype) 0, 'i');
@@ -25107,15 +25107,15 @@ void turtle_quad_render_internal(double x1, double y1, double x2, double y2, dou
 #ifdef TURTLE_ENABLE_TEXTURES
 /* function to add a vertex to the turtle.bufferList */
 void turtle_add_vertex(double x, double y, double r, double g, double b, double a, double tx, double ty, double useTexture) {
-    floatList_append(turtle.bufferList, x);
-    floatList_append(turtle.bufferList, y);
-    floatList_append(turtle.bufferList, r);
-    floatList_append(turtle.bufferList, g);
-    floatList_append(turtle.bufferList, b);
-    floatList_append(turtle.bufferList, a);
-    floatList_append(turtle.bufferList, tx);
-    floatList_append(turtle.bufferList, ty);
-    floatList_append(turtle.bufferList, useTexture);
+    float_list_append(turtle.bufferList, x);
+    float_list_append(turtle.bufferList, y);
+    float_list_append(turtle.bufferList, r);
+    float_list_append(turtle.bufferList, g);
+    float_list_append(turtle.bufferList, b);
+    float_list_append(turtle.bufferList, a);
+    float_list_append(turtle.bufferList, tx);
+    float_list_append(turtle.bufferList, ty);
+    float_list_append(turtle.bufferList, useTexture);
 }
 
 /* draws a circle at the specified x and y (coordinates) */
@@ -26136,7 +26136,7 @@ void turtle_free() {
     list_free(turtle.keyPressed);
     list_free(turtle.penPos);
     #ifdef TURTLE_ENABLE_TEXTURES
-    floatList_free(turtle.bufferList);
+    float_list_free(turtle.bufferList);
     #endif /* TURTLE_ENABLE_TEXTURES */
     glfwTerminate();
 }
@@ -27324,8 +27324,8 @@ using the tab key to select different elements? And allowing them to be changed 
 */
 
 
-/* UI element colours (in order listed in tt_element_names_t) */
-int32_t tt_color_default[] = {
+/* UI element colours (in order listed in turtle_tools_element_names_t) */
+int32_t turtleToolsColorDefault[] = {
     /*         none                           button                         switch                            dial                           slider                          textbox                        dropdown                         scrollbar                      context                       variable reader                   list reader                     ribbon                           popup               */
     0,                              TT_COLOR_TEXT_ALTERNATE,        TT_COLOR_TEXT_BASE,             TT_COLOR_TEXT_BASE,             TT_COLOR_TEXT_BASE,             TT_COLOR_TEXT_ALTERNATE,        TT_COLOR_TEXT_BASE,             0,                              TT_COLOR_TEXT_ALTERNATE,        TT_COLOR_BLACK,                 TT_COLOR_BLACK,                 TT_COLOR_TEXT_ALTERNATE,        TT_COLOR_TEXT_ALTERNATE,        
     0,                              TT_COLOR_COMPONENT,             TT_COLOR_TEXT_ALTERNATE,        TT_COLOR_TEXT_BASE,             TT_COLOR_COMPONENT_ALTERNATE,   TT_COLOR_COMPONENT_BASE,        TT_COLOR_TEXT_ALTERNATE,        TT_COLOR_COMPONENT_BASE,        TT_COLOR_COMPONENT_BASE,        TT_COLOR_WHITE,                 TT_COLOR_WHITE,                 TT_COLOR_COMPONENT_HIGHLIGHT,   TT_COLOR_COMPONENT_ALTERNATE,   
@@ -27337,11 +27337,11 @@ int32_t tt_color_default[] = {
     0,                              0,                              0,                              0,                              0,                              0,                              0,                              0,                              0,                              0,                              TT_COLOR_DARK_GREY,             0,                              0,                              
 };
 
-int randomInt(int lowerBound, int upperBound) { // random integer between lower and upper bound (inclusive)
+int random_int(int lowerBound, int upperBound) { // random integer between lower and upper bound (inclusive)
     return (rand() % (upperBound - lowerBound + 1) + lowerBound);
 }
 
-double randomDouble(double lowerBound, double upperBound) { // random double between lower and upper bound
+double random_double(double lowerBound, double upperBound) { // random double between lower and upper bound
     return (rand() * (upperBound - lowerBound) / RAND_MAX + lowerBound); // probably works idk
 }
 
@@ -27364,12 +27364,12 @@ char *strdel(char *dest, int32_t index, int32_t size) {
     return dest;
 }
 
-tt_theme_name_t tt_theme;
-tt_enabled_t tt_enabled; // all start at 0 (global variable)
-tt_elements_t tt_elements;
+turtle_tools_theme_t turtleToolsTheme;
+turtle_tools_enabled_t turtleToolsEnabled; // all start at 0 (global variable)
+turtle_tools_elements_t turtleToolsElements;
 
 /* default colours (light theme) */
-double tt_themeColors[] = {
+double turtleToolsThemeColors[] = {
     255.0, 255.0, 255.0, // TT_COLOR_BACKGROUND (0)
     222.0, 222.0, 222.0, // TT_COLOR_BACKGROUND_HIGHLIGHT (3)
     230.0, 230.0, 230.0, // TT_COLOR_BACKGROUND_ALTERNATE (6)
@@ -27414,14 +27414,14 @@ double tt_themeColors[] = {
     199.0, 199.0, 199.0, // TT_COLOR_LIGHT_GREY_ALTERNATE (123)
 };
 
-void tt_setColor(int32_t index) {
-    turtle_pen_color(tt_themeColors[index], tt_themeColors[index + 1], tt_themeColors[index + 2]);
+void turtle_tools_set_color(turtle_tools_color_t color) {
+    turtle_pen_color(turtleToolsThemeColors[color], turtleToolsThemeColors[color + 1], turtleToolsThemeColors[color + 2]);
 }
 
-void turtleToolsSetTheme(tt_theme_name_t theme) {
+void turtle_tools_set_theme(turtle_tools_theme_t theme) {
     if (theme == TT_THEME_DARK) {
-        tt_theme = theme;
-        double tt_themeCopy[] = {
+        turtleToolsTheme = theme;
+        double turtleToolsThemeCopy[] = {
             30.0, 30.0, 30.0,    // TT_COLOR_BACKGROUND (0)
             200.0, 200.0, 200.0, // TT_COLOR_BACKGROUND_HIGHLIGHT (3)
             125.0, 125.0, 125.0, // TT_COLOR_BACKGROUND_ALTERNATE (6)
@@ -27465,10 +27465,10 @@ void turtleToolsSetTheme(tt_theme_name_t theme) {
             187.0, 187.0, 187.0, // TT_COLOR_LIGHT_GREY (120)
             199.0, 199.0, 199.0, // TT_COLOR_LIGHT_GREY_ALTERNATE (123)
         };
-        memcpy(tt_themeColors, tt_themeCopy, sizeof(tt_themeCopy));
+        memcpy(turtleToolsThemeColors, turtleToolsThemeCopy, sizeof(turtleToolsThemeCopy));
     } else if (theme == TT_THEME_COLT) {
-        tt_theme = theme;
-        double tt_themeCopy[] = {
+        turtleToolsTheme = theme;
+        double turtleToolsThemeCopy[] = {
             36.0, 30.0, 32.0,    // TT_COLOR_BACKGROUND (0)
             154.0, 141.0, 133.0, // TT_COLOR_BACKGROUND_HIGHLIGHT (3)
             118.0, 107.0, 104.0, // TT_COLOR_BACKGROUND_ALTERNATE (6)
@@ -27512,10 +27512,10 @@ void turtleToolsSetTheme(tt_theme_name_t theme) {
             187.0, 187.0, 187.0, // TT_COLOR_LIGHT_GREY (120)
             199.0, 199.0, 199.0, // TT_COLOR_LIGHT_GREY_ALTERNATE (123)
         };
-        memcpy(tt_themeColors, tt_themeCopy, sizeof(tt_themeCopy));
+        memcpy(turtleToolsThemeColors, turtleToolsThemeCopy, sizeof(turtleToolsThemeCopy));
     } else if (theme == TT_THEME_NAVY) {
-        tt_theme = theme;
-        double tt_themeCopy[] = {
+        turtleToolsTheme = theme;
+        double turtleToolsThemeCopy[] = {
             212.0, 201.0, 190.0, // TT_COLOR_BACKGROUND (0)
             255.0, 253.0, 250.0, // TT_COLOR_BACKGROUND_HIGHLIGHT (3)
             241.0, 239.0, 236.0, // TT_COLOR_BACKGROUND_ALTERNATE (6)
@@ -27559,10 +27559,10 @@ void turtleToolsSetTheme(tt_theme_name_t theme) {
             187.0, 187.0, 187.0, // TT_COLOR_LIGHT_GREY (120)
             199.0, 199.0, 199.0, // TT_COLOR_LIGHT_GREY_ALTERNATE (123)
         };
-        memcpy(tt_themeColors, tt_themeCopy, sizeof(tt_themeCopy));
+        memcpy(turtleToolsThemeColors, turtleToolsThemeCopy, sizeof(turtleToolsThemeCopy));
     } else {
-        tt_theme = TT_THEME_LIGHT;
-        double tt_themeCopy[] = {
+        turtleToolsTheme = TT_THEME_LIGHT;
+        double turtleToolsThemeCopy[] = {
                 255.0, 255.0, 255.0, // TT_COLOR_BACKGROUND (0)
                 222.0, 222.0, 222.0, // TT_COLOR_BACKGROUND_HIGHLIGHT (3)
                 230.0, 230.0, 230.0, // TT_COLOR_BACKGROUND_ALTERNATE (6)
@@ -27606,19 +27606,19 @@ void turtleToolsSetTheme(tt_theme_name_t theme) {
                 187.0, 187.0, 187.0, // TT_COLOR_LIGHT_GREY (120)
                 199.0, 199.0, 199.0, // TT_COLOR_LIGHT_GREY_ALTERNATE (123)
         };
-        memcpy(tt_themeColors, tt_themeCopy, sizeof(tt_themeCopy));
+        memcpy(turtleToolsThemeColors, turtleToolsThemeCopy, sizeof(turtleToolsThemeCopy));
     }
-    turtle_background_color(tt_themeColors[TT_COLOR_BACKGROUND], tt_themeColors[TT_COLOR_BACKGROUND + 1], tt_themeColors[TT_COLOR_BACKGROUND + 2]);
+    turtle_background_color(turtleToolsThemeColors[TT_COLOR_BACKGROUND], turtleToolsThemeColors[TT_COLOR_BACKGROUND + 1], turtleToolsThemeColors[TT_COLOR_BACKGROUND + 2]);
 }
 
 /* ribbon */
 
 /* ribbon variables */
 
-tt_ribbon_t tt_ribbon;
+turtle_tools_ribbon_t turtleToolsRibbon;
 
 /* initialise ribbon */
-int32_t tt_ribbonInit(const char *filename) {
+int32_t turtle_tools_ribbon_init(const char *filename) {
     /* load from config file */
     char fileExists = 1;
     list_t *defaultRibbonFile = list_init();
@@ -27630,73 +27630,73 @@ int32_t tt_ribbonInit(const char *filename) {
         printf("Error: file %s not found\n", filename);
         fileExists = 0;
     }
-    return tt_ribbonInitInternal(configFile, defaultRibbonFile, fileExists);
+    return turtle_tools_ribbon_init_internal(configFile, defaultRibbonFile, fileExists);
 }
 
 /* initialise ribbon with a list instead of a config file */
-int32_t tt_ribbonInitList(list_t *config) {
+int32_t turtle_tools_ribbon_init_list(list_t *config) {
     /* load from config file */
-    return tt_ribbonInitInternal(NULL, config, 0);
+    return turtle_tools_ribbon_init_internal(NULL, config, 0);
 }
 
 /* initialise ribbon */
-int32_t tt_ribbonInitInternal(FILE *configFile, list_t *configList, int8_t fileExists) {
+int32_t turtle_tools_ribbon_init_internal(FILE *configFile, list_t *configList, int8_t fileExists) {
     /* enable ribbon */
-    tt_enabled.ribbonEnabled = 1;
-    if (tt_enabled.turtleToolsEnabled == 0) {
-        tt_enabled.turtleToolsEnabled = 1;
-        tt_elements.all = list_init();
+    turtleToolsEnabled.ribbonEnabled = 1;
+    if (turtleToolsEnabled.turtleToolsEnabled == 0) {
+        turtleToolsEnabled.turtleToolsEnabled = 1;
+        turtleToolsElements.all = list_init();
     }
-    tt_ribbon.element = TT_ELEMENT_RIBBON;
-    tt_ribbon.priority = tt_ribbon.element;
-    tt_ribbon.enabled = TT_ELEMENT_ENABLED;
-    tt_elementResetColor((void *) &tt_ribbon);
+    turtleToolsRibbon.element = TT_ELEMENT_RIBBON;
+    turtleToolsRibbon.priority = turtleToolsRibbon.element;
+    turtleToolsRibbon.enabled = TT_ELEMENT_ENABLED;
+    turtle_tools_element_reset_color((void *) &turtleToolsRibbon);
     /* set ribbon parameters */
-    tt_ribbon.marginSize = (turtle.initbounds[3] - turtle.initbounds[1]) / 36.0; // number of pixels between different items in the ribbon (not affected by ribbonSize)
-    tt_ribbon.mainselect[0] = -1;
-    tt_ribbon.mainselect[1] = -1;
-    tt_ribbon.mainselect[2] = -1;
-    tt_ribbon.subselect[0] = -1;
-    tt_ribbon.subselect[1] = -1;
-    tt_ribbon.subselect[2] = -1;
-    tt_ribbon.output[0] = 0;
-    tt_ribbon.output[1] = -1;
-    tt_ribbon.output[2] = -1;
+    turtleToolsRibbon.marginSize = (turtle.initbounds[3] - turtle.initbounds[1]) / 36.0; // number of pixels between different items in the ribbon (not affected by ribbonSize)
+    turtleToolsRibbon.mainselect[0] = -1;
+    turtleToolsRibbon.mainselect[1] = -1;
+    turtleToolsRibbon.mainselect[2] = -1;
+    turtleToolsRibbon.subselect[0] = -1;
+    turtleToolsRibbon.subselect[1] = -1;
+    turtleToolsRibbon.subselect[2] = -1;
+    turtleToolsRibbon.output[0] = 0;
+    turtleToolsRibbon.output[1] = -1;
+    turtleToolsRibbon.output[2] = -1;
 
-    tt_ribbon.mouseDown = 0;
+    turtleToolsRibbon.mouseDown = 0;
 
-    tt_ribbon.bounds[0] = turtle.initbounds[0];
-    tt_ribbon.bounds[1] = turtle.initbounds[1];
-    tt_ribbon.bounds[2] = turtle.initbounds[2];
-    tt_ribbon.bounds[3] = turtle.initbounds[3];
+    turtleToolsRibbon.bounds[0] = turtle.initbounds[0];
+    turtleToolsRibbon.bounds[1] = turtle.initbounds[1];
+    turtleToolsRibbon.bounds[2] = turtle.initbounds[2];
+    turtleToolsRibbon.bounds[3] = turtle.initbounds[3];
 
-    tt_ribbon.ribbonSize = (turtle.initbounds[3] - turtle.initbounds[1]) / 360.0; // 1 is default for 640 by 360 coordiantes, below 1 is smaller, above 1 is larger (scales as a multiplier, 0.1 is 100x smaller than 10)
-    if (tt_ribbon.options != NULL) {
+    turtleToolsRibbon.ribbonSize = (turtle.initbounds[3] - turtle.initbounds[1]) / 360.0; // 1 is default for 640 by 360 coordiantes, below 1 is smaller, above 1 is larger (scales as a multiplier, 0.1 is 100x smaller than 10)
+    if (turtleToolsRibbon.options != NULL) {
         /* support reinitialising to change ribbon contents */
-        list_free(tt_ribbon.options);
+        list_free(turtleToolsRibbon.options);
     }
-    if (tt_ribbon.lengths != NULL) {
-        list_free(tt_ribbon.lengths);
+    if (turtleToolsRibbon.lengths != NULL) {
+        list_free(turtleToolsRibbon.lengths);
     }
-    tt_ribbon.options = list_init();
-    tt_ribbon.lengths = list_init();
+    turtleToolsRibbon.options = list_init();
+    turtleToolsRibbon.lengths = list_init();
 
     /* load ribbon options */
     char line[1024]; // maximum size of any list of options
-    while ((fileExists == 0 && tt_ribbon.options -> length < configList -> length) || (fileExists == 1 && fgets(line, 1024, configFile) != NULL)) {
+    while ((fileExists == 0 && turtleToolsRibbon.options -> length < configList -> length) || (fileExists == 1 && fgets(line, 1024, configFile) != NULL)) {
         if (fileExists == 0) {
-            memcpy(line, configList -> data[tt_ribbon.options -> length].s, strlen(configList -> data[tt_ribbon.options -> length].s) + 1);
+            memcpy(line, configList -> data[turtleToolsRibbon.options -> length].s, strlen(configList -> data[turtleToolsRibbon.options -> length].s) + 1);
         }
         if (line[strlen(line) - 1] == '\n') {
             line[strlen(line) - 1] = '\0'; // cull newline
         }
-        list_append(tt_ribbon.options, (unitype) list_init(), 'r');
+        list_append(turtleToolsRibbon.options, (unitype) list_init(), 'r');
         char *item = strtok(line, ",");
         while (item != NULL) {
             if (item[0] == ' ') {
                 item++; // cull leading space
             }
-            list_append(tt_ribbon.options -> data[tt_ribbon.options -> length - 1].r, (unitype) item, 's');
+            list_append(turtleToolsRibbon.options -> data[turtleToolsRibbon.options -> length - 1].r, (unitype) item, 's');
             item = strtok(NULL, ",");
         }
     }
@@ -27704,101 +27704,101 @@ int32_t tt_ribbonInitInternal(FILE *configFile, list_t *configList, int8_t fileE
         fclose(configFile);
     }
 
-    for (int32_t i = 0; i < tt_ribbon.options -> length; i++) {
-        list_append(tt_ribbon.lengths, (unitype) turtle_text_get_string_length(tt_ribbon.options -> data[i].r -> data[0].s, 7 * tt_ribbon.ribbonSize), 'd');
+    for (int32_t i = 0; i < turtleToolsRibbon.options -> length; i++) {
+        list_append(turtleToolsRibbon.lengths, (unitype) turtle_text_get_string_length(turtleToolsRibbon.options -> data[i].r -> data[0].s, 7 * turtleToolsRibbon.ribbonSize), 'd');
         double max = 0;
-        for (int32_t j = 1; j < tt_ribbon.options -> data[i].r -> length; j++) {
-            double current = turtle_text_get_string_length(tt_ribbon.options -> data[i].r -> data[j].s, 7 * tt_ribbon.ribbonSize);
+        for (int32_t j = 1; j < turtleToolsRibbon.options -> data[i].r -> length; j++) {
+            double current = turtle_text_get_string_length(turtleToolsRibbon.options -> data[i].r -> data[j].s, 7 * turtleToolsRibbon.ribbonSize);
             if (current > max) {
                 max = current;
             }
         }
-        list_append(tt_ribbon.lengths, (unitype) max, 'd');
+        list_append(turtleToolsRibbon.lengths, (unitype) max, 'd');
     }
     list_free(configList);
     return 0;
 }
 
 /* render ribbon */
-void tt_ribbonUpdate() {
-    tt_setColor(tt_ribbon.color[TT_COLOR_SLOT_RIBBON_TOP]);
-    turtle_rectangle(tt_ribbon.bounds[0], tt_ribbon.bounds[3] - tt_ribbon.ribbonSize * 10, tt_ribbon.bounds[2], tt_ribbon.bounds[3]);
-    tt_setColor(tt_ribbon.color[TT_COLOR_SLOT_RIBBON_TEXT]);
-    double cutoff = tt_ribbon.bounds[0] + tt_ribbon.marginSize;
-    tt_ribbon.mainselect[0] = -1;
-    tt_ribbon.subselect[0] = -1;
-    for (int32_t i = 0; i < tt_ribbon.options -> length; i++) {
+void turtle_tools_ribbon_update() {
+    turtle_tools_set_color(turtleToolsRibbon.color[TT_COLOR_SLOT_RIBBON_TOP]);
+    turtle_rectangle(turtleToolsRibbon.bounds[0], turtleToolsRibbon.bounds[3] - turtleToolsRibbon.ribbonSize * 10, turtleToolsRibbon.bounds[2], turtleToolsRibbon.bounds[3]);
+    turtle_tools_set_color(turtleToolsRibbon.color[TT_COLOR_SLOT_RIBBON_TEXT]);
+    double cutoff = turtleToolsRibbon.bounds[0] + turtleToolsRibbon.marginSize;
+    turtleToolsRibbon.mainselect[0] = -1;
+    turtleToolsRibbon.subselect[0] = -1;
+    for (int32_t i = 0; i < turtleToolsRibbon.options -> length; i++) {
         double prevCutoff = cutoff;
-        if (i == tt_ribbon.mainselect[2]) {
-            double xLeft = prevCutoff - tt_ribbon.marginSize / 2.0;
-            double xRight = prevCutoff + tt_ribbon.lengths -> data[i * 2 + 1].d + tt_ribbon.marginSize / 2.0;
-            double yDown = tt_ribbon.bounds[3] - 10 * tt_ribbon.ribbonSize - 15 * tt_ribbon.ribbonSize * (tt_ribbon.options -> data[i].r -> length - 1) - tt_ribbon.marginSize / 2.0;
-            tt_setColor(tt_ribbon.color[TT_COLOR_SLOT_RIBBON_DROPDOWN]);
-            turtle_rectangle(xLeft, tt_ribbon.bounds[3] - 10 * tt_ribbon.ribbonSize, xRight, yDown); // ribbon highlight
-            for (int32_t j = 1; j < tt_ribbon.options -> data[i].r -> length; j++) {
-                if (tt_globals.elementLogicTypeOld <= TT_ELEMENT_RIBBON) {
-                    if (turtle.mouseY > tt_ribbon.bounds[3] - 10 * tt_ribbon.ribbonSize - 15 * tt_ribbon.ribbonSize * j - tt_ribbon.marginSize / 4.0 && turtle.mouseY < tt_ribbon.bounds[3] - 10 * tt_ribbon.ribbonSize && turtle.mouseX > xLeft && turtle.mouseX < xRight && tt_ribbon.subselect[0] == -1) {
-                        tt_setColor(tt_ribbon.color[TT_COLOR_SLOT_RIBBON_HOVER]);
-                        turtle_rectangle(xLeft, tt_ribbon.bounds[3] - 10 * tt_ribbon.ribbonSize - 15 * tt_ribbon.ribbonSize * (j - 1) - tt_ribbon.marginSize / 4.0, xRight, tt_ribbon.bounds[3] - 10 * tt_ribbon.ribbonSize - 15 * tt_ribbon.ribbonSize * j - tt_ribbon.marginSize / 3.0); // dropdown highlight
-                        tt_ribbon.subselect[0] = j;
+        if (i == turtleToolsRibbon.mainselect[2]) {
+            double xLeft = prevCutoff - turtleToolsRibbon.marginSize / 2.0;
+            double xRight = prevCutoff + turtleToolsRibbon.lengths -> data[i * 2 + 1].d + turtleToolsRibbon.marginSize / 2.0;
+            double yDown = turtleToolsRibbon.bounds[3] - 10 * turtleToolsRibbon.ribbonSize - 15 * turtleToolsRibbon.ribbonSize * (turtleToolsRibbon.options -> data[i].r -> length - 1) - turtleToolsRibbon.marginSize / 2.0;
+            turtle_tools_set_color(turtleToolsRibbon.color[TT_COLOR_SLOT_RIBBON_DROPDOWN]);
+            turtle_rectangle(xLeft, turtleToolsRibbon.bounds[3] - 10 * turtleToolsRibbon.ribbonSize, xRight, yDown); // ribbon highlight
+            for (int32_t j = 1; j < turtleToolsRibbon.options -> data[i].r -> length; j++) {
+                if (turtleToolsGlobals.elementLogicTypeOld <= TT_ELEMENT_RIBBON) {
+                    if (turtle.mouseY > turtleToolsRibbon.bounds[3] - 10 * turtleToolsRibbon.ribbonSize - 15 * turtleToolsRibbon.ribbonSize * j - turtleToolsRibbon.marginSize / 4.0 && turtle.mouseY < turtleToolsRibbon.bounds[3] - 10 * turtleToolsRibbon.ribbonSize && turtle.mouseX > xLeft && turtle.mouseX < xRight && turtleToolsRibbon.subselect[0] == -1) {
+                        turtle_tools_set_color(turtleToolsRibbon.color[TT_COLOR_SLOT_RIBBON_HOVER]);
+                        turtle_rectangle(xLeft, turtleToolsRibbon.bounds[3] - 10 * turtleToolsRibbon.ribbonSize - 15 * turtleToolsRibbon.ribbonSize * (j - 1) - turtleToolsRibbon.marginSize / 4.0, xRight, turtleToolsRibbon.bounds[3] - 10 * turtleToolsRibbon.ribbonSize - 15 * turtleToolsRibbon.ribbonSize * j - turtleToolsRibbon.marginSize / 3.0); // dropdown highlight
+                        turtleToolsRibbon.subselect[0] = j;
                     }
                 }
-                tt_setColor(tt_ribbon.color[TT_COLOR_SLOT_RIBBON_TEXT]);
-                turtle_text_write_unicode(tt_ribbon.options -> data[i].r -> data[j].s, prevCutoff, tt_ribbon.bounds[3] - 5.5 * tt_ribbon.ribbonSize - j * 15 * tt_ribbon.ribbonSize, 7 * tt_ribbon.ribbonSize, 0);
+                turtle_tools_set_color(turtleToolsRibbon.color[TT_COLOR_SLOT_RIBBON_TEXT]);
+                turtle_text_write_unicode(turtleToolsRibbon.options -> data[i].r -> data[j].s, prevCutoff, turtleToolsRibbon.bounds[3] - 5.5 * turtleToolsRibbon.ribbonSize - j * 15 * turtleToolsRibbon.ribbonSize, 7 * turtleToolsRibbon.ribbonSize, 0);
             }
         }
-        cutoff += tt_ribbon.lengths -> data[i * 2].d + tt_ribbon.marginSize;
-        if (tt_globals.elementLogicTypeOld <= TT_ELEMENT_RIBBON) {
-            if (turtle.mouseY > tt_ribbon.bounds[3] - 10 * tt_ribbon.ribbonSize && turtle.mouseY < tt_ribbon.bounds[3] && turtle.mouseX > tt_ribbon.bounds[0] + tt_ribbon.marginSize / 2.0 && turtle.mouseX < cutoff - tt_ribbon.marginSize / 2.0 && tt_ribbon.mainselect[0] == -1) { // -217, -195, -164
-                tt_setColor(tt_ribbon.color[TT_COLOR_SLOT_RIBBON_SELECT]);
-                turtle_rectangle(prevCutoff - tt_ribbon.marginSize / 2.0, tt_ribbon.bounds[3] - tt_ribbon.ribbonSize, cutoff - tt_ribbon.marginSize / 2.0, tt_ribbon.bounds[3] - 9 * tt_ribbon.ribbonSize); // render dropdown
-                tt_ribbon.mainselect[0] = i;
-                tt_globals.elementLogicType = TT_ELEMENT_RIBBON;
+        cutoff += turtleToolsRibbon.lengths -> data[i * 2].d + turtleToolsRibbon.marginSize;
+        if (turtleToolsGlobals.elementLogicTypeOld <= TT_ELEMENT_RIBBON) {
+            if (turtle.mouseY > turtleToolsRibbon.bounds[3] - 10 * turtleToolsRibbon.ribbonSize && turtle.mouseY < turtleToolsRibbon.bounds[3] && turtle.mouseX > turtleToolsRibbon.bounds[0] + turtleToolsRibbon.marginSize / 2.0 && turtle.mouseX < cutoff - turtleToolsRibbon.marginSize / 2.0 && turtleToolsRibbon.mainselect[0] == -1) { // -217, -195, -164
+                turtle_tools_set_color(turtleToolsRibbon.color[TT_COLOR_SLOT_RIBBON_SELECT]);
+                turtle_rectangle(prevCutoff - turtleToolsRibbon.marginSize / 2.0, turtleToolsRibbon.bounds[3] - turtleToolsRibbon.ribbonSize, cutoff - turtleToolsRibbon.marginSize / 2.0, turtleToolsRibbon.bounds[3] - 9 * turtleToolsRibbon.ribbonSize); // render dropdown
+                turtleToolsRibbon.mainselect[0] = i;
+                turtleToolsGlobals.elementLogicType = TT_ELEMENT_RIBBON;
             }
         }
-        tt_setColor(tt_ribbon.color[TT_COLOR_SLOT_RIBBON_TEXT]);
-        turtle_text_write_unicode(tt_ribbon.options -> data[i].r -> data[0].s, prevCutoff, tt_ribbon.bounds[3] - 5.5 * tt_ribbon.ribbonSize, 7 * tt_ribbon.ribbonSize, 0);
+        turtle_tools_set_color(turtleToolsRibbon.color[TT_COLOR_SLOT_RIBBON_TEXT]);
+        turtle_text_write_unicode(turtleToolsRibbon.options -> data[i].r -> data[0].s, prevCutoff, turtleToolsRibbon.bounds[3] - 5.5 * turtleToolsRibbon.ribbonSize, 7 * turtleToolsRibbon.ribbonSize, 0);
     }
-    if (tt_globals.elementLogicTypeOld <= TT_ELEMENT_RIBBON) {
-        if (tt_ribbon.mainselect[2] > -1 || tt_ribbon.subselect[2] > -1) {
-            tt_globals.elementLogicType = TT_ELEMENT_RIBBON;
+    if (turtleToolsGlobals.elementLogicTypeOld <= TT_ELEMENT_RIBBON) {
+        if (turtleToolsRibbon.mainselect[2] > -1 || turtleToolsRibbon.subselect[2] > -1) {
+            turtleToolsGlobals.elementLogicType = TT_ELEMENT_RIBBON;
         }
         if (turtle_mouse_down()) { // this is hideous
-            if (tt_ribbon.mouseDown == 0) {
-                tt_ribbon.mouseDown = 1;
-                if (tt_ribbon.subselect[0] == tt_ribbon.subselect[1] && tt_ribbon.subselect[0] != -1) {
-                    tt_ribbon.subselect[2] = tt_ribbon.subselect[0];
-                    tt_ribbon.output[0] = 1;
-                    tt_ribbon.output[1] = tt_ribbon.mainselect[2];
-                    tt_ribbon.output[2] = tt_ribbon.subselect[2];
+            if (turtleToolsRibbon.mouseDown == 0) {
+                turtleToolsRibbon.mouseDown = 1;
+                if (turtleToolsRibbon.subselect[0] == turtleToolsRibbon.subselect[1] && turtleToolsRibbon.subselect[0] != -1) {
+                    turtleToolsRibbon.subselect[2] = turtleToolsRibbon.subselect[0];
+                    turtleToolsRibbon.output[0] = 1;
+                    turtleToolsRibbon.output[1] = turtleToolsRibbon.mainselect[2];
+                    turtleToolsRibbon.output[2] = turtleToolsRibbon.subselect[2];
                 }
-                if (tt_ribbon.mainselect[0] == tt_ribbon.mainselect[1]) {
-                    if (tt_ribbon.mainselect[0] == tt_ribbon.mainselect[2]) {
-                        tt_ribbon.mainselect[3] = -1;
+                if (turtleToolsRibbon.mainselect[0] == turtleToolsRibbon.mainselect[1]) {
+                    if (turtleToolsRibbon.mainselect[0] == turtleToolsRibbon.mainselect[2]) {
+                        turtleToolsRibbon.mainselect[3] = -1;
                     } else {
-                        tt_ribbon.mainselect[2] = tt_ribbon.mainselect[0];
-                        tt_globals.elementLogicType = TT_ELEMENT_RIBBON;
+                        turtleToolsRibbon.mainselect[2] = turtleToolsRibbon.mainselect[0];
+                        turtleToolsGlobals.elementLogicType = TT_ELEMENT_RIBBON;
                     }
                 }
             }
         } else {
-            if (tt_ribbon.mouseDown == 1) {
-                if (tt_ribbon.subselect[0] != -1) {
-                    tt_ribbon.subselect[2] = tt_ribbon.subselect[0];
-                    tt_ribbon.output[0] = 1;
-                    tt_ribbon.output[1] = tt_ribbon.mainselect[2];
-                    tt_ribbon.output[2] = tt_ribbon.subselect[2];
-                    tt_ribbon.mainselect[2] = -1;
+            if (turtleToolsRibbon.mouseDown == 1) {
+                if (turtleToolsRibbon.subselect[0] != -1) {
+                    turtleToolsRibbon.subselect[2] = turtleToolsRibbon.subselect[0];
+                    turtleToolsRibbon.output[0] = 1;
+                    turtleToolsRibbon.output[1] = turtleToolsRibbon.mainselect[2];
+                    turtleToolsRibbon.output[2] = turtleToolsRibbon.subselect[2];
+                    turtleToolsRibbon.mainselect[2] = -1;
                 }
-                tt_ribbon.subselect[2] = -1;
+                turtleToolsRibbon.subselect[2] = -1;
             }
-            if (tt_ribbon.mainselect[3] == -1 && tt_ribbon.mainselect[0] == tt_ribbon.mainselect[2]) {
-                tt_ribbon.mainselect[2] = -1;
+            if (turtleToolsRibbon.mainselect[3] == -1 && turtleToolsRibbon.mainselect[0] == turtleToolsRibbon.mainselect[2]) {
+                turtleToolsRibbon.mainselect[2] = -1;
             }
-            tt_ribbon.mainselect[3] = 0;
-            tt_ribbon.mouseDown = 0;
-            tt_ribbon.mainselect[1] = tt_ribbon.mainselect[0];
-            tt_ribbon.subselect[1] = tt_ribbon.subselect[0];
+            turtleToolsRibbon.mainselect[3] = 0;
+            turtleToolsRibbon.mouseDown = 0;
+            turtleToolsRibbon.mainselect[1] = turtleToolsRibbon.mainselect[0];
+            turtleToolsRibbon.subselect[1] = turtleToolsRibbon.subselect[0];
         }
     }
 }
@@ -27807,10 +27807,10 @@ void tt_ribbonUpdate() {
 
 /* popup variables */
 
-tt_popup_t tt_popup;
+turtle_tools_popup_t turtleToolsPopup;
 
 /* initialise popup */
-int32_t tt_popupInit(char *filename) {
+int32_t turtle_tools_popup_init(char *filename) {
     /* read information from config file */
     char fileExists = 1;
     list_t *defaultPopupFile = list_init();
@@ -27822,30 +27822,30 @@ int32_t tt_popupInit(char *filename) {
         printf("Error: file %s not found\n", filename);
         fileExists = 0;
     }
-    return tt_popupInitInternal(configFile, defaultPopupFile, fileExists);
+    return turtle_tools_popup_init_internal(configFile, defaultPopupFile, fileExists);
 }
 
 /* initialise popup with a list instead of a config file */
-int32_t tt_popupInitList(list_t *config) {
-    return tt_popupInitInternal(NULL, config, 0);
+int32_t turtle_tools_popup_init_list(list_t *config) {
+    return turtle_tools_popup_init_internal(NULL, config, 0);
 }
 
 /* initialise popup */
-int32_t tt_popupInitInternal(FILE *configFile, list_t *configList, int8_t fileExists) {
-    tt_enabled.popupEnabled = 1;
-    if (tt_enabled.turtleToolsEnabled == 0) {
-        tt_enabled.turtleToolsEnabled = 1;
-        tt_elements.all = list_init();
+int32_t turtle_tools_popup_init_internal(FILE *configFile, list_t *configList, int8_t fileExists) {
+    turtleToolsEnabled.popupEnabled = 1;
+    if (turtleToolsEnabled.turtleToolsEnabled == 0) {
+        turtleToolsEnabled.turtleToolsEnabled = 1;
+        turtleToolsElements.all = list_init();
     }
-    tt_popup.element = TT_ELEMENT_POPUP;
-    tt_popup.priority = tt_popup.element;
-    tt_popup.enabled = TT_ELEMENT_ENABLED;
-    tt_elementResetColor((void *) &tt_popup);
-    tt_popup.output[0] = 0;
-    tt_popup.output[1] = -1;
-    tt_popup.mouseDown = 0;
-    tt_popup.size = (turtle.initbounds[3] - turtle.initbounds[1]) / 72;
-    tt_popup.style = 0;
+    turtleToolsPopup.element = TT_ELEMENT_POPUP;
+    turtleToolsPopup.priority = turtleToolsPopup.element;
+    turtleToolsPopup.enabled = TT_ELEMENT_ENABLED;
+    turtle_tools_element_reset_color((void *) &turtleToolsPopup);
+    turtleToolsPopup.output[0] = 0;
+    turtleToolsPopup.output[1] = -1;
+    turtleToolsPopup.mouseDown = 0;
+    turtleToolsPopup.size = (turtle.initbounds[3] - turtle.initbounds[1]) / 72;
+    turtleToolsPopup.style = 0;
 
     char line[256] = {1, 0}; // maximum size of message or option
     /* read popup message */
@@ -27854,25 +27854,25 @@ int32_t tt_popupInitInternal(FILE *configFile, list_t *configList, int8_t fileEx
             if (line[strlen(line) - 1] == '\n') {
                 line[strlen(line) - 1] = '\0'; // cull newline
             }
-            tt_popup.message = strdup(line);
+            turtleToolsPopup.message = strdup(line);
         }
     } else {
-        tt_popup.message = strdup(configList -> data[0].s);
+        turtleToolsPopup.message = strdup(configList -> data[0].s);
     }
     /* read popup options */
     double defaultPadding = (turtle.initbounds[2] - turtle.initbounds[0]) / 50;
     double buttonWidth = defaultPadding;
-    tt_popup.options = list_init();
-    while ((fileExists == 0 && tt_popup.options -> length < configList -> length - 1) || (fileExists == 1 && fgets(line, 256, configFile) != NULL)) {
+    turtleToolsPopup.options = list_init();
+    while ((fileExists == 0 && turtleToolsPopup.options -> length < configList -> length - 1) || (fileExists == 1 && fgets(line, 256, configFile) != NULL)) {
         if (fileExists == 1) {
             if (line[strlen(line) - 1] == '\n') {
                 line[strlen(line) - 1] = '\0'; // cull newline
             }
-            list_append(tt_popup.options, (unitype) strdup(line), 's');
+            list_append(turtleToolsPopup.options, (unitype) strdup(line), 's');
         } else {
-            list_append(tt_popup.options, configList -> data[tt_popup.options -> length + 1], 's');
+            list_append(turtleToolsPopup.options, configList -> data[turtleToolsPopup.options -> length + 1], 's');
         }
-        buttonWidth += turtle_text_get_unicode_length(tt_popup.options -> data[tt_popup.options -> length - 1].s, tt_popup.size) + defaultPadding;
+        buttonWidth += turtle_text_get_unicode_length(turtleToolsPopup.options -> data[turtleToolsPopup.options -> length - 1].s, turtleToolsPopup.size) + defaultPadding;
     }
     if (fileExists) {
         fclose(configFile);
@@ -27881,101 +27881,101 @@ int32_t tt_popupInitInternal(FILE *configFile, list_t *configList, int8_t fileEx
     double centerY = (turtle.initbounds[1] + turtle.initbounds[3]) / 2;
     double height = (turtle.initbounds[3] - turtle.initbounds[1]) / 9;
     double centerX = (turtle.initbounds[0] + turtle.initbounds[2]) / 2;
-    double messageWidth = turtle_text_get_unicode_length(tt_popup.message, tt_popup.size) + defaultPadding;
+    double messageWidth = turtle_text_get_unicode_length(turtleToolsPopup.message, turtleToolsPopup.size) + defaultPadding;
     double width = messageWidth;
     if (messageWidth < buttonWidth) {
         width = buttonWidth;
     }
-    tt_popup.minX = centerX - width / 2;
-    tt_popup.minY = centerY - height / 2;
-    tt_popup.maxX = centerX + width / 2;
-    tt_popup.maxY = centerY + height / 2;
+    turtleToolsPopup.minX = centerX - width / 2;
+    turtleToolsPopup.minY = centerY - height / 2;
+    turtleToolsPopup.maxX = centerX + width / 2;
+    turtleToolsPopup.maxY = centerY + height / 2;
     return 0;
 }
 
 /* render popup */
-void tt_popupUpdate() {
+void turtle_tools_popup_update() {
     if (turtle.close == 1) {
-        tt_globals.elementLogicType = TT_ELEMENT_POPUP;
-        tt_setColor(tt_popup.color[TT_COLOR_SLOT_POPUP_BOX]);
-        turtle_rectangle(tt_popup.minX, tt_popup.minY, tt_popup.maxX, tt_popup.maxY);
-        double textX = tt_popup.minX + (tt_popup.maxX - tt_popup.minX) / 2;
-        double textY = tt_popup.maxY - tt_popup.size * 2;
-        tt_setColor(tt_popup.color[TT_COLOR_SLOT_POPUP_TEXT]);
-        turtle_text_write_unicode(tt_popup.message, textX, textY, tt_popup.size, 50);
-        textY -= tt_popup.size * 4;
+        turtleToolsGlobals.elementLogicType = TT_ELEMENT_POPUP;
+        turtle_tools_set_color(turtleToolsPopup.color[TT_COLOR_SLOT_POPUP_BOX]);
+        turtle_rectangle(turtleToolsPopup.minX, turtleToolsPopup.minY, turtleToolsPopup.maxX, turtleToolsPopup.maxY);
+        double textX = turtleToolsPopup.minX + (turtleToolsPopup.maxX - turtleToolsPopup.minX) / 2;
+        double textY = turtleToolsPopup.maxY - turtleToolsPopup.size * 2;
+        turtle_tools_set_color(turtleToolsPopup.color[TT_COLOR_SLOT_POPUP_TEXT]);
+        turtle_text_write_unicode(turtleToolsPopup.message, textX, textY, turtleToolsPopup.size, 50);
+        textY -= turtleToolsPopup.size * 4;
         double fullLength = 0;
-        for (int32_t i = 0; i < tt_popup.options -> length; i++) {
-            fullLength += turtle_text_get_string_length(tt_popup.options -> data[i].s, tt_popup.size);
+        for (int32_t i = 0; i < turtleToolsPopup.options -> length; i++) {
+            fullLength += turtle_text_get_string_length(turtleToolsPopup.options -> data[i].s, turtleToolsPopup.size);
         }
         /* we have the length of the strings, now we pad with n + 1 padding regions */
-        double padding = (tt_popup.maxX - tt_popup.minX - fullLength) / (tt_popup.options -> length + 1);
-        textX = tt_popup.minX + padding;
+        double padding = (turtleToolsPopup.maxX - turtleToolsPopup.minX - fullLength) / (turtleToolsPopup.options -> length + 1);
+        textX = turtleToolsPopup.minX + padding;
         char flagged = 0;
-        if (!turtle_mouse_down() && tt_popup.mouseDown == 1) {
+        if (!turtle_mouse_down() && turtleToolsPopup.mouseDown == 1) {
             flagged = 1; // flagged for mouse misbehaviour
         }
-        for (int32_t i = 0; i < tt_popup.options -> length; i++) {
-            double strLen = turtle_text_get_string_length(tt_popup.options -> data[i].s, tt_popup.size);
-            if (turtle.mouseX > textX - tt_popup.size && turtle.mouseX < textX + strLen + tt_popup.size && turtle.mouseY > textY - tt_popup.size && turtle.mouseY < textY + tt_popup.size) {
-                tt_setColor(tt_popup.color[TT_COLOR_SLOT_POPUP_BUTTON_SELECT]);
-                turtle_rectangle(textX - tt_popup.size, textY - tt_popup.size, textX + tt_popup.size + strLen, textY + tt_popup.size);
+        for (int32_t i = 0; i < turtleToolsPopup.options -> length; i++) {
+            double strLen = turtle_text_get_string_length(turtleToolsPopup.options -> data[i].s, turtleToolsPopup.size);
+            if (turtle.mouseX > textX - turtleToolsPopup.size && turtle.mouseX < textX + strLen + turtleToolsPopup.size && turtle.mouseY > textY - turtleToolsPopup.size && turtle.mouseY < textY + turtleToolsPopup.size) {
+                turtle_tools_set_color(turtleToolsPopup.color[TT_COLOR_SLOT_POPUP_BUTTON_SELECT]);
+                turtle_rectangle(textX - turtleToolsPopup.size, textY - turtleToolsPopup.size, textX + turtleToolsPopup.size + strLen, textY + turtleToolsPopup.size);
                 if (turtle_mouse_down()) {
-                    if (tt_popup.mouseDown == 0) {
-                        tt_popup.mouseDown = 1;
-                        if (tt_popup.output[0] == 0) {
-                            tt_popup.output[1] = i;
+                    if (turtleToolsPopup.mouseDown == 0) {
+                        turtleToolsPopup.mouseDown = 1;
+                        if (turtleToolsPopup.output[0] == 0) {
+                            turtleToolsPopup.output[1] = i;
                         }
-                        // tt_globals.elementLogicType = TT_ELEMENT_NONE;
+                        // turtleToolsGlobals.elementLogicType = TT_ELEMENT_NONE;
                     }
                 } else {
-                    if (tt_popup.mouseDown == 1) {
-                        tt_popup.mouseDown = 0;
-                        if (tt_popup.output[1] == i) {
-                            tt_popup.output[0] = 1;
+                    if (turtleToolsPopup.mouseDown == 1) {
+                        turtleToolsPopup.mouseDown = 0;
+                        if (turtleToolsPopup.output[1] == i) {
+                            turtleToolsPopup.output[0] = 1;
                         }
-                        // tt_globals.elementLogicType = TT_ELEMENT_NONE;
+                        // turtleToolsGlobals.elementLogicType = TT_ELEMENT_NONE;
                     }
                 }
             } else {
-                tt_setColor(tt_popup.color[TT_COLOR_SLOT_POPUP_BUTTON]);
-                turtle_rectangle(textX - tt_popup.size, textY - tt_popup.size, textX + tt_popup.size + strLen, textY + tt_popup.size);
+                turtle_tools_set_color(turtleToolsPopup.color[TT_COLOR_SLOT_POPUP_BUTTON]);
+                turtle_rectangle(textX - turtleToolsPopup.size, textY - turtleToolsPopup.size, textX + turtleToolsPopup.size + strLen, textY + turtleToolsPopup.size);
             }
-            tt_setColor(tt_popup.color[TT_COLOR_SLOT_POPUP_TEXT]);
-            turtle_text_write_unicode(tt_popup.options -> data[i].s, textX, textY, tt_popup.size, 0);
+            turtle_tools_set_color(turtleToolsPopup.color[TT_COLOR_SLOT_POPUP_TEXT]);
+            turtle_text_write_unicode(turtleToolsPopup.options -> data[i].s, textX, textY, turtleToolsPopup.size, 0);
             textX += strLen + padding;
         }
-        if (!turtle_mouse_down() && tt_popup.mouseDown == 1 && flagged == 1) {
-            tt_popup.mouseDown = 0;
-            tt_popup.output[0] = 0;
-            tt_popup.output[1] = -1;
-            // tt_globals.elementLogicType = TT_ELEMENT_NONE;
+        if (!turtle_mouse_down() && turtleToolsPopup.mouseDown == 1 && flagged == 1) {
+            turtleToolsPopup.mouseDown = 0;
+            turtleToolsPopup.output[0] = 0;
+            turtleToolsPopup.output[1] = -1;
+            // turtleToolsGlobals.elementLogicType = TT_ELEMENT_NONE;
         }
     }
 }
 
-void tt_popupFree() {
-    free(tt_popup.message);
+void turtle_tools_popup_free() {
+    free(turtleToolsPopup.message);
 }
 
 /* UI tools */
 
-tt_globals_t tt_globals;
+turtle_tools_globals_t turtleToolsGlobals;
 
-void tt_elementResetColor(void *elementp) {
-    int32_t elementType = ((tt_button_t *) elementp) -> element;
+void turtle_tools_element_reset_color(void *elementp) {
+    int32_t elementType = ((turtle_tools_button_t *) elementp) -> element;
     for (int32_t i = 0; i < 8; i++) {
-        ((tt_button_t *) elementp) -> color[i] = tt_color_default[i * TT_NUMBER_OF_ELEMENTS + elementType];
+        ((turtle_tools_button_t *) elementp) -> color[i] = turtleToolsColorDefault[i * TT_NUMBER_OF_ELEMENTS + elementType];
     }
 }
 
-int32_t tt_elementFree(void *elementp) {
+int32_t turtle_tools_element_free(void *elementp) {
     if (elementp == NULL) {
         return -1;
     }
-    switch (((tt_button_t *) elementp) -> element) {
+    switch (((turtle_tools_button_t *) elementp) -> element) {
     case TT_ELEMENT_BUTTON:
-        tt_buttonFree((tt_button_t *) elementp);
+        tt_buttonFree((turtle_tools_button_t *) elementp);
     break;
     case TT_ELEMENT_SWITCH:
         tt_switchFree((tt_switch_t *) elementp);
@@ -28009,32 +28009,32 @@ int32_t tt_elementFree(void *elementp) {
     return 0;
 }
 
-void tt_hideAllElements() {
-    for (int32_t i = 0; i < tt_elements.all -> length; i++) {
-        ((tt_button_t *) tt_elements.all -> data[i].p) -> enabled = TT_ELEMENT_HIDE;
+void turtle_tools_hide_all_elements() {
+    for (int32_t i = 0; i < turtleToolsElements.all -> length; i++) {
+        ((turtle_tools_button_t *) turtleToolsElements.all -> data[i].p) -> enabled = TT_ELEMENT_HIDE;
     }
 }
 
 /* initialise UI elements */
 
 void turtleToolsInit() {
-    if (tt_enabled.turtleToolsEnabled == 0) {
-        tt_enabled.turtleToolsEnabled = 1;
-        tt_globals.elementLogicType = TT_ELEMENT_NONE;
-        tt_globals.elementLogicIndex = -1;
-        tt_globals.elementLogicTemp = -1;
-        tt_elements.all = list_init();
+    if (turtleToolsEnabled.turtleToolsEnabled == 0) {
+        turtleToolsEnabled.turtleToolsEnabled = 1;
+        turtleToolsGlobals.elementLogicType = TT_ELEMENT_NONE;
+        turtleToolsGlobals.elementLogicIndex = -1;
+        turtleToolsGlobals.elementLogicTemp = -1;
+        turtleToolsElements.all = list_init();
     }
 }
 
 /* create a button */
-tt_button_t *tt_buttonInit(char *label, int8_t *variable, double x, double y, double size) {
-    if (tt_enabled.buttonEnabled == 0) {
-        tt_enabled.buttonEnabled = 1;
-        tt_elements.buttons = list_init();
+turtle_tools_button_t *tt_buttonInit(char *label, int8_t *variable, double x, double y, double size) {
+    if (turtleToolsEnabled.buttonEnabled == 0) {
+        turtleToolsEnabled.buttonEnabled = 1;
+        turtleToolsElements.buttons = list_init();
     }
     turtleToolsInit();
-    tt_button_t *buttonp = calloc(1, sizeof(tt_button_t));
+    turtle_tools_button_t *buttonp = calloc(1, sizeof(turtle_tools_button_t));
     buttonp -> element = TT_ELEMENT_BUTTON;
     buttonp -> priority = buttonp -> element;
     buttonp -> enabled = TT_ELEMENT_ENABLED;
@@ -28051,7 +28051,7 @@ tt_button_t *tt_buttonInit(char *label, int8_t *variable, double x, double y, do
             memcpy(buttonp -> label, label, length);
         }
     }
-    tt_elementResetColor(buttonp);
+    turtle_tools_element_reset_color(buttonp);
     buttonp -> status = TT_STATUS_IDLE;
     buttonp -> x = x;
     buttonp -> y = y;
@@ -28062,21 +28062,21 @@ tt_button_t *tt_buttonInit(char *label, int8_t *variable, double x, double y, do
     if (variable != NULL) {
         *variable = 0; // button starts unpressed
     }
-    list_append(tt_elements.buttons, (unitype) (void *) buttonp, 'p');
-    list_append(tt_elements.all, (unitype) (void *) buttonp, 'l');
+    list_append(turtleToolsElements.buttons, (unitype) (void *) buttonp, 'p');
+    list_append(turtleToolsElements.all, (unitype) (void *) buttonp, 'l');
     return buttonp;
 }
 
-void tt_buttonFree(tt_button_t *buttonp) {
-    list_remove(tt_elements.all, (unitype) (uint64_t) buttonp, 'l');
-    list_remove(tt_elements.buttons, (unitype) (void *) buttonp, 'p');
+void tt_buttonFree(turtle_tools_button_t *buttonp) {
+    list_remove(turtleToolsElements.all, (unitype) (uint64_t) buttonp, 'l');
+    list_remove(turtleToolsElements.buttons, (unitype) (void *) buttonp, 'p');
 }
 
 /* create a switch */
 tt_switch_t *tt_switchInit(char *label, int8_t *variable, double x, double y, double size) {
-    if (tt_enabled.switchEnabled == 0) {
-        tt_enabled.switchEnabled = 1;
-        tt_elements.switches = list_init();
+    if (turtleToolsEnabled.switchEnabled == 0) {
+        turtleToolsEnabled.switchEnabled = 1;
+        turtleToolsElements.switches = list_init();
     }
     turtleToolsInit();
     tt_switch_t *switchp = calloc(1, sizeof(tt_switch_t));
@@ -28096,7 +28096,7 @@ tt_switch_t *tt_switchInit(char *label, int8_t *variable, double x, double y, do
             memcpy(switchp -> label, label, length);
         }
     }
-    tt_elementResetColor(switchp);
+    turtle_tools_element_reset_color(switchp);
     switchp -> status = TT_STATUS_IDLE;
     switchp -> x = x;
     switchp -> y = y;
@@ -28109,21 +28109,21 @@ tt_switch_t *tt_switchInit(char *label, int8_t *variable, double x, double y, do
     } else {
         switchp -> value = *variable;
     }
-    list_append(tt_elements.switches, (unitype) (void *) switchp, 'p');
-    list_append(tt_elements.all, (unitype) (void *) switchp, 'l');
+    list_append(turtleToolsElements.switches, (unitype) (void *) switchp, 'p');
+    list_append(turtleToolsElements.all, (unitype) (void *) switchp, 'l');
     return switchp;
 }
 
 void tt_switchFree(tt_switch_t *switchp) {
-    list_remove(tt_elements.all, (unitype) (uint64_t) switchp, 'l');
-    list_remove(tt_elements.switches, (unitype) (void *) switchp, 'p');
+    list_remove(turtleToolsElements.all, (unitype) (uint64_t) switchp, 'l');
+    list_remove(turtleToolsElements.switches, (unitype) (void *) switchp, 'p');
 }
 
 /* create a dial - make renderNumberFactor 0 to hide dial number */
 tt_dial_t *tt_dialInit(char *label, int32_t *variable, tt_dial_scale_t scale, double x, double y, double size, int32_t bottom, int32_t top, char *render, double renderMultiplier) {
-    if (tt_enabled.dialEnabled == 0) {
-        tt_enabled.dialEnabled = 1;
-        tt_elements.dials = list_init();
+    if (turtleToolsEnabled.dialEnabled == 0) {
+        turtleToolsEnabled.dialEnabled = 1;
+        turtleToolsElements.dials = list_init();
     }
     turtleToolsInit();
     tt_dial_t *dialp = calloc(1, sizeof(tt_dial_t));
@@ -28143,7 +28143,7 @@ tt_dial_t *tt_dialInit(char *label, int32_t *variable, tt_dial_scale_t scale, do
             memcpy(dialp -> label, label, stringLength);
         }
     }
-    tt_elementResetColor(dialp);
+    turtle_tools_element_reset_color(dialp);
     dialp -> status = TT_STATUS_IDLE;
     dialp -> scale = scale;
     dialp -> x = x;
@@ -28185,21 +28185,21 @@ tt_dial_t *tt_dialInit(char *label, int32_t *variable, tt_dial_scale_t scale, do
         dialp -> defaultValue = *variable;
     }
     dialp -> value = dialp -> defaultValue;
-    list_append(tt_elements.dials, (unitype) (void *) dialp, 'p');
-    list_append(tt_elements.all, (unitype) (void *) dialp, 'l');
+    list_append(turtleToolsElements.dials, (unitype) (void *) dialp, 'p');
+    list_append(turtleToolsElements.all, (unitype) (void *) dialp, 'l');
     return dialp;
 }
 
 void tt_dialFree(tt_dial_t *dialp) {
-    list_remove(tt_elements.all, (unitype) (uint64_t) dialp, 'l');
-    list_remove(tt_elements.dials, (unitype) (void *) dialp, 'p');
+    list_remove(turtleToolsElements.all, (unitype) (uint64_t) dialp, 'l');
+    list_remove(turtleToolsElements.dials, (unitype) (void *) dialp, 'p');
 }
 
 /* create a slider - make renderNumberFactor 0 to hide slider number */
 tt_slider_t *tt_sliderInit(char *label, int32_t *variable, tt_slider_type_t type, tt_slider_align_t align, double x, double y, double size, double length, int32_t bottom, int32_t top, char *render, double renderMultiplier) {
-    if (tt_enabled.sliderEnabled == 0) {
-        tt_enabled.sliderEnabled = 1;
-        tt_elements.sliders = list_init();
+    if (turtleToolsEnabled.sliderEnabled == 0) {
+        turtleToolsEnabled.sliderEnabled = 1;
+        turtleToolsElements.sliders = list_init();
     }
     turtleToolsInit();
     tt_slider_t *sliderp = calloc(1, sizeof(tt_slider_t));
@@ -28219,7 +28219,7 @@ tt_slider_t *tt_sliderInit(char *label, int32_t *variable, tt_slider_type_t type
             memcpy(sliderp -> label, label, stringLength);
         }
     }
-    tt_elementResetColor(sliderp);
+    turtle_tools_element_reset_color(sliderp);
     sliderp -> status = TT_STATUS_IDLE;
     sliderp -> type = type;
     sliderp -> align = align;
@@ -28265,23 +28265,23 @@ tt_slider_t *tt_sliderInit(char *label, int32_t *variable, tt_slider_type_t type
         sliderp -> defaultValue = *variable;
     }
     sliderp -> value = sliderp -> defaultValue;
-    list_append(tt_elements.sliders, (unitype) (void *) sliderp, 'p');
-    list_append(tt_elements.all, (unitype) (void *) sliderp, 'l');
+    list_append(turtleToolsElements.sliders, (unitype) (void *) sliderp, 'p');
+    list_append(turtleToolsElements.all, (unitype) (void *) sliderp, 'l');
     return sliderp;
 }
 
 void tt_sliderFree(tt_slider_t *sliderp) {
-    list_remove(tt_elements.all, (unitype) (uint64_t) sliderp, 'l');
-    list_remove(tt_elements.sliders, (unitype) (void *) sliderp, 'p');
+    list_remove(turtleToolsElements.all, (unitype) (uint64_t) sliderp, 'l');
+    list_remove(turtleToolsElements.sliders, (unitype) (void *) sliderp, 'p');
 }
 
 /* create a textbox */
 tt_textbox_t *tt_textboxInit(char *label, char *variable, int32_t maxCharacters, double x, double y, double size, double length) {
-    if (tt_enabled.textboxEnabled == 0) {
+    if (turtleToolsEnabled.textboxEnabled == 0) {
         turtle.unicodeCallback = tt_textboxUnicodeCallback;
         turtle.keyCallback = tt_textboxKeyCallback;
-        tt_enabled.textboxEnabled = 1;
-        tt_elements.textboxes = list_init();
+        turtleToolsEnabled.textboxEnabled = 1;
+        turtleToolsElements.textboxes = list_init();
     }
     turtleToolsInit();
     tt_textbox_t *textboxp = calloc(1, sizeof(tt_textbox_t));
@@ -28301,7 +28301,7 @@ tt_textbox_t *tt_textboxInit(char *label, char *variable, int32_t maxCharacters,
             memcpy(textboxp -> label, label, length);
         }
     }
-    tt_elementResetColor(textboxp);
+    turtle_tools_element_reset_color(textboxp);
     textboxp -> status = TT_STATUS_IDLE;
     textboxp -> mouseOver = 0;
     textboxp -> moveToTop = 0;
@@ -28332,16 +28332,16 @@ tt_textbox_t *tt_textboxInit(char *label, char *variable, int32_t maxCharacters,
     textboxp -> renderPixelOffset = 0;
     textboxp -> renderStartingIndex = 0;
     textboxp -> renderNumCharacters = 0;
-    list_append(tt_elements.textboxes, (unitype) (void *) textboxp, 'p');
-    list_append(tt_elements.all, (unitype) (void *) textboxp, 'l');
+    list_append(turtleToolsElements.textboxes, (unitype) (void *) textboxp, 'p');
+    list_append(turtleToolsElements.all, (unitype) (void *) textboxp, 'l');
     textboxp -> whitelist = NULL;
     textboxp -> blacklist = NULL;
     return textboxp;
 }
 
 void tt_textboxFree(tt_textbox_t *textboxp) {
-    list_remove(tt_elements.all, (unitype) (uint64_t) textboxp, 'l');
-    list_remove(tt_elements.textboxes, (unitype) (void *) textboxp, 'p');
+    list_remove(turtleToolsElements.all, (unitype) (uint64_t) textboxp, 'l');
+    list_remove(turtleToolsElements.textboxes, (unitype) (void *) textboxp, 'p');
 }
 
 void tt_dropdownCalculateMax(tt_dropdown_t *dropdownp) {
@@ -28356,9 +28356,9 @@ void tt_dropdownCalculateMax(tt_dropdown_t *dropdownp) {
 
 /* create a dropdown - use a list of strings for options */
 tt_dropdown_t *tt_dropdownInit(char *label, list_t *options, int32_t *variable, tt_dropdown_align_t align, double x, double y, double size) {
-    if (tt_enabled.dropdownEnabled == 0) {
-        tt_enabled.dropdownEnabled = 1;
-        tt_elements.dropdowns = list_init();
+    if (turtleToolsEnabled.dropdownEnabled == 0) {
+        turtleToolsEnabled.dropdownEnabled = 1;
+        turtleToolsElements.dropdowns = list_init();
     }
     turtleToolsInit();
     tt_dropdown_t *dropdownp = calloc(1, sizeof(tt_dropdown_t));
@@ -28378,7 +28378,7 @@ tt_dropdown_t *tt_dropdownInit(char *label, list_t *options, int32_t *variable, 
             memcpy(dropdownp -> label, label, length);
         }
     }
-    tt_elementResetColor(dropdownp);
+    turtle_tools_element_reset_color(dropdownp);
     dropdownp -> options = options;
     if (variable == NULL) {
         dropdownp -> index = 0;
@@ -28397,22 +28397,22 @@ tt_dropdown_t *tt_dropdownInit(char *label, list_t *options, int32_t *variable, 
     dropdownp -> size = size;
     dropdownp -> variable = variable;
     tt_dropdownCalculateMax(dropdownp);
-    list_append(tt_elements.dropdowns, (unitype) (void *) dropdownp, 'p');
-    list_append(tt_elements.all, (unitype) (void *) dropdownp, 'l');
+    list_append(turtleToolsElements.dropdowns, (unitype) (void *) dropdownp, 'p');
+    list_append(turtleToolsElements.all, (unitype) (void *) dropdownp, 'l');
     return dropdownp;
 }
 
 void tt_dropdownFree(tt_dropdown_t *dropdownp) {
     list_free(dropdownp -> options);
-    list_remove(tt_elements.all, (unitype) (uint64_t) dropdownp, 'l');
-    list_remove(tt_elements.dropdowns, (unitype) (void *) dropdownp, 'p');
+    list_remove(turtleToolsElements.all, (unitype) (uint64_t) dropdownp, 'l');
+    list_remove(turtleToolsElements.dropdowns, (unitype) (void *) dropdownp, 'p');
 }
 
 /* create a scrollbar */
 tt_scrollbar_t *tt_scrollbarInit(double *variable, tt_scrollbar_type_t type, double x, double y, double size, double length, double barPercentage) {
-    if (tt_enabled.scrollbarEnabled == 0) {
-        tt_enabled.scrollbarEnabled = 1;
-        tt_elements.scrollbars = list_init();
+    if (turtleToolsEnabled.scrollbarEnabled == 0) {
+        turtleToolsEnabled.scrollbarEnabled = 1;
+        turtleToolsElements.scrollbars = list_init();
     }
     turtleToolsInit();
     tt_scrollbar_t *scrollbarp = calloc(1, sizeof(tt_scrollbar_t));
@@ -28420,7 +28420,7 @@ tt_scrollbar_t *tt_scrollbarInit(double *variable, tt_scrollbar_type_t type, dou
     scrollbarp -> priority = scrollbarp -> element;
     scrollbarp -> enabled = TT_ELEMENT_ENABLED;
     scrollbarp -> ignored = TT_ELEMENT_NOT_IGNORED;
-    tt_elementResetColor(scrollbarp);
+    turtle_tools_element_reset_color(scrollbarp);
     scrollbarp -> status = TT_STATUS_IDLE;
     scrollbarp -> type = type;
     scrollbarp -> x = x;
@@ -28429,14 +28429,14 @@ tt_scrollbar_t *tt_scrollbarInit(double *variable, tt_scrollbar_type_t type, dou
     scrollbarp -> length = length;
     scrollbarp -> barPercentage = barPercentage;
     scrollbarp -> variable = variable;
-    list_append(tt_elements.scrollbars, (unitype) (void *) scrollbarp, 'p');
-    list_append(tt_elements.all, (unitype) (void *) scrollbarp, 'l');
+    list_append(turtleToolsElements.scrollbars, (unitype) (void *) scrollbarp, 'p');
+    list_append(turtleToolsElements.all, (unitype) (void *) scrollbarp, 'l');
     return scrollbarp;
 }
 
 void tt_scrollbarFree(tt_scrollbar_t *scrollbarp) {
-    list_remove(tt_elements.all, (unitype) (uint64_t) scrollbarp, 'l');
-    list_remove(tt_elements.scrollbars, (unitype) (void *) scrollbarp, 'p');
+    list_remove(turtleToolsElements.all, (unitype) (uint64_t) scrollbarp, 'l');
+    list_remove(turtleToolsElements.scrollbars, (unitype) (void *) scrollbarp, 'p');
 }
 
 void tt_contextCalculateMax(tt_context_t *contextp) {
@@ -28451,9 +28451,9 @@ void tt_contextCalculateMax(tt_context_t *contextp) {
 
 /* create a context menu */
 tt_context_t *tt_contextInit(list_t *options, int32_t *variable, double x, double y, double size) {
-    if (tt_enabled.contextEnabled == 0) {
-        tt_enabled.contextEnabled = 1;
-        tt_elements.contexts = list_init();
+    if (turtleToolsEnabled.contextEnabled == 0) {
+        turtleToolsEnabled.contextEnabled = 1;
+        turtleToolsElements.contexts = list_init();
     }
     turtleToolsInit();
     tt_context_t *contextp = calloc(1, sizeof(tt_context_t));
@@ -28461,7 +28461,7 @@ tt_context_t *tt_contextInit(list_t *options, int32_t *variable, double x, doubl
     contextp -> priority = contextp -> element;
     contextp -> enabled = TT_ELEMENT_ENABLED;
     contextp -> ignored = TT_ELEMENT_NOT_IGNORED;
-    tt_elementResetColor(contextp);
+    turtle_tools_element_reset_color(contextp);
     contextp -> options = options;
     contextp -> index = -1;
     contextp -> value = -1;
@@ -28477,21 +28477,21 @@ tt_context_t *tt_contextInit(list_t *options, int32_t *variable, double x, doubl
     contextp -> direction = TT_CONTEXT_DIRECTION_AUTO;
     contextp -> autoLowerBound = turtle.initbounds[1];
     contextp -> autoRightBound = turtle.initbounds[2];
-    list_append(tt_elements.contexts, (unitype) (void *) contextp, 'p');
-    list_append(tt_elements.all, (unitype) (void *) contextp, 'l');
+    list_append(turtleToolsElements.contexts, (unitype) (void *) contextp, 'p');
+    list_append(turtleToolsElements.all, (unitype) (void *) contextp, 'l');
     return contextp;
 }
 
 void tt_contextFree(tt_context_t *contextp) {
     list_free(contextp -> options);
-    list_remove(tt_elements.all, (unitype) (uint64_t) contextp, 'l');
-    list_remove(tt_elements.contexts, (unitype) (void *) contextp, 'p');
+    list_remove(turtleToolsElements.all, (unitype) (uint64_t) contextp, 'l');
+    list_remove(turtleToolsElements.contexts, (unitype) (void *) contextp, 'p');
 }
 
 tt_reader_t *tt_readerInit(char *label, unitype *variable, char type, double x, double y, double size) {
-    if (tt_enabled.readerEnabled == 0) {
-        tt_enabled.readerEnabled = 1;
-        tt_elements.readers = list_init();
+    if (turtleToolsEnabled.readerEnabled == 0) {
+        turtleToolsEnabled.readerEnabled = 1;
+        turtleToolsElements.readers = list_init();
     }
     turtleToolsInit();
     tt_reader_t *readerp = calloc(1, sizeof(tt_reader_t));
@@ -28515,7 +28515,7 @@ tt_reader_t *tt_readerInit(char *label, unitype *variable, char type, double x, 
             memcpy(readerp -> label, label, length);
         }
     }
-    tt_elementResetColor(readerp);
+    turtle_tools_element_reset_color(readerp);
     readerp -> x = x;
     readerp -> y = y;
     readerp -> size = size;
@@ -28537,24 +28537,24 @@ tt_reader_t *tt_readerInit(char *label, unitype *variable, char type, double x, 
         readerp -> scrollbarp -> ignored = TT_ELEMENT_IGNORED; // this scrollbar is updated with the list reader to ensure it appears on top of the reader
         readerp -> scrollbarp -> priority = TT_ELEMENT_LIST_READER;
     }
-    list_append(tt_elements.readers, (unitype) (void *) readerp, 'p');
-    list_append(tt_elements.all, (unitype) (void *) readerp, 'l');
+    list_append(turtleToolsElements.readers, (unitype) (void *) readerp, 'p');
+    list_append(turtleToolsElements.all, (unitype) (void *) readerp, 'l');
     return readerp;
 }
 
 void tt_readerFree(tt_reader_t *readerp) {
     if (readerp -> element == TT_ELEMENT_VARIABLE_READER) {
-        list_remove(tt_elements.all, (unitype) (uint64_t) readerp, 'l');
-        list_remove(tt_elements.readers, (unitype) (void *) readerp, 'p');
+        list_remove(turtleToolsElements.all, (unitype) (uint64_t) readerp, 'l');
+        list_remove(turtleToolsElements.readers, (unitype) (void *) readerp, 'p');
     } else if (readerp -> element == TT_ELEMENT_LIST_READER) {
-        list_remove(tt_elements.all, (unitype) (uint64_t) readerp -> scrollbarp, 'l');
-        list_remove(tt_elements.scrollbars, (unitype) (void *) readerp -> scrollbarp, 'p');
-        list_remove(tt_elements.all, (unitype) (uint64_t) readerp, 'l');
-        list_remove(tt_elements.readers, (unitype) (void *) readerp, 'p');
+        list_remove(turtleToolsElements.all, (unitype) (uint64_t) readerp -> scrollbarp, 'l');
+        list_remove(turtleToolsElements.scrollbars, (unitype) (void *) readerp -> scrollbarp, 'p');
+        list_remove(turtleToolsElements.all, (unitype) (uint64_t) readerp, 'l');
+        list_remove(turtleToolsElements.readers, (unitype) (void *) readerp, 'p');
     }
 }
 
-void tt_buttonUpdate(tt_button_t *buttonp) {
+void tt_buttonUpdate(turtle_tools_button_t *buttonp) {
     if (buttonp -> variable != NULL) {
         buttonp -> value = *buttonp -> variable;
     }
@@ -28581,14 +28581,14 @@ void tt_buttonUpdate(tt_button_t *buttonp) {
     switch (buttonp -> status) {
         case TT_STATUS_HOVER_FIRST_TICK:
         case TT_STATUS_HOVER:
-        tt_setColor(buttonp -> color[TT_COLOR_SLOT_BUTTON_SELECT]);
+        turtle_tools_set_color(buttonp -> color[TT_COLOR_SLOT_BUTTON_SELECT]);
         break;
         case TT_STATUS_CLICK_FIRST_TICK:
         case TT_STATUS_CLICK:
-        tt_setColor(buttonp -> color[TT_COLOR_SLOT_BUTTON_CLICKED]);
+        turtle_tools_set_color(buttonp -> color[TT_COLOR_SLOT_BUTTON_CLICKED]);
         break;
         default:
-        tt_setColor(buttonp -> color[TT_COLOR_SLOT_BUTTON]);
+        turtle_tools_set_color(buttonp -> color[TT_COLOR_SLOT_BUTTON]);
         break;
     }
     if (buttonp -> shape == TT_BUTTON_SHAPE_RECTANGLE) {
@@ -28609,25 +28609,25 @@ void tt_buttonUpdate(tt_button_t *buttonp) {
         turtle_pen_down();
         turtle_pen_up();
     }
-    tt_setColor(buttonp -> color[TT_COLOR_SLOT_BUTTON_TEXT]);
+    turtle_tools_set_color(buttonp -> color[TT_COLOR_SLOT_BUTTON_TEXT]);
     if (buttonp -> shape == TT_BUTTON_SHAPE_TEXT) {
         switch (buttonp -> status) {
             case TT_STATUS_HOVER_FIRST_TICK:
             case TT_STATUS_HOVER:
-            tt_setColor(buttonp -> color[TT_COLOR_SLOT_BUTTON_TEXT]);
+            turtle_tools_set_color(buttonp -> color[TT_COLOR_SLOT_BUTTON_TEXT]);
             break;
             case TT_STATUS_CLICK_FIRST_TICK:
             case TT_STATUS_CLICK:
-            tt_setColor(buttonp -> color[TT_COLOR_SLOT_BUTTON_CLICKED]);
+            turtle_tools_set_color(buttonp -> color[TT_COLOR_SLOT_BUTTON_CLICKED]);
             break;
             default:
-            tt_setColor(buttonp -> color[TT_COLOR_SLOT_BUTTON_SELECTED_TEXT]);
+            turtle_tools_set_color(buttonp -> color[TT_COLOR_SLOT_BUTTON_SELECTED_TEXT]);
             break;
         }
     }
     turtle_text_write_unicode(buttonp -> label, (buttonLeftX + buttonRightX) / 2, buttonY, buttonp -> size - 1, 50);
     /* mouse */
-    if (buttonp -> enabled != TT_ELEMENT_ENABLED || tt_globals.elementLogicTypeOld > buttonp -> priority || (tt_globals.elementLogicTypeOld == buttonp -> priority && tt_globals.elementLogicIndexOld > tt_globals.elementLogicTemp)) {
+    if (buttonp -> enabled != TT_ELEMENT_ENABLED || turtleToolsGlobals.elementLogicTypeOld > buttonp -> priority || (turtleToolsGlobals.elementLogicTypeOld == buttonp -> priority && turtleToolsGlobals.elementLogicIndexOld > turtleToolsGlobals.elementLogicTemp)) {
         /* button not enabled or higher priority element is being interacted with */
         if (buttonp -> status != TT_STATUS_BLOCKED) {
             buttonp -> status = TT_STATUS_IDLE;
@@ -28692,8 +28692,8 @@ void tt_buttonUpdate(tt_button_t *buttonp) {
         }
     }
     if (buttonp -> status == TT_STATUS_HOVER || buttonp -> status == TT_STATUS_CLICK || buttonp -> status == TT_STATUS_HOVER_FIRST_TICK || buttonp -> status == TT_STATUS_CLICK_FIRST_TICK) {
-        tt_globals.elementLogicType = buttonp -> priority;
-        tt_globals.elementLogicIndex = tt_globals.elementLogicTemp;
+        turtleToolsGlobals.elementLogicType = buttonp -> priority;
+        turtleToolsGlobals.elementLogicIndex = turtleToolsGlobals.elementLogicTemp;
     }
     LABEL_BUTTON_END:
     if (buttonp -> variable != NULL) {
@@ -28726,9 +28726,9 @@ void tt_switchUpdate(tt_switch_t *switchp) {
     if (switchp -> style == TT_SWITCH_STYLE_CLASSIC || switchp -> style == TT_SWITCH_STYLE_SIDESWIPE) {
         /* render switch */
         if (switchp -> value) {
-            tt_setColor(switchp -> color[TT_COLOR_SLOT_SWITCH_ON]);
+            turtle_tools_set_color(switchp -> color[TT_COLOR_SLOT_SWITCH_ON]);
         } else {
-            tt_setColor(switchp -> color[TT_COLOR_SLOT_SWITCH_OFF]);
+            turtle_tools_set_color(switchp -> color[TT_COLOR_SLOT_SWITCH_OFF]);
         }
         turtle_pen_size(switchp -> size * 1.2);
         turtle_goto(switchX - switchp -> size * 0.8, switchY);
@@ -28737,10 +28737,10 @@ void tt_switchUpdate(tt_switch_t *switchp) {
         turtle_pen_up();
         turtle_pen_size(switchp -> size);
         if (switchp -> value) {
-            tt_setColor(switchp -> color[TT_COLOR_SLOT_CIRCLE_ON]);
+            turtle_tools_set_color(switchp -> color[TT_COLOR_SLOT_CIRCLE_ON]);
             turtle_goto(switchX + switchp -> size * 0.8, switchY);
         } else {
-            tt_setColor(switchp -> color[TT_COLOR_SLOT_CIRCLE_OFF]);
+            turtle_tools_set_color(switchp -> color[TT_COLOR_SLOT_CIRCLE_OFF]);
             turtle_goto(switchX - switchp -> size * 0.8, switchY);
         }
         turtle_pen_down();
@@ -28761,7 +28761,7 @@ void tt_switchUpdate(tt_switch_t *switchp) {
         switchClickDown = switchY - switchp -> size * 0.6;
         switchClickUp = switchY + switchp -> size * 0.6;
         /* render text */
-        tt_setColor(switchp -> color[TT_COLOR_SLOT_SWITCH_TEXT]);
+        turtle_tools_set_color(switchp -> color[TT_COLOR_SLOT_SWITCH_TEXT]);
         if (switchp -> style == TT_SWITCH_STYLE_CLASSIC) {
             if (switchp -> align == TT_SWITCH_ALIGN_CENTER) {
                 turtle_text_write_unicode(switchp -> label, switchX, switchY + 1.6 * switchp -> size, switchp -> size - 1, 50);
@@ -28772,25 +28772,25 @@ void tt_switchUpdate(tt_switch_t *switchp) {
             }
         } else if (switchp -> style == TT_SWITCH_STYLE_SIDESWIPE && (switchp -> align == TT_SWITCH_ALIGN_LEFT || switchp -> align == TT_SWITCH_ALIGN_CENTER)) {
             if (switchp -> status == TT_STATUS_IDLE || switchp -> status == TT_STATUS_BLOCKED) {
-                tt_setColor(switchp -> color[TT_COLOR_SLOT_SWITCH_TEXT]);
+                turtle_tools_set_color(switchp -> color[TT_COLOR_SLOT_SWITCH_TEXT]);
             } else {
-                tt_setColor(switchp -> color[TT_COLOR_SLOT_SWITCH_TEXT_HOVER]);
+                turtle_tools_set_color(switchp -> color[TT_COLOR_SLOT_SWITCH_TEXT_HOVER]);
             }
             turtle_text_write_unicode(switchp -> label, switchX + switchp -> size * 2, switchY, switchp -> size - 1, 0);
         } else if (switchp -> style == TT_SWITCH_STYLE_SIDESWIPE && switchp -> align == TT_SWITCH_ALIGN_RIGHT) {
             if (switchp -> status == TT_STATUS_IDLE || switchp -> status == TT_STATUS_BLOCKED) {
-                tt_setColor(switchp -> color[TT_COLOR_SLOT_SWITCH_TEXT]);
+                turtle_tools_set_color(switchp -> color[TT_COLOR_SLOT_SWITCH_TEXT]);
             } else {
-                tt_setColor(switchp -> color[TT_COLOR_SLOT_SWITCH_TEXT_HOVER]);
+                turtle_tools_set_color(switchp -> color[TT_COLOR_SLOT_SWITCH_TEXT_HOVER]);
             }
             turtle_text_write_unicode(switchp -> label, switchX - switchp -> size * 2, switchY, switchp -> size - 1, 100);
         }
     } else if (switchp -> style == TT_SWITCH_STYLE_VERTICAL) {
         /* render switch */
         if (switchp -> value) {
-            tt_setColor(switchp -> color[TT_COLOR_SLOT_SWITCH_ON]);
+            turtle_tools_set_color(switchp -> color[TT_COLOR_SLOT_SWITCH_ON]);
         } else {
-            tt_setColor(switchp -> color[TT_COLOR_SLOT_SWITCH_OFF]);
+            turtle_tools_set_color(switchp -> color[TT_COLOR_SLOT_SWITCH_OFF]);
         }
         turtle_pen_size(switchp -> size * 1.2);
         turtle_goto(switchX, switchY - switchp -> size * 0.8);
@@ -28799,10 +28799,10 @@ void tt_switchUpdate(tt_switch_t *switchp) {
         turtle_pen_up();
         turtle_pen_size(switchp -> size);
         if (switchp -> value) {
-            tt_setColor(switchp -> color[TT_COLOR_SLOT_CIRCLE_ON]);
+            turtle_tools_set_color(switchp -> color[TT_COLOR_SLOT_CIRCLE_ON]);
             turtle_goto(switchX, switchY + switchp -> size * 0.8);
         } else {
-            tt_setColor(switchp -> color[TT_COLOR_SLOT_CIRCLE_OFF]);
+            turtle_tools_set_color(switchp -> color[TT_COLOR_SLOT_CIRCLE_OFF]);
             turtle_goto(switchX, switchY - switchp -> size * 0.8);
         }
         turtle_pen_down();
@@ -28813,7 +28813,7 @@ void tt_switchUpdate(tt_switch_t *switchp) {
         switchClickDown = switchY - switchp -> size * 1.35;
         switchClickUp = switchY + switchp -> size * 1.35;
         /* render text */
-        tt_setColor(switchp -> color[TT_COLOR_SLOT_SWITCH_TEXT]);
+        turtle_tools_set_color(switchp -> color[TT_COLOR_SLOT_SWITCH_TEXT]);
         if (switchp -> align == TT_SWITCH_ALIGN_CENTER) {
             turtle_text_write_unicode(switchp -> label, switchX, switchY + 2.2 * switchp -> size, switchp -> size - 1, 50);
         } else if (switchp -> align == TT_SWITCH_ALIGN_LEFT) {
@@ -28823,9 +28823,9 @@ void tt_switchUpdate(tt_switch_t *switchp) {
         }
     } else if (switchp -> style == TT_SWITCH_STYLE_CHECKBOX || switchp -> style == TT_SWITCH_STYLE_XBOX) {
         /* render box */
-        tt_setColor(switchp -> color[TT_COLOR_SLOT_SWITCH_ON]);
+        turtle_tools_set_color(switchp -> color[TT_COLOR_SLOT_SWITCH_ON]);
         turtle_rectangle(switchX - switchp -> size / 2, switchY - switchp -> size / 2, switchX + switchp -> size / 2, switchY + switchp -> size / 2);
-        tt_setColor(switchp -> color[TT_COLOR_SLOT_SWITCH_OFF]);
+        turtle_tools_set_color(switchp -> color[TT_COLOR_SLOT_SWITCH_OFF]);
         turtle_pen_size(switchp -> size / 6);
         turtle_goto(switchX - switchp -> size / 2, switchY - switchp -> size / 2);
         turtle_pen_down();
@@ -28837,7 +28837,7 @@ void tt_switchUpdate(tt_switch_t *switchp) {
         if (switchp -> value) {
             if (switchp -> style == TT_SWITCH_STYLE_CHECKBOX) {
                 /* render check */
-                tt_setColor(switchp -> color[TT_COLOR_SLOT_CIRCLE_ON]);
+                turtle_tools_set_color(switchp -> color[TT_COLOR_SLOT_CIRCLE_ON]);
                 turtle_goto(switchX - switchp -> size / 2.5, switchY);
                 turtle_pen_down();
                 turtle_goto(switchX, switchY - switchp -> size / 2.5);
@@ -28845,7 +28845,7 @@ void tt_switchUpdate(tt_switch_t *switchp) {
                 turtle_pen_up();
             } else if (switchp -> style == TT_SWITCH_STYLE_XBOX) {
                 /* render X */
-                tt_setColor(switchp -> color[TT_COLOR_SLOT_CIRCLE_ON]);
+                turtle_tools_set_color(switchp -> color[TT_COLOR_SLOT_CIRCLE_ON]);
                 turtle_goto(switchX + switchp -> size / 2.5, switchY + switchp -> size / 2.5);
                 turtle_pen_down();
                 turtle_goto(switchX - switchp -> size / 2.5, switchY - switchp -> size / 2.5);
@@ -28864,17 +28864,17 @@ void tt_switchUpdate(tt_switch_t *switchp) {
         switchClickUp = switchY + switchp -> size * 0.6;
         /* render text */
         if (switchp -> status == TT_STATUS_IDLE || switchp -> status == TT_STATUS_BLOCKED) {
-            tt_setColor(switchp -> color[TT_COLOR_SLOT_SWITCH_TEXT]);
+            turtle_tools_set_color(switchp -> color[TT_COLOR_SLOT_SWITCH_TEXT]);
         } else {
-            tt_setColor(switchp -> color[TT_COLOR_SLOT_SWITCH_TEXT_HOVER]);
+            turtle_tools_set_color(switchp -> color[TT_COLOR_SLOT_SWITCH_TEXT_HOVER]);
         }
         turtle_text_write_unicode(switchp -> label, switchX + switchp -> size, switchY, switchp -> size - 1, 0);
     } else if (switchp -> style == TT_SWITCH_STYLE_TRIANGLE) {
         if (switchp -> value) {
-            tt_setColor(switchp -> color[TT_COLOR_SLOT_SWITCH_ON]);
+            turtle_tools_set_color(switchp -> color[TT_COLOR_SLOT_SWITCH_ON]);
             turtle_triangle(switchX - switchp -> size * 0.5, switchY - switchp -> size * 0.5, switchX + switchp -> size * 0.5, switchY - switchp -> size * 0.5, switchX + switchp -> size * 0.5, switchY + switchp -> size * 0.5);
         } else {
-            tt_setColor(switchp -> color[TT_COLOR_SLOT_SWITCH_OFF]);
+            turtle_tools_set_color(switchp -> color[TT_COLOR_SLOT_SWITCH_OFF]);
             turtle_triangle(switchX - switchp -> size * 0.5, switchY - switchp -> size * 0.5, switchX + switchp -> size * 0.3, switchY, switchX - switchp -> size * 0.5, switchY + switchp -> size * 0.5);
         }
         switchClickLeft = switchX - switchp -> size * 0.6;
@@ -28883,7 +28883,7 @@ void tt_switchUpdate(tt_switch_t *switchp) {
         switchClickUp = switchY + switchp -> size * 0.6;
     }
     /* mouse */
-    if (switchp -> enabled != TT_ELEMENT_ENABLED || tt_globals.elementLogicTypeOld > switchp -> priority || (tt_globals.elementLogicTypeOld == switchp -> priority && tt_globals.elementLogicIndexOld > tt_globals.elementLogicTemp)) {
+    if (switchp -> enabled != TT_ELEMENT_ENABLED || turtleToolsGlobals.elementLogicTypeOld > switchp -> priority || (turtleToolsGlobals.elementLogicTypeOld == switchp -> priority && turtleToolsGlobals.elementLogicIndexOld > turtleToolsGlobals.elementLogicTemp)) {
         /* switch not enabled or higher priority element is being interacted with */
         if (switchp -> status != TT_STATUS_BLOCKED) {
             switchp -> status = TT_STATUS_IDLE;
@@ -28926,8 +28926,8 @@ void tt_switchUpdate(tt_switch_t *switchp) {
         switchp -> value = !switchp -> value;
     }
     if (switchp -> status == TT_STATUS_HOVER || switchp -> status == TT_STATUS_CLICK || switchp -> status == TT_STATUS_HOVER_FIRST_TICK || switchp -> status == TT_STATUS_CLICK_FIRST_TICK) {
-        tt_globals.elementLogicType = switchp -> priority;
-        tt_globals.elementLogicIndex = tt_globals.elementLogicTemp;
+        turtleToolsGlobals.elementLogicType = switchp -> priority;
+        turtleToolsGlobals.elementLogicIndex = turtleToolsGlobals.elementLogicTemp;
     }
     LABEL_SWITCH_END:
     if (switchp -> variable != NULL) {
@@ -28965,13 +28965,13 @@ void tt_dialUpdate(tt_dial_t *dialp) {
         }
         return;
     }
-    tt_setColor(dialp -> color[TT_COLOR_SLOT_DIAL_TEXT]);
+    turtle_tools_set_color(dialp -> color[TT_COLOR_SLOT_DIAL_TEXT]);
     turtle_text_write_unicode(dialp -> label, dialp -> x, dialp -> y + 1.9 * dialp -> size, dialp -> size - 1, 50);
     double dialX = dialp -> x;
     double dialY = dialp -> y;
     turtle_pen_size(dialp -> size / 10);
     double circleSize = dialp -> size * 0.9;
-    tt_setColor(dialp -> color[TT_COLOR_SLOT_DIAL]);
+    turtle_tools_set_color(dialp -> color[TT_COLOR_SLOT_DIAL]);
     /* draw circle */
     int32_t bezierPrezCurrent = (int32_t) ceil(sqrt(dialp -> size * turtleText.bezierPrez * 3));
     if (dialp -> style == TT_DIAL_STYLE_CLASSIC) {
@@ -28995,7 +28995,7 @@ void tt_dialUpdate(tt_dial_t *dialp) {
     }
     turtle_pen_up();
     turtle_goto(dialX, dialY);
-    tt_setColor(dialp -> color[TT_COLOR_SLOT_DIAL]);
+    turtle_tools_set_color(dialp -> color[TT_COLOR_SLOT_DIAL]);
     turtle_pen_down();
     double dialAngle = 0.0;
     if (dialp -> style == TT_DIAL_STYLE_CLASSIC) {
@@ -29018,7 +29018,7 @@ void tt_dialUpdate(tt_dial_t *dialp) {
     turtle_goto(dialX + sin(dialAngle / 57.2958) * dialp -> size, dialY + cos(dialAngle / 57.2958) * dialp -> size);
     turtle_pen_up();
     /* mouse */
-    if (dialp -> enabled != TT_ELEMENT_ENABLED || tt_globals.elementLogicTypeOld > dialp -> priority || (tt_globals.elementLogicTypeOld == dialp -> priority && tt_globals.elementLogicIndexOld > tt_globals.elementLogicTemp)) {
+    if (dialp -> enabled != TT_ELEMENT_ENABLED || turtleToolsGlobals.elementLogicTypeOld > dialp -> priority || (turtleToolsGlobals.elementLogicTypeOld == dialp -> priority && turtleToolsGlobals.elementLogicIndexOld > turtleToolsGlobals.elementLogicTemp)) {
         /* dial not enabled or higher priority element is being interacted with */
         if (dialp -> status != TT_STATUS_BLOCKED) {
             dialp -> status = TT_STATUS_IDLE;
@@ -29043,8 +29043,8 @@ void tt_dialUpdate(tt_dial_t *dialp) {
         if (dialp -> status == TT_STATUS_HOVER || dialp -> status == TT_STATUS_HOVER_FIRST_TICK) {
             /* first tick clicked */
             dialp -> status = TT_STATUS_CLICK_FIRST_TICK;
-            tt_globals.dialAnchorX = dialX;
-            tt_globals.dialAnchorY = dialY;
+            turtleToolsGlobals.dialAnchorX = dialX;
+            turtleToolsGlobals.dialAnchorY = dialY;
             dialp -> mouseAnchor = turtle.mouseX - dialX;
         } else if (dialp -> status == TT_STATUS_CLICK || dialp -> status == TT_STATUS_CLICK_FIRST_TICK) {
             /* dial is being held */
@@ -29067,15 +29067,15 @@ void tt_dialUpdate(tt_dial_t *dialp) {
         }
     }
     if (dialp -> status == TT_STATUS_CLICK || dialp -> status == TT_STATUS_CLICK_FIRST_TICK) {
-        dialAngle = tt_angleBetween(tt_globals.dialAnchorX, tt_globals.dialAnchorY, turtle.mouseX, turtle.mouseY);
+        dialAngle = tt_angleBetween(turtleToolsGlobals.dialAnchorX, turtleToolsGlobals.dialAnchorY, turtle.mouseX, turtle.mouseY);
         if (dialp -> style == TT_DIAL_STYLE_CLASSIC) {
-            if (turtle.mouseY < tt_globals.dialAnchorY) {
+            if (turtle.mouseY < turtleToolsGlobals.dialAnchorY) {
                 dialp -> mouseAnchor = turtle.mouseX - dialX;
             }
-            if ((dialAngle < 0.000000001 || dialAngle > 180) && turtle.mouseY > tt_globals.dialAnchorY && dialp -> mouseAnchor >= 0) {
+            if ((dialAngle < 0.000000001 || dialAngle > 180) && turtle.mouseY > turtleToolsGlobals.dialAnchorY && dialp -> mouseAnchor >= 0) {
                 dialAngle = 0.000000001;
             }
-            if ((dialAngle > 359.99999999 || dialAngle < 180) && turtle.mouseY > tt_globals.dialAnchorY && dialp -> mouseAnchor < 0) {
+            if ((dialAngle > 359.99999999 || dialAngle < 180) && turtle.mouseY > turtleToolsGlobals.dialAnchorY && dialp -> mouseAnchor < 0) {
                 dialAngle = 359.99999999;
             }
             if (dialp -> scale == TT_DIAL_SCALE_LOG) {
@@ -29086,13 +29086,13 @@ void tt_dialUpdate(tt_dial_t *dialp) {
                 dialp -> value = round(dialp -> range[0] + (dialp -> range[1] - dialp -> range[0]) * ((pow(361, dialAngle / 360) - 1) / 360));
             }
         } else if (dialp -> style == TT_DIAL_STYLE_SPEEDOMETER) {
-            if (turtle.mouseY > tt_globals.dialAnchorY) {
+            if (turtle.mouseY > turtleToolsGlobals.dialAnchorY) {
                 dialp -> mouseAnchor = turtle.mouseX - dialX;
             }
-            if (dialAngle < 225 && turtle.mouseY < tt_globals.dialAnchorY && dialp -> mouseAnchor < 0) {
+            if (dialAngle < 225 && turtle.mouseY < turtleToolsGlobals.dialAnchorY && dialp -> mouseAnchor < 0) {
                 dialAngle = 225.000000001;
             }
-            if (dialAngle > 135 && turtle.mouseY < tt_globals.dialAnchorY && dialp -> mouseAnchor >= 0) {
+            if (dialAngle > 135 && turtle.mouseY < turtleToolsGlobals.dialAnchorY && dialp -> mouseAnchor >= 0) {
                 dialAngle = 134.99999999;
             }
             dialAngle += 135;
@@ -29109,12 +29109,12 @@ void tt_dialUpdate(tt_dial_t *dialp) {
         }
     }
     if (dialp -> status == TT_STATUS_HOVER || dialp -> status == TT_STATUS_CLICK || dialp -> status == TT_STATUS_HOVER_FIRST_TICK || dialp -> status == TT_STATUS_CLICK_FIRST_TICK) {
-        tt_globals.elementLogicType = dialp -> priority;
-        tt_globals.elementLogicIndex = tt_globals.elementLogicTemp;
+        turtleToolsGlobals.elementLogicType = dialp -> priority;
+        turtleToolsGlobals.elementLogicIndex = turtleToolsGlobals.elementLogicTemp;
     }
     LABEL_DIAL_END:
     if (dialp -> renderMultiplier != 0) {
-        tt_setColor(dialp -> color[TT_COLOR_SLOT_DIAL_TEXT]);
+        turtle_tools_set_color(dialp -> color[TT_COLOR_SLOT_DIAL_TEXT]);
         if (dialp -> style == TT_DIAL_STYLE_CLASSIC) {
             turtle_text_write_stringf(dialX + dialp -> size * 1.3, dialY, dialp -> size / 2, 0, dialp -> render, dialp -> value * dialp -> renderMultiplier);
         } else if (dialp -> style == TT_DIAL_STYLE_SPEEDOMETER) {
@@ -29258,7 +29258,7 @@ void tt_sliderUpdate(tt_slider_t *sliderp) {
             }
         }
     }
-    tt_setColor(sliderp -> color[TT_COLOR_SLOT_SLIDER_TEXT]);
+    turtle_tools_set_color(sliderp -> color[TT_COLOR_SLOT_SLIDER_TEXT]);
     if (sliderRotateFactor != 0) {
         turtle_text_write_unicode_rotated(sliderp -> label, sliderp -> x + sliderOffsetXFactor, sliderp -> y + sliderOffsetYFactor, sliderp -> size - 1, sliderAlignFactor, sliderRotateFactor);
     } else {
@@ -29272,12 +29272,12 @@ void tt_sliderUpdate(tt_slider_t *sliderp) {
     }
     turtle_pen_size(sliderp -> size * 1.2);
     turtle_goto(sliderXLeft, sliderYLeft);
-    tt_setColor(sliderp -> color[TT_COLOR_SLOT_SLIDER_BAR]);
+    turtle_tools_set_color(sliderp -> color[TT_COLOR_SLOT_SLIDER_BAR]);
     turtle_pen_down();
     turtle_goto(sliderXRight, sliderYRight);
     turtle_pen_up();
     turtle_pen_size(sliderp -> size);
-    tt_setColor(sliderp -> color[TT_COLOR_SLOT_SLIDER_CIRCLE]);
+    turtle_tools_set_color(sliderp -> color[TT_COLOR_SLOT_SLIDER_CIRCLE]);
     if (sliderp -> type == TT_SLIDER_TYPE_HORIZONTAL) {
         if (sliderp -> scale == TT_SLIDER_SCALE_LINEAR) {
             turtle_goto(sliderXLeft + (sliderXRight - sliderXLeft) * (sliderp -> value - sliderp -> range[0]) / (sliderp -> range[1] - sliderp -> range[0]), sliderYLeft);
@@ -29298,7 +29298,7 @@ void tt_sliderUpdate(tt_slider_t *sliderp) {
     turtle_pen_down();
     turtle_pen_up();
     /* mouse */
-    if (sliderp -> enabled != TT_ELEMENT_ENABLED || tt_globals.elementLogicTypeOld > sliderp -> priority || (tt_globals.elementLogicTypeOld == sliderp -> priority && tt_globals.elementLogicIndexOld > tt_globals.elementLogicTemp)) {
+    if (sliderp -> enabled != TT_ELEMENT_ENABLED || turtleToolsGlobals.elementLogicTypeOld > sliderp -> priority || (turtleToolsGlobals.elementLogicTypeOld == sliderp -> priority && turtleToolsGlobals.elementLogicIndexOld > turtleToolsGlobals.elementLogicTemp)) {
         /* slider not enabled or higher priority element is being interacted with */
         if (sliderp -> status != TT_STATUS_BLOCKED) {
             sliderp -> status = TT_STATUS_IDLE;
@@ -29377,12 +29377,12 @@ void tt_sliderUpdate(tt_slider_t *sliderp) {
         }
     }
     if (sliderp -> status == TT_STATUS_HOVER || sliderp -> status == TT_STATUS_CLICK || sliderp -> status == TT_STATUS_HOVER_FIRST_TICK || sliderp -> status == TT_STATUS_CLICK_FIRST_TICK) {
-        tt_globals.elementLogicType = sliderp -> priority;
-        tt_globals.elementLogicIndex = tt_globals.elementLogicTemp;
+        turtleToolsGlobals.elementLogicType = sliderp -> priority;
+        turtleToolsGlobals.elementLogicIndex = turtleToolsGlobals.elementLogicTemp;
     }
     LABEL_SLIDER_END:
     if (sliderp -> renderMultiplier != 0) {
-        tt_setColor(sliderp -> color[TT_COLOR_SLOT_SLIDER_TEXT]);
+        turtle_tools_set_color(sliderp -> color[TT_COLOR_SLOT_SLIDER_TEXT]);
         if (sliderRotateFactor != 0) {
             turtle_text_write_stringf_rotated(sliderp -> x + sliderOffsetXFactorSmall, sliderp -> y + sliderOffsetYFactorSmall, sliderp -> size / 2, sliderAlignFactor, sliderRotateFactor, sliderp -> render, sliderp -> value * sliderp -> renderMultiplier);
         } else {
@@ -29452,8 +29452,8 @@ void tt_textboxAddKey(tt_textbox_t *textboxp, int32_t key) {
 }
 
 void tt_textboxUnicodeCallback(uint32_t codepoint) {
-    for (int32_t i = 0; i < tt_elements.textboxes -> length; i++) {
-        tt_textbox_t *textboxp = (tt_textbox_t *) (tt_elements.textboxes -> data[i].p);
+    for (int32_t i = 0; i < turtleToolsElements.textboxes -> length; i++) {
+        tt_textbox_t *textboxp = (tt_textbox_t *) (turtleToolsElements.textboxes -> data[i].p);
         if (textboxp -> status == TT_STATUS_CLICK || textboxp -> status == TT_STATUS_OPEN || textboxp -> status == TT_STATUS_CLICK_FIRST_TICK || textboxp -> status == TT_STATUS_OPEN_FIRST_TICK) {
             tt_textboxAddKey(textboxp, codepoint);
             break;
@@ -29590,8 +29590,8 @@ void tt_textboxHandleOtherKey(tt_textbox_t *textboxp, int32_t key) {
 void tt_textboxKeyCallback(int32_t key, int32_t scancode, int32_t action) {
     /* non-printable keys */
     if (action == GLFW_PRESS) {
-        for (int32_t i = 0; i < tt_elements.textboxes -> length; i++) {
-            tt_textbox_t *textboxp = (tt_textbox_t *) (tt_elements.textboxes -> data[i].p);
+        for (int32_t i = 0; i < turtleToolsElements.textboxes -> length; i++) {
+            tt_textbox_t *textboxp = (tt_textbox_t *) (turtleToolsElements.textboxes -> data[i].p);
             if (textboxp -> status == TT_STATUS_CLICK || textboxp -> status == TT_STATUS_OPEN || textboxp -> status == TT_STATUS_CLICK_FIRST_TICK || textboxp -> status == TT_STATUS_OPEN_FIRST_TICK) {
                 textboxp -> lastKey = key;
                 textboxp -> keyTimeout = textboxp -> initialKeyTimeout;
@@ -29717,7 +29717,7 @@ void tt_textboxUpdate(tt_textbox_t *textboxp) {
             textboxp -> count = 1;
         }
     }
-    tt_setColor(textboxp -> color[TT_COLOR_SLOT_TEXTBOX_BOX]);
+    turtle_tools_set_color(textboxp -> color[TT_COLOR_SLOT_TEXTBOX_BOX]);
     turtle_rectangle(textboxp -> x, textboxp -> y - textboxp -> size, textboxp -> x + textboxp -> length, textboxp -> y + textboxp -> size);
     if (textboxp -> status == TT_STATUS_IDLE || textboxp -> status == TT_STATUS_BLOCKED || textboxp -> status == TT_STATUS_HOVER || textboxp -> status == TT_STATUS_HOVER_FIRST_TICK) {
         textboxp -> renderPixelOffset = textboxp -> size / 3;
@@ -29726,7 +29726,7 @@ void tt_textboxUpdate(tt_textbox_t *textboxp) {
         if (strlen(textboxp -> text) == 0) {
             /* render label */
             textboxp -> renderNumCharacters = 0;
-            tt_setColor(textboxp -> color[TT_COLOR_SLOT_TEXTBOX_PHANTOM_TEXT]);
+            turtle_tools_set_color(textboxp -> color[TT_COLOR_SLOT_TEXTBOX_PHANTOM_TEXT]);
             turtle_text_write_unicode(textboxp -> label, textboxp -> x + textboxp -> size / 2, textboxp -> y, textboxp -> size - 1, 0);
         } else {
             /* calculate rendered characters */
@@ -29796,16 +29796,16 @@ void tt_textboxUpdate(tt_textbox_t *textboxp) {
             highlightRight = turtle_text_get_unicode_length(textboxp -> text + textboxp -> renderStartingIndex, textboxp -> size - 1) + (textboxp -> editIndexLength < 0) * textboxp -> size / 10;
             textboxp -> text[textboxp -> editIndex + textboxp -> editIndexLength] = tempHold;
         }
-        tt_setColor(textboxp -> color[TT_COLOR_SLOT_TEXTBOX_HIGHLIGHT]);
+        turtle_tools_set_color(textboxp -> color[TT_COLOR_SLOT_TEXTBOX_HIGHLIGHT]);
         turtle_rectangle(textboxp -> x + textboxp -> renderPixelOffset + highlightLeft, textboxp -> y - textboxp -> size * 0.8, textboxp -> x + textboxp -> renderPixelOffset + highlightRight, textboxp -> y + textboxp -> size * 0.8);
     }
     char tempHold;
     tempHold = textboxp -> text[textboxp -> renderStartingIndex + textboxp -> renderNumCharacters];
     textboxp -> text[textboxp -> renderStartingIndex + textboxp -> renderNumCharacters] = '\0';
-    tt_setColor(textboxp -> color[TT_COLOR_SLOT_TEXTBOX_TEXT]);
+    turtle_tools_set_color(textboxp -> color[TT_COLOR_SLOT_TEXTBOX_TEXT]);
     turtle_text_write_unicode(textboxp -> text + textboxp -> renderStartingIndex, textboxp -> x + textboxp -> renderPixelOffset, textboxp -> y, textboxp -> size - 1, 0);
     textboxp -> text[textboxp -> renderStartingIndex + textboxp -> renderNumCharacters] = tempHold;
-    tt_setColor(textboxp -> color[TT_COLOR_SLOT_TEXTBOX_BOX]);
+    turtle_tools_set_color(textboxp -> color[TT_COLOR_SLOT_TEXTBOX_BOX]);
     turtle_rectangle(textboxp -> x, textboxp -> y - textboxp -> size, textboxp -> x + textboxp -> size / 4, textboxp -> y + textboxp -> size);
     turtle_rectangle(textboxp -> x + textboxp -> length, textboxp -> y - textboxp -> size, textboxp -> x + textboxp -> length - textboxp -> size / 4, textboxp -> y + textboxp -> size);
     if ((textboxp -> status == TT_STATUS_CLICK || textboxp -> status == TT_STATUS_OPEN || textboxp -> status == TT_STATUS_CLICK_FIRST_TICK || textboxp -> status == TT_STATUS_OPEN_FIRST_TICK) && textboxp -> count <= textboxp -> linePeriod / 2 && textboxp -> editIndexLength == 0) {
@@ -29818,7 +29818,7 @@ void tt_textboxUpdate(tt_textbox_t *textboxp) {
             textLength = turtle_text_get_unicode_length(textboxp -> text + textboxp -> renderStartingIndex, textboxp -> size - 1);
             textboxp -> text[textboxp -> editIndex] = tempHold;
         }
-        tt_setColor(textboxp -> color[TT_COLOR_SLOT_TEXTBOX_LINE]);
+        turtle_tools_set_color(textboxp -> color[TT_COLOR_SLOT_TEXTBOX_LINE]);
         turtle_rectangle(textboxp -> x + textboxp -> renderPixelOffset + textLength, textboxp -> y - textboxp -> size * 0.8, textboxp -> x + textboxp -> renderPixelOffset + textLength + textboxp -> size / 10, textboxp -> y + textboxp -> size * 0.8);
     }
     /* mouse */
@@ -29827,7 +29827,7 @@ void tt_textboxUpdate(tt_textbox_t *textboxp) {
     } else {
         textboxp -> mouseOver = 0;
     }
-    if (textboxp -> enabled != TT_ELEMENT_ENABLED || tt_globals.elementLogicTypeOld > textboxp -> priority || (tt_globals.elementLogicTypeOld == textboxp -> priority && tt_globals.elementLogicIndexOld > tt_globals.elementLogicTemp)) {
+    if (textboxp -> enabled != TT_ELEMENT_ENABLED || turtleToolsGlobals.elementLogicTypeOld > textboxp -> priority || (turtleToolsGlobals.elementLogicTypeOld == textboxp -> priority && turtleToolsGlobals.elementLogicIndexOld > turtleToolsGlobals.elementLogicTemp)) {
         /* textbox not enabled or higher priority element is being interacted with */
         if (textboxp -> status == TT_STATUS_OPEN || textboxp -> status == TT_STATUS_OPEN_FIRST_TICK) {
             goto LABEL_TEXTBOX_CHECK_HOVER;
@@ -29858,11 +29858,11 @@ void tt_textboxUpdate(tt_textbox_t *textboxp) {
             textboxp -> count = 1;
             textboxp -> editIndex = tt_textboxCalculateIndexFromPosition(textboxp, turtle.mouseX);
             textboxp -> editIndexLength = 0;
-            int32_t index = list_find(tt_elements.textboxes, (unitype) (void *) textboxp, 'p');
-            if (index != -1 && index != tt_elements.textboxes -> length - 1) {
-                tt_elements.textboxes -> type[index] = 'l'; // switch to l to avoid free
-                list_delete(tt_elements.textboxes, index);
-                list_append(tt_elements.textboxes, (unitype) (void *) textboxp, 'p');
+            int32_t index = list_find(turtleToolsElements.textboxes, (unitype) (void *) textboxp, 'p');
+            if (index != -1 && index != turtleToolsElements.textboxes -> length - 1) {
+                turtleToolsElements.textboxes -> type[index] = 'l'; // switch to l to avoid free
+                list_delete(turtleToolsElements.textboxes, index);
+                list_append(turtleToolsElements.textboxes, (unitype) (void *) textboxp, 'p');
                 textboxp -> moveToTop = 1;
             }
             textboxp -> status = TT_STATUS_CLICK_FIRST_TICK;
@@ -29927,8 +29927,8 @@ void tt_textboxUpdate(tt_textbox_t *textboxp) {
         textboxp -> editingMode = 0;
     }
     if (textboxp -> status == TT_STATUS_OPEN || textboxp -> status == TT_STATUS_HOVER || textboxp -> status == TT_STATUS_CLICK || textboxp -> status == TT_STATUS_OPEN_FIRST_TICK || textboxp -> status == TT_STATUS_HOVER_FIRST_TICK || textboxp -> status == TT_STATUS_CLICK_FIRST_TICK) {
-        tt_globals.elementLogicType = textboxp -> priority;
-        tt_globals.elementLogicIndex = tt_globals.elementLogicTemp;
+        turtleToolsGlobals.elementLogicType = textboxp -> priority;
+        turtleToolsGlobals.elementLogicIndex = turtleToolsGlobals.elementLogicTemp;
     }
 }
 
@@ -29955,7 +29955,7 @@ void tt_dropdownUpdate(tt_dropdown_t *dropdownp) {
     double dropdownMaxXFactor[2];
     double dropdownAlignFactor;
     /* render dropdown label */
-    tt_setColor(dropdownp -> color[TT_COLOR_SLOT_DROPDOWN_TEXT_LABEL]);
+    turtle_tools_set_color(dropdownp -> color[TT_COLOR_SLOT_DROPDOWN_TEXT_LABEL]);
     if (dropdownp -> align == TT_DROPDOWN_ALIGN_LEFT) {
         dropdownXFactor[0] = dropdownX;
         dropdownXFactor[1] = dropdownX + xfactor + dropdownp -> size * 1.2;
@@ -30007,21 +30007,21 @@ void tt_dropdownUpdate(tt_dropdown_t *dropdownp) {
     }
     /* render dropdown */
     if (dropdownp -> status == TT_STATUS_HOVER || dropdownp -> status == TT_STATUS_HOVER_FIRST_TICK) {
-        tt_setColor(dropdownp -> color[TT_COLOR_SLOT_DROPDOWN_SELECT]);
+        turtle_tools_set_color(dropdownp -> color[TT_COLOR_SLOT_DROPDOWN_SELECT]);
         turtle_rectangle(dropdownXFactor[0], dropdownY - dropdownp -> size * 0.9, dropdownXFactor[1] + dropdownp -> size, dropdownY + dropdownp -> size * 0.9);
     } else if (dropdownp -> status == TT_STATUS_OPEN || dropdownp -> status == TT_STATUS_CLICK || dropdownp -> status == TT_STATUS_OPEN_FIRST_TICK || dropdownp -> status == TT_STATUS_CLICK_FIRST_TICK) {
-        tt_setColor(dropdownp -> color[TT_COLOR_SLOT_DROPDOWN_BASE]);
+        turtle_tools_set_color(dropdownp -> color[TT_COLOR_SLOT_DROPDOWN_BASE]);
         if (dropdownDirection == TT_DROPDOWN_DIRECTION_UP) {
             turtle_rectangle(dropdownMaxXFactor[0], dropdownY + dropdownp -> size * 0.9 + (dropdownp -> options -> length - 1) * itemHeight, dropdownMaxXFactor[1], dropdownY - dropdownp -> size * 0.9);
         } else {
             turtle_rectangle(dropdownMaxXFactor[0], dropdownY - dropdownp -> size * 0.9 - (dropdownp -> options -> length - 1) * itemHeight, dropdownMaxXFactor[1], dropdownY + dropdownp -> size * 0.9);
         }
     } else {
-        tt_setColor(dropdownp -> color[TT_COLOR_SLOT_DROPDOWN_BASE]);
+        turtle_tools_set_color(dropdownp -> color[TT_COLOR_SLOT_DROPDOWN_BASE]);
         turtle_rectangle(dropdownXFactor[0], dropdownY - dropdownp -> size * 0.9, dropdownXFactor[1] + dropdownp -> size, dropdownY + dropdownp -> size * 0.9);
     }
     /* mouse */
-    if (dropdownp -> enabled != TT_ELEMENT_ENABLED || tt_globals.elementLogicTypeOld > dropdownp -> priority || (tt_globals.elementLogicTypeOld == dropdownp -> priority && tt_globals.elementLogicIndexOld > tt_globals.elementLogicTemp)) {
+    if (dropdownp -> enabled != TT_ELEMENT_ENABLED || turtleToolsGlobals.elementLogicTypeOld > dropdownp -> priority || (turtleToolsGlobals.elementLogicTypeOld == dropdownp -> priority && turtleToolsGlobals.elementLogicIndexOld > turtleToolsGlobals.elementLogicTemp)) {
         /* dropdown not enabled or higher priority element is being interacted with */
         if (dropdownp -> status == TT_STATUS_OPEN || dropdownp -> status == TT_STATUS_OPEN_FIRST_TICK) {
             goto LABEL_DROPDOWN_CHECK_HOVER;
@@ -30031,7 +30031,7 @@ void tt_dropdownUpdate(tt_dropdown_t *dropdownp) {
         }
         goto LABEL_DROPDOWN_END;
     }
-    if (tt_ribbon.mainselect[2] != -1) {
+    if (turtleToolsRibbon.mainselect[2] != -1) {
         /* fixes to dropdown/ribbon interaction */
         goto LABEL_DROPDOWN_END;
     }
@@ -30084,11 +30084,11 @@ void tt_dropdownUpdate(tt_dropdown_t *dropdownp) {
             dropdownp -> status = TT_STATUS_OPEN_CLICK;
         } else if (dropdownp -> status == TT_STATUS_HOVER || dropdownp -> status == TT_STATUS_HOVER_FIRST_TICK) {
             /* first tick clicked */
-            int32_t index = list_find(tt_elements.dropdowns, (unitype) (void *) dropdownp, 'p');
-            if (index != -1 && index != tt_elements.dropdowns -> length - 1) {
-                tt_elements.dropdowns -> type[index] = 'l'; // switch to l to avoid free
-                list_delete(tt_elements.dropdowns, index);
-                list_append(tt_elements.dropdowns, (unitype) (void *) dropdownp, 'p');
+            int32_t index = list_find(turtleToolsElements.dropdowns, (unitype) (void *) dropdownp, 'p');
+            if (index != -1 && index != turtleToolsElements.dropdowns -> length - 1) {
+                turtleToolsElements.dropdowns -> type[index] = 'l'; // switch to l to avoid free
+                list_delete(turtleToolsElements.dropdowns, index);
+                list_append(turtleToolsElements.dropdowns, (unitype) (void *) dropdownp, 'p');
                 dropdownp -> moveToTop = 1;
             }
             dropdownp -> status = TT_STATUS_CLICK_FIRST_TICK;
@@ -30147,14 +30147,14 @@ void tt_dropdownUpdate(tt_dropdown_t *dropdownp) {
             }
         }
         if (turtle.mouseX > dropdownMaxXFactor[0] && turtle.mouseX < dropdownMaxXFactor[1] && selected >= 0 && selected < dropdownp -> options -> length) {
-            tt_setColor(dropdownp -> color[TT_COLOR_SLOT_DROPDOWN_HOVER]);
+            turtle_tools_set_color(dropdownp -> color[TT_COLOR_SLOT_DROPDOWN_HOVER]);
             if (directionRender == -1 && selected == 0) {
                 turtle_rectangle(dropdownMaxXFactor[0], dropdownY - dropdownp -> size * 0.9 - (directionRender - 1) / 2.0 * dropdownp -> options -> length * itemHeight - dropdownp -> options -> length * itemHeight, dropdownMaxXFactor[1], dropdownY + dropdownp -> size * 0.9 - (directionRender - 1) / 2.0 * dropdownp -> options -> length * itemHeight - dropdownp -> options -> length * itemHeight);
             } else {
                 turtle_rectangle(dropdownMaxXFactor[0], dropdownY - dropdownp -> size * 0.9 - (directionRender - 1) / 2.0 * dropdownp -> options -> length * itemHeight - selected * itemHeight, dropdownMaxXFactor[1], dropdownY + dropdownp -> size * 0.9 - (directionRender - 1) / 2.0 * dropdownp -> options -> length * itemHeight - selected * itemHeight);
             }
         }
-        tt_setColor(dropdownp -> color[TT_COLOR_SLOT_DROPDOWN_TEXT]);
+        turtle_tools_set_color(dropdownp -> color[TT_COLOR_SLOT_DROPDOWN_TEXT]);
         int32_t renderIndex = 1;
         for (int32_t i = 0; i < dropdownp -> options -> length; i++) {
             if (i != dropdownp -> index) {
@@ -30170,11 +30170,11 @@ void tt_dropdownUpdate(tt_dropdown_t *dropdownp) {
         }
     }
     if (dropdownp -> status == TT_STATUS_OPEN || dropdownp -> status == TT_STATUS_OPEN_CLICK || dropdownp -> status == TT_STATUS_HOVER || dropdownp -> status == TT_STATUS_CLICK || dropdownp -> status == TT_STATUS_OPEN_FIRST_TICK || dropdownp -> status == TT_STATUS_OPEN_CLICK_FIRST_TICK || dropdownp -> status == TT_STATUS_HOVER_FIRST_TICK) {
-        tt_globals.elementLogicType = dropdownp -> priority;
-        tt_globals.elementLogicIndex = tt_globals.elementLogicTemp;
+        turtleToolsGlobals.elementLogicType = dropdownp -> priority;
+        turtleToolsGlobals.elementLogicIndex = turtleToolsGlobals.elementLogicTemp;
     }
     LABEL_DROPDOWN_END:
-    tt_setColor(dropdownp -> color[TT_COLOR_SLOT_DROPDOWN_TEXT]);
+    turtle_tools_set_color(dropdownp -> color[TT_COLOR_SLOT_DROPDOWN_TEXT]);
     if (dropdownp -> align == TT_DROPDOWN_ALIGN_LEFT) {
         turtle_text_write_unicode(dropdownp -> options -> data[dropdownp -> index].s, dropdownXFactor[0] + dropdownp -> size / 2, dropdownY, dropdownp -> size - 1, dropdownAlignFactor);
     } else if (dropdownp -> align == TT_DROPDOWN_ALIGN_CENTER) {
@@ -30182,7 +30182,7 @@ void tt_dropdownUpdate(tt_dropdown_t *dropdownp) {
     } else if (dropdownp -> align == TT_DROPDOWN_ALIGN_RIGHT) {
         turtle_text_write_unicode(dropdownp -> options -> data[dropdownp -> index].s, dropdownXFactor[1] - dropdownp -> size * 0.55, dropdownY, dropdownp -> size - 1, dropdownAlignFactor);
     }
-    tt_setColor(dropdownp -> color[TT_COLOR_SLOT_DROPDOWN_TRIANGLE]);
+    turtle_tools_set_color(dropdownp -> color[TT_COLOR_SLOT_DROPDOWN_TRIANGLE]);
     if (dropdownp -> status == TT_STATUS_OPEN || dropdownp -> status == TT_STATUS_CLICK || dropdownp -> status == TT_STATUS_OPEN_FIRST_TICK || dropdownp -> status == TT_STATUS_CLICK_FIRST_TICK) {
         turtle_triangle(dropdownXFactor[1] + dropdownp -> size * 0.4, dropdownY + dropdownp -> size * 0.4, dropdownXFactor[1] + dropdownp -> size * 0.4, dropdownY - dropdownp -> size * 0.4, dropdownXFactor[1] - dropdownp -> size * 0.2, dropdownY);
     } else {
@@ -30217,18 +30217,18 @@ void tt_scrollbarUpdate(tt_scrollbar_t *scrollbarp) {
     double dragRight = dragLeft + (scrollbarp -> length * scrollbarp -> barPercentage / 100);
     if (scrollbarp -> type == TT_SCROLLBAR_TYPE_HORIZONTAL) {
         turtle_pen_size(scrollbarp -> size * 1);
-        tt_setColor(scrollbarp -> color[TT_COLOR_SLOT_SCROLLBAR_BASE]);
+        turtle_tools_set_color(scrollbarp -> color[TT_COLOR_SLOT_SCROLLBAR_BASE]);
         turtle_goto(scrollbarLeft, scrollbarp -> y);
         turtle_pen_down();
         turtle_goto(scrollbarRight, scrollbarp -> y);
         turtle_pen_up();
         turtle_pen_size(scrollbarp -> size * 0.8);
         if ((scrollbarp -> status == TT_STATUS_HOVER || scrollbarp -> status == TT_STATUS_HOVER_FIRST_TICK) && turtle.mouseX > dragLeft - scrollbarp -> size * 0.4 && turtle.mouseX < dragRight + scrollbarp -> size * 0.4) {
-            tt_setColor(scrollbarp -> color[TT_COLOR_SLOT_SCROLLBAR_HOVER]);
+            turtle_tools_set_color(scrollbarp -> color[TT_COLOR_SLOT_SCROLLBAR_HOVER]);
         } else if (scrollbarp -> status == TT_STATUS_CLICK || scrollbarp -> status == TT_STATUS_CLICK_FIRST_TICK) {
-            tt_setColor(scrollbarp -> color[TT_COLOR_SLOT_SCROLLBAR_CLICKED]);
+            turtle_tools_set_color(scrollbarp -> color[TT_COLOR_SLOT_SCROLLBAR_CLICKED]);
         } else {
-            tt_setColor(scrollbarp -> color[TT_COLOR_SLOT_SCROLLBAR_BAR]);
+            turtle_tools_set_color(scrollbarp -> color[TT_COLOR_SLOT_SCROLLBAR_BAR]);
         }
         turtle_goto(dragLeft, scrollbarp -> y);
         turtle_pen_down();
@@ -30243,18 +30243,18 @@ void tt_scrollbarUpdate(tt_scrollbar_t *scrollbarp) {
         dragRight = scrollbarRight - scrollbarp -> value / 100 * (scrollbarp -> length * (1 - scrollbarp -> barPercentage / 100));
         dragLeft = dragRight - (scrollbarp -> length * scrollbarp -> barPercentage / 100);
         turtle_pen_size(scrollbarp -> size * 1);
-        tt_setColor(scrollbarp -> color[TT_COLOR_SLOT_SCROLLBAR_BASE]);
+        turtle_tools_set_color(scrollbarp -> color[TT_COLOR_SLOT_SCROLLBAR_BASE]);
         turtle_goto(scrollbarp -> x, scrollbarLeft);
         turtle_pen_down();
         turtle_goto(scrollbarp -> x, scrollbarRight);
         turtle_pen_up();
         turtle_pen_size(scrollbarp -> size * 0.8);
         if ((scrollbarp -> status == TT_STATUS_HOVER || scrollbarp -> status == TT_STATUS_HOVER_FIRST_TICK) && turtle.mouseY > dragLeft - scrollbarp -> size * 0.4 && turtle.mouseY < dragRight + scrollbarp -> size * 0.4) {
-            tt_setColor(scrollbarp -> color[TT_COLOR_SLOT_SCROLLBAR_HOVER]);
+            turtle_tools_set_color(scrollbarp -> color[TT_COLOR_SLOT_SCROLLBAR_HOVER]);
         } else if (scrollbarp -> status == TT_STATUS_CLICK || scrollbarp -> status == TT_STATUS_CLICK_FIRST_TICK) {
-            tt_setColor(scrollbarp -> color[TT_COLOR_SLOT_SCROLLBAR_CLICKED]);
+            turtle_tools_set_color(scrollbarp -> color[TT_COLOR_SLOT_SCROLLBAR_CLICKED]);
         } else {
-            tt_setColor(scrollbarp -> color[TT_COLOR_SLOT_SCROLLBAR_BAR]);
+            turtle_tools_set_color(scrollbarp -> color[TT_COLOR_SLOT_SCROLLBAR_BAR]);
         }
         turtle_goto(scrollbarp -> x, dragLeft);
         turtle_pen_down();
@@ -30262,7 +30262,7 @@ void tt_scrollbarUpdate(tt_scrollbar_t *scrollbarp) {
         turtle_pen_up();
     }
     /* mouse */
-    if (scrollbarp -> enabled != TT_ELEMENT_ENABLED || tt_globals.elementLogicTypeOld > scrollbarp -> priority || (tt_globals.elementLogicTypeOld == scrollbarp -> priority && tt_globals.elementLogicIndexOld > tt_globals.elementLogicTemp)) {
+    if (scrollbarp -> enabled != TT_ELEMENT_ENABLED || turtleToolsGlobals.elementLogicTypeOld > scrollbarp -> priority || (turtleToolsGlobals.elementLogicTypeOld == scrollbarp -> priority && turtleToolsGlobals.elementLogicIndexOld > turtleToolsGlobals.elementLogicTemp)) {
         /* slider not enabled or higher priority element is being interacted with */
         if (scrollbarp -> status != TT_STATUS_BLOCKED) {
             scrollbarp -> status = TT_STATUS_IDLE;
@@ -30288,12 +30288,12 @@ void tt_scrollbarUpdate(tt_scrollbar_t *scrollbarp) {
             /* first tick clicked */
             if (simulateMouseX > dragLeft - scrollbarp -> size * 0.4 && simulateMouseX < dragRight + scrollbarp -> size * 0.4) {
                 if (scrollbarp -> type == TT_SCROLLBAR_TYPE_HORIZONTAL) {
-                    tt_globals.barAnchor = simulateMouseX - dragLeft;
+                    turtleToolsGlobals.barAnchor = simulateMouseX - dragLeft;
                 } else if (scrollbarp -> type == TT_SCROLLBAR_TYPE_VERTICAL) {
-                    tt_globals.barAnchor = dragRight - simulateMouseX;
+                    turtleToolsGlobals.barAnchor = dragRight - simulateMouseX;
                 }
             } else {
-                tt_globals.barAnchor = (scrollbarp -> length * scrollbarp -> barPercentage / 100) / 2;
+                turtleToolsGlobals.barAnchor = (scrollbarp -> length * scrollbarp -> barPercentage / 100) / 2;
             }
             scrollbarp -> status = TT_STATUS_CLICK_FIRST_TICK;
         } else if (scrollbarp -> status == TT_STATUS_CLICK || scrollbarp -> status == TT_STATUS_CLICK_FIRST_TICK) {
@@ -30312,9 +30312,9 @@ void tt_scrollbarUpdate(tt_scrollbar_t *scrollbarp) {
     }
     if (scrollbarp -> status == TT_STATUS_CLICK || scrollbarp -> status == TT_STATUS_CLICK_FIRST_TICK) {
         if (scrollbarp -> type == TT_SCROLLBAR_TYPE_HORIZONTAL) {
-            scrollbarp -> value = (simulateMouseX - scrollbarLeft - tt_globals.barAnchor) / (scrollbarp -> length * (1 - scrollbarp -> barPercentage / 100)) * 100;
+            scrollbarp -> value = (simulateMouseX - scrollbarLeft - turtleToolsGlobals.barAnchor) / (scrollbarp -> length * (1 - scrollbarp -> barPercentage / 100)) * 100;
         } else if (scrollbarp -> type == TT_SCROLLBAR_TYPE_VERTICAL) {
-            scrollbarp -> value = (scrollbarRight - simulateMouseX - tt_globals.barAnchor) / (scrollbarp -> length * (1 - scrollbarp -> barPercentage / 100)) * 100;
+            scrollbarp -> value = (scrollbarRight - simulateMouseX - turtleToolsGlobals.barAnchor) / (scrollbarp -> length * (1 - scrollbarp -> barPercentage / 100)) * 100;
         }
         if (scrollbarp -> value < 0) {
             scrollbarp -> value = 0;
@@ -30324,8 +30324,8 @@ void tt_scrollbarUpdate(tt_scrollbar_t *scrollbarp) {
         }
     }
     if (scrollbarp -> status == TT_STATUS_HOVER || scrollbarp -> status == TT_STATUS_CLICK || scrollbarp -> status == TT_STATUS_HOVER_FIRST_TICK || scrollbarp -> status == TT_STATUS_CLICK_FIRST_TICK) {
-        tt_globals.elementLogicType = scrollbarp -> priority;
-        tt_globals.elementLogicIndex = tt_globals.elementLogicTemp;
+        turtleToolsGlobals.elementLogicType = scrollbarp -> priority;
+        turtleToolsGlobals.elementLogicIndex = turtleToolsGlobals.elementLogicTemp;
     }
     LABEL_SCROLLBAR_END:
     if (scrollbarp -> variable != NULL) {
@@ -30340,8 +30340,8 @@ void tt_contextUpdate(tt_context_t *contextp) {
     }
     if (contextp -> enabled == TT_ELEMENT_HIDE) {
         if (contextp -> status == TT_STATUS_OPEN_CLICK) {
-            tt_globals.elementLogicType = contextp -> priority;
-            tt_globals.elementLogicIndex = tt_globals.elementLogicTemp;
+            turtleToolsGlobals.elementLogicType = contextp -> priority;
+            turtleToolsGlobals.elementLogicIndex = turtleToolsGlobals.elementLogicTemp;
             if (!turtle_mouse_down()) {
                 contextp -> status = TT_STATUS_IDLE;
             }
@@ -30367,24 +30367,24 @@ void tt_contextUpdate(tt_context_t *contextp) {
             contextTextY = contextp -> y + contextp -> size * 0.9 + (contextp -> options -> length - 1) * itemHeight + 2;
         }
     }
-    tt_setColor(contextp -> color[TT_COLOR_SLOT_CONTEXT_BASE]);
+    turtle_tools_set_color(contextp -> color[TT_COLOR_SLOT_CONTEXT_BASE]);
     turtle_rectangle(contextTextX, contextTextY - contextp -> size * 0.9 - (contextp -> options -> length - 1) * itemHeight - 2, contextTextX + contextp -> maxXfactor + contextp -> size / 1.25, contextTextY + contextp -> size * 0.9 + 2);
-    tt_setColor(contextp -> color[TT_COLOR_SLOT_CONTEXT_TEXT]);
+    turtle_tools_set_color(contextp -> color[TT_COLOR_SLOT_CONTEXT_TEXT]);
     contextp -> index = -1;
     contextp -> value = -1;
     for (int32_t i = 0; i < contextp -> options -> length; i++) {
         if (turtle.mouseX > contextTextX && turtle.mouseX < contextTextX + contextp -> maxXfactor + contextp -> size / 1.25 && turtle.mouseY >= contextTextY - i * itemHeight - contextp -> size * 0.9 && turtle.mouseY < contextTextY - i * itemHeight + contextp -> size * 0.9) {
-            tt_setColor(contextp -> color[TT_COLOR_SLOT_CONTEXT_SELECT]);
+            turtle_tools_set_color(contextp -> color[TT_COLOR_SLOT_CONTEXT_SELECT]);
             turtle_rectangle(contextTextX, contextTextY - i * itemHeight - contextp -> size * 0.9, contextTextX + contextp -> maxXfactor + contextp -> size / 1.25, contextTextY - i * itemHeight + contextp -> size * 0.9);
-            tt_setColor(contextp -> color[TT_COLOR_SLOT_CONTEXT_TEXT]);
+            turtle_tools_set_color(contextp -> color[TT_COLOR_SLOT_CONTEXT_TEXT]);
             contextp -> index = i;
             contextp -> value = i;
         }
         turtle_text_write_unicode(contextp -> options -> data[i].s, contextTextX + contextp -> size / 2.5, contextTextY - i * itemHeight, contextp -> size - 1, 0);
     }
-    if (contextp -> enabled == TT_ELEMENT_ENABLED && (tt_globals.elementLogicTypeOld < contextp -> priority || (tt_globals.elementLogicTypeOld == contextp -> priority && tt_globals.elementLogicIndexOld <= (int32_t) tt_globals.elementLogicTemp))) {
-        tt_globals.elementLogicType = contextp -> priority;
-        tt_globals.elementLogicIndex = tt_globals.elementLogicTemp;
+    if (contextp -> enabled == TT_ELEMENT_ENABLED && (turtleToolsGlobals.elementLogicTypeOld < contextp -> priority || (turtleToolsGlobals.elementLogicTypeOld == contextp -> priority && turtleToolsGlobals.elementLogicIndexOld <= (int32_t) turtleToolsGlobals.elementLogicTemp))) {
+        turtleToolsGlobals.elementLogicType = contextp -> priority;
+        turtleToolsGlobals.elementLogicIndex = turtleToolsGlobals.elementLogicTemp;
         if (turtle_mouse_down()) {
             if (contextp -> index != -1) {
                 contextp -> status = TT_STATUS_OPEN_CLICK;
@@ -30406,7 +30406,7 @@ void tt_readerUpdate(tt_reader_t *readerp) {
         double readerRightX = readerp -> x + readerp -> width;
         double readerY = readerp -> y + readerp -> size * 0.8;
         double readerTopHeight = readerp -> size * 2;
-        tt_setColor(readerp -> color[TT_COLOR_SLOT_LIST_READER_BASE]);
+        turtle_tools_set_color(readerp -> color[TT_COLOR_SLOT_LIST_READER_BASE]);
         turtle_pen_size(readerp -> size);
         turtle_goto(readerLeftX + readerp -> size / 2, readerY - readerp -> height + readerp -> size / 2);
         turtle_pen_down();
@@ -30431,28 +30431,28 @@ void tt_readerUpdate(tt_reader_t *readerp) {
             numItems = list -> length - startingItem;
         }
         for (int32_t i = startingItem; i < numItems + startingItem; i++) {
-            tt_setColor(readerp -> color[TT_COLOR_SLOT_LIST_READER_TEXT]);
+            turtle_tools_set_color(readerp -> color[TT_COLOR_SLOT_LIST_READER_TEXT]);
             char numberLabel[32];
             sprintf(numberLabel, "%d", i);
             double edgeX = readerLeftX + readerp -> size + strlen(numberLabel) * (readerp -> size - 1) * 0.75;
             if (i == startingItem && ypos > readerY - readerp -> size * 1.5) {
                 /* exception - don't draw top of box */
-                tt_setColor(readerp -> color[TT_COLOR_SLOT_LIST_READER_ITEM]);
+                turtle_tools_set_color(readerp -> color[TT_COLOR_SLOT_LIST_READER_ITEM]);
                 turtle_rectangle(edgeX, ypos, readerRightX - readerp -> size, ypos - readerp -> size);
             } else if (ypos < readerY - readerp -> height + readerp -> size) {
                 /* exception - box is entirely below reader */
                 break;
             } else if (ypos < readerY - readerp -> height + readerp -> size * 1.5) {
                 /* exception - don't draw bottom of box */
-                tt_setColor(readerp -> color[TT_COLOR_SLOT_LIST_READER_ITEM]);
+                turtle_tools_set_color(readerp -> color[TT_COLOR_SLOT_LIST_READER_ITEM]);
                 turtle_rectangle(edgeX, ypos + readerp -> size, readerRightX - readerp -> size, ypos);
                 break;
             } else {
                 turtle_text_write_string(numberLabel, (readerLeftX + edgeX) / 2, ypos, readerp -> size - 1, 50);
-                tt_setColor(readerp -> color[TT_COLOR_SLOT_LIST_READER_ITEM]);
+                turtle_tools_set_color(readerp -> color[TT_COLOR_SLOT_LIST_READER_ITEM]);
                 turtle_rectangle(edgeX, ypos + readerp -> size, readerRightX - readerp -> size, ypos - readerp -> size);
                 unitype_sprint(readerString, list -> data[i], list -> type[i]);
-                tt_setColor(readerp -> color[TT_COLOR_SLOT_LIST_READER_TEXT_ITEM]);
+                turtle_tools_set_color(readerp -> color[TT_COLOR_SLOT_LIST_READER_TEXT_ITEM]);
                 if (turtle_text_get_unicode_length(readerString, readerp -> size - 1) > (readerRightX - readerp -> size) - edgeX - (readerp -> size - 1)) {
                     /* text is too long to fit */
                     turtle_text_truncate_string(readerString, readerp -> size - 1, (readerRightX - readerp -> size) - edgeX - (readerp -> size - 1) * 1.5, 1);
@@ -30463,15 +30463,15 @@ void tt_readerUpdate(tt_reader_t *readerp) {
             ypos -= readerp -> size * 2.2;
         }
         /* draw top and bottom boxes */
-        tt_setColor(readerp -> color[TT_COLOR_SLOT_LIST_READER_BASE]); // TT_COLOR_SLOT_LIST_READER_BASE, TT_COLOR_SLOT_LIST_READER_SCROLLBAR_BASE
+        turtle_tools_set_color(readerp -> color[TT_COLOR_SLOT_LIST_READER_BASE]); // TT_COLOR_SLOT_LIST_READER_BASE, TT_COLOR_SLOT_LIST_READER_SCROLLBAR_BASE
         turtle_rectangle(readerLeftX + readerp -> size / 4, readerY - readerp -> size / 4, readerRightX - readerp -> size / 4, readerY - readerp -> size * 2);
         turtle_rectangle(readerLeftX + readerp -> size / 4, readerY + readerp -> size / 4 - readerp -> height, readerRightX - readerp -> size / 4, readerY + readerp -> size * 2 - readerp -> height);
         /* render label */
-        tt_setColor(readerp -> color[TT_COLOR_SLOT_LIST_READER_TEXT]);
+        turtle_tools_set_color(readerp -> color[TT_COLOR_SLOT_LIST_READER_TEXT]);
         turtle_text_write_unicode(readerp -> label, (readerLeftX + readerRightX) / 2, readerY - readerp -> size, readerp -> size - 1, 50);
         turtle_text_write_stringf((readerLeftX + readerRightX) / 2, readerY - readerp -> height + readerp -> size, readerp -> size - 1, 50, "Items: %d", list -> length);
         turtle_pen_size(readerp -> size / 12);
-        tt_setColor(readerp -> color[TT_COLOR_SLOT_LIST_READER_SCROLLBAR_BAR]);
+        turtle_tools_set_color(readerp -> color[TT_COLOR_SLOT_LIST_READER_SCROLLBAR_BAR]);
         turtle_goto(readerRightX - readerp -> size * 0.5, readerY - readerp -> height);
         turtle_pen_down();
         turtle_goto(readerRightX, readerY - readerp -> height + readerp -> size * 0.5);
@@ -30494,13 +30494,13 @@ void tt_readerUpdate(tt_reader_t *readerp) {
             readerp -> scrollbarp -> color[TT_COLOR_SLOT_SCROLLBAR_CLICKED] = readerp -> color[TT_COLOR_SLOT_LIST_READER_SCROLLBAR_CLICKED];
             readerp -> scrollbarp -> barPercentage = 100.0 / (log((list -> length - itemsInWindow) / 2.0 + 1) + 1);
             readerp -> scrollbarp -> length = readerp -> height - readerp -> size * 4.75;
-            tt_globals.elementLogicTemp++;
+            turtleToolsGlobals.elementLogicTemp++;
             tt_scrollbarUpdate(readerp -> scrollbarp);
         } else {
             readerp -> scrollbarp -> value = 0;
         }
         /* mouse */
-        if (readerp -> enabled != TT_ELEMENT_ENABLED || tt_globals.elementLogicTypeOld > readerp -> priority || (tt_globals.elementLogicTypeOld == readerp -> priority && tt_globals.elementLogicIndexOld > tt_globals.elementLogicTemp)) {
+        if (readerp -> enabled != TT_ELEMENT_ENABLED || turtleToolsGlobals.elementLogicTypeOld > readerp -> priority || (turtleToolsGlobals.elementLogicTypeOld == readerp -> priority && turtleToolsGlobals.elementLogicIndexOld > turtleToolsGlobals.elementLogicTemp)) {
             /* reader not enabled or higher priority element is being interacted with */
             if (readerp -> status == TT_STATUS_CLICK || readerp -> status == TT_STATUS_CLICK_FIRST_TICK) {
                 goto LABEL_LIST_READER_CHECK_HOVER;
@@ -30546,11 +30546,11 @@ void tt_readerUpdate(tt_reader_t *readerp) {
                 }
                 readerp -> mouseAnchorX = turtle.mouseX;
                 readerp -> mouseAnchorY = turtle.mouseY;
-                int32_t index = list_find(tt_elements.readers, (unitype) (void *) readerp, 'p');
-                if (index != -1 && index != tt_elements.readers -> length - 1) {
-                    tt_elements.readers -> type[index] = 'l'; // switch to l to avoid free
-                    list_delete(tt_elements.readers, index);
-                    list_append(tt_elements.readers, (unitype) (void *) readerp, 'p');
+                int32_t index = list_find(turtleToolsElements.readers, (unitype) (void *) readerp, 'p');
+                if (index != -1 && index != turtleToolsElements.readers -> length - 1) {
+                    turtleToolsElements.readers -> type[index] = 'l'; // switch to l to avoid free
+                    list_delete(turtleToolsElements.readers, index);
+                    list_append(turtleToolsElements.readers, (unitype) (void *) readerp, 'p');
                     readerp -> moveToTop = 1;
                 }
                 readerp -> status = TT_STATUS_CLICK_FIRST_TICK;
@@ -30585,8 +30585,8 @@ void tt_readerUpdate(tt_reader_t *readerp) {
             }
         }
         if (readerp -> status == TT_STATUS_HOVER || readerp -> status == TT_STATUS_CLICK || readerp -> status == TT_STATUS_HOVER_FIRST_TICK || readerp -> status == TT_STATUS_CLICK_FIRST_TICK) {
-            tt_globals.elementLogicType = readerp -> priority;
-            tt_globals.elementLogicIndex = tt_globals.elementLogicTemp;
+            turtleToolsGlobals.elementLogicType = readerp -> priority;
+            turtleToolsGlobals.elementLogicIndex = turtleToolsGlobals.elementLogicTemp;
         }
     } else if (readerp -> element == TT_ELEMENT_VARIABLE_READER) {
         unitype variable = *(readerp -> variable);
@@ -30601,7 +30601,7 @@ void tt_readerUpdate(tt_reader_t *readerp) {
         double readerY = readerp -> y;
         double readerHeight = readerp -> size * 1.75;
         /* rounded rectangle (base) */
-        tt_setColor(readerp -> color[TT_COLOR_SLOT_VARIABLE_READER_BASE]);
+        turtle_tools_set_color(readerp -> color[TT_COLOR_SLOT_VARIABLE_READER_BASE]);
         turtle_pen_size(readerp -> size);
         turtle_goto(readerLeftX + readerp -> size / 2, readerY - readerHeight / 2 + readerp -> size / 2);
         turtle_pen_down();
@@ -30615,7 +30615,7 @@ void tt_readerUpdate(tt_reader_t *readerp) {
         double readerInnerRightX = readerRightX - readerp -> size * 0.6;
         double readerInnerLeftX = readerInnerRightX - innerWidth;
         double readerInnerHeight = readerHeight * 0.8;
-        tt_setColor(readerp -> color[TT_COLOR_SLOT_VARIABLE_READER_ITEM]);
+        turtle_tools_set_color(readerp -> color[TT_COLOR_SLOT_VARIABLE_READER_ITEM]);
         turtle_pen_size(readerp -> size * 0.5);
         turtle_goto(readerInnerLeftX + readerp -> size / 4, readerY - readerInnerHeight / 2 + readerp -> size / 4);
         turtle_pen_down();
@@ -30626,12 +30626,12 @@ void tt_readerUpdate(tt_reader_t *readerp) {
         turtle_pen_up();
         turtle_rectangle(readerInnerLeftX + readerp -> size / 4, readerY - readerInnerHeight / 2 + readerp -> size / 4, readerInnerRightX - readerp -> size / 4, readerY + readerInnerHeight / 2 - readerp -> size / 4);
         /* render text */
-        tt_setColor(readerp -> color[TT_COLOR_SLOT_VARIABLE_READER_TEXT]);
+        turtle_tools_set_color(readerp -> color[TT_COLOR_SLOT_VARIABLE_READER_TEXT]);
         turtle_text_write_unicode(readerp -> label, readerp -> x + readerp -> size * 0.6, readerp -> y, readerp -> size - 1, 0);
-        tt_setColor(readerp -> color[TT_COLOR_SLOT_VARIABLE_READER_TEXT_ITEM]);
+        turtle_tools_set_color(readerp -> color[TT_COLOR_SLOT_VARIABLE_READER_TEXT_ITEM]);
         turtle_text_write_unicode(readerString, (readerInnerLeftX + readerInnerRightX) / 2, readerp -> y, readerp -> size - 1, 50);
         /* mouse */
-        if (readerp -> enabled != TT_ELEMENT_ENABLED || tt_globals.elementLogicTypeOld > readerp -> priority || (tt_globals.elementLogicTypeOld == readerp -> priority && tt_globals.elementLogicIndexOld > tt_globals.elementLogicTemp)) {
+        if (readerp -> enabled != TT_ELEMENT_ENABLED || turtleToolsGlobals.elementLogicTypeOld > readerp -> priority || (turtleToolsGlobals.elementLogicTypeOld == readerp -> priority && turtleToolsGlobals.elementLogicIndexOld > turtleToolsGlobals.elementLogicTemp)) {
             /* reader not enabled or higher priority element is being interacted with */
             if (readerp -> status == TT_STATUS_CLICK || readerp -> status == TT_STATUS_CLICK_FIRST_TICK) {
                 goto LABEL_VARIABLE_READER_CHECK_HOVER;
@@ -30662,11 +30662,11 @@ void tt_readerUpdate(tt_reader_t *readerp) {
                 readerp -> anchorY = readerp -> y;
                 readerp -> mouseAnchorX = turtle.mouseX;
                 readerp -> mouseAnchorY = turtle.mouseY;
-                int32_t index = list_find(tt_elements.readers, (unitype) (void *) readerp, 'p');
-                if (index != -1 && index != tt_elements.readers -> length - 1) {
-                    tt_elements.readers -> type[index] = 'l'; // switch to l to avoid free
-                    list_delete(tt_elements.readers, index);
-                    list_append(tt_elements.readers, (unitype) (void *) readerp, 'p');
+                int32_t index = list_find(turtleToolsElements.readers, (unitype) (void *) readerp, 'p');
+                if (index != -1 && index != turtleToolsElements.readers -> length - 1) {
+                    turtleToolsElements.readers -> type[index] = 'l'; // switch to l to avoid free
+                    list_delete(turtleToolsElements.readers, index);
+                    list_append(turtleToolsElements.readers, (unitype) (void *) readerp, 'p');
                     readerp -> moveToTop = 1;
                 }
                 readerp -> status = TT_STATUS_CLICK_FIRST_TICK;
@@ -30690,8 +30690,8 @@ void tt_readerUpdate(tt_reader_t *readerp) {
             readerp -> y = readerp -> anchorY + turtle.mouseY - readerp -> mouseAnchorY;
         }
         if (readerp -> status == TT_STATUS_HOVER || readerp -> status == TT_STATUS_CLICK || readerp -> status == TT_STATUS_HOVER_FIRST_TICK || readerp -> status == TT_STATUS_CLICK_FIRST_TICK) {
-            tt_globals.elementLogicType = readerp -> priority;
-            tt_globals.elementLogicIndex = tt_globals.elementLogicTemp;
+            turtleToolsGlobals.elementLogicType = readerp -> priority;
+            turtleToolsGlobals.elementLogicIndex = turtleToolsGlobals.elementLogicTemp;
         }
     }
 }
@@ -30702,133 +30702,133 @@ void turtleToolsUpdate() {
 }
 
 void turtleToolsUpdateUI() {
-    tt_globals.elementLogicType = TT_ELEMENT_NONE;
-    tt_globals.elementLogicIndex = -1;
-    tt_globals.elementLogicTemp = -1;
+    turtleToolsGlobals.elementLogicType = TT_ELEMENT_NONE;
+    turtleToolsGlobals.elementLogicIndex = -1;
+    turtleToolsGlobals.elementLogicTemp = -1;
     uint16_t shapeSave = turtle.penshape;
     turtle_pen_shape(TURTLE_PEN_SHAPE_CIRCLE);
-    if (tt_enabled.buttonEnabled) {
-        tt_globals.elementLogicTemp = 0;
-        for (int32_t i = 0; i < tt_elements.buttons -> length; i++) {
-            if (((tt_button_t *) (tt_elements.buttons -> data[i].p)) -> ignored == TT_ELEMENT_IGNORED) {
+    if (turtleToolsEnabled.buttonEnabled) {
+        turtleToolsGlobals.elementLogicTemp = 0;
+        for (int32_t i = 0; i < turtleToolsElements.buttons -> length; i++) {
+            if (((turtle_tools_button_t *) (turtleToolsElements.buttons -> data[i].p)) -> ignored == TT_ELEMENT_IGNORED) {
                 continue;
             }
-            tt_buttonUpdate((tt_button_t *) (tt_elements.buttons -> data[i].p));
-            tt_globals.elementLogicTemp++;
+            tt_buttonUpdate((turtle_tools_button_t *) (turtleToolsElements.buttons -> data[i].p));
+            turtleToolsGlobals.elementLogicTemp++;
         }
     }
-    if (tt_enabled.switchEnabled) {
-        tt_globals.elementLogicTemp = 0;
-        for (int32_t i = 0; i < tt_elements.switches -> length; i++) {
-            if (((tt_switch_t *) (tt_elements.switches -> data[i].p)) -> ignored == TT_ELEMENT_IGNORED) {
+    if (turtleToolsEnabled.switchEnabled) {
+        turtleToolsGlobals.elementLogicTemp = 0;
+        for (int32_t i = 0; i < turtleToolsElements.switches -> length; i++) {
+            if (((tt_switch_t *) (turtleToolsElements.switches -> data[i].p)) -> ignored == TT_ELEMENT_IGNORED) {
                 continue;
             }
-            tt_switchUpdate((tt_switch_t *) (tt_elements.switches -> data[i].p));
-            tt_globals.elementLogicTemp++;
+            tt_switchUpdate((tt_switch_t *) (turtleToolsElements.switches -> data[i].p));
+            turtleToolsGlobals.elementLogicTemp++;
         }
     }
-    if (tt_enabled.dialEnabled) {
-        tt_globals.elementLogicTemp = 0;
-        for (int32_t i = 0; i < tt_elements.dials -> length; i++) {
-            if (((tt_dial_t *) (tt_elements.dials -> data[i].p)) -> ignored == TT_ELEMENT_IGNORED) {
+    if (turtleToolsEnabled.dialEnabled) {
+        turtleToolsGlobals.elementLogicTemp = 0;
+        for (int32_t i = 0; i < turtleToolsElements.dials -> length; i++) {
+            if (((tt_dial_t *) (turtleToolsElements.dials -> data[i].p)) -> ignored == TT_ELEMENT_IGNORED) {
                 continue;
             }
-            tt_dialUpdate((tt_dial_t *) (tt_elements.dials -> data[i].p));
-            tt_globals.elementLogicTemp++;
+            tt_dialUpdate((tt_dial_t *) (turtleToolsElements.dials -> data[i].p));
+            turtleToolsGlobals.elementLogicTemp++;
         }
     }
-    if (tt_enabled.sliderEnabled) {
-        tt_globals.elementLogicTemp = 0;
-        for (int32_t i = 0; i < tt_elements.sliders -> length; i++) {
-            if (((tt_slider_t *) (tt_elements.sliders -> data[i].p)) -> ignored == TT_ELEMENT_IGNORED) {
+    if (turtleToolsEnabled.sliderEnabled) {
+        turtleToolsGlobals.elementLogicTemp = 0;
+        for (int32_t i = 0; i < turtleToolsElements.sliders -> length; i++) {
+            if (((tt_slider_t *) (turtleToolsElements.sliders -> data[i].p)) -> ignored == TT_ELEMENT_IGNORED) {
                 continue;
             }
-            tt_sliderUpdate((tt_slider_t *) (tt_elements.sliders -> data[i].p));
-            tt_globals.elementLogicTemp++;
+            tt_sliderUpdate((tt_slider_t *) (turtleToolsElements.sliders -> data[i].p));
+            turtleToolsGlobals.elementLogicTemp++;
         }
     }
-    if (tt_enabled.textboxEnabled) {
-        tt_globals.elementLogicTemp = 0;
-        for (int32_t i = 0; i < tt_elements.textboxes -> length; i++) {
-            if (((tt_textbox_t *) (tt_elements.textboxes -> data[i].p)) -> ignored == TT_ELEMENT_IGNORED) {
+    if (turtleToolsEnabled.textboxEnabled) {
+        turtleToolsGlobals.elementLogicTemp = 0;
+        for (int32_t i = 0; i < turtleToolsElements.textboxes -> length; i++) {
+            if (((tt_textbox_t *) (turtleToolsElements.textboxes -> data[i].p)) -> ignored == TT_ELEMENT_IGNORED) {
                 continue;
             }
-            tt_textbox_t *textboxp = (tt_textbox_t *) (tt_elements.textboxes -> data[i].p);
+            tt_textbox_t *textboxp = (tt_textbox_t *) (turtleToolsElements.textboxes -> data[i].p);
             tt_textboxUpdate(textboxp);
             if (textboxp -> moveToTop) {
                 i--;
             } else {
-                tt_globals.elementLogicTemp++;
+                turtleToolsGlobals.elementLogicTemp++;
             }
         }
     }
-    if (tt_enabled.dropdownEnabled) {
-        tt_globals.elementLogicTemp = 0;
-        for (int32_t i = 0; i < tt_elements.dropdowns -> length; i++) {
-            if (((tt_dropdown_t *) (tt_elements.dropdowns -> data[i].p)) -> ignored == TT_ELEMENT_IGNORED) {
+    if (turtleToolsEnabled.dropdownEnabled) {
+        turtleToolsGlobals.elementLogicTemp = 0;
+        for (int32_t i = 0; i < turtleToolsElements.dropdowns -> length; i++) {
+            if (((tt_dropdown_t *) (turtleToolsElements.dropdowns -> data[i].p)) -> ignored == TT_ELEMENT_IGNORED) {
                 continue;
             }
-            tt_dropdown_t *dropdownp = (tt_dropdown_t *) (tt_elements.dropdowns -> data[i].p);
+            tt_dropdown_t *dropdownp = (tt_dropdown_t *) (turtleToolsElements.dropdowns -> data[i].p);
             tt_dropdownUpdate(dropdownp);
             if (dropdownp -> moveToTop) {
                 i--;
             } else {
-                tt_globals.elementLogicTemp++;
+                turtleToolsGlobals.elementLogicTemp++;
             }
         }
     }
-    if (tt_enabled.scrollbarEnabled) {
-        tt_globals.elementLogicTemp = 0;
-        for (int32_t i = 0; i < tt_elements.scrollbars -> length; i++) {
-            if (((tt_scrollbar_t *) (tt_elements.scrollbars -> data[i].p)) -> ignored == TT_ELEMENT_IGNORED) {
+    if (turtleToolsEnabled.scrollbarEnabled) {
+        turtleToolsGlobals.elementLogicTemp = 0;
+        for (int32_t i = 0; i < turtleToolsElements.scrollbars -> length; i++) {
+            if (((tt_scrollbar_t *) (turtleToolsElements.scrollbars -> data[i].p)) -> ignored == TT_ELEMENT_IGNORED) {
                 continue;
             }
-            tt_scrollbarUpdate((tt_scrollbar_t *) (tt_elements.scrollbars -> data[i].p));
-            tt_globals.elementLogicTemp++;
+            tt_scrollbarUpdate((tt_scrollbar_t *) (turtleToolsElements.scrollbars -> data[i].p));
+            turtleToolsGlobals.elementLogicTemp++;
         }
     }
-    if (tt_enabled.contextEnabled) {
-        tt_globals.elementLogicTemp = 0;
-        for (int32_t i = 0; i < tt_elements.contexts -> length; i++) {
-            if (((tt_context_t *) (tt_elements.contexts -> data[i].p)) -> ignored == TT_ELEMENT_IGNORED) {
+    if (turtleToolsEnabled.contextEnabled) {
+        turtleToolsGlobals.elementLogicTemp = 0;
+        for (int32_t i = 0; i < turtleToolsElements.contexts -> length; i++) {
+            if (((tt_context_t *) (turtleToolsElements.contexts -> data[i].p)) -> ignored == TT_ELEMENT_IGNORED) {
                 continue;
             }
-            tt_contextUpdate((tt_context_t *) (tt_elements.contexts -> data[i].p));
-            tt_globals.elementLogicTemp++;
+            tt_contextUpdate((tt_context_t *) (turtleToolsElements.contexts -> data[i].p));
+            turtleToolsGlobals.elementLogicTemp++;
         }
     }
-    if (tt_enabled.readerEnabled) {
-        tt_globals.elementLogicTemp = 0;
-        for (int32_t i = 0; i < tt_elements.readers -> length; i++) {
-            if (((tt_reader_t *) (tt_elements.readers -> data[i].p)) -> ignored == TT_ELEMENT_IGNORED) {
+    if (turtleToolsEnabled.readerEnabled) {
+        turtleToolsGlobals.elementLogicTemp = 0;
+        for (int32_t i = 0; i < turtleToolsElements.readers -> length; i++) {
+            if (((tt_reader_t *) (turtleToolsElements.readers -> data[i].p)) -> ignored == TT_ELEMENT_IGNORED) {
                 continue;
             }
-            tt_reader_t *readerp = (tt_reader_t *) (tt_elements.readers -> data[i].p);
+            tt_reader_t *readerp = (tt_reader_t *) (turtleToolsElements.readers -> data[i].p);
             tt_readerUpdate(readerp);
             if (readerp -> moveToTop) {
                 i--;
             } else {
-                tt_globals.elementLogicTemp += 2;
+                turtleToolsGlobals.elementLogicTemp += 2;
             }
         }
     }
     turtle.penshape = shapeSave;
-    tt_globals.elementLogicTypeOld = tt_globals.elementLogicType;
-    tt_globals.elementLogicIndexOld = tt_globals.elementLogicIndex;
+    turtleToolsGlobals.elementLogicTypeOld = turtleToolsGlobals.elementLogicType;
+    turtleToolsGlobals.elementLogicIndexOld = turtleToolsGlobals.elementLogicIndex;
 }
 
 void turtleToolsUpdateRibbonPopup() {
     uint16_t shapeSave = turtle.penshape;
     turtle_pen_shape(TURTLE_PEN_SHAPE_CIRCLE);
-    if (tt_enabled.ribbonEnabled) {
-        tt_ribbonUpdate();
+    if (turtleToolsEnabled.ribbonEnabled) {
+        turtle_tools_ribbon_update();
     }
-    if (tt_enabled.popupEnabled) {
-        tt_popupUpdate();
+    if (turtleToolsEnabled.popupEnabled) {
+        turtle_tools_popup_update();
     }
     turtle.penshape = shapeSave;
-    tt_globals.elementLogicTypeOld = tt_globals.elementLogicType;
-    tt_globals.elementLogicIndexOld = tt_globals.elementLogicIndex;
+    turtleToolsGlobals.elementLogicTypeOld = turtleToolsGlobals.elementLogicType;
+    turtleToolsGlobals.elementLogicIndexOld = turtleToolsGlobals.elementLogicIndex;
 }
 
 #endif /* TURTLE_TOOLS_IMPLEMENTATION */

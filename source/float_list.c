@@ -8,10 +8,10 @@
 https://patorjk.com/software/taag/#p=display&f=ANSI%20Shadow
 */
 
-#include "../include/floatList.h"
+#include "../include/float_list.h"
 
-floatList_t* floatList_init() {
-    floatList_t *list = malloc(sizeof(floatList_t));
+float_list_t* float_list_init() {
+    float_list_t *list = malloc(sizeof(float_list_t));
     list -> length = 0;
     list -> realLength = 1;
     list -> data = calloc(1, sizeof(float));
@@ -19,7 +19,7 @@ floatList_t* floatList_init() {
 }
 
 /* append to list */
-void floatList_append(floatList_t *list, float data) {
+void float_list_append(float_list_t *list, float data) {
     if (list -> realLength  <= list -> length) {
         list -> realLength *= 2;
         list -> data = realloc(list -> data, list -> realLength * sizeof(float));
@@ -28,15 +28,15 @@ void floatList_append(floatList_t *list, float data) {
     list -> length += 1;
 }
 
-void floatList_clear(floatList_t *list) {
-    floatList_free_lite(list);
+void float_list_clear(float_list_t *list) {
+    float_list_free_lite(list);
     list -> length = 0;
     list -> realLength = 1;
     list -> data = calloc(1, sizeof(float));
 }
 
 /* pops the last item of the list off and returns it */
-float floatList_pop(floatList_t *list) {
+float float_list_pop(float_list_t *list) {
     if (list -> length > 0) {
         list -> length -= 1;
         float ret = list -> data[list -> length];
@@ -52,7 +52,7 @@ float floatList_pop(floatList_t *list) {
 }
 
 /* deletes the item at list[index] of the list and returns it */
-float floatList_delete(floatList_t *list, int32_t index) {
+float float_list_delete(float_list_t *list, int32_t index) {
     while (index < 0) {index += list -> length;}
     index %= list -> length;
     float ret = list -> data[index];
@@ -69,7 +69,7 @@ float floatList_delete(floatList_t *list, int32_t index) {
 }
 
 /* deletes many items from the list spanning from [indexMin] to [indexMax - 1] */
-void floatList_delete_range(floatList_t* list, int32_t indexMin, int32_t indexMax) {
+void float_list_delete_range(float_list_t* list, int32_t indexMin, int32_t indexMax) {
     if (indexMin > indexMax) {
         int32_t swap = indexMin;
         indexMin = indexMax;
@@ -98,7 +98,7 @@ void floatList_delete_range(floatList_t* list, int32_t indexMin, int32_t indexMa
 }
 
 /* returns the index of the first instance of the item in the list, returns -1 if not found (python) */
-int32_t floatList_find(floatList_t *list, float item) {
+int32_t float_list_find(float_list_t *list, float item) {
     for (int32_t i = 0; i < list -> length; i++) {
         if (list -> data[i] == item) {
             return i;
@@ -108,7 +108,7 @@ int32_t floatList_find(floatList_t *list, float item) {
 }
 
 /* duplicate of list_find */
-int32_t floatList_index(floatList_t *list, float item) {
+int32_t float_list_index(float_list_t *list, float item) {
     for (int32_t i = 0; i < list -> length; i++) {
         if (list -> data[i] == item) {
             return i;
@@ -118,7 +118,7 @@ int32_t floatList_index(floatList_t *list, float item) {
 }
 
 /* counts how many instances of an item is found in the list */
-int32_t floatList_count(floatList_t *list, float item) {
+int32_t float_list_count(float_list_t *list, float item) {
     int32_t count = 0;
     for (int32_t i = 0; i < list -> length; i++) {
         count += (list -> data[i] == item);
@@ -127,10 +127,10 @@ int32_t floatList_count(floatList_t *list, float item) {
 }
 
 /* deletes the first instance of the item from the list, returns the index the item was at, returns -1 and doesn't modify the list if not found (python but without ValueError) */
-int32_t floatList_remove(floatList_t *list, float item) {
+int32_t float_list_remove(float_list_t *list, float item) {
     for (int32_t i = 0; i < list -> length; i++) {
         if (list -> data[i] == item) {
-            floatList_delete(list, i);
+            float_list_delete(list, i);
             return i;
         }
     }
@@ -138,8 +138,8 @@ int32_t floatList_remove(floatList_t *list, float item) {
 }
 
 /* copies one list to another */
-void floatList_copy(floatList_t *dest, floatList_t *src) {
-    floatList_free_lite(dest);
+void float_list_copy(float_list_t *dest, float_list_t *src) {
+    float_list_free_lite(dest);
     dest -> data = calloc(src -> realLength, sizeof(float));
     int32_t len = src -> length;
     dest -> length = len;
@@ -150,7 +150,7 @@ void floatList_copy(floatList_t *dest, floatList_t *src) {
 }
 
 /* prints the list (like python would) */
-void floatList_print(floatList_t *list) {
+void float_list_print(float_list_t *list) {
     printf("[");
     if (list -> length == 0) {
         printf("]\n");
@@ -167,7 +167,7 @@ void floatList_print(floatList_t *list) {
 }
 
 /* prints the list but without closing \n */
-void floatList_print_emb(floatList_t *list) {
+void float_list_print_emb(float_list_t *list) {
     printf("[");
     if (list -> length == 0) {
         printf("]");
@@ -184,12 +184,12 @@ void floatList_print_emb(floatList_t *list) {
 }
 
 /* frees the list's data but not the list itself */
-void floatList_free_lite(floatList_t *list) {
+void float_list_free_lite(float_list_t *list) {
     free(list -> data);
 }
 
 /* frees the data used by the list */
-void floatList_free(floatList_t *list) {
-    floatList_free_lite(list);
+void float_list_free(float_list_t *list) {
+    float_list_free_lite(list);
     free(list);
 }
