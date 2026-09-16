@@ -21,9 +21,9 @@ const char headerFiles[][128] = {
     "include/stb_image.h",
     "include/stb_image_write.h",
     "include/turtle.h",
-    "include/turtleText.h",
-    "include/turtleTools.h",
-    "include/osTools.h",
+    "include/turtle_text.h",
+    "include/turtle_tools.h",
+    "include/os_tools.h",
     "include/khrplatform.h",
     "include/glad.h",
     "include/gl3.h",
@@ -36,9 +36,9 @@ const char sourceFiles[][128] = {
     "source/list.c",
     "source/floatList.c",
     "source/turtle.c",
-    "source/turtleText.c",
-    "source/turtleTools.c",
-    "source/osTools.c",
+    "source/turtle_text.c",
+    "source/turtle_tools.c",
+    "source/os_tools.c",
 };
 
 /* these macros correspond to the source files */

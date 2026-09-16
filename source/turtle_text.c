@@ -7,16 +7,15 @@
    ╚═╝    ╚═════╝ ╚═╝  ╚═╝   ╚═╝   ╚══════╝╚══════╝   ╚═╝   ╚══════╝╚═╝  ╚═╝   ╚═╝╚═╝ ╚═════╝
 https://patorjk.com/software/taag/#p=display&f=ANSI%20Shadow
 
-turtleText uses openGL and the turtle library to render text on the screen
+turtle_text uses openGL and the turtle library to render text on the screen
 */
 
-#include "../include/turtleText.h"
+#include "../include/turtle_text.h"
 
-turtleText_t turtleText;
+turtle_text_t turtleText;
 
-/* initialise turtleText, must supply a font file (tgl) - if font file is not found then a default font will be substituted */
-int32_t turtleTextInit(const char *filename) {
-    turtlePenColor(0, 0, 0);
+/* initialise turtle_text, must supply a font file (tgl) - if font file is not found then a default font will be substituted */
+int32_t turtle_text_init(const char *filename) {
     turtleText.bezierPrez = 10;
 
     /* load file */
@@ -25,7 +24,7 @@ int32_t turtleTextInit(const char *filename) {
     FILE *tgl = fopen(filename, "r");
     if (tgl == NULL) {
         printf("Error: could not open file %s, using default\n", filename);
-        turtleTextGenerateDefaultFont(generatedFont);
+        turtle_text_generate_default_font(generatedFont);
         fileExists = 0;
     }
 
@@ -215,9 +214,9 @@ int32_t turtleTextInit(const char *filename) {
 /* render functions */
 
 /* renders a quadratic bezier curve on the screen */
-void turtleTextRenderBezier(double x1, double y1, double x2, double y2, double x3, double y3, int32_t prez) {
-    turtleGoto(x1, y1);
-    turtlePenDown();
+void turtle_text_render_bezier(double x1, double y1, double x2, double y2, double x3, double y3, int32_t prez) {
+    turtle_goto(x1, y1);
+    turtle_pen_down();
     double iter1 = 1;
     double iter2 = 0;
     for (int32_t i = 0; i < prez; i++) {
@@ -226,20 +225,20 @@ void turtleTextRenderBezier(double x1, double y1, double x2, double y2, double x
         double t1 = iter1 * iter1;
         double t2 = iter2 * iter2;
         double t3 = 2 * iter1 * iter2;
-        turtleGoto(t1 * x1 + t3 * x2 + t2 * x3, t1 * y1 + t3 * y2 + t2 * y3);
+        turtle_goto(t1 * x1 + t3 * x2 + t2 * x3, t1 * y1 + t3 * y2 + t2 * y3);
     }
-    turtleGoto(x3, y3);
+    turtle_goto(x3, y3);
 }
 
 /* renders a single character - INTERNAL */
-void turtleTextRenderChar(int32_t index, double x, double y, double size) {
+void turtle_text_render_char(int32_t index, double x, double y, double size) {
     double sizeSave = turtle.pensize;
     index += 1;
     int32_t len1 = turtleText.fontData[index];
     for (int32_t i = 0; i < len1; i++) {
         index += 1;
         if (turtle.pen == 1) {
-            turtlePenUp();
+            turtle_pen_up();
         }
         int32_t len2 = turtleText.fontData[index];
         if (len2 == 1 && turtleText.fontData[index + 1] != 140894115) {
@@ -252,30 +251,30 @@ void turtleTextRenderChar(int32_t index, double x, double y, double size) {
             if (turtleText.fontData[index] == 140894115) { // 140894115 is the b value (reserved)
                 index += 4;
                 if (turtleText.fontData[index + 1] != 140894115) {
-                    turtleTextRenderBezier(x + turtleText.fontData[index - 3] * size, y + turtleText.fontData[index - 2] * size, x + turtleText.fontData[index - 1] * size, y + turtleText.fontData[index] * size, x + turtleText.fontData[index + 1] * size, y + turtleText.fontData[index + 2] * size, turtleText.bezierPrezCurrent);
+                    turtle_text_render_bezier(x + turtleText.fontData[index - 3] * size, y + turtleText.fontData[index - 2] * size, x + turtleText.fontData[index - 1] * size, y + turtleText.fontData[index] * size, x + turtleText.fontData[index + 1] * size, y + turtleText.fontData[index + 2] * size, turtleText.bezierPrezCurrent);
                     index += 2;
                 } else {
-                    turtleTextRenderBezier(x + turtleText.fontData[index - 3] * size, y + turtleText.fontData[index - 2] * size, x + turtleText.fontData[index - 1] * size, y + turtleText.fontData[index] * size, x + turtleText.fontData[index + 2] * size, y + turtleText.fontData[index + 3] * size, turtleText.bezierPrezCurrent);
+                    turtle_text_render_bezier(x + turtleText.fontData[index - 3] * size, y + turtleText.fontData[index - 2] * size, x + turtleText.fontData[index - 1] * size, y + turtleText.fontData[index] * size, x + turtleText.fontData[index + 2] * size, y + turtleText.fontData[index + 3] * size, turtleText.bezierPrezCurrent);
                 }
             } else {
                 index += 1;
-                turtleGoto(x + turtleText.fontData[index - 1] * size, y + turtleText.fontData[index] * size);
+                turtle_goto(x + turtleText.fontData[index - 1] * size, y + turtleText.fontData[index] * size);
             }
-            turtlePenDown();
+            turtle_pen_down();
         }
     }
-    turtlePenUp();
+    turtle_pen_up();
     turtle.pensize = sizeSave;
 }
 
-/* special version of turtleTextRenderChar with rotation - INTERNAL */
-void turtleTextRenderCharRotated(int32_t index, double x, double y, double size, double sinR, double cosR) {
+/* special version of turtle_text_render_char with rotation - INTERNAL */
+void turtle_text_render_char_rotated(int32_t index, double x, double y, double size, double sinR, double cosR) {
     index += 1;
     int32_t len1 = turtleText.fontData[index];
     for (int32_t i = 0; i < len1; i++) {
         index += 1;
         if (turtle.pen == 1) {
-            turtlePenUp();
+            turtle_pen_up();
         }
         int32_t len2 = turtleText.fontData[index];
         for (int32_t j = 0; j < len2; j++) {
@@ -283,27 +282,27 @@ void turtleTextRenderCharRotated(int32_t index, double x, double y, double size,
             if (turtleText.fontData[index] == 140894115) { // 140894115 is the b value (reserved)
                 index += 4;
                 if (turtleText.fontData[index + 1] != 140894115) {
-                    turtleTextRenderBezier(x + turtleText.fontData[index - 3] * size * cosR + turtleText.fontData[index - 2] * size * sinR, y - turtleText.fontData[index - 3] * size * sinR + turtleText.fontData[index - 2] * size * cosR,
+                    turtle_text_render_bezier(x + turtleText.fontData[index - 3] * size * cosR + turtleText.fontData[index - 2] * size * sinR, y - turtleText.fontData[index - 3] * size * sinR + turtleText.fontData[index - 2] * size * cosR,
                                  x + turtleText.fontData[index - 1] * size * cosR + turtleText.fontData[index] * size * sinR, y - turtleText.fontData[index - 1] * size * sinR + turtleText.fontData[index] * size * cosR,
                                  x + turtleText.fontData[index + 1] * size * cosR + turtleText.fontData[index + 2] * size * sinR, y - turtleText.fontData[index + 1] * size * sinR + turtleText.fontData[index + 2] * size * cosR, turtleText.bezierPrezCurrent);
                     index += 2;
                 } else {
-                    turtleTextRenderBezier(x + turtleText.fontData[index - 3] * size * cosR + turtleText.fontData[index - 2] * size * sinR, y - turtleText.fontData[index - 3] * size * sinR + turtleText.fontData[index - 2] * size * cosR,
+                    turtle_text_render_bezier(x + turtleText.fontData[index - 3] * size * cosR + turtleText.fontData[index - 2] * size * sinR, y - turtleText.fontData[index - 3] * size * sinR + turtleText.fontData[index - 2] * size * cosR,
                                  x + turtleText.fontData[index - 1] * size * cosR + turtleText.fontData[index] * size * sinR, y - turtleText.fontData[index - 1] * size * sinR + turtleText.fontData[index] * size * cosR,
                                  x + turtleText.fontData[index + 2] * size * cosR + turtleText.fontData[index + 3] * size * sinR, y - turtleText.fontData[index + 2] * size * sinR + turtleText.fontData[index + 3] * size * cosR, turtleText.bezierPrezCurrent);
                 }
             } else {
                 index += 1;
-                turtleGoto(x + turtleText.fontData[index - 1] * size * cosR + turtleText.fontData[index] * size * sinR, y - turtleText.fontData[index - 1] * size * sinR + turtleText.fontData[index] * size * cosR);
+                turtle_goto(x + turtleText.fontData[index - 1] * size * cosR + turtleText.fontData[index] * size * sinR, y - turtleText.fontData[index - 1] * size * sinR + turtleText.fontData[index] * size * cosR);
             }
-            turtlePenDown();
+            turtle_pen_down();
         }
     }
-    turtlePenUp();
+    turtle_pen_up();
 }
 
 /* gets the length of a string in coordinates on the screen */
-double turtleTextGetLength(const uint32_t *text, int32_t textLength, double size) {
+double turtle_text_get_length(const uint32_t *text, int32_t textLength, double size) {
     if (textLength == 0) {
         return 0;
     }
@@ -324,28 +323,28 @@ double turtleTextGetLength(const uint32_t *text, int32_t textLength, double size
 }
 
 /* gets the length of a formatted string in coordinates on the screen */
-double turtleTextGetStringLength(const char *str, double size) {
+double turtle_text_get_string_length(const char *str, double size) {
     int32_t len = strlen(str);
     uint32_t converted[len];
     for (int32_t i = 0; i < len; i++) {
         converted[i] = (uint32_t) str[i];
     }
-    return turtleTextGetLength(converted, len, size);
+    return turtle_text_get_length(converted, len, size);
 }
 
-/* gets the length of a string in coordinates on the screen */
-double turtleTextGetStringLengthf(double size, const char *str, ...) {
+/* gets the length of a string in coordinates on the screen (max of 2048 characters) */
+double turtle_text_get_string_lengthf(double size, const char *str, ...) {
     char buffer[2048];
     va_list args;
     va_start(args, str);
     vsnprintf(buffer, 2048, str, args);
-    double out = turtleTextGetStringLength(buffer, size);
+    double out = turtle_text_get_string_length(buffer, size);
     va_end(args);
     return out;
 }
 
 /* gets the length of a formatted utf8-string in coordinates on the screen */
-double turtleTextGetUnicodeLength(const char *str, double size) {
+double turtle_text_get_unicode_length(const char *str, double size) {
     int32_t len = strlen(str);
     uint32_t converted[len];
     int32_t byteLength;
@@ -375,22 +374,22 @@ double turtleTextGetUnicodeLength(const char *str, double size) {
         i += byteLength;
         next += 1;
     }
-    return turtleTextGetLength(converted, next, size);
+    return turtle_text_get_length(converted, next, size);
 }
 
-/* gets the length of a utf8-string in coordinates on the screen */
-double turtleTextGetUnicodeLengthf(double size, const char *str, ...) {
+/* gets the length of a utf8-string in coordinates on the screen (max of 2048 characters) */
+double turtle_text_get_unicode_lengthf(double size, const char *str, ...) {
     char buffer[2048];
     va_list args;
     va_start(args, str);
     vsnprintf(buffer, 2048, str, args);
-    double out = turtleTextGetUnicodeLength(buffer, size);
+    double out = turtle_text_get_unicode_length(buffer, size);
     va_end(args);
     return out;
 }
 
 /* cut the text of a string such that it will fit in a coordinate size width (0 - left truncate, 1 - right truncate) */
-void turtleTextTruncateString(char *str, double size, double width, int8_t leftRight) {
+void turtle_text_truncate_string(char *str, double size, double width, int8_t leftRight) {
     int32_t length = strlen(str);
     size /= 175;
     double xTrack = 0;
@@ -430,7 +429,7 @@ void turtleTextTruncateString(char *str, double size, double width, int8_t leftR
 }
 
 /* Writes to the screen - INTERNAL */
-void turtleTextWrite(const uint32_t *text, int32_t textLength, double x, double y, double size, double align) {
+void turtle_text_write(const uint32_t *text, int32_t textLength, double x, double y, double size, double align) {
     uint16_t saveShape = turtle.penshape;
     double saveSize = turtle.pensize;
     turtleText.bezierPrezCurrent = (int32_t) ceil(sqrt(size * turtleText.bezierPrez / 10));
@@ -440,14 +439,14 @@ void turtleTextWrite(const uint32_t *text, int32_t textLength, double x, double 
     double minY = 0;
     #endif
     size /= 175;
-    turtlePenSize(20 * size);
+    turtle_pen_size(20 * size);
     #if defined(TURTLE_TEXT_FAST_PEN) && !defined(TURTLE_TEXT_PRETTY_PEN)
-    turtlePenShape("connected"); // fast
+    turtle_pen_shape(TURTLE_PEN_SHAPE_CONNECTED); // fast
     #else
     #if !defined(TURTLE_TEXT_FAST_PEN) && defined(TURTLE_TEXT_PRETTY_PEN)
-    turtlePenShape("circle"); // pretty
+    turtle_pen_shape(TURTLE_PEN_SHAPE_CIRCLE); // pretty
     #else
-    turtlePenShape("text"); // dedicated setting that blends circle and connected
+    turtle_pen_shape(TURTLE_PEN_SHAPE_TEXT); // dedicated setting that blends circle and connected
     #endif
     #endif
     list_t *xvals = list_init();
@@ -479,7 +478,7 @@ void turtleTextWrite(const uint32_t *text, int32_t textLength, double x, double 
     y -= 80 * size;
     #endif
     for (int32_t i = 0; i < textLength; i++) {
-        turtleTextRenderChar(turtleText.fontPointer[dataIndStored -> data[i].i], xvals -> data[i].d - ((xTrack - x) * (align / 100)), y, size);
+        turtle_text_render_char(turtleText.fontPointer[dataIndStored -> data[i].i], xvals -> data[i].d - ((xTrack - x) * (align / 100)), y, size);
     }
     list_free(dataIndStored);
     list_free(xvals);
@@ -488,7 +487,7 @@ void turtleTextWrite(const uint32_t *text, int32_t textLength, double x, double 
 }
 
 /* Special form of write function which supports rotated text - INTERNAL */
-void turtleTextWriteRotated(const uint32_t *text, int32_t textLength, double x, double y, double size, double align, double rotate) {
+void turtle_text_write_rotated(const uint32_t *text, int32_t textLength, double x, double y, double size, double align, double rotate) {
     uint16_t saveShape = turtle.penshape;
     double saveSize = turtle.pensize;
     turtleText.bezierPrezCurrent = (int32_t) ceil(sqrt(size * turtleText.bezierPrez / 10));
@@ -498,14 +497,14 @@ void turtleTextWriteRotated(const uint32_t *text, int32_t textLength, double x, 
     double minY = 0;
     #endif
     size /= 175;
-    turtlePenSize(20 * size);
+    turtle_pen_size(20 * size);
     #if defined(TURTLE_TEXT_FAST_PEN) && !defined(TURTLE_TEXT_PRETTY_PEN)
-    turtlePenShape("connected"); // fast
+    turtle_pen_shape(TURTLE_PEN_SHAPE_CONNECTED); // fast
     #else
     #if !defined(TURTLE_TEXT_FAST_PEN) && defined(TURTLE_TEXT_PRETTY_PEN)
-    turtlePenShape("circle"); // pretty
+    turtle_pen_shape(TURTLE_PEN_SHAPE_CIRCLE); // pretty
     #else
-    turtlePenShape("text"); // dedicated setting that blends circle and connected
+    turtle_pen_shape(TURTLE_PEN_SHAPE_TEXT); // dedicated setting that blends circle and connected
     #endif
     #endif
     double cosR = cos(rotate / 57.2958);
@@ -541,7 +540,7 @@ void turtleTextWriteRotated(const uint32_t *text, int32_t textLength, double x, 
     y -= 80 * size * cosR;
     #endif
     for (int32_t i = 0; i < textLength; i++) {
-        turtleTextRenderCharRotated(turtleText.fontPointer[dataIndStored -> data[i].i], x + (xvals -> data[i].d - (xTrack * (align / 100))) * cosR, y - (xvals -> data[i].d - (xTrack * (align / 100))) * sinR, size, sinR, cosR);
+        turtle_text_render_char_rotated(turtleText.fontPointer[dataIndStored -> data[i].i], x + (xvals -> data[i].d - (xTrack * (align / 100))) * cosR, y - (xvals -> data[i].d - (xTrack * (align / 100))) * sinR, size, sinR, cosR);
     }
     list_free(dataIndStored);
     list_free(xvals);
@@ -550,47 +549,47 @@ void turtleTextWriteRotated(const uint32_t *text, int32_t textLength, double x, 
 }
 
 /* Write a string to the screen */
-void turtleTextWriteString(const char *str, double x, double y, double size, double align) {
+void turtle_text_write_string(const char *str, double x, double y, double size, double align) {
     int32_t len = strlen(str);
     uint32_t converted[len];
     for (int32_t i = 0; i < len; i++) {
         converted[i] = (uint32_t) str[i];
     }
-    turtleTextWrite(converted, len, x, y, size, align);
+    turtle_text_write(converted, len, x, y, size, align);
 }
 
-/* Write a formatted string to the screen */
-void turtleTextWriteStringf(double x, double y, double size, double align, const char *str, ...) {
+/* Write a formatted string to the screen (max of 2048 characters) */
+void turtle_text_write_stringf(double x, double y, double size, double align, const char *str, ...) {
     char buffer[2048];
     va_list args;
     va_start(args, str);
     vsnprintf(buffer, 2048, str, args);
-    turtleTextWriteString(buffer, x, y, size, align);
+    turtle_text_write_string(buffer, x, y, size, align);
     va_end(args);
 }
 
 /* Write a string to the screen (with rotation) */
-void turtleTextWriteStringRotated(const char *str, double x, double y, double size, double align, double rotate) {
+void turtle_text_write_string_rotated(const char *str, double x, double y, double size, double align, double rotate) {
     int32_t len = strlen(str);
     uint32_t converted[len];
     for (int32_t i = 0; i < len; i++) {
         converted[i] = (uint32_t) str[i];
     }
-    turtleTextWriteRotated(converted, len, x, y, size, align, rotate);
+    turtle_text_write_rotated(converted, len, x, y, size, align, rotate);
 }
 
-/* Write a formatted string to the screen (with rotation) */
-void turtleTextWriteStringfRotated(double x, double y, double size, double align, double rotate, const char *str, ...) {
+/* Write a formatted string to the screen (with rotation) (max of 2048 characters) */
+void turtle_text_write_stringf_rotated(double x, double y, double size, double align, double rotate, const char *str, ...) {
     char buffer[2048];
     va_list args;
     va_start(args, str);
     vsnprintf(buffer, 2048, str, args);
-    turtleTextWriteStringRotated(buffer, x, y, size, align, rotate);
+    turtle_text_write_string_rotated(buffer, x, y, size, align, rotate);
     va_end(args);
 }
 
 /* Write a utf8-string to the screen */
-void turtleTextWriteUnicode(const char *str, double x, double y, double size, double align) {
+void turtle_text_write_unicode(const char *str, double x, double y, double size, double align) {
     int32_t len = strlen(str);
     uint32_t converted[len];
     int32_t byteLength;
@@ -620,21 +619,21 @@ void turtleTextWriteUnicode(const char *str, double x, double y, double size, do
         i += byteLength;
         next += 1;
     }
-    turtleTextWrite(converted, next, x, y, size, align);
+    turtle_text_write(converted, next, x, y, size, align);
 }
 
-/* Write a formatted utf8-string to the screen */
-void turtleTextWriteUnicodef(double x, double y, double size, double align, const char *str, ...) {
+/* Write a formatted utf8-string to the screen (max of 2048 characters) */
+void turtle_text_write_unicodef(double x, double y, double size, double align, const char *str, ...) {
     char buffer[2048];
     va_list args;
     va_start(args, str);
     vsnprintf(buffer, 2048, str, args);
-    turtleTextWriteUnicode(buffer, x, y, size, align);
+    turtle_text_write_unicode(buffer, x, y, size, align);
     va_end(args);
 }
 
 /* Write a utf8-string to the screen (with rotation) */
-void turtleTextWriteUnicodeRotated(const char *str, double x, double y, double size, double align, double rotate) {
+void turtle_text_write_unicode_rotated(const char *str, double x, double y, double size, double align, double rotate) {
     int32_t len = strlen(str);
     uint32_t converted[len];
     int32_t byteLength;
@@ -664,21 +663,21 @@ void turtleTextWriteUnicodeRotated(const char *str, double x, double y, double s
         i += byteLength;
         next += 1;
     }
-    turtleTextWriteRotated(converted, next, x, y, size, align, rotate);
+    turtle_text_write_rotated(converted, next, x, y, size, align, rotate);
 }
 
-/* Write a formatted utf8-string to the screen (with rotation) */
-void turtleTextWriteUnicodefRotated(double x, double y, double size, double align, double rotate, const char *str, ...) {
+/* Write a formatted utf8-string to the screen (with rotation) (max of 2048 characters) */
+void turtle_text_write_unicodef_rotated(double x, double y, double size, double align, double rotate, const char *str, ...) {
     char buffer[2048];
     va_list args;
     va_start(args, str);
     vsnprintf(buffer, 2048, str, args);
-    turtleTextWriteUnicodeRotated(buffer, x, y, size, align, rotate);
+    turtle_text_write_unicode_rotated(buffer, x, y, size, align, rotate);
     va_end(args);
 }
 
 /* internal function for converting utf8 to uint32_t characters */
-int32_t turtleTextConvertUnicode(const char *str, uint32_t *converted) {
+int32_t turtle_text_convert_unicode(const char *str, uint32_t *converted) {
     int32_t len = strlen(str);
     int32_t byteLength;
     int32_t i = 0;
@@ -711,7 +710,7 @@ int32_t turtleTextConvertUnicode(const char *str, uint32_t *converted) {
 }
 
 /* if the font file is not found, use the default font (kept here) */
-void turtleTextGenerateDefaultFont(list_t *generatedFont) {
+void turtle_text_generate_default_font(list_t *generatedFont) {
     list_append(generatedFont, (unitype) " , 0", 's');
     list_append(generatedFont, (unitype) "A, 2, 3, -160, -100, -100, 60, -40, -100, 2, -137, -40, -63, -40", 's');
     list_append(generatedFont, (unitype) "À, 3, 3, -160, -100, -100, 60, -40, -100, 2, -137, -40, -63, -40, 2, -100, 85, -120, 105", 's');

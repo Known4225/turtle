@@ -73,8 +73,8 @@ static EM_BOOL turtleBrowserWindowResize(int eventType, const EmscriptenUiEvent 
 }
 #endif /* OS_BROWSER */
 
-/* special function that can be called prior to turtleInit - this function condenses the window creation code boilerplate */
-GLFWwindow *turtleCreateWindow(int32_t windowWidth, int32_t windowHeight, char *windowName) {
+/* special function that can be called prior to turtle_init - this function condenses the window creation code boilerplate */
+GLFWwindow *turtle_create_window(int32_t windowWidth, int32_t windowHeight, char *windowName) {
     /* Initialise glfw */
     if (!glfwInit()) {
         return NULL;
@@ -138,9 +138,9 @@ GLFWwindow *turtleCreateWindow(int32_t windowWidth, int32_t windowHeight, char *
 }
 
 #ifdef TURTLE_ENABLE_TEXTURES
-/* special function that can be called prior to turtleInit - this function condenses the window creation code with icon boilerplate */
-GLFWwindow *turtleCreateWindowIcon(int32_t windowWidth, int32_t windowHeight, char *windowName, char *filename) {
-    GLFWwindow *window = turtleCreateWindow(windowWidth, windowHeight, windowName);
+/* special function that can be called prior to turtle_init - this function condenses the window creation code with icon boilerplate */
+GLFWwindow *turtle_create_window_icon(int32_t windowWidth, int32_t windowHeight, char *windowName, char *filename) {
+    GLFWwindow *window = turtle_create_window(windowWidth, windowHeight, windowName);
     /* initialise logo */
     GLFWimage icon;
     int32_t iconChannels;
@@ -158,7 +158,7 @@ GLFWwindow *turtleCreateWindowIcon(int32_t windowWidth, int32_t windowHeight, ch
 #endif
 
 /* initializes the turtletools module */
-void turtleInit(GLFWwindow *window, double leftX, double bottomY, double rightX, double topY) {
+void turtle_init(GLFWwindow *window, double leftX, double bottomY, double rightX, double topY) {
     #ifndef TURTLE_ENABLE_TEXTURES
     /* fixed pipeline */
     gladLoadGL();
@@ -267,13 +267,13 @@ void turtleInit(GLFWwindow *window, double leftX, double bottomY, double rightX,
     turtle.x = 0;
     turtle.y = 0;
     turtle.pensize = 1;
-    turtle.penshape = 0;
+    turtle.penshape = TURTLE_PEN_SHAPE_CIRCLE;
     turtle.circleprez = 9; // default circleprez value
     turtle.pen = 0;
-    turtle.penr = 0.0;
-    turtle.peng = 0.0;
-    turtle.penb = 0.0;
-    turtle.pena = 0.0;
+    turtle.red = 0;
+    turtle.green = 0;
+    turtle.blue = 0;
+    turtle.alpha = 0;
     for (uint8_t i = 0; i < 4; i++) {
         turtle.currentColor[i] = -1.0;
     }
@@ -285,13 +285,13 @@ void turtleInit(GLFWwindow *window, double leftX, double bottomY, double rightX,
     turtle.cameraDirectionLeftRight = 0;
     turtle.cameraDirectionUpDown = 0;
 
-    turtleSetWorldCoordinates(leftX, bottomY, rightX, topY);
+    turtle_set_world_coordinates(leftX, bottomY, rightX, topY);
     turtle.keyCallback = NULL;
     turtle.unicodeCallback = NULL;
-    glfwSetCharCallback(window, unicodeSense);
-    glfwSetKeyCallback(window, keySense); // initiate mouse and keyboard detection
-    glfwSetMouseButtonCallback(window, mouseSense);
-    glfwSetScrollCallback(window, scrollSense);
+    glfwSetCharCallback(window, turtle_unicode_sense);
+    glfwSetKeyCallback(window, turtle_key_sense); // initiate mouse and keyboard detection
+    glfwSetMouseButtonCallback(window, turtle_mouse_sense);
+    glfwSetScrollCallback(window, turtle_scroll_sense);
 
     /* adjust window position and size */
     #ifdef OS_LINUX
@@ -321,7 +321,7 @@ void turtleInit(GLFWwindow *window, double leftX, double bottomY, double rightX,
 }
 
 /* run this to set the bounds of the window in coordinates */
-void turtleSetWorldCoordinates(double leftX, double bottomY, double rightX, double topY) {
+void turtle_set_world_coordinates(double leftX, double bottomY, double rightX, double topY) {
     glfwGetWindowSize(turtle.window, &turtle.screenbounds[0], &turtle.screenbounds[1]);
     turtle.centerAndScale[0] = (rightX + leftX) / 2;
     turtle.centerAndScale[1] = (topY + bottomY) / 2;
@@ -338,14 +338,14 @@ void turtleSetWorldCoordinates(double leftX, double bottomY, double rightX, doub
 }
 
 /* detect character */
-void unicodeSense(GLFWwindow *window, uint32_t codepoint) {
+void turtle_unicode_sense(GLFWwindow *window, uint32_t codepoint) {
     if (turtle.unicodeCallback != NULL) {
         turtle.unicodeCallback(codepoint);
     }
 }
 
 /* detect key presses */
-void keySense(GLFWwindow *window, int32_t key, int32_t scancode, int32_t action, int32_t mods) {
+void turtle_key_sense(GLFWwindow *window, int32_t key, int32_t scancode, int32_t action, int32_t mods) {
     if (turtle.keyCallback != NULL) {
         turtle.keyCallback(key, scancode, action);
     }
@@ -358,7 +358,7 @@ void keySense(GLFWwindow *window, int32_t key, int32_t scancode, int32_t action,
 }
 
 /* detect mouse clicks */
-void mouseSense(GLFWwindow *window, int32_t button, int32_t action, int32_t mods) {
+void turtle_mouse_sense(GLFWwindow *window, int32_t button, int32_t action, int32_t mods) {
     if (action == GLFW_PRESS) {
         switch(button) {
         case GLFW_MOUSE_BUTTON_LEFT:
@@ -404,49 +404,49 @@ void mouseSense(GLFWwindow *window, int32_t button, int32_t action, int32_t mods
 }
 
 /* detect scroll wheel */
-void scrollSense(GLFWwindow *window, double xoffset, double yoffset) {
+void turtle_scroll_sense(GLFWwindow *window, double xoffset, double yoffset) {
     turtle.scrollY = yoffset;
 }
 
 /* the behavior with the mouse wheel is different since it can't be "on" or "off" */
-double turtleMouseWheel() {
+double turtle_mouse_wheel() {
     double temp = turtle.scrollY;
     turtle.scrollY = 0;
     return temp;
 }
 
 /* top level boolean output call to check if the key with code [key] is currently being held down. Uses the GLFW_KEY_X macros */
-int8_t turtleKeyPressed(int32_t key) {
+int8_t turtle_key_pressed(int32_t key) {
     return list_count(turtle.keyPressed, (unitype) key, 'c');
 }
 
 /* top level boolean output call to check if the left click button is currently being held down */
-int8_t turtleMouseDown() {
+int8_t turtle_mouse_down() {
     return turtle.mousePressed[0];
 }
 
-/* alternate duplicate of turtleMouseDown() */
-int8_t turtleMouseLeft() {
+/* alternate duplicate of turtle_mouse_down() */
+int8_t turtle_mouse_left() {
     return turtle.mousePressed[0];
 }
 
 /* top level boolean output call to check if the right click button is currently being held down */
-int8_t turtleMouseRight() {
+int8_t turtle_mouse_right() {
     return turtle.mousePressed[1];
 }
 
 /* top level boolean output call to check if the middle mouse button is currently being held down */
-int8_t turtleMouseMiddle() {
+int8_t turtle_mouse_middle() {
     return turtle.mousePressed[2];
 }
 
-/* alternate duplicate of turtleMouseMiddle() */
-int8_t turtleMouseMid() {
+/* alternate duplicate of turtle_mouse_middle() */
+int8_t turtle_mouse_mid() {
     return turtle.mousePressed[2];
 }
 
 /* puts the mouse coordinates in turtle.mouseX and turtle.mouseY */
-void turtleGetMouseCoordinates() {
+void turtle_get_mouse_coordinates() {
     glfwGetCursorPos(turtle.window, &turtle.mouseAbsX, &turtle.mouseAbsY); // get mouse positions (absolute)
     if (turtle.resizeMode == TURTLE_RESIZE_MODE_STRETCH) {
         turtle.mouseX = (turtle.mouseAbsX - turtle.screenbounds[0] / 2) / turtle.screenbounds[0] * (turtle.initbounds[2] - turtle.initbounds[0]) + (turtle.bounds[0] + turtle.bounds[2]) / 2;
@@ -465,40 +465,40 @@ void turtleGetMouseCoordinates() {
 }
 
 /* set the background color */
-void turtleBackgroundColor(uint8_t r, uint8_t g, uint8_t b) {
+void turtle_background_color(uint8_t r, uint8_t g, uint8_t b) {
     glClearColor(r / 255.0, g / 255.0, b / 255.0, 1.0);
 }
 
 /* set the pen color */
-void turtlePenColor(uint8_t r, uint8_t g, uint8_t b) {
-    turtle.penr = r / 255.0;
-    turtle.peng = g / 255.0;
-    turtle.penb = b / 255.0;
-    turtle.pena = 1.0;
+void turtle_pen_color(uint8_t r, uint8_t g, uint8_t b) {
+    turtle.red = r;
+    turtle.green = g;
+    turtle.blue = b;
+    turtle.alpha = 255;
 }
 
 /* set the pen color (with transparency) */
-void turtlePenColorAlpha(uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
-    turtle.penr = r / 255.0;
-    turtle.peng = g / 255.0;
-    turtle.penb = b / 255.0;
-    turtle.pena = 1.0 - a / 255.0;
+void turtle_pen_color_alpha(uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
+    turtle.red = r;
+    turtle.green = g;
+    turtle.blue = b;
+    turtle.alpha = 255 - a;
 }
 
 /* set the pen size */
-void turtlePenSize(double size) {
+void turtle_pen_size(double size) {
     turtle.pensize = size * 0.5; // ensures pensize matches pixel size (a pen size of 240 will be 240 coordinates long)
 }
 
 /* clears all the pen drawings */
-void turtleClear() {
+void turtle_clear() {
     // list_free(turtle.penPos);
     // turtle.penPos = list_init();
     turtle.penPos -> length = 0; // could be dangerous
 }
 
 /* pen down */
-void turtlePenDown() {
+void turtle_pen_down() {
     if (turtle.pen == 0) {
         turtle.pen = 1;
         int8_t changed = 0;
@@ -508,10 +508,10 @@ void turtlePenDown() {
             if (ren[len - 9].d != turtle.x) {changed = 1;}
             if (ren[len - 8].d != turtle.y) {changed = 1;}
             if (ren[len - 7].d != turtle.pensize) {changed = 1;}
-            if (ren[len - 6].d != turtle.penr) {changed = 1;}
-            if (ren[len - 5].d != turtle.peng) {changed = 1;}
-            if (ren[len - 4].d != turtle.penb) {changed = 1;}
-            if (ren[len - 3].d != turtle.pena) {changed = 1;}
+            if (ren[len - 6].b != turtle.red) {changed = 1;}
+            if (ren[len - 5].b != turtle.green) {changed = 1;}
+            if (ren[len - 4].b != turtle.blue) {changed = 1;}
+            if (ren[len - 3].b != turtle.alpha) {changed = 1;}
             if (ren[len - 2].hu != turtle.penshape) {changed = 1;}
             if (ren[len - 1].d != turtle.circleprez) {changed = 1;}
         } else {
@@ -521,10 +521,10 @@ void turtlePenDown() {
             list_append(turtle.penPos, (unitype) turtle.x, 'd');
             list_append(turtle.penPos, (unitype) turtle.y, 'd');
             list_append(turtle.penPos, (unitype) turtle.pensize, 'd');
-            list_append(turtle.penPos, (unitype) turtle.penr, 'd');
-            list_append(turtle.penPos, (unitype) turtle.peng, 'd');
-            list_append(turtle.penPos, (unitype) turtle.penb, 'd');
-            list_append(turtle.penPos, (unitype) turtle.pena, 'd');
+            list_append(turtle.penPos, (unitype) turtle.red, 'b');
+            list_append(turtle.penPos, (unitype) turtle.green, 'b');
+            list_append(turtle.penPos, (unitype) turtle.blue, 'b');
+            list_append(turtle.penPos, (unitype) turtle.alpha, 'b');
             list_append(turtle.penPos, (unitype) turtle.penshape, 'h');
             list_append(turtle.penPos, (unitype) turtle.circleprez, 'd');
         }
@@ -532,7 +532,7 @@ void turtlePenDown() {
 }
 
 /* lift the pen */
-void turtlePenUp() {
+void turtle_pen_up() {
     if (turtle.pen == 1) {
         turtle.pen = 0;
         if (turtle.penPos -> length > 0 && turtle.penPos -> type[turtle.penPos -> length - 1] != 'c') {
@@ -550,34 +550,17 @@ void turtlePenUp() {
 }
 
 /* set the pen shape ("circle", "square", "triangle", "none", or "connected") */
-void turtlePenShape(char *selection) {
-    if (strcmp(selection, "circle") == 0 || strcmp(selection, "Circle") == 0) {
-        turtle.penshape = 0;
-    }
-    if (strcmp(selection, "square") == 0 || strcmp(selection, "Square") == 0) {
-        turtle.penshape = 1;
-    }
-    if (strcmp(selection, "triangle") == 0 || strcmp(selection, "Triangle") == 0) {
-        turtle.penshape = 2;
-    }
-    if (strcmp(selection, "none") == 0 || strcmp(selection, "None") == 0) {
-        turtle.penshape = 3;
-    }
-    if (strcmp(selection, "connected") == 0 || strcmp(selection, "Connected") == 0) {
-        turtle.penshape = 4;
-    }
-    if (strcmp(selection, "text") == 0 || strcmp(selection, "Text") == 0) {
-        turtle.penshape = 5;
-    }
+void turtle_pen_shape(turtle_pen_shape_t shape) {
+    turtle.penshape = shape;
 }
 
-/* set the circle precision */
-void turtlePenPrez(double prez) {
+/* set the circle precision (default 9) */
+void turtle_pen_prez(double prez) {
     turtle.circleprez = prez;
 }
 
 /* moves the turtle to a coordinate */
-void turtleGoto(double x, double y) {
+void turtle_goto(double x, double y) {
     if (fabs(turtle.x - x) > 0.01 || fabs(turtle.y - y) > 0.01) {
         turtle.x = x;
         turtle.y = y;
@@ -589,10 +572,10 @@ void turtleGoto(double x, double y) {
                 if (ren[len - 9].d != turtle.x) {changed = 1;}
                 if (ren[len - 8].d != turtle.y) {changed = 1;}
                 if (ren[len - 7].d != turtle.pensize) {changed = 1;}
-                if (ren[len - 6].d != turtle.penr) {changed = 1;}
-                if (ren[len - 5].d != turtle.peng) {changed = 1;}
-                if (ren[len - 4].d != turtle.penb) {changed = 1;}
-                if (ren[len - 3].d != turtle.pena) {changed = 1;}
+                if (ren[len - 6].d != turtle.red) {changed = 1;}
+                if (ren[len - 5].d != turtle.green) {changed = 1;}
+                if (ren[len - 4].d != turtle.blue) {changed = 1;}
+                if (ren[len - 3].d != turtle.alpha) {changed = 1;}
                 if (ren[len - 2].hu != turtle.penshape) {changed = 1;}
                 if (ren[len - 1].d != turtle.circleprez) {changed = 1;}
             } else {
@@ -602,10 +585,10 @@ void turtleGoto(double x, double y) {
                 list_append(turtle.penPos, (unitype) x, 'd');
                 list_append(turtle.penPos, (unitype) y, 'd');
                 list_append(turtle.penPos, (unitype) turtle.pensize, 'd');
-                list_append(turtle.penPos, (unitype) turtle.penr, 'd');
-                list_append(turtle.penPos, (unitype) turtle.peng, 'd');
-                list_append(turtle.penPos, (unitype) turtle.penb, 'd');
-                list_append(turtle.penPos, (unitype) turtle.pena, 'd');
+                list_append(turtle.penPos, (unitype) turtle.red, 'b');
+                list_append(turtle.penPos, (unitype) turtle.green, 'b');
+                list_append(turtle.penPos, (unitype) turtle.blue, 'b');
+                list_append(turtle.penPos, (unitype) turtle.alpha, 'b');
                 list_append(turtle.penPos, (unitype) turtle.penshape, 'h');
                 list_append(turtle.penPos, (unitype) turtle.circleprez, 'd');
             }
@@ -615,7 +598,7 @@ void turtleGoto(double x, double y) {
 
 #ifndef TURTLE_ENABLE_TEXTURES
 /* draws a circle at the specified x and y (coordinates) */
-void turtleCircleRenderInternal(double x, double y, double rad, double r, double g, double b, double a, double xcenter, double ycenter, double xfact, double yfact, double prez) {
+void turtle_circle_render_internal(double x, double y, double rad, double r, double g, double b, double a, double xcenter, double ycenter, double xfact, double yfact, double prez) {
     int8_t colorChange = 0;
     if (r != turtle.currentColor[0]) {colorChange = 1;}
     if (g != turtle.currentColor[1]) {colorChange = 1;}
@@ -636,7 +619,7 @@ void turtleCircleRenderInternal(double x, double y, double rad, double r, double
 }
 
 /* draws a rectangle */
-void turtleRectangleRenderInternal(double x1, double y1, double x2, double y2, double r, double g, double b, double a, double xcenter, double ycenter, double xfact, double yfact) {
+void turtle_rectangle_render_internal(double x1, double y1, double x2, double y2, double r, double g, double b, double a, double xcenter, double ycenter, double xfact, double yfact) {
     int8_t colorChange = 0;
     if (r != turtle.currentColor[0]) {colorChange = 1;}
     if (g != turtle.currentColor[1]) {colorChange = 1;}
@@ -658,7 +641,7 @@ void turtleRectangleRenderInternal(double x1, double y1, double x2, double y2, d
 }
 
 /* draws a triangle */
-void turtleTriangleRenderInternal(double x1, double y1, double x2, double y2, double x3, double y3, double r, double g, double b, double a, double xcenter, double ycenter, double xfact, double yfact) {
+void turtle_triangle_render_internal(double x1, double y1, double x2, double y2, double x3, double y3, double r, double g, double b, double a, double xcenter, double ycenter, double xfact, double yfact) {
     int8_t colorChange = 0;
     if (r != turtle.currentColor[0]) {colorChange = 1;}
     if (g != turtle.currentColor[1]) {colorChange = 1;}
@@ -679,7 +662,7 @@ void turtleTriangleRenderInternal(double x1, double y1, double x2, double y2, do
 }
 
 /* draws a quadrilateral */
-void turtleQuadRenderInternal(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, double r, double g, double b, double a, double xcenter, double ycenter, double xfact, double yfact) {
+void turtle_quad_render_internal(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, double r, double g, double b, double a, double xcenter, double ycenter, double xfact, double yfact) {
     int8_t colorChange = 0;
     if (r != turtle.currentColor[0]) {colorChange = 1;}
     if (g != turtle.currentColor[1]) {colorChange = 1;}
@@ -703,7 +686,7 @@ void turtleQuadRenderInternal(double x1, double y1, double x2, double y2, double
 
 #ifdef TURTLE_ENABLE_TEXTURES
 /* function to add a vertex to the turtle.bufferList */
-void addVertex(double x, double y, double r, double g, double b, double a, double tx, double ty, double useTexture) {
+void turtle_add_vertex(double x, double y, double r, double g, double b, double a, double tx, double ty, double useTexture) {
     floatList_append(turtle.bufferList, x);
     floatList_append(turtle.bufferList, y);
     floatList_append(turtle.bufferList, r);
@@ -716,52 +699,52 @@ void addVertex(double x, double y, double r, double g, double b, double a, doubl
 }
 
 /* draws a circle at the specified x and y (coordinates) */
-void turtleCircleRenderInternal(double x, double y, double rad, double r, double g, double b, double a, double xcenter, double ycenter, double xfact, double yfact, double prez) {
+void turtle_circle_render_internal(double x, double y, double rad, double r, double g, double b, double a, double xcenter, double ycenter, double xfact, double yfact, double prez) {
     int32_t p = (int32_t) prez;
     if (p > 0) {
         // p--;
         float originX = x * xfact + xcenter;
         float originY = (y + rad) * yfact + ycenter;
-        addVertex(originX, originY, r, g, b, a, 0, 0, 0);
-        addVertex((x + rad * sin(2 * 1 * M_PI / prez)) * xfact + xcenter, (y + rad * cos(2 * 1 * M_PI / prez)) * yfact + ycenter, r, g, b, a, 0, 0, 0);
+        turtle_add_vertex(originX, originY, r, g, b, a, 0, 0, 0);
+        turtle_add_vertex((x + rad * sin(2 * 1 * M_PI / prez)) * xfact + xcenter, (y + rad * cos(2 * 1 * M_PI / prez)) * yfact + ycenter, r, g, b, a, 0, 0, 0);
         int32_t i = 0;
         for (; i < p; i++) {
-            addVertex((x + rad * sin(2 * i * M_PI / prez)) * xfact + xcenter, (y + rad * cos(2 * i * M_PI / prez)) * yfact + ycenter, r, g, b, a, 0, 0, 0);
-            addVertex(originX, originY, r, g, b, a, 0, 0, 0);
-            addVertex(turtle.bufferList -> data[turtle.bufferList -> length - BUFFER_OBJECT_SIZE * 2], turtle.bufferList -> data[turtle.bufferList -> length - BUFFER_OBJECT_SIZE * 2 + 1], r, g, b, a, 0, 0, 0);
+            turtle_add_vertex((x + rad * sin(2 * i * M_PI / prez)) * xfact + xcenter, (y + rad * cos(2 * i * M_PI / prez)) * yfact + ycenter, r, g, b, a, 0, 0, 0);
+            turtle_add_vertex(originX, originY, r, g, b, a, 0, 0, 0);
+            turtle_add_vertex(turtle.bufferList -> data[turtle.bufferList -> length - BUFFER_OBJECT_SIZE * 2], turtle.bufferList -> data[turtle.bufferList -> length - BUFFER_OBJECT_SIZE * 2 + 1], r, g, b, a, 0, 0, 0);
         }
-        addVertex((x + rad * sin(2 * i * M_PI / prez)) * xfact + xcenter, (y + rad * cos(2 * i * M_PI / prez)) * yfact + ycenter, r, g, b, a, 0, 0, 0);
+        turtle_add_vertex((x + rad * sin(2 * i * M_PI / prez)) * xfact + xcenter, (y + rad * cos(2 * i * M_PI / prez)) * yfact + ycenter, r, g, b, a, 0, 0, 0);
     }
 }
 
 /* draws a rectangle */
-void turtleRectangleRenderInternal(double x1, double y1, double x2, double y2, double r, double g, double b, double a, double xcenter, double ycenter, double xfact, double yfact) {
-    addVertex(x1 * xfact + xcenter, y1 * yfact + ycenter, r, g, b, a, 0, 0, 0);
-    addVertex(x2 * xfact + xcenter, y1 * yfact + ycenter, r, g, b, a, 0, 0, 0);
-    addVertex(x2 * xfact + xcenter, y2 * yfact + ycenter, r, g, b, a, 0, 0, 0);
-    addVertex(x1 * xfact + xcenter, y1 * yfact + ycenter, r, g, b, a, 0, 0, 0);
-    addVertex(x2 * xfact + xcenter, y2 * yfact + ycenter, r, g, b, a, 0, 0, 0);
-    addVertex(x1 * xfact + xcenter, y2 * yfact + ycenter, r, g, b, a, 0, 0, 0);
+void turtle_rectangle_render_internal(double x1, double y1, double x2, double y2, double r, double g, double b, double a, double xcenter, double ycenter, double xfact, double yfact) {
+    turtle_add_vertex(x1 * xfact + xcenter, y1 * yfact + ycenter, r, g, b, a, 0, 0, 0);
+    turtle_add_vertex(x2 * xfact + xcenter, y1 * yfact + ycenter, r, g, b, a, 0, 0, 0);
+    turtle_add_vertex(x2 * xfact + xcenter, y2 * yfact + ycenter, r, g, b, a, 0, 0, 0);
+    turtle_add_vertex(x1 * xfact + xcenter, y1 * yfact + ycenter, r, g, b, a, 0, 0, 0);
+    turtle_add_vertex(x2 * xfact + xcenter, y2 * yfact + ycenter, r, g, b, a, 0, 0, 0);
+    turtle_add_vertex(x1 * xfact + xcenter, y2 * yfact + ycenter, r, g, b, a, 0, 0, 0);
 }
 
 /* draws a triangle */
-void turtleTriangleRenderInternal(double x1, double y1, double x2, double y2, double x3, double y3, double r, double g, double b, double a, double xcenter, double ycenter, double xfact, double yfact) {
-    addVertex(x1 * xfact + xcenter, y1 * yfact + ycenter, r, g, b, a, 0, 0, 0);
-    addVertex(x2 * xfact + xcenter, y2 * yfact + ycenter, r, g, b, a, 0, 0, 0);
-    addVertex(x3 * xfact + xcenter, y3 * yfact + ycenter, r, g, b, a, 0, 0, 0);
+void turtle_triangle_render_internal(double x1, double y1, double x2, double y2, double x3, double y3, double r, double g, double b, double a, double xcenter, double ycenter, double xfact, double yfact) {
+    turtle_add_vertex(x1 * xfact + xcenter, y1 * yfact + ycenter, r, g, b, a, 0, 0, 0);
+    turtle_add_vertex(x2 * xfact + xcenter, y2 * yfact + ycenter, r, g, b, a, 0, 0, 0);
+    turtle_add_vertex(x3 * xfact + xcenter, y3 * yfact + ycenter, r, g, b, a, 0, 0, 0);
 }
 
 /* draws a quadrilateral */
-void turtleQuadRenderInternal(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, double r, double g, double b, double a, double xcenter, double ycenter, double xfact, double yfact) {
-    addVertex(x1 * xfact + xcenter, y1 * yfact + ycenter, r, g, b, a, 0, 0, 0);
-    addVertex(x2 * xfact + xcenter, y2 * yfact + ycenter, r, g, b, a, 0, 0, 0);
-    addVertex(x3 * xfact + xcenter, y3 * yfact + ycenter, r, g, b, a, 0, 0, 0);
-    addVertex(x1 * xfact + xcenter, y1 * yfact + ycenter, r, g, b, a, 0, 0, 0);
-    addVertex(x3 * xfact + xcenter, y3 * yfact + ycenter, r, g, b, a, 0, 0, 0);
-    addVertex(x4 * xfact + xcenter, y4 * yfact + ycenter, r, g, b, a, 0, 0, 0);
+void turtle_quad_render_internal(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, double r, double g, double b, double a, double xcenter, double ycenter, double xfact, double yfact) {
+    turtle_add_vertex(x1 * xfact + xcenter, y1 * yfact + ycenter, r, g, b, a, 0, 0, 0);
+    turtle_add_vertex(x2 * xfact + xcenter, y2 * yfact + ycenter, r, g, b, a, 0, 0, 0);
+    turtle_add_vertex(x3 * xfact + xcenter, y3 * yfact + ycenter, r, g, b, a, 0, 0, 0);
+    turtle_add_vertex(x1 * xfact + xcenter, y1 * yfact + ycenter, r, g, b, a, 0, 0, 0);
+    turtle_add_vertex(x3 * xfact + xcenter, y3 * yfact + ycenter, r, g, b, a, 0, 0, 0);
+    turtle_add_vertex(x4 * xfact + xcenter, y4 * yfact + ycenter, r, g, b, a, 0, 0, 0);
 }
 
-void turtleTextureRenderInternal(int32_t textureCode, double x1, double y1, double x2, double y2, double r, double g, double b, double rot, double xcenter, double ycenter, double xfact, double yfact) {
+void turtle_texture_render_internal(int32_t textureCode, double x1, double y1, double x2, double y2, double r, double g, double b, double rot, double xcenter, double ycenter, double xfact, double yfact) {
     /* do the rotation math here - rotate on center */
     double avgX = (x1 + x2) / 2;
     double avgY = (y1 + y2) / 2;
@@ -779,12 +762,12 @@ void turtleTextureRenderInternal(int32_t textureCode, double x1, double y1, doub
     double y3 = avgY + x2Displace * sinRot + y1Displace * cosRot;
     double x4 = avgX + x1Displace * cosRot - y2Displace * sinRot;
     double y4 = avgY + x1Displace * sinRot + y2Displace * cosRot;
-    addVertex(x4 * xfact + xcenter, y4 * yfact + ycenter, r, g, b, 1.0, 0, 0, textureCode);
-    addVertex(x1 * xfact + xcenter, y1 * yfact + ycenter, r, g, b, 1.0, 0, 1, textureCode);
-    addVertex(x3 * xfact + xcenter, y3 * yfact + ycenter, r, g, b, 1.0, 1, 1, textureCode);
-    addVertex(x4 * xfact + xcenter, y4 * yfact + ycenter, r, g, b, 1.0, 0, 0, textureCode);
-    addVertex(x2 * xfact + xcenter, y2 * yfact + ycenter, r, g, b, 1.0, 1, 0, textureCode);
-    addVertex(x3 * xfact + xcenter, y3 * yfact + ycenter, r, g, b, 1.0, 1, 1, textureCode);
+    turtle_add_vertex(x4 * xfact + xcenter, y4 * yfact + ycenter, r, g, b, 1.0, 0, 0, textureCode);
+    turtle_add_vertex(x1 * xfact + xcenter, y1 * yfact + ycenter, r, g, b, 1.0, 0, 1, textureCode);
+    turtle_add_vertex(x3 * xfact + xcenter, y3 * yfact + ycenter, r, g, b, 1.0, 1, 1, textureCode);
+    turtle_add_vertex(x4 * xfact + xcenter, y4 * yfact + ycenter, r, g, b, 1.0, 0, 0, textureCode);
+    turtle_add_vertex(x2 * xfact + xcenter, y2 * yfact + ycenter, r, g, b, 1.0, 1, 0, textureCode);
+    turtle_add_vertex(x3 * xfact + xcenter, y3 * yfact + ycenter, r, g, b, 1.0, 1, 1, textureCode);
 }
 
 void printList(double *list, int32_t len) {
@@ -809,7 +792,7 @@ void printListInt(int32_t *list, int32_t len) {
     }
 }
 
-uint8_t *turtleImageResize(uint8_t *dest, uint32_t destWidth, uint32_t destHeight, uint32_t destEncoding, uint8_t *src, uint32_t srcWidth, uint32_t srcHeight, uint32_t srcEncoding, turtle_image_resize_t method) {
+uint8_t *turtle_image_resize(uint8_t *dest, uint32_t destWidth, uint32_t destHeight, uint32_t destEncoding, uint8_t *src, uint32_t srcWidth, uint32_t srcHeight, uint32_t srcEncoding, turtle_image_resize_t method) {
     /* determine encoding */
     uint8_t destChannels = 0;
     if (destEncoding == GL_RGB) {
@@ -823,7 +806,7 @@ uint8_t *turtleImageResize(uint8_t *dest, uint32_t destWidth, uint32_t destHeigh
     } else if (destEncoding == GL_RED || destEncoding == GL_GREEN || destEncoding == GL_BLUE || destEncoding == GL_ALPHA) {
         destChannels = 1;
     } else {
-        printf("turtleImageResize: Unsupported destination encoding %d\n", destEncoding);
+        printf("turtle_image_resize: Unsupported destination encoding %d\n", destEncoding);
         return NULL;
     }
     uint8_t srcChannels = 0;
@@ -838,11 +821,11 @@ uint8_t *turtleImageResize(uint8_t *dest, uint32_t destWidth, uint32_t destHeigh
     } else if (srcEncoding == GL_RED || srcEncoding == GL_GREEN || srcEncoding == GL_BLUE || srcEncoding == GL_ALPHA) {
         srcChannels = 1;
     } else {
-        printf("turtleImageResize: Unsupported source encoding %d\n", srcEncoding);
+        printf("turtle_image_resize: Unsupported source encoding %d\n", srcEncoding);
         return NULL;
     }
     if (srcEncoding != destEncoding) {
-        printf("turtleImageResize: Source encoding must match destination encoding (TODO)\n");
+        printf("turtle_image_resize: Source encoding must match destination encoding (TODO)\n");
         return NULL;
     }
     int8_t freeDest = 0;
@@ -973,20 +956,20 @@ uint8_t *turtleImageResize(uint8_t *dest, uint32_t destWidth, uint32_t destHeigh
         if (freeDest) {
             free(dest);
         }
-        printf("turtleImageResize: Unsupported method %d\n", method);
+        printf("turtle_image_resize: Unsupported method %d\n", method);
         return NULL;
     }
     return dest;
 }
 
-turtle_texture_t turtleTextureLoad(char *filename) {
+turtle_texture_t turtle_texture_load(char *filename) {
     /* load image */
     int width;
     int height;
     int channels;
     uint8_t *image = stbi_load(filename, &width, &height, &channels, 0);
     if (image == NULL) {
-        printf("turtleTextureLoad: Could not load image %s\n", filename);
+        printf("turtle_texture_load: Could not load image %s\n", filename);
         return -1;
     }
     uint32_t encoding = GL_RGB;
@@ -997,10 +980,10 @@ turtle_texture_t turtleTextureLoad(char *filename) {
         encoding = GL_RED;
     }
     uint8_t *resized = malloc(channels * turtle.textureWidth * turtle.textureHeight);
-    turtleImageResize(resized, turtle.textureWidth, turtle.textureHeight, encoding, image, width, height, encoding, TURTLE_IMAGE_RESIZE_LINEAR);
+    turtle_image_resize(resized, turtle.textureWidth, turtle.textureHeight, encoding, image, width, height, encoding, TURTLE_IMAGE_RESIZE_LINEAR);
     free(image);
     if (resized == NULL) {
-        printf("turtleTextureLoad: Could not resize image %s\n", filename);
+        printf("turtle_texture_load: Could not resize image %s\n", filename);
         return -1;
     }
     /* find first available texture */
@@ -1031,15 +1014,15 @@ turtle_texture_t turtleTextureLoad(char *filename) {
     return texture;
 }
 
-turtle_texture_t turtleTextureLoadArray(uint8_t *array, uint32_t width, uint32_t height, uint32_t encoding) {
-    return turtleTextureLoadListArrayInternal(NULL, array, width, height, encoding);
+turtle_texture_t turtle_texture_load_array(uint8_t *array, uint32_t width, uint32_t height, uint32_t encoding) {
+    return turtle_texture_load_list_array_internal(NULL, array, width, height, encoding);
 }
 
-turtle_texture_t turtleTextureLoadList(list_t *list, uint32_t width, uint32_t height, uint32_t encoding) {
-    return turtleTextureLoadListArrayInternal(list, NULL, width, height, encoding);
+turtle_texture_t turtle_texture_load_list(list_t *list, uint32_t width, uint32_t height, uint32_t encoding) {
+    return turtle_texture_load_list_array_internal(list, NULL, width, height, encoding);
 }
 
-turtle_texture_t turtleTextureLoadListArrayInternal(list_t *list, uint8_t *array, uint32_t width, uint32_t height, uint32_t encoding) {
+turtle_texture_t turtle_texture_load_list_array_internal(list_t *list, uint8_t *array, uint32_t width, uint32_t height, uint32_t encoding) {
     /* determine encoding */
     uint8_t channels = 0;
     if (encoding == GL_RGB) {
@@ -1053,13 +1036,13 @@ turtle_texture_t turtleTextureLoadListArrayInternal(list_t *list, uint8_t *array
     } else if (encoding == GL_RED || encoding == GL_GREEN || encoding == GL_BLUE || encoding == GL_ALPHA) {
         channels = 1;
     } else {
-        printf("turtleTextureLoadListArrayInternal: Unsupported encoding %d\n", encoding);
+        printf("turtle_texture_load_list_array_internal: Unsupported encoding %d\n", encoding);
         return -1;
     }
     uint8_t freeArrayFlag = 0;
     if (array == NULL) {
         if (list == NULL) {
-            printf("turtleTextureLoadListArrayInternal: both list and array are NULL\n");
+            printf("turtle_texture_load_list_array_internal: both list and array are NULL\n");
             return -1;
         }
         array = malloc(list -> length);
@@ -1069,12 +1052,12 @@ turtle_texture_t turtleTextureLoadListArrayInternal(list_t *list, uint8_t *array
         freeArrayFlag = 1;
     }
     uint8_t *resized = malloc(channels * turtle.textureWidth * turtle.textureHeight);
-    turtleImageResize(resized, turtle.textureWidth, turtle.textureHeight, encoding, array, width, height, encoding, TURTLE_IMAGE_RESIZE_LINEAR);
+    turtle_image_resize(resized, turtle.textureWidth, turtle.textureHeight, encoding, array, width, height, encoding, TURTLE_IMAGE_RESIZE_LINEAR);
     if (freeArrayFlag) {
         free(array);
     }
     if (resized == NULL) {
-        printf("turtleTextureLoadListArrayInternal: Could not resize image\n");
+        printf("turtle_texture_load_list_array_internal: Could not resize image\n");
         return -1;
     }
     /* find first available texture */
@@ -1110,21 +1093,21 @@ turtle_texture_t turtleTextureLoadListArrayInternal(list_t *list, uint8_t *array
     return texture;
 }
 
-int32_t turtleTextureGetWidth(turtle_texture_t texture) {
+int32_t turtle_texture_get_width(turtle_texture_t texture) {
     if (texture < 0 || texture >= turtle.textureList -> length) {
         return -1;
     }
     return turtle.textureList -> data[texture + 1].i;
 }
 
-int32_t turtleTextureGetHeight(turtle_texture_t texture) {
+int32_t turtle_texture_get_height(turtle_texture_t texture) {
     if (texture < 0 || texture >= turtle.textureList -> length) {
         return -1;
     }
     return turtle.textureList -> data[texture + 2].i;
 }
 
-void turtleTexturePrint(turtle_texture_t texture) {
+void turtle_texture_print(turtle_texture_t texture) {
     printf("Texture ID: %d\n", texture);
     if (texture >= 0 && texture < turtle.textureList -> length) {
         printf("- Texture Name: %s\n", turtle.textureList -> data[texture].s);
@@ -1140,14 +1123,14 @@ void turtleTexturePrint(turtle_texture_t texture) {
 }
 
 /* replace a texture with new data from a png, jpg, or bmp */
-int32_t turtleTextureReplace(turtle_texture_t texture, char *filename) {
+int32_t turtle_texture_replace(turtle_texture_t texture, char *filename) {
     /* load image */
     int width;
     int height;
     int channels;
     uint8_t *image = stbi_load(filename, &width, &height, &channels, 0);
     if (image == NULL) {
-        printf("turtleTextureReplace: Could not load image %s\n", filename);
+        printf("turtle_texture_replace: Could not load image %s\n", filename);
         return -1;
     }
     uint32_t encoding = GL_RGB;
@@ -1158,10 +1141,10 @@ int32_t turtleTextureReplace(turtle_texture_t texture, char *filename) {
         encoding = GL_RED;
     }
     uint8_t *resized = malloc(channels * turtle.textureWidth * turtle.textureHeight);
-    turtleImageResize(resized, turtle.textureWidth, turtle.textureHeight, encoding, image, width, height, encoding, TURTLE_IMAGE_RESIZE_LINEAR);
+    turtle_image_resize(resized, turtle.textureWidth, turtle.textureHeight, encoding, image, width, height, encoding, TURTLE_IMAGE_RESIZE_LINEAR);
     free(image);
     if (resized == NULL) {
-        printf("turtleTextureReplace: Could not resize image %s\n", filename);
+        printf("turtle_texture_replace: Could not resize image %s\n", filename);
         return -1;
     }
     /* load to GPU */
@@ -1173,16 +1156,16 @@ int32_t turtleTextureReplace(turtle_texture_t texture, char *filename) {
 }
 
 /* replace a texture with new data from an array - supported encodings: GL_RGB, GL_RGBA, GL_BGR, GL_BGRA, GL_RED, GL_GREEN, GL_BLUE, GL_ALPHA */
-int32_t turtleTextureReplaceArray(turtle_texture_t texture, uint8_t *array, uint32_t width, uint32_t height, uint32_t encoding) {
-    return turtleTextureReplaceListArrayInternal(texture, NULL, array, width, height, encoding);
+int32_t turtle_texture_replace_array(turtle_texture_t texture, uint8_t *array, uint32_t width, uint32_t height, uint32_t encoding) {
+    return turtle_texture_replace_list_array_internal(texture, NULL, array, width, height, encoding);
 }
 
 /* replace a texture with new data from an list - supported encodings: GL_RGB, GL_RGBA, GL_BGR, GL_BGRA, GL_RED, GL_GREEN, GL_BLUE, GL_ALPHA */
-int32_t turtleTextureReplaceList(turtle_texture_t texture, list_t *list, uint32_t width, uint32_t height, uint32_t encoding) {
-    return turtleTextureReplaceListArrayInternal(texture, list, NULL, width, height, encoding);
+int32_t turtle_texture_replace_list(turtle_texture_t texture, list_t *list, uint32_t width, uint32_t height, uint32_t encoding) {
+    return turtle_texture_replace_list_array_internal(texture, list, NULL, width, height, encoding);
 }
 
-int32_t turtleTextureReplaceListArrayInternal(turtle_texture_t texture, list_t *list, uint8_t *array, uint32_t width, uint32_t height, uint32_t encoding) {
+int32_t turtle_texture_replace_list_array_internal(turtle_texture_t texture, list_t *list, uint8_t *array, uint32_t width, uint32_t height, uint32_t encoding) {
     /* determine encoding */
     uint8_t channels = 0;
     if (encoding == GL_RGB) {
@@ -1196,13 +1179,13 @@ int32_t turtleTextureReplaceListArrayInternal(turtle_texture_t texture, list_t *
     } else if (encoding == GL_RED || encoding == GL_GREEN || encoding == GL_BLUE || encoding == GL_ALPHA) {
         channels = 1;
     } else {
-        printf("turtleTextureReplaceListArrayInternal: Unsupported encoding %d\n", encoding);
+        printf("turtle_texture_replace_list_array_internal: Unsupported encoding %d\n", encoding);
         return -1;
     }
     uint8_t freeArrayFlag = 0;
     if (array == NULL) {
         if (list == NULL) {
-            printf("turtleTextureReplaceListArrayInternal: both list and array are NULL\n");
+            printf("turtle_texture_replace_list_array_internal: both list and array are NULL\n");
             return -1;
         }
         array = malloc(list -> length);
@@ -1212,12 +1195,12 @@ int32_t turtleTextureReplaceListArrayInternal(turtle_texture_t texture, list_t *
         freeArrayFlag = 1;
     }
     uint8_t *resized = malloc(channels * turtle.textureWidth * turtle.textureHeight);
-    turtleImageResize(resized, turtle.textureWidth, turtle.textureHeight, encoding, array, width, height, encoding, TURTLE_IMAGE_RESIZE_LINEAR);
+    turtle_image_resize(resized, turtle.textureWidth, turtle.textureHeight, encoding, array, width, height, encoding, TURTLE_IMAGE_RESIZE_LINEAR);
     if (freeArrayFlag) {
         free(array);
     }
     if (resized == NULL) {
-        printf("turtleTextureReplaceListArrayInternal: Could not resize image\n");
+        printf("turtle_texture_replace_list_array_internal: Could not resize image\n");
         return -1;
     }
     glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, texture / 4, turtle.textureWidth, turtle.textureHeight, 1, encoding, GL_UNSIGNED_BYTE, resized);
@@ -1227,7 +1210,7 @@ int32_t turtleTextureReplaceListArrayInternal(turtle_texture_t texture, list_t *
     return texture;
 }
 
-int32_t turtleTextureUnload(turtle_texture_t texture) {
+int32_t turtle_texture_unload(turtle_texture_t texture) {
     /* update list */
     if (texture >= turtle.textureList -> length || texture < 1) {
         return -1;
@@ -1238,7 +1221,7 @@ int32_t turtleTextureUnload(turtle_texture_t texture) {
     return 0;
 }
 
-int32_t turtleTextureUnloadAll() {
+int32_t turtle_texture_unload_all() {
     list_free(turtle.textureList);
     list_append(turtle.textureList, (unitype) "null", 's'); // filename, cannot have texture code of 0 because of shader using 0 as the non-texture code
     list_append(turtle.textureList, (unitype) 0, 'i'); // width
@@ -1248,213 +1231,213 @@ int32_t turtleTextureUnloadAll() {
     return 0;
 }
 
-void turtleTexture(turtle_texture_t texture, double x1, double y1, double x2, double y2, double rot) {
+void turtle_texture(turtle_texture_t texture, double x1, double y1, double x2, double y2, double rot) {
     list_append(turtle.penPos, (unitype) x1, 'd');
     list_append(turtle.penPos, (unitype) y1, 'd');
     list_append(turtle.penPos, (unitype) x2, 'd');
     list_append(turtle.penPos, (unitype) y2, 'd');
     list_append(turtle.penPos, (unitype) rot, 'd'); // rotation (degrees, bearing)
-    list_append(turtle.penPos, (unitype) 1.0, 'd');
-    list_append(turtle.penPos, (unitype) 1.0, 'd');
+    list_append(turtle.penPos, (unitype) 255, 'b');
+    list_append(turtle.penPos, (unitype) 255, 'b');
     list_append(turtle.penPos, (unitype) (128 + texture / 4), 'h'); // blit texture signifier + texture code - limited to 32639 textures
-    list_append(turtle.penPos, (unitype) 1.0, 'd');
+    list_append(turtle.penPos, (unitype) 255, 'b');
 }
 
-void turtleTextureColor(turtle_texture_t texture, double x1, double y1, double x2, double y2, double rot, uint8_t r, uint8_t g, uint8_t b) {
+void turtle_texture_color(turtle_texture_t texture, double x1, double y1, double x2, double y2, double rot, uint8_t r, uint8_t g, uint8_t b) {
     list_append(turtle.penPos, (unitype) x1, 'd');
     list_append(turtle.penPos, (unitype) y1, 'd');
     list_append(turtle.penPos, (unitype) x2, 'd');
     list_append(turtle.penPos, (unitype) y2, 'd');
     list_append(turtle.penPos, (unitype) rot, 'd'); // rotation (degrees, bearing)
-    list_append(turtle.penPos, (unitype) (r / 255.0), 'd');
-    list_append(turtle.penPos, (unitype) (g / 255.0), 'd');
+    list_append(turtle.penPos, (unitype) r, 'b');
+    list_append(turtle.penPos, (unitype) g, 'b');
     list_append(turtle.penPos, (unitype) (128 + texture / 4), 'h'); // blit texture signifier + texture code - limited to 32639 textures
-    list_append(turtle.penPos, (unitype) (b / 255.0), 'd');
+    list_append(turtle.penPos, (unitype) b, 'b');
 }
 
-void turtleSetTextureSize(int32_t width, int32_t height) {
+void turtle_set_texture_size(int32_t width, int32_t height) {
     turtle.textureWidth = width;
     turtle.textureHeight = height;
 }
 
-void turtleSetMaxTextures(int32_t maxTextures) {
+void turtle_set_max_textures(int32_t maxTextures) {
     turtle.maxTextures = maxTextures;
 }
 #endif /* TURTLE_ENABLE_TEXTURES */
 
-void turtleSetResizeMode(turtle_resize_mode_t resizeMode) {
+void turtle_set_resize_mode(turtle_resize_mode_t resizeMode) {
     turtle.resizeMode = resizeMode;
 }
 
 /* adds a (blit) triangle to the pipeline (for better speed) */
-void turtleTriangle(double x1, double y1, double x2, double y2, double x3, double y3) {
+void turtle_triangle(double x1, double y1, double x2, double y2, double x3, double y3) {
     list_append(turtle.penPos, (unitype) x1, 'd');
     list_append(turtle.penPos, (unitype) y1, 'd');
     list_append(turtle.penPos, (unitype) x2, 'd');
-    list_append(turtle.penPos, (unitype) turtle.penr, 'd');
-    list_append(turtle.penPos, (unitype) turtle.peng, 'd');
-    list_append(turtle.penPos, (unitype) turtle.penb, 'd');
-    list_append(turtle.penPos, (unitype) turtle.pena, 'd');
+    list_append(turtle.penPos, (unitype) turtle.red, 'b');
+    list_append(turtle.penPos, (unitype) turtle.green, 'b');
+    list_append(turtle.penPos, (unitype) turtle.blue, 'b');
+    list_append(turtle.penPos, (unitype) turtle.alpha, 'b');
     list_append(turtle.penPos, (unitype) 66, 'h'); // blit triangle signifier
     list_append(turtle.penPos, (unitype) y2, 'd'); // some unconventional formatting but it works
 
     list_append(turtle.penPos, (unitype) x3, 'd');
     list_append(turtle.penPos, (unitype) y3, 'd');
     list_append(turtle.penPos, (unitype) 0, 'd'); // zero'd out (wasted space)
-    list_append(turtle.penPos, (unitype) turtle.penr, 'd'); // duplicate colour data (wasted space)
-    list_append(turtle.penPos, (unitype) turtle.peng, 'd');
-    list_append(turtle.penPos, (unitype) turtle.penb, 'd');
-    list_append(turtle.penPos, (unitype) turtle.pena, 'd');
+    list_append(turtle.penPos, (unitype) turtle.red, 'b'); // duplicate colour data (wasted space)
+    list_append(turtle.penPos, (unitype) turtle.green, 'b');
+    list_append(turtle.penPos, (unitype) turtle.blue, 'b');
+    list_append(turtle.penPos, (unitype) turtle.alpha, 'b');
     list_append(turtle.penPos, (unitype) 66, 'h'); // blit triangle signifier
     list_append(turtle.penPos, (unitype) 0, 'd'); // zero'd out (wasted space)
 }
 
-void turtleTriangleColor(double x1, double y1, double x2, double y2, double x3, double y3, uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
+void turtle_triangle_color(double x1, double y1, double x2, double y2, double x3, double y3, uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
     list_append(turtle.penPos, (unitype) x1, 'd');
     list_append(turtle.penPos, (unitype) y1, 'd');
     list_append(turtle.penPos, (unitype) x2, 'd');
-    list_append(turtle.penPos, (unitype) (r / 255.0), 'd');
-    list_append(turtle.penPos, (unitype) (g / 255.0), 'd');
-    list_append(turtle.penPos, (unitype) (b / 255.0), 'd');
-    list_append(turtle.penPos, (unitype) (1.0 - a / 255.0), 'd');
+    list_append(turtle.penPos, (unitype) r, 'b');
+    list_append(turtle.penPos, (unitype) g, 'b');
+    list_append(turtle.penPos, (unitype) b, 'b');
+    list_append(turtle.penPos, (unitype) (255 - a), 'b');
     list_append(turtle.penPos, (unitype) 66, 'h'); // blit triangle signifier
     list_append(turtle.penPos, (unitype) y2, 'd'); // some unconventional formatting but it works
 
     list_append(turtle.penPos, (unitype) x3, 'd');
     list_append(turtle.penPos, (unitype) y3, 'd');
     list_append(turtle.penPos, (unitype) 0, 'd'); // zero'd out (wasted space)
-    list_append(turtle.penPos, (unitype) r, 'd'); // duplicate colour data (wasted space)
-    list_append(turtle.penPos, (unitype) g, 'd');
-    list_append(turtle.penPos, (unitype) b, 'd');
-    list_append(turtle.penPos, (unitype) a, 'd');
+    list_append(turtle.penPos, (unitype) r, 'b'); // duplicate colour data (wasted space)
+    list_append(turtle.penPos, (unitype) g, 'b');
+    list_append(turtle.penPos, (unitype) b, 'b');
+    list_append(turtle.penPos, (unitype) (255 - a), 'b');
     list_append(turtle.penPos, (unitype) 66, 'h'); // blit triangle signifier
     list_append(turtle.penPos, (unitype) 0, 'd'); // zero'd out (wasted space)
 }
 
 /* adds a (blit) quad to the pipeline (for better speed) */
-void turtleQuad(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4) {
+void turtle_quad(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4) {
     list_append(turtle.penPos, (unitype) x1, 'd');
     list_append(turtle.penPos, (unitype) y1, 'd');
     list_append(turtle.penPos, (unitype) x2, 'd');
-    list_append(turtle.penPos, (unitype) turtle.penr, 'd');
-    list_append(turtle.penPos, (unitype) turtle.peng, 'd');
-    list_append(turtle.penPos, (unitype) turtle.penb, 'd');
-    list_append(turtle.penPos, (unitype) turtle.pena, 'd');
+    list_append(turtle.penPos, (unitype) turtle.red, 'b');
+    list_append(turtle.penPos, (unitype) turtle.green, 'b');
+    list_append(turtle.penPos, (unitype) turtle.blue, 'b');
+    list_append(turtle.penPos, (unitype) turtle.alpha, 'b');
     list_append(turtle.penPos, (unitype) 67, 'h'); // blit quad signifier
     list_append(turtle.penPos, (unitype) y2, 'd'); // some unconventional formatting but it works
 
     list_append(turtle.penPos, (unitype) x3, 'd');
     list_append(turtle.penPos, (unitype) y3, 'd');
     list_append(turtle.penPos, (unitype) x4, 'd');
-    list_append(turtle.penPos, (unitype) turtle.penr, 'd'); // duplicate colour data (wasted space)
-    list_append(turtle.penPos, (unitype) turtle.peng, 'd');
-    list_append(turtle.penPos, (unitype) turtle.penb, 'd');
-    list_append(turtle.penPos, (unitype) turtle.pena, 'd');
+    list_append(turtle.penPos, (unitype) turtle.red, 'b'); // duplicate colour data (wasted space)
+    list_append(turtle.penPos, (unitype) turtle.green, 'b');
+    list_append(turtle.penPos, (unitype) turtle.blue, 'b');
+    list_append(turtle.penPos, (unitype) turtle.alpha, 'b');
     list_append(turtle.penPos, (unitype) 67, 'h'); // blit quad signifier
     list_append(turtle.penPos, (unitype) y4, 'd');
 }
 
-void turtleQuadColor(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
+void turtle_quad_color(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
     list_append(turtle.penPos, (unitype) x1, 'd');
     list_append(turtle.penPos, (unitype) y1, 'd');
     list_append(turtle.penPos, (unitype) x2, 'd');
-    list_append(turtle.penPos, (unitype) (r / 255.0), 'd');
-    list_append(turtle.penPos, (unitype) (g / 255.0), 'd');
-    list_append(turtle.penPos, (unitype) (b / 255.0), 'd');
-    list_append(turtle.penPos, (unitype) (1.0 - a / 255.0), 'd');
+    list_append(turtle.penPos, (unitype) r, 'b');
+    list_append(turtle.penPos, (unitype) g, 'b');
+    list_append(turtle.penPos, (unitype) b, 'b');
+    list_append(turtle.penPos, (unitype) (255 - a), 'b');
     list_append(turtle.penPos, (unitype) 67, 'h'); // blit quad signifier
     list_append(turtle.penPos, (unitype) y2, 'd'); // some unconventional formatting but it works
 
     list_append(turtle.penPos, (unitype) x3, 'd');
     list_append(turtle.penPos, (unitype) y3, 'd');
     list_append(turtle.penPos, (unitype) x4, 'd');
-    list_append(turtle.penPos, (unitype) r, 'd'); // duplicate colour data (wasted space)
-    list_append(turtle.penPos, (unitype) g, 'd');
-    list_append(turtle.penPos, (unitype) b, 'd');
-    list_append(turtle.penPos, (unitype) a, 'd');
+    list_append(turtle.penPos, (unitype) r, 'b'); // duplicate colour data (wasted space)
+    list_append(turtle.penPos, (unitype) g, 'b');
+    list_append(turtle.penPos, (unitype) b, 'b');
+    list_append(turtle.penPos, (unitype) (255 - a), 'b');
     list_append(turtle.penPos, (unitype) 67, 'h'); // blit quad signifier
     list_append(turtle.penPos, (unitype) y4, 'd');
 }
 
 /* adds a (blit) rectangle to the pipeline (uses quad interface) */
-void turtleRectangle(double x1, double y1, double x2, double y2) {
+void turtle_rectangle(double x1, double y1, double x2, double y2) {
     list_append(turtle.penPos, (unitype) x1, 'd');
     list_append(turtle.penPos, (unitype) y1, 'd');
     list_append(turtle.penPos, (unitype) x2, 'd');
-    list_append(turtle.penPos, (unitype) turtle.penr, 'd');
-    list_append(turtle.penPos, (unitype) turtle.peng, 'd');
-    list_append(turtle.penPos, (unitype) turtle.penb, 'd');
-    list_append(turtle.penPos, (unitype) turtle.pena, 'd');
+    list_append(turtle.penPos, (unitype) turtle.red, 'b');
+    list_append(turtle.penPos, (unitype) turtle.green, 'b');
+    list_append(turtle.penPos, (unitype) turtle.blue, 'b');
+    list_append(turtle.penPos, (unitype) turtle.alpha, 'b');
     list_append(turtle.penPos, (unitype) 67, 'h'); // blit quad signifier
     list_append(turtle.penPos, (unitype) y1, 'd'); // some unconventional formatting but it works
 
     list_append(turtle.penPos, (unitype) x2, 'd');
     list_append(turtle.penPos, (unitype) y2, 'd');
     list_append(turtle.penPos, (unitype) x1, 'd');
-    list_append(turtle.penPos, (unitype) turtle.penr, 'd'); // duplicate colour data (wasted space)
-    list_append(turtle.penPos, (unitype) turtle.peng, 'd');
-    list_append(turtle.penPos, (unitype) turtle.penb, 'd');
-    list_append(turtle.penPos, (unitype) turtle.pena, 'd');
+    list_append(turtle.penPos, (unitype) turtle.red, 'b'); // duplicate colour data (wasted space)
+    list_append(turtle.penPos, (unitype) turtle.green, 'b');
+    list_append(turtle.penPos, (unitype) turtle.blue, 'b');
+    list_append(turtle.penPos, (unitype) turtle.alpha, 'b');
     list_append(turtle.penPos, (unitype) 67, 'h'); // blit quad signifier
     list_append(turtle.penPos, (unitype) y2, 'd');
 }
 
-void turtleRectangleColor(double x1, double y1, double x2, double y2, uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
+void turtle_rectangle_color(double x1, double y1, double x2, double y2, uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
     list_append(turtle.penPos, (unitype) x1, 'd');
     list_append(turtle.penPos, (unitype) y1, 'd');
     list_append(turtle.penPos, (unitype) x2, 'd');
-    list_append(turtle.penPos, (unitype) (r / 255.0), 'd');
-    list_append(turtle.penPos, (unitype) (g / 255.0), 'd');
-    list_append(turtle.penPos, (unitype) (b / 255.0), 'd');
-    list_append(turtle.penPos, (unitype) (1.0 - a / 255.0), 'd');
+    list_append(turtle.penPos, (unitype) r, 'b');
+    list_append(turtle.penPos, (unitype) g, 'b');
+    list_append(turtle.penPos, (unitype) b, 'b');
+    list_append(turtle.penPos, (unitype) (255 - a), 'b');
     list_append(turtle.penPos, (unitype) 67, 'h'); // blit quad signifier
     list_append(turtle.penPos, (unitype) y1, 'd'); // some unconventional formatting but it works
 
     list_append(turtle.penPos, (unitype) x2, 'd');
     list_append(turtle.penPos, (unitype) y2, 'd');
     list_append(turtle.penPos, (unitype) x1, 'd');
-    list_append(turtle.penPos, (unitype) r, 'd'); // duplicate colour data (wasted space)
-    list_append(turtle.penPos, (unitype) g, 'd');
-    list_append(turtle.penPos, (unitype) b, 'd');
-    list_append(turtle.penPos, (unitype) a, 'd');
+    list_append(turtle.penPos, (unitype) r, 'b'); // duplicate colour data (wasted space)
+    list_append(turtle.penPos, (unitype) g, 'b');
+    list_append(turtle.penPos, (unitype) b, 'b');
+    list_append(turtle.penPos, (unitype) (255 - a), 'b');
     list_append(turtle.penPos, (unitype) 67, 'h'); // blit quad signifier
     list_append(turtle.penPos, (unitype) y2, 'd');
 }
 
 /* adds a (blit) circle to the pipeline */
-void turtleCircle(double x, double y, double radius) {
+void turtle_circle(double x, double y, double radius) {
     list_append(turtle.penPos, (unitype) x, 'd');
     list_append(turtle.penPos, (unitype) y, 'd');
     list_append(turtle.penPos, (unitype) radius, 'd');
-    list_append(turtle.penPos, (unitype) turtle.penr, 'd');
-    list_append(turtle.penPos, (unitype) turtle.peng, 'd');
-    list_append(turtle.penPos, (unitype) turtle.penb, 'd');
-    list_append(turtle.penPos, (unitype) turtle.pena, 'd');
+    list_append(turtle.penPos, (unitype) turtle.red, 'b');
+    list_append(turtle.penPos, (unitype) turtle.green, 'b');
+    list_append(turtle.penPos, (unitype) turtle.blue, 'b');
+    list_append(turtle.penPos, (unitype) turtle.alpha, 'b');
     list_append(turtle.penPos, (unitype) 64, 'h'); // blit circle signifier
     list_append(turtle.penPos, (unitype) turtle.circleprez, 'd');
 }
 
-void turtleCircleColor(double x, double y, double radius, uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
+void turtle_circle_color(double x, double y, double radius, uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
     list_append(turtle.penPos, (unitype) x, 'd');
     list_append(turtle.penPos, (unitype) y, 'd');
     list_append(turtle.penPos, (unitype) radius, 'd');
-    list_append(turtle.penPos, (unitype) (r / 255.0), 'd');
-    list_append(turtle.penPos, (unitype) (g / 255.0), 'd');
-    list_append(turtle.penPos, (unitype) (b / 255.0), 'd');
-    list_append(turtle.penPos, (unitype) (1.0 - a / 255.0), 'd');
+    list_append(turtle.penPos, (unitype) r, 'b');
+    list_append(turtle.penPos, (unitype) g, 'b');
+    list_append(turtle.penPos, (unitype) b, 'b');
+    list_append(turtle.penPos, (unitype) (255 - a), 'b');
     list_append(turtle.penPos, (unitype) 64, 'h'); // blit circle signifier
     list_append(turtle.penPos, (unitype) turtle.circleprez, 'd');
 }
 
 /* create a triangle in 3D */
-void turtle3DTriangle(double x1, double y1, double z1, double x2, double y2, double z2, double x3, double y3, double z3) {
+void turtle_3D_Triangle(double x1, double y1, double z1, double x2, double y2, double z2, double x3, double y3, double z3) {
     list_append(turtle.penPos, (unitype) x1, 'd');
     list_append(turtle.penPos, (unitype) y1, 'd');
     list_append(turtle.penPos, (unitype) z1, 'd');
-    list_append(turtle.penPos, (unitype) turtle.penr, 'd');
-    list_append(turtle.penPos, (unitype) turtle.peng, 'd');
-    list_append(turtle.penPos, (unitype) turtle.penb, 'd');
-    list_append(turtle.penPos, (unitype) turtle.pena, 'd');
+    list_append(turtle.penPos, (unitype) turtle.red, 'b');
+    list_append(turtle.penPos, (unitype) turtle.green, 'b');
+    list_append(turtle.penPos, (unitype) turtle.blue, 'b');
+    list_append(turtle.penPos, (unitype) turtle.alpha, 'b');
     list_append(turtle.penPos, (unitype) 130, 'h'); // blit 3D triangle signifier
     list_append(turtle.penPos, (unitype) x2, 'd');
 
@@ -1470,7 +1453,7 @@ void turtle3DTriangle(double x1, double y1, double z1, double x2, double y2, dou
 }
 
 /* 3D -> 2D using perspective projection matrix */
-void turtlePerspective(double x, double y, double z, double *xOut, double *yOut) {
+void turtle_perspective(double x, double y, double z, double *xOut, double *yOut) {
     /* https://www.scratchapixel.com/lessons/3d-basic-rendering/perspective-and-orthographic-projection-matrix/building-basic-perspective-projection-matrix.html */
     // double transform[16] = {
     //     1, 0, 0, 0,
@@ -1509,7 +1492,7 @@ void turtlePerspective(double x, double y, double z, double *xOut, double *yOut)
 }
 
 /* draws the turtle's path on the screen, "this could all be a shader" */
-void turtleUpdate() {
+void turtle_update() {
     /* bad fix to a niche problem part 1 */
     if (turtle.pen == 1) {
         if (turtle.penPos -> length > 0 && turtle.penPos -> type[turtle.penPos -> length - 1] != 'c') {
@@ -1589,28 +1572,28 @@ void turtleUpdate() {
         for (int32_t i = 0; i < len; i += 9) {
             if (renType[i] == 'd') {
                 switch (ren[i + 7].hu) {
-                case 0: // penshape circle
+                case TURTLE_PEN_SHAPE_CIRCLE: // penshape circle
                     if (lastSize != ren[i + 2].d || lastPrez != ren[i + 8].d) {
                         precomputedLog = ren[i + 8].d * log(2.71 + ren[i + 2].d);
                     }
                     lastSize = ren[i + 2].d;
                     lastPrez = ren[i + 8].d;
-                    turtleCircleRenderInternal(ren[i].d, ren[i + 1].d, ren[i + 2].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xcenter, ycenter, xfact, yfact, precomputedLog);
+                    turtle_circle_render_internal(ren[i].d, ren[i + 1].d, ren[i + 2].d, ren[i + 3].b / 255.0, ren[i + 4].b / 255.0, ren[i + 5].b / 255.0, ren[i + 6].b / 255.0, xcenter, ycenter, xfact, yfact, precomputedLog);
                 break;
-                case 1: // penshape square
-                    turtleRectangleRenderInternal(ren[i].d - ren[i + 2].d, ren[i + 1].d - ren[i + 2].d, ren[i].d + ren[i + 2].d, ren[i + 1].d + ren[i + 2].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xcenter, ycenter, xfact, yfact);
+                case TURTLE_PEN_SHAPE_SQUARE: // penshape square
+                    turtle_rectangle_render_internal(ren[i].d - ren[i + 2].d, ren[i + 1].d - ren[i + 2].d, ren[i].d + ren[i + 2].d, ren[i + 1].d + ren[i + 2].d, ren[i + 3].b / 255.0, ren[i + 4].b / 255.0, ren[i + 5].b / 255.0, ren[i + 6].b / 255.0, xcenter, ycenter, xfact, yfact);
                 break;
-                case 2: // penshape triangle
-                    turtleTriangleRenderInternal(ren[i].d - ren[i + 2].d, ren[i + 1].d - ren[i + 2].d, ren[i].d + ren[i + 2].d, ren[i + 1].d - ren[i + 2].d, ren[i].d, ren[i + 1].d + ren[i + 2].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xcenter, ycenter, xfact, yfact);
+                case TURTLE_PEN_SHAPE_TRIANGLE: // penshape triangle
+                    turtle_triangle_render_internal(ren[i].d - ren[i + 2].d, ren[i + 1].d - ren[i + 2].d, ren[i].d + ren[i + 2].d, ren[i + 1].d - ren[i + 2].d, ren[i].d, ren[i + 1].d + ren[i + 2].d, ren[i + 3].b / 255.0, ren[i + 4].b / 255.0, ren[i + 5].b / 255.0, ren[i + 6].b / 255.0, xcenter, ycenter, xfact, yfact);
                 break;
-                case 5: // penshape text
+                case TURTLE_PEN_SHAPE_TEXT: // penshape text
                     if (i - 9 < 0 || i + 9 >= len || renType[i - 1] == 'c' || ren[i - 2].hu > 5) {
                         if (lastSize != ren[i + 2].d || lastPrez != ren[i + 8].d) {
                             precomputedLog = ren[i + 8].d * log(2.71 + ren[i + 2].d);
                         }
                         lastSize = ren[i + 2].d;
                         lastPrez = ren[i + 8].d;
-                        turtleCircleRenderInternal(ren[i].d, ren[i + 1].d, ren[i + 2].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xcenter, ycenter, xfact, yfact, precomputedLog);
+                        turtle_circle_render_internal(ren[i].d, ren[i + 1].d, ren[i + 2].d, ren[i + 3].b / 255.0, ren[i + 4].b / 255.0, ren[i + 5].b / 255.0, ren[i + 6].b / 255.0, xcenter, ycenter, xfact, yfact, precomputedLog);
                     }
                 break;
                 default:
@@ -1620,30 +1603,30 @@ void turtleUpdate() {
                     double dir = atan((ren[i + 9].d - ren[i].d) / (ren[i + 1].d - ren[i + 10].d));
                     double sinn = sin(dir + M_PI / 2);
                     double coss = cos(dir + M_PI / 2);
-                    turtleQuadRenderInternal(ren[i].d + ren[i + 2].d * sinn, ren[i + 1].d - ren[i + 2].d * coss, ren[i + 9].d + ren[i + 2].d * sinn, ren[i + 10].d - ren[i + 2].d * coss, ren[i + 9].d - ren[i + 2].d * sinn, ren[i + 10].d + ren[i + 2].d * coss, ren[i].d - ren[i + 2].d * sinn, ren[i + 1].d + ren[i + 2].d * coss, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xcenter, ycenter, xfact, yfact);
+                    turtle_quad_render_internal(ren[i].d + ren[i + 2].d * sinn, ren[i + 1].d - ren[i + 2].d * coss, ren[i + 9].d + ren[i + 2].d * sinn, ren[i + 10].d - ren[i + 2].d * coss, ren[i + 9].d - ren[i + 2].d * sinn, ren[i + 10].d + ren[i + 2].d * coss, ren[i].d - ren[i + 2].d * sinn, ren[i + 1].d + ren[i + 2].d * coss, ren[i + 3].b / 255.0, ren[i + 4].b / 255.0, ren[i + 5].b / 255.0, ren[i + 6].b / 255.0, xcenter, ycenter, xfact, yfact);
                     if ((ren[i + 7].hu == 4 || ren[i + 7].hu == 5) && i + 18 < len && renType[i + 18] == 'd') {
                         double dir2 = atan((ren[i + 18].d - ren[i + 9].d) / (ren[i + 10].d - ren[i + 19].d));
                         double sinn2 = sin(dir2 + M_PI / 2);
                         double coss2 = cos(dir2 + M_PI / 2);
-                        turtleTriangleRenderInternal(ren[i + 9].d + ren[i + 2].d * sinn, ren[i + 10].d - ren[i + 2].d * coss, ren[i + 9].d - ren[i + 2].d * sinn, ren[i + 10].d + ren[i + 2].d * coss, ren[i + 9].d + ren[i + 11].d * sinn2, ren[i + 10].d - ren[i + 11].d * coss2, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xcenter, ycenter, xfact, yfact); // in a perfect world the program would know which one of these triangles to render (to blend the segments)
-                        turtleTriangleRenderInternal(ren[i + 9].d + ren[i + 2].d * sinn, ren[i + 10].d - ren[i + 2].d * coss, ren[i + 9].d - ren[i + 2].d * sinn, ren[i + 10].d + ren[i + 2].d * coss, ren[i + 9].d - ren[i + 11].d * sinn2, ren[i + 10].d + ren[i + 11].d * coss2, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xcenter, ycenter, xfact, yfact); // however we live in a world where i am bad at math, so it just renders both no matter what (one has no effect)
+                        turtle_triangle_render_internal(ren[i + 9].d + ren[i + 2].d * sinn, ren[i + 10].d - ren[i + 2].d * coss, ren[i + 9].d - ren[i + 2].d * sinn, ren[i + 10].d + ren[i + 2].d * coss, ren[i + 9].d + ren[i + 11].d * sinn2, ren[i + 10].d - ren[i + 11].d * coss2, ren[i + 3].b / 255.0, ren[i + 4].b / 255.0, ren[i + 5].b / 255.0, ren[i + 6].b / 255.0, xcenter, ycenter, xfact, yfact); // in a perfect world the program would know which one of these triangles to render (to blend the segments)
+                        turtle_triangle_render_internal(ren[i + 9].d + ren[i + 2].d * sinn, ren[i + 10].d - ren[i + 2].d * coss, ren[i + 9].d - ren[i + 2].d * sinn, ren[i + 10].d + ren[i + 2].d * coss, ren[i + 9].d - ren[i + 11].d * sinn2, ren[i + 10].d + ren[i + 11].d * coss2, ren[i + 3].b / 255.0, ren[i + 4].b / 255.0, ren[i + 5].b / 255.0, ren[i + 6].b / 255.0, xcenter, ycenter, xfact, yfact); // however we live in a world where i am bad at math, so it just renders both no matter what (one has no effect)
                     }
                 } else {
-                    if (ren[i + 7].hu == 4 && i > 8 && renType[i - 8] == 'c') {
+                    if (ren[i + 7].hu == TURTLE_PEN_SHAPE_CONNECTED && i > 8 && renType[i - 8] == 'c') {
                         if (!(lastSize == ren[i + 2].d) || !(lastPrez != ren[i + 8].d)) {
                             precomputedLog = ren[i + 8].d * log(2.71 + ren[i + 2].d);
                         }
                         lastSize = ren[i + 2].d;
                         lastPrez = ren[i + 8].d;
-                        turtleCircleRenderInternal(ren[i].d, ren[i + 1].d, ren[i + 2].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xcenter, ycenter, xfact, yfact, precomputedLog);
+                        turtle_circle_render_internal(ren[i].d, ren[i + 1].d, ren[i + 2].d, ren[i + 3].b / 255.0, ren[i + 4].b / 255.0, ren[i + 5].b / 255.0, ren[i + 6].b / 255.0, xcenter, ycenter, xfact, yfact, precomputedLog);
                     }
-                    if (ren[i + 7].hu == 5 && i > 8) {
+                    if (ren[i + 7].hu == TURTLE_PEN_SHAPE_TEXT && i > 8) {
                         if (!(lastSize == ren[i + 2].d) || !(lastPrez != ren[i + 8].d)) {
                             precomputedLog = ren[i + 8].d * log(2.71 + ren[i + 2].d);
                         }
                         lastSize = ren[i + 2].d;
                         lastPrez = ren[i + 8].d;
-                        turtleCircleRenderInternal(ren[i].d, ren[i + 1].d, ren[i + 2].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xcenter, ycenter, xfact, yfact, precomputedLog);
+                        turtle_circle_render_internal(ren[i].d, ren[i + 1].d, ren[i + 2].d, ren[i + 3].b / 255.0, ren[i + 4].b / 255.0, ren[i + 5].b / 255.0, ren[i + 6].b / 255.0, xcenter, ycenter, xfact, yfact, precomputedLog);
                     }
                 }
                 if (ren[i + 7].hu == 64) { // blit circle
@@ -1652,19 +1635,19 @@ void turtleUpdate() {
                     }
                     lastSize = ren[i + 2].d;
                     lastPrez = ren[i + 8].d;
-                    turtleCircleRenderInternal(ren[i].d, ren[i + 1].d, ren[i + 2].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xcenter, ycenter, xfact, yfact, precomputedLog);
+                    turtle_circle_render_internal(ren[i].d, ren[i + 1].d, ren[i + 2].d, ren[i + 3].b / 255.0, ren[i + 4].b / 255.0, ren[i + 5].b / 255.0, ren[i + 6].b / 255.0, xcenter, ycenter, xfact, yfact, precomputedLog);
                 }
                 if (ren[i + 7].hu == 66) { // blit triangle
-                    turtleTriangleRenderInternal(ren[i].d, ren[i + 1].d, ren[i + 2].d, ren[i + 8].d, ren[i + 9].d, ren[i + 10].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xcenter, ycenter, xfact, yfact);
+                    turtle_triangle_render_internal(ren[i].d, ren[i + 1].d, ren[i + 2].d, ren[i + 8].d, ren[i + 9].d, ren[i + 10].d, ren[i + 3].b / 255.0, ren[i + 4].b / 255.0, ren[i + 5].b / 255.0, ren[i + 6].b / 255.0, xcenter, ycenter, xfact, yfact);
                     i += 9;
                 }
                 if (ren[i + 7].hu == 67) { // blit quad
-                    turtleQuadRenderInternal(ren[i].d, ren[i + 1].d, ren[i + 2].d, ren[i + 8].d, ren[i + 9].d, ren[i + 10].d, ren[i + 11].d, ren[i + 17].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xcenter, ycenter, xfact, yfact);
+                    turtle_quad_render_internal(ren[i].d, ren[i + 1].d, ren[i + 2].d, ren[i + 8].d, ren[i + 9].d, ren[i + 10].d, ren[i + 11].d, ren[i + 17].d, ren[i + 3].b / 255.0, ren[i + 4].b / 255.0, ren[i + 5].b / 255.0, ren[i + 6].b / 255.0, xcenter, ycenter, xfact, yfact);
                     i += 9;
                 }
                 #ifdef TURTLE_ENABLE_TEXTURES
                 if (ren[i + 7].hu >= 128) { // blit texture (rectangle)
-                    turtleTextureRenderInternal(ren[i + 7].hu - 128, ren[i].d, ren[i + 1].d, ren[i + 2].d, ren[i + 3].d, ren[i + 5].d, ren[i + 6].d, ren[i + 8].d, ren[i + 4].d / 57.2958, xcenter, ycenter, xfact, yfact);
+                    turtle_texture_render_internal(ren[i + 7].hu - 128, ren[i].d, ren[i + 1].d, ren[i + 2].d, ren[i + 3].d, ren[i + 5].b / 255.0, ren[i + 6].b / 255.0, ren[i + 8].b / 255.0, ren[i + 4].d / 57.2958, xcenter, ycenter, xfact, yfact);
                 }
                 #endif /* TURTLE_ENABLE_TEXTURES */
                 // if (ren[i + 7].hu == 256) { // blit 3D sphere
@@ -1674,10 +1657,10 @@ void turtleUpdate() {
 
                 // }
                 // if (ren[i + 7].hu == 258) { // blit 3D triangle
-                //     turtlePerspective(ren[i].d, ren[i + 1].d, ren[i + 2].d, &ren[i].d, &ren[i + 1].d);
-                //     turtlePerspective(ren[i + 8].d, ren[i + 9].d, ren[i + 10].d, &ren[i + 8].d, &ren[i + 9].d);
-                //     turtlePerspective(ren[i + 11].d, ren[i + 12].d, ren[i + 13].d, &ren[i + 11].d, &ren[i + 12].d);
-                //     turtleTriangleRenderInternal(ren[i].d, ren[i + 1].d, ren[i + 8].d, ren[i + 9].d, ren[i + 11].d, ren[i + 12].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xcenter, ycenter, xfact, yfact);
+                //     turtle_perspective(ren[i].d, ren[i + 1].d, ren[i + 2].d, &ren[i].d, &ren[i + 1].d);
+                //     turtle_perspective(ren[i + 8].d, ren[i + 9].d, ren[i + 10].d, &ren[i + 8].d, &ren[i + 9].d);
+                //     turtle_perspective(ren[i + 11].d, ren[i + 12].d, ren[i + 13].d, &ren[i + 11].d, &ren[i + 12].d);
+                //     turtle_triangle_render_internal(ren[i].d, ren[i + 1].d, ren[i + 8].d, ren[i + 9].d, ren[i + 11].d, ren[i + 12].d, ren[i + 3].b / 255.0, ren[i + 4].b / 255.0, ren[i + 5].b / 255.0, ren[i + 6].b / 255.0, xcenter, ycenter, xfact, yfact);
                 //     i += 9;
                 // }
                 // if (ren[i + 7].hu == 259) { // blit 3D quad
@@ -1690,11 +1673,11 @@ void turtleUpdate() {
             double originalAspect = (double) turtle.initscreenbounds[0] / turtle.initscreenbounds[1];
             double currentAspect = (double) turtle.screenbounds[0] / turtle.screenbounds[1];
             if (currentAspect > originalAspect) {
-                turtleRectangleRenderInternal(turtle.initbounds[0], turtle.initbounds[1], turtle.bounds[0], turtle.initbounds[3], 0, 0, 0, 1.0, xcenter, ycenter, xfact, yfact);
-                turtleRectangleRenderInternal(turtle.initbounds[2], turtle.initbounds[1], turtle.bounds[2], turtle.initbounds[3], 0, 0, 0, 1.0, xcenter, ycenter, xfact, yfact);
+                turtle_rectangle_render_internal(turtle.initbounds[0], turtle.initbounds[1], turtle.bounds[0], turtle.initbounds[3], 0, 0, 0, 1.0, xcenter, ycenter, xfact, yfact);
+                turtle_rectangle_render_internal(turtle.initbounds[2], turtle.initbounds[1], turtle.bounds[2], turtle.initbounds[3], 0, 0, 0, 1.0, xcenter, ycenter, xfact, yfact);
             } else {
-                turtleRectangleRenderInternal(turtle.initbounds[0], turtle.initbounds[1], turtle.initbounds[2], turtle.bounds[1], 0, 0, 0, 1.0, xcenter, ycenter, xfact, yfact);
-                turtleRectangleRenderInternal(turtle.initbounds[0], turtle.initbounds[3], turtle.initbounds[2], turtle.bounds[3], 0, 0, 0, 1.0, xcenter, ycenter, xfact, yfact);
+                turtle_rectangle_render_internal(turtle.initbounds[0], turtle.initbounds[1], turtle.initbounds[2], turtle.bounds[1], 0, 0, 0, 1.0, xcenter, ycenter, xfact, yfact);
+                turtle_rectangle_render_internal(turtle.initbounds[0], turtle.initbounds[3], turtle.initbounds[2], turtle.bounds[3], 0, 0, 0, 1.0, xcenter, ycenter, xfact, yfact);
             }
         }
         #ifdef TURTLE_ENABLE_TEXTURES
@@ -1721,18 +1704,19 @@ void turtleUpdate() {
     #endif /* OS_BROWSER */
 }
 
-/* keeps the window open while doing nothing else (from python turtleMainLoop()) */
-void turtleMainLoop() {
+/* keeps the window open while doing nothing else (from python turtle.mainloop()) */
+void turtle_main_loop() {
     while (turtle.close == 0) {
-        turtleUpdate();
+        turtle_update();
     }
 }
 
 /* free turtle memory */
-void turtleFree() {
+void turtle_free() {
     list_free(turtle.keyPressed);
     list_free(turtle.penPos);
     #ifdef TURTLE_ENABLE_TEXTURES
     floatList_free(turtle.bufferList);
     #endif /* TURTLE_ENABLE_TEXTURES */
+    glfwTerminate();
 }

@@ -11,7 +11,7 @@ https://patorjk.com/software/taag/#p=display&f=ANSI%20Shadow
 #ifndef TURTLE_TOOLS_H
 #define TURTLE_TOOLS_H
 
-#include "turtleText.h"
+#include "turtle_text.h"
 
 /* random integer between lower and upper bound (inclusive) */
 int randomInt(int lowerBound, int upperBound);

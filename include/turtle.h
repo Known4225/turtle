@@ -24,7 +24,7 @@ https://patorjk.com/software/taag/#p=display&f=ANSI%20Shadow
 #endif /* TURTLE_ENABLE_TEXTURES */
 
 /* required forward declarations (for packaging) */
-extern void glColor4d(double r, double g, double b, double a); // genius tactic to stop compiler warnings
+extern void glColor4d(double r, double g, double b, double a);
 extern void glBegin(int type);
 extern void glVertex2d(double x, double y);
 extern void glEnd();
@@ -38,11 +38,11 @@ enum {
     TURTLE_WINDOW_MONITOR_HEIGHT, // primary monitor height
 };
 
-/* special function that can be called prior to turtleInit() - this function condenses the window creation code boilerplate */
-GLFWwindow *turtleCreateWindow(int32_t windowWidth, int32_t windowHeight, char *windowName);
+/* special function that can be called prior to turtle_init() - this function condenses the window creation code boilerplate */
+GLFWwindow *turtle_create_window(int32_t windowWidth, int32_t windowHeight, char *windowName);
 
-/* special function that can be called prior to turtleInit() - this function condenses the window creation code with icon boilerplate */
-GLFWwindow *turtleCreateWindowIcon(int32_t windowWidth, int32_t windowHeight, char *windowName, char *filename);
+/* special function that can be called prior to turtle_init() - this function condenses the window creation code with icon boilerplate */
+GLFWwindow *turtle_create_window_icon(int32_t windowWidth, int32_t windowHeight, char *windowName, char *filename);
 
 typedef struct {
     GLFWwindow *window; // the window
@@ -53,16 +53,16 @@ typedef struct {
     int32_t screenbounds[2]; // current window size (x, y) (pixels)
     int32_t lastscreenbounds[2]; // last frame window size (x, y) (pixels)
     int32_t initscreenbounds[2]; // window size (x, y) (pixels) at initialisation
-    int32_t resizeMode; // TURTLE_RESIZE_MODE_PAD, TURTLE_RESIZE_MODE_STRETCH, TURTLE_RESIZE_MODE_PAD_NO_BARS (call turtleSetResizeMode() prior to turtleInit() to change)
+    int32_t resizeMode; // TURTLE_RESIZE_MODE_PAD, TURTLE_RESIZE_MODE_STRETCH, TURTLE_RESIZE_MODE_PAD_NO_BARS (call turtle_set_resize_mode() prior to turtle_init() to change)
     double initbounds[4]; // list of coordinate bounds at initialisation (leftX, bottomY, rightX, topY)
     double bounds[4]; // list of coordinate bounds (leftX, bottomY, rightX, topY)
     double centerAndScale[4]; // centerX, centerY, ratioX, ratioY
     double aspect; // aspect ratio
-    double mouseX; // coordinate x position of mouse cursor (must call turtleGetMouseCoordinates() to update)
-    double mouseY; // coordinate y position of mouse cursor (must call turtleGetMouseCoordinates() to update)
-    double scrollY; // call turtleMouseWheel to update
-    double mouseAbsX; // absolute x position of mouse cursor (in pixels) (must call turtleGetMouseCoordinates() to update)
-    double mouseAbsY; // absolute y position of mouse cursor (in pixels) (must call turtleGetMouseCoordinates() to update)
+    double mouseX; // coordinate x position of mouse cursor (must call turtle_get_mouse_coordinates() to update)
+    double mouseY; // coordinate y position of mouse cursor (must call turtle_get_mouse_coordinates() to update)
+    double scrollY; // call turtle_mouse_wheel to update
+    double mouseAbsX; // absolute x position of mouse cursor (in pixels) (must call turtle_get_mouse_coordinates() to update)
+    double mouseAbsY; // absolute y position of mouse cursor (in pixels) (must call turtle_get_mouse_coordinates() to update)
     double x; // coordinate x position of turtle
     double y; // coordinate y position of turtle
     #ifdef TURTLE_ENABLE_TEXTURES
@@ -72,10 +72,10 @@ typedef struct {
     void *bufferList;
     #endif /* TURTLE_ENABLE_TEXTURES */
     list_t *textureList; // filename, original width, original height, channels
-    int32_t textureWidth; // turtle texture width (default 1024) (call turtleSetTextureSize() prior to turtleInit() to change)
-    int32_t textureHeight; // turtle texture height (default 1024) (call turtleSetTextureSize() prior to turtleInit() to change)
+    int32_t textureWidth; // turtle texture width (default 1024) (call turtle_set_texture_size() prior to turtle_init() to change)
+    int32_t textureHeight; // turtle texture height (default 1024) (call turtle_set_texture_size() prior to turtle_init() to change)
     int32_t textureBuffer; // size of GPU glTex 2D Array (default 64)
-    int32_t maxTextures; // size of GPU glTex 2D Array (default 64) (call turtleSetMaxTextures() prior to turtleInit() to change)
+    int32_t maxTextures; // size of GPU glTex 2D Array (default 64) (call turtle_set_max_textures() prior to turtle_init() to change)
     uint32_t textureID; // openGL texture handle
     list_t *penPos; // a list of where to draw
     uint64_t penHash; // the penPos list is hashed and this hash is used to determine if any changes occured between frames
@@ -88,10 +88,10 @@ typedef struct {
     uint8_t forceUpdate; // toggle to skip check to see if screen has changed
     double circleprez; // how precise circles are (specifically, the number of sides of a circle with diameter e, default: 9)
     double pensize; // turtle pen size
-    double penr; // pen red (0 to 1)
-    double peng; // pen green (0 to 1)
-    double penb; // pen blue (0 to 1)
-    double pena; // pen alpha (0 to 1)
+    uint8_t red; // pen red (0 to 255)
+    uint8_t green; // pen green (0 to 255)
+    uint8_t blue; // pen blue (0 to 255)
+    uint8_t alpha; // pen alpha (0 to 255)
     double currentColor[4]; // for reducing API color calls
 
     /* 3D variables */
@@ -115,191 +115,200 @@ typedef enum {
     TURTLE_IMAGE_RESIZE_NEAREST = 2,
 } turtle_image_resize_t;
 
+typedef enum {
+    TURTLE_PEN_SHAPE_CIRCLE = 0,
+    TURTLE_PEN_SHAPE_SQUARE = 1,
+    TURTLE_PEN_SHAPE_TRIANGLE = 2,
+    TURTLE_PEN_SHAPE_NONE = 3,
+    TURTLE_PEN_SHAPE_CONNECTED = 4,
+    TURTLE_PEN_SHAPE_TEXT = 5,
+} turtle_pen_shape_t;
+
 extern turtle_t turtle;
 
 /* run this to set the bounds of the window in coordinates */
-void turtleSetWorldCoordinates(double leftX, double bottomY, double rightX, double topY);
+void turtle_set_world_coordinates(double leftX, double bottomY, double rightX, double topY);
 
 /* detect character */
-void unicodeSense(GLFWwindow *window, uint32_t codepoint);
+void turtle_unicode_sense(GLFWwindow *window, uint32_t codepoint);
 
 /* detect key presses */
-void keySense(GLFWwindow *window, int32_t key, int32_t scancode, int32_t action, int32_t mods);
+void turtle_key_sense(GLFWwindow *window, int32_t key, int32_t scancode, int32_t action, int32_t mods);
 
 /* detect mouse clicks */
-void mouseSense(GLFWwindow *window, int32_t button, int32_t action, int32_t mods);
+void turtle_mouse_sense(GLFWwindow *window, int32_t button, int32_t action, int32_t mods);
 
 /* detect scroll wheel */
-void scrollSense(GLFWwindow *window, double xoffset, double yoffset);
+void turtle_scroll_sense(GLFWwindow *window, double xoffset, double yoffset);
 
 /* the behavior with the mouse wheel is different since it can't be "on" or "off" */
-double turtleMouseWheel();
+double turtle_mouse_wheel();
 
 /* top level boolean output call to check if the key with code [key] is currently being held down. Uses the GLFW_KEY_X macros */
-int8_t turtleKeyPressed(int32_t key);
+int8_t turtle_key_pressed(int32_t key);
 
 /* top level boolean output call to check if the left click button is currently being held down */
-int8_t turtleMouseDown();
+int8_t turtle_mouse_down();
 
-/* alternate duplicate of turtleMouseDown() */
-int8_t turtleMouseLeft();
+/* alternate duplicate of turtle_mouse_down() */
+int8_t turtle_mouse_left();
 
 /* top level boolean output call to check if the right click button is currently being held down */
-int8_t turtleMouseRight();
+int8_t turtle_mouse_right();
 
 /* top level boolean output call to check if the middle mouse button is currently being held down */
-int8_t turtleMouseMiddle();
+int8_t turtle_mouse_middle();
 
-/* alternate duplicate of turtleMouseMiddle() */
-int8_t turtleMouseMid();
+/* alternate duplicate of turtle_mouse_middle() */
+int8_t turtle_mouse_mid();
 
 /* initialises the turtle module, supply coordinate bounds */
-void turtleInit(GLFWwindow *window, double leftX, double bottomY, double rightX, double topY);
+void turtle_init(GLFWwindow *window, double leftX, double bottomY, double rightX, double topY);
 
 /* puts the mouse coordinates in turtle.mouseX and turtle.mouseY */
-void turtleGetMouseCoordinates();
+void turtle_get_mouse_coordinates();
 
 /* set the background color */
-void turtleBackgroundColor(uint8_t r, uint8_t g, uint8_t b);
+void turtle_background_color(uint8_t r, uint8_t g, uint8_t b);
 
 /* set the pen color */
-void turtlePenColor(uint8_t r, uint8_t g, uint8_t b);
+void turtle_pen_color(uint8_t r, uint8_t g, uint8_t b);
 
 /* set the pen color (with transparency) */
-void turtlePenColorAlpha(uint8_t r, uint8_t g, uint8_t b, uint8_t a);
+void turtle_pen_color_alpha(uint8_t r, uint8_t g, uint8_t b, uint8_t a);
 
 /* set the pen size */
-void turtlePenSize(double size);
+void turtle_pen_size(double size);
 
 /* clears all the pen drawings */
-void turtleClear();
+void turtle_clear();
 
 /* pen down */
-void turtlePenDown();
+void turtle_pen_down();
 
 /* lift the pen */
-void turtlePenUp();
+void turtle_pen_up();
 
 /* set the pen shape ("circle", "square", "triangle", "none", or "connected") */
-void turtlePenShape(char *selection);
+void turtle_pen_shape(turtle_pen_shape_t shape);
 
-/* set the circle precision */
-void turtlePenPrez(double prez);
+/* set the circle precision (default 9) */
+void turtle_pen_prez(double prez);
 
 /* moves the turtle to a coordinate */
-void turtleGoto(double x, double y);
+void turtle_goto(double x, double y);
 
 /* texture handle */
 typedef int32_t turtle_texture_t;
 
 #ifdef TURTLE_ENABLE_TEXTURES
 /* function to add a vertex to the turtle.bufferList */
-void addVertex(double x, double y, double r, double g, double b, double a, double tx, double ty, double useTexture);
+void turtle_add_vertex(double x, double y, double r, double g, double b, double a, double tx, double ty, double useTexture);
 
-void turtleTextureRenderInternal(int32_t textureCode, double x1, double y1, double x2, double y2, double r, double g, double b, double rot, double xcenter, double ycenter, double xfact, double yfact);
+void turtle_texture_render_internal(int32_t textureCode, double x1, double y1, double x2, double y2, double r, double g, double b, double rot, double xcenter, double ycenter, double xfact, double yfact);
 #endif /* TURTLE_ENABLE_TEXTURES */
 
-/* set pixel width and height of textures (determines how much memory textures take in the GPU, default 1024, 1024) - must be done BEFORE turtleInit() */
-void turtleSetTextureSize(int32_t width, int32_t height);
+/* set pixel width and height of textures (determines how much memory textures take in the GPU, default 1024, 1024) - must be done BEFORE turtle_init() */
+void turtle_set_texture_size(int32_t width, int32_t height);
 
-/* set maximum number of textures (default 32) - must be done BEFORE turtleInit() */
-void turtleSetMaxTextures(int32_t maxTextures);
+/* set maximum number of textures (default 32) - must be done BEFORE turtle_init() */
+void turtle_set_max_textures(int32_t maxTextures);
 
-/* set resize mode of turtle (TURTLE_RESIZE_MODE_PAD, TURTLE_RESIZE_MODE_STRETCH, or TURTLE_RESIZE_MODE_PAD_NO_BARS) (default TURTLE_RESIZE_MODE_PAD) - must be done BEFORE turtleInit() */
-void turtleSetResizeMode(turtle_resize_mode_t resizeMode);
+/* set resize mode of turtle (TURTLE_RESIZE_MODE_PAD, TURTLE_RESIZE_MODE_STRETCH, or TURTLE_RESIZE_MODE_PAD_NO_BARS) (default TURTLE_RESIZE_MODE_PAD) - must be done BEFORE turtle_init() */
+void turtle_set_resize_mode(turtle_resize_mode_t resizeMode);
 
 /* resize an image - supported encodings: GL_RGB, GL_RGBA, GL_BGR, GL_BGRA, GL_RED, GL_GREEN, GL_BLUE, GL_ALPHA, supported methods: TURTLE_IMAGE_RESIZE_SRGB, TURTLE_IMAGE_RESIZE_LINEAR, TURTLE_IMAGE_RESIZE_NEAREST */
-uint8_t *turtleImageResize(uint8_t *dest, uint32_t destWidth, uint32_t destHeight, uint32_t destEncoding, uint8_t *src, uint32_t srcWidth, uint32_t srcHeight, uint32_t srcEncoding, turtle_image_resize_t method);
+uint8_t *turtle_image_resize(uint8_t *dest, uint32_t destWidth, uint32_t destHeight, uint32_t destEncoding, uint8_t *src, uint32_t srcWidth, uint32_t srcHeight, uint32_t srcEncoding, turtle_image_resize_t method);
 
 /* load a png, jpg, or bmp to GPU memory as a texture */
-turtle_texture_t turtleTextureLoad(char *filename);
+turtle_texture_t turtle_texture_load(char *filename);
 
 /* load data from an array - supported encodings: GL_RGB, GL_RGBA, GL_BGR, GL_BGRA, GL_RED, GL_GREEN, GL_BLUE, GL_ALPHA */
-turtle_texture_t turtleTextureLoadArray(uint8_t *array, uint32_t width, uint32_t height, uint32_t encoding);
+turtle_texture_t turtle_texture_load_array(uint8_t *array, uint32_t width, uint32_t height, uint32_t encoding);
 
 /* load data from a list - supported encodings: GL_RGB, GL_RGBA, GL_BGR, GL_BGRA, GL_RED, GL_GREEN, GL_BLUE, GL_ALPHA */
-turtle_texture_t turtleTextureLoadList(list_t *list, uint32_t width, uint32_t height, uint32_t encoding);
+turtle_texture_t turtle_texture_load_list(list_t *list, uint32_t width, uint32_t height, uint32_t encoding);
 
 /* load data from a list or array of uint8 (make one NULL) - supported encodings: GL_RGB, GL_RGBA, GL_BGR, GL_BGRA, GL_RED, GL_GREEN, GL_BLUE, GL_ALPHA */
-turtle_texture_t turtleTextureLoadListArrayInternal(list_t *list, uint8_t *array, uint32_t width, uint32_t height, uint32_t encoding);
+turtle_texture_t turtle_texture_load_list_array_internal(list_t *list, uint8_t *array, uint32_t width, uint32_t height, uint32_t encoding);
 
 /* get the original width of a loaded texture */
-int32_t turtleTextureGetWidth(turtle_texture_t texture);
+int32_t turtle_texture_get_width(turtle_texture_t texture);
 
 /* get the original height of a loaded texture */
-int32_t turtleTextureGetHeight(turtle_texture_t texture);
+int32_t turtle_texture_get_height(turtle_texture_t texture);
 
 /* print texture name, width, height, and channels */
-void turtleTexturePrint(turtle_texture_t texture);
+void turtle_texture_print(turtle_texture_t texture);
 
 /* replace a texture with new data from a png, jpg, or bmp */
-int32_t turtleTextureReplace(turtle_texture_t texture, char *filename);
+int32_t turtle_texture_replace(turtle_texture_t texture, char *filename);
 
 /* replace a texture with new data from an array - supported encodings: GL_RGB, GL_RGBA, GL_BGR, GL_BGRA, GL_RED, GL_GREEN, GL_BLUE, GL_ALPHA */
-int32_t turtleTextureReplaceArray(turtle_texture_t texture, uint8_t *array, uint32_t width, uint32_t height, uint32_t encoding);
+int32_t turtle_texture_replace_array(turtle_texture_t texture, uint8_t *array, uint32_t width, uint32_t height, uint32_t encoding);
 
 /* replace a texture with new data from a list - supported encodings: GL_RGB, GL_RGBA, GL_BGR, GL_BGRA, GL_RED, GL_GREEN, GL_BLUE, GL_ALPHA */
-int32_t turtleTextureReplaceList(turtle_texture_t texture, list_t *list, uint32_t width, uint32_t height, uint32_t encoding);
+int32_t turtle_texture_replace_list(turtle_texture_t texture, list_t *list, uint32_t width, uint32_t height, uint32_t encoding);
 
 /* replace a texture with new data from a list or array of uint8 (make one NULL) - supported encodings: GL_RGB, GL_RGBA, GL_BGR, GL_BGRA, GL_RED, GL_GREEN, GL_BLUE, GL_ALPHA */
-int32_t turtleTextureReplaceListArrayInternal(turtle_texture_t texture, list_t *list, uint8_t *array, uint32_t width, uint32_t height, uint32_t encoding);
+int32_t turtle_texture_replace_list_array_internal(turtle_texture_t texture, list_t *list, uint8_t *array, uint32_t width, uint32_t height, uint32_t encoding);
 
 /* remove a texture from GPU memory */
-int32_t turtleTextureUnload(turtle_texture_t texture);
+int32_t turtle_texture_unload(turtle_texture_t texture);
 
 /* remove all textures from GPU memory */
-int32_t turtleTextureUnloadAll();
+int32_t turtle_texture_unload_all();
 
 /* adds a (blit) rectangular texture */
-void turtleTexture(turtle_texture_t texture, double x1, double y1, double x2, double y2, double rot);
+void turtle_texture(turtle_texture_t texture, double x1, double y1, double x2, double y2, double rot);
 
-void turtleTextureColor(turtle_texture_t texture, double x1, double y1, double x2, double y2, double rot, uint8_t r, uint8_t g, uint8_t b);
+void turtle_texture_color(turtle_texture_t texture, double x1, double y1, double x2, double y2, double rot, uint8_t r, uint8_t g, uint8_t b);
 
 /* draws a circle at the specified x and y (coordinates) */
-void turtleCircleRenderInternal(double x, double y, double rad, double r, double g, double b, double a, double xcenter, double ycenter, double xfact, double yfact, double prez);
+void turtle_circle_render_internal(double x, double y, double rad, double r, double g, double b, double a, double xcenter, double ycenter, double xfact, double yfact, double prez);
 
 /* draws a rectangle */
-void turtleRectangleRenderInternal(double x1, double y1, double x2, double y2, double r, double g, double b, double a, double xcenter, double ycenter, double xfact, double yfact);
+void turtle_rectangle_render_internal(double x1, double y1, double x2, double y2, double r, double g, double b, double a, double xcenter, double ycenter, double xfact, double yfact);
 
 /* draws a triangle */
-void turtleTriangleRenderInternal(double x1, double y1, double x2, double y2, double x3, double y3, double r, double g, double b, double a, double xcenter, double ycenter, double xfact, double yfact);
+void turtle_triangle_render_internal(double x1, double y1, double x2, double y2, double x3, double y3, double r, double g, double b, double a, double xcenter, double ycenter, double xfact, double yfact);
 
 /* draws a quadrilateral */
-void turtleQuadRenderInternal(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, double r, double g, double b, double a, double xcenter, double ycenter, double xfact, double yfact);
+void turtle_quad_render_internal(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, double r, double g, double b, double a, double xcenter, double ycenter, double xfact, double yfact);
 
 /* adds a (blit) triangle to the pipeline (for better speed) */
-void turtleTriangle(double x1, double y1, double x2, double y2, double x3, double y3);
+void turtle_triangle(double x1, double y1, double x2, double y2, double x3, double y3);
 
-void turtleTriangleColor(double x1, double y1, double x2, double y2, double x3, double y3, uint8_t r, uint8_t g, uint8_t b, uint8_t a);
+void turtle_triangle_color(double x1, double y1, double x2, double y2, double x3, double y3, uint8_t r, uint8_t g, uint8_t b, uint8_t a);
 
 /* adds a (blit) quad to the pipeline (for better speed) */
-void turtleQuad(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4);
+void turtle_quad(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4);
 
-void turtleQuadColor(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, uint8_t r, uint8_t g, uint8_t b, uint8_t a);
+void turtle_quad_color(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, uint8_t r, uint8_t g, uint8_t b, uint8_t a);
 
 /* adds a (blit) rectangle to the pipeline (uses quad interface) */
-void turtleRectangle(double x1, double y1, double x2, double y2);
+void turtle_rectangle(double x1, double y1, double x2, double y2);
 
-void turtleRectangleColor(double x1, double y1, double x2, double y2, uint8_t r, uint8_t g, uint8_t b, uint8_t a);
+void turtle_rectangle_color(double x1, double y1, double x2, double y2, uint8_t r, uint8_t g, uint8_t b, uint8_t a);
 
 /* adds a (blit) circle to the pipeline */
-void turtleCircle(double x, double y, double radius);
+void turtle_circle(double x, double y, double radius);
 
-void turtleCircleColor(double x, double y, double radius, uint8_t r, uint8_t g, uint8_t b, uint8_t a);
+void turtle_circle_color(double x, double y, double radius, uint8_t r, uint8_t g, uint8_t b, uint8_t a);
 
 /* create a triangle in 3D */
-void turtle3DTriangle(double x1, double y1, double z1, double x2, double y2, double z2, double x3, double y3, double z3);
+void turtle_3D_Triangle(double x1, double y1, double z1, double x2, double y2, double z2, double x3, double y3, double z3);
 
 /* 3D -> 2D using perspective projection matrix */
-void turtlePerspective(double x, double y, double z, double *xOut, double *yOut);
+void turtle_perspective(double x, double y, double z, double *xOut, double *yOut);
 
 /* draws the turtle's path on the screen */
-void turtleUpdate();
+void turtle_update();
 
-/* keeps the window open while doing nothing else (from python turtleMainLoop()) */
-void turtleMainLoop();
+/* keeps the window open while doing nothing else (from python turtle.mainloop()) */
+void turtle_main_loop();
 
 /* free turtle memory */
-void turtleFree();
+void turtle_free();
 
 #endif /* TURTLE_INTERNAL_H */

@@ -10059,7 +10059,7 @@ https://patorjk.com/software/taag/#p=display&f=ANSI%20Shadow
 #endif /* TURTLE_ENABLE_TEXTURES */
 
 /* required forward declarations (for packaging) */
-extern void glColor4d(double r, double g, double b, double a); // genius tactic to stop compiler warnings
+extern void glColor4d(double r, double g, double b, double a);
 extern void glBegin(int type);
 extern void glVertex2d(double x, double y);
 extern void glEnd();
@@ -10073,11 +10073,11 @@ enum {
     TURTLE_WINDOW_MONITOR_HEIGHT, // primary monitor height
 };
 
-/* special function that can be called prior to turtleInit() - this function condenses the window creation code boilerplate */
-GLFWwindow *turtleCreateWindow(int32_t windowWidth, int32_t windowHeight, char *windowName);
+/* special function that can be called prior to turtle_init() - this function condenses the window creation code boilerplate */
+GLFWwindow *turtle_create_window(int32_t windowWidth, int32_t windowHeight, char *windowName);
 
-/* special function that can be called prior to turtleInit() - this function condenses the window creation code with icon boilerplate */
-GLFWwindow *turtleCreateWindowIcon(int32_t windowWidth, int32_t windowHeight, char *windowName, char *filename);
+/* special function that can be called prior to turtle_init() - this function condenses the window creation code with icon boilerplate */
+GLFWwindow *turtle_create_window_icon(int32_t windowWidth, int32_t windowHeight, char *windowName, char *filename);
 
 typedef struct {
     GLFWwindow *window; // the window
@@ -10088,16 +10088,16 @@ typedef struct {
     int32_t screenbounds[2]; // current window size (x, y) (pixels)
     int32_t lastscreenbounds[2]; // last frame window size (x, y) (pixels)
     int32_t initscreenbounds[2]; // window size (x, y) (pixels) at initialisation
-    int32_t resizeMode; // TURTLE_RESIZE_MODE_PAD, TURTLE_RESIZE_MODE_STRETCH, TURTLE_RESIZE_MODE_PAD_NO_BARS (call turtleSetResizeMode() prior to turtleInit() to change)
+    int32_t resizeMode; // TURTLE_RESIZE_MODE_PAD, TURTLE_RESIZE_MODE_STRETCH, TURTLE_RESIZE_MODE_PAD_NO_BARS (call turtle_set_resize_mode() prior to turtle_init() to change)
     double initbounds[4]; // list of coordinate bounds at initialisation (leftX, bottomY, rightX, topY)
     double bounds[4]; // list of coordinate bounds (leftX, bottomY, rightX, topY)
     double centerAndScale[4]; // centerX, centerY, ratioX, ratioY
     double aspect; // aspect ratio
-    double mouseX; // coordinate x position of mouse cursor (must call turtleGetMouseCoordinates() to update)
-    double mouseY; // coordinate y position of mouse cursor (must call turtleGetMouseCoordinates() to update)
-    double scrollY; // call turtleMouseWheel to update
-    double mouseAbsX; // absolute x position of mouse cursor (in pixels) (must call turtleGetMouseCoordinates() to update)
-    double mouseAbsY; // absolute y position of mouse cursor (in pixels) (must call turtleGetMouseCoordinates() to update)
+    double mouseX; // coordinate x position of mouse cursor (must call turtle_get_mouse_coordinates() to update)
+    double mouseY; // coordinate y position of mouse cursor (must call turtle_get_mouse_coordinates() to update)
+    double scrollY; // call turtle_mouse_wheel to update
+    double mouseAbsX; // absolute x position of mouse cursor (in pixels) (must call turtle_get_mouse_coordinates() to update)
+    double mouseAbsY; // absolute y position of mouse cursor (in pixels) (must call turtle_get_mouse_coordinates() to update)
     double x; // coordinate x position of turtle
     double y; // coordinate y position of turtle
     #ifdef TURTLE_ENABLE_TEXTURES
@@ -10107,10 +10107,10 @@ typedef struct {
     void *bufferList;
     #endif /* TURTLE_ENABLE_TEXTURES */
     list_t *textureList; // filename, original width, original height, channels
-    int32_t textureWidth; // turtle texture width (default 1024) (call turtleSetTextureSize() prior to turtleInit() to change)
-    int32_t textureHeight; // turtle texture height (default 1024) (call turtleSetTextureSize() prior to turtleInit() to change)
+    int32_t textureWidth; // turtle texture width (default 1024) (call turtle_set_texture_size() prior to turtle_init() to change)
+    int32_t textureHeight; // turtle texture height (default 1024) (call turtle_set_texture_size() prior to turtle_init() to change)
     int32_t textureBuffer; // size of GPU glTex 2D Array (default 64)
-    int32_t maxTextures; // size of GPU glTex 2D Array (default 64) (call turtleSetMaxTextures() prior to turtleInit() to change)
+    int32_t maxTextures; // size of GPU glTex 2D Array (default 64) (call turtle_set_max_textures() prior to turtle_init() to change)
     uint32_t textureID; // openGL texture handle
     list_t *penPos; // a list of where to draw
     uint64_t penHash; // the penPos list is hashed and this hash is used to determine if any changes occured between frames
@@ -10123,10 +10123,10 @@ typedef struct {
     uint8_t forceUpdate; // toggle to skip check to see if screen has changed
     double circleprez; // how precise circles are (specifically, the number of sides of a circle with diameter e, default: 9)
     double pensize; // turtle pen size
-    double penr; // pen red (0 to 1)
-    double peng; // pen green (0 to 1)
-    double penb; // pen blue (0 to 1)
-    double pena; // pen alpha (0 to 1)
+    uint8_t red; // pen red (0 to 255)
+    uint8_t green; // pen green (0 to 255)
+    uint8_t blue; // pen blue (0 to 255)
+    uint8_t alpha; // pen alpha (0 to 255)
     double currentColor[4]; // for reducing API color calls
 
     /* 3D variables */
@@ -10150,192 +10150,201 @@ typedef enum {
     TURTLE_IMAGE_RESIZE_NEAREST = 2,
 } turtle_image_resize_t;
 
+typedef enum {
+    TURTLE_PEN_SHAPE_CIRCLE = 0,
+    TURTLE_PEN_SHAPE_SQUARE = 1,
+    TURTLE_PEN_SHAPE_TRIANGLE = 2,
+    TURTLE_PEN_SHAPE_NONE = 3,
+    TURTLE_PEN_SHAPE_CONNECTED = 4,
+    TURTLE_PEN_SHAPE_TEXT = 5,
+} turtle_pen_shape_t;
+
 extern turtle_t turtle;
 
 /* run this to set the bounds of the window in coordinates */
-void turtleSetWorldCoordinates(double leftX, double bottomY, double rightX, double topY);
+void turtle_set_world_coordinates(double leftX, double bottomY, double rightX, double topY);
 
 /* detect character */
-void unicodeSense(GLFWwindow *window, uint32_t codepoint);
+void turtle_unicode_sense(GLFWwindow *window, uint32_t codepoint);
 
 /* detect key presses */
-void keySense(GLFWwindow *window, int32_t key, int32_t scancode, int32_t action, int32_t mods);
+void turtle_key_sense(GLFWwindow *window, int32_t key, int32_t scancode, int32_t action, int32_t mods);
 
 /* detect mouse clicks */
-void mouseSense(GLFWwindow *window, int32_t button, int32_t action, int32_t mods);
+void turtle_mouse_sense(GLFWwindow *window, int32_t button, int32_t action, int32_t mods);
 
 /* detect scroll wheel */
-void scrollSense(GLFWwindow *window, double xoffset, double yoffset);
+void turtle_scroll_sense(GLFWwindow *window, double xoffset, double yoffset);
 
 /* the behavior with the mouse wheel is different since it can't be "on" or "off" */
-double turtleMouseWheel();
+double turtle_mouse_wheel();
 
 /* top level boolean output call to check if the key with code [key] is currently being held down. Uses the GLFW_KEY_X macros */
-int8_t turtleKeyPressed(int32_t key);
+int8_t turtle_key_pressed(int32_t key);
 
 /* top level boolean output call to check if the left click button is currently being held down */
-int8_t turtleMouseDown();
+int8_t turtle_mouse_down();
 
-/* alternate duplicate of turtleMouseDown() */
-int8_t turtleMouseLeft();
+/* alternate duplicate of turtle_mouse_down() */
+int8_t turtle_mouse_left();
 
 /* top level boolean output call to check if the right click button is currently being held down */
-int8_t turtleMouseRight();
+int8_t turtle_mouse_right();
 
 /* top level boolean output call to check if the middle mouse button is currently being held down */
-int8_t turtleMouseMiddle();
+int8_t turtle_mouse_middle();
 
-/* alternate duplicate of turtleMouseMiddle() */
-int8_t turtleMouseMid();
+/* alternate duplicate of turtle_mouse_middle() */
+int8_t turtle_mouse_mid();
 
 /* initialises the turtle module, supply coordinate bounds */
-void turtleInit(GLFWwindow *window, double leftX, double bottomY, double rightX, double topY);
+void turtle_init(GLFWwindow *window, double leftX, double bottomY, double rightX, double topY);
 
 /* puts the mouse coordinates in turtle.mouseX and turtle.mouseY */
-void turtleGetMouseCoordinates();
+void turtle_get_mouse_coordinates();
 
 /* set the background color */
-void turtleBackgroundColor(uint8_t r, uint8_t g, uint8_t b);
+void turtle_background_color(uint8_t r, uint8_t g, uint8_t b);
 
 /* set the pen color */
-void turtlePenColor(uint8_t r, uint8_t g, uint8_t b);
+void turtle_pen_color(uint8_t r, uint8_t g, uint8_t b);
 
 /* set the pen color (with transparency) */
-void turtlePenColorAlpha(uint8_t r, uint8_t g, uint8_t b, uint8_t a);
+void turtle_pen_color_alpha(uint8_t r, uint8_t g, uint8_t b, uint8_t a);
 
 /* set the pen size */
-void turtlePenSize(double size);
+void turtle_pen_size(double size);
 
 /* clears all the pen drawings */
-void turtleClear();
+void turtle_clear();
 
 /* pen down */
-void turtlePenDown();
+void turtle_pen_down();
 
 /* lift the pen */
-void turtlePenUp();
+void turtle_pen_up();
 
 /* set the pen shape ("circle", "square", "triangle", "none", or "connected") */
-void turtlePenShape(char *selection);
+void turtle_pen_shape(turtle_pen_shape_t shape);
 
-/* set the circle precision */
-void turtlePenPrez(double prez);
+/* set the circle precision (default 9) */
+void turtle_pen_prez(double prez);
 
 /* moves the turtle to a coordinate */
-void turtleGoto(double x, double y);
+void turtle_goto(double x, double y);
 
 /* texture handle */
 typedef int32_t turtle_texture_t;
 
 #ifdef TURTLE_ENABLE_TEXTURES
 /* function to add a vertex to the turtle.bufferList */
-void addVertex(double x, double y, double r, double g, double b, double a, double tx, double ty, double useTexture);
+void turtle_add_vertex(double x, double y, double r, double g, double b, double a, double tx, double ty, double useTexture);
 
-void turtleTextureRenderInternal(int32_t textureCode, double x1, double y1, double x2, double y2, double r, double g, double b, double rot, double xcenter, double ycenter, double xfact, double yfact);
+void turtle_texture_render_internal(int32_t textureCode, double x1, double y1, double x2, double y2, double r, double g, double b, double rot, double xcenter, double ycenter, double xfact, double yfact);
 #endif /* TURTLE_ENABLE_TEXTURES */
 
-/* set pixel width and height of textures (determines how much memory textures take in the GPU, default 1024, 1024) - must be done BEFORE turtleInit() */
-void turtleSetTextureSize(int32_t width, int32_t height);
+/* set pixel width and height of textures (determines how much memory textures take in the GPU, default 1024, 1024) - must be done BEFORE turtle_init() */
+void turtle_set_texture_size(int32_t width, int32_t height);
 
-/* set maximum number of textures (default 32) - must be done BEFORE turtleInit() */
-void turtleSetMaxTextures(int32_t maxTextures);
+/* set maximum number of textures (default 32) - must be done BEFORE turtle_init() */
+void turtle_set_max_textures(int32_t maxTextures);
 
-/* set resize mode of turtle (TURTLE_RESIZE_MODE_PAD, TURTLE_RESIZE_MODE_STRETCH, or TURTLE_RESIZE_MODE_PAD_NO_BARS) (default TURTLE_RESIZE_MODE_PAD) - must be done BEFORE turtleInit() */
-void turtleSetResizeMode(turtle_resize_mode_t resizeMode);
+/* set resize mode of turtle (TURTLE_RESIZE_MODE_PAD, TURTLE_RESIZE_MODE_STRETCH, or TURTLE_RESIZE_MODE_PAD_NO_BARS) (default TURTLE_RESIZE_MODE_PAD) - must be done BEFORE turtle_init() */
+void turtle_set_resize_mode(turtle_resize_mode_t resizeMode);
 
 /* resize an image - supported encodings: GL_RGB, GL_RGBA, GL_BGR, GL_BGRA, GL_RED, GL_GREEN, GL_BLUE, GL_ALPHA, supported methods: TURTLE_IMAGE_RESIZE_SRGB, TURTLE_IMAGE_RESIZE_LINEAR, TURTLE_IMAGE_RESIZE_NEAREST */
-uint8_t *turtleImageResize(uint8_t *dest, uint32_t destWidth, uint32_t destHeight, uint32_t destEncoding, uint8_t *src, uint32_t srcWidth, uint32_t srcHeight, uint32_t srcEncoding, turtle_image_resize_t method);
+uint8_t *turtle_image_resize(uint8_t *dest, uint32_t destWidth, uint32_t destHeight, uint32_t destEncoding, uint8_t *src, uint32_t srcWidth, uint32_t srcHeight, uint32_t srcEncoding, turtle_image_resize_t method);
 
 /* load a png, jpg, or bmp to GPU memory as a texture */
-turtle_texture_t turtleTextureLoad(char *filename);
+turtle_texture_t turtle_texture_load(char *filename);
 
 /* load data from an array - supported encodings: GL_RGB, GL_RGBA, GL_BGR, GL_BGRA, GL_RED, GL_GREEN, GL_BLUE, GL_ALPHA */
-turtle_texture_t turtleTextureLoadArray(uint8_t *array, uint32_t width, uint32_t height, uint32_t encoding);
+turtle_texture_t turtle_texture_load_array(uint8_t *array, uint32_t width, uint32_t height, uint32_t encoding);
 
 /* load data from a list - supported encodings: GL_RGB, GL_RGBA, GL_BGR, GL_BGRA, GL_RED, GL_GREEN, GL_BLUE, GL_ALPHA */
-turtle_texture_t turtleTextureLoadList(list_t *list, uint32_t width, uint32_t height, uint32_t encoding);
+turtle_texture_t turtle_texture_load_list(list_t *list, uint32_t width, uint32_t height, uint32_t encoding);
 
 /* load data from a list or array of uint8 (make one NULL) - supported encodings: GL_RGB, GL_RGBA, GL_BGR, GL_BGRA, GL_RED, GL_GREEN, GL_BLUE, GL_ALPHA */
-turtle_texture_t turtleTextureLoadListArrayInternal(list_t *list, uint8_t *array, uint32_t width, uint32_t height, uint32_t encoding);
+turtle_texture_t turtle_texture_load_list_array_internal(list_t *list, uint8_t *array, uint32_t width, uint32_t height, uint32_t encoding);
 
 /* get the original width of a loaded texture */
-int32_t turtleTextureGetWidth(turtle_texture_t texture);
+int32_t turtle_texture_get_width(turtle_texture_t texture);
 
 /* get the original height of a loaded texture */
-int32_t turtleTextureGetHeight(turtle_texture_t texture);
+int32_t turtle_texture_get_height(turtle_texture_t texture);
 
 /* print texture name, width, height, and channels */
-void turtleTexturePrint(turtle_texture_t texture);
+void turtle_texture_print(turtle_texture_t texture);
 
 /* replace a texture with new data from a png, jpg, or bmp */
-int32_t turtleTextureReplace(turtle_texture_t texture, char *filename);
+int32_t turtle_texture_replace(turtle_texture_t texture, char *filename);
 
 /* replace a texture with new data from an array - supported encodings: GL_RGB, GL_RGBA, GL_BGR, GL_BGRA, GL_RED, GL_GREEN, GL_BLUE, GL_ALPHA */
-int32_t turtleTextureReplaceArray(turtle_texture_t texture, uint8_t *array, uint32_t width, uint32_t height, uint32_t encoding);
+int32_t turtle_texture_replace_array(turtle_texture_t texture, uint8_t *array, uint32_t width, uint32_t height, uint32_t encoding);
 
 /* replace a texture with new data from a list - supported encodings: GL_RGB, GL_RGBA, GL_BGR, GL_BGRA, GL_RED, GL_GREEN, GL_BLUE, GL_ALPHA */
-int32_t turtleTextureReplaceList(turtle_texture_t texture, list_t *list, uint32_t width, uint32_t height, uint32_t encoding);
+int32_t turtle_texture_replace_list(turtle_texture_t texture, list_t *list, uint32_t width, uint32_t height, uint32_t encoding);
 
 /* replace a texture with new data from a list or array of uint8 (make one NULL) - supported encodings: GL_RGB, GL_RGBA, GL_BGR, GL_BGRA, GL_RED, GL_GREEN, GL_BLUE, GL_ALPHA */
-int32_t turtleTextureReplaceListArrayInternal(turtle_texture_t texture, list_t *list, uint8_t *array, uint32_t width, uint32_t height, uint32_t encoding);
+int32_t turtle_texture_replace_list_array_internal(turtle_texture_t texture, list_t *list, uint8_t *array, uint32_t width, uint32_t height, uint32_t encoding);
 
 /* remove a texture from GPU memory */
-int32_t turtleTextureUnload(turtle_texture_t texture);
+int32_t turtle_texture_unload(turtle_texture_t texture);
 
 /* remove all textures from GPU memory */
-int32_t turtleTextureUnloadAll();
+int32_t turtle_texture_unload_all();
 
 /* adds a (blit) rectangular texture */
-void turtleTexture(turtle_texture_t texture, double x1, double y1, double x2, double y2, double rot);
+void turtle_texture(turtle_texture_t texture, double x1, double y1, double x2, double y2, double rot);
 
-void turtleTextureColor(turtle_texture_t texture, double x1, double y1, double x2, double y2, double rot, uint8_t r, uint8_t g, uint8_t b);
+void turtle_texture_color(turtle_texture_t texture, double x1, double y1, double x2, double y2, double rot, uint8_t r, uint8_t g, uint8_t b);
 
 /* draws a circle at the specified x and y (coordinates) */
-void turtleCircleRenderInternal(double x, double y, double rad, double r, double g, double b, double a, double xcenter, double ycenter, double xfact, double yfact, double prez);
+void turtle_circle_render_internal(double x, double y, double rad, double r, double g, double b, double a, double xcenter, double ycenter, double xfact, double yfact, double prez);
 
 /* draws a rectangle */
-void turtleRectangleRenderInternal(double x1, double y1, double x2, double y2, double r, double g, double b, double a, double xcenter, double ycenter, double xfact, double yfact);
+void turtle_rectangle_render_internal(double x1, double y1, double x2, double y2, double r, double g, double b, double a, double xcenter, double ycenter, double xfact, double yfact);
 
 /* draws a triangle */
-void turtleTriangleRenderInternal(double x1, double y1, double x2, double y2, double x3, double y3, double r, double g, double b, double a, double xcenter, double ycenter, double xfact, double yfact);
+void turtle_triangle_render_internal(double x1, double y1, double x2, double y2, double x3, double y3, double r, double g, double b, double a, double xcenter, double ycenter, double xfact, double yfact);
 
 /* draws a quadrilateral */
-void turtleQuadRenderInternal(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, double r, double g, double b, double a, double xcenter, double ycenter, double xfact, double yfact);
+void turtle_quad_render_internal(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, double r, double g, double b, double a, double xcenter, double ycenter, double xfact, double yfact);
 
 /* adds a (blit) triangle to the pipeline (for better speed) */
-void turtleTriangle(double x1, double y1, double x2, double y2, double x3, double y3);
+void turtle_triangle(double x1, double y1, double x2, double y2, double x3, double y3);
 
-void turtleTriangleColor(double x1, double y1, double x2, double y2, double x3, double y3, uint8_t r, uint8_t g, uint8_t b, uint8_t a);
+void turtle_triangle_color(double x1, double y1, double x2, double y2, double x3, double y3, uint8_t r, uint8_t g, uint8_t b, uint8_t a);
 
 /* adds a (blit) quad to the pipeline (for better speed) */
-void turtleQuad(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4);
+void turtle_quad(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4);
 
-void turtleQuadColor(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, uint8_t r, uint8_t g, uint8_t b, uint8_t a);
+void turtle_quad_color(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, uint8_t r, uint8_t g, uint8_t b, uint8_t a);
 
 /* adds a (blit) rectangle to the pipeline (uses quad interface) */
-void turtleRectangle(double x1, double y1, double x2, double y2);
+void turtle_rectangle(double x1, double y1, double x2, double y2);
 
-void turtleRectangleColor(double x1, double y1, double x2, double y2, uint8_t r, uint8_t g, uint8_t b, uint8_t a);
+void turtle_rectangle_color(double x1, double y1, double x2, double y2, uint8_t r, uint8_t g, uint8_t b, uint8_t a);
 
 /* adds a (blit) circle to the pipeline */
-void turtleCircle(double x, double y, double radius);
+void turtle_circle(double x, double y, double radius);
 
-void turtleCircleColor(double x, double y, double radius, uint8_t r, uint8_t g, uint8_t b, uint8_t a);
+void turtle_circle_color(double x, double y, double radius, uint8_t r, uint8_t g, uint8_t b, uint8_t a);
 
 /* create a triangle in 3D */
-void turtle3DTriangle(double x1, double y1, double z1, double x2, double y2, double z2, double x3, double y3, double z3);
+void turtle_3D_Triangle(double x1, double y1, double z1, double x2, double y2, double z2, double x3, double y3, double z3);
 
 /* 3D -> 2D using perspective projection matrix */
-void turtlePerspective(double x, double y, double z, double *xOut, double *yOut);
+void turtle_perspective(double x, double y, double z, double *xOut, double *yOut);
 
 /* draws the turtle's path on the screen */
-void turtleUpdate();
+void turtle_update();
 
-/* keeps the window open while doing nothing else (from python turtleMainLoop()) */
-void turtleMainLoop();
+/* keeps the window open while doing nothing else (from python turtle.mainloop()) */
+void turtle_main_loop();
 
 /* free turtle memory */
-void turtleFree();
+void turtle_free();
 
 #endif /* TURTLE_INTERNAL_H */
 
@@ -10363,7 +10372,7 @@ https://patorjk.com/software/taag/#p=display&f=ANSI%20Shadow
 
 #include <stdarg.h>
 
-/* turtleText variables */
+/* turtle_text variables */
 typedef struct {
     int32_t bezierPrez; // precision for bezier curves
     int32_t bezierPrezCurrent;
@@ -10388,77 +10397,77 @@ typedef struct {
         }
     }
     */
-} turtleText_t;
+} turtle_text_t;
 
-extern turtleText_t turtleText;
+extern turtle_text_t turtleText;
 
-/* initialise turtleText, must supply a font file (tgl) - if font file is not found then a default font will be substituted */
-int32_t turtleTextInit(const char *filename);
+/* initialise turtle_text, must supply a font file (tgl) - if font file is not found then a default font will be substituted */
+int32_t turtle_text_init(const char *filename);
 
 /* render functions */
 
 /* renders a quadratic bezier curve on the screen */
-void turtleTextRenderBezier(double x1, double y1, double x2, double y2, double x3, double y3, int32_t prez);
+void turtle_text_render_bezier(double x1, double y1, double x2, double y2, double x3, double y3, int32_t prez);
 
 /* renders a single character - INTERNAL */
-void turtleTextRenderChar(int32_t index, double x, double y, double size);
+void turtle_text_render_char(int32_t index, double x, double y, double size);
 
-/* special version of turtleTextRenderChar with rotation - INTERNAL */
-void turtleTextRenderCharRotated(int32_t index, double x, double y, double size, double sinR, double cosR);
+/* special version of turtle_text_render_char with rotation - INTERNAL */
+void turtle_text_render_char_rotated(int32_t index, double x, double y, double size, double sinR, double cosR);
 
 /* gets the length of a string in coordinates on the screen */
-double turtleTextGetLength(const uint32_t *text, int32_t textLength, double size);
+double turtle_text_get_length(const uint32_t *text, int32_t textLength, double size);
 
 /* gets the length of a formatted string in coordinates on the screen */
-double turtleTextGetStringLength(const char *str, double size);
+double turtle_text_get_string_length(const char *str, double size);
 
-/* gets the length of a string in coordinates on the screen */
-double turtleTextGetStringLengthf(double size, const char *str, ...);
+/* gets the length of a string in coordinates on the screen (max of 2048 characters) */
+double turtle_text_get_string_lengthf(double size, const char *str, ...);
 
 /* gets the length of a formatted utf8-string in coordinates on the screen */
-double turtleTextGetUnicodeLength(const char *str, double size);
+double turtle_text_get_unicode_length(const char *str, double size);
 
-/* gets the length of a utf8-string in coordinates on the screen */
-double turtleTextGetUnicodeLengthf(double size, const char *str, ...);
+/* gets the length of a utf8-string in coordinates on the screen (max of 2048 characters) */
+double turtle_text_get_unicode_lengthf(double size, const char *str, ...);
 
 /* cut the text of a string such that it will fit in a coordinate size width (0 - left truncate, 1 - right truncate) */
-void turtleTextTruncateString(char *str, double size, double width, int8_t leftRight);
+void turtle_text_truncate_string(char *str, double size, double width, int8_t leftRight);
 
 /* Writes to the screen - INTERNAL */
-void turtleTextWrite(const uint32_t *text, int32_t textLength, double x, double y, double size, double align);
+void turtle_text_write(const uint32_t *text, int32_t textLength, double x, double y, double size, double align);
 
 /* Special form of write function which supports rotated text - INTERNAL */
-void turtleTextWriteRotated(const uint32_t *text, int32_t textLength, double x, double y, double size, double align, double rotate);
+void turtle_text_write_rotated(const uint32_t *text, int32_t textLength, double x, double y, double size, double align, double rotate);
 
 /* Write a string to the screen */
-void turtleTextWriteString(const char *str, double x, double y, double size, double align);
+void turtle_text_write_string(const char *str, double x, double y, double size, double align);
 
-/* Write a formatted string to the screen */
-void turtleTextWriteStringf(double x, double y, double size, double align, const char *str, ...);
+/* Write a formatted string to the screen (max of 2048 characters) */
+void turtle_text_write_stringf(double x, double y, double size, double align, const char *str, ...);
 
 /* Write a string to the screen (with rotation) */
-void turtleTextWriteStringRotated(const char *str, double x, double y, double size, double align, double rotate);
+void turtle_text_write_string_rotated(const char *str, double x, double y, double size, double align, double rotate);
 
-/* Write a formatted string to the screen (with rotation) */
-void turtleTextWriteStringfRotated(double x, double y, double size, double align, double rotate, const char *str, ...);
+/* Write a formatted string to the screen (with rotation) (max of 2048 characters) */
+void turtle_text_write_stringf_rotated(double x, double y, double size, double align, double rotate, const char *str, ...);
 
 /* Write a utf8-string to the screen */
-void turtleTextWriteUnicode(const char *str, double x, double y, double size, double align);
+void turtle_text_write_unicode(const char *str, double x, double y, double size, double align);
 
-/* Write a formatted utf8-string to the screen */
-void turtleTextWriteUnicodef(double x, double y, double size, double align, const char *str, ...);
+/* Write a formatted utf8-string to the screen (max of 2048 characters) */
+void turtle_text_write_unicodef(double x, double y, double size, double align, const char *str, ...);
 
 /* Write a utf8-string to the screen (with rotation) */
-void turtleTextWriteUnicodeRotated(const char *str, double x, double y, double size, double align, double rotate);
+void turtle_text_write_unicode_rotated(const char *str, double x, double y, double size, double align, double rotate);
 
-/* Write a formatted utf8-string to the screen (with rotation) */
-void turtleTextWriteUnicodefRotated(double x, double y, double size, double align, double rotate, const char *str, ...);
+/* Write a formatted utf8-string to the screen (with rotation) (max of 2048 characters) */
+void turtle_text_write_unicodef_rotated(double x, double y, double size, double align, double rotate, const char *str, ...);
 
 /* internal function for converting utf8 to uint32_t characters */
-int32_t turtleTextConvertUnicode(const char *str, uint32_t *converted);
+int32_t turtle_text_convert_unicode(const char *str, uint32_t *converted);
 
 /* if the font file is not found, use the default font (kept here) */
-void turtleTextGenerateDefaultFont(list_t *generatedFont);
+void turtle_text_generate_default_font(list_t *generatedFont);
 
 #endif /* TURTLE_TEXT_H */
 
@@ -11286,13 +11295,13 @@ extern ost_file_dialog_t osToolsFileDialog;
 extern ost_memmap_t osToolsMemmap;
 
 /* OS independent functions */
-void osToolsIndependentInit(GLFWwindow *window);
+void os_tools_independent_init(GLFWwindow *window);
 
 /* returns clipboard text */
-const char *osToolsClipboardGetText();
+const char *os_tools_clipboard_get_text();
 
 /* takes null terminated strings */
-int32_t osToolsClipboardSetText(const char *input);
+int32_t os_tools_clipboard_set_text(const char *input);
 
 /*
 GLFW_ARROW_CURSOR
@@ -11305,11 +11314,11 @@ GLFW_DLESIZE_CURSOR
 GLFW_DRESIZE_CURSOR
 GLFW_MOVE_CURSOR
 */
-void osToolsSetCursor(uint32_t cursor);
+void os_tools_set_cursor(uint32_t cursor);
 
-void osToolsHideAndLockCursor();
+void os_tools_hide_and_lock_cursor();
 
-void osToolsShowCursor();
+void os_tools_show_cursor();
 
 typedef enum {
     OSTOOLS_CSV_ROW = 0,
@@ -11322,22 +11331,22 @@ typedef enum {
     OSTOOLS_CSV_FIELD_STRING = 2,
 } ost_csv_field_t;
 
-list_t *osToolsLoadInternal(char *filename, ost_csv_t rowOrColumn, char delimeter, ost_csv_field_t fieldType);
+list_t *os_tools_load_internal(char *filename, ost_csv_t rowOrColumn, char delimeter, ost_csv_field_t fieldType);
 
 /* packages a CSV file into a list (headers are strings, all fields are doubles) - use OSTOOLS_CSV_ROW to put it in a list of lists where each list is a row of the CSV and use OSTOOLS_CSV_COLUMN to output a list of lists where each list is a column of the CSV */
-list_t *osToolsLoadCSV(char *filename, ost_csv_t rowOrColumn);
+list_t *os_tools_load_csv(char *filename, ost_csv_t rowOrColumn);
 
 /* packages a CSV file into a list (headers are strings, all fields are doubles) - use OSTOOLS_CSV_ROW to put it in a list of lists where each list is a row of the CSV and use OSTOOLS_CSV_COLUMN to output a list of lists where each list is a column of the CSV */
-list_t *osToolsLoadCSVDouble(char *filename, ost_csv_t rowOrColumn);
+list_t *os_tools_load_csv_double(char *filename, ost_csv_t rowOrColumn);
 
 /* packages a CSV file into a list (headers are strings, all fields are ints) - use OSTOOLS_CSV_ROW to put it in a list of lists where each list is a row of the CSV and use OSTOOLS_CSV_COLUMN to output a list of lists where each list is a column of the CSV */
-list_t *osToolsLoadCSVInt(char *filename, ost_csv_t rowOrColumn);
+list_t *os_tools_load_csv_int(char *filename, ost_csv_t rowOrColumn);
 
 /* packages a CSV file into a list (headers are strings, all fields are strings) - use OSTOOLS_CSV_ROW to put it in a list of lists where each list is a row of the CSV and use OSTOOLS_CSV_COLUMN to output a list of lists where each list is a column of the CSV */
-list_t *osToolsLoadCSVString(char *filename, ost_csv_t rowOrColumn);
+list_t *os_tools_load_csv_string(char *filename, ost_csv_t rowOrColumn);
 
 /* untether the program from the console that spawned it - will close a console if the program is run independently */
-void osToolsCloseConsole();
+void os_tools_close_console();
 
 /* Serial support */
 typedef enum {
@@ -11366,19 +11375,19 @@ typedef struct {
 extern ost_serial_t osToolsSerial;
 
 /* get a list of all serial ports (strings) */
-list_t *osToolsSerialList();
+list_t *os_tools_serial_list();
 
 /* opens a serial port */
-int32_t osToolsSerialOpen(char *name, osToolsSerialBaud_t baudRate);
+int32_t os_tools_serial_open(char *name, osToolsSerialBaud_t baudRate);
 
 /* returns number of bytes sent. This function blocks until all data has been sent (or error) */
-int32_t osToolsSerialSend(char *name, uint8_t *data, int32_t length);
+int32_t os_tools_serial_send(char *name, uint8_t *data, int32_t length);
 
 /* returns number of bytes received. This function blocks until length bytes are received or timeoutMilliseconds is exceeded */
-int32_t osToolsSerialReceive(char *name, uint8_t *buffer, int32_t length, int32_t timeoutMilliseconds);
+int32_t os_tools_serial_receive(char *name, uint8_t *buffer, int32_t length, int32_t timeoutMilliseconds);
 
 /* closes a serial port */
-int32_t osToolsSerialClose(char *name);
+int32_t os_tools_serial_close(char *name);
 
 /* Socket (IPv4) support */
 typedef enum {
@@ -11404,28 +11413,28 @@ typedef struct {
 extern ost_socket_t osToolsSocket;
 
 /* gets the address of a socket as a string (populated in address argument) */
-int32_t osToolsGetSocketAddress(char *socketName, char *address, int32_t length);
+int32_t os_tools_get_socket_address(char *socketName, char *address, int32_t length);
 
 /* gets the port of a socket as a string (populated in port argument) */
-int32_t osToolsGetPort(char *socketName, char *port, int32_t length);
+int32_t os_tools_get_port(char *socketName, char *port, int32_t length);
 
 /* create the name for the server (used to access it), as well as a protocol (either OSTOOLS_PROTOCOL_TCP or OSTOOLS_PROTOCOL_UDP) and a binding address */
-int32_t osToolsServerSocketCreate(char *serverName, osToolsSocketProtocol_t protocol, char *serverAddress);
+int32_t os_tools_server_socket_create(char *serverName, osToolsSocketProtocol_t protocol, char *serverAddress);
 
 /* listens for connections on a server socket, when a connection comes in it will create a new socket and assign it the name clientName. This function blocks until a connection is received then it will return a list [address (string), port (string)] of the incoming connection */
-int32_t osToolsServerSocketListen(char *serverName, char *clientName);
+int32_t os_tools_server_socket_listen(char *serverName, char *clientName);
 
 /* create the name for the client (used to access it), as well as a protocol (either OSTOOLS_PROTOCOL_TCP or OSTOOLS_PROTOCOL_UDP) and specify the server's address, and port (the server that this client socket will connect to) */
-int32_t osToolsClientSocketCreate(char *clientName, osToolsSocketProtocol_t protocol, char *serverAddress, char *serverPort, int32_t timeoutMilliseconds);
+int32_t os_tools_client_socket_create(char *clientName, osToolsSocketProtocol_t protocol, char *serverAddress, char *serverPort, int32_t timeoutMilliseconds);
 
 /* sends data over a socket. This function blocks until all data has been sent (or error) */
-int32_t osToolsSocketSend(char *socketName, uint8_t *data, int32_t length);
+int32_t os_tools_socket_send(char *socketName, uint8_t *data, int32_t length);
 
 /* receives up to length bytes from a socket - returns number of bytes received. This function blocks until length bytes are received or timeoutMilliseconds is exceeded */
-int32_t osToolsSocketReceive(char *socketName, uint8_t *data, int32_t length, int32_t timeoutMilliseconds);
+int32_t os_tools_socket_receive(char *socketName, uint8_t *data, int32_t length, int32_t timeoutMilliseconds);
 
-/* close and destroy a socket */
-int32_t osToolsSocketDestroy(char *socketName);
+/* close and delete a socket */
+int32_t os_tools_socket_delete(char *socketName);
 
 /* Camera support */
 typedef struct {
@@ -11435,16 +11444,16 @@ typedef struct {
 extern ost_camera_t osToolsCamera;
 
 /* gets a list [camera name (string), width (int), height (int), framerate (double), ...] of camera devices on the system */
-list_t *osToolsCameraList();
+list_t *os_tools_camera_list();
 
-/* opens a camera given camera name from osToolsCameraList */
-int32_t osToolsCameraOpen(char *name);
+/* opens a camera given camera name from os_tools_camera_list */
+int32_t os_tools_camera_open(char *name);
 
 /* gets an RGB buffer from the camera - buffer must be at least width * height * 3 bytes */
-int32_t osToolsCameraReceive(char *name, uint8_t *data);
+int32_t os_tools_camera_receive(char *name, uint8_t *data);
 
 /* closes a camera */
-int32_t osToolsCameraClose(char *name);
+int32_t os_tools_camera_close(char *name);
 
 #ifdef OS_WINDOWS
 #define WIN32_LEAN_AND_MEAN
@@ -11489,16 +11498,16 @@ int32_t osToolsCameraClose(char *name);
 #endif /* OS_BROWSER */
 
 /* initialise osTools, pass in argv[0] from main function as well as GLFW window object */
-int32_t osToolsInit(char argv0[], GLFWwindow *window);
+int32_t os_tools_init(char argv0[], GLFWwindow *window);
 
 /* clear the list of global extensions */
-void osToolsFileDialogClearGlobalExtensions();
+void os_tools_file_dialog_clear_global_extensions();
 
 /* add a single extension to the global file extensions */
-void osToolsFileDialogAddGlobalExtension(char *extension);
+void os_tools_file_dialog_add_global_extension(char *extension);
 
 /* copies the data from the list to the global extensions (you can free the list passed in immediately after calling this) */
-void osToolsFileDialogSetGlobalExtensions(list_t *extensions);
+void os_tools_file_dialog_set_global_extensions(list_t *extensions);
 
 typedef enum {
     OSTOOLS_FILE_DIALOG_OPEN = 0,
@@ -11524,32 +11533,32 @@ folder: 0 - file dialog, 1 - folder dialog
 prename: refers to autofill filename ("null" or empty string for no autofill)
 extensions: pass in a list of accepted file extensions or pass in NULL to use global list of extensions
 */
-int32_t osToolsFileDialogPrompt(ost_file_dialog_save_t openOrSave, ost_file_dialog_multiselect_t multiselect, ost_file_dialog_folder_t folder, char *prename, list_t *extensions);
+int32_t os_tools_file_dialog_prompt(ost_file_dialog_save_t openOrSave, ost_file_dialog_multiselect_t multiselect, ost_file_dialog_folder_t folder, char *prename, list_t *extensions);
 
 /* save dialog - set prename to NULL for no prename, set extensions to NULL to use global extensions */
-int32_t osToolsFileDialogSave(ost_file_dialog_folder_t folder, char *prename, list_t *extensions);
+int32_t os_tools_file_dialog_save(ost_file_dialog_folder_t folder, char *prename, list_t *extensions);
 
 /* open dialog - set prename to NULL for no prename, set extensions to NULL to use global extensions */
-int32_t osToolsFileDialogOpen(ost_file_dialog_multiselect_t multiselect, ost_file_dialog_folder_t folder, char *prename, list_t *extensions);
+int32_t os_tools_file_dialog_open(ost_file_dialog_multiselect_t multiselect, ost_file_dialog_folder_t folder, char *prename, list_t *extensions);
 
-uint8_t *osToolsFileMap(char *filename, uint32_t *sizeOutput);
+uint8_t *os_tools_file_map(char *filename, uint32_t *sizeOutput);
 
-int32_t osToolsFileUnmap(uint8_t *data);
+int32_t os_tools_file_unmap(uint8_t *data);
 
 /* lists files in a directory (does NOT list folders), format [name, size, name, size, ...] */
-list_t *osToolsFileList(char *directory);
+list_t *os_tools_file_list(char *directory);
 
 /* non-recursive, lists folders in a directory, format [name, name, ...] */
-list_t *osToolsFolderList(char *directory);
+list_t *os_tools_folder_list(char *directory);
 
 /* lists files and folders in a directory, format [name, size, name, size, ...] (size is -1 for folders) */
-list_t *osToolsFileAndFolderList(char *directory);
+list_t *os_tools_file_and_folder_list(char *directory);
 
 /* create a folder */
-int32_t osToolsFolderCreate(char *folder);
+int32_t os_tools_folder_create(char *folder);
 
 /* delete a folder (and all files and subfolders) */
-int32_t osToolsFolderDestroy(char *folder);
+int32_t os_tools_folder_delete(char *folder);
 
 #endif /* OS_TOOLS_H */
 
@@ -24484,8 +24493,8 @@ static EM_BOOL turtleBrowserWindowResize(int eventType, const EmscriptenUiEvent 
 }
 #endif /* OS_BROWSER */
 
-/* special function that can be called prior to turtleInit - this function condenses the window creation code boilerplate */
-GLFWwindow *turtleCreateWindow(int32_t windowWidth, int32_t windowHeight, char *windowName) {
+/* special function that can be called prior to turtle_init - this function condenses the window creation code boilerplate */
+GLFWwindow *turtle_create_window(int32_t windowWidth, int32_t windowHeight, char *windowName) {
     /* Initialise glfw */
     if (!glfwInit()) {
         return NULL;
@@ -24549,9 +24558,9 @@ GLFWwindow *turtleCreateWindow(int32_t windowWidth, int32_t windowHeight, char *
 }
 
 #ifdef TURTLE_ENABLE_TEXTURES
-/* special function that can be called prior to turtleInit - this function condenses the window creation code with icon boilerplate */
-GLFWwindow *turtleCreateWindowIcon(int32_t windowWidth, int32_t windowHeight, char *windowName, char *filename) {
-    GLFWwindow *window = turtleCreateWindow(windowWidth, windowHeight, windowName);
+/* special function that can be called prior to turtle_init - this function condenses the window creation code with icon boilerplate */
+GLFWwindow *turtle_create_window_icon(int32_t windowWidth, int32_t windowHeight, char *windowName, char *filename) {
+    GLFWwindow *window = turtle_create_window(windowWidth, windowHeight, windowName);
     /* initialise logo */
     GLFWimage icon;
     int32_t iconChannels;
@@ -24569,7 +24578,7 @@ GLFWwindow *turtleCreateWindowIcon(int32_t windowWidth, int32_t windowHeight, ch
 #endif
 
 /* initializes the turtletools module */
-void turtleInit(GLFWwindow *window, double leftX, double bottomY, double rightX, double topY) {
+void turtle_init(GLFWwindow *window, double leftX, double bottomY, double rightX, double topY) {
     #ifndef TURTLE_ENABLE_TEXTURES
     /* fixed pipeline */
     gladLoadGL();
@@ -24678,13 +24687,13 @@ void turtleInit(GLFWwindow *window, double leftX, double bottomY, double rightX,
     turtle.x = 0;
     turtle.y = 0;
     turtle.pensize = 1;
-    turtle.penshape = 0;
+    turtle.penshape = TURTLE_PEN_SHAPE_CIRCLE;
     turtle.circleprez = 9; // default circleprez value
     turtle.pen = 0;
-    turtle.penr = 0.0;
-    turtle.peng = 0.0;
-    turtle.penb = 0.0;
-    turtle.pena = 0.0;
+    turtle.red = 0;
+    turtle.green = 0;
+    turtle.blue = 0;
+    turtle.alpha = 0;
     for (uint8_t i = 0; i < 4; i++) {
         turtle.currentColor[i] = -1.0;
     }
@@ -24696,13 +24705,13 @@ void turtleInit(GLFWwindow *window, double leftX, double bottomY, double rightX,
     turtle.cameraDirectionLeftRight = 0;
     turtle.cameraDirectionUpDown = 0;
 
-    turtleSetWorldCoordinates(leftX, bottomY, rightX, topY);
+    turtle_set_world_coordinates(leftX, bottomY, rightX, topY);
     turtle.keyCallback = NULL;
     turtle.unicodeCallback = NULL;
-    glfwSetCharCallback(window, unicodeSense);
-    glfwSetKeyCallback(window, keySense); // initiate mouse and keyboard detection
-    glfwSetMouseButtonCallback(window, mouseSense);
-    glfwSetScrollCallback(window, scrollSense);
+    glfwSetCharCallback(window, turtle_unicode_sense);
+    glfwSetKeyCallback(window, turtle_key_sense); // initiate mouse and keyboard detection
+    glfwSetMouseButtonCallback(window, turtle_mouse_sense);
+    glfwSetScrollCallback(window, turtle_scroll_sense);
 
     /* adjust window position and size */
     #ifdef OS_LINUX
@@ -24732,7 +24741,7 @@ void turtleInit(GLFWwindow *window, double leftX, double bottomY, double rightX,
 }
 
 /* run this to set the bounds of the window in coordinates */
-void turtleSetWorldCoordinates(double leftX, double bottomY, double rightX, double topY) {
+void turtle_set_world_coordinates(double leftX, double bottomY, double rightX, double topY) {
     glfwGetWindowSize(turtle.window, &turtle.screenbounds[0], &turtle.screenbounds[1]);
     turtle.centerAndScale[0] = (rightX + leftX) / 2;
     turtle.centerAndScale[1] = (topY + bottomY) / 2;
@@ -24749,14 +24758,14 @@ void turtleSetWorldCoordinates(double leftX, double bottomY, double rightX, doub
 }
 
 /* detect character */
-void unicodeSense(GLFWwindow *window, uint32_t codepoint) {
+void turtle_unicode_sense(GLFWwindow *window, uint32_t codepoint) {
     if (turtle.unicodeCallback != NULL) {
         turtle.unicodeCallback(codepoint);
     }
 }
 
 /* detect key presses */
-void keySense(GLFWwindow *window, int32_t key, int32_t scancode, int32_t action, int32_t mods) {
+void turtle_key_sense(GLFWwindow *window, int32_t key, int32_t scancode, int32_t action, int32_t mods) {
     if (turtle.keyCallback != NULL) {
         turtle.keyCallback(key, scancode, action);
     }
@@ -24769,7 +24778,7 @@ void keySense(GLFWwindow *window, int32_t key, int32_t scancode, int32_t action,
 }
 
 /* detect mouse clicks */
-void mouseSense(GLFWwindow *window, int32_t button, int32_t action, int32_t mods) {
+void turtle_mouse_sense(GLFWwindow *window, int32_t button, int32_t action, int32_t mods) {
     if (action == GLFW_PRESS) {
         switch(button) {
         case GLFW_MOUSE_BUTTON_LEFT:
@@ -24815,49 +24824,49 @@ void mouseSense(GLFWwindow *window, int32_t button, int32_t action, int32_t mods
 }
 
 /* detect scroll wheel */
-void scrollSense(GLFWwindow *window, double xoffset, double yoffset) {
+void turtle_scroll_sense(GLFWwindow *window, double xoffset, double yoffset) {
     turtle.scrollY = yoffset;
 }
 
 /* the behavior with the mouse wheel is different since it can't be "on" or "off" */
-double turtleMouseWheel() {
+double turtle_mouse_wheel() {
     double temp = turtle.scrollY;
     turtle.scrollY = 0;
     return temp;
 }
 
 /* top level boolean output call to check if the key with code [key] is currently being held down. Uses the GLFW_KEY_X macros */
-int8_t turtleKeyPressed(int32_t key) {
+int8_t turtle_key_pressed(int32_t key) {
     return list_count(turtle.keyPressed, (unitype) key, 'c');
 }
 
 /* top level boolean output call to check if the left click button is currently being held down */
-int8_t turtleMouseDown() {
+int8_t turtle_mouse_down() {
     return turtle.mousePressed[0];
 }
 
-/* alternate duplicate of turtleMouseDown() */
-int8_t turtleMouseLeft() {
+/* alternate duplicate of turtle_mouse_down() */
+int8_t turtle_mouse_left() {
     return turtle.mousePressed[0];
 }
 
 /* top level boolean output call to check if the right click button is currently being held down */
-int8_t turtleMouseRight() {
+int8_t turtle_mouse_right() {
     return turtle.mousePressed[1];
 }
 
 /* top level boolean output call to check if the middle mouse button is currently being held down */
-int8_t turtleMouseMiddle() {
+int8_t turtle_mouse_middle() {
     return turtle.mousePressed[2];
 }
 
-/* alternate duplicate of turtleMouseMiddle() */
-int8_t turtleMouseMid() {
+/* alternate duplicate of turtle_mouse_middle() */
+int8_t turtle_mouse_mid() {
     return turtle.mousePressed[2];
 }
 
 /* puts the mouse coordinates in turtle.mouseX and turtle.mouseY */
-void turtleGetMouseCoordinates() {
+void turtle_get_mouse_coordinates() {
     glfwGetCursorPos(turtle.window, &turtle.mouseAbsX, &turtle.mouseAbsY); // get mouse positions (absolute)
     if (turtle.resizeMode == TURTLE_RESIZE_MODE_STRETCH) {
         turtle.mouseX = (turtle.mouseAbsX - turtle.screenbounds[0] / 2) / turtle.screenbounds[0] * (turtle.initbounds[2] - turtle.initbounds[0]) + (turtle.bounds[0] + turtle.bounds[2]) / 2;
@@ -24876,40 +24885,40 @@ void turtleGetMouseCoordinates() {
 }
 
 /* set the background color */
-void turtleBackgroundColor(uint8_t r, uint8_t g, uint8_t b) {
+void turtle_background_color(uint8_t r, uint8_t g, uint8_t b) {
     glClearColor(r / 255.0, g / 255.0, b / 255.0, 1.0);
 }
 
 /* set the pen color */
-void turtlePenColor(uint8_t r, uint8_t g, uint8_t b) {
-    turtle.penr = r / 255.0;
-    turtle.peng = g / 255.0;
-    turtle.penb = b / 255.0;
-    turtle.pena = 1.0;
+void turtle_pen_color(uint8_t r, uint8_t g, uint8_t b) {
+    turtle.red = r;
+    turtle.green = g;
+    turtle.blue = b;
+    turtle.alpha = 255;
 }
 
 /* set the pen color (with transparency) */
-void turtlePenColorAlpha(uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
-    turtle.penr = r / 255.0;
-    turtle.peng = g / 255.0;
-    turtle.penb = b / 255.0;
-    turtle.pena = 1.0 - a / 255.0;
+void turtle_pen_color_alpha(uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
+    turtle.red = r;
+    turtle.green = g;
+    turtle.blue = b;
+    turtle.alpha = 255 - a;
 }
 
 /* set the pen size */
-void turtlePenSize(double size) {
+void turtle_pen_size(double size) {
     turtle.pensize = size * 0.5; // ensures pensize matches pixel size (a pen size of 240 will be 240 coordinates long)
 }
 
 /* clears all the pen drawings */
-void turtleClear() {
+void turtle_clear() {
     // list_free(turtle.penPos);
     // turtle.penPos = list_init();
     turtle.penPos -> length = 0; // could be dangerous
 }
 
 /* pen down */
-void turtlePenDown() {
+void turtle_pen_down() {
     if (turtle.pen == 0) {
         turtle.pen = 1;
         int8_t changed = 0;
@@ -24919,10 +24928,10 @@ void turtlePenDown() {
             if (ren[len - 9].d != turtle.x) {changed = 1;}
             if (ren[len - 8].d != turtle.y) {changed = 1;}
             if (ren[len - 7].d != turtle.pensize) {changed = 1;}
-            if (ren[len - 6].d != turtle.penr) {changed = 1;}
-            if (ren[len - 5].d != turtle.peng) {changed = 1;}
-            if (ren[len - 4].d != turtle.penb) {changed = 1;}
-            if (ren[len - 3].d != turtle.pena) {changed = 1;}
+            if (ren[len - 6].b != turtle.red) {changed = 1;}
+            if (ren[len - 5].b != turtle.green) {changed = 1;}
+            if (ren[len - 4].b != turtle.blue) {changed = 1;}
+            if (ren[len - 3].b != turtle.alpha) {changed = 1;}
             if (ren[len - 2].hu != turtle.penshape) {changed = 1;}
             if (ren[len - 1].d != turtle.circleprez) {changed = 1;}
         } else {
@@ -24932,10 +24941,10 @@ void turtlePenDown() {
             list_append(turtle.penPos, (unitype) turtle.x, 'd');
             list_append(turtle.penPos, (unitype) turtle.y, 'd');
             list_append(turtle.penPos, (unitype) turtle.pensize, 'd');
-            list_append(turtle.penPos, (unitype) turtle.penr, 'd');
-            list_append(turtle.penPos, (unitype) turtle.peng, 'd');
-            list_append(turtle.penPos, (unitype) turtle.penb, 'd');
-            list_append(turtle.penPos, (unitype) turtle.pena, 'd');
+            list_append(turtle.penPos, (unitype) turtle.red, 'b');
+            list_append(turtle.penPos, (unitype) turtle.green, 'b');
+            list_append(turtle.penPos, (unitype) turtle.blue, 'b');
+            list_append(turtle.penPos, (unitype) turtle.alpha, 'b');
             list_append(turtle.penPos, (unitype) turtle.penshape, 'h');
             list_append(turtle.penPos, (unitype) turtle.circleprez, 'd');
         }
@@ -24943,7 +24952,7 @@ void turtlePenDown() {
 }
 
 /* lift the pen */
-void turtlePenUp() {
+void turtle_pen_up() {
     if (turtle.pen == 1) {
         turtle.pen = 0;
         if (turtle.penPos -> length > 0 && turtle.penPos -> type[turtle.penPos -> length - 1] != 'c') {
@@ -24961,34 +24970,17 @@ void turtlePenUp() {
 }
 
 /* set the pen shape ("circle", "square", "triangle", "none", or "connected") */
-void turtlePenShape(char *selection) {
-    if (strcmp(selection, "circle") == 0 || strcmp(selection, "Circle") == 0) {
-        turtle.penshape = 0;
-    }
-    if (strcmp(selection, "square") == 0 || strcmp(selection, "Square") == 0) {
-        turtle.penshape = 1;
-    }
-    if (strcmp(selection, "triangle") == 0 || strcmp(selection, "Triangle") == 0) {
-        turtle.penshape = 2;
-    }
-    if (strcmp(selection, "none") == 0 || strcmp(selection, "None") == 0) {
-        turtle.penshape = 3;
-    }
-    if (strcmp(selection, "connected") == 0 || strcmp(selection, "Connected") == 0) {
-        turtle.penshape = 4;
-    }
-    if (strcmp(selection, "text") == 0 || strcmp(selection, "Text") == 0) {
-        turtle.penshape = 5;
-    }
+void turtle_pen_shape(turtle_pen_shape_t shape) {
+    turtle.penshape = shape;
 }
 
-/* set the circle precision */
-void turtlePenPrez(double prez) {
+/* set the circle precision (default 9) */
+void turtle_pen_prez(double prez) {
     turtle.circleprez = prez;
 }
 
 /* moves the turtle to a coordinate */
-void turtleGoto(double x, double y) {
+void turtle_goto(double x, double y) {
     if (fabs(turtle.x - x) > 0.01 || fabs(turtle.y - y) > 0.01) {
         turtle.x = x;
         turtle.y = y;
@@ -25000,10 +24992,10 @@ void turtleGoto(double x, double y) {
                 if (ren[len - 9].d != turtle.x) {changed = 1;}
                 if (ren[len - 8].d != turtle.y) {changed = 1;}
                 if (ren[len - 7].d != turtle.pensize) {changed = 1;}
-                if (ren[len - 6].d != turtle.penr) {changed = 1;}
-                if (ren[len - 5].d != turtle.peng) {changed = 1;}
-                if (ren[len - 4].d != turtle.penb) {changed = 1;}
-                if (ren[len - 3].d != turtle.pena) {changed = 1;}
+                if (ren[len - 6].d != turtle.red) {changed = 1;}
+                if (ren[len - 5].d != turtle.green) {changed = 1;}
+                if (ren[len - 4].d != turtle.blue) {changed = 1;}
+                if (ren[len - 3].d != turtle.alpha) {changed = 1;}
                 if (ren[len - 2].hu != turtle.penshape) {changed = 1;}
                 if (ren[len - 1].d != turtle.circleprez) {changed = 1;}
             } else {
@@ -25013,10 +25005,10 @@ void turtleGoto(double x, double y) {
                 list_append(turtle.penPos, (unitype) x, 'd');
                 list_append(turtle.penPos, (unitype) y, 'd');
                 list_append(turtle.penPos, (unitype) turtle.pensize, 'd');
-                list_append(turtle.penPos, (unitype) turtle.penr, 'd');
-                list_append(turtle.penPos, (unitype) turtle.peng, 'd');
-                list_append(turtle.penPos, (unitype) turtle.penb, 'd');
-                list_append(turtle.penPos, (unitype) turtle.pena, 'd');
+                list_append(turtle.penPos, (unitype) turtle.red, 'b');
+                list_append(turtle.penPos, (unitype) turtle.green, 'b');
+                list_append(turtle.penPos, (unitype) turtle.blue, 'b');
+                list_append(turtle.penPos, (unitype) turtle.alpha, 'b');
                 list_append(turtle.penPos, (unitype) turtle.penshape, 'h');
                 list_append(turtle.penPos, (unitype) turtle.circleprez, 'd');
             }
@@ -25026,7 +25018,7 @@ void turtleGoto(double x, double y) {
 
 #ifndef TURTLE_ENABLE_TEXTURES
 /* draws a circle at the specified x and y (coordinates) */
-void turtleCircleRenderInternal(double x, double y, double rad, double r, double g, double b, double a, double xcenter, double ycenter, double xfact, double yfact, double prez) {
+void turtle_circle_render_internal(double x, double y, double rad, double r, double g, double b, double a, double xcenter, double ycenter, double xfact, double yfact, double prez) {
     int8_t colorChange = 0;
     if (r != turtle.currentColor[0]) {colorChange = 1;}
     if (g != turtle.currentColor[1]) {colorChange = 1;}
@@ -25047,7 +25039,7 @@ void turtleCircleRenderInternal(double x, double y, double rad, double r, double
 }
 
 /* draws a rectangle */
-void turtleRectangleRenderInternal(double x1, double y1, double x2, double y2, double r, double g, double b, double a, double xcenter, double ycenter, double xfact, double yfact) {
+void turtle_rectangle_render_internal(double x1, double y1, double x2, double y2, double r, double g, double b, double a, double xcenter, double ycenter, double xfact, double yfact) {
     int8_t colorChange = 0;
     if (r != turtle.currentColor[0]) {colorChange = 1;}
     if (g != turtle.currentColor[1]) {colorChange = 1;}
@@ -25069,7 +25061,7 @@ void turtleRectangleRenderInternal(double x1, double y1, double x2, double y2, d
 }
 
 /* draws a triangle */
-void turtleTriangleRenderInternal(double x1, double y1, double x2, double y2, double x3, double y3, double r, double g, double b, double a, double xcenter, double ycenter, double xfact, double yfact) {
+void turtle_triangle_render_internal(double x1, double y1, double x2, double y2, double x3, double y3, double r, double g, double b, double a, double xcenter, double ycenter, double xfact, double yfact) {
     int8_t colorChange = 0;
     if (r != turtle.currentColor[0]) {colorChange = 1;}
     if (g != turtle.currentColor[1]) {colorChange = 1;}
@@ -25090,7 +25082,7 @@ void turtleTriangleRenderInternal(double x1, double y1, double x2, double y2, do
 }
 
 /* draws a quadrilateral */
-void turtleQuadRenderInternal(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, double r, double g, double b, double a, double xcenter, double ycenter, double xfact, double yfact) {
+void turtle_quad_render_internal(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, double r, double g, double b, double a, double xcenter, double ycenter, double xfact, double yfact) {
     int8_t colorChange = 0;
     if (r != turtle.currentColor[0]) {colorChange = 1;}
     if (g != turtle.currentColor[1]) {colorChange = 1;}
@@ -25114,7 +25106,7 @@ void turtleQuadRenderInternal(double x1, double y1, double x2, double y2, double
 
 #ifdef TURTLE_ENABLE_TEXTURES
 /* function to add a vertex to the turtle.bufferList */
-void addVertex(double x, double y, double r, double g, double b, double a, double tx, double ty, double useTexture) {
+void turtle_add_vertex(double x, double y, double r, double g, double b, double a, double tx, double ty, double useTexture) {
     floatList_append(turtle.bufferList, x);
     floatList_append(turtle.bufferList, y);
     floatList_append(turtle.bufferList, r);
@@ -25127,52 +25119,52 @@ void addVertex(double x, double y, double r, double g, double b, double a, doubl
 }
 
 /* draws a circle at the specified x and y (coordinates) */
-void turtleCircleRenderInternal(double x, double y, double rad, double r, double g, double b, double a, double xcenter, double ycenter, double xfact, double yfact, double prez) {
+void turtle_circle_render_internal(double x, double y, double rad, double r, double g, double b, double a, double xcenter, double ycenter, double xfact, double yfact, double prez) {
     int32_t p = (int32_t) prez;
     if (p > 0) {
         // p--;
         float originX = x * xfact + xcenter;
         float originY = (y + rad) * yfact + ycenter;
-        addVertex(originX, originY, r, g, b, a, 0, 0, 0);
-        addVertex((x + rad * sin(2 * 1 * M_PI / prez)) * xfact + xcenter, (y + rad * cos(2 * 1 * M_PI / prez)) * yfact + ycenter, r, g, b, a, 0, 0, 0);
+        turtle_add_vertex(originX, originY, r, g, b, a, 0, 0, 0);
+        turtle_add_vertex((x + rad * sin(2 * 1 * M_PI / prez)) * xfact + xcenter, (y + rad * cos(2 * 1 * M_PI / prez)) * yfact + ycenter, r, g, b, a, 0, 0, 0);
         int32_t i = 0;
         for (; i < p; i++) {
-            addVertex((x + rad * sin(2 * i * M_PI / prez)) * xfact + xcenter, (y + rad * cos(2 * i * M_PI / prez)) * yfact + ycenter, r, g, b, a, 0, 0, 0);
-            addVertex(originX, originY, r, g, b, a, 0, 0, 0);
-            addVertex(turtle.bufferList -> data[turtle.bufferList -> length - BUFFER_OBJECT_SIZE * 2], turtle.bufferList -> data[turtle.bufferList -> length - BUFFER_OBJECT_SIZE * 2 + 1], r, g, b, a, 0, 0, 0);
+            turtle_add_vertex((x + rad * sin(2 * i * M_PI / prez)) * xfact + xcenter, (y + rad * cos(2 * i * M_PI / prez)) * yfact + ycenter, r, g, b, a, 0, 0, 0);
+            turtle_add_vertex(originX, originY, r, g, b, a, 0, 0, 0);
+            turtle_add_vertex(turtle.bufferList -> data[turtle.bufferList -> length - BUFFER_OBJECT_SIZE * 2], turtle.bufferList -> data[turtle.bufferList -> length - BUFFER_OBJECT_SIZE * 2 + 1], r, g, b, a, 0, 0, 0);
         }
-        addVertex((x + rad * sin(2 * i * M_PI / prez)) * xfact + xcenter, (y + rad * cos(2 * i * M_PI / prez)) * yfact + ycenter, r, g, b, a, 0, 0, 0);
+        turtle_add_vertex((x + rad * sin(2 * i * M_PI / prez)) * xfact + xcenter, (y + rad * cos(2 * i * M_PI / prez)) * yfact + ycenter, r, g, b, a, 0, 0, 0);
     }
 }
 
 /* draws a rectangle */
-void turtleRectangleRenderInternal(double x1, double y1, double x2, double y2, double r, double g, double b, double a, double xcenter, double ycenter, double xfact, double yfact) {
-    addVertex(x1 * xfact + xcenter, y1 * yfact + ycenter, r, g, b, a, 0, 0, 0);
-    addVertex(x2 * xfact + xcenter, y1 * yfact + ycenter, r, g, b, a, 0, 0, 0);
-    addVertex(x2 * xfact + xcenter, y2 * yfact + ycenter, r, g, b, a, 0, 0, 0);
-    addVertex(x1 * xfact + xcenter, y1 * yfact + ycenter, r, g, b, a, 0, 0, 0);
-    addVertex(x2 * xfact + xcenter, y2 * yfact + ycenter, r, g, b, a, 0, 0, 0);
-    addVertex(x1 * xfact + xcenter, y2 * yfact + ycenter, r, g, b, a, 0, 0, 0);
+void turtle_rectangle_render_internal(double x1, double y1, double x2, double y2, double r, double g, double b, double a, double xcenter, double ycenter, double xfact, double yfact) {
+    turtle_add_vertex(x1 * xfact + xcenter, y1 * yfact + ycenter, r, g, b, a, 0, 0, 0);
+    turtle_add_vertex(x2 * xfact + xcenter, y1 * yfact + ycenter, r, g, b, a, 0, 0, 0);
+    turtle_add_vertex(x2 * xfact + xcenter, y2 * yfact + ycenter, r, g, b, a, 0, 0, 0);
+    turtle_add_vertex(x1 * xfact + xcenter, y1 * yfact + ycenter, r, g, b, a, 0, 0, 0);
+    turtle_add_vertex(x2 * xfact + xcenter, y2 * yfact + ycenter, r, g, b, a, 0, 0, 0);
+    turtle_add_vertex(x1 * xfact + xcenter, y2 * yfact + ycenter, r, g, b, a, 0, 0, 0);
 }
 
 /* draws a triangle */
-void turtleTriangleRenderInternal(double x1, double y1, double x2, double y2, double x3, double y3, double r, double g, double b, double a, double xcenter, double ycenter, double xfact, double yfact) {
-    addVertex(x1 * xfact + xcenter, y1 * yfact + ycenter, r, g, b, a, 0, 0, 0);
-    addVertex(x2 * xfact + xcenter, y2 * yfact + ycenter, r, g, b, a, 0, 0, 0);
-    addVertex(x3 * xfact + xcenter, y3 * yfact + ycenter, r, g, b, a, 0, 0, 0);
+void turtle_triangle_render_internal(double x1, double y1, double x2, double y2, double x3, double y3, double r, double g, double b, double a, double xcenter, double ycenter, double xfact, double yfact) {
+    turtle_add_vertex(x1 * xfact + xcenter, y1 * yfact + ycenter, r, g, b, a, 0, 0, 0);
+    turtle_add_vertex(x2 * xfact + xcenter, y2 * yfact + ycenter, r, g, b, a, 0, 0, 0);
+    turtle_add_vertex(x3 * xfact + xcenter, y3 * yfact + ycenter, r, g, b, a, 0, 0, 0);
 }
 
 /* draws a quadrilateral */
-void turtleQuadRenderInternal(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, double r, double g, double b, double a, double xcenter, double ycenter, double xfact, double yfact) {
-    addVertex(x1 * xfact + xcenter, y1 * yfact + ycenter, r, g, b, a, 0, 0, 0);
-    addVertex(x2 * xfact + xcenter, y2 * yfact + ycenter, r, g, b, a, 0, 0, 0);
-    addVertex(x3 * xfact + xcenter, y3 * yfact + ycenter, r, g, b, a, 0, 0, 0);
-    addVertex(x1 * xfact + xcenter, y1 * yfact + ycenter, r, g, b, a, 0, 0, 0);
-    addVertex(x3 * xfact + xcenter, y3 * yfact + ycenter, r, g, b, a, 0, 0, 0);
-    addVertex(x4 * xfact + xcenter, y4 * yfact + ycenter, r, g, b, a, 0, 0, 0);
+void turtle_quad_render_internal(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, double r, double g, double b, double a, double xcenter, double ycenter, double xfact, double yfact) {
+    turtle_add_vertex(x1 * xfact + xcenter, y1 * yfact + ycenter, r, g, b, a, 0, 0, 0);
+    turtle_add_vertex(x2 * xfact + xcenter, y2 * yfact + ycenter, r, g, b, a, 0, 0, 0);
+    turtle_add_vertex(x3 * xfact + xcenter, y3 * yfact + ycenter, r, g, b, a, 0, 0, 0);
+    turtle_add_vertex(x1 * xfact + xcenter, y1 * yfact + ycenter, r, g, b, a, 0, 0, 0);
+    turtle_add_vertex(x3 * xfact + xcenter, y3 * yfact + ycenter, r, g, b, a, 0, 0, 0);
+    turtle_add_vertex(x4 * xfact + xcenter, y4 * yfact + ycenter, r, g, b, a, 0, 0, 0);
 }
 
-void turtleTextureRenderInternal(int32_t textureCode, double x1, double y1, double x2, double y2, double r, double g, double b, double rot, double xcenter, double ycenter, double xfact, double yfact) {
+void turtle_texture_render_internal(int32_t textureCode, double x1, double y1, double x2, double y2, double r, double g, double b, double rot, double xcenter, double ycenter, double xfact, double yfact) {
     /* do the rotation math here - rotate on center */
     double avgX = (x1 + x2) / 2;
     double avgY = (y1 + y2) / 2;
@@ -25190,12 +25182,12 @@ void turtleTextureRenderInternal(int32_t textureCode, double x1, double y1, doub
     double y3 = avgY + x2Displace * sinRot + y1Displace * cosRot;
     double x4 = avgX + x1Displace * cosRot - y2Displace * sinRot;
     double y4 = avgY + x1Displace * sinRot + y2Displace * cosRot;
-    addVertex(x4 * xfact + xcenter, y4 * yfact + ycenter, r, g, b, 1.0, 0, 0, textureCode);
-    addVertex(x1 * xfact + xcenter, y1 * yfact + ycenter, r, g, b, 1.0, 0, 1, textureCode);
-    addVertex(x3 * xfact + xcenter, y3 * yfact + ycenter, r, g, b, 1.0, 1, 1, textureCode);
-    addVertex(x4 * xfact + xcenter, y4 * yfact + ycenter, r, g, b, 1.0, 0, 0, textureCode);
-    addVertex(x2 * xfact + xcenter, y2 * yfact + ycenter, r, g, b, 1.0, 1, 0, textureCode);
-    addVertex(x3 * xfact + xcenter, y3 * yfact + ycenter, r, g, b, 1.0, 1, 1, textureCode);
+    turtle_add_vertex(x4 * xfact + xcenter, y4 * yfact + ycenter, r, g, b, 1.0, 0, 0, textureCode);
+    turtle_add_vertex(x1 * xfact + xcenter, y1 * yfact + ycenter, r, g, b, 1.0, 0, 1, textureCode);
+    turtle_add_vertex(x3 * xfact + xcenter, y3 * yfact + ycenter, r, g, b, 1.0, 1, 1, textureCode);
+    turtle_add_vertex(x4 * xfact + xcenter, y4 * yfact + ycenter, r, g, b, 1.0, 0, 0, textureCode);
+    turtle_add_vertex(x2 * xfact + xcenter, y2 * yfact + ycenter, r, g, b, 1.0, 1, 0, textureCode);
+    turtle_add_vertex(x3 * xfact + xcenter, y3 * yfact + ycenter, r, g, b, 1.0, 1, 1, textureCode);
 }
 
 void printList(double *list, int32_t len) {
@@ -25220,7 +25212,7 @@ void printListInt(int32_t *list, int32_t len) {
     }
 }
 
-uint8_t *turtleImageResize(uint8_t *dest, uint32_t destWidth, uint32_t destHeight, uint32_t destEncoding, uint8_t *src, uint32_t srcWidth, uint32_t srcHeight, uint32_t srcEncoding, turtle_image_resize_t method) {
+uint8_t *turtle_image_resize(uint8_t *dest, uint32_t destWidth, uint32_t destHeight, uint32_t destEncoding, uint8_t *src, uint32_t srcWidth, uint32_t srcHeight, uint32_t srcEncoding, turtle_image_resize_t method) {
     /* determine encoding */
     uint8_t destChannels = 0;
     if (destEncoding == GL_RGB) {
@@ -25234,7 +25226,7 @@ uint8_t *turtleImageResize(uint8_t *dest, uint32_t destWidth, uint32_t destHeigh
     } else if (destEncoding == GL_RED || destEncoding == GL_GREEN || destEncoding == GL_BLUE || destEncoding == GL_ALPHA) {
         destChannels = 1;
     } else {
-        printf("turtleImageResize: Unsupported destination encoding %d\n", destEncoding);
+        printf("turtle_image_resize: Unsupported destination encoding %d\n", destEncoding);
         return NULL;
     }
     uint8_t srcChannels = 0;
@@ -25249,11 +25241,11 @@ uint8_t *turtleImageResize(uint8_t *dest, uint32_t destWidth, uint32_t destHeigh
     } else if (srcEncoding == GL_RED || srcEncoding == GL_GREEN || srcEncoding == GL_BLUE || srcEncoding == GL_ALPHA) {
         srcChannels = 1;
     } else {
-        printf("turtleImageResize: Unsupported source encoding %d\n", srcEncoding);
+        printf("turtle_image_resize: Unsupported source encoding %d\n", srcEncoding);
         return NULL;
     }
     if (srcEncoding != destEncoding) {
-        printf("turtleImageResize: Source encoding must match destination encoding (TODO)\n");
+        printf("turtle_image_resize: Source encoding must match destination encoding (TODO)\n");
         return NULL;
     }
     int8_t freeDest = 0;
@@ -25384,20 +25376,20 @@ uint8_t *turtleImageResize(uint8_t *dest, uint32_t destWidth, uint32_t destHeigh
         if (freeDest) {
             free(dest);
         }
-        printf("turtleImageResize: Unsupported method %d\n", method);
+        printf("turtle_image_resize: Unsupported method %d\n", method);
         return NULL;
     }
     return dest;
 }
 
-turtle_texture_t turtleTextureLoad(char *filename) {
+turtle_texture_t turtle_texture_load(char *filename) {
     /* load image */
     int width;
     int height;
     int channels;
     uint8_t *image = stbi_load(filename, &width, &height, &channels, 0);
     if (image == NULL) {
-        printf("turtleTextureLoad: Could not load image %s\n", filename);
+        printf("turtle_texture_load: Could not load image %s\n", filename);
         return -1;
     }
     uint32_t encoding = GL_RGB;
@@ -25408,10 +25400,10 @@ turtle_texture_t turtleTextureLoad(char *filename) {
         encoding = GL_RED;
     }
     uint8_t *resized = malloc(channels * turtle.textureWidth * turtle.textureHeight);
-    turtleImageResize(resized, turtle.textureWidth, turtle.textureHeight, encoding, image, width, height, encoding, TURTLE_IMAGE_RESIZE_LINEAR);
+    turtle_image_resize(resized, turtle.textureWidth, turtle.textureHeight, encoding, image, width, height, encoding, TURTLE_IMAGE_RESIZE_LINEAR);
     free(image);
     if (resized == NULL) {
-        printf("turtleTextureLoad: Could not resize image %s\n", filename);
+        printf("turtle_texture_load: Could not resize image %s\n", filename);
         return -1;
     }
     /* find first available texture */
@@ -25442,15 +25434,15 @@ turtle_texture_t turtleTextureLoad(char *filename) {
     return texture;
 }
 
-turtle_texture_t turtleTextureLoadArray(uint8_t *array, uint32_t width, uint32_t height, uint32_t encoding) {
-    return turtleTextureLoadListArrayInternal(NULL, array, width, height, encoding);
+turtle_texture_t turtle_texture_load_array(uint8_t *array, uint32_t width, uint32_t height, uint32_t encoding) {
+    return turtle_texture_load_list_array_internal(NULL, array, width, height, encoding);
 }
 
-turtle_texture_t turtleTextureLoadList(list_t *list, uint32_t width, uint32_t height, uint32_t encoding) {
-    return turtleTextureLoadListArrayInternal(list, NULL, width, height, encoding);
+turtle_texture_t turtle_texture_load_list(list_t *list, uint32_t width, uint32_t height, uint32_t encoding) {
+    return turtle_texture_load_list_array_internal(list, NULL, width, height, encoding);
 }
 
-turtle_texture_t turtleTextureLoadListArrayInternal(list_t *list, uint8_t *array, uint32_t width, uint32_t height, uint32_t encoding) {
+turtle_texture_t turtle_texture_load_list_array_internal(list_t *list, uint8_t *array, uint32_t width, uint32_t height, uint32_t encoding) {
     /* determine encoding */
     uint8_t channels = 0;
     if (encoding == GL_RGB) {
@@ -25464,13 +25456,13 @@ turtle_texture_t turtleTextureLoadListArrayInternal(list_t *list, uint8_t *array
     } else if (encoding == GL_RED || encoding == GL_GREEN || encoding == GL_BLUE || encoding == GL_ALPHA) {
         channels = 1;
     } else {
-        printf("turtleTextureLoadListArrayInternal: Unsupported encoding %d\n", encoding);
+        printf("turtle_texture_load_list_array_internal: Unsupported encoding %d\n", encoding);
         return -1;
     }
     uint8_t freeArrayFlag = 0;
     if (array == NULL) {
         if (list == NULL) {
-            printf("turtleTextureLoadListArrayInternal: both list and array are NULL\n");
+            printf("turtle_texture_load_list_array_internal: both list and array are NULL\n");
             return -1;
         }
         array = malloc(list -> length);
@@ -25480,12 +25472,12 @@ turtle_texture_t turtleTextureLoadListArrayInternal(list_t *list, uint8_t *array
         freeArrayFlag = 1;
     }
     uint8_t *resized = malloc(channels * turtle.textureWidth * turtle.textureHeight);
-    turtleImageResize(resized, turtle.textureWidth, turtle.textureHeight, encoding, array, width, height, encoding, TURTLE_IMAGE_RESIZE_LINEAR);
+    turtle_image_resize(resized, turtle.textureWidth, turtle.textureHeight, encoding, array, width, height, encoding, TURTLE_IMAGE_RESIZE_LINEAR);
     if (freeArrayFlag) {
         free(array);
     }
     if (resized == NULL) {
-        printf("turtleTextureLoadListArrayInternal: Could not resize image\n");
+        printf("turtle_texture_load_list_array_internal: Could not resize image\n");
         return -1;
     }
     /* find first available texture */
@@ -25521,21 +25513,21 @@ turtle_texture_t turtleTextureLoadListArrayInternal(list_t *list, uint8_t *array
     return texture;
 }
 
-int32_t turtleTextureGetWidth(turtle_texture_t texture) {
+int32_t turtle_texture_get_width(turtle_texture_t texture) {
     if (texture < 0 || texture >= turtle.textureList -> length) {
         return -1;
     }
     return turtle.textureList -> data[texture + 1].i;
 }
 
-int32_t turtleTextureGetHeight(turtle_texture_t texture) {
+int32_t turtle_texture_get_height(turtle_texture_t texture) {
     if (texture < 0 || texture >= turtle.textureList -> length) {
         return -1;
     }
     return turtle.textureList -> data[texture + 2].i;
 }
 
-void turtleTexturePrint(turtle_texture_t texture) {
+void turtle_texture_print(turtle_texture_t texture) {
     printf("Texture ID: %d\n", texture);
     if (texture >= 0 && texture < turtle.textureList -> length) {
         printf("- Texture Name: %s\n", turtle.textureList -> data[texture].s);
@@ -25551,14 +25543,14 @@ void turtleTexturePrint(turtle_texture_t texture) {
 }
 
 /* replace a texture with new data from a png, jpg, or bmp */
-int32_t turtleTextureReplace(turtle_texture_t texture, char *filename) {
+int32_t turtle_texture_replace(turtle_texture_t texture, char *filename) {
     /* load image */
     int width;
     int height;
     int channels;
     uint8_t *image = stbi_load(filename, &width, &height, &channels, 0);
     if (image == NULL) {
-        printf("turtleTextureReplace: Could not load image %s\n", filename);
+        printf("turtle_texture_replace: Could not load image %s\n", filename);
         return -1;
     }
     uint32_t encoding = GL_RGB;
@@ -25569,10 +25561,10 @@ int32_t turtleTextureReplace(turtle_texture_t texture, char *filename) {
         encoding = GL_RED;
     }
     uint8_t *resized = malloc(channels * turtle.textureWidth * turtle.textureHeight);
-    turtleImageResize(resized, turtle.textureWidth, turtle.textureHeight, encoding, image, width, height, encoding, TURTLE_IMAGE_RESIZE_LINEAR);
+    turtle_image_resize(resized, turtle.textureWidth, turtle.textureHeight, encoding, image, width, height, encoding, TURTLE_IMAGE_RESIZE_LINEAR);
     free(image);
     if (resized == NULL) {
-        printf("turtleTextureReplace: Could not resize image %s\n", filename);
+        printf("turtle_texture_replace: Could not resize image %s\n", filename);
         return -1;
     }
     /* load to GPU */
@@ -25584,16 +25576,16 @@ int32_t turtleTextureReplace(turtle_texture_t texture, char *filename) {
 }
 
 /* replace a texture with new data from an array - supported encodings: GL_RGB, GL_RGBA, GL_BGR, GL_BGRA, GL_RED, GL_GREEN, GL_BLUE, GL_ALPHA */
-int32_t turtleTextureReplaceArray(turtle_texture_t texture, uint8_t *array, uint32_t width, uint32_t height, uint32_t encoding) {
-    return turtleTextureReplaceListArrayInternal(texture, NULL, array, width, height, encoding);
+int32_t turtle_texture_replace_array(turtle_texture_t texture, uint8_t *array, uint32_t width, uint32_t height, uint32_t encoding) {
+    return turtle_texture_replace_list_array_internal(texture, NULL, array, width, height, encoding);
 }
 
 /* replace a texture with new data from an list - supported encodings: GL_RGB, GL_RGBA, GL_BGR, GL_BGRA, GL_RED, GL_GREEN, GL_BLUE, GL_ALPHA */
-int32_t turtleTextureReplaceList(turtle_texture_t texture, list_t *list, uint32_t width, uint32_t height, uint32_t encoding) {
-    return turtleTextureReplaceListArrayInternal(texture, list, NULL, width, height, encoding);
+int32_t turtle_texture_replace_list(turtle_texture_t texture, list_t *list, uint32_t width, uint32_t height, uint32_t encoding) {
+    return turtle_texture_replace_list_array_internal(texture, list, NULL, width, height, encoding);
 }
 
-int32_t turtleTextureReplaceListArrayInternal(turtle_texture_t texture, list_t *list, uint8_t *array, uint32_t width, uint32_t height, uint32_t encoding) {
+int32_t turtle_texture_replace_list_array_internal(turtle_texture_t texture, list_t *list, uint8_t *array, uint32_t width, uint32_t height, uint32_t encoding) {
     /* determine encoding */
     uint8_t channels = 0;
     if (encoding == GL_RGB) {
@@ -25607,13 +25599,13 @@ int32_t turtleTextureReplaceListArrayInternal(turtle_texture_t texture, list_t *
     } else if (encoding == GL_RED || encoding == GL_GREEN || encoding == GL_BLUE || encoding == GL_ALPHA) {
         channels = 1;
     } else {
-        printf("turtleTextureReplaceListArrayInternal: Unsupported encoding %d\n", encoding);
+        printf("turtle_texture_replace_list_array_internal: Unsupported encoding %d\n", encoding);
         return -1;
     }
     uint8_t freeArrayFlag = 0;
     if (array == NULL) {
         if (list == NULL) {
-            printf("turtleTextureReplaceListArrayInternal: both list and array are NULL\n");
+            printf("turtle_texture_replace_list_array_internal: both list and array are NULL\n");
             return -1;
         }
         array = malloc(list -> length);
@@ -25623,12 +25615,12 @@ int32_t turtleTextureReplaceListArrayInternal(turtle_texture_t texture, list_t *
         freeArrayFlag = 1;
     }
     uint8_t *resized = malloc(channels * turtle.textureWidth * turtle.textureHeight);
-    turtleImageResize(resized, turtle.textureWidth, turtle.textureHeight, encoding, array, width, height, encoding, TURTLE_IMAGE_RESIZE_LINEAR);
+    turtle_image_resize(resized, turtle.textureWidth, turtle.textureHeight, encoding, array, width, height, encoding, TURTLE_IMAGE_RESIZE_LINEAR);
     if (freeArrayFlag) {
         free(array);
     }
     if (resized == NULL) {
-        printf("turtleTextureReplaceListArrayInternal: Could not resize image\n");
+        printf("turtle_texture_replace_list_array_internal: Could not resize image\n");
         return -1;
     }
     glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, texture / 4, turtle.textureWidth, turtle.textureHeight, 1, encoding, GL_UNSIGNED_BYTE, resized);
@@ -25638,7 +25630,7 @@ int32_t turtleTextureReplaceListArrayInternal(turtle_texture_t texture, list_t *
     return texture;
 }
 
-int32_t turtleTextureUnload(turtle_texture_t texture) {
+int32_t turtle_texture_unload(turtle_texture_t texture) {
     /* update list */
     if (texture >= turtle.textureList -> length || texture < 1) {
         return -1;
@@ -25649,7 +25641,7 @@ int32_t turtleTextureUnload(turtle_texture_t texture) {
     return 0;
 }
 
-int32_t turtleTextureUnloadAll() {
+int32_t turtle_texture_unload_all() {
     list_free(turtle.textureList);
     list_append(turtle.textureList, (unitype) "null", 's'); // filename, cannot have texture code of 0 because of shader using 0 as the non-texture code
     list_append(turtle.textureList, (unitype) 0, 'i'); // width
@@ -25659,213 +25651,213 @@ int32_t turtleTextureUnloadAll() {
     return 0;
 }
 
-void turtleTexture(turtle_texture_t texture, double x1, double y1, double x2, double y2, double rot) {
+void turtle_texture(turtle_texture_t texture, double x1, double y1, double x2, double y2, double rot) {
     list_append(turtle.penPos, (unitype) x1, 'd');
     list_append(turtle.penPos, (unitype) y1, 'd');
     list_append(turtle.penPos, (unitype) x2, 'd');
     list_append(turtle.penPos, (unitype) y2, 'd');
     list_append(turtle.penPos, (unitype) rot, 'd'); // rotation (degrees, bearing)
-    list_append(turtle.penPos, (unitype) 1.0, 'd');
-    list_append(turtle.penPos, (unitype) 1.0, 'd');
+    list_append(turtle.penPos, (unitype) 255, 'b');
+    list_append(turtle.penPos, (unitype) 255, 'b');
     list_append(turtle.penPos, (unitype) (128 + texture / 4), 'h'); // blit texture signifier + texture code - limited to 32639 textures
-    list_append(turtle.penPos, (unitype) 1.0, 'd');
+    list_append(turtle.penPos, (unitype) 255, 'b');
 }
 
-void turtleTextureColor(turtle_texture_t texture, double x1, double y1, double x2, double y2, double rot, uint8_t r, uint8_t g, uint8_t b) {
+void turtle_texture_color(turtle_texture_t texture, double x1, double y1, double x2, double y2, double rot, uint8_t r, uint8_t g, uint8_t b) {
     list_append(turtle.penPos, (unitype) x1, 'd');
     list_append(turtle.penPos, (unitype) y1, 'd');
     list_append(turtle.penPos, (unitype) x2, 'd');
     list_append(turtle.penPos, (unitype) y2, 'd');
     list_append(turtle.penPos, (unitype) rot, 'd'); // rotation (degrees, bearing)
-    list_append(turtle.penPos, (unitype) (r / 255.0), 'd');
-    list_append(turtle.penPos, (unitype) (g / 255.0), 'd');
+    list_append(turtle.penPos, (unitype) r, 'b');
+    list_append(turtle.penPos, (unitype) g, 'b');
     list_append(turtle.penPos, (unitype) (128 + texture / 4), 'h'); // blit texture signifier + texture code - limited to 32639 textures
-    list_append(turtle.penPos, (unitype) (b / 255.0), 'd');
+    list_append(turtle.penPos, (unitype) b, 'b');
 }
 
-void turtleSetTextureSize(int32_t width, int32_t height) {
+void turtle_set_texture_size(int32_t width, int32_t height) {
     turtle.textureWidth = width;
     turtle.textureHeight = height;
 }
 
-void turtleSetMaxTextures(int32_t maxTextures) {
+void turtle_set_max_textures(int32_t maxTextures) {
     turtle.maxTextures = maxTextures;
 }
 #endif /* TURTLE_ENABLE_TEXTURES */
 
-void turtleSetResizeMode(turtle_resize_mode_t resizeMode) {
+void turtle_set_resize_mode(turtle_resize_mode_t resizeMode) {
     turtle.resizeMode = resizeMode;
 }
 
 /* adds a (blit) triangle to the pipeline (for better speed) */
-void turtleTriangle(double x1, double y1, double x2, double y2, double x3, double y3) {
+void turtle_triangle(double x1, double y1, double x2, double y2, double x3, double y3) {
     list_append(turtle.penPos, (unitype) x1, 'd');
     list_append(turtle.penPos, (unitype) y1, 'd');
     list_append(turtle.penPos, (unitype) x2, 'd');
-    list_append(turtle.penPos, (unitype) turtle.penr, 'd');
-    list_append(turtle.penPos, (unitype) turtle.peng, 'd');
-    list_append(turtle.penPos, (unitype) turtle.penb, 'd');
-    list_append(turtle.penPos, (unitype) turtle.pena, 'd');
+    list_append(turtle.penPos, (unitype) turtle.red, 'b');
+    list_append(turtle.penPos, (unitype) turtle.green, 'b');
+    list_append(turtle.penPos, (unitype) turtle.blue, 'b');
+    list_append(turtle.penPos, (unitype) turtle.alpha, 'b');
     list_append(turtle.penPos, (unitype) 66, 'h'); // blit triangle signifier
     list_append(turtle.penPos, (unitype) y2, 'd'); // some unconventional formatting but it works
 
     list_append(turtle.penPos, (unitype) x3, 'd');
     list_append(turtle.penPos, (unitype) y3, 'd');
     list_append(turtle.penPos, (unitype) 0, 'd'); // zero'd out (wasted space)
-    list_append(turtle.penPos, (unitype) turtle.penr, 'd'); // duplicate colour data (wasted space)
-    list_append(turtle.penPos, (unitype) turtle.peng, 'd');
-    list_append(turtle.penPos, (unitype) turtle.penb, 'd');
-    list_append(turtle.penPos, (unitype) turtle.pena, 'd');
+    list_append(turtle.penPos, (unitype) turtle.red, 'b'); // duplicate colour data (wasted space)
+    list_append(turtle.penPos, (unitype) turtle.green, 'b');
+    list_append(turtle.penPos, (unitype) turtle.blue, 'b');
+    list_append(turtle.penPos, (unitype) turtle.alpha, 'b');
     list_append(turtle.penPos, (unitype) 66, 'h'); // blit triangle signifier
     list_append(turtle.penPos, (unitype) 0, 'd'); // zero'd out (wasted space)
 }
 
-void turtleTriangleColor(double x1, double y1, double x2, double y2, double x3, double y3, uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
+void turtle_triangle_color(double x1, double y1, double x2, double y2, double x3, double y3, uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
     list_append(turtle.penPos, (unitype) x1, 'd');
     list_append(turtle.penPos, (unitype) y1, 'd');
     list_append(turtle.penPos, (unitype) x2, 'd');
-    list_append(turtle.penPos, (unitype) (r / 255.0), 'd');
-    list_append(turtle.penPos, (unitype) (g / 255.0), 'd');
-    list_append(turtle.penPos, (unitype) (b / 255.0), 'd');
-    list_append(turtle.penPos, (unitype) (1.0 - a / 255.0), 'd');
+    list_append(turtle.penPos, (unitype) r, 'b');
+    list_append(turtle.penPos, (unitype) g, 'b');
+    list_append(turtle.penPos, (unitype) b, 'b');
+    list_append(turtle.penPos, (unitype) (255 - a), 'b');
     list_append(turtle.penPos, (unitype) 66, 'h'); // blit triangle signifier
     list_append(turtle.penPos, (unitype) y2, 'd'); // some unconventional formatting but it works
 
     list_append(turtle.penPos, (unitype) x3, 'd');
     list_append(turtle.penPos, (unitype) y3, 'd');
     list_append(turtle.penPos, (unitype) 0, 'd'); // zero'd out (wasted space)
-    list_append(turtle.penPos, (unitype) r, 'd'); // duplicate colour data (wasted space)
-    list_append(turtle.penPos, (unitype) g, 'd');
-    list_append(turtle.penPos, (unitype) b, 'd');
-    list_append(turtle.penPos, (unitype) a, 'd');
+    list_append(turtle.penPos, (unitype) r, 'b'); // duplicate colour data (wasted space)
+    list_append(turtle.penPos, (unitype) g, 'b');
+    list_append(turtle.penPos, (unitype) b, 'b');
+    list_append(turtle.penPos, (unitype) (255 - a), 'b');
     list_append(turtle.penPos, (unitype) 66, 'h'); // blit triangle signifier
     list_append(turtle.penPos, (unitype) 0, 'd'); // zero'd out (wasted space)
 }
 
 /* adds a (blit) quad to the pipeline (for better speed) */
-void turtleQuad(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4) {
+void turtle_quad(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4) {
     list_append(turtle.penPos, (unitype) x1, 'd');
     list_append(turtle.penPos, (unitype) y1, 'd');
     list_append(turtle.penPos, (unitype) x2, 'd');
-    list_append(turtle.penPos, (unitype) turtle.penr, 'd');
-    list_append(turtle.penPos, (unitype) turtle.peng, 'd');
-    list_append(turtle.penPos, (unitype) turtle.penb, 'd');
-    list_append(turtle.penPos, (unitype) turtle.pena, 'd');
+    list_append(turtle.penPos, (unitype) turtle.red, 'b');
+    list_append(turtle.penPos, (unitype) turtle.green, 'b');
+    list_append(turtle.penPos, (unitype) turtle.blue, 'b');
+    list_append(turtle.penPos, (unitype) turtle.alpha, 'b');
     list_append(turtle.penPos, (unitype) 67, 'h'); // blit quad signifier
     list_append(turtle.penPos, (unitype) y2, 'd'); // some unconventional formatting but it works
 
     list_append(turtle.penPos, (unitype) x3, 'd');
     list_append(turtle.penPos, (unitype) y3, 'd');
     list_append(turtle.penPos, (unitype) x4, 'd');
-    list_append(turtle.penPos, (unitype) turtle.penr, 'd'); // duplicate colour data (wasted space)
-    list_append(turtle.penPos, (unitype) turtle.peng, 'd');
-    list_append(turtle.penPos, (unitype) turtle.penb, 'd');
-    list_append(turtle.penPos, (unitype) turtle.pena, 'd');
+    list_append(turtle.penPos, (unitype) turtle.red, 'b'); // duplicate colour data (wasted space)
+    list_append(turtle.penPos, (unitype) turtle.green, 'b');
+    list_append(turtle.penPos, (unitype) turtle.blue, 'b');
+    list_append(turtle.penPos, (unitype) turtle.alpha, 'b');
     list_append(turtle.penPos, (unitype) 67, 'h'); // blit quad signifier
     list_append(turtle.penPos, (unitype) y4, 'd');
 }
 
-void turtleQuadColor(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
+void turtle_quad_color(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
     list_append(turtle.penPos, (unitype) x1, 'd');
     list_append(turtle.penPos, (unitype) y1, 'd');
     list_append(turtle.penPos, (unitype) x2, 'd');
-    list_append(turtle.penPos, (unitype) (r / 255.0), 'd');
-    list_append(turtle.penPos, (unitype) (g / 255.0), 'd');
-    list_append(turtle.penPos, (unitype) (b / 255.0), 'd');
-    list_append(turtle.penPos, (unitype) (1.0 - a / 255.0), 'd');
+    list_append(turtle.penPos, (unitype) r, 'b');
+    list_append(turtle.penPos, (unitype) g, 'b');
+    list_append(turtle.penPos, (unitype) b, 'b');
+    list_append(turtle.penPos, (unitype) (255 - a), 'b');
     list_append(turtle.penPos, (unitype) 67, 'h'); // blit quad signifier
     list_append(turtle.penPos, (unitype) y2, 'd'); // some unconventional formatting but it works
 
     list_append(turtle.penPos, (unitype) x3, 'd');
     list_append(turtle.penPos, (unitype) y3, 'd');
     list_append(turtle.penPos, (unitype) x4, 'd');
-    list_append(turtle.penPos, (unitype) r, 'd'); // duplicate colour data (wasted space)
-    list_append(turtle.penPos, (unitype) g, 'd');
-    list_append(turtle.penPos, (unitype) b, 'd');
-    list_append(turtle.penPos, (unitype) a, 'd');
+    list_append(turtle.penPos, (unitype) r, 'b'); // duplicate colour data (wasted space)
+    list_append(turtle.penPos, (unitype) g, 'b');
+    list_append(turtle.penPos, (unitype) b, 'b');
+    list_append(turtle.penPos, (unitype) (255 - a), 'b');
     list_append(turtle.penPos, (unitype) 67, 'h'); // blit quad signifier
     list_append(turtle.penPos, (unitype) y4, 'd');
 }
 
 /* adds a (blit) rectangle to the pipeline (uses quad interface) */
-void turtleRectangle(double x1, double y1, double x2, double y2) {
+void turtle_rectangle(double x1, double y1, double x2, double y2) {
     list_append(turtle.penPos, (unitype) x1, 'd');
     list_append(turtle.penPos, (unitype) y1, 'd');
     list_append(turtle.penPos, (unitype) x2, 'd');
-    list_append(turtle.penPos, (unitype) turtle.penr, 'd');
-    list_append(turtle.penPos, (unitype) turtle.peng, 'd');
-    list_append(turtle.penPos, (unitype) turtle.penb, 'd');
-    list_append(turtle.penPos, (unitype) turtle.pena, 'd');
+    list_append(turtle.penPos, (unitype) turtle.red, 'b');
+    list_append(turtle.penPos, (unitype) turtle.green, 'b');
+    list_append(turtle.penPos, (unitype) turtle.blue, 'b');
+    list_append(turtle.penPos, (unitype) turtle.alpha, 'b');
     list_append(turtle.penPos, (unitype) 67, 'h'); // blit quad signifier
     list_append(turtle.penPos, (unitype) y1, 'd'); // some unconventional formatting but it works
 
     list_append(turtle.penPos, (unitype) x2, 'd');
     list_append(turtle.penPos, (unitype) y2, 'd');
     list_append(turtle.penPos, (unitype) x1, 'd');
-    list_append(turtle.penPos, (unitype) turtle.penr, 'd'); // duplicate colour data (wasted space)
-    list_append(turtle.penPos, (unitype) turtle.peng, 'd');
-    list_append(turtle.penPos, (unitype) turtle.penb, 'd');
-    list_append(turtle.penPos, (unitype) turtle.pena, 'd');
+    list_append(turtle.penPos, (unitype) turtle.red, 'b'); // duplicate colour data (wasted space)
+    list_append(turtle.penPos, (unitype) turtle.green, 'b');
+    list_append(turtle.penPos, (unitype) turtle.blue, 'b');
+    list_append(turtle.penPos, (unitype) turtle.alpha, 'b');
     list_append(turtle.penPos, (unitype) 67, 'h'); // blit quad signifier
     list_append(turtle.penPos, (unitype) y2, 'd');
 }
 
-void turtleRectangleColor(double x1, double y1, double x2, double y2, uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
+void turtle_rectangle_color(double x1, double y1, double x2, double y2, uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
     list_append(turtle.penPos, (unitype) x1, 'd');
     list_append(turtle.penPos, (unitype) y1, 'd');
     list_append(turtle.penPos, (unitype) x2, 'd');
-    list_append(turtle.penPos, (unitype) (r / 255.0), 'd');
-    list_append(turtle.penPos, (unitype) (g / 255.0), 'd');
-    list_append(turtle.penPos, (unitype) (b / 255.0), 'd');
-    list_append(turtle.penPos, (unitype) (1.0 - a / 255.0), 'd');
+    list_append(turtle.penPos, (unitype) r, 'b');
+    list_append(turtle.penPos, (unitype) g, 'b');
+    list_append(turtle.penPos, (unitype) b, 'b');
+    list_append(turtle.penPos, (unitype) (255 - a), 'b');
     list_append(turtle.penPos, (unitype) 67, 'h'); // blit quad signifier
     list_append(turtle.penPos, (unitype) y1, 'd'); // some unconventional formatting but it works
 
     list_append(turtle.penPos, (unitype) x2, 'd');
     list_append(turtle.penPos, (unitype) y2, 'd');
     list_append(turtle.penPos, (unitype) x1, 'd');
-    list_append(turtle.penPos, (unitype) r, 'd'); // duplicate colour data (wasted space)
-    list_append(turtle.penPos, (unitype) g, 'd');
-    list_append(turtle.penPos, (unitype) b, 'd');
-    list_append(turtle.penPos, (unitype) a, 'd');
+    list_append(turtle.penPos, (unitype) r, 'b'); // duplicate colour data (wasted space)
+    list_append(turtle.penPos, (unitype) g, 'b');
+    list_append(turtle.penPos, (unitype) b, 'b');
+    list_append(turtle.penPos, (unitype) (255 - a), 'b');
     list_append(turtle.penPos, (unitype) 67, 'h'); // blit quad signifier
     list_append(turtle.penPos, (unitype) y2, 'd');
 }
 
 /* adds a (blit) circle to the pipeline */
-void turtleCircle(double x, double y, double radius) {
+void turtle_circle(double x, double y, double radius) {
     list_append(turtle.penPos, (unitype) x, 'd');
     list_append(turtle.penPos, (unitype) y, 'd');
     list_append(turtle.penPos, (unitype) radius, 'd');
-    list_append(turtle.penPos, (unitype) turtle.penr, 'd');
-    list_append(turtle.penPos, (unitype) turtle.peng, 'd');
-    list_append(turtle.penPos, (unitype) turtle.penb, 'd');
-    list_append(turtle.penPos, (unitype) turtle.pena, 'd');
+    list_append(turtle.penPos, (unitype) turtle.red, 'b');
+    list_append(turtle.penPos, (unitype) turtle.green, 'b');
+    list_append(turtle.penPos, (unitype) turtle.blue, 'b');
+    list_append(turtle.penPos, (unitype) turtle.alpha, 'b');
     list_append(turtle.penPos, (unitype) 64, 'h'); // blit circle signifier
     list_append(turtle.penPos, (unitype) turtle.circleprez, 'd');
 }
 
-void turtleCircleColor(double x, double y, double radius, uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
+void turtle_circle_color(double x, double y, double radius, uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
     list_append(turtle.penPos, (unitype) x, 'd');
     list_append(turtle.penPos, (unitype) y, 'd');
     list_append(turtle.penPos, (unitype) radius, 'd');
-    list_append(turtle.penPos, (unitype) (r / 255.0), 'd');
-    list_append(turtle.penPos, (unitype) (g / 255.0), 'd');
-    list_append(turtle.penPos, (unitype) (b / 255.0), 'd');
-    list_append(turtle.penPos, (unitype) (1.0 - a / 255.0), 'd');
+    list_append(turtle.penPos, (unitype) r, 'b');
+    list_append(turtle.penPos, (unitype) g, 'b');
+    list_append(turtle.penPos, (unitype) b, 'b');
+    list_append(turtle.penPos, (unitype) (255 - a), 'b');
     list_append(turtle.penPos, (unitype) 64, 'h'); // blit circle signifier
     list_append(turtle.penPos, (unitype) turtle.circleprez, 'd');
 }
 
 /* create a triangle in 3D */
-void turtle3DTriangle(double x1, double y1, double z1, double x2, double y2, double z2, double x3, double y3, double z3) {
+void turtle_3D_Triangle(double x1, double y1, double z1, double x2, double y2, double z2, double x3, double y3, double z3) {
     list_append(turtle.penPos, (unitype) x1, 'd');
     list_append(turtle.penPos, (unitype) y1, 'd');
     list_append(turtle.penPos, (unitype) z1, 'd');
-    list_append(turtle.penPos, (unitype) turtle.penr, 'd');
-    list_append(turtle.penPos, (unitype) turtle.peng, 'd');
-    list_append(turtle.penPos, (unitype) turtle.penb, 'd');
-    list_append(turtle.penPos, (unitype) turtle.pena, 'd');
+    list_append(turtle.penPos, (unitype) turtle.red, 'b');
+    list_append(turtle.penPos, (unitype) turtle.green, 'b');
+    list_append(turtle.penPos, (unitype) turtle.blue, 'b');
+    list_append(turtle.penPos, (unitype) turtle.alpha, 'b');
     list_append(turtle.penPos, (unitype) 130, 'h'); // blit 3D triangle signifier
     list_append(turtle.penPos, (unitype) x2, 'd');
 
@@ -25881,7 +25873,7 @@ void turtle3DTriangle(double x1, double y1, double z1, double x2, double y2, dou
 }
 
 /* 3D -> 2D using perspective projection matrix */
-void turtlePerspective(double x, double y, double z, double *xOut, double *yOut) {
+void turtle_perspective(double x, double y, double z, double *xOut, double *yOut) {
     /* https://www.scratchapixel.com/lessons/3d-basic-rendering/perspective-and-orthographic-projection-matrix/building-basic-perspective-projection-matrix.html */
     // double transform[16] = {
     //     1, 0, 0, 0,
@@ -25920,7 +25912,7 @@ void turtlePerspective(double x, double y, double z, double *xOut, double *yOut)
 }
 
 /* draws the turtle's path on the screen, "this could all be a shader" */
-void turtleUpdate() {
+void turtle_update() {
     /* bad fix to a niche problem part 1 */
     if (turtle.pen == 1) {
         if (turtle.penPos -> length > 0 && turtle.penPos -> type[turtle.penPos -> length - 1] != 'c') {
@@ -26000,28 +25992,28 @@ void turtleUpdate() {
         for (int32_t i = 0; i < len; i += 9) {
             if (renType[i] == 'd') {
                 switch (ren[i + 7].hu) {
-                case 0: // penshape circle
+                case TURTLE_PEN_SHAPE_CIRCLE: // penshape circle
                     if (lastSize != ren[i + 2].d || lastPrez != ren[i + 8].d) {
                         precomputedLog = ren[i + 8].d * log(2.71 + ren[i + 2].d);
                     }
                     lastSize = ren[i + 2].d;
                     lastPrez = ren[i + 8].d;
-                    turtleCircleRenderInternal(ren[i].d, ren[i + 1].d, ren[i + 2].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xcenter, ycenter, xfact, yfact, precomputedLog);
+                    turtle_circle_render_internal(ren[i].d, ren[i + 1].d, ren[i + 2].d, ren[i + 3].b / 255.0, ren[i + 4].b / 255.0, ren[i + 5].b / 255.0, ren[i + 6].b / 255.0, xcenter, ycenter, xfact, yfact, precomputedLog);
                 break;
-                case 1: // penshape square
-                    turtleRectangleRenderInternal(ren[i].d - ren[i + 2].d, ren[i + 1].d - ren[i + 2].d, ren[i].d + ren[i + 2].d, ren[i + 1].d + ren[i + 2].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xcenter, ycenter, xfact, yfact);
+                case TURTLE_PEN_SHAPE_SQUARE: // penshape square
+                    turtle_rectangle_render_internal(ren[i].d - ren[i + 2].d, ren[i + 1].d - ren[i + 2].d, ren[i].d + ren[i + 2].d, ren[i + 1].d + ren[i + 2].d, ren[i + 3].b / 255.0, ren[i + 4].b / 255.0, ren[i + 5].b / 255.0, ren[i + 6].b / 255.0, xcenter, ycenter, xfact, yfact);
                 break;
-                case 2: // penshape triangle
-                    turtleTriangleRenderInternal(ren[i].d - ren[i + 2].d, ren[i + 1].d - ren[i + 2].d, ren[i].d + ren[i + 2].d, ren[i + 1].d - ren[i + 2].d, ren[i].d, ren[i + 1].d + ren[i + 2].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xcenter, ycenter, xfact, yfact);
+                case TURTLE_PEN_SHAPE_TRIANGLE: // penshape triangle
+                    turtle_triangle_render_internal(ren[i].d - ren[i + 2].d, ren[i + 1].d - ren[i + 2].d, ren[i].d + ren[i + 2].d, ren[i + 1].d - ren[i + 2].d, ren[i].d, ren[i + 1].d + ren[i + 2].d, ren[i + 3].b / 255.0, ren[i + 4].b / 255.0, ren[i + 5].b / 255.0, ren[i + 6].b / 255.0, xcenter, ycenter, xfact, yfact);
                 break;
-                case 5: // penshape text
+                case TURTLE_PEN_SHAPE_TEXT: // penshape text
                     if (i - 9 < 0 || i + 9 >= len || renType[i - 1] == 'c' || ren[i - 2].hu > 5) {
                         if (lastSize != ren[i + 2].d || lastPrez != ren[i + 8].d) {
                             precomputedLog = ren[i + 8].d * log(2.71 + ren[i + 2].d);
                         }
                         lastSize = ren[i + 2].d;
                         lastPrez = ren[i + 8].d;
-                        turtleCircleRenderInternal(ren[i].d, ren[i + 1].d, ren[i + 2].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xcenter, ycenter, xfact, yfact, precomputedLog);
+                        turtle_circle_render_internal(ren[i].d, ren[i + 1].d, ren[i + 2].d, ren[i + 3].b / 255.0, ren[i + 4].b / 255.0, ren[i + 5].b / 255.0, ren[i + 6].b / 255.0, xcenter, ycenter, xfact, yfact, precomputedLog);
                     }
                 break;
                 default:
@@ -26031,30 +26023,30 @@ void turtleUpdate() {
                     double dir = atan((ren[i + 9].d - ren[i].d) / (ren[i + 1].d - ren[i + 10].d));
                     double sinn = sin(dir + M_PI / 2);
                     double coss = cos(dir + M_PI / 2);
-                    turtleQuadRenderInternal(ren[i].d + ren[i + 2].d * sinn, ren[i + 1].d - ren[i + 2].d * coss, ren[i + 9].d + ren[i + 2].d * sinn, ren[i + 10].d - ren[i + 2].d * coss, ren[i + 9].d - ren[i + 2].d * sinn, ren[i + 10].d + ren[i + 2].d * coss, ren[i].d - ren[i + 2].d * sinn, ren[i + 1].d + ren[i + 2].d * coss, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xcenter, ycenter, xfact, yfact);
+                    turtle_quad_render_internal(ren[i].d + ren[i + 2].d * sinn, ren[i + 1].d - ren[i + 2].d * coss, ren[i + 9].d + ren[i + 2].d * sinn, ren[i + 10].d - ren[i + 2].d * coss, ren[i + 9].d - ren[i + 2].d * sinn, ren[i + 10].d + ren[i + 2].d * coss, ren[i].d - ren[i + 2].d * sinn, ren[i + 1].d + ren[i + 2].d * coss, ren[i + 3].b / 255.0, ren[i + 4].b / 255.0, ren[i + 5].b / 255.0, ren[i + 6].b / 255.0, xcenter, ycenter, xfact, yfact);
                     if ((ren[i + 7].hu == 4 || ren[i + 7].hu == 5) && i + 18 < len && renType[i + 18] == 'd') {
                         double dir2 = atan((ren[i + 18].d - ren[i + 9].d) / (ren[i + 10].d - ren[i + 19].d));
                         double sinn2 = sin(dir2 + M_PI / 2);
                         double coss2 = cos(dir2 + M_PI / 2);
-                        turtleTriangleRenderInternal(ren[i + 9].d + ren[i + 2].d * sinn, ren[i + 10].d - ren[i + 2].d * coss, ren[i + 9].d - ren[i + 2].d * sinn, ren[i + 10].d + ren[i + 2].d * coss, ren[i + 9].d + ren[i + 11].d * sinn2, ren[i + 10].d - ren[i + 11].d * coss2, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xcenter, ycenter, xfact, yfact); // in a perfect world the program would know which one of these triangles to render (to blend the segments)
-                        turtleTriangleRenderInternal(ren[i + 9].d + ren[i + 2].d * sinn, ren[i + 10].d - ren[i + 2].d * coss, ren[i + 9].d - ren[i + 2].d * sinn, ren[i + 10].d + ren[i + 2].d * coss, ren[i + 9].d - ren[i + 11].d * sinn2, ren[i + 10].d + ren[i + 11].d * coss2, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xcenter, ycenter, xfact, yfact); // however we live in a world where i am bad at math, so it just renders both no matter what (one has no effect)
+                        turtle_triangle_render_internal(ren[i + 9].d + ren[i + 2].d * sinn, ren[i + 10].d - ren[i + 2].d * coss, ren[i + 9].d - ren[i + 2].d * sinn, ren[i + 10].d + ren[i + 2].d * coss, ren[i + 9].d + ren[i + 11].d * sinn2, ren[i + 10].d - ren[i + 11].d * coss2, ren[i + 3].b / 255.0, ren[i + 4].b / 255.0, ren[i + 5].b / 255.0, ren[i + 6].b / 255.0, xcenter, ycenter, xfact, yfact); // in a perfect world the program would know which one of these triangles to render (to blend the segments)
+                        turtle_triangle_render_internal(ren[i + 9].d + ren[i + 2].d * sinn, ren[i + 10].d - ren[i + 2].d * coss, ren[i + 9].d - ren[i + 2].d * sinn, ren[i + 10].d + ren[i + 2].d * coss, ren[i + 9].d - ren[i + 11].d * sinn2, ren[i + 10].d + ren[i + 11].d * coss2, ren[i + 3].b / 255.0, ren[i + 4].b / 255.0, ren[i + 5].b / 255.0, ren[i + 6].b / 255.0, xcenter, ycenter, xfact, yfact); // however we live in a world where i am bad at math, so it just renders both no matter what (one has no effect)
                     }
                 } else {
-                    if (ren[i + 7].hu == 4 && i > 8 && renType[i - 8] == 'c') {
+                    if (ren[i + 7].hu == TURTLE_PEN_SHAPE_CONNECTED && i > 8 && renType[i - 8] == 'c') {
                         if (!(lastSize == ren[i + 2].d) || !(lastPrez != ren[i + 8].d)) {
                             precomputedLog = ren[i + 8].d * log(2.71 + ren[i + 2].d);
                         }
                         lastSize = ren[i + 2].d;
                         lastPrez = ren[i + 8].d;
-                        turtleCircleRenderInternal(ren[i].d, ren[i + 1].d, ren[i + 2].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xcenter, ycenter, xfact, yfact, precomputedLog);
+                        turtle_circle_render_internal(ren[i].d, ren[i + 1].d, ren[i + 2].d, ren[i + 3].b / 255.0, ren[i + 4].b / 255.0, ren[i + 5].b / 255.0, ren[i + 6].b / 255.0, xcenter, ycenter, xfact, yfact, precomputedLog);
                     }
-                    if (ren[i + 7].hu == 5 && i > 8) {
+                    if (ren[i + 7].hu == TURTLE_PEN_SHAPE_TEXT && i > 8) {
                         if (!(lastSize == ren[i + 2].d) || !(lastPrez != ren[i + 8].d)) {
                             precomputedLog = ren[i + 8].d * log(2.71 + ren[i + 2].d);
                         }
                         lastSize = ren[i + 2].d;
                         lastPrez = ren[i + 8].d;
-                        turtleCircleRenderInternal(ren[i].d, ren[i + 1].d, ren[i + 2].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xcenter, ycenter, xfact, yfact, precomputedLog);
+                        turtle_circle_render_internal(ren[i].d, ren[i + 1].d, ren[i + 2].d, ren[i + 3].b / 255.0, ren[i + 4].b / 255.0, ren[i + 5].b / 255.0, ren[i + 6].b / 255.0, xcenter, ycenter, xfact, yfact, precomputedLog);
                     }
                 }
                 if (ren[i + 7].hu == 64) { // blit circle
@@ -26063,19 +26055,19 @@ void turtleUpdate() {
                     }
                     lastSize = ren[i + 2].d;
                     lastPrez = ren[i + 8].d;
-                    turtleCircleRenderInternal(ren[i].d, ren[i + 1].d, ren[i + 2].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xcenter, ycenter, xfact, yfact, precomputedLog);
+                    turtle_circle_render_internal(ren[i].d, ren[i + 1].d, ren[i + 2].d, ren[i + 3].b / 255.0, ren[i + 4].b / 255.0, ren[i + 5].b / 255.0, ren[i + 6].b / 255.0, xcenter, ycenter, xfact, yfact, precomputedLog);
                 }
                 if (ren[i + 7].hu == 66) { // blit triangle
-                    turtleTriangleRenderInternal(ren[i].d, ren[i + 1].d, ren[i + 2].d, ren[i + 8].d, ren[i + 9].d, ren[i + 10].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xcenter, ycenter, xfact, yfact);
+                    turtle_triangle_render_internal(ren[i].d, ren[i + 1].d, ren[i + 2].d, ren[i + 8].d, ren[i + 9].d, ren[i + 10].d, ren[i + 3].b / 255.0, ren[i + 4].b / 255.0, ren[i + 5].b / 255.0, ren[i + 6].b / 255.0, xcenter, ycenter, xfact, yfact);
                     i += 9;
                 }
                 if (ren[i + 7].hu == 67) { // blit quad
-                    turtleQuadRenderInternal(ren[i].d, ren[i + 1].d, ren[i + 2].d, ren[i + 8].d, ren[i + 9].d, ren[i + 10].d, ren[i + 11].d, ren[i + 17].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xcenter, ycenter, xfact, yfact);
+                    turtle_quad_render_internal(ren[i].d, ren[i + 1].d, ren[i + 2].d, ren[i + 8].d, ren[i + 9].d, ren[i + 10].d, ren[i + 11].d, ren[i + 17].d, ren[i + 3].b / 255.0, ren[i + 4].b / 255.0, ren[i + 5].b / 255.0, ren[i + 6].b / 255.0, xcenter, ycenter, xfact, yfact);
                     i += 9;
                 }
                 #ifdef TURTLE_ENABLE_TEXTURES
                 if (ren[i + 7].hu >= 128) { // blit texture (rectangle)
-                    turtleTextureRenderInternal(ren[i + 7].hu - 128, ren[i].d, ren[i + 1].d, ren[i + 2].d, ren[i + 3].d, ren[i + 5].d, ren[i + 6].d, ren[i + 8].d, ren[i + 4].d / 57.2958, xcenter, ycenter, xfact, yfact);
+                    turtle_texture_render_internal(ren[i + 7].hu - 128, ren[i].d, ren[i + 1].d, ren[i + 2].d, ren[i + 3].d, ren[i + 5].b / 255.0, ren[i + 6].b / 255.0, ren[i + 8].b / 255.0, ren[i + 4].d / 57.2958, xcenter, ycenter, xfact, yfact);
                 }
                 #endif /* TURTLE_ENABLE_TEXTURES */
                 // if (ren[i + 7].hu == 256) { // blit 3D sphere
@@ -26085,10 +26077,10 @@ void turtleUpdate() {
 
                 // }
                 // if (ren[i + 7].hu == 258) { // blit 3D triangle
-                //     turtlePerspective(ren[i].d, ren[i + 1].d, ren[i + 2].d, &ren[i].d, &ren[i + 1].d);
-                //     turtlePerspective(ren[i + 8].d, ren[i + 9].d, ren[i + 10].d, &ren[i + 8].d, &ren[i + 9].d);
-                //     turtlePerspective(ren[i + 11].d, ren[i + 12].d, ren[i + 13].d, &ren[i + 11].d, &ren[i + 12].d);
-                //     turtleTriangleRenderInternal(ren[i].d, ren[i + 1].d, ren[i + 8].d, ren[i + 9].d, ren[i + 11].d, ren[i + 12].d, ren[i + 3].d, ren[i + 4].d, ren[i + 5].d, ren[i + 6].d, xcenter, ycenter, xfact, yfact);
+                //     turtle_perspective(ren[i].d, ren[i + 1].d, ren[i + 2].d, &ren[i].d, &ren[i + 1].d);
+                //     turtle_perspective(ren[i + 8].d, ren[i + 9].d, ren[i + 10].d, &ren[i + 8].d, &ren[i + 9].d);
+                //     turtle_perspective(ren[i + 11].d, ren[i + 12].d, ren[i + 13].d, &ren[i + 11].d, &ren[i + 12].d);
+                //     turtle_triangle_render_internal(ren[i].d, ren[i + 1].d, ren[i + 8].d, ren[i + 9].d, ren[i + 11].d, ren[i + 12].d, ren[i + 3].b / 255.0, ren[i + 4].b / 255.0, ren[i + 5].b / 255.0, ren[i + 6].b / 255.0, xcenter, ycenter, xfact, yfact);
                 //     i += 9;
                 // }
                 // if (ren[i + 7].hu == 259) { // blit 3D quad
@@ -26101,11 +26093,11 @@ void turtleUpdate() {
             double originalAspect = (double) turtle.initscreenbounds[0] / turtle.initscreenbounds[1];
             double currentAspect = (double) turtle.screenbounds[0] / turtle.screenbounds[1];
             if (currentAspect > originalAspect) {
-                turtleRectangleRenderInternal(turtle.initbounds[0], turtle.initbounds[1], turtle.bounds[0], turtle.initbounds[3], 0, 0, 0, 1.0, xcenter, ycenter, xfact, yfact);
-                turtleRectangleRenderInternal(turtle.initbounds[2], turtle.initbounds[1], turtle.bounds[2], turtle.initbounds[3], 0, 0, 0, 1.0, xcenter, ycenter, xfact, yfact);
+                turtle_rectangle_render_internal(turtle.initbounds[0], turtle.initbounds[1], turtle.bounds[0], turtle.initbounds[3], 0, 0, 0, 1.0, xcenter, ycenter, xfact, yfact);
+                turtle_rectangle_render_internal(turtle.initbounds[2], turtle.initbounds[1], turtle.bounds[2], turtle.initbounds[3], 0, 0, 0, 1.0, xcenter, ycenter, xfact, yfact);
             } else {
-                turtleRectangleRenderInternal(turtle.initbounds[0], turtle.initbounds[1], turtle.initbounds[2], turtle.bounds[1], 0, 0, 0, 1.0, xcenter, ycenter, xfact, yfact);
-                turtleRectangleRenderInternal(turtle.initbounds[0], turtle.initbounds[3], turtle.initbounds[2], turtle.bounds[3], 0, 0, 0, 1.0, xcenter, ycenter, xfact, yfact);
+                turtle_rectangle_render_internal(turtle.initbounds[0], turtle.initbounds[1], turtle.initbounds[2], turtle.bounds[1], 0, 0, 0, 1.0, xcenter, ycenter, xfact, yfact);
+                turtle_rectangle_render_internal(turtle.initbounds[0], turtle.initbounds[3], turtle.initbounds[2], turtle.bounds[3], 0, 0, 0, 1.0, xcenter, ycenter, xfact, yfact);
             }
         }
         #ifdef TURTLE_ENABLE_TEXTURES
@@ -26132,20 +26124,21 @@ void turtleUpdate() {
     #endif /* OS_BROWSER */
 }
 
-/* keeps the window open while doing nothing else (from python turtleMainLoop()) */
-void turtleMainLoop() {
+/* keeps the window open while doing nothing else (from python turtle.mainloop()) */
+void turtle_main_loop() {
     while (turtle.close == 0) {
-        turtleUpdate();
+        turtle_update();
     }
 }
 
 /* free turtle memory */
-void turtleFree() {
+void turtle_free() {
     list_free(turtle.keyPressed);
     list_free(turtle.penPos);
     #ifdef TURTLE_ENABLE_TEXTURES
     floatList_free(turtle.bufferList);
     #endif /* TURTLE_ENABLE_TEXTURES */
+    glfwTerminate();
 }
 
 #endif /* TURTLE_INTERNAL_IMPLEMENTATION */
@@ -26159,15 +26152,14 @@ void turtleFree() {
    ╚═╝    ╚═════╝ ╚═╝  ╚═╝   ╚═╝   ╚══════╝╚══════╝   ╚═╝   ╚══════╝╚═╝  ╚═╝   ╚═╝╚═╝ ╚═════╝
 https://patorjk.com/software/taag/#p=display&f=ANSI%20Shadow
 
-turtleText uses openGL and the turtle library to render text on the screen
+turtle_text uses openGL and the turtle library to render text on the screen
 */
 
 
-turtleText_t turtleText;
+turtle_text_t turtleText;
 
-/* initialise turtleText, must supply a font file (tgl) - if font file is not found then a default font will be substituted */
-int32_t turtleTextInit(const char *filename) {
-    turtlePenColor(0, 0, 0);
+/* initialise turtle_text, must supply a font file (tgl) - if font file is not found then a default font will be substituted */
+int32_t turtle_text_init(const char *filename) {
     turtleText.bezierPrez = 10;
 
     /* load file */
@@ -26176,7 +26168,7 @@ int32_t turtleTextInit(const char *filename) {
     FILE *tgl = fopen(filename, "r");
     if (tgl == NULL) {
         printf("Error: could not open file %s, using default\n", filename);
-        turtleTextGenerateDefaultFont(generatedFont);
+        turtle_text_generate_default_font(generatedFont);
         fileExists = 0;
     }
 
@@ -26366,9 +26358,9 @@ int32_t turtleTextInit(const char *filename) {
 /* render functions */
 
 /* renders a quadratic bezier curve on the screen */
-void turtleTextRenderBezier(double x1, double y1, double x2, double y2, double x3, double y3, int32_t prez) {
-    turtleGoto(x1, y1);
-    turtlePenDown();
+void turtle_text_render_bezier(double x1, double y1, double x2, double y2, double x3, double y3, int32_t prez) {
+    turtle_goto(x1, y1);
+    turtle_pen_down();
     double iter1 = 1;
     double iter2 = 0;
     for (int32_t i = 0; i < prez; i++) {
@@ -26377,20 +26369,20 @@ void turtleTextRenderBezier(double x1, double y1, double x2, double y2, double x
         double t1 = iter1 * iter1;
         double t2 = iter2 * iter2;
         double t3 = 2 * iter1 * iter2;
-        turtleGoto(t1 * x1 + t3 * x2 + t2 * x3, t1 * y1 + t3 * y2 + t2 * y3);
+        turtle_goto(t1 * x1 + t3 * x2 + t2 * x3, t1 * y1 + t3 * y2 + t2 * y3);
     }
-    turtleGoto(x3, y3);
+    turtle_goto(x3, y3);
 }
 
 /* renders a single character - INTERNAL */
-void turtleTextRenderChar(int32_t index, double x, double y, double size) {
+void turtle_text_render_char(int32_t index, double x, double y, double size) {
     double sizeSave = turtle.pensize;
     index += 1;
     int32_t len1 = turtleText.fontData[index];
     for (int32_t i = 0; i < len1; i++) {
         index += 1;
         if (turtle.pen == 1) {
-            turtlePenUp();
+            turtle_pen_up();
         }
         int32_t len2 = turtleText.fontData[index];
         if (len2 == 1 && turtleText.fontData[index + 1] != 140894115) {
@@ -26403,30 +26395,30 @@ void turtleTextRenderChar(int32_t index, double x, double y, double size) {
             if (turtleText.fontData[index] == 140894115) { // 140894115 is the b value (reserved)
                 index += 4;
                 if (turtleText.fontData[index + 1] != 140894115) {
-                    turtleTextRenderBezier(x + turtleText.fontData[index - 3] * size, y + turtleText.fontData[index - 2] * size, x + turtleText.fontData[index - 1] * size, y + turtleText.fontData[index] * size, x + turtleText.fontData[index + 1] * size, y + turtleText.fontData[index + 2] * size, turtleText.bezierPrezCurrent);
+                    turtle_text_render_bezier(x + turtleText.fontData[index - 3] * size, y + turtleText.fontData[index - 2] * size, x + turtleText.fontData[index - 1] * size, y + turtleText.fontData[index] * size, x + turtleText.fontData[index + 1] * size, y + turtleText.fontData[index + 2] * size, turtleText.bezierPrezCurrent);
                     index += 2;
                 } else {
-                    turtleTextRenderBezier(x + turtleText.fontData[index - 3] * size, y + turtleText.fontData[index - 2] * size, x + turtleText.fontData[index - 1] * size, y + turtleText.fontData[index] * size, x + turtleText.fontData[index + 2] * size, y + turtleText.fontData[index + 3] * size, turtleText.bezierPrezCurrent);
+                    turtle_text_render_bezier(x + turtleText.fontData[index - 3] * size, y + turtleText.fontData[index - 2] * size, x + turtleText.fontData[index - 1] * size, y + turtleText.fontData[index] * size, x + turtleText.fontData[index + 2] * size, y + turtleText.fontData[index + 3] * size, turtleText.bezierPrezCurrent);
                 }
             } else {
                 index += 1;
-                turtleGoto(x + turtleText.fontData[index - 1] * size, y + turtleText.fontData[index] * size);
+                turtle_goto(x + turtleText.fontData[index - 1] * size, y + turtleText.fontData[index] * size);
             }
-            turtlePenDown();
+            turtle_pen_down();
         }
     }
-    turtlePenUp();
+    turtle_pen_up();
     turtle.pensize = sizeSave;
 }
 
-/* special version of turtleTextRenderChar with rotation - INTERNAL */
-void turtleTextRenderCharRotated(int32_t index, double x, double y, double size, double sinR, double cosR) {
+/* special version of turtle_text_render_char with rotation - INTERNAL */
+void turtle_text_render_char_rotated(int32_t index, double x, double y, double size, double sinR, double cosR) {
     index += 1;
     int32_t len1 = turtleText.fontData[index];
     for (int32_t i = 0; i < len1; i++) {
         index += 1;
         if (turtle.pen == 1) {
-            turtlePenUp();
+            turtle_pen_up();
         }
         int32_t len2 = turtleText.fontData[index];
         for (int32_t j = 0; j < len2; j++) {
@@ -26434,27 +26426,27 @@ void turtleTextRenderCharRotated(int32_t index, double x, double y, double size,
             if (turtleText.fontData[index] == 140894115) { // 140894115 is the b value (reserved)
                 index += 4;
                 if (turtleText.fontData[index + 1] != 140894115) {
-                    turtleTextRenderBezier(x + turtleText.fontData[index - 3] * size * cosR + turtleText.fontData[index - 2] * size * sinR, y - turtleText.fontData[index - 3] * size * sinR + turtleText.fontData[index - 2] * size * cosR,
+                    turtle_text_render_bezier(x + turtleText.fontData[index - 3] * size * cosR + turtleText.fontData[index - 2] * size * sinR, y - turtleText.fontData[index - 3] * size * sinR + turtleText.fontData[index - 2] * size * cosR,
                                  x + turtleText.fontData[index - 1] * size * cosR + turtleText.fontData[index] * size * sinR, y - turtleText.fontData[index - 1] * size * sinR + turtleText.fontData[index] * size * cosR,
                                  x + turtleText.fontData[index + 1] * size * cosR + turtleText.fontData[index + 2] * size * sinR, y - turtleText.fontData[index + 1] * size * sinR + turtleText.fontData[index + 2] * size * cosR, turtleText.bezierPrezCurrent);
                     index += 2;
                 } else {
-                    turtleTextRenderBezier(x + turtleText.fontData[index - 3] * size * cosR + turtleText.fontData[index - 2] * size * sinR, y - turtleText.fontData[index - 3] * size * sinR + turtleText.fontData[index - 2] * size * cosR,
+                    turtle_text_render_bezier(x + turtleText.fontData[index - 3] * size * cosR + turtleText.fontData[index - 2] * size * sinR, y - turtleText.fontData[index - 3] * size * sinR + turtleText.fontData[index - 2] * size * cosR,
                                  x + turtleText.fontData[index - 1] * size * cosR + turtleText.fontData[index] * size * sinR, y - turtleText.fontData[index - 1] * size * sinR + turtleText.fontData[index] * size * cosR,
                                  x + turtleText.fontData[index + 2] * size * cosR + turtleText.fontData[index + 3] * size * sinR, y - turtleText.fontData[index + 2] * size * sinR + turtleText.fontData[index + 3] * size * cosR, turtleText.bezierPrezCurrent);
                 }
             } else {
                 index += 1;
-                turtleGoto(x + turtleText.fontData[index - 1] * size * cosR + turtleText.fontData[index] * size * sinR, y - turtleText.fontData[index - 1] * size * sinR + turtleText.fontData[index] * size * cosR);
+                turtle_goto(x + turtleText.fontData[index - 1] * size * cosR + turtleText.fontData[index] * size * sinR, y - turtleText.fontData[index - 1] * size * sinR + turtleText.fontData[index] * size * cosR);
             }
-            turtlePenDown();
+            turtle_pen_down();
         }
     }
-    turtlePenUp();
+    turtle_pen_up();
 }
 
 /* gets the length of a string in coordinates on the screen */
-double turtleTextGetLength(const uint32_t *text, int32_t textLength, double size) {
+double turtle_text_get_length(const uint32_t *text, int32_t textLength, double size) {
     if (textLength == 0) {
         return 0;
     }
@@ -26475,28 +26467,28 @@ double turtleTextGetLength(const uint32_t *text, int32_t textLength, double size
 }
 
 /* gets the length of a formatted string in coordinates on the screen */
-double turtleTextGetStringLength(const char *str, double size) {
+double turtle_text_get_string_length(const char *str, double size) {
     int32_t len = strlen(str);
     uint32_t converted[len];
     for (int32_t i = 0; i < len; i++) {
         converted[i] = (uint32_t) str[i];
     }
-    return turtleTextGetLength(converted, len, size);
+    return turtle_text_get_length(converted, len, size);
 }
 
-/* gets the length of a string in coordinates on the screen */
-double turtleTextGetStringLengthf(double size, const char *str, ...) {
+/* gets the length of a string in coordinates on the screen (max of 2048 characters) */
+double turtle_text_get_string_lengthf(double size, const char *str, ...) {
     char buffer[2048];
     va_list args;
     va_start(args, str);
     vsnprintf(buffer, 2048, str, args);
-    double out = turtleTextGetStringLength(buffer, size);
+    double out = turtle_text_get_string_length(buffer, size);
     va_end(args);
     return out;
 }
 
 /* gets the length of a formatted utf8-string in coordinates on the screen */
-double turtleTextGetUnicodeLength(const char *str, double size) {
+double turtle_text_get_unicode_length(const char *str, double size) {
     int32_t len = strlen(str);
     uint32_t converted[len];
     int32_t byteLength;
@@ -26526,22 +26518,22 @@ double turtleTextGetUnicodeLength(const char *str, double size) {
         i += byteLength;
         next += 1;
     }
-    return turtleTextGetLength(converted, next, size);
+    return turtle_text_get_length(converted, next, size);
 }
 
-/* gets the length of a utf8-string in coordinates on the screen */
-double turtleTextGetUnicodeLengthf(double size, const char *str, ...) {
+/* gets the length of a utf8-string in coordinates on the screen (max of 2048 characters) */
+double turtle_text_get_unicode_lengthf(double size, const char *str, ...) {
     char buffer[2048];
     va_list args;
     va_start(args, str);
     vsnprintf(buffer, 2048, str, args);
-    double out = turtleTextGetUnicodeLength(buffer, size);
+    double out = turtle_text_get_unicode_length(buffer, size);
     va_end(args);
     return out;
 }
 
 /* cut the text of a string such that it will fit in a coordinate size width (0 - left truncate, 1 - right truncate) */
-void turtleTextTruncateString(char *str, double size, double width, int8_t leftRight) {
+void turtle_text_truncate_string(char *str, double size, double width, int8_t leftRight) {
     int32_t length = strlen(str);
     size /= 175;
     double xTrack = 0;
@@ -26581,7 +26573,7 @@ void turtleTextTruncateString(char *str, double size, double width, int8_t leftR
 }
 
 /* Writes to the screen - INTERNAL */
-void turtleTextWrite(const uint32_t *text, int32_t textLength, double x, double y, double size, double align) {
+void turtle_text_write(const uint32_t *text, int32_t textLength, double x, double y, double size, double align) {
     uint16_t saveShape = turtle.penshape;
     double saveSize = turtle.pensize;
     turtleText.bezierPrezCurrent = (int32_t) ceil(sqrt(size * turtleText.bezierPrez / 10));
@@ -26591,14 +26583,14 @@ void turtleTextWrite(const uint32_t *text, int32_t textLength, double x, double 
     double minY = 0;
     #endif
     size /= 175;
-    turtlePenSize(20 * size);
+    turtle_pen_size(20 * size);
     #if defined(TURTLE_TEXT_FAST_PEN) && !defined(TURTLE_TEXT_PRETTY_PEN)
-    turtlePenShape("connected"); // fast
+    turtle_pen_shape(TURTLE_PEN_SHAPE_CONNECTED); // fast
     #else
     #if !defined(TURTLE_TEXT_FAST_PEN) && defined(TURTLE_TEXT_PRETTY_PEN)
-    turtlePenShape("circle"); // pretty
+    turtle_pen_shape(TURTLE_PEN_SHAPE_CIRCLE); // pretty
     #else
-    turtlePenShape("text"); // dedicated setting that blends circle and connected
+    turtle_pen_shape(TURTLE_PEN_SHAPE_TEXT); // dedicated setting that blends circle and connected
     #endif
     #endif
     list_t *xvals = list_init();
@@ -26630,7 +26622,7 @@ void turtleTextWrite(const uint32_t *text, int32_t textLength, double x, double 
     y -= 80 * size;
     #endif
     for (int32_t i = 0; i < textLength; i++) {
-        turtleTextRenderChar(turtleText.fontPointer[dataIndStored -> data[i].i], xvals -> data[i].d - ((xTrack - x) * (align / 100)), y, size);
+        turtle_text_render_char(turtleText.fontPointer[dataIndStored -> data[i].i], xvals -> data[i].d - ((xTrack - x) * (align / 100)), y, size);
     }
     list_free(dataIndStored);
     list_free(xvals);
@@ -26639,7 +26631,7 @@ void turtleTextWrite(const uint32_t *text, int32_t textLength, double x, double 
 }
 
 /* Special form of write function which supports rotated text - INTERNAL */
-void turtleTextWriteRotated(const uint32_t *text, int32_t textLength, double x, double y, double size, double align, double rotate) {
+void turtle_text_write_rotated(const uint32_t *text, int32_t textLength, double x, double y, double size, double align, double rotate) {
     uint16_t saveShape = turtle.penshape;
     double saveSize = turtle.pensize;
     turtleText.bezierPrezCurrent = (int32_t) ceil(sqrt(size * turtleText.bezierPrez / 10));
@@ -26649,14 +26641,14 @@ void turtleTextWriteRotated(const uint32_t *text, int32_t textLength, double x, 
     double minY = 0;
     #endif
     size /= 175;
-    turtlePenSize(20 * size);
+    turtle_pen_size(20 * size);
     #if defined(TURTLE_TEXT_FAST_PEN) && !defined(TURTLE_TEXT_PRETTY_PEN)
-    turtlePenShape("connected"); // fast
+    turtle_pen_shape(TURTLE_PEN_SHAPE_CONNECTED); // fast
     #else
     #if !defined(TURTLE_TEXT_FAST_PEN) && defined(TURTLE_TEXT_PRETTY_PEN)
-    turtlePenShape("circle"); // pretty
+    turtle_pen_shape(TURTLE_PEN_SHAPE_CIRCLE); // pretty
     #else
-    turtlePenShape("text"); // dedicated setting that blends circle and connected
+    turtle_pen_shape(TURTLE_PEN_SHAPE_TEXT); // dedicated setting that blends circle and connected
     #endif
     #endif
     double cosR = cos(rotate / 57.2958);
@@ -26692,7 +26684,7 @@ void turtleTextWriteRotated(const uint32_t *text, int32_t textLength, double x, 
     y -= 80 * size * cosR;
     #endif
     for (int32_t i = 0; i < textLength; i++) {
-        turtleTextRenderCharRotated(turtleText.fontPointer[dataIndStored -> data[i].i], x + (xvals -> data[i].d - (xTrack * (align / 100))) * cosR, y - (xvals -> data[i].d - (xTrack * (align / 100))) * sinR, size, sinR, cosR);
+        turtle_text_render_char_rotated(turtleText.fontPointer[dataIndStored -> data[i].i], x + (xvals -> data[i].d - (xTrack * (align / 100))) * cosR, y - (xvals -> data[i].d - (xTrack * (align / 100))) * sinR, size, sinR, cosR);
     }
     list_free(dataIndStored);
     list_free(xvals);
@@ -26701,47 +26693,47 @@ void turtleTextWriteRotated(const uint32_t *text, int32_t textLength, double x, 
 }
 
 /* Write a string to the screen */
-void turtleTextWriteString(const char *str, double x, double y, double size, double align) {
+void turtle_text_write_string(const char *str, double x, double y, double size, double align) {
     int32_t len = strlen(str);
     uint32_t converted[len];
     for (int32_t i = 0; i < len; i++) {
         converted[i] = (uint32_t) str[i];
     }
-    turtleTextWrite(converted, len, x, y, size, align);
+    turtle_text_write(converted, len, x, y, size, align);
 }
 
-/* Write a formatted string to the screen */
-void turtleTextWriteStringf(double x, double y, double size, double align, const char *str, ...) {
+/* Write a formatted string to the screen (max of 2048 characters) */
+void turtle_text_write_stringf(double x, double y, double size, double align, const char *str, ...) {
     char buffer[2048];
     va_list args;
     va_start(args, str);
     vsnprintf(buffer, 2048, str, args);
-    turtleTextWriteString(buffer, x, y, size, align);
+    turtle_text_write_string(buffer, x, y, size, align);
     va_end(args);
 }
 
 /* Write a string to the screen (with rotation) */
-void turtleTextWriteStringRotated(const char *str, double x, double y, double size, double align, double rotate) {
+void turtle_text_write_string_rotated(const char *str, double x, double y, double size, double align, double rotate) {
     int32_t len = strlen(str);
     uint32_t converted[len];
     for (int32_t i = 0; i < len; i++) {
         converted[i] = (uint32_t) str[i];
     }
-    turtleTextWriteRotated(converted, len, x, y, size, align, rotate);
+    turtle_text_write_rotated(converted, len, x, y, size, align, rotate);
 }
 
-/* Write a formatted string to the screen (with rotation) */
-void turtleTextWriteStringfRotated(double x, double y, double size, double align, double rotate, const char *str, ...) {
+/* Write a formatted string to the screen (with rotation) (max of 2048 characters) */
+void turtle_text_write_stringf_rotated(double x, double y, double size, double align, double rotate, const char *str, ...) {
     char buffer[2048];
     va_list args;
     va_start(args, str);
     vsnprintf(buffer, 2048, str, args);
-    turtleTextWriteStringRotated(buffer, x, y, size, align, rotate);
+    turtle_text_write_string_rotated(buffer, x, y, size, align, rotate);
     va_end(args);
 }
 
 /* Write a utf8-string to the screen */
-void turtleTextWriteUnicode(const char *str, double x, double y, double size, double align) {
+void turtle_text_write_unicode(const char *str, double x, double y, double size, double align) {
     int32_t len = strlen(str);
     uint32_t converted[len];
     int32_t byteLength;
@@ -26771,21 +26763,21 @@ void turtleTextWriteUnicode(const char *str, double x, double y, double size, do
         i += byteLength;
         next += 1;
     }
-    turtleTextWrite(converted, next, x, y, size, align);
+    turtle_text_write(converted, next, x, y, size, align);
 }
 
-/* Write a formatted utf8-string to the screen */
-void turtleTextWriteUnicodef(double x, double y, double size, double align, const char *str, ...) {
+/* Write a formatted utf8-string to the screen (max of 2048 characters) */
+void turtle_text_write_unicodef(double x, double y, double size, double align, const char *str, ...) {
     char buffer[2048];
     va_list args;
     va_start(args, str);
     vsnprintf(buffer, 2048, str, args);
-    turtleTextWriteUnicode(buffer, x, y, size, align);
+    turtle_text_write_unicode(buffer, x, y, size, align);
     va_end(args);
 }
 
 /* Write a utf8-string to the screen (with rotation) */
-void turtleTextWriteUnicodeRotated(const char *str, double x, double y, double size, double align, double rotate) {
+void turtle_text_write_unicode_rotated(const char *str, double x, double y, double size, double align, double rotate) {
     int32_t len = strlen(str);
     uint32_t converted[len];
     int32_t byteLength;
@@ -26815,21 +26807,21 @@ void turtleTextWriteUnicodeRotated(const char *str, double x, double y, double s
         i += byteLength;
         next += 1;
     }
-    turtleTextWriteRotated(converted, next, x, y, size, align, rotate);
+    turtle_text_write_rotated(converted, next, x, y, size, align, rotate);
 }
 
-/* Write a formatted utf8-string to the screen (with rotation) */
-void turtleTextWriteUnicodefRotated(double x, double y, double size, double align, double rotate, const char *str, ...) {
+/* Write a formatted utf8-string to the screen (with rotation) (max of 2048 characters) */
+void turtle_text_write_unicodef_rotated(double x, double y, double size, double align, double rotate, const char *str, ...) {
     char buffer[2048];
     va_list args;
     va_start(args, str);
     vsnprintf(buffer, 2048, str, args);
-    turtleTextWriteUnicodeRotated(buffer, x, y, size, align, rotate);
+    turtle_text_write_unicode_rotated(buffer, x, y, size, align, rotate);
     va_end(args);
 }
 
 /* internal function for converting utf8 to uint32_t characters */
-int32_t turtleTextConvertUnicode(const char *str, uint32_t *converted) {
+int32_t turtle_text_convert_unicode(const char *str, uint32_t *converted) {
     int32_t len = strlen(str);
     int32_t byteLength;
     int32_t i = 0;
@@ -26862,7 +26854,7 @@ int32_t turtleTextConvertUnicode(const char *str, uint32_t *converted) {
 }
 
 /* if the font file is not found, use the default font (kept here) */
-void turtleTextGenerateDefaultFont(list_t *generatedFont) {
+void turtle_text_generate_default_font(list_t *generatedFont) {
     list_append(generatedFont, (unitype) " , 0", 's');
     list_append(generatedFont, (unitype) "A, 2, 3, -160, -100, -100, 60, -40, -100, 2, -137, -40, -63, -40", 's');
     list_append(generatedFont, (unitype) "À, 3, 3, -160, -100, -100, 60, -40, -100, 2, -137, -40, -63, -40, 2, -100, 85, -120, 105", 's');
@@ -27423,7 +27415,7 @@ double tt_themeColors[] = {
 };
 
 void tt_setColor(int32_t index) {
-    turtlePenColor(tt_themeColors[index], tt_themeColors[index + 1], tt_themeColors[index + 2]);
+    turtle_pen_color(tt_themeColors[index], tt_themeColors[index + 1], tt_themeColors[index + 2]);
 }
 
 void turtleToolsSetTheme(tt_theme_name_t theme) {
@@ -27616,7 +27608,7 @@ void turtleToolsSetTheme(tt_theme_name_t theme) {
         };
         memcpy(tt_themeColors, tt_themeCopy, sizeof(tt_themeCopy));
     }
-    turtleBackgroundColor(tt_themeColors[TT_COLOR_BACKGROUND], tt_themeColors[TT_COLOR_BACKGROUND + 1], tt_themeColors[TT_COLOR_BACKGROUND + 2]);
+    turtle_background_color(tt_themeColors[TT_COLOR_BACKGROUND], tt_themeColors[TT_COLOR_BACKGROUND + 1], tt_themeColors[TT_COLOR_BACKGROUND + 2]);
 }
 
 /* ribbon */
@@ -27713,10 +27705,10 @@ int32_t tt_ribbonInitInternal(FILE *configFile, list_t *configList, int8_t fileE
     }
 
     for (int32_t i = 0; i < tt_ribbon.options -> length; i++) {
-        list_append(tt_ribbon.lengths, (unitype) turtleTextGetStringLength(tt_ribbon.options -> data[i].r -> data[0].s, 7 * tt_ribbon.ribbonSize), 'd');
+        list_append(tt_ribbon.lengths, (unitype) turtle_text_get_string_length(tt_ribbon.options -> data[i].r -> data[0].s, 7 * tt_ribbon.ribbonSize), 'd');
         double max = 0;
         for (int32_t j = 1; j < tt_ribbon.options -> data[i].r -> length; j++) {
-            double current = turtleTextGetStringLength(tt_ribbon.options -> data[i].r -> data[j].s, 7 * tt_ribbon.ribbonSize);
+            double current = turtle_text_get_string_length(tt_ribbon.options -> data[i].r -> data[j].s, 7 * tt_ribbon.ribbonSize);
             if (current > max) {
                 max = current;
             }
@@ -27730,7 +27722,7 @@ int32_t tt_ribbonInitInternal(FILE *configFile, list_t *configList, int8_t fileE
 /* render ribbon */
 void tt_ribbonUpdate() {
     tt_setColor(tt_ribbon.color[TT_COLOR_SLOT_RIBBON_TOP]);
-    turtleRectangle(tt_ribbon.bounds[0], tt_ribbon.bounds[3] - tt_ribbon.ribbonSize * 10, tt_ribbon.bounds[2], tt_ribbon.bounds[3]);
+    turtle_rectangle(tt_ribbon.bounds[0], tt_ribbon.bounds[3] - tt_ribbon.ribbonSize * 10, tt_ribbon.bounds[2], tt_ribbon.bounds[3]);
     tt_setColor(tt_ribbon.color[TT_COLOR_SLOT_RIBBON_TEXT]);
     double cutoff = tt_ribbon.bounds[0] + tt_ribbon.marginSize;
     tt_ribbon.mainselect[0] = -1;
@@ -27742,36 +27734,36 @@ void tt_ribbonUpdate() {
             double xRight = prevCutoff + tt_ribbon.lengths -> data[i * 2 + 1].d + tt_ribbon.marginSize / 2.0;
             double yDown = tt_ribbon.bounds[3] - 10 * tt_ribbon.ribbonSize - 15 * tt_ribbon.ribbonSize * (tt_ribbon.options -> data[i].r -> length - 1) - tt_ribbon.marginSize / 2.0;
             tt_setColor(tt_ribbon.color[TT_COLOR_SLOT_RIBBON_DROPDOWN]);
-            turtleRectangle(xLeft, tt_ribbon.bounds[3] - 10 * tt_ribbon.ribbonSize, xRight, yDown); // ribbon highlight
+            turtle_rectangle(xLeft, tt_ribbon.bounds[3] - 10 * tt_ribbon.ribbonSize, xRight, yDown); // ribbon highlight
             for (int32_t j = 1; j < tt_ribbon.options -> data[i].r -> length; j++) {
                 if (tt_globals.elementLogicTypeOld <= TT_ELEMENT_RIBBON) {
                     if (turtle.mouseY > tt_ribbon.bounds[3] - 10 * tt_ribbon.ribbonSize - 15 * tt_ribbon.ribbonSize * j - tt_ribbon.marginSize / 4.0 && turtle.mouseY < tt_ribbon.bounds[3] - 10 * tt_ribbon.ribbonSize && turtle.mouseX > xLeft && turtle.mouseX < xRight && tt_ribbon.subselect[0] == -1) {
                         tt_setColor(tt_ribbon.color[TT_COLOR_SLOT_RIBBON_HOVER]);
-                        turtleRectangle(xLeft, tt_ribbon.bounds[3] - 10 * tt_ribbon.ribbonSize - 15 * tt_ribbon.ribbonSize * (j - 1) - tt_ribbon.marginSize / 4.0, xRight, tt_ribbon.bounds[3] - 10 * tt_ribbon.ribbonSize - 15 * tt_ribbon.ribbonSize * j - tt_ribbon.marginSize / 3.0); // dropdown highlight
+                        turtle_rectangle(xLeft, tt_ribbon.bounds[3] - 10 * tt_ribbon.ribbonSize - 15 * tt_ribbon.ribbonSize * (j - 1) - tt_ribbon.marginSize / 4.0, xRight, tt_ribbon.bounds[3] - 10 * tt_ribbon.ribbonSize - 15 * tt_ribbon.ribbonSize * j - tt_ribbon.marginSize / 3.0); // dropdown highlight
                         tt_ribbon.subselect[0] = j;
                     }
                 }
                 tt_setColor(tt_ribbon.color[TT_COLOR_SLOT_RIBBON_TEXT]);
-                turtleTextWriteUnicode(tt_ribbon.options -> data[i].r -> data[j].s, prevCutoff, tt_ribbon.bounds[3] - 5.5 * tt_ribbon.ribbonSize - j * 15 * tt_ribbon.ribbonSize, 7 * tt_ribbon.ribbonSize, 0);
+                turtle_text_write_unicode(tt_ribbon.options -> data[i].r -> data[j].s, prevCutoff, tt_ribbon.bounds[3] - 5.5 * tt_ribbon.ribbonSize - j * 15 * tt_ribbon.ribbonSize, 7 * tt_ribbon.ribbonSize, 0);
             }
         }
         cutoff += tt_ribbon.lengths -> data[i * 2].d + tt_ribbon.marginSize;
         if (tt_globals.elementLogicTypeOld <= TT_ELEMENT_RIBBON) {
             if (turtle.mouseY > tt_ribbon.bounds[3] - 10 * tt_ribbon.ribbonSize && turtle.mouseY < tt_ribbon.bounds[3] && turtle.mouseX > tt_ribbon.bounds[0] + tt_ribbon.marginSize / 2.0 && turtle.mouseX < cutoff - tt_ribbon.marginSize / 2.0 && tt_ribbon.mainselect[0] == -1) { // -217, -195, -164
                 tt_setColor(tt_ribbon.color[TT_COLOR_SLOT_RIBBON_SELECT]);
-                turtleRectangle(prevCutoff - tt_ribbon.marginSize / 2.0, tt_ribbon.bounds[3] - tt_ribbon.ribbonSize, cutoff - tt_ribbon.marginSize / 2.0, tt_ribbon.bounds[3] - 9 * tt_ribbon.ribbonSize); // render dropdown
+                turtle_rectangle(prevCutoff - tt_ribbon.marginSize / 2.0, tt_ribbon.bounds[3] - tt_ribbon.ribbonSize, cutoff - tt_ribbon.marginSize / 2.0, tt_ribbon.bounds[3] - 9 * tt_ribbon.ribbonSize); // render dropdown
                 tt_ribbon.mainselect[0] = i;
                 tt_globals.elementLogicType = TT_ELEMENT_RIBBON;
             }
         }
         tt_setColor(tt_ribbon.color[TT_COLOR_SLOT_RIBBON_TEXT]);
-        turtleTextWriteUnicode(tt_ribbon.options -> data[i].r -> data[0].s, prevCutoff, tt_ribbon.bounds[3] - 5.5 * tt_ribbon.ribbonSize, 7 * tt_ribbon.ribbonSize, 0);
+        turtle_text_write_unicode(tt_ribbon.options -> data[i].r -> data[0].s, prevCutoff, tt_ribbon.bounds[3] - 5.5 * tt_ribbon.ribbonSize, 7 * tt_ribbon.ribbonSize, 0);
     }
     if (tt_globals.elementLogicTypeOld <= TT_ELEMENT_RIBBON) {
         if (tt_ribbon.mainselect[2] > -1 || tt_ribbon.subselect[2] > -1) {
             tt_globals.elementLogicType = TT_ELEMENT_RIBBON;
         }
-        if (turtleMouseDown()) { // this is hideous
+        if (turtle_mouse_down()) { // this is hideous
             if (tt_ribbon.mouseDown == 0) {
                 tt_ribbon.mouseDown = 1;
                 if (tt_ribbon.subselect[0] == tt_ribbon.subselect[1] && tt_ribbon.subselect[0] != -1) {
@@ -27880,7 +27872,7 @@ int32_t tt_popupInitInternal(FILE *configFile, list_t *configList, int8_t fileEx
         } else {
             list_append(tt_popup.options, configList -> data[tt_popup.options -> length + 1], 's');
         }
-        buttonWidth += turtleTextGetUnicodeLength(tt_popup.options -> data[tt_popup.options -> length - 1].s, tt_popup.size) + defaultPadding;
+        buttonWidth += turtle_text_get_unicode_length(tt_popup.options -> data[tt_popup.options -> length - 1].s, tt_popup.size) + defaultPadding;
     }
     if (fileExists) {
         fclose(configFile);
@@ -27889,7 +27881,7 @@ int32_t tt_popupInitInternal(FILE *configFile, list_t *configList, int8_t fileEx
     double centerY = (turtle.initbounds[1] + turtle.initbounds[3]) / 2;
     double height = (turtle.initbounds[3] - turtle.initbounds[1]) / 9;
     double centerX = (turtle.initbounds[0] + turtle.initbounds[2]) / 2;
-    double messageWidth = turtleTextGetUnicodeLength(tt_popup.message, tt_popup.size) + defaultPadding;
+    double messageWidth = turtle_text_get_unicode_length(tt_popup.message, tt_popup.size) + defaultPadding;
     double width = messageWidth;
     if (messageWidth < buttonWidth) {
         width = buttonWidth;
@@ -27906,29 +27898,29 @@ void tt_popupUpdate() {
     if (turtle.close == 1) {
         tt_globals.elementLogicType = TT_ELEMENT_POPUP;
         tt_setColor(tt_popup.color[TT_COLOR_SLOT_POPUP_BOX]);
-        turtleRectangle(tt_popup.minX, tt_popup.minY, tt_popup.maxX, tt_popup.maxY);
+        turtle_rectangle(tt_popup.minX, tt_popup.minY, tt_popup.maxX, tt_popup.maxY);
         double textX = tt_popup.minX + (tt_popup.maxX - tt_popup.minX) / 2;
         double textY = tt_popup.maxY - tt_popup.size * 2;
         tt_setColor(tt_popup.color[TT_COLOR_SLOT_POPUP_TEXT]);
-        turtleTextWriteUnicode(tt_popup.message, textX, textY, tt_popup.size, 50);
+        turtle_text_write_unicode(tt_popup.message, textX, textY, tt_popup.size, 50);
         textY -= tt_popup.size * 4;
         double fullLength = 0;
         for (int32_t i = 0; i < tt_popup.options -> length; i++) {
-            fullLength += turtleTextGetStringLength(tt_popup.options -> data[i].s, tt_popup.size);
+            fullLength += turtle_text_get_string_length(tt_popup.options -> data[i].s, tt_popup.size);
         }
         /* we have the length of the strings, now we pad with n + 1 padding regions */
         double padding = (tt_popup.maxX - tt_popup.minX - fullLength) / (tt_popup.options -> length + 1);
         textX = tt_popup.minX + padding;
         char flagged = 0;
-        if (!turtleMouseDown() && tt_popup.mouseDown == 1) {
+        if (!turtle_mouse_down() && tt_popup.mouseDown == 1) {
             flagged = 1; // flagged for mouse misbehaviour
         }
         for (int32_t i = 0; i < tt_popup.options -> length; i++) {
-            double strLen = turtleTextGetStringLength(tt_popup.options -> data[i].s, tt_popup.size);
+            double strLen = turtle_text_get_string_length(tt_popup.options -> data[i].s, tt_popup.size);
             if (turtle.mouseX > textX - tt_popup.size && turtle.mouseX < textX + strLen + tt_popup.size && turtle.mouseY > textY - tt_popup.size && turtle.mouseY < textY + tt_popup.size) {
                 tt_setColor(tt_popup.color[TT_COLOR_SLOT_POPUP_BUTTON_SELECT]);
-                turtleRectangle(textX - tt_popup.size, textY - tt_popup.size, textX + tt_popup.size + strLen, textY + tt_popup.size);
-                if (turtleMouseDown()) {
+                turtle_rectangle(textX - tt_popup.size, textY - tt_popup.size, textX + tt_popup.size + strLen, textY + tt_popup.size);
+                if (turtle_mouse_down()) {
                     if (tt_popup.mouseDown == 0) {
                         tt_popup.mouseDown = 1;
                         if (tt_popup.output[0] == 0) {
@@ -27947,13 +27939,13 @@ void tt_popupUpdate() {
                 }
             } else {
                 tt_setColor(tt_popup.color[TT_COLOR_SLOT_POPUP_BUTTON]);
-                turtleRectangle(textX - tt_popup.size, textY - tt_popup.size, textX + tt_popup.size + strLen, textY + tt_popup.size);
+                turtle_rectangle(textX - tt_popup.size, textY - tt_popup.size, textX + tt_popup.size + strLen, textY + tt_popup.size);
             }
             tt_setColor(tt_popup.color[TT_COLOR_SLOT_POPUP_TEXT]);
-            turtleTextWriteUnicode(tt_popup.options -> data[i].s, textX, textY, tt_popup.size, 0);
+            turtle_text_write_unicode(tt_popup.options -> data[i].s, textX, textY, tt_popup.size, 0);
             textX += strLen + padding;
         }
-        if (!turtleMouseDown() && tt_popup.mouseDown == 1 && flagged == 1) {
+        if (!turtle_mouse_down() && tt_popup.mouseDown == 1 && flagged == 1) {
             tt_popup.mouseDown = 0;
             tt_popup.output[0] = 0;
             tt_popup.output[1] = -1;
@@ -28355,7 +28347,7 @@ void tt_textboxFree(tt_textbox_t *textboxp) {
 void tt_dropdownCalculateMax(tt_dropdown_t *dropdownp) {
     dropdownp -> maxXfactor = 0;
     for (int32_t i = 0; i < dropdownp -> options -> length; i++) {
-        double stringLength = turtleTextGetStringLength(dropdownp -> options -> data[i].s, dropdownp -> size - 1);
+        double stringLength = turtle_text_get_string_length(dropdownp -> options -> data[i].s, dropdownp -> size - 1);
         if (stringLength > dropdownp -> maxXfactor) {
             dropdownp -> maxXfactor = stringLength;
         }
@@ -28450,7 +28442,7 @@ void tt_scrollbarFree(tt_scrollbar_t *scrollbarp) {
 void tt_contextCalculateMax(tt_context_t *contextp) {
     contextp -> maxXfactor = 0;
     for (int32_t i = 0; i < contextp -> options -> length; i++) {
-        double stringLength = turtleTextGetStringLength(contextp -> options -> data[i].s, contextp -> size - 1);
+        double stringLength = turtle_text_get_string_length(contextp -> options -> data[i].s, contextp -> size - 1);
         if (stringLength > contextp -> maxXfactor) {
             contextp -> maxXfactor = stringLength;
         }
@@ -28576,7 +28568,7 @@ void tt_buttonUpdate(tt_button_t *buttonp) {
     double buttonLeftX = buttonp -> x;
     double buttonRightX = buttonp -> x;
     double buttonY = buttonp -> y;
-    double buttonWidth = turtleTextGetUnicodeLength(buttonp -> label, buttonp -> size - 1) + buttonp -> size * 0.8;
+    double buttonWidth = turtle_text_get_unicode_length(buttonp -> label, buttonp -> size - 1) + buttonp -> size * 0.8;
     if (buttonp -> align == TT_BUTTON_ALIGN_CENTER) {
         buttonLeftX -= buttonWidth / 2;
         buttonRightX += buttonWidth / 2;
@@ -28600,22 +28592,22 @@ void tt_buttonUpdate(tt_button_t *buttonp) {
         break;
     }
     if (buttonp -> shape == TT_BUTTON_SHAPE_RECTANGLE) {
-        turtleRectangle(buttonLeftX, buttonY - buttonHeight / 2, buttonRightX, buttonY + buttonHeight / 2);
+        turtle_rectangle(buttonLeftX, buttonY - buttonHeight / 2, buttonRightX, buttonY + buttonHeight / 2);
     } else if (buttonp -> shape == TT_BUTTON_SHAPE_ROUNDED_RECTANGLE) {
-        turtlePenSize(buttonp -> size);
-        turtleGoto(buttonLeftX + buttonp -> size / 2, buttonY - buttonHeight / 2 + buttonp -> size / 2);
-        turtlePenDown();
-        turtleGoto(buttonRightX - buttonp -> size / 2, buttonY - buttonHeight / 2 + buttonp -> size / 2);
-        turtleGoto(buttonRightX - buttonp -> size / 2, buttonY + buttonHeight / 2 - buttonp -> size / 2);
-        turtleGoto(buttonLeftX + buttonp -> size / 2, buttonY + buttonHeight / 2 - buttonp -> size / 2);
-        turtleGoto(buttonLeftX + buttonp -> size / 2, buttonY - buttonHeight / 2 + buttonp -> size / 2);
-        turtlePenUp();
-        turtleRectangle(buttonLeftX + buttonp -> size / 2, buttonY - buttonHeight / 2 + buttonp -> size / 2, buttonRightX - buttonp -> size / 2, buttonY + buttonHeight / 2 - buttonp -> size / 2);
+        turtle_pen_size(buttonp -> size);
+        turtle_goto(buttonLeftX + buttonp -> size / 2, buttonY - buttonHeight / 2 + buttonp -> size / 2);
+        turtle_pen_down();
+        turtle_goto(buttonRightX - buttonp -> size / 2, buttonY - buttonHeight / 2 + buttonp -> size / 2);
+        turtle_goto(buttonRightX - buttonp -> size / 2, buttonY + buttonHeight / 2 - buttonp -> size / 2);
+        turtle_goto(buttonLeftX + buttonp -> size / 2, buttonY + buttonHeight / 2 - buttonp -> size / 2);
+        turtle_goto(buttonLeftX + buttonp -> size / 2, buttonY - buttonHeight / 2 + buttonp -> size / 2);
+        turtle_pen_up();
+        turtle_rectangle(buttonLeftX + buttonp -> size / 2, buttonY - buttonHeight / 2 + buttonp -> size / 2, buttonRightX - buttonp -> size / 2, buttonY + buttonHeight / 2 - buttonp -> size / 2);
     } else if (buttonp -> shape == TT_BUTTON_SHAPE_CIRCLE) {
-        turtleGoto((buttonLeftX + buttonRightX) / 2, buttonY);
-        turtlePenSize(buttonWidth);
-        turtlePenDown();
-        turtlePenUp();
+        turtle_goto((buttonLeftX + buttonRightX) / 2, buttonY);
+        turtle_pen_size(buttonWidth);
+        turtle_pen_down();
+        turtle_pen_up();
     }
     tt_setColor(buttonp -> color[TT_COLOR_SLOT_BUTTON_TEXT]);
     if (buttonp -> shape == TT_BUTTON_SHAPE_TEXT) {
@@ -28633,7 +28625,7 @@ void tt_buttonUpdate(tt_button_t *buttonp) {
             break;
         }
     }
-    turtleTextWriteUnicode(buttonp -> label, (buttonLeftX + buttonRightX) / 2, buttonY, buttonp -> size - 1, 50);
+    turtle_text_write_unicode(buttonp -> label, (buttonLeftX + buttonRightX) / 2, buttonY, buttonp -> size - 1, 50);
     /* mouse */
     if (buttonp -> enabled != TT_ELEMENT_ENABLED || tt_globals.elementLogicTypeOld > buttonp -> priority || (tt_globals.elementLogicTypeOld == buttonp -> priority && tt_globals.elementLogicIndexOld > tt_globals.elementLogicTemp)) {
         /* button not enabled or higher priority element is being interacted with */
@@ -28673,7 +28665,7 @@ void tt_buttonUpdate(tt_button_t *buttonp) {
             }
         }
     }
-    if (turtleMouseDown()) {
+    if (turtle_mouse_down()) {
         if (buttonp -> status == TT_STATUS_HOVER || buttonp -> status == TT_STATUS_HOVER_FIRST_TICK) {
             /* first tick clicked */
             buttonp -> status = TT_STATUS_CLICK_FIRST_TICK;
@@ -28738,31 +28730,31 @@ void tt_switchUpdate(tt_switch_t *switchp) {
         } else {
             tt_setColor(switchp -> color[TT_COLOR_SLOT_SWITCH_OFF]);
         }
-        turtlePenSize(switchp -> size * 1.2);
-        turtleGoto(switchX - switchp -> size * 0.8, switchY);
-        turtlePenDown();
-        turtleGoto(switchX + switchp -> size * 0.8, switchY);
-        turtlePenUp();
-        turtlePenSize(switchp -> size);
+        turtle_pen_size(switchp -> size * 1.2);
+        turtle_goto(switchX - switchp -> size * 0.8, switchY);
+        turtle_pen_down();
+        turtle_goto(switchX + switchp -> size * 0.8, switchY);
+        turtle_pen_up();
+        turtle_pen_size(switchp -> size);
         if (switchp -> value) {
             tt_setColor(switchp -> color[TT_COLOR_SLOT_CIRCLE_ON]);
-            turtleGoto(switchX + switchp -> size * 0.8, switchY);
+            turtle_goto(switchX + switchp -> size * 0.8, switchY);
         } else {
             tt_setColor(switchp -> color[TT_COLOR_SLOT_CIRCLE_OFF]);
-            turtleGoto(switchX - switchp -> size * 0.8, switchY);
+            turtle_goto(switchX - switchp -> size * 0.8, switchY);
         }
-        turtlePenDown();
-        turtlePenUp();
+        turtle_pen_down();
+        turtle_pen_up();
         /* mouse parameters */
         if (switchp -> style == TT_SWITCH_STYLE_CLASSIC) {
             switchClickLeft = switchX - switchp -> size * 1.35;
             switchClickRight = switchX + switchp -> size * 1.35;
         } else if (switchp -> style == TT_SWITCH_STYLE_SIDESWIPE && (switchp -> align == TT_SWITCH_ALIGN_LEFT || switchp -> align == TT_SWITCH_ALIGN_CENTER)) {
-            double textLength = turtleTextGetUnicodeLength(switchp -> label, switchp -> size - 1);
+            double textLength = turtle_text_get_unicode_length(switchp -> label, switchp -> size - 1);
             switchClickLeft = switchX - switchp -> size * 1.35;
             switchClickRight = switchX + switchp -> size * 2.2 + textLength;
         } else if (switchp -> style == TT_SWITCH_STYLE_SIDESWIPE && switchp -> align == TT_SWITCH_ALIGN_RIGHT) {
-            double textLength = turtleTextGetUnicodeLength(switchp -> label, switchp -> size - 1);
+            double textLength = turtle_text_get_unicode_length(switchp -> label, switchp -> size - 1);
             switchClickLeft = switchX - switchp -> size * 2 - textLength;
             switchClickRight = switchX + switchp -> size * 1.35;
         }
@@ -28772,11 +28764,11 @@ void tt_switchUpdate(tt_switch_t *switchp) {
         tt_setColor(switchp -> color[TT_COLOR_SLOT_SWITCH_TEXT]);
         if (switchp -> style == TT_SWITCH_STYLE_CLASSIC) {
             if (switchp -> align == TT_SWITCH_ALIGN_CENTER) {
-                turtleTextWriteUnicode(switchp -> label, switchX, switchY + 1.6 * switchp -> size, switchp -> size - 1, 50);
+                turtle_text_write_unicode(switchp -> label, switchX, switchY + 1.6 * switchp -> size, switchp -> size - 1, 50);
             } else if (switchp -> align == TT_SWITCH_ALIGN_LEFT) {
-                turtleTextWriteUnicode(switchp -> label, switchX - switchp -> size * 1.2, switchY + 1.6 * switchp -> size, switchp -> size - 1, 0);
+                turtle_text_write_unicode(switchp -> label, switchX - switchp -> size * 1.2, switchY + 1.6 * switchp -> size, switchp -> size - 1, 0);
             } else if (switchp -> align == TT_SWITCH_ALIGN_RIGHT) {
-                turtleTextWriteUnicode(switchp -> label, switchX + switchp -> size * 1.2, switchY + 1.6 * switchp -> size, switchp -> size - 1, 100);
+                turtle_text_write_unicode(switchp -> label, switchX + switchp -> size * 1.2, switchY + 1.6 * switchp -> size, switchp -> size - 1, 100);
             }
         } else if (switchp -> style == TT_SWITCH_STYLE_SIDESWIPE && (switchp -> align == TT_SWITCH_ALIGN_LEFT || switchp -> align == TT_SWITCH_ALIGN_CENTER)) {
             if (switchp -> status == TT_STATUS_IDLE || switchp -> status == TT_STATUS_BLOCKED) {
@@ -28784,14 +28776,14 @@ void tt_switchUpdate(tt_switch_t *switchp) {
             } else {
                 tt_setColor(switchp -> color[TT_COLOR_SLOT_SWITCH_TEXT_HOVER]);
             }
-            turtleTextWriteUnicode(switchp -> label, switchX + switchp -> size * 2, switchY, switchp -> size - 1, 0);
+            turtle_text_write_unicode(switchp -> label, switchX + switchp -> size * 2, switchY, switchp -> size - 1, 0);
         } else if (switchp -> style == TT_SWITCH_STYLE_SIDESWIPE && switchp -> align == TT_SWITCH_ALIGN_RIGHT) {
             if (switchp -> status == TT_STATUS_IDLE || switchp -> status == TT_STATUS_BLOCKED) {
                 tt_setColor(switchp -> color[TT_COLOR_SLOT_SWITCH_TEXT]);
             } else {
                 tt_setColor(switchp -> color[TT_COLOR_SLOT_SWITCH_TEXT_HOVER]);
             }
-            turtleTextWriteUnicode(switchp -> label, switchX - switchp -> size * 2, switchY, switchp -> size - 1, 100);
+            turtle_text_write_unicode(switchp -> label, switchX - switchp -> size * 2, switchY, switchp -> size - 1, 100);
         }
     } else if (switchp -> style == TT_SWITCH_STYLE_VERTICAL) {
         /* render switch */
@@ -28800,21 +28792,21 @@ void tt_switchUpdate(tt_switch_t *switchp) {
         } else {
             tt_setColor(switchp -> color[TT_COLOR_SLOT_SWITCH_OFF]);
         }
-        turtlePenSize(switchp -> size * 1.2);
-        turtleGoto(switchX, switchY - switchp -> size * 0.8);
-        turtlePenDown();
-        turtleGoto(switchX, switchY + switchp -> size * 0.8);
-        turtlePenUp();
-        turtlePenSize(switchp -> size);
+        turtle_pen_size(switchp -> size * 1.2);
+        turtle_goto(switchX, switchY - switchp -> size * 0.8);
+        turtle_pen_down();
+        turtle_goto(switchX, switchY + switchp -> size * 0.8);
+        turtle_pen_up();
+        turtle_pen_size(switchp -> size);
         if (switchp -> value) {
             tt_setColor(switchp -> color[TT_COLOR_SLOT_CIRCLE_ON]);
-            turtleGoto(switchX, switchY + switchp -> size * 0.8);
+            turtle_goto(switchX, switchY + switchp -> size * 0.8);
         } else {
             tt_setColor(switchp -> color[TT_COLOR_SLOT_CIRCLE_OFF]);
-            turtleGoto(switchX, switchY - switchp -> size * 0.8);
+            turtle_goto(switchX, switchY - switchp -> size * 0.8);
         }
-        turtlePenDown();
-        turtlePenUp();
+        turtle_pen_down();
+        turtle_pen_up();
         /* mouse parameters */
         switchClickLeft = switchX - switchp -> size * 0.6;
         switchClickRight = switchX + switchp -> size * 0.6;
@@ -28823,49 +28815,49 @@ void tt_switchUpdate(tt_switch_t *switchp) {
         /* render text */
         tt_setColor(switchp -> color[TT_COLOR_SLOT_SWITCH_TEXT]);
         if (switchp -> align == TT_SWITCH_ALIGN_CENTER) {
-            turtleTextWriteUnicode(switchp -> label, switchX, switchY + 2.2 * switchp -> size, switchp -> size - 1, 50);
+            turtle_text_write_unicode(switchp -> label, switchX, switchY + 2.2 * switchp -> size, switchp -> size - 1, 50);
         } else if (switchp -> align == TT_SWITCH_ALIGN_LEFT) {
-            turtleTextWriteUnicode(switchp -> label, switchX - switchp -> size * 1.2, switchY + 2.2 * switchp -> size, switchp -> size - 1, 0);
+            turtle_text_write_unicode(switchp -> label, switchX - switchp -> size * 1.2, switchY + 2.2 * switchp -> size, switchp -> size - 1, 0);
         } else if (switchp -> align == TT_SWITCH_ALIGN_RIGHT) {
-            turtleTextWriteUnicode(switchp -> label, switchX + switchp -> size * 1.2, switchY + 2.2 * switchp -> size, switchp -> size - 1, 100);
+            turtle_text_write_unicode(switchp -> label, switchX + switchp -> size * 1.2, switchY + 2.2 * switchp -> size, switchp -> size - 1, 100);
         }
     } else if (switchp -> style == TT_SWITCH_STYLE_CHECKBOX || switchp -> style == TT_SWITCH_STYLE_XBOX) {
         /* render box */
         tt_setColor(switchp -> color[TT_COLOR_SLOT_SWITCH_ON]);
-        turtleRectangle(switchX - switchp -> size / 2, switchY - switchp -> size / 2, switchX + switchp -> size / 2, switchY + switchp -> size / 2);
+        turtle_rectangle(switchX - switchp -> size / 2, switchY - switchp -> size / 2, switchX + switchp -> size / 2, switchY + switchp -> size / 2);
         tt_setColor(switchp -> color[TT_COLOR_SLOT_SWITCH_OFF]);
-        turtlePenSize(switchp -> size / 6);
-        turtleGoto(switchX - switchp -> size / 2, switchY - switchp -> size / 2);
-        turtlePenDown();
-        turtleGoto(switchX + switchp -> size / 2, switchY - switchp -> size / 2);
-        turtleGoto(switchX + switchp -> size / 2, switchY + switchp -> size / 2);
-        turtleGoto(switchX - switchp -> size / 2, switchY + switchp -> size / 2);
-        turtleGoto(switchX - switchp -> size / 2, switchY - switchp -> size / 2);
-        turtlePenUp();
+        turtle_pen_size(switchp -> size / 6);
+        turtle_goto(switchX - switchp -> size / 2, switchY - switchp -> size / 2);
+        turtle_pen_down();
+        turtle_goto(switchX + switchp -> size / 2, switchY - switchp -> size / 2);
+        turtle_goto(switchX + switchp -> size / 2, switchY + switchp -> size / 2);
+        turtle_goto(switchX - switchp -> size / 2, switchY + switchp -> size / 2);
+        turtle_goto(switchX - switchp -> size / 2, switchY - switchp -> size / 2);
+        turtle_pen_up();
         if (switchp -> value) {
             if (switchp -> style == TT_SWITCH_STYLE_CHECKBOX) {
                 /* render check */
                 tt_setColor(switchp -> color[TT_COLOR_SLOT_CIRCLE_ON]);
-                turtleGoto(switchX - switchp -> size / 2.5, switchY);
-                turtlePenDown();
-                turtleGoto(switchX, switchY - switchp -> size / 2.5);
-                turtleGoto(switchX + switchp -> size / 2.5, switchY + switchp -> size / 2.5);
-                turtlePenUp();
+                turtle_goto(switchX - switchp -> size / 2.5, switchY);
+                turtle_pen_down();
+                turtle_goto(switchX, switchY - switchp -> size / 2.5);
+                turtle_goto(switchX + switchp -> size / 2.5, switchY + switchp -> size / 2.5);
+                turtle_pen_up();
             } else if (switchp -> style == TT_SWITCH_STYLE_XBOX) {
                 /* render X */
                 tt_setColor(switchp -> color[TT_COLOR_SLOT_CIRCLE_ON]);
-                turtleGoto(switchX + switchp -> size / 2.5, switchY + switchp -> size / 2.5);
-                turtlePenDown();
-                turtleGoto(switchX - switchp -> size / 2.5, switchY - switchp -> size / 2.5);
-                turtlePenUp();
-                turtleGoto(switchX + switchp -> size / 2.5, switchY - switchp -> size / 2.5);
-                turtlePenDown();
-                turtleGoto(switchX - switchp -> size / 2.5, switchY + switchp -> size / 2.5);
-                turtlePenUp();
+                turtle_goto(switchX + switchp -> size / 2.5, switchY + switchp -> size / 2.5);
+                turtle_pen_down();
+                turtle_goto(switchX - switchp -> size / 2.5, switchY - switchp -> size / 2.5);
+                turtle_pen_up();
+                turtle_goto(switchX + switchp -> size / 2.5, switchY - switchp -> size / 2.5);
+                turtle_pen_down();
+                turtle_goto(switchX - switchp -> size / 2.5, switchY + switchp -> size / 2.5);
+                turtle_pen_up();
             }
         }
         /* mouse parameters - include text */
-        double textLength = turtleTextGetUnicodeLength(switchp -> label, switchp -> size - 1);
+        double textLength = turtle_text_get_unicode_length(switchp -> label, switchp -> size - 1);
         switchClickLeft = switchX - switchp -> size * 0.6;
         switchClickRight = switchX + switchp -> size * 1.2 + textLength;
         switchClickDown = switchY - switchp -> size * 0.6;
@@ -28876,14 +28868,14 @@ void tt_switchUpdate(tt_switch_t *switchp) {
         } else {
             tt_setColor(switchp -> color[TT_COLOR_SLOT_SWITCH_TEXT_HOVER]);
         }
-        turtleTextWriteUnicode(switchp -> label, switchX + switchp -> size, switchY, switchp -> size - 1, 0);
+        turtle_text_write_unicode(switchp -> label, switchX + switchp -> size, switchY, switchp -> size - 1, 0);
     } else if (switchp -> style == TT_SWITCH_STYLE_TRIANGLE) {
         if (switchp -> value) {
             tt_setColor(switchp -> color[TT_COLOR_SLOT_SWITCH_ON]);
-            turtleTriangle(switchX - switchp -> size * 0.5, switchY - switchp -> size * 0.5, switchX + switchp -> size * 0.5, switchY - switchp -> size * 0.5, switchX + switchp -> size * 0.5, switchY + switchp -> size * 0.5);
+            turtle_triangle(switchX - switchp -> size * 0.5, switchY - switchp -> size * 0.5, switchX + switchp -> size * 0.5, switchY - switchp -> size * 0.5, switchX + switchp -> size * 0.5, switchY + switchp -> size * 0.5);
         } else {
             tt_setColor(switchp -> color[TT_COLOR_SLOT_SWITCH_OFF]);
-            turtleTriangle(switchX - switchp -> size * 0.5, switchY - switchp -> size * 0.5, switchX + switchp -> size * 0.3, switchY, switchX - switchp -> size * 0.5, switchY + switchp -> size * 0.5);
+            turtle_triangle(switchX - switchp -> size * 0.5, switchY - switchp -> size * 0.5, switchX + switchp -> size * 0.3, switchY, switchX - switchp -> size * 0.5, switchY + switchp -> size * 0.5);
         }
         switchClickLeft = switchX - switchp -> size * 0.6;
         switchClickRight = switchX + switchp -> size * 0.6;
@@ -28912,7 +28904,7 @@ void tt_switchUpdate(tt_switch_t *switchp) {
             switchp -> status = TT_STATUS_IDLE;
         }
     }
-    if (turtleMouseDown()) {
+    if (turtle_mouse_down()) {
         if (switchp -> status == TT_STATUS_HOVER || switchp -> status == TT_STATUS_HOVER_FIRST_TICK) {
             /* first tick clicked */
             switchp -> status = TT_STATUS_CLICK_FIRST_TICK;
@@ -28974,37 +28966,37 @@ void tt_dialUpdate(tt_dial_t *dialp) {
         return;
     }
     tt_setColor(dialp -> color[TT_COLOR_SLOT_DIAL_TEXT]);
-    turtleTextWriteUnicode(dialp -> label, dialp -> x, dialp -> y + 1.9 * dialp -> size, dialp -> size - 1, 50);
+    turtle_text_write_unicode(dialp -> label, dialp -> x, dialp -> y + 1.9 * dialp -> size, dialp -> size - 1, 50);
     double dialX = dialp -> x;
     double dialY = dialp -> y;
-    turtlePenSize(dialp -> size / 10);
+    turtle_pen_size(dialp -> size / 10);
     double circleSize = dialp -> size * 0.9;
     tt_setColor(dialp -> color[TT_COLOR_SLOT_DIAL]);
     /* draw circle */
     int32_t bezierPrezCurrent = (int32_t) ceil(sqrt(dialp -> size * turtleText.bezierPrez * 3));
     if (dialp -> style == TT_DIAL_STYLE_CLASSIC) {
-        turtleGoto(dialX, dialY + circleSize);
-        turtlePenDown();
+        turtle_goto(dialX, dialY + circleSize);
+        turtle_pen_down();
         double theta = 0;
         for (int32_t i = 0; i < bezierPrezCurrent; i++) {
-            turtleGoto(dialX + circleSize * sin(theta), dialY + circleSize * cos(theta));
+            turtle_goto(dialX + circleSize * sin(theta), dialY + circleSize * cos(theta));
             theta += M_PI * 2 / bezierPrezCurrent;
         }
-        turtleGoto(dialX, dialY + circleSize);
+        turtle_goto(dialX, dialY + circleSize);
     } else if (dialp -> style == TT_DIAL_STYLE_SPEEDOMETER) {
         double theta = -135 / 57.2958;
-        turtleGoto(dialX + circleSize * sin(theta), dialY + circleSize * cos(theta));
-        turtlePenDown();
+        turtle_goto(dialX + circleSize * sin(theta), dialY + circleSize * cos(theta));
+        turtle_pen_down();
         for (int32_t i = 0; i < bezierPrezCurrent; i++) {
-            turtleGoto(dialX + circleSize * sin(theta), dialY + circleSize * cos(theta));
+            turtle_goto(dialX + circleSize * sin(theta), dialY + circleSize * cos(theta));
             theta += M_PI * 2 / bezierPrezCurrent * 0.75;
         }
-        turtleGoto(dialX + circleSize * sin(theta), dialY + circleSize * cos(theta));
+        turtle_goto(dialX + circleSize * sin(theta), dialY + circleSize * cos(theta));
     }
-    turtlePenUp();
-    turtleGoto(dialX, dialY);
+    turtle_pen_up();
+    turtle_goto(dialX, dialY);
     tt_setColor(dialp -> color[TT_COLOR_SLOT_DIAL]);
-    turtlePenDown();
+    turtle_pen_down();
     double dialAngle = 0.0;
     if (dialp -> style == TT_DIAL_STYLE_CLASSIC) {
         if (dialp -> scale == TT_DIAL_SCALE_LOG) {
@@ -29023,8 +29015,8 @@ void tt_dialUpdate(tt_dial_t *dialp) {
             dialAngle = 270 * (log((((double) dialp -> value - dialp -> range[0]) / (dialp -> range[1] - dialp -> range[0])) * 270 + 1) / log(271)) - 135;
         }
     }
-    turtleGoto(dialX + sin(dialAngle / 57.2958) * dialp -> size, dialY + cos(dialAngle / 57.2958) * dialp -> size);
-    turtlePenUp();
+    turtle_goto(dialX + sin(dialAngle / 57.2958) * dialp -> size, dialY + cos(dialAngle / 57.2958) * dialp -> size);
+    turtle_pen_up();
     /* mouse */
     if (dialp -> enabled != TT_ELEMENT_ENABLED || tt_globals.elementLogicTypeOld > dialp -> priority || (tt_globals.elementLogicTypeOld == dialp -> priority && tt_globals.elementLogicIndexOld > tt_globals.elementLogicTemp)) {
         /* dial not enabled or higher priority element is being interacted with */
@@ -29047,7 +29039,7 @@ void tt_dialUpdate(tt_dial_t *dialp) {
             dialp -> status = TT_STATUS_IDLE;
         }
     }
-    if (turtleMouseDown()) {
+    if (turtle_mouse_down()) {
         if (dialp -> status == TT_STATUS_HOVER || dialp -> status == TT_STATUS_HOVER_FIRST_TICK) {
             /* first tick clicked */
             dialp -> status = TT_STATUS_CLICK_FIRST_TICK;
@@ -29061,7 +29053,7 @@ void tt_dialUpdate(tt_dial_t *dialp) {
             /* dial is blocked from interaction until mouse is unclicked */
             dialp -> status = TT_STATUS_BLOCKED;
         }
-    } else if (turtleMouseRight()) {
+    } else if (turtle_mouse_right()) {
         if (dialp -> status == TT_STATUS_HOVER || dialp -> status == TT_STATUS_HOVER_FIRST_TICK) {
             /* first tick right clicked */
             dialp -> value = dialp -> defaultValue;
@@ -29124,9 +29116,9 @@ void tt_dialUpdate(tt_dial_t *dialp) {
     if (dialp -> renderMultiplier != 0) {
         tt_setColor(dialp -> color[TT_COLOR_SLOT_DIAL_TEXT]);
         if (dialp -> style == TT_DIAL_STYLE_CLASSIC) {
-            turtleTextWriteStringf(dialX + dialp -> size * 1.3, dialY, dialp -> size / 2, 0, dialp -> render, dialp -> value * dialp -> renderMultiplier);
+            turtle_text_write_stringf(dialX + dialp -> size * 1.3, dialY, dialp -> size / 2, 0, dialp -> render, dialp -> value * dialp -> renderMultiplier);
         } else if (dialp -> style == TT_DIAL_STYLE_SPEEDOMETER) {
-            turtleTextWriteStringf(dialX, dialY - dialp -> size * 1.2, dialp -> size / 2, 50, dialp -> render, dialp -> value * dialp -> renderMultiplier);
+            turtle_text_write_stringf(dialX, dialY - dialp -> size * 1.2, dialp -> size / 2, 50, dialp -> render, dialp -> value * dialp -> renderMultiplier);
         }
     }
     if (dialp -> variable != NULL) {
@@ -29268,9 +29260,9 @@ void tt_sliderUpdate(tt_slider_t *sliderp) {
     }
     tt_setColor(sliderp -> color[TT_COLOR_SLOT_SLIDER_TEXT]);
     if (sliderRotateFactor != 0) {
-        turtleTextWriteUnicodeRotated(sliderp -> label, sliderp -> x + sliderOffsetXFactor, sliderp -> y + sliderOffsetYFactor, sliderp -> size - 1, sliderAlignFactor, sliderRotateFactor);
+        turtle_text_write_unicode_rotated(sliderp -> label, sliderp -> x + sliderOffsetXFactor, sliderp -> y + sliderOffsetYFactor, sliderp -> size - 1, sliderAlignFactor, sliderRotateFactor);
     } else {
-        turtleTextWriteUnicode(sliderp -> label, sliderp -> x + sliderOffsetXFactor, sliderp -> y + sliderOffsetYFactor, sliderp -> size - 1, sliderAlignFactor);
+        turtle_text_write_unicode(sliderp -> label, sliderp -> x + sliderOffsetXFactor, sliderp -> y + sliderOffsetYFactor, sliderp -> size - 1, sliderAlignFactor);
     }
     if (sliderp -> style == TT_SLIDER_STYLE_SIDESWIPE) {
         sliderAlignFactor = 100 - sliderAlignFactor;
@@ -29278,33 +29270,33 @@ void tt_sliderUpdate(tt_slider_t *sliderp) {
     if (sliderp -> style == TT_SLIDER_STYLE_COMPACT) {
         sliderRotateFactor = 0;
     }
-    turtlePenSize(sliderp -> size * 1.2);
-    turtleGoto(sliderXLeft, sliderYLeft);
+    turtle_pen_size(sliderp -> size * 1.2);
+    turtle_goto(sliderXLeft, sliderYLeft);
     tt_setColor(sliderp -> color[TT_COLOR_SLOT_SLIDER_BAR]);
-    turtlePenDown();
-    turtleGoto(sliderXRight, sliderYRight);
-    turtlePenUp();
-    turtlePenSize(sliderp -> size);
+    turtle_pen_down();
+    turtle_goto(sliderXRight, sliderYRight);
+    turtle_pen_up();
+    turtle_pen_size(sliderp -> size);
     tt_setColor(sliderp -> color[TT_COLOR_SLOT_SLIDER_CIRCLE]);
     if (sliderp -> type == TT_SLIDER_TYPE_HORIZONTAL) {
         if (sliderp -> scale == TT_SLIDER_SCALE_LINEAR) {
-            turtleGoto(sliderXLeft + (sliderXRight - sliderXLeft) * (sliderp -> value - sliderp -> range[0]) / (sliderp -> range[1] - sliderp -> range[0]), sliderYLeft);
+            turtle_goto(sliderXLeft + (sliderXRight - sliderXLeft) * (sliderp -> value - sliderp -> range[0]) / (sliderp -> range[1] - sliderp -> range[0]), sliderYLeft);
         } else if (sliderp -> scale == TT_SLIDER_SCALE_LOG) {
-            turtleGoto(sliderXLeft + pow(sliderXRight - sliderXLeft + 1, ((double) sliderp -> value - sliderp -> range[0]) / (sliderp -> range[1] - sliderp -> range[0])) - 1, sliderYLeft);
+            turtle_goto(sliderXLeft + pow(sliderXRight - sliderXLeft + 1, ((double) sliderp -> value - sliderp -> range[0]) / (sliderp -> range[1] - sliderp -> range[0])) - 1, sliderYLeft);
         } else if (sliderp -> scale == TT_SLIDER_SCALE_EXP) {
-            turtleGoto(sliderXLeft + (sliderXRight - sliderXLeft) * (log((((double) sliderp -> value - sliderp -> range[0]) / (sliderp -> range[1] - sliderp -> range[0])) * (sliderXRight - sliderXLeft) + 1) / log((sliderXRight - sliderXLeft) + 1)), sliderYLeft);
+            turtle_goto(sliderXLeft + (sliderXRight - sliderXLeft) * (log((((double) sliderp -> value - sliderp -> range[0]) / (sliderp -> range[1] - sliderp -> range[0])) * (sliderXRight - sliderXLeft) + 1) / log((sliderXRight - sliderXLeft) + 1)), sliderYLeft);
         }
     } else if (sliderp -> type == TT_SLIDER_TYPE_VERTICAL) {
         if (sliderp -> scale == TT_SLIDER_SCALE_LINEAR) {
-            turtleGoto(sliderXLeft, sliderYLeft + (sliderYRight - sliderYLeft) * (sliderp -> value - sliderp -> range[0]) / (sliderp -> range[1] - sliderp -> range[0]));
+            turtle_goto(sliderXLeft, sliderYLeft + (sliderYRight - sliderYLeft) * (sliderp -> value - sliderp -> range[0]) / (sliderp -> range[1] - sliderp -> range[0]));
         } else if (sliderp -> scale == TT_SLIDER_SCALE_LOG) {
-            turtleGoto(sliderXLeft, sliderYLeft + pow(sliderYRight - sliderYLeft + 1, ((double) sliderp -> value - sliderp -> range[0]) / (sliderp -> range[1] - sliderp -> range[0])) - 1);
+            turtle_goto(sliderXLeft, sliderYLeft + pow(sliderYRight - sliderYLeft + 1, ((double) sliderp -> value - sliderp -> range[0]) / (sliderp -> range[1] - sliderp -> range[0])) - 1);
         } else if (sliderp -> scale == TT_SLIDER_SCALE_EXP) {
-            turtleGoto(sliderXLeft, sliderYLeft + (sliderYRight - sliderYLeft) * (log((((double) sliderp -> value - sliderp -> range[0]) / (sliderp -> range[1] - sliderp -> range[0])) * (sliderYRight - sliderYLeft) + 1) / log((sliderYRight - sliderYLeft) + 1)));
+            turtle_goto(sliderXLeft, sliderYLeft + (sliderYRight - sliderYLeft) * (log((((double) sliderp -> value - sliderp -> range[0]) / (sliderp -> range[1] - sliderp -> range[0])) * (sliderYRight - sliderYLeft) + 1) / log((sliderYRight - sliderYLeft) + 1)));
         }
     }
-    turtlePenDown();
-    turtlePenUp();
+    turtle_pen_down();
+    turtle_pen_up();
     /* mouse */
     if (sliderp -> enabled != TT_ELEMENT_ENABLED || tt_globals.elementLogicTypeOld > sliderp -> priority || (tt_globals.elementLogicTypeOld == sliderp -> priority && tt_globals.elementLogicIndexOld > tt_globals.elementLogicTemp)) {
         /* slider not enabled or higher priority element is being interacted with */
@@ -29327,7 +29319,7 @@ void tt_sliderUpdate(tt_slider_t *sliderp) {
             sliderp -> status = TT_STATUS_IDLE;
         }
     }
-    if (turtleMouseDown()) {
+    if (turtle_mouse_down()) {
         if (sliderp -> status == TT_STATUS_HOVER || sliderp -> status == TT_STATUS_HOVER_FIRST_TICK) {
             /* first tick clicked */
             sliderp -> status = TT_STATUS_CLICK_FIRST_TICK;
@@ -29338,7 +29330,7 @@ void tt_sliderUpdate(tt_slider_t *sliderp) {
             /* slider is blocked from interaction until mouse is unclicked */
             sliderp -> status = TT_STATUS_BLOCKED;
         }
-    } else if (turtleMouseRight()) {
+    } else if (turtle_mouse_right()) {
         if (sliderp -> status == TT_STATUS_HOVER || sliderp -> status == TT_STATUS_HOVER_FIRST_TICK) {
             /* first tick right clicked */
             sliderp -> value = sliderp -> defaultValue;
@@ -29392,9 +29384,9 @@ void tt_sliderUpdate(tt_slider_t *sliderp) {
     if (sliderp -> renderMultiplier != 0) {
         tt_setColor(sliderp -> color[TT_COLOR_SLOT_SLIDER_TEXT]);
         if (sliderRotateFactor != 0) {
-            turtleTextWriteStringfRotated(sliderp -> x + sliderOffsetXFactorSmall, sliderp -> y + sliderOffsetYFactorSmall, sliderp -> size / 2, sliderAlignFactor, sliderRotateFactor, sliderp -> render, sliderp -> value * sliderp -> renderMultiplier);
+            turtle_text_write_stringf_rotated(sliderp -> x + sliderOffsetXFactorSmall, sliderp -> y + sliderOffsetYFactorSmall, sliderp -> size / 2, sliderAlignFactor, sliderRotateFactor, sliderp -> render, sliderp -> value * sliderp -> renderMultiplier);
         } else {
-            turtleTextWriteStringf(sliderp -> x + sliderOffsetXFactorSmall, sliderp -> y + sliderOffsetYFactorSmall, sliderp -> size / 2, sliderAlignFactor, sliderp -> render, sliderp -> value * sliderp -> renderMultiplier);
+            turtle_text_write_stringf(sliderp -> x + sliderOffsetXFactorSmall, sliderp -> y + sliderOffsetYFactorSmall, sliderp -> size / 2, sliderAlignFactor, sliderp -> render, sliderp -> value * sliderp -> renderMultiplier);
         }
     }
     if (sliderp -> variable != NULL) {
@@ -29471,7 +29463,7 @@ void tt_textboxUnicodeCallback(uint32_t codepoint) {
 
 void tt_textboxHandleOtherKey(tt_textbox_t *textboxp, int32_t key) {
     int32_t len = strlen(textboxp -> text);
-    if (key == GLFW_KEY_A && turtleKeyPressed(GLFW_KEY_LEFT_CONTROL)) {
+    if (key == GLFW_KEY_A && turtle_key_pressed(GLFW_KEY_LEFT_CONTROL)) {
         /* select all */
         textboxp -> editIndex = 0;
         textboxp -> editIndexLength = strlen(textboxp -> text);
@@ -29530,7 +29522,7 @@ void tt_textboxHandleOtherKey(tt_textbox_t *textboxp, int32_t key) {
         if (textboxp -> editIndex <= 0) {
             return;
         }
-        if (turtleKeyPressed(GLFW_KEY_LEFT_SHIFT) || turtleKeyPressed(GLFW_KEY_RIGHT_SHIFT)) {
+        if (turtle_key_pressed(GLFW_KEY_LEFT_SHIFT) || turtle_key_pressed(GLFW_KEY_RIGHT_SHIFT)) {
             if (textboxp -> editIndex + textboxp -> editIndexLength > 0) {
                 if (textboxp -> text[textboxp -> editIndex + textboxp -> editIndexLength - 1] & 0b10000000) {
                     while ((textboxp -> text[textboxp -> editIndex + textboxp -> editIndexLength - 1] & 0b01000000) == 0) {
@@ -29560,7 +29552,7 @@ void tt_textboxHandleOtherKey(tt_textbox_t *textboxp, int32_t key) {
             textboxp -> editIndexLength = 0;
             return;
         }
-        if (turtleKeyPressed(GLFW_KEY_LEFT_SHIFT) || turtleKeyPressed(GLFW_KEY_RIGHT_SHIFT)) {
+        if (turtle_key_pressed(GLFW_KEY_LEFT_SHIFT) || turtle_key_pressed(GLFW_KEY_RIGHT_SHIFT)) {
             if (textboxp -> editIndex + textboxp -> editIndexLength < strlen(textboxp -> text)) {
                 if (textboxp -> text[textboxp -> editIndex + textboxp -> editIndexLength] & 0b10000000) {
                     if (textboxp -> text[textboxp -> editIndex + textboxp -> editIndexLength] & 0b00100000) {
@@ -29679,9 +29671,9 @@ int32_t tt_textboxCalculateMaximumCharacters(uint32_t *charlist, int32_t textLen
 
 int32_t tt_textboxCalculateIndexFromPosition(tt_textbox_t *textboxp, double position) {
     uint32_t textConverted[strlen(textboxp -> text) + 1];
-    uint32_t characterLength = turtleTextConvertUnicode(textboxp -> text + textboxp -> renderStartingIndex, textConverted);
+    uint32_t characterLength = turtle_text_convert_unicode(textboxp -> text + textboxp -> renderStartingIndex, textConverted);
     int32_t index;
-    double startingPx = position - (textboxp -> x + textboxp -> renderPixelOffset + textboxp -> size / 10 + turtleTextGetLength(textConverted, 1, textboxp -> size - 1) / 2);
+    double startingPx = position - (textboxp -> x + textboxp -> renderPixelOffset + textboxp -> size / 10 + turtle_text_get_length(textConverted, 1, textboxp -> size - 1) / 2);
     if (startingPx > 0) {
         double dummy;
         index = tt_textboxCalculateMaximumCharacters(textConverted, characterLength, textboxp -> size - 1, startingPx, -1, &dummy) + textboxp -> renderStartingIndex;
@@ -29710,7 +29702,7 @@ void tt_textboxUpdate(tt_textbox_t *textboxp) {
         textboxp -> keyTimeout--;
     }
     if (textboxp -> lastKey > 0) {
-        if (turtleKeyPressed(textboxp -> lastKey)) {
+        if (turtle_key_pressed(textboxp -> lastKey)) {
             if (textboxp -> keyTimeout == 0) {
                 textboxp -> keyTimeout = textboxp -> heldKeyTimeout;
                 tt_textboxHandleOtherKey(textboxp, textboxp -> lastKey);
@@ -29726,7 +29718,7 @@ void tt_textboxUpdate(tt_textbox_t *textboxp) {
         }
     }
     tt_setColor(textboxp -> color[TT_COLOR_SLOT_TEXTBOX_BOX]);
-    turtleRectangle(textboxp -> x, textboxp -> y - textboxp -> size, textboxp -> x + textboxp -> length, textboxp -> y + textboxp -> size);
+    turtle_rectangle(textboxp -> x, textboxp -> y - textboxp -> size, textboxp -> x + textboxp -> length, textboxp -> y + textboxp -> size);
     if (textboxp -> status == TT_STATUS_IDLE || textboxp -> status == TT_STATUS_BLOCKED || textboxp -> status == TT_STATUS_HOVER || textboxp -> status == TT_STATUS_HOVER_FIRST_TICK) {
         textboxp -> renderPixelOffset = textboxp -> size / 3;
         textboxp -> renderStartingIndex = 0;
@@ -29735,16 +29727,16 @@ void tt_textboxUpdate(tt_textbox_t *textboxp) {
             /* render label */
             textboxp -> renderNumCharacters = 0;
             tt_setColor(textboxp -> color[TT_COLOR_SLOT_TEXTBOX_PHANTOM_TEXT]);
-            turtleTextWriteUnicode(textboxp -> label, textboxp -> x + textboxp -> size / 2, textboxp -> y, textboxp -> size - 1, 0);
+            turtle_text_write_unicode(textboxp -> label, textboxp -> x + textboxp -> size / 2, textboxp -> y, textboxp -> size - 1, 0);
         } else {
             /* calculate rendered characters */
-            double totalTextLength = turtleTextGetUnicodeLength(textboxp -> text, textboxp -> size - 1);
+            double totalTextLength = turtle_text_get_unicode_length(textboxp -> text, textboxp -> size - 1);
             if (totalTextLength < textboxp -> length - textboxp -> size / 1.5) {
                 textboxp -> renderNumCharacters = strlen(textboxp -> text);
             } else {
                 /* not all characters fit in textbox - retract text length */
                 uint32_t textConverted[strlen(textboxp -> text) + 1];
-                uint32_t characterLength = turtleTextConvertUnicode(textboxp -> text, textConverted);
+                uint32_t characterLength = turtle_text_convert_unicode(textboxp -> text, textConverted);
                 double dummy;
                 textboxp -> renderNumCharacters = tt_textboxCalculateMaximumCharacters(textConverted, characterLength, textboxp -> size - 1, textboxp -> length - textboxp -> size * 1.2, -1, &dummy);
             }
@@ -29752,7 +29744,7 @@ void tt_textboxUpdate(tt_textbox_t *textboxp) {
     } else if (textboxp -> status == TT_STATUS_CLICK || textboxp -> status == TT_STATUS_OPEN || textboxp -> status == TT_STATUS_CLICK_FIRST_TICK || textboxp -> status == TT_STATUS_OPEN_FIRST_TICK) {
         /* editing text */
         /* calculate rendered characters */
-        double totalTextLength = turtleTextGetUnicodeLength(textboxp -> text, textboxp -> size - 1);
+        double totalTextLength = turtle_text_get_unicode_length(textboxp -> text, textboxp -> size - 1);
         if (totalTextLength < textboxp -> length - textboxp -> size / 1.5) {
             textboxp -> renderStartingIndex = 0;
             textboxp -> renderPixelOffset = textboxp -> size / 3;
@@ -29764,7 +29756,7 @@ void tt_textboxUpdate(tt_textbox_t *textboxp) {
                 textboxp -> renderStartingIndex = textboxp -> editIndex;
                 textboxp -> renderPixelOffset = textboxp -> size / 3;
                 uint32_t textConverted[strlen(textboxp -> text) + 1];
-                uint32_t characterLength = turtleTextConvertUnicode(textboxp -> text + textboxp -> editIndex, textConverted);
+                uint32_t characterLength = turtle_text_convert_unicode(textboxp -> text + textboxp -> editIndex, textConverted);
                 double dummy;
                 textboxp -> renderNumCharacters = tt_textboxCalculateMaximumCharacters(textConverted, characterLength, textboxp -> size - 1, textboxp -> length - textboxp -> size * 1.2, -1, &dummy);
             } else if (textboxp -> editIndex > textboxp -> renderStartingIndex + textboxp -> renderNumCharacters || (strlen(textboxp -> text) < textboxp -> renderStartingIndex + textboxp -> renderNumCharacters && strlen(textboxp -> text) == textboxp -> editIndex)) {
@@ -29773,7 +29765,7 @@ void tt_textboxUpdate(tt_textbox_t *textboxp) {
                 tempHold = textboxp -> text[textboxp -> editIndex];
                 textboxp -> text[textboxp -> editIndex] = '\0';
                 uint32_t textConverted[strlen(textboxp -> text) + 1];
-                uint32_t characterLength = turtleTextConvertUnicode(textboxp -> text, textConverted);
+                uint32_t characterLength = turtle_text_convert_unicode(textboxp -> text, textConverted);
                 double textPixelLength;
                 textboxp -> renderStartingIndex = strlen(textboxp -> text) + tt_textboxCalculateMaximumCharacters(textConverted, characterLength, textboxp -> size - 1, textboxp -> length - textboxp -> size * 1.2, 1, &textPixelLength);
                 textboxp -> renderNumCharacters = strlen(textboxp -> text) - textboxp -> renderStartingIndex;
@@ -29792,7 +29784,7 @@ void tt_textboxUpdate(tt_textbox_t *textboxp) {
         } else {
             tempHold = textboxp -> text[textboxp -> editIndex];
             textboxp -> text[textboxp -> editIndex] = '\0';
-            highlightLeft = turtleTextGetUnicodeLength(textboxp -> text + textboxp -> renderStartingIndex, textboxp -> size - 1) + (textboxp -> editIndexLength > 0) * textboxp -> size / 10;
+            highlightLeft = turtle_text_get_unicode_length(textboxp -> text + textboxp -> renderStartingIndex, textboxp -> size - 1) + (textboxp -> editIndexLength > 0) * textboxp -> size / 10;
             textboxp -> text[textboxp -> editIndex] = tempHold;
         }
         
@@ -29801,21 +29793,21 @@ void tt_textboxUpdate(tt_textbox_t *textboxp) {
         } else {
             tempHold = textboxp -> text[textboxp -> editIndex + textboxp -> editIndexLength];
             textboxp -> text[textboxp -> editIndex + textboxp -> editIndexLength] = '\0';
-            highlightRight = turtleTextGetUnicodeLength(textboxp -> text + textboxp -> renderStartingIndex, textboxp -> size - 1) + (textboxp -> editIndexLength < 0) * textboxp -> size / 10;
+            highlightRight = turtle_text_get_unicode_length(textboxp -> text + textboxp -> renderStartingIndex, textboxp -> size - 1) + (textboxp -> editIndexLength < 0) * textboxp -> size / 10;
             textboxp -> text[textboxp -> editIndex + textboxp -> editIndexLength] = tempHold;
         }
         tt_setColor(textboxp -> color[TT_COLOR_SLOT_TEXTBOX_HIGHLIGHT]);
-        turtleRectangle(textboxp -> x + textboxp -> renderPixelOffset + highlightLeft, textboxp -> y - textboxp -> size * 0.8, textboxp -> x + textboxp -> renderPixelOffset + highlightRight, textboxp -> y + textboxp -> size * 0.8);
+        turtle_rectangle(textboxp -> x + textboxp -> renderPixelOffset + highlightLeft, textboxp -> y - textboxp -> size * 0.8, textboxp -> x + textboxp -> renderPixelOffset + highlightRight, textboxp -> y + textboxp -> size * 0.8);
     }
     char tempHold;
     tempHold = textboxp -> text[textboxp -> renderStartingIndex + textboxp -> renderNumCharacters];
     textboxp -> text[textboxp -> renderStartingIndex + textboxp -> renderNumCharacters] = '\0';
     tt_setColor(textboxp -> color[TT_COLOR_SLOT_TEXTBOX_TEXT]);
-    turtleTextWriteUnicode(textboxp -> text + textboxp -> renderStartingIndex, textboxp -> x + textboxp -> renderPixelOffset, textboxp -> y, textboxp -> size - 1, 0);
+    turtle_text_write_unicode(textboxp -> text + textboxp -> renderStartingIndex, textboxp -> x + textboxp -> renderPixelOffset, textboxp -> y, textboxp -> size - 1, 0);
     textboxp -> text[textboxp -> renderStartingIndex + textboxp -> renderNumCharacters] = tempHold;
     tt_setColor(textboxp -> color[TT_COLOR_SLOT_TEXTBOX_BOX]);
-    turtleRectangle(textboxp -> x, textboxp -> y - textboxp -> size, textboxp -> x + textboxp -> size / 4, textboxp -> y + textboxp -> size);
-    turtleRectangle(textboxp -> x + textboxp -> length, textboxp -> y - textboxp -> size, textboxp -> x + textboxp -> length - textboxp -> size / 4, textboxp -> y + textboxp -> size);
+    turtle_rectangle(textboxp -> x, textboxp -> y - textboxp -> size, textboxp -> x + textboxp -> size / 4, textboxp -> y + textboxp -> size);
+    turtle_rectangle(textboxp -> x + textboxp -> length, textboxp -> y - textboxp -> size, textboxp -> x + textboxp -> length - textboxp -> size / 4, textboxp -> y + textboxp -> size);
     if ((textboxp -> status == TT_STATUS_CLICK || textboxp -> status == TT_STATUS_OPEN || textboxp -> status == TT_STATUS_CLICK_FIRST_TICK || textboxp -> status == TT_STATUS_OPEN_FIRST_TICK) && textboxp -> count <= textboxp -> linePeriod / 2 && textboxp -> editIndexLength == 0) {
         double textLength;
         if (textboxp -> editIndex + textboxp -> editIndexLength == textboxp -> renderStartingIndex) {
@@ -29823,11 +29815,11 @@ void tt_textboxUpdate(tt_textbox_t *textboxp) {
         } else {
             char tempHold = textboxp -> text[textboxp -> editIndex];
             textboxp -> text[textboxp -> editIndex] = '\0';
-            textLength = turtleTextGetUnicodeLength(textboxp -> text + textboxp -> renderStartingIndex, textboxp -> size - 1);
+            textLength = turtle_text_get_unicode_length(textboxp -> text + textboxp -> renderStartingIndex, textboxp -> size - 1);
             textboxp -> text[textboxp -> editIndex] = tempHold;
         }
         tt_setColor(textboxp -> color[TT_COLOR_SLOT_TEXTBOX_LINE]);
-        turtleRectangle(textboxp -> x + textboxp -> renderPixelOffset + textLength, textboxp -> y - textboxp -> size * 0.8, textboxp -> x + textboxp -> renderPixelOffset + textLength + textboxp -> size / 10, textboxp -> y + textboxp -> size * 0.8);
+        turtle_rectangle(textboxp -> x + textboxp -> renderPixelOffset + textLength, textboxp -> y - textboxp -> size * 0.8, textboxp -> x + textboxp -> renderPixelOffset + textLength + textboxp -> size / 10, textboxp -> y + textboxp -> size * 0.8);
     }
     /* mouse */
     if (turtle.mouseX > textboxp -> x && turtle.mouseX < textboxp -> x + textboxp -> length && turtle.mouseY > textboxp -> y - textboxp -> size && turtle.mouseY < textboxp -> y + textboxp -> size) {
@@ -29860,7 +29852,7 @@ void tt_textboxUpdate(tt_textbox_t *textboxp) {
             textboxp -> status = TT_STATUS_IDLE;
         }
     }
-    if (turtleMouseDown()) {
+    if (turtle_mouse_down()) {
         if (textboxp -> status == TT_STATUS_HOVER || (textboxp -> status == TT_STATUS_OPEN && textboxp -> mouseOver) || textboxp -> status == TT_STATUS_HOVER_FIRST_TICK || (textboxp -> status == TT_STATUS_OPEN_FIRST_TICK && textboxp -> mouseOver)) {
             /* first tick clicked */
             textboxp -> count = 1;
@@ -29957,7 +29949,7 @@ void tt_dropdownUpdate(tt_dropdown_t *dropdownp) {
     /* render dropdown default position */
     double dropdownX = dropdownp -> x;
     double dropdownY = dropdownp -> y;
-    double xfactor = turtleTextGetUnicodeLength(dropdownp -> options -> data[dropdownp -> index].s, dropdownp -> size - 1);
+    double xfactor = turtle_text_get_unicode_length(dropdownp -> options -> data[dropdownp -> index].s, dropdownp -> size - 1);
     double itemHeight = (dropdownp -> size * 1.8);
     double dropdownXFactor[2];
     double dropdownMaxXFactor[2];
@@ -29973,7 +29965,7 @@ void tt_dropdownUpdate(tt_dropdown_t *dropdownp) {
             dropdownMaxXFactor[1] = dropdownXFactor[1] + dropdownp -> size * 1.2;
         }
         dropdownAlignFactor = 0;
-        turtleTextWriteUnicode(dropdownp -> label, dropdownX + dropdownp -> size / 5, dropdownY + 2 * dropdownp -> size, dropdownp -> size - 1, dropdownAlignFactor);
+        turtle_text_write_unicode(dropdownp -> label, dropdownX + dropdownp -> size / 5, dropdownY + 2 * dropdownp -> size, dropdownp -> size - 1, dropdownAlignFactor);
     } else if (dropdownp -> align == TT_DROPDOWN_ALIGN_CENTER) {
         dropdownXFactor[0] = dropdownX - xfactor / 2 - dropdownp -> size;
         dropdownXFactor[1] = dropdownX + xfactor / 2;
@@ -29984,14 +29976,14 @@ void tt_dropdownUpdate(tt_dropdown_t *dropdownp) {
             dropdownMaxXFactor[1] = dropdownXFactor[1] + dropdownp -> size;
         }
         dropdownAlignFactor = 50;
-        turtleTextWriteUnicode(dropdownp -> label, dropdownX, dropdownY + 2 * dropdownp -> size, dropdownp -> size - 1, dropdownAlignFactor);
+        turtle_text_write_unicode(dropdownp -> label, dropdownX, dropdownY + 2 * dropdownp -> size, dropdownp -> size - 1, dropdownAlignFactor);
     } else if (dropdownp -> align == TT_DROPDOWN_ALIGN_RIGHT) {
         dropdownXFactor[0] = dropdownX - xfactor - dropdownp -> size * 2;
         dropdownXFactor[1] = dropdownX - dropdownp -> size;
         dropdownMaxXFactor[0] = dropdownX - dropdownp -> maxXfactor - dropdownp -> size * 2.2;
         dropdownMaxXFactor[1] = dropdownX;
         dropdownAlignFactor = 100;
-        turtleTextWriteUnicode(dropdownp -> label, dropdownX - dropdownp -> size / 5, dropdownY + 2 * dropdownp -> size, dropdownp -> size - 1, dropdownAlignFactor);
+        turtle_text_write_unicode(dropdownp -> label, dropdownX - dropdownp -> size / 5, dropdownY + 2 * dropdownp -> size, dropdownp -> size - 1, dropdownAlignFactor);
     }
     /* determine dropdown direction */
     int32_t dropdownDirection = dropdownp -> direction;
@@ -30016,17 +30008,17 @@ void tt_dropdownUpdate(tt_dropdown_t *dropdownp) {
     /* render dropdown */
     if (dropdownp -> status == TT_STATUS_HOVER || dropdownp -> status == TT_STATUS_HOVER_FIRST_TICK) {
         tt_setColor(dropdownp -> color[TT_COLOR_SLOT_DROPDOWN_SELECT]);
-        turtleRectangle(dropdownXFactor[0], dropdownY - dropdownp -> size * 0.9, dropdownXFactor[1] + dropdownp -> size, dropdownY + dropdownp -> size * 0.9);
+        turtle_rectangle(dropdownXFactor[0], dropdownY - dropdownp -> size * 0.9, dropdownXFactor[1] + dropdownp -> size, dropdownY + dropdownp -> size * 0.9);
     } else if (dropdownp -> status == TT_STATUS_OPEN || dropdownp -> status == TT_STATUS_CLICK || dropdownp -> status == TT_STATUS_OPEN_FIRST_TICK || dropdownp -> status == TT_STATUS_CLICK_FIRST_TICK) {
         tt_setColor(dropdownp -> color[TT_COLOR_SLOT_DROPDOWN_BASE]);
         if (dropdownDirection == TT_DROPDOWN_DIRECTION_UP) {
-            turtleRectangle(dropdownMaxXFactor[0], dropdownY + dropdownp -> size * 0.9 + (dropdownp -> options -> length - 1) * itemHeight, dropdownMaxXFactor[1], dropdownY - dropdownp -> size * 0.9);
+            turtle_rectangle(dropdownMaxXFactor[0], dropdownY + dropdownp -> size * 0.9 + (dropdownp -> options -> length - 1) * itemHeight, dropdownMaxXFactor[1], dropdownY - dropdownp -> size * 0.9);
         } else {
-            turtleRectangle(dropdownMaxXFactor[0], dropdownY - dropdownp -> size * 0.9 - (dropdownp -> options -> length - 1) * itemHeight, dropdownMaxXFactor[1], dropdownY + dropdownp -> size * 0.9);
+            turtle_rectangle(dropdownMaxXFactor[0], dropdownY - dropdownp -> size * 0.9 - (dropdownp -> options -> length - 1) * itemHeight, dropdownMaxXFactor[1], dropdownY + dropdownp -> size * 0.9);
         }
     } else {
         tt_setColor(dropdownp -> color[TT_COLOR_SLOT_DROPDOWN_BASE]);
-        turtleRectangle(dropdownXFactor[0], dropdownY - dropdownp -> size * 0.9, dropdownXFactor[1] + dropdownp -> size, dropdownY + dropdownp -> size * 0.9);
+        turtle_rectangle(dropdownXFactor[0], dropdownY - dropdownp -> size * 0.9, dropdownXFactor[1] + dropdownp -> size, dropdownY + dropdownp -> size * 0.9);
     }
     /* mouse */
     if (dropdownp -> enabled != TT_ELEMENT_ENABLED || tt_globals.elementLogicTypeOld > dropdownp -> priority || (tt_globals.elementLogicTypeOld == dropdownp -> priority && tt_globals.elementLogicIndexOld > tt_globals.elementLogicTemp)) {
@@ -30057,7 +30049,7 @@ void tt_dropdownUpdate(tt_dropdown_t *dropdownp) {
             dropdownp -> status = TT_STATUS_IDLE;
         }
     }
-    if (turtleMouseDown()) {
+    if (turtle_mouse_down()) {
         if (dropdownp -> status == TT_STATUS_OPEN || dropdownp -> status == TT_STATUS_OPEN_FIRST_TICK) {
             /* first tick clicked (open) */
             int32_t selected = round((dropdownY - turtle.mouseY) / itemHeight);
@@ -30157,9 +30149,9 @@ void tt_dropdownUpdate(tt_dropdown_t *dropdownp) {
         if (turtle.mouseX > dropdownMaxXFactor[0] && turtle.mouseX < dropdownMaxXFactor[1] && selected >= 0 && selected < dropdownp -> options -> length) {
             tt_setColor(dropdownp -> color[TT_COLOR_SLOT_DROPDOWN_HOVER]);
             if (directionRender == -1 && selected == 0) {
-                turtleRectangle(dropdownMaxXFactor[0], dropdownY - dropdownp -> size * 0.9 - (directionRender - 1) / 2.0 * dropdownp -> options -> length * itemHeight - dropdownp -> options -> length * itemHeight, dropdownMaxXFactor[1], dropdownY + dropdownp -> size * 0.9 - (directionRender - 1) / 2.0 * dropdownp -> options -> length * itemHeight - dropdownp -> options -> length * itemHeight);
+                turtle_rectangle(dropdownMaxXFactor[0], dropdownY - dropdownp -> size * 0.9 - (directionRender - 1) / 2.0 * dropdownp -> options -> length * itemHeight - dropdownp -> options -> length * itemHeight, dropdownMaxXFactor[1], dropdownY + dropdownp -> size * 0.9 - (directionRender - 1) / 2.0 * dropdownp -> options -> length * itemHeight - dropdownp -> options -> length * itemHeight);
             } else {
-                turtleRectangle(dropdownMaxXFactor[0], dropdownY - dropdownp -> size * 0.9 - (directionRender - 1) / 2.0 * dropdownp -> options -> length * itemHeight - selected * itemHeight, dropdownMaxXFactor[1], dropdownY + dropdownp -> size * 0.9 - (directionRender - 1) / 2.0 * dropdownp -> options -> length * itemHeight - selected * itemHeight);
+                turtle_rectangle(dropdownMaxXFactor[0], dropdownY - dropdownp -> size * 0.9 - (directionRender - 1) / 2.0 * dropdownp -> options -> length * itemHeight - selected * itemHeight, dropdownMaxXFactor[1], dropdownY + dropdownp -> size * 0.9 - (directionRender - 1) / 2.0 * dropdownp -> options -> length * itemHeight - selected * itemHeight);
             }
         }
         tt_setColor(dropdownp -> color[TT_COLOR_SLOT_DROPDOWN_TEXT]);
@@ -30167,11 +30159,11 @@ void tt_dropdownUpdate(tt_dropdown_t *dropdownp) {
         for (int32_t i = 0; i < dropdownp -> options -> length; i++) {
             if (i != dropdownp -> index) {
                 if (dropdownp -> align == TT_DROPDOWN_ALIGN_LEFT) {
-                    turtleTextWriteUnicode(dropdownp -> options -> data[i].s, dropdownMaxXFactor[0] + dropdownp -> size / 2, dropdownY - (directionRender - 1) / 2.0 * dropdownp -> options -> length * itemHeight - renderIndex * itemHeight, dropdownp -> size - 1, dropdownAlignFactor);
+                    turtle_text_write_unicode(dropdownp -> options -> data[i].s, dropdownMaxXFactor[0] + dropdownp -> size / 2, dropdownY - (directionRender - 1) / 2.0 * dropdownp -> options -> length * itemHeight - renderIndex * itemHeight, dropdownp -> size - 1, dropdownAlignFactor);
                 } else if (dropdownp -> align == TT_DROPDOWN_ALIGN_CENTER) {
-                    turtleTextWriteUnicode(dropdownp -> options -> data[i].s, (dropdownMaxXFactor[0] + dropdownMaxXFactor[1]) / 2, dropdownY - (directionRender - 1) / 2.0 * dropdownp -> options -> length * itemHeight - renderIndex * itemHeight, dropdownp -> size - 1, dropdownAlignFactor);
+                    turtle_text_write_unicode(dropdownp -> options -> data[i].s, (dropdownMaxXFactor[0] + dropdownMaxXFactor[1]) / 2, dropdownY - (directionRender - 1) / 2.0 * dropdownp -> options -> length * itemHeight - renderIndex * itemHeight, dropdownp -> size - 1, dropdownAlignFactor);
                 } else if (dropdownp -> align == TT_DROPDOWN_ALIGN_RIGHT) {
-                    turtleTextWriteUnicode(dropdownp -> options -> data[i].s, dropdownMaxXFactor[1] - dropdownp -> size * 1.58, dropdownY - (directionRender - 1) / 2.0 * dropdownp -> options -> length * itemHeight - renderIndex * itemHeight, dropdownp -> size - 1, dropdownAlignFactor);
+                    turtle_text_write_unicode(dropdownp -> options -> data[i].s, dropdownMaxXFactor[1] - dropdownp -> size * 1.58, dropdownY - (directionRender - 1) / 2.0 * dropdownp -> options -> length * itemHeight - renderIndex * itemHeight, dropdownp -> size - 1, dropdownAlignFactor);
                 }
                 renderIndex++;
             }
@@ -30184,17 +30176,17 @@ void tt_dropdownUpdate(tt_dropdown_t *dropdownp) {
     LABEL_DROPDOWN_END:
     tt_setColor(dropdownp -> color[TT_COLOR_SLOT_DROPDOWN_TEXT]);
     if (dropdownp -> align == TT_DROPDOWN_ALIGN_LEFT) {
-        turtleTextWriteUnicode(dropdownp -> options -> data[dropdownp -> index].s, dropdownXFactor[0] + dropdownp -> size / 2, dropdownY, dropdownp -> size - 1, dropdownAlignFactor);
+        turtle_text_write_unicode(dropdownp -> options -> data[dropdownp -> index].s, dropdownXFactor[0] + dropdownp -> size / 2, dropdownY, dropdownp -> size - 1, dropdownAlignFactor);
     } else if (dropdownp -> align == TT_DROPDOWN_ALIGN_CENTER) {
-        turtleTextWriteUnicode(dropdownp -> options -> data[dropdownp -> index].s, (dropdownXFactor[0] + dropdownXFactor[1]) / 2, dropdownY, dropdownp -> size - 1, dropdownAlignFactor);
+        turtle_text_write_unicode(dropdownp -> options -> data[dropdownp -> index].s, (dropdownXFactor[0] + dropdownXFactor[1]) / 2, dropdownY, dropdownp -> size - 1, dropdownAlignFactor);
     } else if (dropdownp -> align == TT_DROPDOWN_ALIGN_RIGHT) {
-        turtleTextWriteUnicode(dropdownp -> options -> data[dropdownp -> index].s, dropdownXFactor[1] - dropdownp -> size * 0.55, dropdownY, dropdownp -> size - 1, dropdownAlignFactor);
+        turtle_text_write_unicode(dropdownp -> options -> data[dropdownp -> index].s, dropdownXFactor[1] - dropdownp -> size * 0.55, dropdownY, dropdownp -> size - 1, dropdownAlignFactor);
     }
     tt_setColor(dropdownp -> color[TT_COLOR_SLOT_DROPDOWN_TRIANGLE]);
     if (dropdownp -> status == TT_STATUS_OPEN || dropdownp -> status == TT_STATUS_CLICK || dropdownp -> status == TT_STATUS_OPEN_FIRST_TICK || dropdownp -> status == TT_STATUS_CLICK_FIRST_TICK) {
-        turtleTriangle(dropdownXFactor[1] + dropdownp -> size * 0.4, dropdownY + dropdownp -> size * 0.4, dropdownXFactor[1] + dropdownp -> size * 0.4, dropdownY - dropdownp -> size * 0.4, dropdownXFactor[1] - dropdownp -> size * 0.2, dropdownY);
+        turtle_triangle(dropdownXFactor[1] + dropdownp -> size * 0.4, dropdownY + dropdownp -> size * 0.4, dropdownXFactor[1] + dropdownp -> size * 0.4, dropdownY - dropdownp -> size * 0.4, dropdownXFactor[1] - dropdownp -> size * 0.2, dropdownY);
     } else {
-        turtleTriangle(dropdownXFactor[1] + dropdownp -> size * 0.6, dropdownY + dropdownp -> size * 0.3, dropdownXFactor[1] - dropdownp -> size * 0.2, dropdownY + dropdownp -> size * 0.3, dropdownXFactor[1] + dropdownp -> size * 0.2, dropdownY - dropdownp -> size * 0.3);
+        turtle_triangle(dropdownXFactor[1] + dropdownp -> size * 0.6, dropdownY + dropdownp -> size * 0.3, dropdownXFactor[1] - dropdownp -> size * 0.2, dropdownY + dropdownp -> size * 0.3, dropdownXFactor[1] + dropdownp -> size * 0.2, dropdownY - dropdownp -> size * 0.3);
     }
     if (dropdownp -> variable != NULL) {
         *dropdownp -> variable = dropdownp -> index;
@@ -30224,13 +30216,13 @@ void tt_scrollbarUpdate(tt_scrollbar_t *scrollbarp) {
     double dragLeft = scrollbarLeft + scrollbarp -> value / 100 * (scrollbarp -> length * (1 - scrollbarp -> barPercentage / 100));
     double dragRight = dragLeft + (scrollbarp -> length * scrollbarp -> barPercentage / 100);
     if (scrollbarp -> type == TT_SCROLLBAR_TYPE_HORIZONTAL) {
-        turtlePenSize(scrollbarp -> size * 1);
+        turtle_pen_size(scrollbarp -> size * 1);
         tt_setColor(scrollbarp -> color[TT_COLOR_SLOT_SCROLLBAR_BASE]);
-        turtleGoto(scrollbarLeft, scrollbarp -> y);
-        turtlePenDown();
-        turtleGoto(scrollbarRight, scrollbarp -> y);
-        turtlePenUp();
-        turtlePenSize(scrollbarp -> size * 0.8);
+        turtle_goto(scrollbarLeft, scrollbarp -> y);
+        turtle_pen_down();
+        turtle_goto(scrollbarRight, scrollbarp -> y);
+        turtle_pen_up();
+        turtle_pen_size(scrollbarp -> size * 0.8);
         if ((scrollbarp -> status == TT_STATUS_HOVER || scrollbarp -> status == TT_STATUS_HOVER_FIRST_TICK) && turtle.mouseX > dragLeft - scrollbarp -> size * 0.4 && turtle.mouseX < dragRight + scrollbarp -> size * 0.4) {
             tt_setColor(scrollbarp -> color[TT_COLOR_SLOT_SCROLLBAR_HOVER]);
         } else if (scrollbarp -> status == TT_STATUS_CLICK || scrollbarp -> status == TT_STATUS_CLICK_FIRST_TICK) {
@@ -30238,10 +30230,10 @@ void tt_scrollbarUpdate(tt_scrollbar_t *scrollbarp) {
         } else {
             tt_setColor(scrollbarp -> color[TT_COLOR_SLOT_SCROLLBAR_BAR]);
         }
-        turtleGoto(dragLeft, scrollbarp -> y);
-        turtlePenDown();
-        turtleGoto(dragRight, scrollbarp -> y);
-        turtlePenUp();
+        turtle_goto(dragLeft, scrollbarp -> y);
+        turtle_pen_down();
+        turtle_goto(dragRight, scrollbarp -> y);
+        turtle_pen_up();
     } else if (scrollbarp -> type == TT_SCROLLBAR_TYPE_VERTICAL) {
         simulateMouseX = turtle.mouseY;
         simulateMouseY = turtle.mouseX;
@@ -30250,13 +30242,13 @@ void tt_scrollbarUpdate(tt_scrollbar_t *scrollbarp) {
         scrollbarY = scrollbarp -> x;
         dragRight = scrollbarRight - scrollbarp -> value / 100 * (scrollbarp -> length * (1 - scrollbarp -> barPercentage / 100));
         dragLeft = dragRight - (scrollbarp -> length * scrollbarp -> barPercentage / 100);
-        turtlePenSize(scrollbarp -> size * 1);
+        turtle_pen_size(scrollbarp -> size * 1);
         tt_setColor(scrollbarp -> color[TT_COLOR_SLOT_SCROLLBAR_BASE]);
-        turtleGoto(scrollbarp -> x, scrollbarLeft);
-        turtlePenDown();
-        turtleGoto(scrollbarp -> x, scrollbarRight);
-        turtlePenUp();
-        turtlePenSize(scrollbarp -> size * 0.8);
+        turtle_goto(scrollbarp -> x, scrollbarLeft);
+        turtle_pen_down();
+        turtle_goto(scrollbarp -> x, scrollbarRight);
+        turtle_pen_up();
+        turtle_pen_size(scrollbarp -> size * 0.8);
         if ((scrollbarp -> status == TT_STATUS_HOVER || scrollbarp -> status == TT_STATUS_HOVER_FIRST_TICK) && turtle.mouseY > dragLeft - scrollbarp -> size * 0.4 && turtle.mouseY < dragRight + scrollbarp -> size * 0.4) {
             tt_setColor(scrollbarp -> color[TT_COLOR_SLOT_SCROLLBAR_HOVER]);
         } else if (scrollbarp -> status == TT_STATUS_CLICK || scrollbarp -> status == TT_STATUS_CLICK_FIRST_TICK) {
@@ -30264,10 +30256,10 @@ void tt_scrollbarUpdate(tt_scrollbar_t *scrollbarp) {
         } else {
             tt_setColor(scrollbarp -> color[TT_COLOR_SLOT_SCROLLBAR_BAR]);
         }
-        turtleGoto(scrollbarp -> x, dragLeft);
-        turtlePenDown();
-        turtleGoto(scrollbarp -> x, dragRight);
-        turtlePenUp();
+        turtle_goto(scrollbarp -> x, dragLeft);
+        turtle_pen_down();
+        turtle_goto(scrollbarp -> x, dragRight);
+        turtle_pen_up();
     }
     /* mouse */
     if (scrollbarp -> enabled != TT_ELEMENT_ENABLED || tt_globals.elementLogicTypeOld > scrollbarp -> priority || (tt_globals.elementLogicTypeOld == scrollbarp -> priority && tt_globals.elementLogicIndexOld > tt_globals.elementLogicTemp)) {
@@ -30291,7 +30283,7 @@ void tt_scrollbarUpdate(tt_scrollbar_t *scrollbarp) {
             scrollbarp -> status = TT_STATUS_IDLE;
         }
     }
-    if (turtleMouseDown()) {
+    if (turtle_mouse_down()) {
         if (scrollbarp -> status == TT_STATUS_HOVER || scrollbarp -> status == TT_STATUS_HOVER_FIRST_TICK) {
             /* first tick clicked */
             if (simulateMouseX > dragLeft - scrollbarp -> size * 0.4 && simulateMouseX < dragRight + scrollbarp -> size * 0.4) {
@@ -30350,7 +30342,7 @@ void tt_contextUpdate(tt_context_t *contextp) {
         if (contextp -> status == TT_STATUS_OPEN_CLICK) {
             tt_globals.elementLogicType = contextp -> priority;
             tt_globals.elementLogicIndex = tt_globals.elementLogicTemp;
-            if (!turtleMouseDown()) {
+            if (!turtle_mouse_down()) {
                 contextp -> status = TT_STATUS_IDLE;
             }
         }
@@ -30376,24 +30368,24 @@ void tt_contextUpdate(tt_context_t *contextp) {
         }
     }
     tt_setColor(contextp -> color[TT_COLOR_SLOT_CONTEXT_BASE]);
-    turtleRectangle(contextTextX, contextTextY - contextp -> size * 0.9 - (contextp -> options -> length - 1) * itemHeight - 2, contextTextX + contextp -> maxXfactor + contextp -> size / 1.25, contextTextY + contextp -> size * 0.9 + 2);
+    turtle_rectangle(contextTextX, contextTextY - contextp -> size * 0.9 - (contextp -> options -> length - 1) * itemHeight - 2, contextTextX + contextp -> maxXfactor + contextp -> size / 1.25, contextTextY + contextp -> size * 0.9 + 2);
     tt_setColor(contextp -> color[TT_COLOR_SLOT_CONTEXT_TEXT]);
     contextp -> index = -1;
     contextp -> value = -1;
     for (int32_t i = 0; i < contextp -> options -> length; i++) {
         if (turtle.mouseX > contextTextX && turtle.mouseX < contextTextX + contextp -> maxXfactor + contextp -> size / 1.25 && turtle.mouseY >= contextTextY - i * itemHeight - contextp -> size * 0.9 && turtle.mouseY < contextTextY - i * itemHeight + contextp -> size * 0.9) {
             tt_setColor(contextp -> color[TT_COLOR_SLOT_CONTEXT_SELECT]);
-            turtleRectangle(contextTextX, contextTextY - i * itemHeight - contextp -> size * 0.9, contextTextX + contextp -> maxXfactor + contextp -> size / 1.25, contextTextY - i * itemHeight + contextp -> size * 0.9);
+            turtle_rectangle(contextTextX, contextTextY - i * itemHeight - contextp -> size * 0.9, contextTextX + contextp -> maxXfactor + contextp -> size / 1.25, contextTextY - i * itemHeight + contextp -> size * 0.9);
             tt_setColor(contextp -> color[TT_COLOR_SLOT_CONTEXT_TEXT]);
             contextp -> index = i;
             contextp -> value = i;
         }
-        turtleTextWriteUnicode(contextp -> options -> data[i].s, contextTextX + contextp -> size / 2.5, contextTextY - i * itemHeight, contextp -> size - 1, 0);
+        turtle_text_write_unicode(contextp -> options -> data[i].s, contextTextX + contextp -> size / 2.5, contextTextY - i * itemHeight, contextp -> size - 1, 0);
     }
     if (contextp -> enabled == TT_ELEMENT_ENABLED && (tt_globals.elementLogicTypeOld < contextp -> priority || (tt_globals.elementLogicTypeOld == contextp -> priority && tt_globals.elementLogicIndexOld <= (int32_t) tt_globals.elementLogicTemp))) {
         tt_globals.elementLogicType = contextp -> priority;
         tt_globals.elementLogicIndex = tt_globals.elementLogicTemp;
-        if (turtleMouseDown()) {
+        if (turtle_mouse_down()) {
             if (contextp -> index != -1) {
                 contextp -> status = TT_STATUS_OPEN_CLICK;
             }
@@ -30415,15 +30407,15 @@ void tt_readerUpdate(tt_reader_t *readerp) {
         double readerY = readerp -> y + readerp -> size * 0.8;
         double readerTopHeight = readerp -> size * 2;
         tt_setColor(readerp -> color[TT_COLOR_SLOT_LIST_READER_BASE]);
-        turtlePenSize(readerp -> size);
-        turtleGoto(readerLeftX + readerp -> size / 2, readerY - readerp -> height + readerp -> size / 2);
-        turtlePenDown();
-        turtleGoto(readerRightX - readerp -> size / 2, readerY - readerp -> height + readerp -> size / 2);
-        turtleGoto(readerRightX - readerp -> size / 2, readerY - readerp -> size / 2);
-        turtleGoto(readerLeftX + readerp -> size / 2, readerY - readerp -> size / 2);
-        turtleGoto(readerLeftX + readerp -> size / 2, readerY - readerp -> height + readerp -> size / 2);
-        turtlePenUp();
-        turtleRectangle(readerLeftX + readerp -> size / 2, readerY - readerp -> height + readerp -> size / 2, readerRightX - readerp -> size / 2, readerY - readerp -> size / 2);
+        turtle_pen_size(readerp -> size);
+        turtle_goto(readerLeftX + readerp -> size / 2, readerY - readerp -> height + readerp -> size / 2);
+        turtle_pen_down();
+        turtle_goto(readerRightX - readerp -> size / 2, readerY - readerp -> height + readerp -> size / 2);
+        turtle_goto(readerRightX - readerp -> size / 2, readerY - readerp -> size / 2);
+        turtle_goto(readerLeftX + readerp -> size / 2, readerY - readerp -> size / 2);
+        turtle_goto(readerLeftX + readerp -> size / 2, readerY - readerp -> height + readerp -> size / 2);
+        turtle_pen_up();
+        turtle_rectangle(readerLeftX + readerp -> size / 2, readerY - readerp -> height + readerp -> size / 2, readerRightX - readerp -> size / 2, readerY - readerp -> size / 2);
         /* render items */
         list_t *list = (*(readerp -> variable)).r;
         int32_t numItems = list -> length;
@@ -30446,52 +30438,52 @@ void tt_readerUpdate(tt_reader_t *readerp) {
             if (i == startingItem && ypos > readerY - readerp -> size * 1.5) {
                 /* exception - don't draw top of box */
                 tt_setColor(readerp -> color[TT_COLOR_SLOT_LIST_READER_ITEM]);
-                turtleRectangle(edgeX, ypos, readerRightX - readerp -> size, ypos - readerp -> size);
+                turtle_rectangle(edgeX, ypos, readerRightX - readerp -> size, ypos - readerp -> size);
             } else if (ypos < readerY - readerp -> height + readerp -> size) {
                 /* exception - box is entirely below reader */
                 break;
             } else if (ypos < readerY - readerp -> height + readerp -> size * 1.5) {
                 /* exception - don't draw bottom of box */
                 tt_setColor(readerp -> color[TT_COLOR_SLOT_LIST_READER_ITEM]);
-                turtleRectangle(edgeX, ypos + readerp -> size, readerRightX - readerp -> size, ypos);
+                turtle_rectangle(edgeX, ypos + readerp -> size, readerRightX - readerp -> size, ypos);
                 break;
             } else {
-                turtleTextWriteString(numberLabel, (readerLeftX + edgeX) / 2, ypos, readerp -> size - 1, 50);
+                turtle_text_write_string(numberLabel, (readerLeftX + edgeX) / 2, ypos, readerp -> size - 1, 50);
                 tt_setColor(readerp -> color[TT_COLOR_SLOT_LIST_READER_ITEM]);
-                turtleRectangle(edgeX, ypos + readerp -> size, readerRightX - readerp -> size, ypos - readerp -> size);
+                turtle_rectangle(edgeX, ypos + readerp -> size, readerRightX - readerp -> size, ypos - readerp -> size);
                 unitype_sprint(readerString, list -> data[i], list -> type[i]);
                 tt_setColor(readerp -> color[TT_COLOR_SLOT_LIST_READER_TEXT_ITEM]);
-                if (turtleTextGetUnicodeLength(readerString, readerp -> size - 1) > (readerRightX - readerp -> size) - edgeX - (readerp -> size - 1)) {
+                if (turtle_text_get_unicode_length(readerString, readerp -> size - 1) > (readerRightX - readerp -> size) - edgeX - (readerp -> size - 1)) {
                     /* text is too long to fit */
-                    turtleTextTruncateString(readerString, readerp -> size - 1, (readerRightX - readerp -> size) - edgeX - (readerp -> size - 1) * 1.5, 1);
+                    turtle_text_truncate_string(readerString, readerp -> size - 1, (readerRightX - readerp -> size) - edgeX - (readerp -> size - 1) * 1.5, 1);
                     strcat(readerString, "...");
                 }
-                turtleTextWriteUnicode(readerString, edgeX + (readerp -> size - 1) / 2, ypos, readerp -> size - 1, 0);
+                turtle_text_write_unicode(readerString, edgeX + (readerp -> size - 1) / 2, ypos, readerp -> size - 1, 0);
             }
             ypos -= readerp -> size * 2.2;
         }
         /* draw top and bottom boxes */
         tt_setColor(readerp -> color[TT_COLOR_SLOT_LIST_READER_BASE]); // TT_COLOR_SLOT_LIST_READER_BASE, TT_COLOR_SLOT_LIST_READER_SCROLLBAR_BASE
-        turtleRectangle(readerLeftX + readerp -> size / 4, readerY - readerp -> size / 4, readerRightX - readerp -> size / 4, readerY - readerp -> size * 2);
-        turtleRectangle(readerLeftX + readerp -> size / 4, readerY + readerp -> size / 4 - readerp -> height, readerRightX - readerp -> size / 4, readerY + readerp -> size * 2 - readerp -> height);
+        turtle_rectangle(readerLeftX + readerp -> size / 4, readerY - readerp -> size / 4, readerRightX - readerp -> size / 4, readerY - readerp -> size * 2);
+        turtle_rectangle(readerLeftX + readerp -> size / 4, readerY + readerp -> size / 4 - readerp -> height, readerRightX - readerp -> size / 4, readerY + readerp -> size * 2 - readerp -> height);
         /* render label */
         tt_setColor(readerp -> color[TT_COLOR_SLOT_LIST_READER_TEXT]);
-        turtleTextWriteUnicode(readerp -> label, (readerLeftX + readerRightX) / 2, readerY - readerp -> size, readerp -> size - 1, 50);
-        turtleTextWriteStringf((readerLeftX + readerRightX) / 2, readerY - readerp -> height + readerp -> size, readerp -> size - 1, 50, "Items: %d", list -> length);
-        turtlePenSize(readerp -> size / 12);
+        turtle_text_write_unicode(readerp -> label, (readerLeftX + readerRightX) / 2, readerY - readerp -> size, readerp -> size - 1, 50);
+        turtle_text_write_stringf((readerLeftX + readerRightX) / 2, readerY - readerp -> height + readerp -> size, readerp -> size - 1, 50, "Items: %d", list -> length);
+        turtle_pen_size(readerp -> size / 12);
         tt_setColor(readerp -> color[TT_COLOR_SLOT_LIST_READER_SCROLLBAR_BAR]);
-        turtleGoto(readerRightX - readerp -> size * 0.5, readerY - readerp -> height);
-        turtlePenDown();
-        turtleGoto(readerRightX, readerY - readerp -> height + readerp -> size * 0.5);
-        turtlePenUp();
-        turtleGoto(readerRightX - readerp -> size * 0.75, readerY - readerp -> height);
-        turtlePenDown();
-        turtleGoto(readerRightX, readerY - readerp -> height + readerp -> size * 0.75);
-        turtlePenUp();
-        turtleGoto(readerRightX - readerp -> size * 1.0, readerY - readerp -> height);
-        turtlePenDown();
-        turtleGoto(readerRightX, readerY - readerp -> height + readerp -> size * 1.0);
-        turtlePenUp();
+        turtle_goto(readerRightX - readerp -> size * 0.5, readerY - readerp -> height);
+        turtle_pen_down();
+        turtle_goto(readerRightX, readerY - readerp -> height + readerp -> size * 0.5);
+        turtle_pen_up();
+        turtle_goto(readerRightX - readerp -> size * 0.75, readerY - readerp -> height);
+        turtle_pen_down();
+        turtle_goto(readerRightX, readerY - readerp -> height + readerp -> size * 0.75);
+        turtle_pen_up();
+        turtle_goto(readerRightX - readerp -> size * 1.0, readerY - readerp -> height);
+        turtle_pen_down();
+        turtle_goto(readerRightX, readerY - readerp -> height + readerp -> size * 1.0);
+        turtle_pen_up();
         /* scrollbar */
         if (list -> length >= maxItems - 1) {
             readerp -> scrollbarp -> x = readerp -> x + readerp -> width - readerp -> size / 2;
@@ -30542,7 +30534,7 @@ void tt_readerUpdate(tt_reader_t *readerp) {
                 readerp -> status = TT_STATUS_IDLE;
             }
         }
-        if (turtleMouseDown()) {
+        if (turtle_mouse_down()) {
             if (readerp -> status == TT_STATUS_HOVER || readerp -> status == TT_STATUS_HOVER_FIRST_TICK) {
                 /* first tick clicked */
                 if (readerp -> resizing == 0) {
@@ -30599,45 +30591,45 @@ void tt_readerUpdate(tt_reader_t *readerp) {
     } else if (readerp -> element == TT_ELEMENT_VARIABLE_READER) {
         unitype variable = *(readerp -> variable);
         unitype_sprint(readerString, variable, readerp -> type);
-        double innerWidth = turtleTextGetUnicodeLength(readerString, readerp -> size - 1) + readerp -> size;
+        double innerWidth = turtle_text_get_unicode_length(readerString, readerp -> size - 1) + readerp -> size;
         if (innerWidth < readerp -> size * 4) {
             innerWidth = readerp -> size * 4;
         }
-        double readerWidth = turtleTextGetUnicodeLength(readerp -> label, readerp -> size - 1) + innerWidth + readerp -> size * 1.8;
+        double readerWidth = turtle_text_get_unicode_length(readerp -> label, readerp -> size - 1) + innerWidth + readerp -> size * 1.8;
         double readerLeftX = readerp -> x;
         double readerRightX = readerp -> x + readerWidth;
         double readerY = readerp -> y;
         double readerHeight = readerp -> size * 1.75;
         /* rounded rectangle (base) */
         tt_setColor(readerp -> color[TT_COLOR_SLOT_VARIABLE_READER_BASE]);
-        turtlePenSize(readerp -> size);
-        turtleGoto(readerLeftX + readerp -> size / 2, readerY - readerHeight / 2 + readerp -> size / 2);
-        turtlePenDown();
-        turtleGoto(readerRightX - readerp -> size / 2, readerY - readerHeight / 2 + readerp -> size / 2);
-        turtleGoto(readerRightX - readerp -> size / 2, readerY + readerHeight / 2 - readerp -> size / 2);
-        turtleGoto(readerLeftX + readerp -> size / 2, readerY + readerHeight / 2 - readerp -> size / 2);
-        turtleGoto(readerLeftX + readerp -> size / 2, readerY - readerHeight / 2 + readerp -> size / 2);
-        turtlePenUp();
-        turtleRectangle(readerLeftX + readerp -> size / 2, readerY - readerHeight / 2 + readerp -> size / 2, readerRightX - readerp -> size / 2, readerY + readerHeight / 2 - readerp -> size / 2);
+        turtle_pen_size(readerp -> size);
+        turtle_goto(readerLeftX + readerp -> size / 2, readerY - readerHeight / 2 + readerp -> size / 2);
+        turtle_pen_down();
+        turtle_goto(readerRightX - readerp -> size / 2, readerY - readerHeight / 2 + readerp -> size / 2);
+        turtle_goto(readerRightX - readerp -> size / 2, readerY + readerHeight / 2 - readerp -> size / 2);
+        turtle_goto(readerLeftX + readerp -> size / 2, readerY + readerHeight / 2 - readerp -> size / 2);
+        turtle_goto(readerLeftX + readerp -> size / 2, readerY - readerHeight / 2 + readerp -> size / 2);
+        turtle_pen_up();
+        turtle_rectangle(readerLeftX + readerp -> size / 2, readerY - readerHeight / 2 + readerp -> size / 2, readerRightX - readerp -> size / 2, readerY + readerHeight / 2 - readerp -> size / 2);
         /* rounded rectangle (item) */
         double readerInnerRightX = readerRightX - readerp -> size * 0.6;
         double readerInnerLeftX = readerInnerRightX - innerWidth;
         double readerInnerHeight = readerHeight * 0.8;
         tt_setColor(readerp -> color[TT_COLOR_SLOT_VARIABLE_READER_ITEM]);
-        turtlePenSize(readerp -> size * 0.5);
-        turtleGoto(readerInnerLeftX + readerp -> size / 4, readerY - readerInnerHeight / 2 + readerp -> size / 4);
-        turtlePenDown();
-        turtleGoto(readerInnerRightX - readerp -> size / 4, readerY - readerInnerHeight / 2 + readerp -> size / 4);
-        turtleGoto(readerInnerRightX - readerp -> size / 4, readerY + readerInnerHeight / 2 - readerp -> size / 4);
-        turtleGoto(readerInnerLeftX + readerp -> size / 4, readerY + readerInnerHeight / 2 - readerp -> size / 4);
-        turtleGoto(readerInnerLeftX + readerp -> size / 4, readerY - readerInnerHeight / 2 + readerp -> size / 4);
-        turtlePenUp();
-        turtleRectangle(readerInnerLeftX + readerp -> size / 4, readerY - readerInnerHeight / 2 + readerp -> size / 4, readerInnerRightX - readerp -> size / 4, readerY + readerInnerHeight / 2 - readerp -> size / 4);
+        turtle_pen_size(readerp -> size * 0.5);
+        turtle_goto(readerInnerLeftX + readerp -> size / 4, readerY - readerInnerHeight / 2 + readerp -> size / 4);
+        turtle_pen_down();
+        turtle_goto(readerInnerRightX - readerp -> size / 4, readerY - readerInnerHeight / 2 + readerp -> size / 4);
+        turtle_goto(readerInnerRightX - readerp -> size / 4, readerY + readerInnerHeight / 2 - readerp -> size / 4);
+        turtle_goto(readerInnerLeftX + readerp -> size / 4, readerY + readerInnerHeight / 2 - readerp -> size / 4);
+        turtle_goto(readerInnerLeftX + readerp -> size / 4, readerY - readerInnerHeight / 2 + readerp -> size / 4);
+        turtle_pen_up();
+        turtle_rectangle(readerInnerLeftX + readerp -> size / 4, readerY - readerInnerHeight / 2 + readerp -> size / 4, readerInnerRightX - readerp -> size / 4, readerY + readerInnerHeight / 2 - readerp -> size / 4);
         /* render text */
         tt_setColor(readerp -> color[TT_COLOR_SLOT_VARIABLE_READER_TEXT]);
-        turtleTextWriteUnicode(readerp -> label, readerp -> x + readerp -> size * 0.6, readerp -> y, readerp -> size - 1, 0);
+        turtle_text_write_unicode(readerp -> label, readerp -> x + readerp -> size * 0.6, readerp -> y, readerp -> size - 1, 0);
         tt_setColor(readerp -> color[TT_COLOR_SLOT_VARIABLE_READER_TEXT_ITEM]);
-        turtleTextWriteUnicode(readerString, (readerInnerLeftX + readerInnerRightX) / 2, readerp -> y, readerp -> size - 1, 50);
+        turtle_text_write_unicode(readerString, (readerInnerLeftX + readerInnerRightX) / 2, readerp -> y, readerp -> size - 1, 50);
         /* mouse */
         if (readerp -> enabled != TT_ELEMENT_ENABLED || tt_globals.elementLogicTypeOld > readerp -> priority || (tt_globals.elementLogicTypeOld == readerp -> priority && tt_globals.elementLogicIndexOld > tt_globals.elementLogicTemp)) {
             /* reader not enabled or higher priority element is being interacted with */
@@ -30663,7 +30655,7 @@ void tt_readerUpdate(tt_reader_t *readerp) {
                 readerp -> status = TT_STATUS_IDLE;
             }
         }
-        if (turtleMouseDown()) {
+        if (turtle_mouse_down()) {
             if (readerp -> status == TT_STATUS_HOVER || readerp -> status == TT_STATUS_HOVER_FIRST_TICK) {
                 /* first tick clicked */
                 readerp -> anchorX = readerp -> x;
@@ -30713,8 +30705,8 @@ void turtleToolsUpdateUI() {
     tt_globals.elementLogicType = TT_ELEMENT_NONE;
     tt_globals.elementLogicIndex = -1;
     tt_globals.elementLogicTemp = -1;
-    char shapeSave = turtle.penshape;
-    turtlePenShape("circle");
+    uint16_t shapeSave = turtle.penshape;
+    turtle_pen_shape(TURTLE_PEN_SHAPE_CIRCLE);
     if (tt_enabled.buttonEnabled) {
         tt_globals.elementLogicTemp = 0;
         for (int32_t i = 0; i < tt_elements.buttons -> length; i++) {
@@ -30826,8 +30818,8 @@ void turtleToolsUpdateUI() {
 }
 
 void turtleToolsUpdateRibbonPopup() {
-    char shapeSave = turtle.penshape;
-    turtlePenShape("circle");
+    uint16_t shapeSave = turtle.penshape;
+    turtle_pen_shape(TURTLE_PEN_SHAPE_CIRCLE);
     if (tt_enabled.ribbonEnabled) {
         tt_ribbonUpdate();
     }
@@ -30906,14 +30898,14 @@ ost_socket_t osToolsSocket;
 ost_camera_t osToolsCamera;
 
 /* OS independent functions */
-void osToolsIndependentInit(GLFWwindow *window) {
+void os_tools_independent_init(GLFWwindow *window) {
+    osToolsGLFW.osToolsWindow = window;
     /* initialise file dialog */
     osToolsFileDialog.selectedFilenames = list_init();
     osToolsFileDialog.globalExtensions = list_init();
     /* initialise clipboard */
     osToolsClipboard.text = glfwGetClipboardString(osToolsGLFW.osToolsWindow);
     /* initialise glfw cursors */
-    osToolsGLFW.osToolsWindow = window;
     osToolsGLFW.standardCursors[0] = glfwCreateStandardCursor(GLFW_ARROW_CURSOR);
     osToolsGLFW.standardCursors[1] = glfwCreateStandardCursor(GLFW_IBEAM_CURSOR);
     osToolsGLFW.standardCursors[2] = glfwCreateStandardCursor(GLFW_CROSSHAIR_CURSOR);
@@ -30948,13 +30940,13 @@ void osToolsIndependentInit(GLFWwindow *window) {
 }
 
 /* returns clipboard text */
-const char *osToolsClipboardGetText() {
+const char *os_tools_clipboard_get_text() {
     osToolsClipboard.text = glfwGetClipboardString(osToolsGLFW.osToolsWindow);
     return osToolsClipboard.text;
 }
 
 /* takes null terminated strings */
-int32_t osToolsClipboardSetText(const char *input) {
+int32_t os_tools_clipboard_set_text(const char *input) {
     glfwSetClipboardString(osToolsGLFW.osToolsWindow, input);
     return 0;
 }
@@ -30970,7 +30962,7 @@ GLFW_DLESIZE_CURSOR
 GLFW_DRESIZE_CURSOR
 GLFW_MOVE_CURSOR
 */
-void osToolsSetCursor(uint32_t cursor) {
+void os_tools_set_cursor(uint32_t cursor) {
     switch (cursor) {
     case GLFW_ARROW_CURSOR:
         glfwSetCursor(osToolsGLFW.osToolsWindow, osToolsGLFW.standardCursors[0]);
@@ -31005,17 +30997,17 @@ void osToolsSetCursor(uint32_t cursor) {
     }
 }
 
-void osToolsHideAndLockCursor() {
+void os_tools_hide_and_lock_cursor() {
     glfwSetInputMode(osToolsGLFW.osToolsWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 }
 
-void osToolsShowCursor() {
+void os_tools_show_cursor() {
     glfwSetInputMode(osToolsGLFW.osToolsWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 }
 
-list_t *osToolsLoadInternal(char *filename, ost_csv_t rowOrColumn, char delimeter, ost_csv_field_t fieldType) {
+list_t *os_tools_load_internal(char *filename, ost_csv_t rowOrColumn, char delimeter, ost_csv_field_t fieldType) {
     uint32_t fileSize;
-    uint8_t *mappedFile = osToolsFileMap(filename, &fileSize);
+    uint8_t *mappedFile = os_tools_file_map(filename, &fileSize);
     if (mappedFile == NULL) {
         return NULL;
     }
@@ -31147,7 +31139,7 @@ list_t *osToolsLoadInternal(char *filename, ost_csv_t rowOrColumn, char delimete
                 if (column < outputList -> length) {
                     list_append(outputList -> data[column].r, field, listType);
                 } else {
-                    printf("osToolsLoadInternal - more data columns than headers at row %d\n", row);
+                    printf("os_tools_load_internal - more data columns than headers at row %d\n", row);
                 }
             }
             mappedFile[rightIndex] = delimeter;
@@ -31179,7 +31171,7 @@ list_t *osToolsLoadInternal(char *filename, ost_csv_t rowOrColumn, char delimete
                     if (column < outputList -> length) {
                         list_append(outputList -> data[column].r, field, listType);
                     } else {
-                        printf("osToolsLoadInternal - more data columns than headers at row %d\n", row);
+                        printf("os_tools_load_internal - more data columns than headers at row %d\n", row);
                     }
                 }
                 mappedFile[rightIndex] = tempHold;
@@ -31215,54 +31207,54 @@ list_t *osToolsLoadInternal(char *filename, ost_csv_t rowOrColumn, char delimete
         }
         list_append(outputList -> data[outputList -> length - 1].r, field, listType);
     }
-    osToolsFileUnmap(mappedFile);
+    os_tools_file_unmap(mappedFile);
     return outputList;
 }
 
 /* packages a CSV file into a list (headers are strings, all fields are doubles) - use OSTOOLS_CSV_ROW to put it in a list of lists where each list is a row of the CSV and use OSTOOLS_CSV_COLUMN to output a list of lists where each list is a column of the CSV */
-list_t *osToolsLoadCSV(char *filename, ost_csv_t rowOrColumn) {
-    return osToolsLoadInternal(filename, rowOrColumn, ',', OSTOOLS_CSV_FIELD_DOUBLE);
+list_t *os_tools_load_csv(char *filename, ost_csv_t rowOrColumn) {
+    return os_tools_load_internal(filename, rowOrColumn, ',', OSTOOLS_CSV_FIELD_DOUBLE);
 }
 
 /* packages a CSV file into a list (headers are strings, all fields are doubles) - use OSTOOLS_CSV_ROW to put it in a list of lists where each list is a row of the CSV and use OSTOOLS_CSV_COLUMN to output a list of lists where each list is a column of the CSV */
-list_t *osToolsLoadCSVDouble(char *filename, ost_csv_t rowOrColumn) {
-    return osToolsLoadInternal(filename, rowOrColumn, ',', OSTOOLS_CSV_FIELD_DOUBLE);
+list_t *os_tools_load_csv_double(char *filename, ost_csv_t rowOrColumn) {
+    return os_tools_load_internal(filename, rowOrColumn, ',', OSTOOLS_CSV_FIELD_DOUBLE);
 }
 
 /* packages a CSV file into a list (headers are strings, all fields are ints) - use OSTOOLS_CSV_ROW to put it in a list of lists where each list is a row of the CSV and use OSTOOLS_CSV_COLUMN to output a list of lists where each list is a column of the CSV */
-list_t *osToolsLoadCSVInt(char *filename, ost_csv_t rowOrColumn) {
-    return osToolsLoadInternal(filename, rowOrColumn, ',', OSTOOLS_CSV_FIELD_INT);
+list_t *os_tools_load_csv_int(char *filename, ost_csv_t rowOrColumn) {
+    return os_tools_load_internal(filename, rowOrColumn, ',', OSTOOLS_CSV_FIELD_INT);
 }
 
 /* packages a CSV file into a list (headers are strings, all fields are strings) - use OSTOOLS_CSV_ROW to put it in a list of lists where each list is a row of the CSV and use OSTOOLS_CSV_COLUMN to output a list of lists where each list is a column of the CSV */
-list_t *osToolsLoadCSVString(char *filename, ost_csv_t rowOrColumn) {
-    return osToolsLoadInternal(filename, rowOrColumn, ',', OSTOOLS_CSV_FIELD_STRING);
+list_t *os_tools_load_csv_string(char *filename, ost_csv_t rowOrColumn) {
+    return os_tools_load_internal(filename, rowOrColumn, ',', OSTOOLS_CSV_FIELD_STRING);
 }
 
-void osToolsFileDialogClearGlobalExtensions() {
+void os_tools_file_dialog_clear_global_extensions() {
     list_clear(osToolsFileDialog.globalExtensions);
 }
 
-void osToolsFileDialogAddGlobalExtension(char *extension) {
+void os_tools_file_dialog_add_global_extension(char *extension) {
     list_append(osToolsFileDialog.globalExtensions, (unitype) extension, 's');
 }
 
-void osToolsFileDialogSetGlobalExtensions(list_t *extensions) {
+void os_tools_file_dialog_set_global_extensions(list_t *extensions) {
     list_copy(osToolsFileDialog.globalExtensions, extensions);
 }
 
-int32_t osToolsFileDialogSave(ost_file_dialog_folder_t folder, char *prename, list_t *extensions) {
-    return osToolsFileDialogPrompt(OSTOOLS_FILE_DIALOG_SAVE, OSTOOLS_FILE_DIALOG_SINGLE_SELECT, folder, prename, extensions);
+int32_t os_tools_file_dialog_save(ost_file_dialog_folder_t folder, char *prename, list_t *extensions) {
+    return os_tools_file_dialog_prompt(OSTOOLS_FILE_DIALOG_SAVE, OSTOOLS_FILE_DIALOG_SINGLE_SELECT, folder, prename, extensions);
 }
 
-int32_t osToolsFileDialogOpen(ost_file_dialog_multiselect_t multiselect, ost_file_dialog_folder_t folder, char *prename, list_t *extensions) {
-    return osToolsFileDialogPrompt(OSTOOLS_FILE_DIALOG_OPEN, multiselect, folder, prename, extensions);
+int32_t os_tools_file_dialog_open(ost_file_dialog_multiselect_t multiselect, ost_file_dialog_folder_t folder, char *prename, list_t *extensions) {
+    return os_tools_file_dialog_prompt(OSTOOLS_FILE_DIALOG_OPEN, multiselect, folder, prename, extensions);
 }
 
 #ifdef OS_WINDOWS
 
-int32_t osToolsInit(char argv0[], GLFWwindow *window) {
-    osToolsIndependentInit(window);
+int32_t os_tools_init(char argv0[], GLFWwindow *window) {
+    os_tools_independent_init(window);
     /* get executable filepath */
     GetModuleFileNameA(NULL, osToolsFileDialog.executableFilepath, MAX_PATH);
     if (GetLastError() != ERROR_SUCCESS) {
@@ -31277,7 +31269,7 @@ int32_t osToolsInit(char argv0[], GLFWwindow *window) {
     return 0;
 }
 
-int32_t osToolsFileDialogPrompt(ost_file_dialog_save_t openOrSave, ost_file_dialog_multiselect_t multiselect, ost_file_dialog_folder_t folder, char *prename, list_t *extensions) {
+int32_t os_tools_file_dialog_prompt(ost_file_dialog_save_t openOrSave, ost_file_dialog_multiselect_t multiselect, ost_file_dialog_folder_t folder, char *prename, list_t *extensions) {
     HRESULT hr = CoInitializeEx(NULL, 0); // https://learn.microsoft.com/en-us/windows/win32/api/objbase/ne-objbase-coinit
     if (FAILED(hr)) {
         return -1;
@@ -31450,7 +31442,7 @@ int32_t osToolsFileDialogPrompt(ost_file_dialog_save_t openOrSave, ost_file_dial
     return 0;
 }
 
-uint8_t *osToolsFileMap(char *filename, uint32_t *sizeOutput) {
+uint8_t *os_tools_file_map(char *filename, uint32_t *sizeOutput) {
     HANDLE fileHandle = CreateFileA(filename, FILE_GENERIC_READ | FILE_GENERIC_WRITE, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
     if (fileHandle == INVALID_HANDLE_VALUE) {
         printf("Could not open file %ld\n", GetLastError());
@@ -31485,7 +31477,7 @@ uint8_t *osToolsFileMap(char *filename, uint32_t *sizeOutput) {
     return address;
 }
 
-int32_t osToolsFileUnmap(uint8_t *data) {
+int32_t os_tools_file_unmap(uint8_t *data) {
     UnmapViewOfFile(data);
     int32_t index = -1;
     for (int32_t i = 0; i < osToolsMemmap.mappedFiles -> length; i += 4) {
@@ -31508,11 +31500,11 @@ int32_t osToolsFileUnmap(uint8_t *data) {
     }
 }
 
-list_t *osToolsFileAndFolderList(char *directory) {
+list_t *os_tools_file_and_folder_list(char *directory) {
     /* https://learn.microsoft.com/en-us/windows/win32/fileio/listing-the-files-in-a-directory */
     list_t *output = list_init();
     if (strlen(directory) > MAX_PATH - 3) {
-        printf("osToolsFileAndFolderList: Directory name too long\n");
+        printf("os_tools_file_and_folder_list: Directory name too long\n");
         return output;
     }
     char directoryFor[MAX_PATH];
@@ -31521,7 +31513,7 @@ list_t *osToolsFileAndFolderList(char *directory) {
     WIN32_FIND_DATA findData;
     HANDLE fileHandle = FindFirstFile(directoryFor, &findData);
     if (fileHandle == INVALID_HANDLE_VALUE) {
-        printf("osToolsFileAndFolderList: Handle invalid error %ld\n", GetLastError());
+        printf("os_tools_file_and_folder_list: Handle invalid error %ld\n", GetLastError());
         return output;
     }
     LARGE_INTEGER filesize;
@@ -31542,11 +31534,11 @@ list_t *osToolsFileAndFolderList(char *directory) {
     return output;
 }
 
-list_t *osToolsFileList(char *directory) {
+list_t *os_tools_file_list(char *directory) {
     /* https://learn.microsoft.com/en-us/windows/win32/fileio/listing-the-files-in-a-directory */
     list_t *output = list_init();
     if (strlen(directory) > MAX_PATH - 3) {
-        printf("osToolsFileList: Directory name too long\n");
+        printf("os_tools_file_list: Directory name too long\n");
         return output;
     }
     char directoryFor[MAX_PATH];
@@ -31555,7 +31547,7 @@ list_t *osToolsFileList(char *directory) {
     WIN32_FIND_DATA findData;
     HANDLE fileHandle = FindFirstFile(directoryFor, &findData);
     if (fileHandle == INVALID_HANDLE_VALUE) {
-        printf("osToolsFileList: Handle invalid error %ld\n", GetLastError());
+        printf("os_tools_file_list: Handle invalid error %ld\n", GetLastError());
         return output;
     }
     LARGE_INTEGER filesize;
@@ -31572,11 +31564,11 @@ list_t *osToolsFileList(char *directory) {
     return output;
 }
 
-list_t *osToolsFolderList(char *directory) {
+list_t *os_tools_folder_list(char *directory) {
     /* https://learn.microsoft.com/en-us/windows/win32/fileio/listing-the-files-in-a-directory */
     list_t *output = list_init();
     if (strlen(directory) > MAX_PATH - 3) {
-        printf("osToolsFolderList: Directory name too long\n");
+        printf("os_tools_folder_list: Directory name too long\n");
         return output;
     }
     char directoryFor[MAX_PATH];
@@ -31585,7 +31577,7 @@ list_t *osToolsFolderList(char *directory) {
     WIN32_FIND_DATA findData;
     HANDLE fileHandle = FindFirstFile(directoryFor, &findData);
     if (fileHandle == INVALID_HANDLE_VALUE) {
-        printf("osToolsFolderList: Handle invalid error %ld\n", GetLastError());
+        printf("os_tools_folder_list: Handle invalid error %ld\n", GetLastError());
         return output;
     }
     do {
@@ -31600,12 +31592,12 @@ list_t *osToolsFolderList(char *directory) {
     return output;
 }
 
-int32_t osToolsFolderCreate(char *folder) {
+int32_t os_tools_folder_create(char *folder) {
     /* https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-createdirectory */
     return !CreateDirectory(folder, NULL);
 }
 
-int32_t osToolsFolderDestroy(char *folder) {
+int32_t os_tools_folder_delete(char *folder) {
     /* https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-removedirectorya */
     char directoryFor[MAX_PATH + 12] = "rd /s /q \"";
     int32_t len = strlen(folder);
@@ -31622,7 +31614,7 @@ int32_t osToolsFolderDestroy(char *folder) {
     // RemoveDirectoryA(folder);
 }
 
-void osToolsCloseConsole() {
+void os_tools_close_console() {
     FreeConsole();
 }
 
@@ -31633,7 +31625,7 @@ windows serial port support
 https://learn.microsoft.com/en-us/windows/win32/devio/configuring-a-communications-resource
 */
 
-list_t *osToolsSerialList() {
+list_t *os_tools_serial_list() {
     list_t *output = list_init();
     char comName[8] = "COM";
     char pathInfo[1024];
@@ -31645,23 +31637,23 @@ list_t *osToolsSerialList() {
         }
         if (GetLastError() == ERROR_INSUFFICIENT_BUFFER) {
             
-            printf("osToolsSerialList: Unusual COM device detected on %s\n", comName);
+            printf("os_tools_serial_list: Unusual COM device detected on %s\n", comName);
         }
     }
     return output;
 }
 
-int32_t osToolsSerialOpen(char *name, osToolsSerialBaud_t baudRate) {
+int32_t os_tools_serial_open(char *name, osToolsSerialBaud_t baudRate) {
     /* verify COM */
     if (strlen(name) < 3 || name[0] != 'C' || name[1] != 'O' || name[2] != 'M') {
-        // printf("osToolsSerialOpen: name must start with \"COM\"\n");
+        // printf("os_tools_serial_open: name must start with \"COM\"\n");
         return -1;
     }
     /* check if this port is already open */
     int32_t index = list_find(osToolsSerial.serial, (unitype) name, 's');
     if (index != -1) {
         if (CloseHandle((HANDLE) (osToolsSerial.serial -> data[index + 1].lu)) == 0) {
-            printf("osToolsSerialOpen failed with error %ld\n", GetLastError());
+            printf("os_tools_serial_open failed with error %ld\n", GetLastError());
             return -1;
         }
         list_delete(osToolsSerial.serial, index);
@@ -31718,27 +31710,27 @@ int32_t osToolsSerialOpen(char *name, osToolsSerialBaud_t baudRate) {
     return 0;
 }
 
-int32_t osToolsSerialSend(char *name, uint8_t *data, int32_t length) {
+int32_t os_tools_serial_send(char *name, uint8_t *data, int32_t length) {
     /* check if this port is open */
     int32_t index = list_find(osToolsSerial.serial, (unitype) name, 's');
     if (index == -1) {
-        printf("osToolsSerialSend: %s not open\n", name);
+        printf("os_tools_serial_send: %s not open\n", name);
         return 0;
     }
     /* https://www.codeproject.com/Articles/3061/Creating-a-Serial-communication-on-Win32#sending */
     DWORD bytes;
     if (WriteFile((HANDLE) (osToolsSerial.serial -> data[index + 1].lu), data, length, &bytes, NULL) == 0) {
-        printf("osToolsSerialSend failed with error %ld\n", GetLastError());
+        printf("os_tools_serial_send failed with error %ld\n", GetLastError());
         return 0;
     }
     return bytes;
 }
 
-int32_t osToolsSerialReceive(char *name, uint8_t *buffer, int32_t length, int32_t timeoutMilliseconds) {
+int32_t os_tools_serial_receive(char *name, uint8_t *buffer, int32_t length, int32_t timeoutMilliseconds) {
     /* check if this port is open */
     int32_t index = list_find(osToolsSerial.serial, (unitype) name, 's');
     if (index == -1) {
-        printf("osToolsSerialReceive: %s not open\n", name);
+        printf("os_tools_serial_receive: %s not open\n", name);
         return 0;
     }
     /* Set comm timeout */
@@ -31747,18 +31739,18 @@ int32_t osToolsSerialReceive(char *name, uint8_t *buffer, int32_t length, int32_
     /* read from COM */
     DWORD bytes;
     if (ReadFile((HANDLE) (osToolsSerial.serial -> data[index + 1].lu), buffer, length, &bytes, NULL) == 0) {
-        printf("osToolsSerialReceive failed with error %ld\n", GetLastError());
+        printf("os_tools_serial_receive failed with error %ld\n", GetLastError());
         return 0;
     }
     return bytes;
 }
 
-int32_t osToolsSerialClose(char *name) {
+int32_t os_tools_serial_close(char *name) {
     /* check if this port is already open */
     int32_t index = list_find(osToolsSerial.serial, (unitype) name, 's');
     if (index != -1) {
         if (CloseHandle((HANDLE) (osToolsSerial.serial -> data[index + 1].lu)) == 0) {
-            printf("osToolsSerialClose failed with error %ld\n", GetLastError());
+            printf("os_tools_serial_close failed with error %ld\n", GetLastError());
             return -1;
         }
         list_delete(osToolsSerial.serial, index);
@@ -31799,18 +31791,18 @@ int32_t osToolsGetIP(char *address, uint8_t *buffer, int32_t maxSegments) {
     return segments;
 }
 
-int32_t osToolsGetSocketAddress(char *socketName, char *address, int32_t length) {
+int32_t os_tools_get_socket_address(char *socketName, char *address, int32_t length) {
     if (!socketName) {
-        // printf("osToolsGetSocketAddress ERROR: socketName is NULL\n");
+        // printf("os_tools_get_socket_address ERROR: socketName is NULL\n");
         return -1;
     }
     if (!address) {
-        // printf("osToolsGetSocketAddress ERROR: address is NULL\n");
+        // printf("os_tools_get_socket_address ERROR: address is NULL\n");
         return -1;
     }
     int32_t socketIndex = list_find(osToolsSocket.socket, (unitype) socketName, 's');
     if (socketIndex == -1) {
-        // printf("osToolsGetSocketAddress ERROR: Could not find socket %s\n", socketName);
+        // printf("os_tools_get_socket_address ERROR: Could not find socket %s\n", socketName);
         return -1;
     }
     /* only IPv4 */
@@ -31821,18 +31813,18 @@ int32_t osToolsGetSocketAddress(char *socketName, char *address, int32_t length)
     return 0;
 }
 
-int32_t osToolsGetPort(char *socketName, char *port, int32_t length) {
+int32_t os_tools_get_port(char *socketName, char *port, int32_t length) {
     if (!socketName) {
-        // printf("osToolsGetSocketAddress ERROR: socketName is NULL\n");
+        // printf("os_tools_get_port ERROR: socketName is NULL\n");
         return -1;
     }
     if (!port) {
-        // printf("osToolsGetSocketAddress ERROR: port is NULL\n");
+        // printf("os_tools_get_port ERROR: port is NULL\n");
         return -1;
     }
     int32_t socketIndex = list_find(osToolsSocket.socket, (unitype) socketName, 's');
     if (socketIndex == -1) {
-        // printf("osToolsGetPort ERROR: Could not find socket %s\n", socketName);
+        // printf("os_tools_get_port ERROR: Could not find socket %s\n", socketName);
         return -1;
     }
     char portA[8];
@@ -31844,13 +31836,13 @@ int32_t osToolsGetPort(char *socketName, char *port, int32_t length) {
 
 #ifdef TURTLE_ENABLE_SOCKETS
 
-int32_t osToolsServerSocketCreate(char *serverName, osToolsSocketProtocol_t protocol, char *serverPort) {
+int32_t os_tools_server_socket_create(char *serverName, osToolsSocketProtocol_t protocol, char *serverPort) {
     if (!serverName) {
-        // printf("osToolsServerSocketCreate ERROR: serverName is NULL\n");
+        // printf("os_tools_server_socket_create ERROR: serverName is NULL\n");
         return -1;
     }
     if (!serverPort) {
-        // printf("osToolsServerSocketCreate ERROR: port is NULL\n");
+        // printf("os_tools_server_socket_create ERROR: port is NULL\n");
         return -1;
     }
     int32_t status;
@@ -31859,7 +31851,7 @@ int32_t osToolsServerSocketCreate(char *serverName, osToolsSocketProtocol_t prot
         WSADATA wsaData;
         status = WSAStartup(MAKEWORD(2, 2), &wsaData);
         if (status != 0) {
-            // printf("osToolsServerSocketCreate ERROR: Could not initialise Winsock\n");
+            // printf("os_tools_server_socket_create ERROR: Could not initialise Winsock\n");
             return -1;
         }
         osToolsSocket.win32wsaActive = 1;
@@ -31880,14 +31872,14 @@ int32_t osToolsServerSocketCreate(char *serverName, osToolsSocketProtocol_t prot
     char hostName[128];
     status = gethostname(hostName, sizeof(hostName));
     if (status == SOCKET_ERROR) {
-        // printf("osToolsServerSocketCreate ERROR: Could not gethostname\n");
+        // printf("os_tools_server_socket_create ERROR: Could not gethostname\n");
         return -1;
     }
     printf("Host Name: %s\n", hostName);
 
     struct hostent *host = gethostbyname(hostName);
     if (host == NULL) {
-        // printf("osToolsServerSocketCreate ERROR: Could not gethostbyname\n");
+        // printf("os_tools_server_socket_create ERROR: Could not gethostbyname\n");
         return -1;
     }
 
@@ -31900,18 +31892,18 @@ int32_t osToolsServerSocketCreate(char *serverName, osToolsSocketProtocol_t prot
     }
     char *serverAddress = inet_ntoa(address);
     if (serverAddress == NULL) {
-        // printf("osToolsServerSocketCreate ERROR: No addresses to create server on\n");
+        // printf("os_tools_server_socket_create ERROR: No addresses to create server on\n");
         return -1;
     }
     uint8_t ipAddress[4] = {0};
     if (osToolsGetIP(serverAddress, ipAddress, 4) != 4) {
-        // printf("osToolsServerSocketCreate ERROR: Invalid ip address\n");
+        // printf("os_tools_server_socket_create ERROR: Invalid ip address\n");
     }
 
     /* Resolve the server address and port */
     status = getaddrinfo(serverAddress, serverPort, &hints, &result);
     if (status != 0) {
-        // printf("osToolsServerSocketCreate ERROR: Could not getaddrinfo\n");
+        // printf("os_tools_server_socket_create ERROR: Could not getaddrinfo\n");
         return -1;
     }
     struct addrinfo *resultElement = result;
@@ -31920,7 +31912,7 @@ int32_t osToolsServerSocketCreate(char *serverName, osToolsSocketProtocol_t prot
         resultElement = resultElement -> ai_next;
     }
     if (result == NULL) {
-        // printf("osToolsServerSocketCreate ERROR: getaddrinfo returned NULL\n");
+        // printf("os_tools_server_socket_create ERROR: getaddrinfo returned NULL\n");
         return -1;
     }
 
@@ -31928,7 +31920,7 @@ int32_t osToolsServerSocketCreate(char *serverName, osToolsSocketProtocol_t prot
     SOCKET winsocket = socket(result -> ai_family, result -> ai_socktype, result -> ai_protocol);
     if (winsocket == INVALID_SOCKET) {
         freeaddrinfo(result);
-        // printf("osToolsServerSocketCreate ERROR: Could not create socket\n");
+        // printf("os_tools_server_socket_create ERROR: Could not create socket\n");
         return -1;
     }
 
@@ -31936,7 +31928,7 @@ int32_t osToolsServerSocketCreate(char *serverName, osToolsSocketProtocol_t prot
     status = bind(winsocket, result -> ai_addr, result -> ai_addrlen);
     if (status == SOCKET_ERROR) {
         freeaddrinfo(result);
-        // printf("osToolsServerSocketCreate ERROR: Could not bind socket %s to address %s\n", serverName, serverAddress);
+        // printf("os_tools_server_socket_create ERROR: Could not bind socket %s to address %s\n", serverName, serverAddress);
         return -1;
     }
     freeaddrinfo(result);
@@ -31962,18 +31954,18 @@ int32_t osToolsServerSocketCreate(char *serverName, osToolsSocketProtocol_t prot
     return 0;
 }
 
-int32_t osToolsServerSocketListen(char *serverName, char *clientName) {
+int32_t os_tools_server_socket_listen(char *serverName, char *clientName) {
     if (!serverName) {
-        // printf("osToolsServerSocketListen ERROR: serverName is NULL\n");
+        // printf("os_tools_server_socket_listen ERROR: serverName is NULL\n");
         return -1;
     }
     if (!clientName) {
-        // printf("osToolsServerSocketListen ERROR: clientName is NULL\n");
+        // printf("os_tools_server_socket_listen ERROR: clientName is NULL\n");
         return -1;
     }
     int32_t socketIndex = list_find(osToolsSocket.socket, (unitype) serverName, 's');
     if (socketIndex == -1) {
-        // printf("osToolsServerSocketListen ERROR: Could not find socket %s\n", serverName);
+        // printf("os_tools_server_socket_listen ERROR: Could not find socket %s\n", serverName);
         return -1;
     }
     int32_t status;
@@ -31981,19 +31973,19 @@ int32_t osToolsServerSocketListen(char *serverName, char *clientName) {
 
     status = listen(winsocket, SOMAXCONN);
     if (status == SOCKET_ERROR) {
-        // printf("osToolsServerSocketListen ERROR: Listen failed\n");
+        // printf("os_tools_server_socket_listen ERROR: Listen failed\n");
         return -1;
     }
     struct sockaddr_in address;
     int32_t addressLen = sizeof(address);
     SOCKET connection = accept(winsocket, (struct sockaddr *) &address, &addressLen);
     if (connection == INVALID_SOCKET) {
-        // printf("osToolsServerSocketListen ERROR: Accept failed\n");
+        // printf("os_tools_server_socket_listen ERROR: Accept failed\n");
         return -1;
     }
     uint8_t ipAddress[4] = {0};
     if (osToolsGetIP(inet_ntoa(address.sin_addr), ipAddress, 4) != 4) {
-        // printf("osToolsServerSocketListen ERROR: Invalid ip address\n");
+        // printf("os_tools_server_socket_listen ERROR: Invalid ip address\n");
     }
     printf("Incoming connection from %s:%d\n", inet_ntoa(address.sin_addr), address.sin_port);
     list_append(osToolsSocket.socket, (unitype) clientName, 's');
@@ -32015,22 +32007,22 @@ int32_t osToolsServerSocketListen(char *serverName, char *clientName) {
     return 0;
 }
 
-int32_t osToolsClientSocketCreate(char *clientName, osToolsSocketProtocol_t protocol, char *serverAddress, char *serverPort, int32_t timeoutMilliseconds) {
+int32_t os_tools_client_socket_create(char *clientName, osToolsSocketProtocol_t protocol, char *serverAddress, char *serverPort, int32_t timeoutMilliseconds) {
     if (!clientName) {
-        // printf("osToolsClientSocketCreate ERROR: clientName is NULL\n");
+        // printf("os_tools_client_socket_create ERROR: clientName is NULL\n");
         return -1;
     }
     if (!serverAddress) {
-        // printf("osToolsClientSocketCreate ERROR: serverAddress is NULL\n");
+        // printf("os_tools_client_socket_create ERROR: serverAddress is NULL\n");
         return -1;
     }
     if (!serverPort) {
-        // printf("osToolsClientSocketCreate ERROR: port is NULL\n");
+        // printf("os_tools_client_socket_create ERROR: port is NULL\n");
         return -1;
     }
     uint8_t ipAddress[4] = {0};
     if (osToolsGetIP(serverAddress, ipAddress, 4) != 4) {
-        // printf("osToolsClientSocketCreate ERROR: Invalid ip address\n");
+        // printf("os_tools_client_socket_create ERROR: Invalid ip address\n");
         return -1;
     }
     int32_t status;
@@ -32039,7 +32031,7 @@ int32_t osToolsClientSocketCreate(char *clientName, osToolsSocketProtocol_t prot
         WSADATA wsaData;
         status = WSAStartup(MAKEWORD(2, 2), &wsaData);
         if (status != 0) {
-            // printf("osToolsClientSocketCreate ERROR: Could not initialise Winsock\n");
+            // printf("os_tools_client_socket_create ERROR: Could not initialise Winsock\n");
             return -1;
         }
         osToolsSocket.win32wsaActive = 1;
@@ -32058,7 +32050,7 @@ int32_t osToolsClientSocketCreate(char *clientName, osToolsSocketProtocol_t prot
 
     status = getaddrinfo(serverAddress, serverPort, &hints, &result);
     if (status != 0) {
-        // printf("osToolsClientSocketCreate ERROR: Could not getaddrinfo of %s:%s, failed with %d\n", serverAddress, serverPort, status);
+        // printf("os_tools_client_socket_create ERROR: Could not getaddrinfo of %s:%s, failed with %d\n", serverAddress, serverPort, status);
         return -1;
     }
 
@@ -32068,27 +32060,27 @@ int32_t osToolsClientSocketCreate(char *clientName, osToolsSocketProtocol_t prot
         resultElement = resultElement -> ai_next;
     }
     if (result == NULL) {
-        // printf("osToolsClientSocketCreate ERROR: getaddrinfo returned NULL\n");
+        // printf("os_tools_client_socket_create ERROR: getaddrinfo returned NULL\n");
         return -1;
     }
     /* Use the first element of linked list returned by getaddrinfo */
     SOCKET winsocket = socket(result -> ai_family, result -> ai_socktype, result -> ai_protocol);
     if (winsocket == INVALID_SOCKET) {
         freeaddrinfo(result);
-        // printf("osToolsClientSocketCreate ERROR: Could not create socket\n");
+        // printf("os_tools_client_socket_create ERROR: Could not create socket\n");
         return -1;
     }
     /* set socket to non blocking mode while connecting */
     u_long nonblocking = 1;
     status = ioctlsocket(winsocket, FIONBIO, &nonblocking);
     if (status != NO_ERROR) {
-        // printf("osToolsClientSocketCreate ERROR: Could not set socket to non-blocking mode\n");
+        // printf("os_tools_client_socket_create ERROR: Could not set socket to non-blocking mode\n");
         return -1;
     }
     status = connect(winsocket, result -> ai_addr, (int32_t) result -> ai_addrlen);
     if (status == SOCKET_ERROR) {
         if (WSAGetLastError() != WSAEWOULDBLOCK) {
-            // printf("osToolsClientSocketCreate ERROR: Could not connect socket %d\n", WSAGetLastError());
+            // printf("os_tools_client_socket_create ERROR: Could not connect socket %d\n", WSAGetLastError());
             return -1;
         }
         struct timeval timeout;
@@ -32100,7 +32092,7 @@ int32_t osToolsClientSocketCreate(char *clientName, osToolsSocketProtocol_t prot
         winsockArray.fd_array[0] = winsocket;
         status = select(0, NULL, &winsockArray, NULL, &timeout);
         if (status != 1) {
-            // printf("osToolsClientSocketCreate ERROR: Could not connect socket (timeout)\n");
+            // printf("os_tools_client_socket_create ERROR: Could not connect socket (timeout)\n");
             return -1;
         }
     }
@@ -32108,7 +32100,7 @@ int32_t osToolsClientSocketCreate(char *clientName, osToolsSocketProtocol_t prot
     u_long blocking = 0;
     status = ioctlsocket(winsocket, FIONBIO, &blocking);
     if (status != NO_ERROR) {
-        // printf("osToolsClientSocketCreate ERROR: Could not set socket to blocking mode\n");
+        // printf("os_tools_client_socket_create ERROR: Could not set socket to blocking mode\n");
         return -1;
     }
     printf("Connected to %s:%s\n", serverAddress, serverPort);
@@ -32133,32 +32125,32 @@ int32_t osToolsClientSocketCreate(char *clientName, osToolsSocketProtocol_t prot
     return 0;
 }
 
-int32_t osToolsSocketSend(char *socketName, uint8_t *data, int32_t length) {
+int32_t os_tools_socket_send(char *socketName, uint8_t *data, int32_t length) {
     if (!socketName) {
-        // printf("osToolsSocketSend ERROR: socketName is NULL\n");
+        // printf("os_tools_socket_send ERROR: socketName is NULL\n");
         return -1;
     }
     int32_t socketIndex = list_find(osToolsSocket.socket, (unitype) socketName, 's');
     if (socketIndex == -1) {
-        // printf("osToolsSocketSend ERROR: Could not find socket %s\n", socketName);
+        // printf("os_tools_socket_send ERROR: Could not find socket %s\n", socketName);
         return -1;
     }
     int32_t status = send((SOCKET) osToolsSocket.socket -> data[socketIndex + OSI_SOCKET].p, (char *) data, length, 0);
     if (status == SOCKET_ERROR) {
-        // printf("osToolsSocketSend ERROR: Failed to send\n");
+        // printf("os_tools_socket_send ERROR: Failed to send\n");
         return -1;
     }
     return status;
 }
 
-int32_t osToolsSocketReceive(char *socketName, uint8_t *data, int32_t length, int32_t timeoutMilliseconds) {
+int32_t os_tools_socket_receive(char *socketName, uint8_t *data, int32_t length, int32_t timeoutMilliseconds) {
     if (!socketName) {
-        // printf("osToolsSocketReceive ERROR: socketName is NULL\n");
+        // printf("os_tools_socket_receive ERROR: socketName is NULL\n");
         return -1;
     }
     int32_t socketIndex = list_find(osToolsSocket.socket, (unitype) socketName, 's');
     if (socketIndex == -1) {
-        // printf("osToolsSocketReceive ERROR: Could not find socket %s\n", socketName);
+        // printf("os_tools_socket_receive ERROR: Could not find socket %s\n", socketName);
         return -1;
     }
     setsockopt((SOCKET) osToolsSocket.socket -> data[socketIndex + OSI_SOCKET].p, SOL_SOCKET, SO_RCVTIMEO, (char *) &timeoutMilliseconds, sizeof(timeoutMilliseconds)); // https://stackoverflow.com/questions/2876024/linux-is-there-a-read-or-recv-from-socket-with-timeout
@@ -32166,29 +32158,29 @@ int32_t osToolsSocketReceive(char *socketName, uint8_t *data, int32_t length, in
     if (status == SOCKET_ERROR) {
         if (WSAGetLastError() == WSAETIMEDOUT) {
             /* timeout */
-            // printf("osToolsSocketReceive ERROR: Failed to receive (timeout)\n");
+            // printf("os_tools_socket_receive ERROR: Failed to receive (timeout)\n");
             return -1;
         }
-        // printf("osToolsSocketReceive ERROR: Failed to receive\n");
+        // printf("os_tools_socket_receive ERROR: Failed to receive\n");
         return -1;
     }
     return status;
 }
 
-int32_t osToolsSocketDestroy(char *socketName) {
+int32_t os_tools_socket_delete(char *socketName) {
     if (!socketName) {
-        // printf("osToolsSocketDestroy ERROR: socketName is NULL\n");
+        // printf("os_tools_socket_delete ERROR: socketName is NULL\n");
         return -1;
     }
     int32_t socketIndex = list_find(osToolsSocket.socket, (unitype) socketName, 's');
     if (socketIndex == -1) {
-        // printf("osToolsSocketDestroy ERROR: Could not find socket %s\n", socketName);
+        // printf("os_tools_socket_delete ERROR: Could not find socket %s\n", socketName);
         return -1;
     }
     /* shutdown and close socket */
     int32_t status = shutdown((SOCKET) osToolsSocket.socket -> data[socketIndex + OSI_SOCKET].p, SD_BOTH);
     if (status == SOCKET_ERROR) {
-        // printf("osToolsSocketDestroy WARN: Shutdown not successful\n");
+        // printf("os_tools_socket_delete WARN: Shutdown not successful\n");
     }
     closesocket((SOCKET) osToolsSocket.socket -> data[socketIndex + OSI_SOCKET].p);
     list_delete_range(osToolsSocket.socket, socketIndex, socketIndex + OSI_NUMBER_OF_FIELDS);
@@ -32225,17 +32217,17 @@ https://stackoverflow.com/questions/71783335/unexpected-u-v-plane-offset-with-wi
 schwa walked so i could find no information on this problem
 */
 
-list_t *osToolsCameraList() {
+list_t *os_tools_camera_list() {
     list_clear(osToolsCamera.camera);
     list_t *output = list_init();
     HRESULT hr = CoInitializeEx(NULL, 0);
     if (FAILED(hr)) {
-        printf("osToolsCameraList CoInitializeEx Error: 0x%lX\n", hr);
+        printf("os_tools_camera_list CoInitializeEx Error: 0x%lX\n", hr);
         return output;
     }
     hr = MFStartup(MF_VERSION, MFSTARTUP_NOSOCKET);
     if (FAILED(hr)) {
-        printf("osToolsCameraList MFStartup Error: 0x%lX\n", hr);
+        printf("os_tools_camera_list MFStartup Error: 0x%lX\n", hr);
         return output;
     }
     /* https://learn.microsoft.com/en-us/windows/win32/medfound/enumerating-video-capture-devices
@@ -32249,38 +32241,38 @@ list_t *osToolsCameraList() {
     /* Create an attribute store to specify the enumeration parameters. */
     hr = MFCreateAttributes(&pAttributes, 1);
     if (FAILED(hr)) {
-        printf("osToolsCameraList MFCreateAttributes Error: 0x%lX\n", hr);
-        goto osToolsCameraList_done;
+        printf("os_tools_camera_list MFCreateAttributes Error: 0x%lX\n", hr);
+        goto os_tools_camera_list_done;
     }
 
     /* Source type: video capture devices */
     hr = pAttributes -> lpVtbl -> SetGUID(pAttributes, &MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE, &MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_GUID);
     if (FAILED(hr)) {
-        printf("osToolsCameraList SetGUID Error: 0x%lX\n", hr);
-        goto osToolsCameraList_done;
+        printf("os_tools_camera_list SetGUID Error: 0x%lX\n", hr);
+        goto os_tools_camera_list_done;
     }
 
     /* Enumerate devices. */
     UINT32 count;
     hr = MFEnumDeviceSources(pAttributes, &ppDevices, &count);
     if (FAILED(hr)) {
-        printf("osToolsCameraList MFEnumDeviceSources Error: 0x%lX\n", hr);
-        goto osToolsCameraList_done;
+        printf("os_tools_camera_list MFEnumDeviceSources Error: 0x%lX\n", hr);
+        goto os_tools_camera_list_done;
     }
 
     if (count == 0) {
         hr = E_FAIL;
-        printf("osToolsCameraList: Error no cameras found\n");
-        goto osToolsCameraList_done;
+        printf("os_tools_camera_list: Error no cameras found\n");
+        goto os_tools_camera_list_done;
     }
-    printf("osToolsCameraList: Found %d cameras\n", count);
+    printf("os_tools_camera_list: Found %d cameras\n", count);
 
     /* Create the media source object. */
     for (int32_t i = 0; i < count; i++) {
         hr = ppDevices[i] -> lpVtbl -> ActivateObject(ppDevices[i], &IID_IMFMediaSource, (void **) &pSource);
         if (FAILED(hr)) {
-            printf("osToolsCameraList ActivateObject Error: 0x%lX\n", hr);
-            goto osToolsCameraList_done;
+            printf("os_tools_camera_list ActivateObject Error: 0x%lX\n", hr);
+            goto os_tools_camera_list_done;
         }
         DWORD characteristics;
         pSource -> lpVtbl -> GetCharacteristics(pSource, &characteristics);
@@ -32305,14 +32297,14 @@ list_t *osToolsCameraList() {
         IMFStreamDescriptor *streamDescriptor;
         hr = presentationDescriptor -> lpVtbl -> GetStreamDescriptorByIndex(presentationDescriptor, 0, &selected, &streamDescriptor);
         if (FAILED(hr)) {
-            printf("osToolsCameraList GetStreamDescriptorByIndex Error: 0x%lX\n", hr);
-            goto osToolsCameraList_done;
+            printf("os_tools_camera_list GetStreamDescriptorByIndex Error: 0x%lX\n", hr);
+            goto os_tools_camera_list_done;
         }
         IMFMediaTypeHandler *mediaTypeHandler;
         hr = streamDescriptor -> lpVtbl -> GetMediaTypeHandler(streamDescriptor, &mediaTypeHandler);
         if (FAILED(hr)) {
-            printf("osToolsCameraList GetMediaTypeHandler Error: 0x%lX\n", hr);
-            goto osToolsCameraList_done;
+            printf("os_tools_camera_list GetMediaTypeHandler Error: 0x%lX\n", hr);
+            goto os_tools_camera_list_done;
         }
         DWORD mediaTypeCount;
         mediaTypeHandler -> lpVtbl -> GetMediaTypeCount(mediaTypeHandler, &mediaTypeCount);
@@ -32325,19 +32317,19 @@ list_t *osToolsCameraList() {
             IMFMediaType *mediaType;
             hr = mediaTypeHandler -> lpVtbl -> GetMediaTypeByIndex(mediaTypeHandler, j, &mediaType);
             if (FAILED(hr)) {
-                printf("osToolsCameraList GetMediaTypeByIndex Error: 0x%lX\n", hr);
-                goto osToolsCameraList_done;
+                printf("os_tools_camera_list GetMediaTypeByIndex Error: 0x%lX\n", hr);
+                goto os_tools_camera_list_done;
             }
             hr = mediaType -> lpVtbl -> SetUINT32(mediaType, &MF_SOURCE_READER_ENABLE_VIDEO_PROCESSING, TRUE);
             if (FAILED(hr)) {
-                printf("osToolsCameraList SetUINT32 Error: 0x%lX\n", hr);
-                goto osToolsCameraList_done;
+                printf("os_tools_camera_list SetUINT32 Error: 0x%lX\n", hr);
+                goto os_tools_camera_list_done;
             }
             GUID majorType;
             hr = mediaType -> lpVtbl -> GetMajorType(mediaType, &majorType);
             if (FAILED(hr)) {
-                printf("osToolsCameraList GetMajorType Error: 0x%lX\n", hr);
-                goto osToolsCameraList_done;
+                printf("os_tools_camera_list GetMajorType Error: 0x%lX\n", hr);
+                goto os_tools_camera_list_done;
             }
             /* see mfapi.h for DEFINE_GUID (MFMediaType_Video, 0x73646976, 0x0000, 0x0010, 0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71); */
             if (majorType.Data1 == 0x73646976 && majorType.Data2 == 0x0000 && majorType.Data3 == 0x0010 && majorType.Data4[0] == 0x80 && majorType.Data4[1] == 0x00 && majorType.Data4[2] == 0x00 && majorType.Data4[3] == 0xaa && majorType.Data4[4] == 0x00 && majorType.Data4[5] == 0x38 && majorType.Data4[6] == 0x9b && majorType.Data4[7] == 0x71) {
@@ -32346,16 +32338,16 @@ list_t *osToolsCameraList() {
                 GUID subtype;
                 hr = mediaType -> lpVtbl -> GetGUID(mediaType, &MF_MT_SUBTYPE, &subtype);
                 if (FAILED(hr)) {
-                    printf("osToolsCameraList GetGUID Error: 0x%lX\n", hr);
-                    goto osToolsCameraList_done;
+                    printf("os_tools_camera_list GetGUID Error: 0x%lX\n", hr);
+                    goto os_tools_camera_list_done;
                 }
                 // printf("  - Subtype: %08lx-%02hx%02hx-%02x%02x-%02x%02x%02x%02x%02x%02x\n", subtype.Data1, subtype.Data2, subtype.Data3, // 3231564E-0010-8000-00AA00389B71
                 // subtype.Data4[0], subtype.Data4[1], subtype.Data4[2], subtype.Data4[3], subtype.Data4[4], subtype.Data4[5], subtype.Data4[6], subtype.Data4[7]);
                 uint64_t sizePacked;
                 hr = mediaType -> lpVtbl -> GetUINT64(mediaType, &MF_MT_FRAME_SIZE, &sizePacked);
                 if (FAILED(hr)) {
-                    printf("osToolsCameraList GetUINT64 Error: 0x%lX\n", hr);
-                    goto osToolsCameraList_done;
+                    printf("os_tools_camera_list GetUINT64 Error: 0x%lX\n", hr);
+                    goto os_tools_camera_list_done;
                 }
                 uint32_t width = (uint32_t) (sizePacked >> 32);
                 uint32_t height = (uint32_t) sizePacked;
@@ -32392,8 +32384,8 @@ list_t *osToolsCameraList() {
             /* H264 decoder required */
             hr = CoCreateInstance(&CLSID_CMSH264DecoderMFT, NULL, CLSCTX_ALL, &IID_IMFTransform, (void **) &h264decoder);
             if (FAILED(hr)) {
-                printf("osToolsCameraList ERROR: CoCreateInstance failed on H264 decoder 0x%lX\n", hr);
-                goto osToolsCameraList_done;
+                printf("os_tools_camera_list ERROR: CoCreateInstance failed on H264 decoder 0x%lX\n", hr);
+                goto os_tools_camera_list_done;
             }
             IMFAttributes *h264attributes;
             h264decoder -> lpVtbl -> GetAttributes(h264decoder, &h264attributes);
@@ -32402,32 +32394,32 @@ list_t *osToolsCameraList() {
             DWORD numOutputStreams;
             h264decoder -> lpVtbl -> GetStreamCount(h264decoder, &numInputStreams, &numOutputStreams);
             if (numInputStreams < 1 || numOutputStreams < 1) {
-                printf("osToolsCameraList ERROR: Not enough streams on H264 decoder\n");
-                goto osToolsCameraList_done;
+                printf("os_tools_camera_list ERROR: Not enough streams on H264 decoder\n");
+                goto os_tools_camera_list_done;
             }
             IMFMediaType *inputNativeType;
             MFCreateMediaType(&inputNativeType);
             savedMediaType -> lpVtbl -> CopyAllItems(savedMediaType, (IMFAttributes *) inputNativeType);
             inputNativeType -> lpVtbl -> SetUINT32(inputNativeType, &MF_MT_INTERLACE_MODE, MFVideoInterlace_MixedInterlaceOrProgressive);
             if (FAILED(hr)) {
-                printf("osToolsCameraList SetGUID Error: 0x%lX\n", hr);
-                goto osToolsCameraList_done;
+                printf("os_tools_camera_list SetGUID Error: 0x%lX\n", hr);
+                goto os_tools_camera_list_done;
             }
             hr = h264decoder -> lpVtbl -> SetInputType(h264decoder, 0, inputNativeType, 0);
             if (FAILED(hr)) {
-                printf("osToolsCameraList H264 SetInputType Error: 0x%lX\n", hr);
-                goto osToolsCameraList_done;
+                printf("os_tools_camera_list H264 SetInputType Error: 0x%lX\n", hr);
+                goto os_tools_camera_list_done;
             }
             hr = h264decoder -> lpVtbl -> SetOutputType(h264decoder, 0, NV12MediaType, 0);
             if (FAILED(hr)) {
-                printf("osToolsCameraList H264 SetOutputType Error: 0x%lX\n", hr);
-                goto osToolsCameraList_done;
+                printf("os_tools_camera_list H264 SetOutputType Error: 0x%lX\n", hr);
+                goto os_tools_camera_list_done;
             }
         } else {
             hr = mediaTypeHandler -> lpVtbl -> SetCurrentMediaType(mediaTypeHandler, savedMediaType);
             if (FAILED(hr)) {
-                printf("osToolsCameraList SetCurrentMediaType Error: 0x%lX\n", hr);
-                goto osToolsCameraList_done;
+                printf("os_tools_camera_list SetCurrentMediaType Error: 0x%lX\n", hr);
+                goto os_tools_camera_list_done;
             }
         }
         /* NV12 to RGB32 decoder - https://learn.microsoft.com/en-us/windows/win32/medfound/registering-and-enumerating-mfts#enumerating-mfts */
@@ -32438,12 +32430,12 @@ list_t *osToolsCameraList() {
         uint32_t codecs = 0;
         hr = MFTEnumEx(MFT_CATEGORY_VIDEO_PROCESSOR, unFlags, &inputInfo, &outputInfo, &ppActivate, &codecs); // it's a video processor not an encoder/decoder
         if (FAILED(hr)) {
-            printf("osToolsCameraList ERROR: MFTEnumEx failed with 0x%lX\n", hr);
-            goto osToolsCameraList_done;
+            printf("os_tools_camera_list ERROR: MFTEnumEx failed with 0x%lX\n", hr);
+            goto os_tools_camera_list_done;
         }
         if (SUCCEEDED(hr) && codecs == 0) {
-            printf("osToolsCameraList ERROR: No codecs for NV12 to RGB32\n");
-            goto osToolsCameraList_done;
+            printf("os_tools_camera_list ERROR: No codecs for NV12 to RGB32\n");
+            goto os_tools_camera_list_done;
         }
         hr = ppActivate[0] -> lpVtbl -> ActivateObject(ppActivate[0], &IID_IMFTransform, (void **) &nv12decoder);
         for (int32_t i = 0; i < codecs; i++) {
@@ -32451,8 +32443,8 @@ list_t *osToolsCameraList() {
         }
         CoTaskMemFree(ppActivate);
         if (FAILED(hr)) {
-            printf("osToolsCameraList ActivateObject Error: 0x%lX\n", hr);
-            goto osToolsCameraList_done;
+            printf("os_tools_camera_list ActivateObject Error: 0x%lX\n", hr);
+            goto os_tools_camera_list_done;
         }
         IMFMediaType *RGB32MediaType;
         MFCreateMediaType(&RGB32MediaType);
@@ -32460,13 +32452,13 @@ list_t *osToolsCameraList() {
         hr = RGB32MediaType -> lpVtbl -> SetGUID(RGB32MediaType, &MF_MT_SUBTYPE, &MFVideoFormat_RGB32);
         hr = nv12decoder -> lpVtbl -> SetInputType(nv12decoder, 0, NV12MediaType, 0);
         if (FAILED(hr)) {
-            printf("osToolsCameraList NV12 SetInputType Error: 0x%lX\n", hr);
-            goto osToolsCameraList_done;
+            printf("os_tools_camera_list NV12 SetInputType Error: 0x%lX\n", hr);
+            goto os_tools_camera_list_done;
         }
         hr = nv12decoder -> lpVtbl -> SetOutputType(nv12decoder, 0, RGB32MediaType, 0);
         if (FAILED(hr)) {
-            printf("osToolsCameraList NV12 SetOutputType Error: 0x%lX\n", hr);
-            goto osToolsCameraList_done;
+            printf("os_tools_camera_list NV12 SetOutputType Error: 0x%lX\n", hr);
+            goto os_tools_camera_list_done;
         }
         char cameraString[32];
         sprintf(cameraString, "USB Camera %d", i);
@@ -32486,7 +32478,7 @@ list_t *osToolsCameraList() {
         list_append(osToolsCamera.camera, (unitype) NULL, 'l');
         list_append(osToolsCamera.camera, (unitype) (void *) savedMediaType, 'l');
     }
-osToolsCameraList_done:
+os_tools_camera_list_done:
     if (pAttributes) {
         pAttributes -> lpVtbl -> Release(pAttributes);
         pAttributes = NULL;
@@ -32501,7 +32493,7 @@ osToolsCameraList_done:
     return output;
 }
 
-int32_t osToolsCameraOpen(char *name) {
+int32_t os_tools_camera_open(char *name) {
     int32_t cameraIndex = list_find(osToolsCamera.camera, (unitype) name, 's');
     if (cameraIndex == -1) {
         return -1;
@@ -32516,7 +32508,7 @@ int32_t osToolsCameraOpen(char *name) {
     IMFSourceReader *pReader;
     HRESULT hr = MFCreateSourceReaderFromMediaSource(pSource, pAttributes, &pReader);
     if (FAILED(hr)) {
-        printf("osToolsCameraOpen MFCreateSourceReaderFromMediaSource Error: 0x%lX\n", hr);
+        printf("os_tools_camera_open MFCreateSourceReaderFromMediaSource Error: 0x%lX\n", hr);
         return -1;
     }
     pReader -> lpVtbl -> SetStreamSelection(pReader, MF_SOURCE_READER_FIRST_VIDEO_STREAM, TRUE);
@@ -32540,7 +32532,7 @@ int32_t osToolsCameraOpen(char *name) {
     MFCreateMediaType(&readerType);
     hr = readerType -> lpVtbl -> SetGUID(readerType, &MF_MT_MAJOR_TYPE, &MFMediaType_Video);
     if (FAILED(hr)) {
-        printf("osToolsCameraOpen SetGUID Error: 0x%lX\n", hr);
+        printf("os_tools_camera_open SetGUID Error: 0x%lX\n", hr);
         return -1;
     }
     MFT_OUTPUT_DATA_BUFFER *pTransformBuffer;
@@ -32549,7 +32541,7 @@ int32_t osToolsCameraOpen(char *name) {
         /* H264 decoder exists */
         hr = readerType -> lpVtbl -> SetGUID(readerType, &MF_MT_SUBTYPE, &MFVideoFormat_H264);
         if (FAILED(hr)) {
-            printf("osToolsCameraOpen SetGUID Error: 0x%lX\n", hr);
+            printf("os_tools_camera_open SetGUID Error: 0x%lX\n", hr);
             return -1;
         }
         /* https://stackoverflow.com/questions/30825271/how-to-create-imfsample-for-windowsmediafoundation-h-264-encoder-mft */
@@ -32566,7 +32558,7 @@ int32_t osToolsCameraOpen(char *name) {
         /* no decoder */
         hr = readerType -> lpVtbl -> SetGUID(readerType, &MF_MT_SUBTYPE, &MFVideoFormat_NV12);
         if (FAILED(hr)) {
-            printf("osToolsCameraOpen SetGUID Error: 0x%lX\n", hr);
+            printf("os_tools_camera_open SetGUID Error: 0x%lX\n", hr);
             return -1;
         }
     }
@@ -32582,14 +32574,14 @@ int32_t osToolsCameraOpen(char *name) {
     osToolsCamera.camera -> data[cameraIndex + 9].p = (void *) pTransformBuffer;
     hr = pReader -> lpVtbl -> SetCurrentMediaType(pReader, MF_SOURCE_READER_FIRST_VIDEO_STREAM, NULL, readerType);
     if (FAILED(hr)) {
-        printf("osToolsCameraOpen SetCurrentMediaType Error: 0x%lX\n", hr); // getting 0xC00D5212 -> MF_E_TOPO_CODEC_NOT_FOUND: Could not find a decoder for the native stream type
+        printf("os_tools_camera_open SetCurrentMediaType Error: 0x%lX\n", hr); // getting 0xC00D5212 -> MF_E_TOPO_CODEC_NOT_FOUND: Could not find a decoder for the native stream type
         return -1;
     }
     osToolsCamera.camera -> data[cameraIndex + 5].p = (void *) pReader;
     return 0;
 }
 
-int32_t osToolsCameraReceive(char *name, uint8_t *data) {
+int32_t os_tools_camera_receive(char *name, uint8_t *data) {
     int32_t cameraIndex = list_find(osToolsCamera.camera, (unitype) name, 's');
     if (cameraIndex == -1) {
         return 0;
@@ -32610,7 +32602,7 @@ int32_t osToolsCameraReceive(char *name, uint8_t *data) {
         /* this is reading in syncronous blocking mode, MF supports also async calls */
         hr = pReader -> lpVtbl -> ReadSample(pReader, MF_SOURCE_READER_FIRST_VIDEO_STREAM, 0, &stream, &flags, &timestamp, &pSample);
         if (FAILED(hr)) {
-            printf("osToolsCameraReceive ERROR: ReadSample failed with 0x%lX\n", hr);
+            printf("os_tools_camera_receive ERROR: ReadSample failed with 0x%lX\n", hr);
             return 0;
         }
         if (flags & MF_SOURCE_READERF_STREAMTICK) {
@@ -32628,7 +32620,7 @@ int32_t osToolsCameraReceive(char *name, uint8_t *data) {
         IMFTransform *h264decoder = (IMFTransform *) osToolsCamera.camera -> data[cameraIndex + 6].p;
         hr = h264decoder -> lpVtbl -> ProcessInput(h264decoder, 0, pSample, 0);
         if (FAILED(hr)) {
-            printf("osToolsCameraReceive ERROR: H264 ProcessInput failed with 0x%lX\n", hr);
+            printf("os_tools_camera_receive ERROR: H264 ProcessInput failed with 0x%lX\n", hr);
             pSample -> lpVtbl -> Release(pSample);
             return 0;
         }
@@ -32647,7 +32639,7 @@ int32_t osToolsCameraReceive(char *name, uint8_t *data) {
         while (1) {
             pTransformBuffer = (MFT_OUTPUT_DATA_BUFFER *) osToolsCamera.camera -> data[cameraIndex + 7].p;
             if (pTransformBuffer == NULL) {
-                printf("osToolsCameraReceive ERROR: pTransformBuffer is NULL\n");
+                printf("os_tools_camera_receive ERROR: pTransformBuffer is NULL\n");
                 return 0;
             }
             hr = pTransformBuffer -> pSample -> lpVtbl -> GetBufferByIndex(pTransformBuffer -> pSample, 0, &pBuffer);
@@ -32669,7 +32661,7 @@ int32_t osToolsCameraReceive(char *name, uint8_t *data) {
                             /* just use the first one idfk */
                             hr = h264decoder -> lpVtbl -> SetOutputType(h264decoder, 0, possibleType, 0);
                             if (FAILED(hr)) {
-                                printf("osToolsCameraReceive ERROR: SetOutputType failed with 0x%lX\n", hr);
+                                printf("os_tools_camera_receive ERROR: SetOutputType failed with 0x%lX\n", hr);
                                 return 0;
                             }
                         }
@@ -32677,7 +32669,7 @@ int32_t osToolsCameraReceive(char *name, uint8_t *data) {
                     }
                     continue;
                 } else {
-                    printf("osToolsCameraReceive ERROR: H264 ProcessOutput failed with 0x%lX with flag 0x%lX\n", hr, transformFlags);
+                    printf("os_tools_camera_receive ERROR: H264 ProcessOutput failed with 0x%lX with flag 0x%lX\n", hr, transformFlags);
                     pSample -> lpVtbl -> Release(pSample); // assume sample must not be released between ProcessInput and ProcessOutput
                     return 0;
                 }
@@ -32713,14 +32705,14 @@ int32_t osToolsCameraReceive(char *name, uint8_t *data) {
     pBuffer -> lpVtbl -> SetCurrentLength(pBuffer, 0); // rewind buffer so it can be used again
     hr = nv12decoder -> lpVtbl -> ProcessInput(nv12decoder, 0, pSample, 0);
     if (FAILED(hr)) {
-        printf("osToolsCameraReceive ERROR: NV12 ProcessInput failed with 0x%lX\n", hr);
+        printf("os_tools_camera_receive ERROR: NV12 ProcessInput failed with 0x%lX\n", hr);
         nv12decoder -> lpVtbl -> ProcessMessage(nv12decoder, MFT_MESSAGE_COMMAND_FLUSH, 0);
         return 0;
     }
     DWORD transformFlags = 0;
     hr = nv12decoder -> lpVtbl -> ProcessOutput(nv12decoder, 0, 1, pTransformBuffer, &transformFlags);
     if (FAILED(hr)) {
-        printf("osToolsCameraReceive ERROR: NV12 ProcessOutput failed with 0x%lX with flag 0x%lX\n", hr, transformFlags);
+        printf("os_tools_camera_receive ERROR: NV12 ProcessOutput failed with 0x%lX with flag 0x%lX\n", hr, transformFlags);
         return 0;
     }
     nv12decoder -> lpVtbl -> ProcessMessage(nv12decoder, MFT_MESSAGE_COMMAND_FLUSH, 0);
@@ -32767,7 +32759,7 @@ int32_t osToolsCameraReceive(char *name, uint8_t *data) {
     return iterData;
 }
 
-int32_t osToolsCameraClose(char *name) {
+int32_t os_tools_camera_close(char *name) {
     int32_t cameraIndex = list_find(osToolsCamera.camera, (unitype) name, 's');
     if (cameraIndex == -1) {
         return -1;
@@ -32809,8 +32801,8 @@ FILE* filenameStream = popen("zenity --file-selection --file-filter='Name | *.ex
 This is similar to COMDLG_FILTERSPEC struct's pszName and pszSpec, so you can add more filter "profiles" by using multiple --file-filter tags in the command
 */
 
-int32_t osToolsInit(char argv0[], GLFWwindow *window) {
-    osToolsIndependentInit(window);
+int32_t os_tools_init(char argv0[], GLFWwindow *window) {
+    os_tools_independent_init(window);
     /* get executable filepath */
     FILE *exStringFile = popen("pwd", "r");
     if (fscanf(exStringFile, "%s", osToolsFileDialog.executableFilepath) == 0) {
@@ -32827,7 +32819,7 @@ int32_t osToolsInit(char argv0[], GLFWwindow *window) {
     return 0;
 }
 
-int32_t osToolsFileDialogPrompt(ost_file_dialog_save_t openOrSave, ost_file_dialog_multiselect_t multiselect, ost_file_dialog_folder_t folder, char *prename, list_t *extensions) {
+int32_t os_tools_file_dialog_prompt(ost_file_dialog_save_t openOrSave, ost_file_dialog_multiselect_t multiselect, ost_file_dialog_folder_t folder, char *prename, list_t *extensions) {
     if (extensions == NULL) {
         extensions = osToolsFileDialog.globalExtensions;
     }
@@ -32901,7 +32893,7 @@ int32_t osToolsFileDialogPrompt(ost_file_dialog_save_t openOrSave, ost_file_dial
     return 0;
 }
 
-uint8_t *osToolsFileMap(char *filename, uint32_t *sizeOutput) {
+uint8_t *os_tools_file_map(char *filename, uint32_t *sizeOutput) {
     int32_t fd = open(filename, O_RDWR);
     struct stat stats;
     if (fstat(fd, &stats) == -1) {
@@ -32922,7 +32914,7 @@ uint8_t *osToolsFileMap(char *filename, uint32_t *sizeOutput) {
     return (uint8_t *) out;
 }
 
-int32_t osToolsFileUnmap(uint8_t *data) {
+int32_t os_tools_file_unmap(uint8_t *data) {
     int32_t index = -1;
     for (int32_t i = 0; i < osToolsMemmap.mappedFiles -> length; i += 3) {
         if (osToolsMemmap.mappedFiles -> data[i].p == data) {
@@ -32943,7 +32935,7 @@ int32_t osToolsFileUnmap(uint8_t *data) {
     }
 }
 
-list_t *osToolsFileAndFolderList(char *directory) {
+list_t *os_tools_file_and_folder_list(char *directory) {
     list_t *output = list_init();
     DIR *dir = opendir(directory);
     if (dir == NULL) {
@@ -32973,7 +32965,7 @@ list_t *osToolsFileAndFolderList(char *directory) {
     return output;
 }
 
-list_t *osToolsFileList(char *directory) {
+list_t *os_tools_file_list(char *directory) {
     list_t *output = list_init();
     DIR *dir = opendir(directory);
     if (dir == NULL) {
@@ -32997,7 +32989,7 @@ list_t *osToolsFileList(char *directory) {
     return output;
 }
 
-list_t *osToolsFolderList(char *directory) {
+list_t *os_tools_folder_list(char *directory) {
     list_t *output = list_init();
     DIR *dir = opendir(directory);
     if (dir == NULL) {
@@ -33024,17 +33016,17 @@ list_t *osToolsFolderList(char *directory) {
     return output;
 }
 
-int32_t osToolsFolderCreate(char *folder) {
+int32_t os_tools_folder_create(char *folder) {
     return mkdir(folder, 0755);
 }
 
-int32_t osToolsFolderDestroy(char *folder) {
+int32_t os_tools_folder_delete(char *folder) {
     char command[5000] = "rm -rf ";
     strcat(command, folder);
     return system(command);
 }
 
-void osToolsCloseConsole() {
+void os_tools_close_console() {
     /* don't know how to do this yet - https://unix.stackexchange.com/questions/743272/programatically-start-a-background-process-under-linux */
     return;
 }
@@ -33043,24 +33035,24 @@ void osToolsCloseConsole() {
 
 /* Serial support on linux: https://blog.mbedded.ninja/programming/operating-systems/linux/linux-serial-ports-using-c-cpp/ */
 
-list_t *osToolsSerialList() {
+list_t *os_tools_serial_list() {
     list_t *output = list_init();
     return output;
 }
 
-int32_t osToolsSerialOpen(char *name, osToolsSerialBaud_t baudRate) {
+int32_t os_tools_serial_open(char *name, osToolsSerialBaud_t baudRate) {
     return -1;
 }
 
-int32_t osToolsSerialSend(char *name, uint8_t *data, int32_t length) {
+int32_t os_tools_serial_send(char *name, uint8_t *data, int32_t length) {
     return -1;
 }
 
-int32_t osToolsSerialReceive(char *name, uint8_t *buffer, int32_t length, int32_t timeoutMilliseconds) {
+int32_t os_tools_serial_receive(char *name, uint8_t *buffer, int32_t length, int32_t timeoutMilliseconds) {
     return -1;
 }
 
-int32_t osToolsSerialClose(char *name) {
+int32_t os_tools_serial_close(char *name) {
     return -1;
 }
 
@@ -33088,18 +33080,18 @@ int32_t osToolsGetIP(char *address, uint8_t *buffer, int32_t maxSegments) {
     return segments;
 }
 
-int32_t osToolsGetSocketAddress(char *socketName, char *address, int32_t length) {
+int32_t os_tools_get_socket_address(char *socketName, char *address, int32_t length) {
     if (!socketName) {
-        // printf("osToolsGetSocketAddress ERROR: socketName is NULL\n");
+        // printf("os_tools_get_socket_address ERROR: socketName is NULL\n");
         return -1;
     }
     if (!address) {
-        // printf("osToolsGetSocketAddress ERROR: address is NULL\n");
+        // printf("os_tools_get_socket_address ERROR: address is NULL\n");
         return -1;
     }
     int32_t socketIndex = list_find(osToolsSocket.socket, (unitype) socketName, 's');
     if (socketIndex == -1) {
-        // printf("osToolsGetSocketAddress ERROR: Could not find socket %s\n", socketName);
+        // printf("os_tools_get_socket_address ERROR: Could not find socket %s\n", socketName);
         return -1;
     }
     /* only IPv4 */
@@ -33110,18 +33102,18 @@ int32_t osToolsGetSocketAddress(char *socketName, char *address, int32_t length)
     return 0;
 }
 
-int32_t osToolsGetPort(char *socketName, char *port, int32_t length) {
+int32_t os_tools_get_port(char *socketName, char *port, int32_t length) {
     if (!socketName) {
-        // printf("osToolsGetSocketAddress ERROR: socketName is NULL\n");
+        // printf("os_tools_get_port ERROR: socketName is NULL\n");
         return -1;
     }
     if (!port) {
-        // printf("osToolsGetSocketAddress ERROR: port is NULL\n");
+        // printf("os_tools_get_port ERROR: port is NULL\n");
         return -1;
     }
     int32_t socketIndex = list_find(osToolsSocket.socket, (unitype) socketName, 's');
     if (socketIndex == -1) {
-        // printf("osToolsGetPort ERROR: Could not find socket %s\n", socketName);
+        // printf("os_tools_get_port ERROR: Could not find socket %s\n", socketName);
         return -1;
     }
     char portA[8];
@@ -33133,13 +33125,13 @@ int32_t osToolsGetPort(char *socketName, char *port, int32_t length) {
 
 #ifdef TURTLE_ENABLE_SOCKETS
 
-int32_t osToolsServerSocketCreate(char *serverName, osToolsSocketProtocol_t protocol, char *serverPort) {
+int32_t os_tools_server_socket_create(char *serverName, osToolsSocketProtocol_t protocol, char *serverPort) {
     if (!serverName) {
-        // printf("osToolsServerSocketCreate ERROR: serverName is NULL\n");
+        // printf("os_tools_server_socket_create ERROR: serverName is NULL\n");
         return -1;
     }
     if (!serverPort) {
-        // printf("osToolsServerSocketCreate ERROR: port is NULL\n");
+        // printf("os_tools_server_socket_create ERROR: port is NULL\n");
         return -1;
     }
     int32_t status;
@@ -33161,14 +33153,14 @@ int32_t osToolsServerSocketCreate(char *serverName, osToolsSocketProtocol_t prot
     char hostName[128];
     status = gethostname(hostName, sizeof(hostName));
     if (status == -1) {
-        // printf("osToolsServerSocketCreate ERROR: Could not gethostname\n");
+        // printf("os_tools_server_socket_create ERROR: Could not gethostname\n");
         return -1;
     }
     printf("Host Name: %s\n", hostName);
 
     struct hostent *host = gethostbyname(hostName);
     if (host == NULL) {
-        // printf("osToolsServerSocketCreate ERROR: Could not gethostbyname\n");
+        // printf("os_tools_server_socket_create ERROR: Could not gethostbyname\n");
         return -1;
     }
 
@@ -33181,18 +33173,18 @@ int32_t osToolsServerSocketCreate(char *serverName, osToolsSocketProtocol_t prot
     }
     char *serverAddress = inet_ntoa(address);
     if (serverAddress == NULL) {
-        // printf("osToolsServerSocketCreate ERROR: No addresses to create server on\n");
+        // printf("os_tools_server_socket_create ERROR: No addresses to create server on\n");
         return -1;
     }
     uint8_t ipAddress[4] = {0};
     if (osToolsGetIP(serverAddress, ipAddress, 4) != 4) {
-        // printf("osToolsServerSocketCreate ERROR: Invalid ip address\n");
+        // printf("os_tools_server_socket_create ERROR: Invalid ip address\n");
     }
 
     /* Resolve the server address and port */
     status = getaddrinfo(serverAddress, serverPort, &hints, &result);
     if (status != 0) {
-        // printf("osToolsServerSocketCreate ERROR: Could not getaddrinfo\n");
+        // printf("os_tools_server_socket_create ERROR: Could not getaddrinfo\n");
         return -1;
     }
     struct addrinfo *resultElement = result;
@@ -33201,7 +33193,7 @@ int32_t osToolsServerSocketCreate(char *serverName, osToolsSocketProtocol_t prot
         resultElement = resultElement -> ai_next;
     }
     if (result == NULL) {
-        // printf("osToolsServerSocketCreate ERROR: getaddrinfo returned NULL\n");
+        // printf("os_tools_server_socket_create ERROR: getaddrinfo returned NULL\n");
         return -1;
     }
 
@@ -33209,7 +33201,7 @@ int32_t osToolsServerSocketCreate(char *serverName, osToolsSocketProtocol_t prot
     int32_t sockfd = socket(result -> ai_family, result -> ai_socktype, result -> ai_protocol);
     if (sockfd == -1) {
         freeaddrinfo(result);
-        // printf("osToolsServerSocketCreate ERROR: Could not create socket\n");
+        // printf("os_tools_server_socket_create ERROR: Could not create socket\n");
         return -1;
     }
 
@@ -33217,7 +33209,7 @@ int32_t osToolsServerSocketCreate(char *serverName, osToolsSocketProtocol_t prot
     status = bind(sockfd, result -> ai_addr, result -> ai_addrlen);
     if (status == -1) {
         freeaddrinfo(result);
-        // printf("osToolsServerSocketCreate ERROR: Could not bind socket %s to address %s\n", serverName, serverAddress);
+        // printf("os_tools_server_socket_create ERROR: Could not bind socket %s to address %s\n", serverName, serverAddress);
         return -1;
     }
     freeaddrinfo(result);
@@ -33243,18 +33235,18 @@ int32_t osToolsServerSocketCreate(char *serverName, osToolsSocketProtocol_t prot
     return 0;
 }
 
-int32_t osToolsServerSocketListen(char *serverName, char *clientName) {
+int32_t os_tools_server_socket_listen(char *serverName, char *clientName) {
     if (!serverName) {
-        // printf("osToolsServerSocketListen ERROR: serverName is NULL\n");
+        // printf("os_tools_server_socket_listen ERROR: serverName is NULL\n");
         return -1;
     }
     if (!clientName) {
-        // printf("osToolsServerSocketListen ERROR: clientName is NULL\n");
+        // printf("os_tools_server_socket_listen ERROR: clientName is NULL\n");
         return -1;
     }
     int32_t socketIndex = list_find(osToolsSocket.socket, (unitype) serverName, 's');
     if (socketIndex == -1) {
-        // printf("osToolsServerSocketListen ERROR: Could not find socket %s\n", serverName);
+        // printf("os_tools_server_socket_listen ERROR: Could not find socket %s\n", serverName);
         return -1;
     }
     int32_t status;
@@ -33262,19 +33254,19 @@ int32_t osToolsServerSocketListen(char *serverName, char *clientName) {
 
     status = listen(sockfd, SOMAXCONN);
     if (status == -1) {
-        // printf("osToolsServerSocketListen ERROR: Listen failed\n");
+        // printf("os_tools_server_socket_listen ERROR: Listen failed\n");
         return -1;
     }
     struct sockaddr_in address;
     uint32_t addressLen = sizeof(address);
     int32_t connectionfd = accept(sockfd, (struct sockaddr *) &address, &addressLen);
     if (connectionfd == -1) {
-        // printf("osToolsServerSocketListen ERROR: Accept failed\n");
+        // printf("os_tools_server_socket_listen ERROR: Accept failed\n");
         return -1;
     }
     uint8_t ipAddress[4] = {0};
     if (osToolsGetIP(inet_ntoa(address.sin_addr), ipAddress, 4) != 4) {
-        // printf("osToolsServerSocketListen ERROR: Invalid ip address\n");
+        // printf("os_tools_server_socket_listen ERROR: Invalid ip address\n");
     }
     printf("Incoming connection from %s:%d\n", inet_ntoa(address.sin_addr), address.sin_port);
     list_append(osToolsSocket.socket, (unitype) clientName, 's');
@@ -33296,22 +33288,22 @@ int32_t osToolsServerSocketListen(char *serverName, char *clientName) {
     return 0;
 }
 
-int32_t osToolsClientSocketCreate(char *clientName, osToolsSocketProtocol_t protocol, char *serverAddress, char *serverPort, int32_t timeoutMilliseconds) {
+int32_t os_tools_client_socket_create(char *clientName, osToolsSocketProtocol_t protocol, char *serverAddress, char *serverPort, int32_t timeoutMilliseconds) {
     if (!clientName) {
-        // printf("osToolsClientSocketCreate ERROR: clientName is NULL\n");
+        // printf("os_tools_client_socket_create ERROR: clientName is NULL\n");
         return -1;
     }
     if (!serverAddress) {
-        // printf("osToolsClientSocketCreate ERROR: serverAddress is NULL\n");
+        // printf("os_tools_client_socket_create ERROR: serverAddress is NULL\n");
         return -1;
     }
     if (!serverPort) {
-        // printf("osToolsClientSocketCreate ERROR: port is NULL\n");
+        // printf("os_tools_client_socket_create ERROR: port is NULL\n");
         return -1;
     }
     uint8_t ipAddress[4] = {0};
     if (osToolsGetIP(serverAddress, ipAddress, 4) != 4) {
-        // printf("osToolsClientSocketCreate ERROR: Invalid ip address\n");
+        // printf("os_tools_client_socket_create ERROR: Invalid ip address\n");
         return -1;
     }
     int32_t status;
@@ -33331,7 +33323,7 @@ int32_t osToolsClientSocketCreate(char *clientName, osToolsSocketProtocol_t prot
 
     status = getaddrinfo(serverAddress, serverPort, &hints, &result);
     if (status != 0) {
-        // printf("osToolsClientSocketCreate ERROR: Could not getaddrinfo of %s:%s, failed with %d\n", serverAddress, serverPort, status);
+        // printf("os_tools_client_socket_create ERROR: Could not getaddrinfo of %s:%s, failed with %d\n", serverAddress, serverPort, status);
         return -1;
     }
 
@@ -33341,32 +33333,32 @@ int32_t osToolsClientSocketCreate(char *clientName, osToolsSocketProtocol_t prot
         resultElement = resultElement -> ai_next;
     }
     if (result == NULL) {
-        // printf("osToolsClientSocketCreate ERROR: getaddrinfo returned NULL\n");
+        // printf("os_tools_client_socket_create ERROR: getaddrinfo returned NULL\n");
         return -1;
     }
     /* Use the first element of linked list returned by getaddrinfo */
     int32_t sockfd = socket(result -> ai_family, result -> ai_socktype, result -> ai_protocol);
     if (sockfd == -1) {
         freeaddrinfo(result);
-        // printf("osToolsClientSocketCreate ERROR: Could not create socket\n");
+        // printf("os_tools_client_socket_create ERROR: Could not create socket\n");
         return -1;
     }
     /* set socket to non blocking mode while connecting - https://stackoverflow.com/questions/1543466/how-do-i-change-a-tcp-socket-to-be-non-blocking */
     status = fcntl(sockfd, F_GETFL, 0);
     if (status == -1) {
-        // printf("osToolsClientSocketCreate ERROR: Could not get fcntl flags\n");
+        // printf("os_tools_client_socket_create ERROR: Could not get fcntl flags\n");
         return -1;
     }
     status &= O_NONBLOCK;
     status = fcntl(sockfd, F_SETFL, status);
     if (status != 0) {
-        // printf("osToolsClientSocketCreate ERROR: Could not set socket to non-blocking mode\n");
+        // printf("os_tools_client_socket_create ERROR: Could not set socket to non-blocking mode\n");
         return -1;
     }
     status = connect(sockfd, result -> ai_addr, (int32_t) result -> ai_addrlen);
     if (status == -1) {
         if (errno != EINPROGRESS) {
-            // printf("osToolsClientSocketCreate ERROR: Could not connect socket %d (%s)\n", errno, strerror(errno));
+            // printf("os_tools_client_socket_create ERROR: Could not connect socket %d (%s)\n", errno, strerror(errno));
             return -1;
         }
         struct timeval timeout;
@@ -33377,20 +33369,20 @@ int32_t osToolsClientSocketCreate(char *clientName, osToolsSocketProtocol_t prot
         fdsockArray.__fds_bits[0] = sockfd;
         status = select(sockfd + 1, NULL, &fdsockArray, NULL, &timeout);
         if (status != 1) {
-            // printf("osToolsClientSocketCreate ERROR: Could not connect socket (timeout)\n");
+            // printf("os_tools_client_socket_create ERROR: Could not connect socket (timeout)\n");
             return -1;
         }
     }
     /* set socket back to blocking mode */
     status = fcntl(sockfd, F_GETFL, 0);
     if (status == -1) {
-        // printf("osToolsClientSocketCreate ERROR: Could not get fcntl flags\n");
+        // printf("os_tools_client_socket_create ERROR: Could not get fcntl flags\n");
         return -1;
     }
     status &= ~O_NONBLOCK;
     status = fcntl(sockfd, F_SETFL, status);
     if (status != 0) {
-        // printf("osToolsClientSocketCreate ERROR: Could not set socket to blocking mode\n");
+        // printf("os_tools_client_socket_create ERROR: Could not set socket to blocking mode\n");
         return -1;
     }
     printf("Connected to %s:%s\n", serverAddress, serverPort);
@@ -33415,32 +33407,32 @@ int32_t osToolsClientSocketCreate(char *clientName, osToolsSocketProtocol_t prot
     return 0;
 }
 
-int32_t osToolsSocketSend(char *socketName, uint8_t *data, int32_t length) {
+int32_t os_tools_socket_send(char *socketName, uint8_t *data, int32_t length) {
     if (!socketName) {
-        // printf("osToolsSocketSend ERROR: socketName is NULL\n");
+        // printf("os_tools_socket_send ERROR: socketName is NULL\n");
         return -1;
     }
     int32_t socketIndex = list_find(osToolsSocket.socket, (unitype) socketName, 's');
     if (socketIndex == -1) {
-        // printf("osToolsSocketSend ERROR: Could not find socket %s\n", socketName);
+        // printf("os_tools_socket_send ERROR: Could not find socket %s\n", socketName);
         return -1;
     }
     int32_t status = send(osToolsSocket.socket -> data[socketIndex + OSI_SOCKET].i, (char *) data, length, 0);
     if (status == -1) {
-        // printf("osToolsSocketSend ERROR: Failed to send\n");
+        // printf("os_tools_socket_send ERROR: Failed to send\n");
         return -1;
     }
     return status;
 }
 
-int32_t osToolsSocketReceive(char *socketName, uint8_t *data, int32_t length, int32_t timeoutMilliseconds) {
+int32_t os_tools_socket_receive(char *socketName, uint8_t *data, int32_t length, int32_t timeoutMilliseconds) {
     if (!socketName) {
-        // printf("osToolsSocketReceive ERROR: socketName is NULL\n");
+        // printf("os_tools_socket_receive ERROR: socketName is NULL\n");
         return -1;
     }
     int32_t socketIndex = list_find(osToolsSocket.socket, (unitype) socketName, 's');
     if (socketIndex == -1) {
-        // printf("osToolsSocketReceive ERROR: Could not find socket %s\n", socketName);
+        // printf("os_tools_socket_receive ERROR: Could not find socket %s\n", socketName);
         return -1;
     }
     setsockopt(osToolsSocket.socket -> data[socketIndex + OSI_SOCKET].i, SOL_SOCKET, SO_RCVTIMEO, (char *) &timeoutMilliseconds, sizeof(timeoutMilliseconds)); // https://stackoverflow.com/questions/2876024/linux-is-there-a-read-or-recv-from-socket-with-timeout
@@ -33448,29 +33440,29 @@ int32_t osToolsSocketReceive(char *socketName, uint8_t *data, int32_t length, in
     if (status == -1) {
         if (errno == EAGAIN || errno == EWOULDBLOCK) {
             /* timeout */
-            // printf("osToolsSocketReceive ERROR: Failed to receive (timeout)\n");
+            // printf("os_tools_socket_receive ERROR: Failed to receive (timeout)\n");
             return 0;
         }
-        // printf("osToolsSocketReceive ERROR: Failed to receive\n");
+        // printf("os_tools_socket_receive ERROR: Failed to receive\n");
         return -1;
     }
     return status;
 }
 
-int32_t osToolsSocketDestroy(char *socketName) {
+int32_t os_tools_socket_delete(char *socketName) {
     if (!socketName) {
-        // printf("osToolsSocketDestroy ERROR: socketName is NULL\n");
+        // printf("os_tools_socket_delete ERROR: socketName is NULL\n");
         return -1;
     }
     int32_t socketIndex = list_find(osToolsSocket.socket, (unitype) socketName, 's');
     if (socketIndex == -1) {
-        // printf("osToolsSocketDestroy ERROR: Could not find socket %s\n", socketName);
+        // printf("os_tools_socket_delete ERROR: Could not find socket %s\n", socketName);
         return -1;
     }
     /* shutdown and close socket */
     int32_t status = shutdown(osToolsSocket.socket -> data[socketIndex + OSI_SOCKET].i, SHUT_RDWR);
     if (status == -1) {
-        // printf("osToolsSocketDestroy WARN: Shutdown not successful\n");
+        // printf("os_tools_socket_delete WARN: Shutdown not successful\n");
     }
     close(osToolsSocket.socket -> data[socketIndex + OSI_SOCKET].i);
     list_delete_range(osToolsSocket.socket, socketIndex, socketIndex + OSI_NUMBER_OF_FIELDS);
@@ -33481,20 +33473,20 @@ int32_t osToolsSocketDestroy(char *socketName) {
 
 #ifdef TURTLE_ENABLE_CAMERA
 
-list_t *osToolsCameraList() {
+list_t *os_tools_camera_list() {
     list_t *output = list_init();
     return output;
 }
 
-int32_t osToolsCameraOpen(char *name) {
+int32_t os_tools_camera_open(char *name) {
     return -1;
 }
 
-int32_t osToolsCameraReceive(char *name, uint8_t *data) {
+int32_t os_tools_camera_receive(char *name, uint8_t *data) {
     return -1;
 }
 
-int32_t osToolsCameraClose(char *name) {
+int32_t os_tools_camera_close(char *name) {
     return -1;
 }
 
@@ -33506,8 +33498,8 @@ int32_t osToolsCameraClose(char *name) {
 
 /* Browser version of osTools - limited functionality */
 
-int32_t osToolsInit(char argv0[], GLFWwindow *window) {
-    osToolsIndependentInit(window);
+int32_t os_tools_init(char argv0[], GLFWwindow *window) {
+    os_tools_independent_init(window);
     /* get executable filepath */
     FILE *exStringFile = popen("pwd", "r");
     if (fscanf(exStringFile, "%s", osToolsFileDialog.executableFilepath) == 0) {
@@ -33524,12 +33516,12 @@ int32_t osToolsInit(char argv0[], GLFWwindow *window) {
     return 0;
 }
 
-int32_t osToolsFileDialogPrompt(ost_file_dialog_save_t openOrSave, ost_file_dialog_multiselect_t multiselect, ost_file_dialog_folder_t folder, char *prename, list_t *extensions) {
+int32_t os_tools_file_dialog_prompt(ost_file_dialog_save_t openOrSave, ost_file_dialog_multiselect_t multiselect, ost_file_dialog_folder_t folder, char *prename, list_t *extensions) {
     /* currently not supported in browser */
     return 0;
 }
 
-uint8_t *osToolsFileMap(char *filename, uint32_t *sizeOutput) {
+uint8_t *os_tools_file_map(char *filename, uint32_t *sizeOutput) {
     int32_t fd = open(filename, O_RDWR);
     struct stat stats;
     if (fstat(fd, &stats) == -1) {
@@ -33550,7 +33542,7 @@ uint8_t *osToolsFileMap(char *filename, uint32_t *sizeOutput) {
     return (uint8_t *) out;
 }
 
-int32_t osToolsFileUnmap(uint8_t *data) {
+int32_t os_tools_file_unmap(uint8_t *data) {
     int32_t index = -1;
     for (int32_t i = 0; i < osToolsMemmap.mappedFiles -> length; i += 3) {
         if (osToolsMemmap.mappedFiles -> data[i].p == data) {
@@ -33571,7 +33563,7 @@ int32_t osToolsFileUnmap(uint8_t *data) {
     }
 }
 
-list_t *osToolsFileAndFolderList(char *directory) {
+list_t *os_tools_file_and_folder_list(char *directory) {
     list_t *output = list_init();
     DIR *dir = opendir(directory);
     if (dir == NULL) {
@@ -33601,7 +33593,7 @@ list_t *osToolsFileAndFolderList(char *directory) {
     return output;
 }
 
-list_t *osToolsFileList(char *directory) {
+list_t *os_tools_file_list(char *directory) {
     list_t *output = list_init();
     DIR *dir = opendir(directory);
     if (dir == NULL) {
@@ -33625,7 +33617,7 @@ list_t *osToolsFileList(char *directory) {
     return output;
 }
 
-list_t *osToolsFolderList(char *directory) {
+list_t *os_tools_folder_list(char *directory) {
     list_t *output = list_init();
     DIR *dir = opendir(directory);
     if (dir == NULL) {
@@ -33652,17 +33644,17 @@ list_t *osToolsFolderList(char *directory) {
     return output;
 }
 
-int32_t osToolsFolderCreate(char *folder) {
+int32_t os_tools_folder_create(char *folder) {
     return mkdir(folder, 0755);
 }
 
-int32_t osToolsFolderDestroy(char *folder) {
+int32_t os_tools_folder_delete(char *folder) {
     char command[5000] = "rm -rf ";
     strcat(command, folder);
     return system(command);
 }
 
-void osToolsCloseConsole() {
+void os_tools_close_console() {
     /* don't know how to do this yet - https://unix.stackexchange.com/questions/743272/programatically-start-a-background-process-under-linux */
     return;
 }
@@ -33671,24 +33663,24 @@ void osToolsCloseConsole() {
 
 /* Serial support on linux: https://blog.mbedded.ninja/programming/operating-systems/linux/linux-serial-ports-using-c-cpp/ */
 
-list_t *osToolsSerialList() {
+list_t *os_tools_serial_list() {
     list_t *output = list_init();
     return output;
 }
 
-int32_t osToolsSerialOpen(char *name, osToolsSerialBaud_t baudRate) {
+int32_t os_tools_serial_open(char *name, osToolsSerialBaud_t baudRate) {
     return -1;
 }
 
-int32_t osToolsSerialSend(char *name, uint8_t *data, int32_t length) {
+int32_t os_tools_serial_send(char *name, uint8_t *data, int32_t length) {
     return -1;
 }
 
-int32_t osToolsSerialReceive(char *name, uint8_t *buffer, int32_t length, int32_t timeoutMilliseconds) {
+int32_t os_tools_serial_receive(char *name, uint8_t *buffer, int32_t length, int32_t timeoutMilliseconds) {
     return -1;
 }
 
-int32_t osToolsSerialClose(char *name) {
+int32_t os_tools_serial_close(char *name) {
     return -1;
 }
 
@@ -33716,18 +33708,18 @@ int32_t osToolsGetIP(char *address, uint8_t *buffer, int32_t maxSegments) {
     return segments;
 }
 
-int32_t osToolsGetSocketAddress(char *socketName, char *address, int32_t length) {
+int32_t os_tools_get_socket_address(char *socketName, char *address, int32_t length) {
     if (!socketName) {
-        // printf("osToolsGetSocketAddress ERROR: socketName is NULL\n");
+        // printf("os_tools_get_socket_address ERROR: socketName is NULL\n");
         return -1;
     }
     if (!address) {
-        // printf("osToolsGetSocketAddress ERROR: address is NULL\n");
+        // printf("os_tools_get_socket_address ERROR: address is NULL\n");
         return -1;
     }
     int32_t socketIndex = list_find(osToolsSocket.socket, (unitype) socketName, 's');
     if (socketIndex == -1) {
-        // printf("osToolsGetSocketAddress ERROR: Could not find socket %s\n", socketName);
+        // printf("os_tools_get_socket_address ERROR: Could not find socket %s\n", socketName);
         return -1;
     }
     /* only IPv4 */
@@ -33738,18 +33730,18 @@ int32_t osToolsGetSocketAddress(char *socketName, char *address, int32_t length)
     return 0;
 }
 
-int32_t osToolsGetPort(char *socketName, char *port, int32_t length) {
+int32_t os_tools_get_port(char *socketName, char *port, int32_t length) {
     if (!socketName) {
-        // printf("osToolsGetSocketAddress ERROR: socketName is NULL\n");
+        // printf("os_tools_get_port ERROR: socketName is NULL\n");
         return -1;
     }
     if (!port) {
-        // printf("osToolsGetSocketAddress ERROR: port is NULL\n");
+        // printf("os_tools_get_port ERROR: port is NULL\n");
         return -1;
     }
     int32_t socketIndex = list_find(osToolsSocket.socket, (unitype) socketName, 's');
     if (socketIndex == -1) {
-        // printf("osToolsGetPort ERROR: Could not find socket %s\n", socketName);
+        // printf("os_tools_get_port ERROR: Could not find socket %s\n", socketName);
         return -1;
     }
     char portA[8];
@@ -33761,13 +33753,13 @@ int32_t osToolsGetPort(char *socketName, char *port, int32_t length) {
 
 #ifdef TURTLE_ENABLE_SOCKETS
 
-int32_t osToolsServerSocketCreate(char *serverName, osToolsSocketProtocol_t protocol, char *serverPort) {
+int32_t os_tools_server_socket_create(char *serverName, osToolsSocketProtocol_t protocol, char *serverPort) {
     if (!serverName) {
-        // printf("osToolsServerSocketCreate ERROR: serverName is NULL\n");
+        // printf("os_tools_server_socket_create ERROR: serverName is NULL\n");
         return -1;
     }
     if (!serverPort) {
-        // printf("osToolsServerSocketCreate ERROR: port is NULL\n");
+        // printf("os_tools_server_socket_create ERROR: port is NULL\n");
         return -1;
     }
     int32_t status;
@@ -33789,14 +33781,14 @@ int32_t osToolsServerSocketCreate(char *serverName, osToolsSocketProtocol_t prot
     char hostName[128];
     status = gethostname(hostName, sizeof(hostName));
     if (status == -1) {
-        // printf("osToolsServerSocketCreate ERROR: Could not gethostname\n");
+        // printf("os_tools_server_socket_create ERROR: Could not gethostname\n");
         return -1;
     }
     printf("Host Name: %s\n", hostName);
 
     struct hostent *host = gethostbyname(hostName);
     if (host == NULL) {
-        // printf("osToolsServerSocketCreate ERROR: Could not gethostbyname\n");
+        // printf("os_tools_server_socket_create ERROR: Could not gethostbyname\n");
         return -1;
     }
 
@@ -33809,18 +33801,18 @@ int32_t osToolsServerSocketCreate(char *serverName, osToolsSocketProtocol_t prot
     }
     char *serverAddress = inet_ntoa(address);
     if (serverAddress == NULL) {
-        // printf("osToolsServerSocketCreate ERROR: No addresses to create server on\n");
+        // printf("os_tools_server_socket_create ERROR: No addresses to create server on\n");
         return -1;
     }
     uint8_t ipAddress[4] = {0};
     if (osToolsGetIP(serverAddress, ipAddress, 4) != 4) {
-        // printf("osToolsServerSocketCreate ERROR: Invalid ip address\n");
+        // printf("os_tools_server_socket_create ERROR: Invalid ip address\n");
     }
 
     /* Resolve the server address and port */
     status = getaddrinfo(serverAddress, serverPort, &hints, &result);
     if (status != 0) {
-        // printf("osToolsServerSocketCreate ERROR: Could not getaddrinfo\n");
+        // printf("os_tools_server_socket_create ERROR: Could not getaddrinfo\n");
         return -1;
     }
     struct addrinfo *resultElement = result;
@@ -33829,7 +33821,7 @@ int32_t osToolsServerSocketCreate(char *serverName, osToolsSocketProtocol_t prot
         resultElement = resultElement -> ai_next;
     }
     if (result == NULL) {
-        // printf("osToolsServerSocketCreate ERROR: getaddrinfo returned NULL\n");
+        // printf("os_tools_server_socket_create ERROR: getaddrinfo returned NULL\n");
         return -1;
     }
 
@@ -33837,7 +33829,7 @@ int32_t osToolsServerSocketCreate(char *serverName, osToolsSocketProtocol_t prot
     int32_t sockfd = socket(result -> ai_family, result -> ai_socktype, result -> ai_protocol);
     if (sockfd == -1) {
         freeaddrinfo(result);
-        // printf("osToolsServerSocketCreate ERROR: Could not create socket\n");
+        // printf("os_tools_server_socket_create ERROR: Could not create socket\n");
         return -1;
     }
 
@@ -33845,7 +33837,7 @@ int32_t osToolsServerSocketCreate(char *serverName, osToolsSocketProtocol_t prot
     status = bind(sockfd, result -> ai_addr, result -> ai_addrlen);
     if (status == -1) {
         freeaddrinfo(result);
-        // printf("osToolsServerSocketCreate ERROR: Could not bind socket %s to address %s\n", serverName, serverAddress);
+        // printf("os_tools_server_socket_create ERROR: Could not bind socket %s to address %s\n", serverName, serverAddress);
         return -1;
     }
     freeaddrinfo(result);
@@ -33871,18 +33863,18 @@ int32_t osToolsServerSocketCreate(char *serverName, osToolsSocketProtocol_t prot
     return 0;
 }
 
-int32_t osToolsServerSocketListen(char *serverName, char *clientName) {
+int32_t os_tools_server_socket_listen(char *serverName, char *clientName) {
     if (!serverName) {
-        // printf("osToolsServerSocketListen ERROR: serverName is NULL\n");
+        // printf("os_tools_server_socket_listen ERROR: serverName is NULL\n");
         return -1;
     }
     if (!clientName) {
-        // printf("osToolsServerSocketListen ERROR: clientName is NULL\n");
+        // printf("os_tools_server_socket_listen ERROR: clientName is NULL\n");
         return -1;
     }
     int32_t socketIndex = list_find(osToolsSocket.socket, (unitype) serverName, 's');
     if (socketIndex == -1) {
-        // printf("osToolsServerSocketListen ERROR: Could not find socket %s\n", serverName);
+        // printf("os_tools_server_socket_listen ERROR: Could not find socket %s\n", serverName);
         return -1;
     }
     int32_t status;
@@ -33890,19 +33882,19 @@ int32_t osToolsServerSocketListen(char *serverName, char *clientName) {
 
     status = listen(sockfd, SOMAXCONN);
     if (status == -1) {
-        // printf("osToolsServerSocketListen ERROR: Listen failed\n");
+        // printf("os_tools_server_socket_listen ERROR: Listen failed\n");
         return -1;
     }
     struct sockaddr_in address;
     uint32_t addressLen = sizeof(address);
     int32_t connectionfd = accept(sockfd, (struct sockaddr *) &address, &addressLen);
     if (connectionfd == -1) {
-        // printf("osToolsServerSocketListen ERROR: Accept failed\n");
+        // printf("os_tools_server_socket_listen ERROR: Accept failed\n");
         return -1;
     }
     uint8_t ipAddress[4] = {0};
     if (osToolsGetIP(inet_ntoa(address.sin_addr), ipAddress, 4) != 4) {
-        // printf("osToolsServerSocketListen ERROR: Invalid ip address\n");
+        // printf("os_tools_server_socket_listen ERROR: Invalid ip address\n");
     }
     printf("Incoming connection from %s:%d\n", inet_ntoa(address.sin_addr), address.sin_port);
     list_append(osToolsSocket.socket, (unitype) clientName, 's');
@@ -33924,22 +33916,22 @@ int32_t osToolsServerSocketListen(char *serverName, char *clientName) {
     return 0;
 }
 
-int32_t osToolsClientSocketCreate(char *clientName, osToolsSocketProtocol_t protocol, char *serverAddress, char *serverPort, int32_t timeoutMilliseconds) {
+int32_t os_tools_client_socket_create(char *clientName, osToolsSocketProtocol_t protocol, char *serverAddress, char *serverPort, int32_t timeoutMilliseconds) {
     if (!clientName) {
-        // printf("osToolsClientSocketCreate ERROR: clientName is NULL\n");
+        // printf("os_tools_client_socket_create ERROR: clientName is NULL\n");
         return -1;
     }
     if (!serverAddress) {
-        // printf("osToolsClientSocketCreate ERROR: serverAddress is NULL\n");
+        // printf("os_tools_client_socket_create ERROR: serverAddress is NULL\n");
         return -1;
     }
     if (!serverPort) {
-        // printf("osToolsClientSocketCreate ERROR: port is NULL\n");
+        // printf("os_tools_client_socket_create ERROR: port is NULL\n");
         return -1;
     }
     uint8_t ipAddress[4] = {0};
     if (osToolsGetIP(serverAddress, ipAddress, 4) != 4) {
-        // printf("osToolsClientSocketCreate ERROR: Invalid ip address\n");
+        // printf("os_tools_client_socket_create ERROR: Invalid ip address\n");
         return -1;
     }
     int32_t status;
@@ -33959,7 +33951,7 @@ int32_t osToolsClientSocketCreate(char *clientName, osToolsSocketProtocol_t prot
 
     status = getaddrinfo(serverAddress, serverPort, &hints, &result);
     if (status != 0) {
-        // printf("osToolsClientSocketCreate ERROR: Could not getaddrinfo of %s:%s, failed with %d\n", serverAddress, serverPort, status);
+        // printf("os_tools_client_socket_create ERROR: Could not getaddrinfo of %s:%s, failed with %d\n", serverAddress, serverPort, status);
         return -1;
     }
 
@@ -33969,32 +33961,32 @@ int32_t osToolsClientSocketCreate(char *clientName, osToolsSocketProtocol_t prot
         resultElement = resultElement -> ai_next;
     }
     if (result == NULL) {
-        // printf("osToolsClientSocketCreate ERROR: getaddrinfo returned NULL\n");
+        // printf("os_tools_client_socket_create ERROR: getaddrinfo returned NULL\n");
         return -1;
     }
     /* Use the first element of linked list returned by getaddrinfo */
     int32_t sockfd = socket(result -> ai_family, result -> ai_socktype, result -> ai_protocol);
     if (sockfd == -1) {
         freeaddrinfo(result);
-        // printf("osToolsClientSocketCreate ERROR: Could not create socket\n");
+        // printf("os_tools_client_socket_create ERROR: Could not create socket\n");
         return -1;
     }
     /* set socket to non blocking mode while connecting - https://stackoverflow.com/questions/1543466/how-do-i-change-a-tcp-socket-to-be-non-blocking */
     status = fcntl(sockfd, F_GETFL, 0);
     if (status == -1) {
-        // printf("osToolsClientSocketCreate ERROR: Could not get fcntl flags\n");
+        // printf("os_tools_client_socket_create ERROR: Could not get fcntl flags\n");
         return -1;
     }
     status &= O_NONBLOCK;
     status = fcntl(sockfd, F_SETFL, status);
     if (status != 0) {
-        // printf("osToolsClientSocketCreate ERROR: Could not set socket to non-blocking mode\n");
+        // printf("os_tools_client_socket_create ERROR: Could not set socket to non-blocking mode\n");
         return -1;
     }
     status = connect(sockfd, result -> ai_addr, (int32_t) result -> ai_addrlen);
     if (status == -1) {
         if (errno != EINPROGRESS) {
-            // printf("osToolsClientSocketCreate ERROR: Could not connect socket %d (%s)\n", errno, strerror(errno));
+            // printf("os_tools_client_socket_create ERROR: Could not connect socket %d (%s)\n", errno, strerror(errno));
             return -1;
         }
         struct timeval timeout;
@@ -34005,20 +33997,20 @@ int32_t osToolsClientSocketCreate(char *clientName, osToolsSocketProtocol_t prot
         fdsockArray.fds_bits[0] = sockfd;
         status = select(sockfd + 1, NULL, &fdsockArray, NULL, &timeout);
         if (status != 1) {
-            // printf("osToolsClientSocketCreate ERROR: Could not connect socket (timeout)\n");
+            // printf("os_tools_client_socket_create ERROR: Could not connect socket (timeout)\n");
             return -1;
         }
     }
     /* set socket back to blocking mode */
     status = fcntl(sockfd, F_GETFL, 0);
     if (status == -1) {
-        // printf("osToolsClientSocketCreate ERROR: Could not get fcntl flags\n");
+        // printf("os_tools_client_socket_create ERROR: Could not get fcntl flags\n");
         return -1;
     }
     status &= ~O_NONBLOCK;
     status = fcntl(sockfd, F_SETFL, status);
     if (status != 0) {
-        // printf("osToolsClientSocketCreate ERROR: Could not set socket to blocking mode\n");
+        // printf("os_tools_client_socket_create ERROR: Could not set socket to blocking mode\n");
         return -1;
     }
     printf("Connected to %s:%s\n", serverAddress, serverPort);
@@ -34043,32 +34035,32 @@ int32_t osToolsClientSocketCreate(char *clientName, osToolsSocketProtocol_t prot
     return 0;
 }
 
-int32_t osToolsSocketSend(char *socketName, uint8_t *data, int32_t length) {
+int32_t os_tools_socket_send(char *socketName, uint8_t *data, int32_t length) {
     if (!socketName) {
-        // printf("osToolsSocketSend ERROR: socketName is NULL\n");
+        // printf("os_tools_socket_send ERROR: socketName is NULL\n");
         return -1;
     }
     int32_t socketIndex = list_find(osToolsSocket.socket, (unitype) socketName, 's');
     if (socketIndex == -1) {
-        // printf("osToolsSocketSend ERROR: Could not find socket %s\n", socketName);
+        // printf("os_tools_socket_send ERROR: Could not find socket %s\n", socketName);
         return -1;
     }
     int32_t status = send(osToolsSocket.socket -> data[socketIndex + OSI_SOCKET].i, (char *) data, length, 0);
     if (status == -1) {
-        // printf("osToolsSocketSend ERROR: Failed to send\n");
+        // printf("os_tools_socket_send ERROR: Failed to send\n");
         return -1;
     }
     return status;
 }
 
-int32_t osToolsSocketReceive(char *socketName, uint8_t *data, int32_t length, int32_t timeoutMilliseconds) {
+int32_t os_tools_socket_receive(char *socketName, uint8_t *data, int32_t length, int32_t timeoutMilliseconds) {
     if (!socketName) {
-        // printf("osToolsSocketReceive ERROR: socketName is NULL\n");
+        // printf("os_tools_socket_receive ERROR: socketName is NULL\n");
         return -1;
     }
     int32_t socketIndex = list_find(osToolsSocket.socket, (unitype) socketName, 's');
     if (socketIndex == -1) {
-        // printf("osToolsSocketReceive ERROR: Could not find socket %s\n", socketName);
+        // printf("os_tools_socket_receive ERROR: Could not find socket %s\n", socketName);
         return -1;
     }
     setsockopt(osToolsSocket.socket -> data[socketIndex + OSI_SOCKET].i, SOL_SOCKET, SO_RCVTIMEO, (char *) &timeoutMilliseconds, sizeof(timeoutMilliseconds)); // https://stackoverflow.com/questions/2876024/linux-is-there-a-read-or-recv-from-socket-with-timeout
@@ -34076,29 +34068,29 @@ int32_t osToolsSocketReceive(char *socketName, uint8_t *data, int32_t length, in
     if (status == -1) {
         if (errno == EAGAIN || errno == EWOULDBLOCK) {
             /* timeout */
-            // printf("osToolsSocketReceive ERROR: Failed to receive (timeout)\n");
+            // printf("os_tools_socket_receive ERROR: Failed to receive (timeout)\n");
             return 0;
         }
-        // printf("osToolsSocketReceive ERROR: Failed to receive\n");
+        // printf("os_tools_socket_receive ERROR: Failed to receive\n");
         return -1;
     }
     return status;
 }
 
-int32_t osToolsSocketDestroy(char *socketName) {
+int32_t os_tools_socket_delete(char *socketName) {
     if (!socketName) {
-        // printf("osToolsSocketDestroy ERROR: socketName is NULL\n");
+        // printf("os_tools_socket_delete ERROR: socketName is NULL\n");
         return -1;
     }
     int32_t socketIndex = list_find(osToolsSocket.socket, (unitype) socketName, 's');
     if (socketIndex == -1) {
-        // printf("osToolsSocketDestroy ERROR: Could not find socket %s\n", socketName);
+        // printf("os_tools_socket_delete ERROR: Could not find socket %s\n", socketName);
         return -1;
     }
     /* shutdown and close socket */
     int32_t status = shutdown(osToolsSocket.socket -> data[socketIndex + OSI_SOCKET].i, SHUT_RDWR);
     if (status == -1) {
-        // printf("osToolsSocketDestroy WARN: Shutdown not successful\n");
+        // printf("os_tools_socket_delete WARN: Shutdown not successful\n");
     }
     close(osToolsSocket.socket -> data[socketIndex + OSI_SOCKET].i);
     list_delete_range(osToolsSocket.socket, socketIndex, socketIndex + OSI_NUMBER_OF_FIELDS);
@@ -34109,20 +34101,20 @@ int32_t osToolsSocketDestroy(char *socketName) {
 
 #ifdef TURTLE_ENABLE_CAMERA
 
-list_t *osToolsCameraList() {
+list_t *os_tools_camera_list() {
     list_t *output = list_init();
     return output;
 }
 
-int32_t osToolsCameraOpen(char *name) {
+int32_t os_tools_camera_open(char *name) {
     return -1;
 }
 
-int32_t osToolsCameraReceive(char *name, uint8_t *data) {
+int32_t os_tools_camera_receive(char *name, uint8_t *data) {
     return -1;
 }
 
-int32_t osToolsCameraClose(char *name) {
+int32_t os_tools_camera_close(char *name) {
     return -1;
 }
 

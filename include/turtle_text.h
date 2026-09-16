@@ -23,7 +23,7 @@ https://patorjk.com/software/taag/#p=display&f=ANSI%20Shadow
 #include "turtle.h"
 #include <stdarg.h>
 
-/* turtleText variables */
+/* turtle_text variables */
 typedef struct {
     int32_t bezierPrez; // precision for bezier curves
     int32_t bezierPrezCurrent;
@@ -48,76 +48,76 @@ typedef struct {
         }
     }
     */
-} turtleText_t;
+} turtle_text_t;
 
-extern turtleText_t turtleText;
+extern turtle_text_t turtleText;
 
-/* initialise turtleText, must supply a font file (tgl) - if font file is not found then a default font will be substituted */
-int32_t turtleTextInit(const char *filename);
+/* initialise turtle_text, must supply a font file (tgl) - if font file is not found then a default font will be substituted */
+int32_t turtle_text_init(const char *filename);
 
 /* render functions */
 
 /* renders a quadratic bezier curve on the screen */
-void turtleTextRenderBezier(double x1, double y1, double x2, double y2, double x3, double y3, int32_t prez);
+void turtle_text_render_bezier(double x1, double y1, double x2, double y2, double x3, double y3, int32_t prez);
 
 /* renders a single character - INTERNAL */
-void turtleTextRenderChar(int32_t index, double x, double y, double size);
+void turtle_text_render_char(int32_t index, double x, double y, double size);
 
-/* special version of turtleTextRenderChar with rotation - INTERNAL */
-void turtleTextRenderCharRotated(int32_t index, double x, double y, double size, double sinR, double cosR);
+/* special version of turtle_text_render_char with rotation - INTERNAL */
+void turtle_text_render_char_rotated(int32_t index, double x, double y, double size, double sinR, double cosR);
 
 /* gets the length of a string in coordinates on the screen */
-double turtleTextGetLength(const uint32_t *text, int32_t textLength, double size);
+double turtle_text_get_length(const uint32_t *text, int32_t textLength, double size);
 
 /* gets the length of a formatted string in coordinates on the screen */
-double turtleTextGetStringLength(const char *str, double size);
+double turtle_text_get_string_length(const char *str, double size);
 
-/* gets the length of a string in coordinates on the screen */
-double turtleTextGetStringLengthf(double size, const char *str, ...);
+/* gets the length of a string in coordinates on the screen (max of 2048 characters) */
+double turtle_text_get_string_lengthf(double size, const char *str, ...);
 
 /* gets the length of a formatted utf8-string in coordinates on the screen */
-double turtleTextGetUnicodeLength(const char *str, double size);
+double turtle_text_get_unicode_length(const char *str, double size);
 
-/* gets the length of a utf8-string in coordinates on the screen */
-double turtleTextGetUnicodeLengthf(double size, const char *str, ...);
+/* gets the length of a utf8-string in coordinates on the screen (max of 2048 characters) */
+double turtle_text_get_unicode_lengthf(double size, const char *str, ...);
 
 /* cut the text of a string such that it will fit in a coordinate size width (0 - left truncate, 1 - right truncate) */
-void turtleTextTruncateString(char *str, double size, double width, int8_t leftRight);
+void turtle_text_truncate_string(char *str, double size, double width, int8_t leftRight);
 
 /* Writes to the screen - INTERNAL */
-void turtleTextWrite(const uint32_t *text, int32_t textLength, double x, double y, double size, double align);
+void turtle_text_write(const uint32_t *text, int32_t textLength, double x, double y, double size, double align);
 
 /* Special form of write function which supports rotated text - INTERNAL */
-void turtleTextWriteRotated(const uint32_t *text, int32_t textLength, double x, double y, double size, double align, double rotate);
+void turtle_text_write_rotated(const uint32_t *text, int32_t textLength, double x, double y, double size, double align, double rotate);
 
 /* Write a string to the screen */
-void turtleTextWriteString(const char *str, double x, double y, double size, double align);
+void turtle_text_write_string(const char *str, double x, double y, double size, double align);
 
-/* Write a formatted string to the screen */
-void turtleTextWriteStringf(double x, double y, double size, double align, const char *str, ...);
+/* Write a formatted string to the screen (max of 2048 characters) */
+void turtle_text_write_stringf(double x, double y, double size, double align, const char *str, ...);
 
 /* Write a string to the screen (with rotation) */
-void turtleTextWriteStringRotated(const char *str, double x, double y, double size, double align, double rotate);
+void turtle_text_write_string_rotated(const char *str, double x, double y, double size, double align, double rotate);
 
-/* Write a formatted string to the screen (with rotation) */
-void turtleTextWriteStringfRotated(double x, double y, double size, double align, double rotate, const char *str, ...);
+/* Write a formatted string to the screen (with rotation) (max of 2048 characters) */
+void turtle_text_write_stringf_rotated(double x, double y, double size, double align, double rotate, const char *str, ...);
 
 /* Write a utf8-string to the screen */
-void turtleTextWriteUnicode(const char *str, double x, double y, double size, double align);
+void turtle_text_write_unicode(const char *str, double x, double y, double size, double align);
 
-/* Write a formatted utf8-string to the screen */
-void turtleTextWriteUnicodef(double x, double y, double size, double align, const char *str, ...);
+/* Write a formatted utf8-string to the screen (max of 2048 characters) */
+void turtle_text_write_unicodef(double x, double y, double size, double align, const char *str, ...);
 
 /* Write a utf8-string to the screen (with rotation) */
-void turtleTextWriteUnicodeRotated(const char *str, double x, double y, double size, double align, double rotate);
+void turtle_text_write_unicode_rotated(const char *str, double x, double y, double size, double align, double rotate);
 
-/* Write a formatted utf8-string to the screen (with rotation) */
-void turtleTextWriteUnicodefRotated(double x, double y, double size, double align, double rotate, const char *str, ...);
+/* Write a formatted utf8-string to the screen (with rotation) (max of 2048 characters) */
+void turtle_text_write_unicodef_rotated(double x, double y, double size, double align, double rotate, const char *str, ...);
 
 /* internal function for converting utf8 to uint32_t characters */
-int32_t turtleTextConvertUnicode(const char *str, uint32_t *converted);
+int32_t turtle_text_convert_unicode(const char *str, uint32_t *converted);
 
 /* if the font file is not found, use the default font (kept here) */
-void turtleTextGenerateDefaultFont(list_t *generatedFont);
+void turtle_text_generate_default_font(list_t *generatedFont);
 
 #endif /* TURTLE_TEXT_H */

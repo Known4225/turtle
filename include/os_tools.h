@@ -50,13 +50,13 @@ extern ost_file_dialog_t osToolsFileDialog;
 extern ost_memmap_t osToolsMemmap;
 
 /* OS independent functions */
-void osToolsIndependentInit(GLFWwindow *window);
+void os_tools_independent_init(GLFWwindow *window);
 
 /* returns clipboard text */
-const char *osToolsClipboardGetText();
+const char *os_tools_clipboard_get_text();
 
 /* takes null terminated strings */
-int32_t osToolsClipboardSetText(const char *input);
+int32_t os_tools_clipboard_set_text(const char *input);
 
 /*
 GLFW_ARROW_CURSOR
@@ -69,11 +69,11 @@ GLFW_DLESIZE_CURSOR
 GLFW_DRESIZE_CURSOR
 GLFW_MOVE_CURSOR
 */
-void osToolsSetCursor(uint32_t cursor);
+void os_tools_set_cursor(uint32_t cursor);
 
-void osToolsHideAndLockCursor();
+void os_tools_hide_and_lock_cursor();
 
-void osToolsShowCursor();
+void os_tools_show_cursor();
 
 typedef enum {
     OSTOOLS_CSV_ROW = 0,
@@ -86,22 +86,22 @@ typedef enum {
     OSTOOLS_CSV_FIELD_STRING = 2,
 } ost_csv_field_t;
 
-list_t *osToolsLoadInternal(char *filename, ost_csv_t rowOrColumn, char delimeter, ost_csv_field_t fieldType);
+list_t *os_tools_load_internal(char *filename, ost_csv_t rowOrColumn, char delimeter, ost_csv_field_t fieldType);
 
 /* packages a CSV file into a list (headers are strings, all fields are doubles) - use OSTOOLS_CSV_ROW to put it in a list of lists where each list is a row of the CSV and use OSTOOLS_CSV_COLUMN to output a list of lists where each list is a column of the CSV */
-list_t *osToolsLoadCSV(char *filename, ost_csv_t rowOrColumn);
+list_t *os_tools_load_csv(char *filename, ost_csv_t rowOrColumn);
 
 /* packages a CSV file into a list (headers are strings, all fields are doubles) - use OSTOOLS_CSV_ROW to put it in a list of lists where each list is a row of the CSV and use OSTOOLS_CSV_COLUMN to output a list of lists where each list is a column of the CSV */
-list_t *osToolsLoadCSVDouble(char *filename, ost_csv_t rowOrColumn);
+list_t *os_tools_load_csv_double(char *filename, ost_csv_t rowOrColumn);
 
 /* packages a CSV file into a list (headers are strings, all fields are ints) - use OSTOOLS_CSV_ROW to put it in a list of lists where each list is a row of the CSV and use OSTOOLS_CSV_COLUMN to output a list of lists where each list is a column of the CSV */
-list_t *osToolsLoadCSVInt(char *filename, ost_csv_t rowOrColumn);
+list_t *os_tools_load_csv_int(char *filename, ost_csv_t rowOrColumn);
 
 /* packages a CSV file into a list (headers are strings, all fields are strings) - use OSTOOLS_CSV_ROW to put it in a list of lists where each list is a row of the CSV and use OSTOOLS_CSV_COLUMN to output a list of lists where each list is a column of the CSV */
-list_t *osToolsLoadCSVString(char *filename, ost_csv_t rowOrColumn);
+list_t *os_tools_load_csv_string(char *filename, ost_csv_t rowOrColumn);
 
 /* untether the program from the console that spawned it - will close a console if the program is run independently */
-void osToolsCloseConsole();
+void os_tools_close_console();
 
 /* Serial support */
 typedef enum {
@@ -130,19 +130,19 @@ typedef struct {
 extern ost_serial_t osToolsSerial;
 
 /* get a list of all serial ports (strings) */
-list_t *osToolsSerialList();
+list_t *os_tools_serial_list();
 
 /* opens a serial port */
-int32_t osToolsSerialOpen(char *name, osToolsSerialBaud_t baudRate);
+int32_t os_tools_serial_open(char *name, osToolsSerialBaud_t baudRate);
 
 /* returns number of bytes sent. This function blocks until all data has been sent (or error) */
-int32_t osToolsSerialSend(char *name, uint8_t *data, int32_t length);
+int32_t os_tools_serial_send(char *name, uint8_t *data, int32_t length);
 
 /* returns number of bytes received. This function blocks until length bytes are received or timeoutMilliseconds is exceeded */
-int32_t osToolsSerialReceive(char *name, uint8_t *buffer, int32_t length, int32_t timeoutMilliseconds);
+int32_t os_tools_serial_receive(char *name, uint8_t *buffer, int32_t length, int32_t timeoutMilliseconds);
 
 /* closes a serial port */
-int32_t osToolsSerialClose(char *name);
+int32_t os_tools_serial_close(char *name);
 
 /* Socket (IPv4) support */
 typedef enum {
@@ -168,28 +168,28 @@ typedef struct {
 extern ost_socket_t osToolsSocket;
 
 /* gets the address of a socket as a string (populated in address argument) */
-int32_t osToolsGetSocketAddress(char *socketName, char *address, int32_t length);
+int32_t os_tools_get_socket_address(char *socketName, char *address, int32_t length);
 
 /* gets the port of a socket as a string (populated in port argument) */
-int32_t osToolsGetPort(char *socketName, char *port, int32_t length);
+int32_t os_tools_get_port(char *socketName, char *port, int32_t length);
 
 /* create the name for the server (used to access it), as well as a protocol (either OSTOOLS_PROTOCOL_TCP or OSTOOLS_PROTOCOL_UDP) and a binding address */
-int32_t osToolsServerSocketCreate(char *serverName, osToolsSocketProtocol_t protocol, char *serverAddress);
+int32_t os_tools_server_socket_create(char *serverName, osToolsSocketProtocol_t protocol, char *serverAddress);
 
 /* listens for connections on a server socket, when a connection comes in it will create a new socket and assign it the name clientName. This function blocks until a connection is received then it will return a list [address (string), port (string)] of the incoming connection */
-int32_t osToolsServerSocketListen(char *serverName, char *clientName);
+int32_t os_tools_server_socket_listen(char *serverName, char *clientName);
 
 /* create the name for the client (used to access it), as well as a protocol (either OSTOOLS_PROTOCOL_TCP or OSTOOLS_PROTOCOL_UDP) and specify the server's address, and port (the server that this client socket will connect to) */
-int32_t osToolsClientSocketCreate(char *clientName, osToolsSocketProtocol_t protocol, char *serverAddress, char *serverPort, int32_t timeoutMilliseconds);
+int32_t os_tools_client_socket_create(char *clientName, osToolsSocketProtocol_t protocol, char *serverAddress, char *serverPort, int32_t timeoutMilliseconds);
 
 /* sends data over a socket. This function blocks until all data has been sent (or error) */
-int32_t osToolsSocketSend(char *socketName, uint8_t *data, int32_t length);
+int32_t os_tools_socket_send(char *socketName, uint8_t *data, int32_t length);
 
 /* receives up to length bytes from a socket - returns number of bytes received. This function blocks until length bytes are received or timeoutMilliseconds is exceeded */
-int32_t osToolsSocketReceive(char *socketName, uint8_t *data, int32_t length, int32_t timeoutMilliseconds);
+int32_t os_tools_socket_receive(char *socketName, uint8_t *data, int32_t length, int32_t timeoutMilliseconds);
 
-/* close and destroy a socket */
-int32_t osToolsSocketDestroy(char *socketName);
+/* close and delete a socket */
+int32_t os_tools_socket_delete(char *socketName);
 
 /* Camera support */
 typedef struct {
@@ -199,16 +199,16 @@ typedef struct {
 extern ost_camera_t osToolsCamera;
 
 /* gets a list [camera name (string), width (int), height (int), framerate (double), ...] of camera devices on the system */
-list_t *osToolsCameraList();
+list_t *os_tools_camera_list();
 
-/* opens a camera given camera name from osToolsCameraList */
-int32_t osToolsCameraOpen(char *name);
+/* opens a camera given camera name from os_tools_camera_list */
+int32_t os_tools_camera_open(char *name);
 
 /* gets an RGB buffer from the camera - buffer must be at least width * height * 3 bytes */
-int32_t osToolsCameraReceive(char *name, uint8_t *data);
+int32_t os_tools_camera_receive(char *name, uint8_t *data);
 
 /* closes a camera */
-int32_t osToolsCameraClose(char *name);
+int32_t os_tools_camera_close(char *name);
 
 #ifdef OS_WINDOWS
 #define WIN32_LEAN_AND_MEAN
@@ -253,16 +253,16 @@ int32_t osToolsCameraClose(char *name);
 #endif /* OS_BROWSER */
 
 /* initialise osTools, pass in argv[0] from main function as well as GLFW window object */
-int32_t osToolsInit(char argv0[], GLFWwindow *window);
+int32_t os_tools_init(char argv0[], GLFWwindow *window);
 
 /* clear the list of global extensions */
-void osToolsFileDialogClearGlobalExtensions();
+void os_tools_file_dialog_clear_global_extensions();
 
 /* add a single extension to the global file extensions */
-void osToolsFileDialogAddGlobalExtension(char *extension);
+void os_tools_file_dialog_add_global_extension(char *extension);
 
 /* copies the data from the list to the global extensions (you can free the list passed in immediately after calling this) */
-void osToolsFileDialogSetGlobalExtensions(list_t *extensions);
+void os_tools_file_dialog_set_global_extensions(list_t *extensions);
 
 typedef enum {
     OSTOOLS_FILE_DIALOG_OPEN = 0,
@@ -288,31 +288,31 @@ folder: 0 - file dialog, 1 - folder dialog
 prename: refers to autofill filename ("null" or empty string for no autofill)
 extensions: pass in a list of accepted file extensions or pass in NULL to use global list of extensions
 */
-int32_t osToolsFileDialogPrompt(ost_file_dialog_save_t openOrSave, ost_file_dialog_multiselect_t multiselect, ost_file_dialog_folder_t folder, char *prename, list_t *extensions);
+int32_t os_tools_file_dialog_prompt(ost_file_dialog_save_t openOrSave, ost_file_dialog_multiselect_t multiselect, ost_file_dialog_folder_t folder, char *prename, list_t *extensions);
 
 /* save dialog - set prename to NULL for no prename, set extensions to NULL to use global extensions */
-int32_t osToolsFileDialogSave(ost_file_dialog_folder_t folder, char *prename, list_t *extensions);
+int32_t os_tools_file_dialog_save(ost_file_dialog_folder_t folder, char *prename, list_t *extensions);
 
 /* open dialog - set prename to NULL for no prename, set extensions to NULL to use global extensions */
-int32_t osToolsFileDialogOpen(ost_file_dialog_multiselect_t multiselect, ost_file_dialog_folder_t folder, char *prename, list_t *extensions);
+int32_t os_tools_file_dialog_open(ost_file_dialog_multiselect_t multiselect, ost_file_dialog_folder_t folder, char *prename, list_t *extensions);
 
-uint8_t *osToolsFileMap(char *filename, uint32_t *sizeOutput);
+uint8_t *os_tools_file_map(char *filename, uint32_t *sizeOutput);
 
-int32_t osToolsFileUnmap(uint8_t *data);
+int32_t os_tools_file_unmap(uint8_t *data);
 
 /* lists files in a directory (does NOT list folders), format [name, size, name, size, ...] */
-list_t *osToolsFileList(char *directory);
+list_t *os_tools_file_list(char *directory);
 
 /* non-recursive, lists folders in a directory, format [name, name, ...] */
-list_t *osToolsFolderList(char *directory);
+list_t *os_tools_folder_list(char *directory);
 
 /* lists files and folders in a directory, format [name, size, name, size, ...] (size is -1 for folders) */
-list_t *osToolsFileAndFolderList(char *directory);
+list_t *os_tools_file_and_folder_list(char *directory);
 
 /* create a folder */
-int32_t osToolsFolderCreate(char *folder);
+int32_t os_tools_folder_create(char *folder);
 
 /* delete a folder (and all files and subfolders) */
-int32_t osToolsFolderDestroy(char *folder);
+int32_t os_tools_folder_delete(char *folder);
 
 #endif /* OS_TOOLS_H */

@@ -52,7 +52,7 @@ Sockets: https://learn.microsoft.com/en-us/windows/win32/winsock/tcp-ip-raw-sock
 idea: try glfwGetClipboardString and glfwSetClipboardString
 */
 
-#include "../include/osTools.h"
+#include "../include/os_tools.h"
 
 /* global objects */
 ost_glfw_t osToolsGLFW;
@@ -64,14 +64,14 @@ ost_socket_t osToolsSocket;
 ost_camera_t osToolsCamera;
 
 /* OS independent functions */
-void osToolsIndependentInit(GLFWwindow *window) {
+void os_tools_independent_init(GLFWwindow *window) {
+    osToolsGLFW.osToolsWindow = window;
     /* initialise file dialog */
     osToolsFileDialog.selectedFilenames = list_init();
     osToolsFileDialog.globalExtensions = list_init();
     /* initialise clipboard */
     osToolsClipboard.text = glfwGetClipboardString(osToolsGLFW.osToolsWindow);
     /* initialise glfw cursors */
-    osToolsGLFW.osToolsWindow = window;
     osToolsGLFW.standardCursors[0] = glfwCreateStandardCursor(GLFW_ARROW_CURSOR);
     osToolsGLFW.standardCursors[1] = glfwCreateStandardCursor(GLFW_IBEAM_CURSOR);
     osToolsGLFW.standardCursors[2] = glfwCreateStandardCursor(GLFW_CROSSHAIR_CURSOR);
@@ -106,13 +106,13 @@ void osToolsIndependentInit(GLFWwindow *window) {
 }
 
 /* returns clipboard text */
-const char *osToolsClipboardGetText() {
+const char *os_tools_clipboard_get_text() {
     osToolsClipboard.text = glfwGetClipboardString(osToolsGLFW.osToolsWindow);
     return osToolsClipboard.text;
 }
 
 /* takes null terminated strings */
-int32_t osToolsClipboardSetText(const char *input) {
+int32_t os_tools_clipboard_set_text(const char *input) {
     glfwSetClipboardString(osToolsGLFW.osToolsWindow, input);
     return 0;
 }
@@ -128,7 +128,7 @@ GLFW_DLESIZE_CURSOR
 GLFW_DRESIZE_CURSOR
 GLFW_MOVE_CURSOR
 */
-void osToolsSetCursor(uint32_t cursor) {
+void os_tools_set_cursor(uint32_t cursor) {
     switch (cursor) {
     case GLFW_ARROW_CURSOR:
         glfwSetCursor(osToolsGLFW.osToolsWindow, osToolsGLFW.standardCursors[0]);
@@ -163,17 +163,17 @@ void osToolsSetCursor(uint32_t cursor) {
     }
 }
 
-void osToolsHideAndLockCursor() {
+void os_tools_hide_and_lock_cursor() {
     glfwSetInputMode(osToolsGLFW.osToolsWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 }
 
-void osToolsShowCursor() {
+void os_tools_show_cursor() {
     glfwSetInputMode(osToolsGLFW.osToolsWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 }
 
-list_t *osToolsLoadInternal(char *filename, ost_csv_t rowOrColumn, char delimeter, ost_csv_field_t fieldType) {
+list_t *os_tools_load_internal(char *filename, ost_csv_t rowOrColumn, char delimeter, ost_csv_field_t fieldType) {
     uint32_t fileSize;
-    uint8_t *mappedFile = osToolsFileMap(filename, &fileSize);
+    uint8_t *mappedFile = os_tools_file_map(filename, &fileSize);
     if (mappedFile == NULL) {
         return NULL;
     }
@@ -305,7 +305,7 @@ list_t *osToolsLoadInternal(char *filename, ost_csv_t rowOrColumn, char delimete
                 if (column < outputList -> length) {
                     list_append(outputList -> data[column].r, field, listType);
                 } else {
-                    printf("osToolsLoadInternal - more data columns than headers at row %d\n", row);
+                    printf("os_tools_load_internal - more data columns than headers at row %d\n", row);
                 }
             }
             mappedFile[rightIndex] = delimeter;
@@ -337,7 +337,7 @@ list_t *osToolsLoadInternal(char *filename, ost_csv_t rowOrColumn, char delimete
                     if (column < outputList -> length) {
                         list_append(outputList -> data[column].r, field, listType);
                     } else {
-                        printf("osToolsLoadInternal - more data columns than headers at row %d\n", row);
+                        printf("os_tools_load_internal - more data columns than headers at row %d\n", row);
                     }
                 }
                 mappedFile[rightIndex] = tempHold;
@@ -373,54 +373,54 @@ list_t *osToolsLoadInternal(char *filename, ost_csv_t rowOrColumn, char delimete
         }
         list_append(outputList -> data[outputList -> length - 1].r, field, listType);
     }
-    osToolsFileUnmap(mappedFile);
+    os_tools_file_unmap(mappedFile);
     return outputList;
 }
 
 /* packages a CSV file into a list (headers are strings, all fields are doubles) - use OSTOOLS_CSV_ROW to put it in a list of lists where each list is a row of the CSV and use OSTOOLS_CSV_COLUMN to output a list of lists where each list is a column of the CSV */
-list_t *osToolsLoadCSV(char *filename, ost_csv_t rowOrColumn) {
-    return osToolsLoadInternal(filename, rowOrColumn, ',', OSTOOLS_CSV_FIELD_DOUBLE);
+list_t *os_tools_load_csv(char *filename, ost_csv_t rowOrColumn) {
+    return os_tools_load_internal(filename, rowOrColumn, ',', OSTOOLS_CSV_FIELD_DOUBLE);
 }
 
 /* packages a CSV file into a list (headers are strings, all fields are doubles) - use OSTOOLS_CSV_ROW to put it in a list of lists where each list is a row of the CSV and use OSTOOLS_CSV_COLUMN to output a list of lists where each list is a column of the CSV */
-list_t *osToolsLoadCSVDouble(char *filename, ost_csv_t rowOrColumn) {
-    return osToolsLoadInternal(filename, rowOrColumn, ',', OSTOOLS_CSV_FIELD_DOUBLE);
+list_t *os_tools_load_csv_double(char *filename, ost_csv_t rowOrColumn) {
+    return os_tools_load_internal(filename, rowOrColumn, ',', OSTOOLS_CSV_FIELD_DOUBLE);
 }
 
 /* packages a CSV file into a list (headers are strings, all fields are ints) - use OSTOOLS_CSV_ROW to put it in a list of lists where each list is a row of the CSV and use OSTOOLS_CSV_COLUMN to output a list of lists where each list is a column of the CSV */
-list_t *osToolsLoadCSVInt(char *filename, ost_csv_t rowOrColumn) {
-    return osToolsLoadInternal(filename, rowOrColumn, ',', OSTOOLS_CSV_FIELD_INT);
+list_t *os_tools_load_csv_int(char *filename, ost_csv_t rowOrColumn) {
+    return os_tools_load_internal(filename, rowOrColumn, ',', OSTOOLS_CSV_FIELD_INT);
 }
 
 /* packages a CSV file into a list (headers are strings, all fields are strings) - use OSTOOLS_CSV_ROW to put it in a list of lists where each list is a row of the CSV and use OSTOOLS_CSV_COLUMN to output a list of lists where each list is a column of the CSV */
-list_t *osToolsLoadCSVString(char *filename, ost_csv_t rowOrColumn) {
-    return osToolsLoadInternal(filename, rowOrColumn, ',', OSTOOLS_CSV_FIELD_STRING);
+list_t *os_tools_load_csv_string(char *filename, ost_csv_t rowOrColumn) {
+    return os_tools_load_internal(filename, rowOrColumn, ',', OSTOOLS_CSV_FIELD_STRING);
 }
 
-void osToolsFileDialogClearGlobalExtensions() {
+void os_tools_file_dialog_clear_global_extensions() {
     list_clear(osToolsFileDialog.globalExtensions);
 }
 
-void osToolsFileDialogAddGlobalExtension(char *extension) {
+void os_tools_file_dialog_add_global_extension(char *extension) {
     list_append(osToolsFileDialog.globalExtensions, (unitype) extension, 's');
 }
 
-void osToolsFileDialogSetGlobalExtensions(list_t *extensions) {
+void os_tools_file_dialog_set_global_extensions(list_t *extensions) {
     list_copy(osToolsFileDialog.globalExtensions, extensions);
 }
 
-int32_t osToolsFileDialogSave(ost_file_dialog_folder_t folder, char *prename, list_t *extensions) {
-    return osToolsFileDialogPrompt(OSTOOLS_FILE_DIALOG_SAVE, OSTOOLS_FILE_DIALOG_SINGLE_SELECT, folder, prename, extensions);
+int32_t os_tools_file_dialog_save(ost_file_dialog_folder_t folder, char *prename, list_t *extensions) {
+    return os_tools_file_dialog_prompt(OSTOOLS_FILE_DIALOG_SAVE, OSTOOLS_FILE_DIALOG_SINGLE_SELECT, folder, prename, extensions);
 }
 
-int32_t osToolsFileDialogOpen(ost_file_dialog_multiselect_t multiselect, ost_file_dialog_folder_t folder, char *prename, list_t *extensions) {
-    return osToolsFileDialogPrompt(OSTOOLS_FILE_DIALOG_OPEN, multiselect, folder, prename, extensions);
+int32_t os_tools_file_dialog_open(ost_file_dialog_multiselect_t multiselect, ost_file_dialog_folder_t folder, char *prename, list_t *extensions) {
+    return os_tools_file_dialog_prompt(OSTOOLS_FILE_DIALOG_OPEN, multiselect, folder, prename, extensions);
 }
 
 #ifdef OS_WINDOWS
 
-int32_t osToolsInit(char argv0[], GLFWwindow *window) {
-    osToolsIndependentInit(window);
+int32_t os_tools_init(char argv0[], GLFWwindow *window) {
+    os_tools_independent_init(window);
     /* get executable filepath */
     GetModuleFileNameA(NULL, osToolsFileDialog.executableFilepath, MAX_PATH);
     if (GetLastError() != ERROR_SUCCESS) {
@@ -435,7 +435,7 @@ int32_t osToolsInit(char argv0[], GLFWwindow *window) {
     return 0;
 }
 
-int32_t osToolsFileDialogPrompt(ost_file_dialog_save_t openOrSave, ost_file_dialog_multiselect_t multiselect, ost_file_dialog_folder_t folder, char *prename, list_t *extensions) {
+int32_t os_tools_file_dialog_prompt(ost_file_dialog_save_t openOrSave, ost_file_dialog_multiselect_t multiselect, ost_file_dialog_folder_t folder, char *prename, list_t *extensions) {
     HRESULT hr = CoInitializeEx(NULL, 0); // https://learn.microsoft.com/en-us/windows/win32/api/objbase/ne-objbase-coinit
     if (FAILED(hr)) {
         return -1;
@@ -608,7 +608,7 @@ int32_t osToolsFileDialogPrompt(ost_file_dialog_save_t openOrSave, ost_file_dial
     return 0;
 }
 
-uint8_t *osToolsFileMap(char *filename, uint32_t *sizeOutput) {
+uint8_t *os_tools_file_map(char *filename, uint32_t *sizeOutput) {
     HANDLE fileHandle = CreateFileA(filename, FILE_GENERIC_READ | FILE_GENERIC_WRITE, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
     if (fileHandle == INVALID_HANDLE_VALUE) {
         printf("Could not open file %ld\n", GetLastError());
@@ -643,7 +643,7 @@ uint8_t *osToolsFileMap(char *filename, uint32_t *sizeOutput) {
     return address;
 }
 
-int32_t osToolsFileUnmap(uint8_t *data) {
+int32_t os_tools_file_unmap(uint8_t *data) {
     UnmapViewOfFile(data);
     int32_t index = -1;
     for (int32_t i = 0; i < osToolsMemmap.mappedFiles -> length; i += 4) {
@@ -666,11 +666,11 @@ int32_t osToolsFileUnmap(uint8_t *data) {
     }
 }
 
-list_t *osToolsFileAndFolderList(char *directory) {
+list_t *os_tools_file_and_folder_list(char *directory) {
     /* https://learn.microsoft.com/en-us/windows/win32/fileio/listing-the-files-in-a-directory */
     list_t *output = list_init();
     if (strlen(directory) > MAX_PATH - 3) {
-        printf("osToolsFileAndFolderList: Directory name too long\n");
+        printf("os_tools_file_and_folder_list: Directory name too long\n");
         return output;
     }
     char directoryFor[MAX_PATH];
@@ -679,7 +679,7 @@ list_t *osToolsFileAndFolderList(char *directory) {
     WIN32_FIND_DATA findData;
     HANDLE fileHandle = FindFirstFile(directoryFor, &findData);
     if (fileHandle == INVALID_HANDLE_VALUE) {
-        printf("osToolsFileAndFolderList: Handle invalid error %ld\n", GetLastError());
+        printf("os_tools_file_and_folder_list: Handle invalid error %ld\n", GetLastError());
         return output;
     }
     LARGE_INTEGER filesize;
@@ -700,11 +700,11 @@ list_t *osToolsFileAndFolderList(char *directory) {
     return output;
 }
 
-list_t *osToolsFileList(char *directory) {
+list_t *os_tools_file_list(char *directory) {
     /* https://learn.microsoft.com/en-us/windows/win32/fileio/listing-the-files-in-a-directory */
     list_t *output = list_init();
     if (strlen(directory) > MAX_PATH - 3) {
-        printf("osToolsFileList: Directory name too long\n");
+        printf("os_tools_file_list: Directory name too long\n");
         return output;
     }
     char directoryFor[MAX_PATH];
@@ -713,7 +713,7 @@ list_t *osToolsFileList(char *directory) {
     WIN32_FIND_DATA findData;
     HANDLE fileHandle = FindFirstFile(directoryFor, &findData);
     if (fileHandle == INVALID_HANDLE_VALUE) {
-        printf("osToolsFileList: Handle invalid error %ld\n", GetLastError());
+        printf("os_tools_file_list: Handle invalid error %ld\n", GetLastError());
         return output;
     }
     LARGE_INTEGER filesize;
@@ -730,11 +730,11 @@ list_t *osToolsFileList(char *directory) {
     return output;
 }
 
-list_t *osToolsFolderList(char *directory) {
+list_t *os_tools_folder_list(char *directory) {
     /* https://learn.microsoft.com/en-us/windows/win32/fileio/listing-the-files-in-a-directory */
     list_t *output = list_init();
     if (strlen(directory) > MAX_PATH - 3) {
-        printf("osToolsFolderList: Directory name too long\n");
+        printf("os_tools_folder_list: Directory name too long\n");
         return output;
     }
     char directoryFor[MAX_PATH];
@@ -743,7 +743,7 @@ list_t *osToolsFolderList(char *directory) {
     WIN32_FIND_DATA findData;
     HANDLE fileHandle = FindFirstFile(directoryFor, &findData);
     if (fileHandle == INVALID_HANDLE_VALUE) {
-        printf("osToolsFolderList: Handle invalid error %ld\n", GetLastError());
+        printf("os_tools_folder_list: Handle invalid error %ld\n", GetLastError());
         return output;
     }
     do {
@@ -758,12 +758,12 @@ list_t *osToolsFolderList(char *directory) {
     return output;
 }
 
-int32_t osToolsFolderCreate(char *folder) {
+int32_t os_tools_folder_create(char *folder) {
     /* https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-createdirectory */
     return !CreateDirectory(folder, NULL);
 }
 
-int32_t osToolsFolderDestroy(char *folder) {
+int32_t os_tools_folder_delete(char *folder) {
     /* https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-removedirectorya */
     char directoryFor[MAX_PATH + 12] = "rd /s /q \"";
     int32_t len = strlen(folder);
@@ -780,7 +780,7 @@ int32_t osToolsFolderDestroy(char *folder) {
     // RemoveDirectoryA(folder);
 }
 
-void osToolsCloseConsole() {
+void os_tools_close_console() {
     FreeConsole();
 }
 
@@ -791,7 +791,7 @@ windows serial port support
 https://learn.microsoft.com/en-us/windows/win32/devio/configuring-a-communications-resource
 */
 
-list_t *osToolsSerialList() {
+list_t *os_tools_serial_list() {
     list_t *output = list_init();
     char comName[8] = "COM";
     char pathInfo[1024];
@@ -803,23 +803,23 @@ list_t *osToolsSerialList() {
         }
         if (GetLastError() == ERROR_INSUFFICIENT_BUFFER) {
             
-            printf("osToolsSerialList: Unusual COM device detected on %s\n", comName);
+            printf("os_tools_serial_list: Unusual COM device detected on %s\n", comName);
         }
     }
     return output;
 }
 
-int32_t osToolsSerialOpen(char *name, osToolsSerialBaud_t baudRate) {
+int32_t os_tools_serial_open(char *name, osToolsSerialBaud_t baudRate) {
     /* verify COM */
     if (strlen(name) < 3 || name[0] != 'C' || name[1] != 'O' || name[2] != 'M') {
-        // printf("osToolsSerialOpen: name must start with \"COM\"\n");
+        // printf("os_tools_serial_open: name must start with \"COM\"\n");
         return -1;
     }
     /* check if this port is already open */
     int32_t index = list_find(osToolsSerial.serial, (unitype) name, 's');
     if (index != -1) {
         if (CloseHandle((HANDLE) (osToolsSerial.serial -> data[index + 1].lu)) == 0) {
-            printf("osToolsSerialOpen failed with error %ld\n", GetLastError());
+            printf("os_tools_serial_open failed with error %ld\n", GetLastError());
             return -1;
         }
         list_delete(osToolsSerial.serial, index);
@@ -876,27 +876,27 @@ int32_t osToolsSerialOpen(char *name, osToolsSerialBaud_t baudRate) {
     return 0;
 }
 
-int32_t osToolsSerialSend(char *name, uint8_t *data, int32_t length) {
+int32_t os_tools_serial_send(char *name, uint8_t *data, int32_t length) {
     /* check if this port is open */
     int32_t index = list_find(osToolsSerial.serial, (unitype) name, 's');
     if (index == -1) {
-        printf("osToolsSerialSend: %s not open\n", name);
+        printf("os_tools_serial_send: %s not open\n", name);
         return 0;
     }
     /* https://www.codeproject.com/Articles/3061/Creating-a-Serial-communication-on-Win32#sending */
     DWORD bytes;
     if (WriteFile((HANDLE) (osToolsSerial.serial -> data[index + 1].lu), data, length, &bytes, NULL) == 0) {
-        printf("osToolsSerialSend failed with error %ld\n", GetLastError());
+        printf("os_tools_serial_send failed with error %ld\n", GetLastError());
         return 0;
     }
     return bytes;
 }
 
-int32_t osToolsSerialReceive(char *name, uint8_t *buffer, int32_t length, int32_t timeoutMilliseconds) {
+int32_t os_tools_serial_receive(char *name, uint8_t *buffer, int32_t length, int32_t timeoutMilliseconds) {
     /* check if this port is open */
     int32_t index = list_find(osToolsSerial.serial, (unitype) name, 's');
     if (index == -1) {
-        printf("osToolsSerialReceive: %s not open\n", name);
+        printf("os_tools_serial_receive: %s not open\n", name);
         return 0;
     }
     /* Set comm timeout */
@@ -905,18 +905,18 @@ int32_t osToolsSerialReceive(char *name, uint8_t *buffer, int32_t length, int32_
     /* read from COM */
     DWORD bytes;
     if (ReadFile((HANDLE) (osToolsSerial.serial -> data[index + 1].lu), buffer, length, &bytes, NULL) == 0) {
-        printf("osToolsSerialReceive failed with error %ld\n", GetLastError());
+        printf("os_tools_serial_receive failed with error %ld\n", GetLastError());
         return 0;
     }
     return bytes;
 }
 
-int32_t osToolsSerialClose(char *name) {
+int32_t os_tools_serial_close(char *name) {
     /* check if this port is already open */
     int32_t index = list_find(osToolsSerial.serial, (unitype) name, 's');
     if (index != -1) {
         if (CloseHandle((HANDLE) (osToolsSerial.serial -> data[index + 1].lu)) == 0) {
-            printf("osToolsSerialClose failed with error %ld\n", GetLastError());
+            printf("os_tools_serial_close failed with error %ld\n", GetLastError());
             return -1;
         }
         list_delete(osToolsSerial.serial, index);
@@ -957,18 +957,18 @@ int32_t osToolsGetIP(char *address, uint8_t *buffer, int32_t maxSegments) {
     return segments;
 }
 
-int32_t osToolsGetSocketAddress(char *socketName, char *address, int32_t length) {
+int32_t os_tools_get_socket_address(char *socketName, char *address, int32_t length) {
     if (!socketName) {
-        // printf("osToolsGetSocketAddress ERROR: socketName is NULL\n");
+        // printf("os_tools_get_socket_address ERROR: socketName is NULL\n");
         return -1;
     }
     if (!address) {
-        // printf("osToolsGetSocketAddress ERROR: address is NULL\n");
+        // printf("os_tools_get_socket_address ERROR: address is NULL\n");
         return -1;
     }
     int32_t socketIndex = list_find(osToolsSocket.socket, (unitype) socketName, 's');
     if (socketIndex == -1) {
-        // printf("osToolsGetSocketAddress ERROR: Could not find socket %s\n", socketName);
+        // printf("os_tools_get_socket_address ERROR: Could not find socket %s\n", socketName);
         return -1;
     }
     /* only IPv4 */
@@ -979,18 +979,18 @@ int32_t osToolsGetSocketAddress(char *socketName, char *address, int32_t length)
     return 0;
 }
 
-int32_t osToolsGetPort(char *socketName, char *port, int32_t length) {
+int32_t os_tools_get_port(char *socketName, char *port, int32_t length) {
     if (!socketName) {
-        // printf("osToolsGetSocketAddress ERROR: socketName is NULL\n");
+        // printf("os_tools_get_port ERROR: socketName is NULL\n");
         return -1;
     }
     if (!port) {
-        // printf("osToolsGetSocketAddress ERROR: port is NULL\n");
+        // printf("os_tools_get_port ERROR: port is NULL\n");
         return -1;
     }
     int32_t socketIndex = list_find(osToolsSocket.socket, (unitype) socketName, 's');
     if (socketIndex == -1) {
-        // printf("osToolsGetPort ERROR: Could not find socket %s\n", socketName);
+        // printf("os_tools_get_port ERROR: Could not find socket %s\n", socketName);
         return -1;
     }
     char portA[8];
@@ -1002,13 +1002,13 @@ int32_t osToolsGetPort(char *socketName, char *port, int32_t length) {
 
 #ifdef TURTLE_ENABLE_SOCKETS
 
-int32_t osToolsServerSocketCreate(char *serverName, osToolsSocketProtocol_t protocol, char *serverPort) {
+int32_t os_tools_server_socket_create(char *serverName, osToolsSocketProtocol_t protocol, char *serverPort) {
     if (!serverName) {
-        // printf("osToolsServerSocketCreate ERROR: serverName is NULL\n");
+        // printf("os_tools_server_socket_create ERROR: serverName is NULL\n");
         return -1;
     }
     if (!serverPort) {
-        // printf("osToolsServerSocketCreate ERROR: port is NULL\n");
+        // printf("os_tools_server_socket_create ERROR: port is NULL\n");
         return -1;
     }
     int32_t status;
@@ -1017,7 +1017,7 @@ int32_t osToolsServerSocketCreate(char *serverName, osToolsSocketProtocol_t prot
         WSADATA wsaData;
         status = WSAStartup(MAKEWORD(2, 2), &wsaData);
         if (status != 0) {
-            // printf("osToolsServerSocketCreate ERROR: Could not initialise Winsock\n");
+            // printf("os_tools_server_socket_create ERROR: Could not initialise Winsock\n");
             return -1;
         }
         osToolsSocket.win32wsaActive = 1;
@@ -1038,14 +1038,14 @@ int32_t osToolsServerSocketCreate(char *serverName, osToolsSocketProtocol_t prot
     char hostName[128];
     status = gethostname(hostName, sizeof(hostName));
     if (status == SOCKET_ERROR) {
-        // printf("osToolsServerSocketCreate ERROR: Could not gethostname\n");
+        // printf("os_tools_server_socket_create ERROR: Could not gethostname\n");
         return -1;
     }
     printf("Host Name: %s\n", hostName);
 
     struct hostent *host = gethostbyname(hostName);
     if (host == NULL) {
-        // printf("osToolsServerSocketCreate ERROR: Could not gethostbyname\n");
+        // printf("os_tools_server_socket_create ERROR: Could not gethostbyname\n");
         return -1;
     }
 
@@ -1058,18 +1058,18 @@ int32_t osToolsServerSocketCreate(char *serverName, osToolsSocketProtocol_t prot
     }
     char *serverAddress = inet_ntoa(address);
     if (serverAddress == NULL) {
-        // printf("osToolsServerSocketCreate ERROR: No addresses to create server on\n");
+        // printf("os_tools_server_socket_create ERROR: No addresses to create server on\n");
         return -1;
     }
     uint8_t ipAddress[4] = {0};
     if (osToolsGetIP(serverAddress, ipAddress, 4) != 4) {
-        // printf("osToolsServerSocketCreate ERROR: Invalid ip address\n");
+        // printf("os_tools_server_socket_create ERROR: Invalid ip address\n");
     }
 
     /* Resolve the server address and port */
     status = getaddrinfo(serverAddress, serverPort, &hints, &result);
     if (status != 0) {
-        // printf("osToolsServerSocketCreate ERROR: Could not getaddrinfo\n");
+        // printf("os_tools_server_socket_create ERROR: Could not getaddrinfo\n");
         return -1;
     }
     struct addrinfo *resultElement = result;
@@ -1078,7 +1078,7 @@ int32_t osToolsServerSocketCreate(char *serverName, osToolsSocketProtocol_t prot
         resultElement = resultElement -> ai_next;
     }
     if (result == NULL) {
-        // printf("osToolsServerSocketCreate ERROR: getaddrinfo returned NULL\n");
+        // printf("os_tools_server_socket_create ERROR: getaddrinfo returned NULL\n");
         return -1;
     }
 
@@ -1086,7 +1086,7 @@ int32_t osToolsServerSocketCreate(char *serverName, osToolsSocketProtocol_t prot
     SOCKET winsocket = socket(result -> ai_family, result -> ai_socktype, result -> ai_protocol);
     if (winsocket == INVALID_SOCKET) {
         freeaddrinfo(result);
-        // printf("osToolsServerSocketCreate ERROR: Could not create socket\n");
+        // printf("os_tools_server_socket_create ERROR: Could not create socket\n");
         return -1;
     }
 
@@ -1094,7 +1094,7 @@ int32_t osToolsServerSocketCreate(char *serverName, osToolsSocketProtocol_t prot
     status = bind(winsocket, result -> ai_addr, result -> ai_addrlen);
     if (status == SOCKET_ERROR) {
         freeaddrinfo(result);
-        // printf("osToolsServerSocketCreate ERROR: Could not bind socket %s to address %s\n", serverName, serverAddress);
+        // printf("os_tools_server_socket_create ERROR: Could not bind socket %s to address %s\n", serverName, serverAddress);
         return -1;
     }
     freeaddrinfo(result);
@@ -1120,18 +1120,18 @@ int32_t osToolsServerSocketCreate(char *serverName, osToolsSocketProtocol_t prot
     return 0;
 }
 
-int32_t osToolsServerSocketListen(char *serverName, char *clientName) {
+int32_t os_tools_server_socket_listen(char *serverName, char *clientName) {
     if (!serverName) {
-        // printf("osToolsServerSocketListen ERROR: serverName is NULL\n");
+        // printf("os_tools_server_socket_listen ERROR: serverName is NULL\n");
         return -1;
     }
     if (!clientName) {
-        // printf("osToolsServerSocketListen ERROR: clientName is NULL\n");
+        // printf("os_tools_server_socket_listen ERROR: clientName is NULL\n");
         return -1;
     }
     int32_t socketIndex = list_find(osToolsSocket.socket, (unitype) serverName, 's');
     if (socketIndex == -1) {
-        // printf("osToolsServerSocketListen ERROR: Could not find socket %s\n", serverName);
+        // printf("os_tools_server_socket_listen ERROR: Could not find socket %s\n", serverName);
         return -1;
     }
     int32_t status;
@@ -1139,19 +1139,19 @@ int32_t osToolsServerSocketListen(char *serverName, char *clientName) {
 
     status = listen(winsocket, SOMAXCONN);
     if (status == SOCKET_ERROR) {
-        // printf("osToolsServerSocketListen ERROR: Listen failed\n");
+        // printf("os_tools_server_socket_listen ERROR: Listen failed\n");
         return -1;
     }
     struct sockaddr_in address;
     int32_t addressLen = sizeof(address);
     SOCKET connection = accept(winsocket, (struct sockaddr *) &address, &addressLen);
     if (connection == INVALID_SOCKET) {
-        // printf("osToolsServerSocketListen ERROR: Accept failed\n");
+        // printf("os_tools_server_socket_listen ERROR: Accept failed\n");
         return -1;
     }
     uint8_t ipAddress[4] = {0};
     if (osToolsGetIP(inet_ntoa(address.sin_addr), ipAddress, 4) != 4) {
-        // printf("osToolsServerSocketListen ERROR: Invalid ip address\n");
+        // printf("os_tools_server_socket_listen ERROR: Invalid ip address\n");
     }
     printf("Incoming connection from %s:%d\n", inet_ntoa(address.sin_addr), address.sin_port);
     list_append(osToolsSocket.socket, (unitype) clientName, 's');
@@ -1173,22 +1173,22 @@ int32_t osToolsServerSocketListen(char *serverName, char *clientName) {
     return 0;
 }
 
-int32_t osToolsClientSocketCreate(char *clientName, osToolsSocketProtocol_t protocol, char *serverAddress, char *serverPort, int32_t timeoutMilliseconds) {
+int32_t os_tools_client_socket_create(char *clientName, osToolsSocketProtocol_t protocol, char *serverAddress, char *serverPort, int32_t timeoutMilliseconds) {
     if (!clientName) {
-        // printf("osToolsClientSocketCreate ERROR: clientName is NULL\n");
+        // printf("os_tools_client_socket_create ERROR: clientName is NULL\n");
         return -1;
     }
     if (!serverAddress) {
-        // printf("osToolsClientSocketCreate ERROR: serverAddress is NULL\n");
+        // printf("os_tools_client_socket_create ERROR: serverAddress is NULL\n");
         return -1;
     }
     if (!serverPort) {
-        // printf("osToolsClientSocketCreate ERROR: port is NULL\n");
+        // printf("os_tools_client_socket_create ERROR: port is NULL\n");
         return -1;
     }
     uint8_t ipAddress[4] = {0};
     if (osToolsGetIP(serverAddress, ipAddress, 4) != 4) {
-        // printf("osToolsClientSocketCreate ERROR: Invalid ip address\n");
+        // printf("os_tools_client_socket_create ERROR: Invalid ip address\n");
         return -1;
     }
     int32_t status;
@@ -1197,7 +1197,7 @@ int32_t osToolsClientSocketCreate(char *clientName, osToolsSocketProtocol_t prot
         WSADATA wsaData;
         status = WSAStartup(MAKEWORD(2, 2), &wsaData);
         if (status != 0) {
-            // printf("osToolsClientSocketCreate ERROR: Could not initialise Winsock\n");
+            // printf("os_tools_client_socket_create ERROR: Could not initialise Winsock\n");
             return -1;
         }
         osToolsSocket.win32wsaActive = 1;
@@ -1216,7 +1216,7 @@ int32_t osToolsClientSocketCreate(char *clientName, osToolsSocketProtocol_t prot
 
     status = getaddrinfo(serverAddress, serverPort, &hints, &result);
     if (status != 0) {
-        // printf("osToolsClientSocketCreate ERROR: Could not getaddrinfo of %s:%s, failed with %d\n", serverAddress, serverPort, status);
+        // printf("os_tools_client_socket_create ERROR: Could not getaddrinfo of %s:%s, failed with %d\n", serverAddress, serverPort, status);
         return -1;
     }
 
@@ -1226,27 +1226,27 @@ int32_t osToolsClientSocketCreate(char *clientName, osToolsSocketProtocol_t prot
         resultElement = resultElement -> ai_next;
     }
     if (result == NULL) {
-        // printf("osToolsClientSocketCreate ERROR: getaddrinfo returned NULL\n");
+        // printf("os_tools_client_socket_create ERROR: getaddrinfo returned NULL\n");
         return -1;
     }
     /* Use the first element of linked list returned by getaddrinfo */
     SOCKET winsocket = socket(result -> ai_family, result -> ai_socktype, result -> ai_protocol);
     if (winsocket == INVALID_SOCKET) {
         freeaddrinfo(result);
-        // printf("osToolsClientSocketCreate ERROR: Could not create socket\n");
+        // printf("os_tools_client_socket_create ERROR: Could not create socket\n");
         return -1;
     }
     /* set socket to non blocking mode while connecting */
     u_long nonblocking = 1;
     status = ioctlsocket(winsocket, FIONBIO, &nonblocking);
     if (status != NO_ERROR) {
-        // printf("osToolsClientSocketCreate ERROR: Could not set socket to non-blocking mode\n");
+        // printf("os_tools_client_socket_create ERROR: Could not set socket to non-blocking mode\n");
         return -1;
     }
     status = connect(winsocket, result -> ai_addr, (int32_t) result -> ai_addrlen);
     if (status == SOCKET_ERROR) {
         if (WSAGetLastError() != WSAEWOULDBLOCK) {
-            // printf("osToolsClientSocketCreate ERROR: Could not connect socket %d\n", WSAGetLastError());
+            // printf("os_tools_client_socket_create ERROR: Could not connect socket %d\n", WSAGetLastError());
             return -1;
         }
         struct timeval timeout;
@@ -1258,7 +1258,7 @@ int32_t osToolsClientSocketCreate(char *clientName, osToolsSocketProtocol_t prot
         winsockArray.fd_array[0] = winsocket;
         status = select(0, NULL, &winsockArray, NULL, &timeout);
         if (status != 1) {
-            // printf("osToolsClientSocketCreate ERROR: Could not connect socket (timeout)\n");
+            // printf("os_tools_client_socket_create ERROR: Could not connect socket (timeout)\n");
             return -1;
         }
     }
@@ -1266,7 +1266,7 @@ int32_t osToolsClientSocketCreate(char *clientName, osToolsSocketProtocol_t prot
     u_long blocking = 0;
     status = ioctlsocket(winsocket, FIONBIO, &blocking);
     if (status != NO_ERROR) {
-        // printf("osToolsClientSocketCreate ERROR: Could not set socket to blocking mode\n");
+        // printf("os_tools_client_socket_create ERROR: Could not set socket to blocking mode\n");
         return -1;
     }
     printf("Connected to %s:%s\n", serverAddress, serverPort);
@@ -1291,32 +1291,32 @@ int32_t osToolsClientSocketCreate(char *clientName, osToolsSocketProtocol_t prot
     return 0;
 }
 
-int32_t osToolsSocketSend(char *socketName, uint8_t *data, int32_t length) {
+int32_t os_tools_socket_send(char *socketName, uint8_t *data, int32_t length) {
     if (!socketName) {
-        // printf("osToolsSocketSend ERROR: socketName is NULL\n");
+        // printf("os_tools_socket_send ERROR: socketName is NULL\n");
         return -1;
     }
     int32_t socketIndex = list_find(osToolsSocket.socket, (unitype) socketName, 's');
     if (socketIndex == -1) {
-        // printf("osToolsSocketSend ERROR: Could not find socket %s\n", socketName);
+        // printf("os_tools_socket_send ERROR: Could not find socket %s\n", socketName);
         return -1;
     }
     int32_t status = send((SOCKET) osToolsSocket.socket -> data[socketIndex + OSI_SOCKET].p, (char *) data, length, 0);
     if (status == SOCKET_ERROR) {
-        // printf("osToolsSocketSend ERROR: Failed to send\n");
+        // printf("os_tools_socket_send ERROR: Failed to send\n");
         return -1;
     }
     return status;
 }
 
-int32_t osToolsSocketReceive(char *socketName, uint8_t *data, int32_t length, int32_t timeoutMilliseconds) {
+int32_t os_tools_socket_receive(char *socketName, uint8_t *data, int32_t length, int32_t timeoutMilliseconds) {
     if (!socketName) {
-        // printf("osToolsSocketReceive ERROR: socketName is NULL\n");
+        // printf("os_tools_socket_receive ERROR: socketName is NULL\n");
         return -1;
     }
     int32_t socketIndex = list_find(osToolsSocket.socket, (unitype) socketName, 's');
     if (socketIndex == -1) {
-        // printf("osToolsSocketReceive ERROR: Could not find socket %s\n", socketName);
+        // printf("os_tools_socket_receive ERROR: Could not find socket %s\n", socketName);
         return -1;
     }
     setsockopt((SOCKET) osToolsSocket.socket -> data[socketIndex + OSI_SOCKET].p, SOL_SOCKET, SO_RCVTIMEO, (char *) &timeoutMilliseconds, sizeof(timeoutMilliseconds)); // https://stackoverflow.com/questions/2876024/linux-is-there-a-read-or-recv-from-socket-with-timeout
@@ -1324,29 +1324,29 @@ int32_t osToolsSocketReceive(char *socketName, uint8_t *data, int32_t length, in
     if (status == SOCKET_ERROR) {
         if (WSAGetLastError() == WSAETIMEDOUT) {
             /* timeout */
-            // printf("osToolsSocketReceive ERROR: Failed to receive (timeout)\n");
+            // printf("os_tools_socket_receive ERROR: Failed to receive (timeout)\n");
             return -1;
         }
-        // printf("osToolsSocketReceive ERROR: Failed to receive\n");
+        // printf("os_tools_socket_receive ERROR: Failed to receive\n");
         return -1;
     }
     return status;
 }
 
-int32_t osToolsSocketDestroy(char *socketName) {
+int32_t os_tools_socket_delete(char *socketName) {
     if (!socketName) {
-        // printf("osToolsSocketDestroy ERROR: socketName is NULL\n");
+        // printf("os_tools_socket_delete ERROR: socketName is NULL\n");
         return -1;
     }
     int32_t socketIndex = list_find(osToolsSocket.socket, (unitype) socketName, 's');
     if (socketIndex == -1) {
-        // printf("osToolsSocketDestroy ERROR: Could not find socket %s\n", socketName);
+        // printf("os_tools_socket_delete ERROR: Could not find socket %s\n", socketName);
         return -1;
     }
     /* shutdown and close socket */
     int32_t status = shutdown((SOCKET) osToolsSocket.socket -> data[socketIndex + OSI_SOCKET].p, SD_BOTH);
     if (status == SOCKET_ERROR) {
-        // printf("osToolsSocketDestroy WARN: Shutdown not successful\n");
+        // printf("os_tools_socket_delete WARN: Shutdown not successful\n");
     }
     closesocket((SOCKET) osToolsSocket.socket -> data[socketIndex + OSI_SOCKET].p);
     list_delete_range(osToolsSocket.socket, socketIndex, socketIndex + OSI_NUMBER_OF_FIELDS);
@@ -1383,17 +1383,17 @@ https://stackoverflow.com/questions/71783335/unexpected-u-v-plane-offset-with-wi
 schwa walked so i could find no information on this problem
 */
 
-list_t *osToolsCameraList() {
+list_t *os_tools_camera_list() {
     list_clear(osToolsCamera.camera);
     list_t *output = list_init();
     HRESULT hr = CoInitializeEx(NULL, 0);
     if (FAILED(hr)) {
-        printf("osToolsCameraList CoInitializeEx Error: 0x%lX\n", hr);
+        printf("os_tools_camera_list CoInitializeEx Error: 0x%lX\n", hr);
         return output;
     }
     hr = MFStartup(MF_VERSION, MFSTARTUP_NOSOCKET);
     if (FAILED(hr)) {
-        printf("osToolsCameraList MFStartup Error: 0x%lX\n", hr);
+        printf("os_tools_camera_list MFStartup Error: 0x%lX\n", hr);
         return output;
     }
     /* https://learn.microsoft.com/en-us/windows/win32/medfound/enumerating-video-capture-devices
@@ -1407,38 +1407,38 @@ list_t *osToolsCameraList() {
     /* Create an attribute store to specify the enumeration parameters. */
     hr = MFCreateAttributes(&pAttributes, 1);
     if (FAILED(hr)) {
-        printf("osToolsCameraList MFCreateAttributes Error: 0x%lX\n", hr);
-        goto osToolsCameraList_done;
+        printf("os_tools_camera_list MFCreateAttributes Error: 0x%lX\n", hr);
+        goto os_tools_camera_list_done;
     }
 
     /* Source type: video capture devices */
     hr = pAttributes -> lpVtbl -> SetGUID(pAttributes, &MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE, &MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_GUID);
     if (FAILED(hr)) {
-        printf("osToolsCameraList SetGUID Error: 0x%lX\n", hr);
-        goto osToolsCameraList_done;
+        printf("os_tools_camera_list SetGUID Error: 0x%lX\n", hr);
+        goto os_tools_camera_list_done;
     }
 
     /* Enumerate devices. */
     UINT32 count;
     hr = MFEnumDeviceSources(pAttributes, &ppDevices, &count);
     if (FAILED(hr)) {
-        printf("osToolsCameraList MFEnumDeviceSources Error: 0x%lX\n", hr);
-        goto osToolsCameraList_done;
+        printf("os_tools_camera_list MFEnumDeviceSources Error: 0x%lX\n", hr);
+        goto os_tools_camera_list_done;
     }
 
     if (count == 0) {
         hr = E_FAIL;
-        printf("osToolsCameraList: Error no cameras found\n");
-        goto osToolsCameraList_done;
+        printf("os_tools_camera_list: Error no cameras found\n");
+        goto os_tools_camera_list_done;
     }
-    printf("osToolsCameraList: Found %d cameras\n", count);
+    printf("os_tools_camera_list: Found %d cameras\n", count);
 
     /* Create the media source object. */
     for (int32_t i = 0; i < count; i++) {
         hr = ppDevices[i] -> lpVtbl -> ActivateObject(ppDevices[i], &IID_IMFMediaSource, (void **) &pSource);
         if (FAILED(hr)) {
-            printf("osToolsCameraList ActivateObject Error: 0x%lX\n", hr);
-            goto osToolsCameraList_done;
+            printf("os_tools_camera_list ActivateObject Error: 0x%lX\n", hr);
+            goto os_tools_camera_list_done;
         }
         DWORD characteristics;
         pSource -> lpVtbl -> GetCharacteristics(pSource, &characteristics);
@@ -1463,14 +1463,14 @@ list_t *osToolsCameraList() {
         IMFStreamDescriptor *streamDescriptor;
         hr = presentationDescriptor -> lpVtbl -> GetStreamDescriptorByIndex(presentationDescriptor, 0, &selected, &streamDescriptor);
         if (FAILED(hr)) {
-            printf("osToolsCameraList GetStreamDescriptorByIndex Error: 0x%lX\n", hr);
-            goto osToolsCameraList_done;
+            printf("os_tools_camera_list GetStreamDescriptorByIndex Error: 0x%lX\n", hr);
+            goto os_tools_camera_list_done;
         }
         IMFMediaTypeHandler *mediaTypeHandler;
         hr = streamDescriptor -> lpVtbl -> GetMediaTypeHandler(streamDescriptor, &mediaTypeHandler);
         if (FAILED(hr)) {
-            printf("osToolsCameraList GetMediaTypeHandler Error: 0x%lX\n", hr);
-            goto osToolsCameraList_done;
+            printf("os_tools_camera_list GetMediaTypeHandler Error: 0x%lX\n", hr);
+            goto os_tools_camera_list_done;
         }
         DWORD mediaTypeCount;
         mediaTypeHandler -> lpVtbl -> GetMediaTypeCount(mediaTypeHandler, &mediaTypeCount);
@@ -1483,19 +1483,19 @@ list_t *osToolsCameraList() {
             IMFMediaType *mediaType;
             hr = mediaTypeHandler -> lpVtbl -> GetMediaTypeByIndex(mediaTypeHandler, j, &mediaType);
             if (FAILED(hr)) {
-                printf("osToolsCameraList GetMediaTypeByIndex Error: 0x%lX\n", hr);
-                goto osToolsCameraList_done;
+                printf("os_tools_camera_list GetMediaTypeByIndex Error: 0x%lX\n", hr);
+                goto os_tools_camera_list_done;
             }
             hr = mediaType -> lpVtbl -> SetUINT32(mediaType, &MF_SOURCE_READER_ENABLE_VIDEO_PROCESSING, TRUE);
             if (FAILED(hr)) {
-                printf("osToolsCameraList SetUINT32 Error: 0x%lX\n", hr);
-                goto osToolsCameraList_done;
+                printf("os_tools_camera_list SetUINT32 Error: 0x%lX\n", hr);
+                goto os_tools_camera_list_done;
             }
             GUID majorType;
             hr = mediaType -> lpVtbl -> GetMajorType(mediaType, &majorType);
             if (FAILED(hr)) {
-                printf("osToolsCameraList GetMajorType Error: 0x%lX\n", hr);
-                goto osToolsCameraList_done;
+                printf("os_tools_camera_list GetMajorType Error: 0x%lX\n", hr);
+                goto os_tools_camera_list_done;
             }
             /* see mfapi.h for DEFINE_GUID (MFMediaType_Video, 0x73646976, 0x0000, 0x0010, 0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71); */
             if (majorType.Data1 == 0x73646976 && majorType.Data2 == 0x0000 && majorType.Data3 == 0x0010 && majorType.Data4[0] == 0x80 && majorType.Data4[1] == 0x00 && majorType.Data4[2] == 0x00 && majorType.Data4[3] == 0xaa && majorType.Data4[4] == 0x00 && majorType.Data4[5] == 0x38 && majorType.Data4[6] == 0x9b && majorType.Data4[7] == 0x71) {
@@ -1504,16 +1504,16 @@ list_t *osToolsCameraList() {
                 GUID subtype;
                 hr = mediaType -> lpVtbl -> GetGUID(mediaType, &MF_MT_SUBTYPE, &subtype);
                 if (FAILED(hr)) {
-                    printf("osToolsCameraList GetGUID Error: 0x%lX\n", hr);
-                    goto osToolsCameraList_done;
+                    printf("os_tools_camera_list GetGUID Error: 0x%lX\n", hr);
+                    goto os_tools_camera_list_done;
                 }
                 // printf("  - Subtype: %08lx-%02hx%02hx-%02x%02x-%02x%02x%02x%02x%02x%02x\n", subtype.Data1, subtype.Data2, subtype.Data3, // 3231564E-0010-8000-00AA00389B71
                 // subtype.Data4[0], subtype.Data4[1], subtype.Data4[2], subtype.Data4[3], subtype.Data4[4], subtype.Data4[5], subtype.Data4[6], subtype.Data4[7]);
                 uint64_t sizePacked;
                 hr = mediaType -> lpVtbl -> GetUINT64(mediaType, &MF_MT_FRAME_SIZE, &sizePacked);
                 if (FAILED(hr)) {
-                    printf("osToolsCameraList GetUINT64 Error: 0x%lX\n", hr);
-                    goto osToolsCameraList_done;
+                    printf("os_tools_camera_list GetUINT64 Error: 0x%lX\n", hr);
+                    goto os_tools_camera_list_done;
                 }
                 uint32_t width = (uint32_t) (sizePacked >> 32);
                 uint32_t height = (uint32_t) sizePacked;
@@ -1550,8 +1550,8 @@ list_t *osToolsCameraList() {
             /* H264 decoder required */
             hr = CoCreateInstance(&CLSID_CMSH264DecoderMFT, NULL, CLSCTX_ALL, &IID_IMFTransform, (void **) &h264decoder);
             if (FAILED(hr)) {
-                printf("osToolsCameraList ERROR: CoCreateInstance failed on H264 decoder 0x%lX\n", hr);
-                goto osToolsCameraList_done;
+                printf("os_tools_camera_list ERROR: CoCreateInstance failed on H264 decoder 0x%lX\n", hr);
+                goto os_tools_camera_list_done;
             }
             IMFAttributes *h264attributes;
             h264decoder -> lpVtbl -> GetAttributes(h264decoder, &h264attributes);
@@ -1560,32 +1560,32 @@ list_t *osToolsCameraList() {
             DWORD numOutputStreams;
             h264decoder -> lpVtbl -> GetStreamCount(h264decoder, &numInputStreams, &numOutputStreams);
             if (numInputStreams < 1 || numOutputStreams < 1) {
-                printf("osToolsCameraList ERROR: Not enough streams on H264 decoder\n");
-                goto osToolsCameraList_done;
+                printf("os_tools_camera_list ERROR: Not enough streams on H264 decoder\n");
+                goto os_tools_camera_list_done;
             }
             IMFMediaType *inputNativeType;
             MFCreateMediaType(&inputNativeType);
             savedMediaType -> lpVtbl -> CopyAllItems(savedMediaType, (IMFAttributes *) inputNativeType);
             inputNativeType -> lpVtbl -> SetUINT32(inputNativeType, &MF_MT_INTERLACE_MODE, MFVideoInterlace_MixedInterlaceOrProgressive);
             if (FAILED(hr)) {
-                printf("osToolsCameraList SetGUID Error: 0x%lX\n", hr);
-                goto osToolsCameraList_done;
+                printf("os_tools_camera_list SetGUID Error: 0x%lX\n", hr);
+                goto os_tools_camera_list_done;
             }
             hr = h264decoder -> lpVtbl -> SetInputType(h264decoder, 0, inputNativeType, 0);
             if (FAILED(hr)) {
-                printf("osToolsCameraList H264 SetInputType Error: 0x%lX\n", hr);
-                goto osToolsCameraList_done;
+                printf("os_tools_camera_list H264 SetInputType Error: 0x%lX\n", hr);
+                goto os_tools_camera_list_done;
             }
             hr = h264decoder -> lpVtbl -> SetOutputType(h264decoder, 0, NV12MediaType, 0);
             if (FAILED(hr)) {
-                printf("osToolsCameraList H264 SetOutputType Error: 0x%lX\n", hr);
-                goto osToolsCameraList_done;
+                printf("os_tools_camera_list H264 SetOutputType Error: 0x%lX\n", hr);
+                goto os_tools_camera_list_done;
             }
         } else {
             hr = mediaTypeHandler -> lpVtbl -> SetCurrentMediaType(mediaTypeHandler, savedMediaType);
             if (FAILED(hr)) {
-                printf("osToolsCameraList SetCurrentMediaType Error: 0x%lX\n", hr);
-                goto osToolsCameraList_done;
+                printf("os_tools_camera_list SetCurrentMediaType Error: 0x%lX\n", hr);
+                goto os_tools_camera_list_done;
             }
         }
         /* NV12 to RGB32 decoder - https://learn.microsoft.com/en-us/windows/win32/medfound/registering-and-enumerating-mfts#enumerating-mfts */
@@ -1596,12 +1596,12 @@ list_t *osToolsCameraList() {
         uint32_t codecs = 0;
         hr = MFTEnumEx(MFT_CATEGORY_VIDEO_PROCESSOR, unFlags, &inputInfo, &outputInfo, &ppActivate, &codecs); // it's a video processor not an encoder/decoder
         if (FAILED(hr)) {
-            printf("osToolsCameraList ERROR: MFTEnumEx failed with 0x%lX\n", hr);
-            goto osToolsCameraList_done;
+            printf("os_tools_camera_list ERROR: MFTEnumEx failed with 0x%lX\n", hr);
+            goto os_tools_camera_list_done;
         }
         if (SUCCEEDED(hr) && codecs == 0) {
-            printf("osToolsCameraList ERROR: No codecs for NV12 to RGB32\n");
-            goto osToolsCameraList_done;
+            printf("os_tools_camera_list ERROR: No codecs for NV12 to RGB32\n");
+            goto os_tools_camera_list_done;
         }
         hr = ppActivate[0] -> lpVtbl -> ActivateObject(ppActivate[0], &IID_IMFTransform, (void **) &nv12decoder);
         for (int32_t i = 0; i < codecs; i++) {
@@ -1609,8 +1609,8 @@ list_t *osToolsCameraList() {
         }
         CoTaskMemFree(ppActivate);
         if (FAILED(hr)) {
-            printf("osToolsCameraList ActivateObject Error: 0x%lX\n", hr);
-            goto osToolsCameraList_done;
+            printf("os_tools_camera_list ActivateObject Error: 0x%lX\n", hr);
+            goto os_tools_camera_list_done;
         }
         IMFMediaType *RGB32MediaType;
         MFCreateMediaType(&RGB32MediaType);
@@ -1618,13 +1618,13 @@ list_t *osToolsCameraList() {
         hr = RGB32MediaType -> lpVtbl -> SetGUID(RGB32MediaType, &MF_MT_SUBTYPE, &MFVideoFormat_RGB32);
         hr = nv12decoder -> lpVtbl -> SetInputType(nv12decoder, 0, NV12MediaType, 0);
         if (FAILED(hr)) {
-            printf("osToolsCameraList NV12 SetInputType Error: 0x%lX\n", hr);
-            goto osToolsCameraList_done;
+            printf("os_tools_camera_list NV12 SetInputType Error: 0x%lX\n", hr);
+            goto os_tools_camera_list_done;
         }
         hr = nv12decoder -> lpVtbl -> SetOutputType(nv12decoder, 0, RGB32MediaType, 0);
         if (FAILED(hr)) {
-            printf("osToolsCameraList NV12 SetOutputType Error: 0x%lX\n", hr);
-            goto osToolsCameraList_done;
+            printf("os_tools_camera_list NV12 SetOutputType Error: 0x%lX\n", hr);
+            goto os_tools_camera_list_done;
         }
         char cameraString[32];
         sprintf(cameraString, "USB Camera %d", i);
@@ -1644,7 +1644,7 @@ list_t *osToolsCameraList() {
         list_append(osToolsCamera.camera, (unitype) NULL, 'l');
         list_append(osToolsCamera.camera, (unitype) (void *) savedMediaType, 'l');
     }
-osToolsCameraList_done:
+os_tools_camera_list_done:
     if (pAttributes) {
         pAttributes -> lpVtbl -> Release(pAttributes);
         pAttributes = NULL;
@@ -1659,7 +1659,7 @@ osToolsCameraList_done:
     return output;
 }
 
-int32_t osToolsCameraOpen(char *name) {
+int32_t os_tools_camera_open(char *name) {
     int32_t cameraIndex = list_find(osToolsCamera.camera, (unitype) name, 's');
     if (cameraIndex == -1) {
         return -1;
@@ -1674,7 +1674,7 @@ int32_t osToolsCameraOpen(char *name) {
     IMFSourceReader *pReader;
     HRESULT hr = MFCreateSourceReaderFromMediaSource(pSource, pAttributes, &pReader);
     if (FAILED(hr)) {
-        printf("osToolsCameraOpen MFCreateSourceReaderFromMediaSource Error: 0x%lX\n", hr);
+        printf("os_tools_camera_open MFCreateSourceReaderFromMediaSource Error: 0x%lX\n", hr);
         return -1;
     }
     pReader -> lpVtbl -> SetStreamSelection(pReader, MF_SOURCE_READER_FIRST_VIDEO_STREAM, TRUE);
@@ -1698,7 +1698,7 @@ int32_t osToolsCameraOpen(char *name) {
     MFCreateMediaType(&readerType);
     hr = readerType -> lpVtbl -> SetGUID(readerType, &MF_MT_MAJOR_TYPE, &MFMediaType_Video);
     if (FAILED(hr)) {
-        printf("osToolsCameraOpen SetGUID Error: 0x%lX\n", hr);
+        printf("os_tools_camera_open SetGUID Error: 0x%lX\n", hr);
         return -1;
     }
     MFT_OUTPUT_DATA_BUFFER *pTransformBuffer;
@@ -1707,7 +1707,7 @@ int32_t osToolsCameraOpen(char *name) {
         /* H264 decoder exists */
         hr = readerType -> lpVtbl -> SetGUID(readerType, &MF_MT_SUBTYPE, &MFVideoFormat_H264);
         if (FAILED(hr)) {
-            printf("osToolsCameraOpen SetGUID Error: 0x%lX\n", hr);
+            printf("os_tools_camera_open SetGUID Error: 0x%lX\n", hr);
             return -1;
         }
         /* https://stackoverflow.com/questions/30825271/how-to-create-imfsample-for-windowsmediafoundation-h-264-encoder-mft */
@@ -1724,7 +1724,7 @@ int32_t osToolsCameraOpen(char *name) {
         /* no decoder */
         hr = readerType -> lpVtbl -> SetGUID(readerType, &MF_MT_SUBTYPE, &MFVideoFormat_NV12);
         if (FAILED(hr)) {
-            printf("osToolsCameraOpen SetGUID Error: 0x%lX\n", hr);
+            printf("os_tools_camera_open SetGUID Error: 0x%lX\n", hr);
             return -1;
         }
     }
@@ -1740,14 +1740,14 @@ int32_t osToolsCameraOpen(char *name) {
     osToolsCamera.camera -> data[cameraIndex + 9].p = (void *) pTransformBuffer;
     hr = pReader -> lpVtbl -> SetCurrentMediaType(pReader, MF_SOURCE_READER_FIRST_VIDEO_STREAM, NULL, readerType);
     if (FAILED(hr)) {
-        printf("osToolsCameraOpen SetCurrentMediaType Error: 0x%lX\n", hr); // getting 0xC00D5212 -> MF_E_TOPO_CODEC_NOT_FOUND: Could not find a decoder for the native stream type
+        printf("os_tools_camera_open SetCurrentMediaType Error: 0x%lX\n", hr); // getting 0xC00D5212 -> MF_E_TOPO_CODEC_NOT_FOUND: Could not find a decoder for the native stream type
         return -1;
     }
     osToolsCamera.camera -> data[cameraIndex + 5].p = (void *) pReader;
     return 0;
 }
 
-int32_t osToolsCameraReceive(char *name, uint8_t *data) {
+int32_t os_tools_camera_receive(char *name, uint8_t *data) {
     int32_t cameraIndex = list_find(osToolsCamera.camera, (unitype) name, 's');
     if (cameraIndex == -1) {
         return 0;
@@ -1768,7 +1768,7 @@ int32_t osToolsCameraReceive(char *name, uint8_t *data) {
         /* this is reading in syncronous blocking mode, MF supports also async calls */
         hr = pReader -> lpVtbl -> ReadSample(pReader, MF_SOURCE_READER_FIRST_VIDEO_STREAM, 0, &stream, &flags, &timestamp, &pSample);
         if (FAILED(hr)) {
-            printf("osToolsCameraReceive ERROR: ReadSample failed with 0x%lX\n", hr);
+            printf("os_tools_camera_receive ERROR: ReadSample failed with 0x%lX\n", hr);
             return 0;
         }
         if (flags & MF_SOURCE_READERF_STREAMTICK) {
@@ -1786,7 +1786,7 @@ int32_t osToolsCameraReceive(char *name, uint8_t *data) {
         IMFTransform *h264decoder = (IMFTransform *) osToolsCamera.camera -> data[cameraIndex + 6].p;
         hr = h264decoder -> lpVtbl -> ProcessInput(h264decoder, 0, pSample, 0);
         if (FAILED(hr)) {
-            printf("osToolsCameraReceive ERROR: H264 ProcessInput failed with 0x%lX\n", hr);
+            printf("os_tools_camera_receive ERROR: H264 ProcessInput failed with 0x%lX\n", hr);
             pSample -> lpVtbl -> Release(pSample);
             return 0;
         }
@@ -1805,7 +1805,7 @@ int32_t osToolsCameraReceive(char *name, uint8_t *data) {
         while (1) {
             pTransformBuffer = (MFT_OUTPUT_DATA_BUFFER *) osToolsCamera.camera -> data[cameraIndex + 7].p;
             if (pTransformBuffer == NULL) {
-                printf("osToolsCameraReceive ERROR: pTransformBuffer is NULL\n");
+                printf("os_tools_camera_receive ERROR: pTransformBuffer is NULL\n");
                 return 0;
             }
             hr = pTransformBuffer -> pSample -> lpVtbl -> GetBufferByIndex(pTransformBuffer -> pSample, 0, &pBuffer);
@@ -1827,7 +1827,7 @@ int32_t osToolsCameraReceive(char *name, uint8_t *data) {
                             /* just use the first one idfk */
                             hr = h264decoder -> lpVtbl -> SetOutputType(h264decoder, 0, possibleType, 0);
                             if (FAILED(hr)) {
-                                printf("osToolsCameraReceive ERROR: SetOutputType failed with 0x%lX\n", hr);
+                                printf("os_tools_camera_receive ERROR: SetOutputType failed with 0x%lX\n", hr);
                                 return 0;
                             }
                         }
@@ -1835,7 +1835,7 @@ int32_t osToolsCameraReceive(char *name, uint8_t *data) {
                     }
                     continue;
                 } else {
-                    printf("osToolsCameraReceive ERROR: H264 ProcessOutput failed with 0x%lX with flag 0x%lX\n", hr, transformFlags);
+                    printf("os_tools_camera_receive ERROR: H264 ProcessOutput failed with 0x%lX with flag 0x%lX\n", hr, transformFlags);
                     pSample -> lpVtbl -> Release(pSample); // assume sample must not be released between ProcessInput and ProcessOutput
                     return 0;
                 }
@@ -1871,14 +1871,14 @@ int32_t osToolsCameraReceive(char *name, uint8_t *data) {
     pBuffer -> lpVtbl -> SetCurrentLength(pBuffer, 0); // rewind buffer so it can be used again
     hr = nv12decoder -> lpVtbl -> ProcessInput(nv12decoder, 0, pSample, 0);
     if (FAILED(hr)) {
-        printf("osToolsCameraReceive ERROR: NV12 ProcessInput failed with 0x%lX\n", hr);
+        printf("os_tools_camera_receive ERROR: NV12 ProcessInput failed with 0x%lX\n", hr);
         nv12decoder -> lpVtbl -> ProcessMessage(nv12decoder, MFT_MESSAGE_COMMAND_FLUSH, 0);
         return 0;
     }
     DWORD transformFlags = 0;
     hr = nv12decoder -> lpVtbl -> ProcessOutput(nv12decoder, 0, 1, pTransformBuffer, &transformFlags);
     if (FAILED(hr)) {
-        printf("osToolsCameraReceive ERROR: NV12 ProcessOutput failed with 0x%lX with flag 0x%lX\n", hr, transformFlags);
+        printf("os_tools_camera_receive ERROR: NV12 ProcessOutput failed with 0x%lX with flag 0x%lX\n", hr, transformFlags);
         return 0;
     }
     nv12decoder -> lpVtbl -> ProcessMessage(nv12decoder, MFT_MESSAGE_COMMAND_FLUSH, 0);
@@ -1925,7 +1925,7 @@ int32_t osToolsCameraReceive(char *name, uint8_t *data) {
     return iterData;
 }
 
-int32_t osToolsCameraClose(char *name) {
+int32_t os_tools_camera_close(char *name) {
     int32_t cameraIndex = list_find(osToolsCamera.camera, (unitype) name, 's');
     if (cameraIndex == -1) {
         return -1;
@@ -1967,8 +1967,8 @@ FILE* filenameStream = popen("zenity --file-selection --file-filter='Name | *.ex
 This is similar to COMDLG_FILTERSPEC struct's pszName and pszSpec, so you can add more filter "profiles" by using multiple --file-filter tags in the command
 */
 
-int32_t osToolsInit(char argv0[], GLFWwindow *window) {
-    osToolsIndependentInit(window);
+int32_t os_tools_init(char argv0[], GLFWwindow *window) {
+    os_tools_independent_init(window);
     /* get executable filepath */
     FILE *exStringFile = popen("pwd", "r");
     if (fscanf(exStringFile, "%s", osToolsFileDialog.executableFilepath) == 0) {
@@ -1985,7 +1985,7 @@ int32_t osToolsInit(char argv0[], GLFWwindow *window) {
     return 0;
 }
 
-int32_t osToolsFileDialogPrompt(ost_file_dialog_save_t openOrSave, ost_file_dialog_multiselect_t multiselect, ost_file_dialog_folder_t folder, char *prename, list_t *extensions) {
+int32_t os_tools_file_dialog_prompt(ost_file_dialog_save_t openOrSave, ost_file_dialog_multiselect_t multiselect, ost_file_dialog_folder_t folder, char *prename, list_t *extensions) {
     if (extensions == NULL) {
         extensions = osToolsFileDialog.globalExtensions;
     }
@@ -2059,7 +2059,7 @@ int32_t osToolsFileDialogPrompt(ost_file_dialog_save_t openOrSave, ost_file_dial
     return 0;
 }
 
-uint8_t *osToolsFileMap(char *filename, uint32_t *sizeOutput) {
+uint8_t *os_tools_file_map(char *filename, uint32_t *sizeOutput) {
     int32_t fd = open(filename, O_RDWR);
     struct stat stats;
     if (fstat(fd, &stats) == -1) {
@@ -2080,7 +2080,7 @@ uint8_t *osToolsFileMap(char *filename, uint32_t *sizeOutput) {
     return (uint8_t *) out;
 }
 
-int32_t osToolsFileUnmap(uint8_t *data) {
+int32_t os_tools_file_unmap(uint8_t *data) {
     int32_t index = -1;
     for (int32_t i = 0; i < osToolsMemmap.mappedFiles -> length; i += 3) {
         if (osToolsMemmap.mappedFiles -> data[i].p == data) {
@@ -2101,7 +2101,7 @@ int32_t osToolsFileUnmap(uint8_t *data) {
     }
 }
 
-list_t *osToolsFileAndFolderList(char *directory) {
+list_t *os_tools_file_and_folder_list(char *directory) {
     list_t *output = list_init();
     DIR *dir = opendir(directory);
     if (dir == NULL) {
@@ -2131,7 +2131,7 @@ list_t *osToolsFileAndFolderList(char *directory) {
     return output;
 }
 
-list_t *osToolsFileList(char *directory) {
+list_t *os_tools_file_list(char *directory) {
     list_t *output = list_init();
     DIR *dir = opendir(directory);
     if (dir == NULL) {
@@ -2155,7 +2155,7 @@ list_t *osToolsFileList(char *directory) {
     return output;
 }
 
-list_t *osToolsFolderList(char *directory) {
+list_t *os_tools_folder_list(char *directory) {
     list_t *output = list_init();
     DIR *dir = opendir(directory);
     if (dir == NULL) {
@@ -2182,17 +2182,17 @@ list_t *osToolsFolderList(char *directory) {
     return output;
 }
 
-int32_t osToolsFolderCreate(char *folder) {
+int32_t os_tools_folder_create(char *folder) {
     return mkdir(folder, 0755);
 }
 
-int32_t osToolsFolderDestroy(char *folder) {
+int32_t os_tools_folder_delete(char *folder) {
     char command[5000] = "rm -rf ";
     strcat(command, folder);
     return system(command);
 }
 
-void osToolsCloseConsole() {
+void os_tools_close_console() {
     /* don't know how to do this yet - https://unix.stackexchange.com/questions/743272/programatically-start-a-background-process-under-linux */
     return;
 }
@@ -2201,24 +2201,24 @@ void osToolsCloseConsole() {
 
 /* Serial support on linux: https://blog.mbedded.ninja/programming/operating-systems/linux/linux-serial-ports-using-c-cpp/ */
 
-list_t *osToolsSerialList() {
+list_t *os_tools_serial_list() {
     list_t *output = list_init();
     return output;
 }
 
-int32_t osToolsSerialOpen(char *name, osToolsSerialBaud_t baudRate) {
+int32_t os_tools_serial_open(char *name, osToolsSerialBaud_t baudRate) {
     return -1;
 }
 
-int32_t osToolsSerialSend(char *name, uint8_t *data, int32_t length) {
+int32_t os_tools_serial_send(char *name, uint8_t *data, int32_t length) {
     return -1;
 }
 
-int32_t osToolsSerialReceive(char *name, uint8_t *buffer, int32_t length, int32_t timeoutMilliseconds) {
+int32_t os_tools_serial_receive(char *name, uint8_t *buffer, int32_t length, int32_t timeoutMilliseconds) {
     return -1;
 }
 
-int32_t osToolsSerialClose(char *name) {
+int32_t os_tools_serial_close(char *name) {
     return -1;
 }
 
@@ -2246,18 +2246,18 @@ int32_t osToolsGetIP(char *address, uint8_t *buffer, int32_t maxSegments) {
     return segments;
 }
 
-int32_t osToolsGetSocketAddress(char *socketName, char *address, int32_t length) {
+int32_t os_tools_get_socket_address(char *socketName, char *address, int32_t length) {
     if (!socketName) {
-        // printf("osToolsGetSocketAddress ERROR: socketName is NULL\n");
+        // printf("os_tools_get_socket_address ERROR: socketName is NULL\n");
         return -1;
     }
     if (!address) {
-        // printf("osToolsGetSocketAddress ERROR: address is NULL\n");
+        // printf("os_tools_get_socket_address ERROR: address is NULL\n");
         return -1;
     }
     int32_t socketIndex = list_find(osToolsSocket.socket, (unitype) socketName, 's');
     if (socketIndex == -1) {
-        // printf("osToolsGetSocketAddress ERROR: Could not find socket %s\n", socketName);
+        // printf("os_tools_get_socket_address ERROR: Could not find socket %s\n", socketName);
         return -1;
     }
     /* only IPv4 */
@@ -2268,18 +2268,18 @@ int32_t osToolsGetSocketAddress(char *socketName, char *address, int32_t length)
     return 0;
 }
 
-int32_t osToolsGetPort(char *socketName, char *port, int32_t length) {
+int32_t os_tools_get_port(char *socketName, char *port, int32_t length) {
     if (!socketName) {
-        // printf("osToolsGetSocketAddress ERROR: socketName is NULL\n");
+        // printf("os_tools_get_port ERROR: socketName is NULL\n");
         return -1;
     }
     if (!port) {
-        // printf("osToolsGetSocketAddress ERROR: port is NULL\n");
+        // printf("os_tools_get_port ERROR: port is NULL\n");
         return -1;
     }
     int32_t socketIndex = list_find(osToolsSocket.socket, (unitype) socketName, 's');
     if (socketIndex == -1) {
-        // printf("osToolsGetPort ERROR: Could not find socket %s\n", socketName);
+        // printf("os_tools_get_port ERROR: Could not find socket %s\n", socketName);
         return -1;
     }
     char portA[8];
@@ -2291,13 +2291,13 @@ int32_t osToolsGetPort(char *socketName, char *port, int32_t length) {
 
 #ifdef TURTLE_ENABLE_SOCKETS
 
-int32_t osToolsServerSocketCreate(char *serverName, osToolsSocketProtocol_t protocol, char *serverPort) {
+int32_t os_tools_server_socket_create(char *serverName, osToolsSocketProtocol_t protocol, char *serverPort) {
     if (!serverName) {
-        // printf("osToolsServerSocketCreate ERROR: serverName is NULL\n");
+        // printf("os_tools_server_socket_create ERROR: serverName is NULL\n");
         return -1;
     }
     if (!serverPort) {
-        // printf("osToolsServerSocketCreate ERROR: port is NULL\n");
+        // printf("os_tools_server_socket_create ERROR: port is NULL\n");
         return -1;
     }
     int32_t status;
@@ -2319,14 +2319,14 @@ int32_t osToolsServerSocketCreate(char *serverName, osToolsSocketProtocol_t prot
     char hostName[128];
     status = gethostname(hostName, sizeof(hostName));
     if (status == -1) {
-        // printf("osToolsServerSocketCreate ERROR: Could not gethostname\n");
+        // printf("os_tools_server_socket_create ERROR: Could not gethostname\n");
         return -1;
     }
     printf("Host Name: %s\n", hostName);
 
     struct hostent *host = gethostbyname(hostName);
     if (host == NULL) {
-        // printf("osToolsServerSocketCreate ERROR: Could not gethostbyname\n");
+        // printf("os_tools_server_socket_create ERROR: Could not gethostbyname\n");
         return -1;
     }
 
@@ -2339,18 +2339,18 @@ int32_t osToolsServerSocketCreate(char *serverName, osToolsSocketProtocol_t prot
     }
     char *serverAddress = inet_ntoa(address);
     if (serverAddress == NULL) {
-        // printf("osToolsServerSocketCreate ERROR: No addresses to create server on\n");
+        // printf("os_tools_server_socket_create ERROR: No addresses to create server on\n");
         return -1;
     }
     uint8_t ipAddress[4] = {0};
     if (osToolsGetIP(serverAddress, ipAddress, 4) != 4) {
-        // printf("osToolsServerSocketCreate ERROR: Invalid ip address\n");
+        // printf("os_tools_server_socket_create ERROR: Invalid ip address\n");
     }
 
     /* Resolve the server address and port */
     status = getaddrinfo(serverAddress, serverPort, &hints, &result);
     if (status != 0) {
-        // printf("osToolsServerSocketCreate ERROR: Could not getaddrinfo\n");
+        // printf("os_tools_server_socket_create ERROR: Could not getaddrinfo\n");
         return -1;
     }
     struct addrinfo *resultElement = result;
@@ -2359,7 +2359,7 @@ int32_t osToolsServerSocketCreate(char *serverName, osToolsSocketProtocol_t prot
         resultElement = resultElement -> ai_next;
     }
     if (result == NULL) {
-        // printf("osToolsServerSocketCreate ERROR: getaddrinfo returned NULL\n");
+        // printf("os_tools_server_socket_create ERROR: getaddrinfo returned NULL\n");
         return -1;
     }
 
@@ -2367,7 +2367,7 @@ int32_t osToolsServerSocketCreate(char *serverName, osToolsSocketProtocol_t prot
     int32_t sockfd = socket(result -> ai_family, result -> ai_socktype, result -> ai_protocol);
     if (sockfd == -1) {
         freeaddrinfo(result);
-        // printf("osToolsServerSocketCreate ERROR: Could not create socket\n");
+        // printf("os_tools_server_socket_create ERROR: Could not create socket\n");
         return -1;
     }
 
@@ -2375,7 +2375,7 @@ int32_t osToolsServerSocketCreate(char *serverName, osToolsSocketProtocol_t prot
     status = bind(sockfd, result -> ai_addr, result -> ai_addrlen);
     if (status == -1) {
         freeaddrinfo(result);
-        // printf("osToolsServerSocketCreate ERROR: Could not bind socket %s to address %s\n", serverName, serverAddress);
+        // printf("os_tools_server_socket_create ERROR: Could not bind socket %s to address %s\n", serverName, serverAddress);
         return -1;
     }
     freeaddrinfo(result);
@@ -2401,18 +2401,18 @@ int32_t osToolsServerSocketCreate(char *serverName, osToolsSocketProtocol_t prot
     return 0;
 }
 
-int32_t osToolsServerSocketListen(char *serverName, char *clientName) {
+int32_t os_tools_server_socket_listen(char *serverName, char *clientName) {
     if (!serverName) {
-        // printf("osToolsServerSocketListen ERROR: serverName is NULL\n");
+        // printf("os_tools_server_socket_listen ERROR: serverName is NULL\n");
         return -1;
     }
     if (!clientName) {
-        // printf("osToolsServerSocketListen ERROR: clientName is NULL\n");
+        // printf("os_tools_server_socket_listen ERROR: clientName is NULL\n");
         return -1;
     }
     int32_t socketIndex = list_find(osToolsSocket.socket, (unitype) serverName, 's');
     if (socketIndex == -1) {
-        // printf("osToolsServerSocketListen ERROR: Could not find socket %s\n", serverName);
+        // printf("os_tools_server_socket_listen ERROR: Could not find socket %s\n", serverName);
         return -1;
     }
     int32_t status;
@@ -2420,19 +2420,19 @@ int32_t osToolsServerSocketListen(char *serverName, char *clientName) {
 
     status = listen(sockfd, SOMAXCONN);
     if (status == -1) {
-        // printf("osToolsServerSocketListen ERROR: Listen failed\n");
+        // printf("os_tools_server_socket_listen ERROR: Listen failed\n");
         return -1;
     }
     struct sockaddr_in address;
     uint32_t addressLen = sizeof(address);
     int32_t connectionfd = accept(sockfd, (struct sockaddr *) &address, &addressLen);
     if (connectionfd == -1) {
-        // printf("osToolsServerSocketListen ERROR: Accept failed\n");
+        // printf("os_tools_server_socket_listen ERROR: Accept failed\n");
         return -1;
     }
     uint8_t ipAddress[4] = {0};
     if (osToolsGetIP(inet_ntoa(address.sin_addr), ipAddress, 4) != 4) {
-        // printf("osToolsServerSocketListen ERROR: Invalid ip address\n");
+        // printf("os_tools_server_socket_listen ERROR: Invalid ip address\n");
     }
     printf("Incoming connection from %s:%d\n", inet_ntoa(address.sin_addr), address.sin_port);
     list_append(osToolsSocket.socket, (unitype) clientName, 's');
@@ -2454,22 +2454,22 @@ int32_t osToolsServerSocketListen(char *serverName, char *clientName) {
     return 0;
 }
 
-int32_t osToolsClientSocketCreate(char *clientName, osToolsSocketProtocol_t protocol, char *serverAddress, char *serverPort, int32_t timeoutMilliseconds) {
+int32_t os_tools_client_socket_create(char *clientName, osToolsSocketProtocol_t protocol, char *serverAddress, char *serverPort, int32_t timeoutMilliseconds) {
     if (!clientName) {
-        // printf("osToolsClientSocketCreate ERROR: clientName is NULL\n");
+        // printf("os_tools_client_socket_create ERROR: clientName is NULL\n");
         return -1;
     }
     if (!serverAddress) {
-        // printf("osToolsClientSocketCreate ERROR: serverAddress is NULL\n");
+        // printf("os_tools_client_socket_create ERROR: serverAddress is NULL\n");
         return -1;
     }
     if (!serverPort) {
-        // printf("osToolsClientSocketCreate ERROR: port is NULL\n");
+        // printf("os_tools_client_socket_create ERROR: port is NULL\n");
         return -1;
     }
     uint8_t ipAddress[4] = {0};
     if (osToolsGetIP(serverAddress, ipAddress, 4) != 4) {
-        // printf("osToolsClientSocketCreate ERROR: Invalid ip address\n");
+        // printf("os_tools_client_socket_create ERROR: Invalid ip address\n");
         return -1;
     }
     int32_t status;
@@ -2489,7 +2489,7 @@ int32_t osToolsClientSocketCreate(char *clientName, osToolsSocketProtocol_t prot
 
     status = getaddrinfo(serverAddress, serverPort, &hints, &result);
     if (status != 0) {
-        // printf("osToolsClientSocketCreate ERROR: Could not getaddrinfo of %s:%s, failed with %d\n", serverAddress, serverPort, status);
+        // printf("os_tools_client_socket_create ERROR: Could not getaddrinfo of %s:%s, failed with %d\n", serverAddress, serverPort, status);
         return -1;
     }
 
@@ -2499,32 +2499,32 @@ int32_t osToolsClientSocketCreate(char *clientName, osToolsSocketProtocol_t prot
         resultElement = resultElement -> ai_next;
     }
     if (result == NULL) {
-        // printf("osToolsClientSocketCreate ERROR: getaddrinfo returned NULL\n");
+        // printf("os_tools_client_socket_create ERROR: getaddrinfo returned NULL\n");
         return -1;
     }
     /* Use the first element of linked list returned by getaddrinfo */
     int32_t sockfd = socket(result -> ai_family, result -> ai_socktype, result -> ai_protocol);
     if (sockfd == -1) {
         freeaddrinfo(result);
-        // printf("osToolsClientSocketCreate ERROR: Could not create socket\n");
+        // printf("os_tools_client_socket_create ERROR: Could not create socket\n");
         return -1;
     }
     /* set socket to non blocking mode while connecting - https://stackoverflow.com/questions/1543466/how-do-i-change-a-tcp-socket-to-be-non-blocking */
     status = fcntl(sockfd, F_GETFL, 0);
     if (status == -1) {
-        // printf("osToolsClientSocketCreate ERROR: Could not get fcntl flags\n");
+        // printf("os_tools_client_socket_create ERROR: Could not get fcntl flags\n");
         return -1;
     }
     status &= O_NONBLOCK;
     status = fcntl(sockfd, F_SETFL, status);
     if (status != 0) {
-        // printf("osToolsClientSocketCreate ERROR: Could not set socket to non-blocking mode\n");
+        // printf("os_tools_client_socket_create ERROR: Could not set socket to non-blocking mode\n");
         return -1;
     }
     status = connect(sockfd, result -> ai_addr, (int32_t) result -> ai_addrlen);
     if (status == -1) {
         if (errno != EINPROGRESS) {
-            // printf("osToolsClientSocketCreate ERROR: Could not connect socket %d (%s)\n", errno, strerror(errno));
+            // printf("os_tools_client_socket_create ERROR: Could not connect socket %d (%s)\n", errno, strerror(errno));
             return -1;
         }
         struct timeval timeout;
@@ -2535,20 +2535,20 @@ int32_t osToolsClientSocketCreate(char *clientName, osToolsSocketProtocol_t prot
         fdsockArray.__fds_bits[0] = sockfd;
         status = select(sockfd + 1, NULL, &fdsockArray, NULL, &timeout);
         if (status != 1) {
-            // printf("osToolsClientSocketCreate ERROR: Could not connect socket (timeout)\n");
+            // printf("os_tools_client_socket_create ERROR: Could not connect socket (timeout)\n");
             return -1;
         }
     }
     /* set socket back to blocking mode */
     status = fcntl(sockfd, F_GETFL, 0);
     if (status == -1) {
-        // printf("osToolsClientSocketCreate ERROR: Could not get fcntl flags\n");
+        // printf("os_tools_client_socket_create ERROR: Could not get fcntl flags\n");
         return -1;
     }
     status &= ~O_NONBLOCK;
     status = fcntl(sockfd, F_SETFL, status);
     if (status != 0) {
-        // printf("osToolsClientSocketCreate ERROR: Could not set socket to blocking mode\n");
+        // printf("os_tools_client_socket_create ERROR: Could not set socket to blocking mode\n");
         return -1;
     }
     printf("Connected to %s:%s\n", serverAddress, serverPort);
@@ -2573,32 +2573,32 @@ int32_t osToolsClientSocketCreate(char *clientName, osToolsSocketProtocol_t prot
     return 0;
 }
 
-int32_t osToolsSocketSend(char *socketName, uint8_t *data, int32_t length) {
+int32_t os_tools_socket_send(char *socketName, uint8_t *data, int32_t length) {
     if (!socketName) {
-        // printf("osToolsSocketSend ERROR: socketName is NULL\n");
+        // printf("os_tools_socket_send ERROR: socketName is NULL\n");
         return -1;
     }
     int32_t socketIndex = list_find(osToolsSocket.socket, (unitype) socketName, 's');
     if (socketIndex == -1) {
-        // printf("osToolsSocketSend ERROR: Could not find socket %s\n", socketName);
+        // printf("os_tools_socket_send ERROR: Could not find socket %s\n", socketName);
         return -1;
     }
     int32_t status = send(osToolsSocket.socket -> data[socketIndex + OSI_SOCKET].i, (char *) data, length, 0);
     if (status == -1) {
-        // printf("osToolsSocketSend ERROR: Failed to send\n");
+        // printf("os_tools_socket_send ERROR: Failed to send\n");
         return -1;
     }
     return status;
 }
 
-int32_t osToolsSocketReceive(char *socketName, uint8_t *data, int32_t length, int32_t timeoutMilliseconds) {
+int32_t os_tools_socket_receive(char *socketName, uint8_t *data, int32_t length, int32_t timeoutMilliseconds) {
     if (!socketName) {
-        // printf("osToolsSocketReceive ERROR: socketName is NULL\n");
+        // printf("os_tools_socket_receive ERROR: socketName is NULL\n");
         return -1;
     }
     int32_t socketIndex = list_find(osToolsSocket.socket, (unitype) socketName, 's');
     if (socketIndex == -1) {
-        // printf("osToolsSocketReceive ERROR: Could not find socket %s\n", socketName);
+        // printf("os_tools_socket_receive ERROR: Could not find socket %s\n", socketName);
         return -1;
     }
     setsockopt(osToolsSocket.socket -> data[socketIndex + OSI_SOCKET].i, SOL_SOCKET, SO_RCVTIMEO, (char *) &timeoutMilliseconds, sizeof(timeoutMilliseconds)); // https://stackoverflow.com/questions/2876024/linux-is-there-a-read-or-recv-from-socket-with-timeout
@@ -2606,29 +2606,29 @@ int32_t osToolsSocketReceive(char *socketName, uint8_t *data, int32_t length, in
     if (status == -1) {
         if (errno == EAGAIN || errno == EWOULDBLOCK) {
             /* timeout */
-            // printf("osToolsSocketReceive ERROR: Failed to receive (timeout)\n");
+            // printf("os_tools_socket_receive ERROR: Failed to receive (timeout)\n");
             return 0;
         }
-        // printf("osToolsSocketReceive ERROR: Failed to receive\n");
+        // printf("os_tools_socket_receive ERROR: Failed to receive\n");
         return -1;
     }
     return status;
 }
 
-int32_t osToolsSocketDestroy(char *socketName) {
+int32_t os_tools_socket_delete(char *socketName) {
     if (!socketName) {
-        // printf("osToolsSocketDestroy ERROR: socketName is NULL\n");
+        // printf("os_tools_socket_delete ERROR: socketName is NULL\n");
         return -1;
     }
     int32_t socketIndex = list_find(osToolsSocket.socket, (unitype) socketName, 's');
     if (socketIndex == -1) {
-        // printf("osToolsSocketDestroy ERROR: Could not find socket %s\n", socketName);
+        // printf("os_tools_socket_delete ERROR: Could not find socket %s\n", socketName);
         return -1;
     }
     /* shutdown and close socket */
     int32_t status = shutdown(osToolsSocket.socket -> data[socketIndex + OSI_SOCKET].i, SHUT_RDWR);
     if (status == -1) {
-        // printf("osToolsSocketDestroy WARN: Shutdown not successful\n");
+        // printf("os_tools_socket_delete WARN: Shutdown not successful\n");
     }
     close(osToolsSocket.socket -> data[socketIndex + OSI_SOCKET].i);
     list_delete_range(osToolsSocket.socket, socketIndex, socketIndex + OSI_NUMBER_OF_FIELDS);
@@ -2639,20 +2639,20 @@ int32_t osToolsSocketDestroy(char *socketName) {
 
 #ifdef TURTLE_ENABLE_CAMERA
 
-list_t *osToolsCameraList() {
+list_t *os_tools_camera_list() {
     list_t *output = list_init();
     return output;
 }
 
-int32_t osToolsCameraOpen(char *name) {
+int32_t os_tools_camera_open(char *name) {
     return -1;
 }
 
-int32_t osToolsCameraReceive(char *name, uint8_t *data) {
+int32_t os_tools_camera_receive(char *name, uint8_t *data) {
     return -1;
 }
 
-int32_t osToolsCameraClose(char *name) {
+int32_t os_tools_camera_close(char *name) {
     return -1;
 }
 
@@ -2664,8 +2664,8 @@ int32_t osToolsCameraClose(char *name) {
 
 /* Browser version of osTools - limited functionality */
 
-int32_t osToolsInit(char argv0[], GLFWwindow *window) {
-    osToolsIndependentInit(window);
+int32_t os_tools_init(char argv0[], GLFWwindow *window) {
+    os_tools_independent_init(window);
     /* get executable filepath */
     FILE *exStringFile = popen("pwd", "r");
     if (fscanf(exStringFile, "%s", osToolsFileDialog.executableFilepath) == 0) {
@@ -2682,12 +2682,12 @@ int32_t osToolsInit(char argv0[], GLFWwindow *window) {
     return 0;
 }
 
-int32_t osToolsFileDialogPrompt(ost_file_dialog_save_t openOrSave, ost_file_dialog_multiselect_t multiselect, ost_file_dialog_folder_t folder, char *prename, list_t *extensions) {
+int32_t os_tools_file_dialog_prompt(ost_file_dialog_save_t openOrSave, ost_file_dialog_multiselect_t multiselect, ost_file_dialog_folder_t folder, char *prename, list_t *extensions) {
     /* currently not supported in browser */
     return 0;
 }
 
-uint8_t *osToolsFileMap(char *filename, uint32_t *sizeOutput) {
+uint8_t *os_tools_file_map(char *filename, uint32_t *sizeOutput) {
     int32_t fd = open(filename, O_RDWR);
     struct stat stats;
     if (fstat(fd, &stats) == -1) {
@@ -2708,7 +2708,7 @@ uint8_t *osToolsFileMap(char *filename, uint32_t *sizeOutput) {
     return (uint8_t *) out;
 }
 
-int32_t osToolsFileUnmap(uint8_t *data) {
+int32_t os_tools_file_unmap(uint8_t *data) {
     int32_t index = -1;
     for (int32_t i = 0; i < osToolsMemmap.mappedFiles -> length; i += 3) {
         if (osToolsMemmap.mappedFiles -> data[i].p == data) {
@@ -2729,7 +2729,7 @@ int32_t osToolsFileUnmap(uint8_t *data) {
     }
 }
 
-list_t *osToolsFileAndFolderList(char *directory) {
+list_t *os_tools_file_and_folder_list(char *directory) {
     list_t *output = list_init();
     DIR *dir = opendir(directory);
     if (dir == NULL) {
@@ -2759,7 +2759,7 @@ list_t *osToolsFileAndFolderList(char *directory) {
     return output;
 }
 
-list_t *osToolsFileList(char *directory) {
+list_t *os_tools_file_list(char *directory) {
     list_t *output = list_init();
     DIR *dir = opendir(directory);
     if (dir == NULL) {
@@ -2783,7 +2783,7 @@ list_t *osToolsFileList(char *directory) {
     return output;
 }
 
-list_t *osToolsFolderList(char *directory) {
+list_t *os_tools_folder_list(char *directory) {
     list_t *output = list_init();
     DIR *dir = opendir(directory);
     if (dir == NULL) {
@@ -2810,17 +2810,17 @@ list_t *osToolsFolderList(char *directory) {
     return output;
 }
 
-int32_t osToolsFolderCreate(char *folder) {
+int32_t os_tools_folder_create(char *folder) {
     return mkdir(folder, 0755);
 }
 
-int32_t osToolsFolderDestroy(char *folder) {
+int32_t os_tools_folder_delete(char *folder) {
     char command[5000] = "rm -rf ";
     strcat(command, folder);
     return system(command);
 }
 
-void osToolsCloseConsole() {
+void os_tools_close_console() {
     /* don't know how to do this yet - https://unix.stackexchange.com/questions/743272/programatically-start-a-background-process-under-linux */
     return;
 }
@@ -2829,24 +2829,24 @@ void osToolsCloseConsole() {
 
 /* Serial support on linux: https://blog.mbedded.ninja/programming/operating-systems/linux/linux-serial-ports-using-c-cpp/ */
 
-list_t *osToolsSerialList() {
+list_t *os_tools_serial_list() {
     list_t *output = list_init();
     return output;
 }
 
-int32_t osToolsSerialOpen(char *name, osToolsSerialBaud_t baudRate) {
+int32_t os_tools_serial_open(char *name, osToolsSerialBaud_t baudRate) {
     return -1;
 }
 
-int32_t osToolsSerialSend(char *name, uint8_t *data, int32_t length) {
+int32_t os_tools_serial_send(char *name, uint8_t *data, int32_t length) {
     return -1;
 }
 
-int32_t osToolsSerialReceive(char *name, uint8_t *buffer, int32_t length, int32_t timeoutMilliseconds) {
+int32_t os_tools_serial_receive(char *name, uint8_t *buffer, int32_t length, int32_t timeoutMilliseconds) {
     return -1;
 }
 
-int32_t osToolsSerialClose(char *name) {
+int32_t os_tools_serial_close(char *name) {
     return -1;
 }
 
@@ -2874,18 +2874,18 @@ int32_t osToolsGetIP(char *address, uint8_t *buffer, int32_t maxSegments) {
     return segments;
 }
 
-int32_t osToolsGetSocketAddress(char *socketName, char *address, int32_t length) {
+int32_t os_tools_get_socket_address(char *socketName, char *address, int32_t length) {
     if (!socketName) {
-        // printf("osToolsGetSocketAddress ERROR: socketName is NULL\n");
+        // printf("os_tools_get_socket_address ERROR: socketName is NULL\n");
         return -1;
     }
     if (!address) {
-        // printf("osToolsGetSocketAddress ERROR: address is NULL\n");
+        // printf("os_tools_get_socket_address ERROR: address is NULL\n");
         return -1;
     }
     int32_t socketIndex = list_find(osToolsSocket.socket, (unitype) socketName, 's');
     if (socketIndex == -1) {
-        // printf("osToolsGetSocketAddress ERROR: Could not find socket %s\n", socketName);
+        // printf("os_tools_get_socket_address ERROR: Could not find socket %s\n", socketName);
         return -1;
     }
     /* only IPv4 */
@@ -2896,18 +2896,18 @@ int32_t osToolsGetSocketAddress(char *socketName, char *address, int32_t length)
     return 0;
 }
 
-int32_t osToolsGetPort(char *socketName, char *port, int32_t length) {
+int32_t os_tools_get_port(char *socketName, char *port, int32_t length) {
     if (!socketName) {
-        // printf("osToolsGetSocketAddress ERROR: socketName is NULL\n");
+        // printf("os_tools_get_port ERROR: socketName is NULL\n");
         return -1;
     }
     if (!port) {
-        // printf("osToolsGetSocketAddress ERROR: port is NULL\n");
+        // printf("os_tools_get_port ERROR: port is NULL\n");
         return -1;
     }
     int32_t socketIndex = list_find(osToolsSocket.socket, (unitype) socketName, 's');
     if (socketIndex == -1) {
-        // printf("osToolsGetPort ERROR: Could not find socket %s\n", socketName);
+        // printf("os_tools_get_port ERROR: Could not find socket %s\n", socketName);
         return -1;
     }
     char portA[8];
@@ -2919,13 +2919,13 @@ int32_t osToolsGetPort(char *socketName, char *port, int32_t length) {
 
 #ifdef TURTLE_ENABLE_SOCKETS
 
-int32_t osToolsServerSocketCreate(char *serverName, osToolsSocketProtocol_t protocol, char *serverPort) {
+int32_t os_tools_server_socket_create(char *serverName, osToolsSocketProtocol_t protocol, char *serverPort) {
     if (!serverName) {
-        // printf("osToolsServerSocketCreate ERROR: serverName is NULL\n");
+        // printf("os_tools_server_socket_create ERROR: serverName is NULL\n");
         return -1;
     }
     if (!serverPort) {
-        // printf("osToolsServerSocketCreate ERROR: port is NULL\n");
+        // printf("os_tools_server_socket_create ERROR: port is NULL\n");
         return -1;
     }
     int32_t status;
@@ -2947,14 +2947,14 @@ int32_t osToolsServerSocketCreate(char *serverName, osToolsSocketProtocol_t prot
     char hostName[128];
     status = gethostname(hostName, sizeof(hostName));
     if (status == -1) {
-        // printf("osToolsServerSocketCreate ERROR: Could not gethostname\n");
+        // printf("os_tools_server_socket_create ERROR: Could not gethostname\n");
         return -1;
     }
     printf("Host Name: %s\n", hostName);
 
     struct hostent *host = gethostbyname(hostName);
     if (host == NULL) {
-        // printf("osToolsServerSocketCreate ERROR: Could not gethostbyname\n");
+        // printf("os_tools_server_socket_create ERROR: Could not gethostbyname\n");
         return -1;
     }
 
@@ -2967,18 +2967,18 @@ int32_t osToolsServerSocketCreate(char *serverName, osToolsSocketProtocol_t prot
     }
     char *serverAddress = inet_ntoa(address);
     if (serverAddress == NULL) {
-        // printf("osToolsServerSocketCreate ERROR: No addresses to create server on\n");
+        // printf("os_tools_server_socket_create ERROR: No addresses to create server on\n");
         return -1;
     }
     uint8_t ipAddress[4] = {0};
     if (osToolsGetIP(serverAddress, ipAddress, 4) != 4) {
-        // printf("osToolsServerSocketCreate ERROR: Invalid ip address\n");
+        // printf("os_tools_server_socket_create ERROR: Invalid ip address\n");
     }
 
     /* Resolve the server address and port */
     status = getaddrinfo(serverAddress, serverPort, &hints, &result);
     if (status != 0) {
-        // printf("osToolsServerSocketCreate ERROR: Could not getaddrinfo\n");
+        // printf("os_tools_server_socket_create ERROR: Could not getaddrinfo\n");
         return -1;
     }
     struct addrinfo *resultElement = result;
@@ -2987,7 +2987,7 @@ int32_t osToolsServerSocketCreate(char *serverName, osToolsSocketProtocol_t prot
         resultElement = resultElement -> ai_next;
     }
     if (result == NULL) {
-        // printf("osToolsServerSocketCreate ERROR: getaddrinfo returned NULL\n");
+        // printf("os_tools_server_socket_create ERROR: getaddrinfo returned NULL\n");
         return -1;
     }
 
@@ -2995,7 +2995,7 @@ int32_t osToolsServerSocketCreate(char *serverName, osToolsSocketProtocol_t prot
     int32_t sockfd = socket(result -> ai_family, result -> ai_socktype, result -> ai_protocol);
     if (sockfd == -1) {
         freeaddrinfo(result);
-        // printf("osToolsServerSocketCreate ERROR: Could not create socket\n");
+        // printf("os_tools_server_socket_create ERROR: Could not create socket\n");
         return -1;
     }
 
@@ -3003,7 +3003,7 @@ int32_t osToolsServerSocketCreate(char *serverName, osToolsSocketProtocol_t prot
     status = bind(sockfd, result -> ai_addr, result -> ai_addrlen);
     if (status == -1) {
         freeaddrinfo(result);
-        // printf("osToolsServerSocketCreate ERROR: Could not bind socket %s to address %s\n", serverName, serverAddress);
+        // printf("os_tools_server_socket_create ERROR: Could not bind socket %s to address %s\n", serverName, serverAddress);
         return -1;
     }
     freeaddrinfo(result);
@@ -3029,18 +3029,18 @@ int32_t osToolsServerSocketCreate(char *serverName, osToolsSocketProtocol_t prot
     return 0;
 }
 
-int32_t osToolsServerSocketListen(char *serverName, char *clientName) {
+int32_t os_tools_server_socket_listen(char *serverName, char *clientName) {
     if (!serverName) {
-        // printf("osToolsServerSocketListen ERROR: serverName is NULL\n");
+        // printf("os_tools_server_socket_listen ERROR: serverName is NULL\n");
         return -1;
     }
     if (!clientName) {
-        // printf("osToolsServerSocketListen ERROR: clientName is NULL\n");
+        // printf("os_tools_server_socket_listen ERROR: clientName is NULL\n");
         return -1;
     }
     int32_t socketIndex = list_find(osToolsSocket.socket, (unitype) serverName, 's');
     if (socketIndex == -1) {
-        // printf("osToolsServerSocketListen ERROR: Could not find socket %s\n", serverName);
+        // printf("os_tools_server_socket_listen ERROR: Could not find socket %s\n", serverName);
         return -1;
     }
     int32_t status;
@@ -3048,19 +3048,19 @@ int32_t osToolsServerSocketListen(char *serverName, char *clientName) {
 
     status = listen(sockfd, SOMAXCONN);
     if (status == -1) {
-        // printf("osToolsServerSocketListen ERROR: Listen failed\n");
+        // printf("os_tools_server_socket_listen ERROR: Listen failed\n");
         return -1;
     }
     struct sockaddr_in address;
     uint32_t addressLen = sizeof(address);
     int32_t connectionfd = accept(sockfd, (struct sockaddr *) &address, &addressLen);
     if (connectionfd == -1) {
-        // printf("osToolsServerSocketListen ERROR: Accept failed\n");
+        // printf("os_tools_server_socket_listen ERROR: Accept failed\n");
         return -1;
     }
     uint8_t ipAddress[4] = {0};
     if (osToolsGetIP(inet_ntoa(address.sin_addr), ipAddress, 4) != 4) {
-        // printf("osToolsServerSocketListen ERROR: Invalid ip address\n");
+        // printf("os_tools_server_socket_listen ERROR: Invalid ip address\n");
     }
     printf("Incoming connection from %s:%d\n", inet_ntoa(address.sin_addr), address.sin_port);
     list_append(osToolsSocket.socket, (unitype) clientName, 's');
@@ -3082,22 +3082,22 @@ int32_t osToolsServerSocketListen(char *serverName, char *clientName) {
     return 0;
 }
 
-int32_t osToolsClientSocketCreate(char *clientName, osToolsSocketProtocol_t protocol, char *serverAddress, char *serverPort, int32_t timeoutMilliseconds) {
+int32_t os_tools_client_socket_create(char *clientName, osToolsSocketProtocol_t protocol, char *serverAddress, char *serverPort, int32_t timeoutMilliseconds) {
     if (!clientName) {
-        // printf("osToolsClientSocketCreate ERROR: clientName is NULL\n");
+        // printf("os_tools_client_socket_create ERROR: clientName is NULL\n");
         return -1;
     }
     if (!serverAddress) {
-        // printf("osToolsClientSocketCreate ERROR: serverAddress is NULL\n");
+        // printf("os_tools_client_socket_create ERROR: serverAddress is NULL\n");
         return -1;
     }
     if (!serverPort) {
-        // printf("osToolsClientSocketCreate ERROR: port is NULL\n");
+        // printf("os_tools_client_socket_create ERROR: port is NULL\n");
         return -1;
     }
     uint8_t ipAddress[4] = {0};
     if (osToolsGetIP(serverAddress, ipAddress, 4) != 4) {
-        // printf("osToolsClientSocketCreate ERROR: Invalid ip address\n");
+        // printf("os_tools_client_socket_create ERROR: Invalid ip address\n");
         return -1;
     }
     int32_t status;
@@ -3117,7 +3117,7 @@ int32_t osToolsClientSocketCreate(char *clientName, osToolsSocketProtocol_t prot
 
     status = getaddrinfo(serverAddress, serverPort, &hints, &result);
     if (status != 0) {
-        // printf("osToolsClientSocketCreate ERROR: Could not getaddrinfo of %s:%s, failed with %d\n", serverAddress, serverPort, status);
+        // printf("os_tools_client_socket_create ERROR: Could not getaddrinfo of %s:%s, failed with %d\n", serverAddress, serverPort, status);
         return -1;
     }
 
@@ -3127,32 +3127,32 @@ int32_t osToolsClientSocketCreate(char *clientName, osToolsSocketProtocol_t prot
         resultElement = resultElement -> ai_next;
     }
     if (result == NULL) {
-        // printf("osToolsClientSocketCreate ERROR: getaddrinfo returned NULL\n");
+        // printf("os_tools_client_socket_create ERROR: getaddrinfo returned NULL\n");
         return -1;
     }
     /* Use the first element of linked list returned by getaddrinfo */
     int32_t sockfd = socket(result -> ai_family, result -> ai_socktype, result -> ai_protocol);
     if (sockfd == -1) {
         freeaddrinfo(result);
-        // printf("osToolsClientSocketCreate ERROR: Could not create socket\n");
+        // printf("os_tools_client_socket_create ERROR: Could not create socket\n");
         return -1;
     }
     /* set socket to non blocking mode while connecting - https://stackoverflow.com/questions/1543466/how-do-i-change-a-tcp-socket-to-be-non-blocking */
     status = fcntl(sockfd, F_GETFL, 0);
     if (status == -1) {
-        // printf("osToolsClientSocketCreate ERROR: Could not get fcntl flags\n");
+        // printf("os_tools_client_socket_create ERROR: Could not get fcntl flags\n");
         return -1;
     }
     status &= O_NONBLOCK;
     status = fcntl(sockfd, F_SETFL, status);
     if (status != 0) {
-        // printf("osToolsClientSocketCreate ERROR: Could not set socket to non-blocking mode\n");
+        // printf("os_tools_client_socket_create ERROR: Could not set socket to non-blocking mode\n");
         return -1;
     }
     status = connect(sockfd, result -> ai_addr, (int32_t) result -> ai_addrlen);
     if (status == -1) {
         if (errno != EINPROGRESS) {
-            // printf("osToolsClientSocketCreate ERROR: Could not connect socket %d (%s)\n", errno, strerror(errno));
+            // printf("os_tools_client_socket_create ERROR: Could not connect socket %d (%s)\n", errno, strerror(errno));
             return -1;
         }
         struct timeval timeout;
@@ -3163,20 +3163,20 @@ int32_t osToolsClientSocketCreate(char *clientName, osToolsSocketProtocol_t prot
         fdsockArray.fds_bits[0] = sockfd;
         status = select(sockfd + 1, NULL, &fdsockArray, NULL, &timeout);
         if (status != 1) {
-            // printf("osToolsClientSocketCreate ERROR: Could not connect socket (timeout)\n");
+            // printf("os_tools_client_socket_create ERROR: Could not connect socket (timeout)\n");
             return -1;
         }
     }
     /* set socket back to blocking mode */
     status = fcntl(sockfd, F_GETFL, 0);
     if (status == -1) {
-        // printf("osToolsClientSocketCreate ERROR: Could not get fcntl flags\n");
+        // printf("os_tools_client_socket_create ERROR: Could not get fcntl flags\n");
         return -1;
     }
     status &= ~O_NONBLOCK;
     status = fcntl(sockfd, F_SETFL, status);
     if (status != 0) {
-        // printf("osToolsClientSocketCreate ERROR: Could not set socket to blocking mode\n");
+        // printf("os_tools_client_socket_create ERROR: Could not set socket to blocking mode\n");
         return -1;
     }
     printf("Connected to %s:%s\n", serverAddress, serverPort);
@@ -3201,32 +3201,32 @@ int32_t osToolsClientSocketCreate(char *clientName, osToolsSocketProtocol_t prot
     return 0;
 }
 
-int32_t osToolsSocketSend(char *socketName, uint8_t *data, int32_t length) {
+int32_t os_tools_socket_send(char *socketName, uint8_t *data, int32_t length) {
     if (!socketName) {
-        // printf("osToolsSocketSend ERROR: socketName is NULL\n");
+        // printf("os_tools_socket_send ERROR: socketName is NULL\n");
         return -1;
     }
     int32_t socketIndex = list_find(osToolsSocket.socket, (unitype) socketName, 's');
     if (socketIndex == -1) {
-        // printf("osToolsSocketSend ERROR: Could not find socket %s\n", socketName);
+        // printf("os_tools_socket_send ERROR: Could not find socket %s\n", socketName);
         return -1;
     }
     int32_t status = send(osToolsSocket.socket -> data[socketIndex + OSI_SOCKET].i, (char *) data, length, 0);
     if (status == -1) {
-        // printf("osToolsSocketSend ERROR: Failed to send\n");
+        // printf("os_tools_socket_send ERROR: Failed to send\n");
         return -1;
     }
     return status;
 }
 
-int32_t osToolsSocketReceive(char *socketName, uint8_t *data, int32_t length, int32_t timeoutMilliseconds) {
+int32_t os_tools_socket_receive(char *socketName, uint8_t *data, int32_t length, int32_t timeoutMilliseconds) {
     if (!socketName) {
-        // printf("osToolsSocketReceive ERROR: socketName is NULL\n");
+        // printf("os_tools_socket_receive ERROR: socketName is NULL\n");
         return -1;
     }
     int32_t socketIndex = list_find(osToolsSocket.socket, (unitype) socketName, 's');
     if (socketIndex == -1) {
-        // printf("osToolsSocketReceive ERROR: Could not find socket %s\n", socketName);
+        // printf("os_tools_socket_receive ERROR: Could not find socket %s\n", socketName);
         return -1;
     }
     setsockopt(osToolsSocket.socket -> data[socketIndex + OSI_SOCKET].i, SOL_SOCKET, SO_RCVTIMEO, (char *) &timeoutMilliseconds, sizeof(timeoutMilliseconds)); // https://stackoverflow.com/questions/2876024/linux-is-there-a-read-or-recv-from-socket-with-timeout
@@ -3234,29 +3234,29 @@ int32_t osToolsSocketReceive(char *socketName, uint8_t *data, int32_t length, in
     if (status == -1) {
         if (errno == EAGAIN || errno == EWOULDBLOCK) {
             /* timeout */
-            // printf("osToolsSocketReceive ERROR: Failed to receive (timeout)\n");
+            // printf("os_tools_socket_receive ERROR: Failed to receive (timeout)\n");
             return 0;
         }
-        // printf("osToolsSocketReceive ERROR: Failed to receive\n");
+        // printf("os_tools_socket_receive ERROR: Failed to receive\n");
         return -1;
     }
     return status;
 }
 
-int32_t osToolsSocketDestroy(char *socketName) {
+int32_t os_tools_socket_delete(char *socketName) {
     if (!socketName) {
-        // printf("osToolsSocketDestroy ERROR: socketName is NULL\n");
+        // printf("os_tools_socket_delete ERROR: socketName is NULL\n");
         return -1;
     }
     int32_t socketIndex = list_find(osToolsSocket.socket, (unitype) socketName, 's');
     if (socketIndex == -1) {
-        // printf("osToolsSocketDestroy ERROR: Could not find socket %s\n", socketName);
+        // printf("os_tools_socket_delete ERROR: Could not find socket %s\n", socketName);
         return -1;
     }
     /* shutdown and close socket */
     int32_t status = shutdown(osToolsSocket.socket -> data[socketIndex + OSI_SOCKET].i, SHUT_RDWR);
     if (status == -1) {
-        // printf("osToolsSocketDestroy WARN: Shutdown not successful\n");
+        // printf("os_tools_socket_delete WARN: Shutdown not successful\n");
     }
     close(osToolsSocket.socket -> data[socketIndex + OSI_SOCKET].i);
     list_delete_range(osToolsSocket.socket, socketIndex, socketIndex + OSI_NUMBER_OF_FIELDS);
@@ -3267,20 +3267,20 @@ int32_t osToolsSocketDestroy(char *socketName) {
 
 #ifdef TURTLE_ENABLE_CAMERA
 
-list_t *osToolsCameraList() {
+list_t *os_tools_camera_list() {
     list_t *output = list_init();
     return output;
 }
 
-int32_t osToolsCameraOpen(char *name) {
+int32_t os_tools_camera_open(char *name) {
     return -1;
 }
 
-int32_t osToolsCameraReceive(char *name, uint8_t *data) {
+int32_t os_tools_camera_receive(char *name, uint8_t *data) {
     return -1;
 }
 
-int32_t osToolsCameraClose(char *name) {
+int32_t os_tools_camera_close(char *name) {
     return -1;
 }
 
