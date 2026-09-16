@@ -3,16 +3,16 @@
 #include <time.h>
 
 void parseRibbonOutput() {
-    if (tt_ribbon.output[0] == 0) {
+    if (turtleToolsRibbon.output[0] == 0) {
         return;
     }
-    tt_ribbon.output[0] = 0;
-    if (tt_ribbon.output[1] == 0) { // File
-        if (tt_ribbon.output[2] == 1) { // New
+    turtleToolsRibbon.output[0] = 0;
+    if (turtleToolsRibbon.output[1] == 0) { // File
+        if (turtleToolsRibbon.output[2] == 1) { // New
             list_clear(osToolsFileDialog.selectedFilenames);
             printf("New\n");
         }
-        if (tt_ribbon.output[2] == 2) { // Save
+        if (turtleToolsRibbon.output[2] == 2) { // Save
             if (osToolsFileDialog.selectedFilenames -> length == 0) {
                 if (os_tools_file_dialog_save(OSTOOLS_FILE_DIALOG_FILE, "Save.txt", NULL) != -1) {
                     printf("Saved to: %s\n", osToolsFileDialog.selectedFilenames -> data[0].s);
@@ -21,13 +21,13 @@ void parseRibbonOutput() {
                 printf("Saved to: %s\n", osToolsFileDialog.selectedFilenames -> data[0].s);
             }
         }
-        if (tt_ribbon.output[2] == 3) { // Save As...
+        if (turtleToolsRibbon.output[2] == 3) { // Save As...
             list_clear(osToolsFileDialog.selectedFilenames);
             if (os_tools_file_dialog_save(OSTOOLS_FILE_DIALOG_FILE, "Save.txt", NULL) != -1) {
                 printf("Saved to: %s\n", osToolsFileDialog.selectedFilenames -> data[0].s);
             }
         }
-        if (tt_ribbon.output[2] == 4) { // Open
+        if (turtleToolsRibbon.output[2] == 4) { // Open
             list_clear(osToolsFileDialog.selectedFilenames);
             if (os_tools_file_dialog_open(OSTOOLS_FILE_DIALOG_MULTIPLE_SELECT, OSTOOLS_FILE_DIALOG_FILE, "", NULL) != -1) {
                 printf("Loaded data from: ");
@@ -35,59 +35,59 @@ void parseRibbonOutput() {
             }
         }
     }
-    if (tt_ribbon.output[1] == 1) { // Edit
-        if (tt_ribbon.output[2] == 1) { // Undo
+    if (turtleToolsRibbon.output[1] == 1) { // Edit
+        if (turtleToolsRibbon.output[2] == 1) { // Undo
             printf("Undo\n");
         }
-        if (tt_ribbon.output[2] == 2) { // Redo
+        if (turtleToolsRibbon.output[2] == 2) { // Redo
             printf("Redo\n");
         }
-        if (tt_ribbon.output[2] == 3) { // Cut
+        if (turtleToolsRibbon.output[2] == 3) { // Cut
             os_tools_clipboard_set_text("test123");
             printf("Cut \"test123\" to clipboard!\n");
         }
-        if (tt_ribbon.output[2] == 4) { // Copy
+        if (turtleToolsRibbon.output[2] == 4) { // Copy
             os_tools_clipboard_set_text("test345");
             printf("Copied \"test345\" to clipboard!\n");
         }
-        if (tt_ribbon.output[2] == 5) { // Paste
+        if (turtleToolsRibbon.output[2] == 5) { // Paste
             os_tools_clipboard_get_text();
             printf("Pasted \"%s\" from clipboard!\n", osToolsClipboard.text);
         }
     }
-    if (tt_ribbon.output[1] == 2) { // View
-        if (tt_ribbon.output[2] == 1) { // Change theme
+    if (turtleToolsRibbon.output[1] == 2) { // View
+        if (turtleToolsRibbon.output[2] == 1) { // Change theme
             printf("Change theme\n");
-            if (tt_theme == TT_THEME_DARK) {
+            if (turtleToolsTheme == TT_THEME_DARK) {
                 turtle_background_color(36, 30, 32);
-                turtleToolsSetTheme(TT_THEME_COLT);
-            } else if (tt_theme == TT_THEME_COLT) {
+                turtle_tools_set_theme(TT_THEME_COLT);
+            } else if (turtleToolsTheme == TT_THEME_COLT) {
                 turtle_background_color(212, 201, 190);
-                turtleToolsSetTheme(TT_THEME_NAVY);
-            } else if (tt_theme == TT_THEME_NAVY) {
+                turtle_tools_set_theme(TT_THEME_NAVY);
+            } else if (turtleToolsTheme == TT_THEME_NAVY) {
                 turtle_background_color(255, 255, 255);
-                turtleToolsSetTheme(TT_THEME_LIGHT);
-            } else if (tt_theme == TT_THEME_LIGHT) {
+                turtle_tools_set_theme(TT_THEME_LIGHT);
+            } else if (turtleToolsTheme == TT_THEME_LIGHT) {
                 turtle_background_color(30, 30, 30);
-                turtleToolsSetTheme(TT_THEME_DARK);
+                turtle_tools_set_theme(TT_THEME_DARK);
             }
         }
-        if (tt_ribbon.output[2] == 2) { // GLFW
+        if (turtleToolsRibbon.output[2] == 2) { // GLFW
             printf("GLFW settings\n");
         }
     }
 }
 
 void parsePopupOutput(GLFWwindow *window) {
-    if (tt_popup.output[0] == 0) {
+    if (turtleToolsPopup.output[0] == 0) {
         return;
     }
-    tt_popup.output[0] = 0; // untoggle
-    if (tt_popup.output[1] == 0) { // cancel
+    turtleToolsPopup.output[0] = 0; // untoggle
+    if (turtleToolsPopup.output[1] == 0) { // cancel
         turtle.close = 0;
         glfwSetWindowShouldClose(window, 0);
     }
-    if (tt_popup.output[1] == 1) { // close
+    if (turtleToolsPopup.output[1] == 1) { // close
         turtle.popupClose = 1;
     }
 }
@@ -115,26 +115,26 @@ int main(int argc, char *argv[]) {
     turtle_text_init(constructedFilepath);
 
     /* initialise turtleTools ribbon */
-    turtleToolsSetTheme(TT_THEME_DARK); // dark theme preset
+    turtle_tools_set_theme(TT_THEME_DARK); // dark theme preset
     strcpy(constructedFilepath, osToolsFileDialog.executableFilepath);
     strcat(constructedFilepath, "config/ribbonConfig.txt");
-    tt_ribbonInit(constructedFilepath);
+    turtle_tools_ribbon_init(constructedFilepath);
 
     // list_t *ribbonConfig = list_init();
     // list_append(ribbonConfig, (unitype) "File, 📄 New, 📄 Save, 📄 Save As..., 📄 Open", 's');
     // list_append(ribbonConfig, (unitype) "Edit, Undo, Redo, Cut, Copy, Paste", 's');
     // list_append(ribbonConfig, (unitype) "View, Change Theme, GLFW", 's');
-    // tt_ribbonInitList(ribbonConfig);
+    // turtle_tools_ribbon_init_list(ribbonConfig);
 
     /* initialise turtleTools popup */
     strcpy(constructedFilepath, osToolsFileDialog.executableFilepath);
     strcat(constructedFilepath, "config/popupConfig.txt");
-    tt_popupInit(constructedFilepath);
+    turtle_tools_popup_init(constructedFilepath);
     // list_t *popupConfig = list_init();
     // list_append(popupConfig, (unitype) "Are you sure you want to close?", 's');
     // list_append(popupConfig, (unitype) "Cancel", 's');
     // list_append(popupConfig, (unitype) "Close", 's');
-    // tt_popupInitList(popupConfig);
+    // turtle_tools_popup_init_list(popupConfig);
     strcpy(constructedFilepath, osToolsFileDialog.executableFilepath);
     strcat(constructedFilepath, "config/test.csv");
     list_t *rowLike = os_tools_load_csv_string(constructedFilepath, OSTOOLS_CSV_ROW);
@@ -229,7 +229,7 @@ int main(int argc, char *argv[]) {
     int32_t oldImageDropdown = imageDropdown -> value;
 
     int32_t sliderVar = 0, dialVar = 0;
-    tt_button_t *button = tt_buttonInit("Button", NULL, 150, 20, 10);
+    turtle_tools_button_t *button = tt_buttonInit("Button", NULL, 150, 20, 10);
     button -> shape = TT_BUTTON_SHAPE_ROUNDED_RECTANGLE;
     tt_switchInit("Switch", NULL, 150, -20, 10);
     tt_dialInit("Exp", &dialVar, TT_DIAL_SCALE_EXP, -150, 20, 10, 0, 1000, NULL, 1);
@@ -293,24 +293,24 @@ int main(int argc, char *argv[]) {
     checkbox -> style = TT_SWITCH_STYLE_CHECKBOX;
     xbox -> value = 1;
     xbox -> style = TT_SWITCH_STYLE_XBOX;
-    tt_button_t *textButton = tt_buttonInit("Text Button", NULL, 330, -30, 10);
-    tt_button_t *circleButton = tt_buttonInit("Circle Button", NULL, 338, -100, 10);
+    turtle_tools_button_t *textButton = tt_buttonInit("Text Button", NULL, 330, -30, 10);
+    turtle_tools_button_t *circleButton = tt_buttonInit("Circle Button", NULL, 338, -100, 10);
     textButton -> shape = TT_BUTTON_SHAPE_TEXT;
     circleButton -> shape = TT_BUTTON_SHAPE_CIRCLE;
 
     uint64_t tick = 0; // count number of ticks since application started
     tt_readerInit("tick", (unitype *) &tick, 'l', -315, 155, 10);
-    tt_readerInit("tt_globals.elementLogicTypeOld", (unitype *) &tt_globals.elementLogicTypeOld, 'i', -315, 135, 10);
-    tt_readerInit("tt_globals.elementLogicIndexOld", (unitype *) &tt_globals.elementLogicIndexOld, 'i', -315, 115, 10);
+    tt_readerInit("elementLogicTypeOld", (unitype *) &turtleToolsGlobals.elementLogicTypeOld, 'i', -315, 135, 10);
+    tt_readerInit("elementLogicIndexOld", (unitype *) &turtleToolsGlobals.elementLogicIndexOld, 'i', -315, 115, 10);
     tt_reader_t *listReader = tt_readerInit("Sources", (unitype *) &sources, 'r', -315, 95, 10);
     listReader -> height = 175;
     listReader -> width = 100;
 
     list_t *xPositions = list_init();
     list_t *yPositions = list_init();
-    for (int32_t i = 0; i < tt_elements.all -> length; i++) {
-        list_append(xPositions, (unitype) ((tt_button_t *) tt_elements.all -> data[i].p) -> x, 'd');
-        list_append(yPositions, (unitype) ((tt_button_t *) tt_elements.all -> data[i].p) -> y, 'd');
+    for (int32_t i = 0; i < turtleToolsElements.all -> length; i++) {
+        list_append(xPositions, (unitype) ((turtle_tools_button_t *) turtleToolsElements.all -> data[i].p) -> x, 'd');
+        list_append(yPositions, (unitype) ((turtle_tools_button_t *) turtleToolsElements.all -> data[i].p) -> y, 'd');
     }
 
     double scroll = 0.0;
@@ -327,15 +327,15 @@ int main(int argc, char *argv[]) {
         turtle_get_mouse_coordinates();
         turtle_clear();
         /* update element positions (scrollbar) */
-        for (int32_t i = 0; i < tt_elements.all -> length; i++) {
-            if (((tt_button_t *) tt_elements.all -> data[i].p) -> element != TT_ELEMENT_SCROLLBAR && ((tt_button_t *) tt_elements.all -> data[i].p) -> element != TT_ELEMENT_CONTEXT) {
-                if ((((tt_button_t *) tt_elements.all -> data[i].p) -> element == TT_ELEMENT_VARIABLE_READER || ((tt_button_t *) tt_elements.all -> data[i].p) -> element == TT_ELEMENT_LIST_READER) && (((tt_reader_t *) tt_elements.all -> data[i].p) -> status == TT_STATUS_CLICK || ((tt_reader_t *) tt_elements.all -> data[i].p) -> status == TT_STATUS_CLICK_FIRST_TICK)) {
-                    xPositions -> data[i].d = ((tt_button_t *) tt_elements.all -> data[i].p) -> x + scrollbarX -> value * 5;
-                    yPositions -> data[i].d = ((tt_button_t *) tt_elements.all -> data[i].p) -> y - scrollbarY -> value * 3.3;
+        for (int32_t i = 0; i < turtleToolsElements.all -> length; i++) {
+            if (((turtle_tools_button_t *) turtleToolsElements.all -> data[i].p) -> element != TT_ELEMENT_SCROLLBAR && ((turtle_tools_button_t *) turtleToolsElements.all -> data[i].p) -> element != TT_ELEMENT_CONTEXT) {
+                if ((((turtle_tools_button_t *) turtleToolsElements.all -> data[i].p) -> element == TT_ELEMENT_VARIABLE_READER || ((turtle_tools_button_t *) turtleToolsElements.all -> data[i].p) -> element == TT_ELEMENT_LIST_READER) && (((tt_reader_t *) turtleToolsElements.all -> data[i].p) -> status == TT_STATUS_CLICK || ((tt_reader_t *) turtleToolsElements.all -> data[i].p) -> status == TT_STATUS_CLICK_FIRST_TICK)) {
+                    xPositions -> data[i].d = ((turtle_tools_button_t *) turtleToolsElements.all -> data[i].p) -> x + scrollbarX -> value * 5;
+                    yPositions -> data[i].d = ((turtle_tools_button_t *) turtleToolsElements.all -> data[i].p) -> y - scrollbarY -> value * 3.3;
                     continue;
                 }
-                ((tt_button_t *) tt_elements.all -> data[i].p) -> x = xPositions -> data[i].d - scrollbarX -> value * 5;
-                ((tt_button_t *) tt_elements.all -> data[i].p) -> y = yPositions -> data[i].d + scrollbarY -> value * 3.3;
+                ((turtle_tools_button_t *) turtleToolsElements.all -> data[i].p) -> x = xPositions -> data[i].d - scrollbarX -> value * 5;
+                ((turtle_tools_button_t *) turtleToolsElements.all -> data[i].p) -> y = yPositions -> data[i].d + scrollbarY -> value * 3.3;
             }
         }
 
@@ -346,7 +346,7 @@ int main(int argc, char *argv[]) {
         }
 
         /* write all characters supported */
-        tt_setColor(TT_COLOR_TEXT);
+        turtle_tools_set_color(TT_COLOR_TEXT);
         turtle_text_write_unicode("AÀÁĂÄÃÅĀĄÆBCĆČĊÇDĎĐÐEÈÉĚÊËĒĖĘƏFGĞĠHĦ", scrollbarX -> value * -5 + 260, scrollbarY -> value * 3.3 - 180, 10, 0);
         turtle_text_write_unicode("IÌÍÎÏĪİĮJKĶLĹĽĻŁĿMNŃŇÑŅOÒÓÔÖÕŐØŒPQRŔ", scrollbarX -> value * -5 + 260, scrollbarY -> value * 3.3 - 195, 10, 0);
         turtle_text_write_unicode("ŘSŚŠŞȘẞTŤȚÞUÙÚÛÜŮŰŪŲVWXYÝZŹŽŻaàáâăäã", scrollbarX -> value * -5 + 260, scrollbarY -> value * 3.3 - 210, 10, 0);
@@ -442,7 +442,7 @@ int main(int argc, char *argv[]) {
         if (turtle_mouse_right()) {
             if (keys[1] == 0) {
                 keys[1] = 1;
-                if (tt_globals.elementLogicType == TT_ELEMENT_CONTEXT || tt_globals.elementLogicType == TT_ELEMENT_NONE) {
+                if (turtleToolsGlobals.elementLogicType == TT_ELEMENT_CONTEXT || turtleToolsGlobals.elementLogicType == TT_ELEMENT_NONE) {
                     context -> enabled = TT_ELEMENT_ENABLED;
                     context -> x = turtle.mouseX;
                     context -> y = turtle.mouseY;
@@ -452,7 +452,7 @@ int main(int argc, char *argv[]) {
             keys[1] = 0;
         }
         turtleToolsUpdate(); // update turtleTools
-        tt_setColor(TT_COLOR_TEXT);
+        turtle_tools_set_color(TT_COLOR_TEXT);
         turtle_text_write_stringf(-310, -170, 5, 0, "%.2lf, %.2lf", turtle.mouseX, turtle.mouseY);
         parseRibbonOutput(); // user defined function to use ribbon
         parsePopupOutput(window); // user defined function to use popup
