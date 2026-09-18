@@ -337,7 +337,7 @@ typedef enum {
     TT_STATUS_OPEN = 7,                  // Used to indicate a context menu or dropdown is open, or a textbox is accepting text
     TT_STATUS_OPEN_CLICK_FIRST_TICK = 8, // Used for dropdowns and context menus when an option is clicked (first tick)
     TT_STATUS_OPEN_CLICK = 9,            // Used for dropdowns and context menus when an option is clicked
-} turtle_status_t;
+} turtle_tools_status_t;
 
 #define TT_LABEL_LENGTH_LIMIT 128
 
@@ -366,7 +366,7 @@ typedef struct {
     double size;
     int8_t *variable; // bound variable (can be NULL)
     char label[TT_LABEL_LENGTH_LIMIT];
-    turtle_status_t status;
+    turtle_tools_status_t status;
     turtle_tools_button_shape_t shape;
     turtle_tools_button_align_t align;
     /* value */
@@ -400,23 +400,23 @@ typedef struct {
     double size;
     int8_t *variable; // bound variable (can be NULL)
     char label[TT_LABEL_LENGTH_LIMIT];
-    turtle_status_t status;
+    turtle_tools_status_t status;
     turtle_tools_switch_style_t style;
     turtle_tools_switch_align_t align;
     /* value */
     int8_t value; // 1 if switch is flipped, 0 otherwise
-} tt_switch_t;
+} turtle_tools_switch_t;
 
 typedef enum {
     TT_DIAL_SCALE_LINEAR = 0,
     TT_DIAL_SCALE_LOG = 1,
     TT_DIAL_SCALE_EXP = 2,
-} tt_dial_scale_t;
+} turtle_tools_dial_scale_t;
 
 typedef enum {
     TT_DIAL_STYLE_CLASSIC = 0,
     TT_DIAL_STYLE_SPEEDOMETER = 1,
-} tt_dial_style_t;
+} turtle_tools_dial_style_t;
 
 /* dial */
 typedef struct {
@@ -430,40 +430,40 @@ typedef struct {
     double size;
     int32_t *variable; // bound variable (can be NULL)
     char label[TT_LABEL_LENGTH_LIMIT];
-    turtle_status_t status;
+    turtle_tools_status_t status;
     double mouseAnchor;
-    tt_dial_scale_t scale;
-    tt_dial_style_t style;
+    turtle_tools_dial_scale_t scale;
+    turtle_tools_dial_style_t style;
     int32_t range[2];
     char render[32];
     double renderMultiplier;
     int32_t defaultValue;
     /* value */
     int32_t value; // value of dial
-} tt_dial_t;
+} turtle_tools_dial_t;
 
 typedef enum {
     TT_SLIDER_TYPE_HORIZONTAL = 0,
     TT_SLIDER_TYPE_VERTICAL = 1,
-} tt_slider_type_t;
+} turtle_tools_slider_type_t;
 
 typedef enum {
     TT_SLIDER_ALIGN_LEFT = 0,
     TT_SLIDER_ALIGN_CENTER = 1,
     TT_SLIDER_ALIGN_RIGHT = 2,
-} tt_slider_align_t;
+} turtle_tools_slider_align_t;
 
 typedef enum {
     TT_SLIDER_SCALE_LINEAR = 0,
     TT_SLIDER_SCALE_LOG = 1,
     TT_SLIDER_SCALE_EXP = 2,
-} tt_slider_scale_t;
+} turtle_tools_slider_scale_t;
 
 typedef enum {
     TT_SLIDER_STYLE_CLASSIC = 0,
     TT_SLIDER_STYLE_SIDESWIPE = 1,
     TT_SLIDER_STYLE_COMPACT = 2,
-} tt_slider_style_t;
+} turtle_tools_slider_style_t;
 
 /* slider */
 typedef struct {
@@ -477,11 +477,11 @@ typedef struct {
     double size;
     int32_t *variable; // bound variable (can be NULL)
     char label[TT_LABEL_LENGTH_LIMIT];
-    turtle_status_t status;
-    tt_slider_type_t type;
-    tt_slider_align_t align;
-    tt_slider_scale_t scale;
-    tt_slider_style_t style;
+    turtle_tools_status_t status;
+    turtle_tools_slider_type_t type;
+    turtle_tools_slider_align_t align;
+    turtle_tools_slider_scale_t scale;
+    turtle_tools_slider_style_t style;
     double length;
     int32_t range[2];
     char render[32];
@@ -489,13 +489,13 @@ typedef struct {
     int32_t defaultValue;
     /* value */
     int32_t value; // value of slider
-} tt_slider_t;
+} turtle_tools_slider_t;
 
 typedef enum {
     TT_TEXTBOX_ALIGN_LEFT = 0,
     TT_TEXTBOX_ALIGN_CENTER = 1,
     TT_TEXTBOX_ALIGN_RIGHT = 2,
-} tt_textbox_align_t;
+} turtle_tools_textbox_align_t;
 
 /* textbox */
 typedef struct {
@@ -508,11 +508,11 @@ typedef struct {
     double y;
     double size;
     char label[TT_LABEL_LENGTH_LIMIT];
-    turtle_status_t status;
+    turtle_tools_status_t status;
     int8_t mouseOver; // whether mouse is hovering over textbox
     int8_t moveToTop;
     int32_t count; // counts updates for line flashing animation
-    tt_textbox_align_t align;
+    turtle_tools_textbox_align_t align;
     double length; // length of textbox in coordinates
     int32_t maxCharacters; // maximum characters of textbox text
     int32_t editIndex; // index of editing (index of text)
@@ -536,20 +536,20 @@ typedef struct {
     /* value */
     char *text; // text of textbox
     char *value; // text of textbox (duplicate name - always equal to text)
-} tt_textbox_t;
+} turtle_tools_textbox_t;
 
 typedef enum {
     TT_DROPDOWN_ALIGN_LEFT = 0,
     TT_DROPDOWN_ALIGN_CENTER = 1,
     TT_DROPDOWN_ALIGN_RIGHT = 2,
-} tt_dropdown_align_t;
+} turtle_tools_dropdown_align_t;
 
 typedef enum {
     TT_DROPDOWN_DIRECTION_AUTO = 0,
     TT_DROPDOWN_DIRECTION_AUTO_PREFER_UP = 1,
     TT_DROPDOWN_DIRECTION_UP = 2,
     TT_DROPDOWN_DIRECTION_DOWN = 3,
-} tt_dropdown_direction_t;
+} turtle_tools_dropdown_direction_t;
 
 /* dropdown */
 typedef struct {
@@ -564,9 +564,9 @@ typedef struct {
     int32_t *variable; // bound variable (can be NULL)
     char label[TT_LABEL_LENGTH_LIMIT];
     list_t *options;
-    turtle_status_t status;
-    tt_dropdown_align_t align;
-    tt_dropdown_direction_t direction;
+    turtle_tools_status_t status;
+    turtle_tools_dropdown_align_t align;
+    turtle_tools_dropdown_direction_t direction;
     int8_t moveToTop;
     double autoLowerBound;
     double autoUpperBound;
@@ -574,12 +574,12 @@ typedef struct {
     /* value */
     int32_t index; // index of selected option
     int32_t value; // index of selected option (duplicate name - always equal to index)
-} tt_dropdown_t;
+} turtle_tools_dropdown_t;
 
 typedef enum {
     TT_SCROLLBAR_TYPE_HORIZONTAL = 0,
     TT_SCROLLBAR_TYPE_VERTICAL = 1,
-} tt_scrollbar_type_t;
+} turtle_tools_scrollbar_type_t;
 
 /* scrollbar */
 typedef struct {
@@ -592,13 +592,13 @@ typedef struct {
     double y;
     double size;
     double *variable; // bound variable (can be NULL)
-    turtle_status_t status;
-    tt_scrollbar_type_t type;
+    turtle_tools_status_t status;
+    turtle_tools_scrollbar_type_t type;
     double length;
     double barPercentage; // percentage of scrollbar occupied by bar
     /* value */
     double value; // value of scrollbar
-} tt_scrollbar_t;
+} turtle_tools_scrollbar_t;
 
 typedef enum {
     TT_CONTEXT_DIRECTION_AUTO = 0,
@@ -606,7 +606,7 @@ typedef enum {
     TT_CONTEXT_DIRECTION_UP_RIGHT = 2,
     TT_CONTEXT_DIRECTION_DOWN_LEFT = 3,
     TT_CONTEXT_DIRECTION_DOWN_RIGHT = 4,
-} tt_context_direction_t;
+} turtle_tools_context_direction_t;
 
 /* context menu */
 typedef struct {
@@ -620,15 +620,15 @@ typedef struct {
     double size;
     int32_t *variable; // bound variable (can be NULL)
     list_t *options;
-    turtle_status_t status;
-    tt_context_direction_t direction;
+    turtle_tools_status_t status;
+    turtle_tools_context_direction_t direction;
     double autoLowerBound;
     double autoRightBound;
     double maxXfactor;
     /* value */
     int32_t index; // index of selected option
     int32_t value; // index of selected option (duplicate name - always equal to index)
-} tt_context_t;
+} turtle_tools_context_t;
 
 /* reader */
 typedef struct {
@@ -642,7 +642,7 @@ typedef struct {
     double size;
     unitype *variable;
     char label[TT_LABEL_LENGTH_LIMIT];
-    turtle_status_t status;
+    turtle_tools_status_t status;
     char type;
     double anchorX;
     double anchorY;
@@ -652,124 +652,122 @@ typedef struct {
     int8_t resizing; // only used for list readers
     double width; // only used for list readers
     double height; // only used for list readers
-    tt_scrollbar_t *scrollbarp; // only used for list readers
-} tt_reader_t;
+    turtle_tools_scrollbar_t *scrollbarp; // only used for list readers
+} turtle_tools_reader_t;
 
 /* initialise UI elements */
 
 /* this function is automatically called when creating any turtleTools elements, it is not required to be called by the user */
-void turtleToolsInit();
+void turtle_tools_init();
 
 /* create a button */
-turtle_tools_button_t *tt_buttonInit(char *label, int8_t *variable, double x, double y, double size);
+turtle_tools_button_t *turtle_tools_button_init(char *label, int8_t *variable, double x, double y, double size);
 
-/* delete button */
-void tt_buttonFree(turtle_tools_button_t *buttonp);
+/* delete a button */
+void turtle_tools_button_free(turtle_tools_button_t *buttonp);
 
 /* create a switch */
-tt_switch_t *tt_switchInit(char *label, int8_t *variable, double x, double y, double size);
+turtle_tools_switch_t *turtle_tools_switch_init(char *label, int8_t *variable, double x, double y, double size);
 
-/* delete switch */
-void tt_switchFree(tt_switch_t *switchp);
+/* delete a switch */
+void turtle_tools_switch_free(turtle_tools_switch_t *switchp);
 
-/* create a dial - make renderNumberFactor 0 to hide dial number */
-tt_dial_t *tt_dialInit(char *label, int32_t *variable, tt_dial_scale_t scale, double x, double y, double size, int32_t bottom, int32_t top, char *render, double renderMultiplier);
+/* create a dial - make renderMultiplier 0 to hide dial number */
+turtle_tools_dial_t *turtle_tools_dial_init(char *label, int32_t *variable, turtle_tools_dial_scale_t scale, double x, double y, double size, int32_t bottom, int32_t top, char *render, double renderMultiplier);
 
-/* delete dial */
-void tt_dialFree(tt_dial_t *dialp);
+/* delete a dial */
+void turtle_tools_dial_free(turtle_tools_dial_t *dialp);
 
-/* create a slider - make renderNumberFactor 0 to hide slider number */
-tt_slider_t *tt_sliderInit(char *label, int32_t *variable, tt_slider_type_t type, tt_slider_align_t align, double x, double y, double size, double length, int32_t bottom, int32_t top, char *render, double renderMultiplier);
+/* create a slider - make renderMultiplier 0 to hide slider number */
+turtle_tools_slider_t *turtle_tools_slider_init(char *label, int32_t *variable, turtle_tools_slider_type_t type, turtle_tools_slider_align_t align, double x, double y, double size, double length, int32_t bottom, int32_t top, char *render, double renderMultiplier);
 
-/* delete slider */
-void tt_sliderFree(tt_slider_t *sliderp);
+/* delete a slider */
+void turtle_tools_slider_free(turtle_tools_slider_t *sliderp);
 
 /* create a textbox */
-tt_textbox_t *tt_textboxInit(char *label, char *variable, int32_t maxCharacters, double x, double y, double size, double length);
+turtle_tools_textbox_t *turtle_tools_textbox_init(char *label, char *variable, int32_t maxCharacters, double x, double y, double size, double length);
 
 /* delete textbox */
-void tt_textboxFree(tt_textbox_t *textboxp);
+void turtle_tools_textbox_free(turtle_tools_textbox_t *textboxp);
 
-void tt_dropdownCalculateMax(tt_dropdown_t *dropdownp);
+/* this function must be run if the contents of the the dropdown is changed. It will automatically resize the dropdown container based on the lengths of the options */
+void turtle_tools_dropdown_calculate_bounds(turtle_tools_dropdown_t *dropdownp);
 
 /* create a dropdown - use a list of strings for options (options must have at least one string) */
-tt_dropdown_t *tt_dropdownInit(char *label, list_t *options, int32_t *variable, tt_dropdown_align_t align, double x, double y, double size);
+turtle_tools_dropdown_t *turtle_tools_dropdown_init(char *label, list_t *options, int32_t *variable, turtle_tools_dropdown_align_t align, double x, double y, double size);
 
-/* delete dropdown */
-void tt_dropdownFree(tt_dropdown_t *dropdownp);
+/* delete a dropdown */
+void turtle_tools_dropdown_free(turtle_tools_dropdown_t *dropdownp);
 
 /* create a scrollbar */
-tt_scrollbar_t *tt_scrollbarInit(double *variable, tt_scrollbar_type_t type, double x, double y, double size, double length, double barPercentage);
+turtle_tools_scrollbar_t *turtle_tools_scrollbar_init(double *variable, turtle_tools_scrollbar_type_t type, double x, double y, double size, double length, double barPercentage);
 
-/* delete scrollbar */
-void tt_scrollbarFree(tt_scrollbar_t *scrollbarp);
+/* delete a scrollbar */
+void turtle_tools_scrollbar_free(turtle_tools_scrollbar_t *scrollbarp);
 
-void tt_contextCalculateMax(tt_context_t *contextp);
+/* this function must be run if the contents of the the context menu is changed. It will automatically resize the context container based on the lengths of the options */
+void turtle_tools_context_calculate_bounds(turtle_tools_context_t *contextp);
 
-/* create a context */
-tt_context_t *tt_contextInit(list_t *options, int32_t *variable, double x, double y, double size);
+/* create a context menu */
+turtle_tools_context_t *turtle_tools_context_init(list_t *options, int32_t *variable, double x, double y, double size);
 
-/* delete context */
-void tt_contextFree(tt_context_t *contextp);
+/* delete a context menu */
+void turtle_tools_context_free(turtle_tools_context_t *contextp);
 
 /* create a reader */
-tt_reader_t *tt_readerInit(char *label, unitype *variable, char type, double x, double y, double size);
+turtle_tools_reader_t *turtle_tools_reader_init(char *label, unitype *variable, char type, double x, double y, double size);
 
-/* delete reader */
-void tt_readerFree(tt_reader_t *readerp);
+/* delete a reader */
+void turtle_tools_reader_free(turtle_tools_reader_t *readerp);
 
 /* update a button */
-void tt_buttonUpdate(turtle_tools_button_t *buttonp);
+void turtle_tools_button_update(turtle_tools_button_t *buttonp);
 
 /* update a switch */
-void tt_switchUpdate(tt_switch_t *switchp);
+void turtle_tools_switch_update(turtle_tools_switch_t *switchp);
 
-/* angle between two coordinates (in degrees) */
-double tt_angleBetween(double x1, double y1, double x2, double y2);
+/* calculate the angle between two coordinates (in degrees) */
+double turtle_tools_angle_between(double x1, double y1, double x2, double y2);
 
 /* update a dial */
-void tt_dialUpdate(tt_dial_t *dialp);
+void turtle_tools_dial_update(turtle_tools_dial_t *dialp);
 
 /* update a slider */
-void tt_sliderUpdate(tt_slider_t *sliderp);
+void turtle_tools_slider_update(turtle_tools_slider_t *sliderp);
 
-void tt_textboxAddKey(tt_textbox_t *textboxp, int32_t key);
-
-void tt_textboxUnicodeCallback(uint32_t codepoint);
-
-void tt_textboxHandleOtherKey(tt_textbox_t *textboxp, int32_t key);
-
-void tt_textboxKeyCallback(int32_t key, int32_t scancode, int32_t action);
-
-int32_t tt_textboxCalculateMaximumCharacters(uint32_t *charlist, int32_t textLength, double size, double lengthPixels, int8_t sweepDirection, double *outputLength);
+/* internal textbox functions */
+void turtle_tools_textbox_add_key(turtle_tools_textbox_t *textboxp, int32_t key);
+void turtle_tools_textbox_unicode_callback(uint32_t codepoint);
+void turtle_tools_textbox_handle_other_key(turtle_tools_textbox_t *textboxp, int32_t key);
+void turtle_tools_textbox_key_callback(int32_t key, int32_t scancode, int32_t action);
+int32_t turtle_tools_textbox_calculate_maximum_characters(uint32_t *charlist, int32_t textLength, double size, double lengthPixels, int8_t sweepDirection, double *outputLength);
+int32_t turtle_tools_textbox_calculate_index_from_position(turtle_tools_textbox_t *textboxp, double position);
 
 /* update a textbox */
-void tt_textboxUpdate(tt_textbox_t *textboxp);
+void turtle_tools_textbox_update(turtle_tools_textbox_t *textboxp);
 
 /* update a dropdown */
-void tt_dropdownUpdate(tt_dropdown_t *dropdownp);
+void turtle_tools_dropdown_update(turtle_tools_dropdown_t *dropdownp);
 
-/*
-update a scrollbar
+/* update a scrollbar
 scrollbar range of motion (coordinates):
 scrollbar.length * (1 - scrollbar.barPercentage / 100)
-tip: try to match the ratio of visible content to the scrollbar's barPercentage - if half of the content can be shown on one screen then make the barPercentage 50
-*/
-void tt_scrollbarUpdate(tt_scrollbar_t *scrollbarp);
+tip: try to match the ratio of visible content to the scrollbar's barPercentage - if half of the content can be shown on one screen then make the barPercentage 50 */
+void turtle_tools_scrollbar_update(turtle_tools_scrollbar_t *scrollbarp);
 
 /* update a context */
-void tt_contextUpdate(tt_context_t *contextp);
+void turtle_tools_context_update(turtle_tools_context_t *contextp);
 
 /* update a reader */
-void tt_readerUpdate(tt_reader_t *readerp);
+void turtle_tools_reader_update(turtle_tools_reader_t *readerp);
 
 /* update all turtleTools */
-void turtleToolsUpdate();
+void turtle_tools_update();
 
 /* update all turtleTools except ribbon and popup */
-void turtleToolsUpdateUI();
+void turtle_tools_update_ui();
 
 /* update ribbon and popup */
-void turtleToolsUpdateRibbonPopup();
+void turtle_tools_update_ribbon_popup();
 
 #endif /* TURTLETOOLS_H */

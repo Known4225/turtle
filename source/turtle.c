@@ -770,28 +770,6 @@ void turtle_texture_render_internal(int32_t textureCode, double x1, double y1, d
     turtle_add_vertex(x3 * xfact + xcenter, y3 * yfact + ycenter, r, g, b, 1.0, 1, 1, textureCode);
 }
 
-void printList(double *list, int32_t len) {
-    printf("[");
-    for (int32_t i = 0; i < len; i++) {
-        if (i == len - 1) {
-            printf("%lf]\n", list[i]);
-        } else {
-            printf("%lf ", list[i]);
-        }
-    }
-}
-
-void printListInt(int32_t *list, int32_t len) {
-    printf("[");
-    for (int32_t i = 0; i < len; i++) {
-        if (i == len - 1) {
-            printf("%d]\n", list[i]);
-        } else {
-            printf("%d ", list[i]);
-        }
-    }
-}
-
 uint8_t *turtle_image_resize(uint8_t *dest, uint32_t destWidth, uint32_t destHeight, uint32_t destEncoding, uint8_t *src, uint32_t srcWidth, uint32_t srcHeight, uint32_t srcEncoding, turtle_image_resize_t method) {
     /* determine encoding */
     uint8_t destChannels = 0;

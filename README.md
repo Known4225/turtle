@@ -50,6 +50,7 @@ The following build commands are available:
 - Linux COM support
 - I think there is a way to increase performance for texture enabled turtle - I think it is possible to remove penpos entirely and just write straight to bufferList
 - Possibility of using turtle to make auto-hotkey-like scripts? But in C.
+- [shapecatcher](https://shapecatcher.com/) is good for finding unicode symbols
 
 # Limitations of web deployment
 - Most osTools features will not work

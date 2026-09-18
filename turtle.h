@@ -10809,7 +10809,7 @@ typedef enum {
     TT_STATUS_OPEN = 7,                  // Used to indicate a context menu or dropdown is open, or a textbox is accepting text
     TT_STATUS_OPEN_CLICK_FIRST_TICK = 8, // Used for dropdowns and context menus when an option is clicked (first tick)
     TT_STATUS_OPEN_CLICK = 9,            // Used for dropdowns and context menus when an option is clicked
-} turtle_status_t;
+} turtle_tools_status_t;
 
 #define TT_LABEL_LENGTH_LIMIT 128
 
@@ -10838,7 +10838,7 @@ typedef struct {
     double size;
     int8_t *variable; // bound variable (can be NULL)
     char label[TT_LABEL_LENGTH_LIMIT];
-    turtle_status_t status;
+    turtle_tools_status_t status;
     turtle_tools_button_shape_t shape;
     turtle_tools_button_align_t align;
     /* value */
@@ -10872,23 +10872,23 @@ typedef struct {
     double size;
     int8_t *variable; // bound variable (can be NULL)
     char label[TT_LABEL_LENGTH_LIMIT];
-    turtle_status_t status;
+    turtle_tools_status_t status;
     turtle_tools_switch_style_t style;
     turtle_tools_switch_align_t align;
     /* value */
     int8_t value; // 1 if switch is flipped, 0 otherwise
-} tt_switch_t;
+} turtle_tools_switch_t;
 
 typedef enum {
     TT_DIAL_SCALE_LINEAR = 0,
     TT_DIAL_SCALE_LOG = 1,
     TT_DIAL_SCALE_EXP = 2,
-} tt_dial_scale_t;
+} turtle_tools_dial_scale_t;
 
 typedef enum {
     TT_DIAL_STYLE_CLASSIC = 0,
     TT_DIAL_STYLE_SPEEDOMETER = 1,
-} tt_dial_style_t;
+} turtle_tools_dial_style_t;
 
 /* dial */
 typedef struct {
@@ -10902,40 +10902,40 @@ typedef struct {
     double size;
     int32_t *variable; // bound variable (can be NULL)
     char label[TT_LABEL_LENGTH_LIMIT];
-    turtle_status_t status;
+    turtle_tools_status_t status;
     double mouseAnchor;
-    tt_dial_scale_t scale;
-    tt_dial_style_t style;
+    turtle_tools_dial_scale_t scale;
+    turtle_tools_dial_style_t style;
     int32_t range[2];
     char render[32];
     double renderMultiplier;
     int32_t defaultValue;
     /* value */
     int32_t value; // value of dial
-} tt_dial_t;
+} turtle_tools_dial_t;
 
 typedef enum {
     TT_SLIDER_TYPE_HORIZONTAL = 0,
     TT_SLIDER_TYPE_VERTICAL = 1,
-} tt_slider_type_t;
+} turtle_tools_slider_type_t;
 
 typedef enum {
     TT_SLIDER_ALIGN_LEFT = 0,
     TT_SLIDER_ALIGN_CENTER = 1,
     TT_SLIDER_ALIGN_RIGHT = 2,
-} tt_slider_align_t;
+} turtle_tools_slider_align_t;
 
 typedef enum {
     TT_SLIDER_SCALE_LINEAR = 0,
     TT_SLIDER_SCALE_LOG = 1,
     TT_SLIDER_SCALE_EXP = 2,
-} tt_slider_scale_t;
+} turtle_tools_slider_scale_t;
 
 typedef enum {
     TT_SLIDER_STYLE_CLASSIC = 0,
     TT_SLIDER_STYLE_SIDESWIPE = 1,
     TT_SLIDER_STYLE_COMPACT = 2,
-} tt_slider_style_t;
+} turtle_tools_slider_style_t;
 
 /* slider */
 typedef struct {
@@ -10949,11 +10949,11 @@ typedef struct {
     double size;
     int32_t *variable; // bound variable (can be NULL)
     char label[TT_LABEL_LENGTH_LIMIT];
-    turtle_status_t status;
-    tt_slider_type_t type;
-    tt_slider_align_t align;
-    tt_slider_scale_t scale;
-    tt_slider_style_t style;
+    turtle_tools_status_t status;
+    turtle_tools_slider_type_t type;
+    turtle_tools_slider_align_t align;
+    turtle_tools_slider_scale_t scale;
+    turtle_tools_slider_style_t style;
     double length;
     int32_t range[2];
     char render[32];
@@ -10961,13 +10961,13 @@ typedef struct {
     int32_t defaultValue;
     /* value */
     int32_t value; // value of slider
-} tt_slider_t;
+} turtle_tools_slider_t;
 
 typedef enum {
     TT_TEXTBOX_ALIGN_LEFT = 0,
     TT_TEXTBOX_ALIGN_CENTER = 1,
     TT_TEXTBOX_ALIGN_RIGHT = 2,
-} tt_textbox_align_t;
+} turtle_tools_textbox_align_t;
 
 /* textbox */
 typedef struct {
@@ -10980,11 +10980,11 @@ typedef struct {
     double y;
     double size;
     char label[TT_LABEL_LENGTH_LIMIT];
-    turtle_status_t status;
+    turtle_tools_status_t status;
     int8_t mouseOver; // whether mouse is hovering over textbox
     int8_t moveToTop;
     int32_t count; // counts updates for line flashing animation
-    tt_textbox_align_t align;
+    turtle_tools_textbox_align_t align;
     double length; // length of textbox in coordinates
     int32_t maxCharacters; // maximum characters of textbox text
     int32_t editIndex; // index of editing (index of text)
@@ -11008,20 +11008,20 @@ typedef struct {
     /* value */
     char *text; // text of textbox
     char *value; // text of textbox (duplicate name - always equal to text)
-} tt_textbox_t;
+} turtle_tools_textbox_t;
 
 typedef enum {
     TT_DROPDOWN_ALIGN_LEFT = 0,
     TT_DROPDOWN_ALIGN_CENTER = 1,
     TT_DROPDOWN_ALIGN_RIGHT = 2,
-} tt_dropdown_align_t;
+} turtle_tools_dropdown_align_t;
 
 typedef enum {
     TT_DROPDOWN_DIRECTION_AUTO = 0,
     TT_DROPDOWN_DIRECTION_AUTO_PREFER_UP = 1,
     TT_DROPDOWN_DIRECTION_UP = 2,
     TT_DROPDOWN_DIRECTION_DOWN = 3,
-} tt_dropdown_direction_t;
+} turtle_tools_dropdown_direction_t;
 
 /* dropdown */
 typedef struct {
@@ -11036,9 +11036,9 @@ typedef struct {
     int32_t *variable; // bound variable (can be NULL)
     char label[TT_LABEL_LENGTH_LIMIT];
     list_t *options;
-    turtle_status_t status;
-    tt_dropdown_align_t align;
-    tt_dropdown_direction_t direction;
+    turtle_tools_status_t status;
+    turtle_tools_dropdown_align_t align;
+    turtle_tools_dropdown_direction_t direction;
     int8_t moveToTop;
     double autoLowerBound;
     double autoUpperBound;
@@ -11046,12 +11046,12 @@ typedef struct {
     /* value */
     int32_t index; // index of selected option
     int32_t value; // index of selected option (duplicate name - always equal to index)
-} tt_dropdown_t;
+} turtle_tools_dropdown_t;
 
 typedef enum {
     TT_SCROLLBAR_TYPE_HORIZONTAL = 0,
     TT_SCROLLBAR_TYPE_VERTICAL = 1,
-} tt_scrollbar_type_t;
+} turtle_tools_scrollbar_type_t;
 
 /* scrollbar */
 typedef struct {
@@ -11064,13 +11064,13 @@ typedef struct {
     double y;
     double size;
     double *variable; // bound variable (can be NULL)
-    turtle_status_t status;
-    tt_scrollbar_type_t type;
+    turtle_tools_status_t status;
+    turtle_tools_scrollbar_type_t type;
     double length;
     double barPercentage; // percentage of scrollbar occupied by bar
     /* value */
     double value; // value of scrollbar
-} tt_scrollbar_t;
+} turtle_tools_scrollbar_t;
 
 typedef enum {
     TT_CONTEXT_DIRECTION_AUTO = 0,
@@ -11078,7 +11078,7 @@ typedef enum {
     TT_CONTEXT_DIRECTION_UP_RIGHT = 2,
     TT_CONTEXT_DIRECTION_DOWN_LEFT = 3,
     TT_CONTEXT_DIRECTION_DOWN_RIGHT = 4,
-} tt_context_direction_t;
+} turtle_tools_context_direction_t;
 
 /* context menu */
 typedef struct {
@@ -11092,15 +11092,15 @@ typedef struct {
     double size;
     int32_t *variable; // bound variable (can be NULL)
     list_t *options;
-    turtle_status_t status;
-    tt_context_direction_t direction;
+    turtle_tools_status_t status;
+    turtle_tools_context_direction_t direction;
     double autoLowerBound;
     double autoRightBound;
     double maxXfactor;
     /* value */
     int32_t index; // index of selected option
     int32_t value; // index of selected option (duplicate name - always equal to index)
-} tt_context_t;
+} turtle_tools_context_t;
 
 /* reader */
 typedef struct {
@@ -11114,7 +11114,7 @@ typedef struct {
     double size;
     unitype *variable;
     char label[TT_LABEL_LENGTH_LIMIT];
-    turtle_status_t status;
+    turtle_tools_status_t status;
     char type;
     double anchorX;
     double anchorY;
@@ -11124,125 +11124,123 @@ typedef struct {
     int8_t resizing; // only used for list readers
     double width; // only used for list readers
     double height; // only used for list readers
-    tt_scrollbar_t *scrollbarp; // only used for list readers
-} tt_reader_t;
+    turtle_tools_scrollbar_t *scrollbarp; // only used for list readers
+} turtle_tools_reader_t;
 
 /* initialise UI elements */
 
 /* this function is automatically called when creating any turtleTools elements, it is not required to be called by the user */
-void turtleToolsInit();
+void turtle_tools_init();
 
 /* create a button */
-turtle_tools_button_t *tt_buttonInit(char *label, int8_t *variable, double x, double y, double size);
+turtle_tools_button_t *turtle_tools_button_init(char *label, int8_t *variable, double x, double y, double size);
 
-/* delete button */
-void tt_buttonFree(turtle_tools_button_t *buttonp);
+/* delete a button */
+void turtle_tools_button_free(turtle_tools_button_t *buttonp);
 
 /* create a switch */
-tt_switch_t *tt_switchInit(char *label, int8_t *variable, double x, double y, double size);
+turtle_tools_switch_t *turtle_tools_switch_init(char *label, int8_t *variable, double x, double y, double size);
 
-/* delete switch */
-void tt_switchFree(tt_switch_t *switchp);
+/* delete a switch */
+void turtle_tools_switch_free(turtle_tools_switch_t *switchp);
 
-/* create a dial - make renderNumberFactor 0 to hide dial number */
-tt_dial_t *tt_dialInit(char *label, int32_t *variable, tt_dial_scale_t scale, double x, double y, double size, int32_t bottom, int32_t top, char *render, double renderMultiplier);
+/* create a dial - make renderMultiplier 0 to hide dial number */
+turtle_tools_dial_t *turtle_tools_dial_init(char *label, int32_t *variable, turtle_tools_dial_scale_t scale, double x, double y, double size, int32_t bottom, int32_t top, char *render, double renderMultiplier);
 
-/* delete dial */
-void tt_dialFree(tt_dial_t *dialp);
+/* delete a dial */
+void turtle_tools_dial_free(turtle_tools_dial_t *dialp);
 
-/* create a slider - make renderNumberFactor 0 to hide slider number */
-tt_slider_t *tt_sliderInit(char *label, int32_t *variable, tt_slider_type_t type, tt_slider_align_t align, double x, double y, double size, double length, int32_t bottom, int32_t top, char *render, double renderMultiplier);
+/* create a slider - make renderMultiplier 0 to hide slider number */
+turtle_tools_slider_t *turtle_tools_slider_init(char *label, int32_t *variable, turtle_tools_slider_type_t type, turtle_tools_slider_align_t align, double x, double y, double size, double length, int32_t bottom, int32_t top, char *render, double renderMultiplier);
 
-/* delete slider */
-void tt_sliderFree(tt_slider_t *sliderp);
+/* delete a slider */
+void turtle_tools_slider_free(turtle_tools_slider_t *sliderp);
 
 /* create a textbox */
-tt_textbox_t *tt_textboxInit(char *label, char *variable, int32_t maxCharacters, double x, double y, double size, double length);
+turtle_tools_textbox_t *turtle_tools_textbox_init(char *label, char *variable, int32_t maxCharacters, double x, double y, double size, double length);
 
 /* delete textbox */
-void tt_textboxFree(tt_textbox_t *textboxp);
+void turtle_tools_textbox_free(turtle_tools_textbox_t *textboxp);
 
-void tt_dropdownCalculateMax(tt_dropdown_t *dropdownp);
+/* this function must be run if the contents of the the dropdown is changed. It will automatically resize the dropdown container based on the lengths of the options */
+void turtle_tools_dropdown_calculate_bounds(turtle_tools_dropdown_t *dropdownp);
 
 /* create a dropdown - use a list of strings for options (options must have at least one string) */
-tt_dropdown_t *tt_dropdownInit(char *label, list_t *options, int32_t *variable, tt_dropdown_align_t align, double x, double y, double size);
+turtle_tools_dropdown_t *turtle_tools_dropdown_init(char *label, list_t *options, int32_t *variable, turtle_tools_dropdown_align_t align, double x, double y, double size);
 
-/* delete dropdown */
-void tt_dropdownFree(tt_dropdown_t *dropdownp);
+/* delete a dropdown */
+void turtle_tools_dropdown_free(turtle_tools_dropdown_t *dropdownp);
 
 /* create a scrollbar */
-tt_scrollbar_t *tt_scrollbarInit(double *variable, tt_scrollbar_type_t type, double x, double y, double size, double length, double barPercentage);
+turtle_tools_scrollbar_t *turtle_tools_scrollbar_init(double *variable, turtle_tools_scrollbar_type_t type, double x, double y, double size, double length, double barPercentage);
 
-/* delete scrollbar */
-void tt_scrollbarFree(tt_scrollbar_t *scrollbarp);
+/* delete a scrollbar */
+void turtle_tools_scrollbar_free(turtle_tools_scrollbar_t *scrollbarp);
 
-void tt_contextCalculateMax(tt_context_t *contextp);
+/* this function must be run if the contents of the the context menu is changed. It will automatically resize the context container based on the lengths of the options */
+void turtle_tools_context_calculate_bounds(turtle_tools_context_t *contextp);
 
-/* create a context */
-tt_context_t *tt_contextInit(list_t *options, int32_t *variable, double x, double y, double size);
+/* create a context menu */
+turtle_tools_context_t *turtle_tools_context_init(list_t *options, int32_t *variable, double x, double y, double size);
 
-/* delete context */
-void tt_contextFree(tt_context_t *contextp);
+/* delete a context menu */
+void turtle_tools_context_free(turtle_tools_context_t *contextp);
 
 /* create a reader */
-tt_reader_t *tt_readerInit(char *label, unitype *variable, char type, double x, double y, double size);
+turtle_tools_reader_t *turtle_tools_reader_init(char *label, unitype *variable, char type, double x, double y, double size);
 
-/* delete reader */
-void tt_readerFree(tt_reader_t *readerp);
+/* delete a reader */
+void turtle_tools_reader_free(turtle_tools_reader_t *readerp);
 
 /* update a button */
-void tt_buttonUpdate(turtle_tools_button_t *buttonp);
+void turtle_tools_button_update(turtle_tools_button_t *buttonp);
 
 /* update a switch */
-void tt_switchUpdate(tt_switch_t *switchp);
+void turtle_tools_switch_update(turtle_tools_switch_t *switchp);
 
-/* angle between two coordinates (in degrees) */
-double tt_angleBetween(double x1, double y1, double x2, double y2);
+/* calculate the angle between two coordinates (in degrees) */
+double turtle_tools_angle_between(double x1, double y1, double x2, double y2);
 
 /* update a dial */
-void tt_dialUpdate(tt_dial_t *dialp);
+void turtle_tools_dial_update(turtle_tools_dial_t *dialp);
 
 /* update a slider */
-void tt_sliderUpdate(tt_slider_t *sliderp);
+void turtle_tools_slider_update(turtle_tools_slider_t *sliderp);
 
-void tt_textboxAddKey(tt_textbox_t *textboxp, int32_t key);
-
-void tt_textboxUnicodeCallback(uint32_t codepoint);
-
-void tt_textboxHandleOtherKey(tt_textbox_t *textboxp, int32_t key);
-
-void tt_textboxKeyCallback(int32_t key, int32_t scancode, int32_t action);
-
-int32_t tt_textboxCalculateMaximumCharacters(uint32_t *charlist, int32_t textLength, double size, double lengthPixels, int8_t sweepDirection, double *outputLength);
+/* internal textbox functions */
+void turtle_tools_textbox_add_key(turtle_tools_textbox_t *textboxp, int32_t key);
+void turtle_tools_textbox_unicode_callback(uint32_t codepoint);
+void turtle_tools_textbox_handle_other_key(turtle_tools_textbox_t *textboxp, int32_t key);
+void turtle_tools_textbox_key_callback(int32_t key, int32_t scancode, int32_t action);
+int32_t turtle_tools_textbox_calculate_maximum_characters(uint32_t *charlist, int32_t textLength, double size, double lengthPixels, int8_t sweepDirection, double *outputLength);
+int32_t turtle_tools_textbox_calculate_index_from_position(turtle_tools_textbox_t *textboxp, double position);
 
 /* update a textbox */
-void tt_textboxUpdate(tt_textbox_t *textboxp);
+void turtle_tools_textbox_update(turtle_tools_textbox_t *textboxp);
 
 /* update a dropdown */
-void tt_dropdownUpdate(tt_dropdown_t *dropdownp);
+void turtle_tools_dropdown_update(turtle_tools_dropdown_t *dropdownp);
 
-/*
-update a scrollbar
+/* update a scrollbar
 scrollbar range of motion (coordinates):
 scrollbar.length * (1 - scrollbar.barPercentage / 100)
-tip: try to match the ratio of visible content to the scrollbar's barPercentage - if half of the content can be shown on one screen then make the barPercentage 50
-*/
-void tt_scrollbarUpdate(tt_scrollbar_t *scrollbarp);
+tip: try to match the ratio of visible content to the scrollbar's barPercentage - if half of the content can be shown on one screen then make the barPercentage 50 */
+void turtle_tools_scrollbar_update(turtle_tools_scrollbar_t *scrollbarp);
 
 /* update a context */
-void tt_contextUpdate(tt_context_t *contextp);
+void turtle_tools_context_update(turtle_tools_context_t *contextp);
 
 /* update a reader */
-void tt_readerUpdate(tt_reader_t *readerp);
+void turtle_tools_reader_update(turtle_tools_reader_t *readerp);
 
 /* update all turtleTools */
-void turtleToolsUpdate();
+void turtle_tools_update();
 
 /* update all turtleTools except ribbon and popup */
-void turtleToolsUpdateUI();
+void turtle_tools_update_ui();
 
 /* update ribbon and popup */
-void turtleToolsUpdateRibbonPopup();
+void turtle_tools_update_ribbon_popup();
 
 #endif /* TURTLETOOLS_H */
 
@@ -25190,28 +25188,6 @@ void turtle_texture_render_internal(int32_t textureCode, double x1, double y1, d
     turtle_add_vertex(x3 * xfact + xcenter, y3 * yfact + ycenter, r, g, b, 1.0, 1, 1, textureCode);
 }
 
-void printList(double *list, int32_t len) {
-    printf("[");
-    for (int32_t i = 0; i < len; i++) {
-        if (i == len - 1) {
-            printf("%lf]\n", list[i]);
-        } else {
-            printf("%lf ", list[i]);
-        }
-    }
-}
-
-void printListInt(int32_t *list, int32_t len) {
-    printf("[");
-    for (int32_t i = 0; i < len; i++) {
-        if (i == len - 1) {
-            printf("%d]\n", list[i]);
-        } else {
-            printf("%d ", list[i]);
-        }
-    }
-}
-
 uint8_t *turtle_image_resize(uint8_t *dest, uint32_t destWidth, uint32_t destHeight, uint32_t destEncoding, uint8_t *src, uint32_t srcWidth, uint32_t srcHeight, uint32_t srcEncoding, turtle_image_resize_t method) {
     /* determine encoding */
     uint8_t destChannels = 0;
@@ -27293,6 +27269,8 @@ void turtle_text_generate_default_font(list_t *generatedFont) {
     list_append(generatedFont, (unitype) "😊, 4, 4, b, -80, -100, 0, -100, b, 0, -20, 0, 60, b, -80, 60, -160, 60, b, -160, -20, -160, -100, -80, -100, 2, b, -120, 5, -120, 15, b, -110, 15, -100, 15, -100, 5, 2, b, -60, 5, -60, 15, b, -50, 15, -40, 15, -40, 5, 2, b, -115, -45, -110, -65, b, -80, -65, -50, -65, -45, -45", 's');
     list_append(generatedFont, (unitype) "♖, 6, 5, -40, -100, -160, -100, -160, -85, -40, -85, -40, -100, 4, -50, -85, -50, -70, -150, -70, -150, -85, 2, -145, -70, -135, -55, 6, -55, -70, -65, -55, -135, -55, -135, 15, -65, 15, -65, -55, 15, -65, 15, -55, 30, -50, 30, -50, 55, -65, 55, -65, 45, -90, 45, -90, 55, -110, 55, -110, 45, -135, 45, -135, 55, -150, 55, -150, 30, -55, 30, 2, -135, 15, -145, 30", 's');
     list_append(generatedFont, (unitype) "🔄, 4, 2, b, -140, -50, -130, -100, b, -80, -100, -20, -100, -20, -30, 3, -55, -50, -20, -30, 5, -65, 2, b, -20, 20, -30, 60, b, -80, 60, -140, 60, -140, 0, 3, -105, 20, -140, 0, -165, 35", 's');
+    list_append(generatedFont, (unitype) "⛶, 4, 3, -160, -40, -160, -80, -120, -80, 3, -80, -80, -40, -80, -40, -40, 3, -40, 0, -40, 40, -80, 40, 3, -120, 40, -160, 40, -160, 0", 's');
+    list_append(generatedFont, (unitype) "╬, 4, 3, -160, -40, -110, -40, -110, -90, 3, -70, -90, -70, -40, -20, -40, 3, -20, 0, -70, 0, -70, 50, 3, -110, 50, -110, 0, -160, 0", 's');
 }
 
 #endif /* TURTLE_TEXT_IMPLEMENTATION */
@@ -27975,32 +27953,32 @@ int32_t turtle_tools_element_free(void *elementp) {
     }
     switch (((turtle_tools_button_t *) elementp) -> element) {
     case TT_ELEMENT_BUTTON:
-        tt_buttonFree((turtle_tools_button_t *) elementp);
+        turtle_tools_button_free((turtle_tools_button_t *) elementp);
     break;
     case TT_ELEMENT_SWITCH:
-        tt_switchFree((tt_switch_t *) elementp);
+        turtle_tools_switch_free((turtle_tools_switch_t *) elementp);
     break;
     case TT_ELEMENT_DIAL:
-        tt_dialFree((tt_dial_t *) elementp);
+        turtle_tools_dial_free((turtle_tools_dial_t *) elementp);
     break;
     case TT_ELEMENT_SLIDER:
-        tt_sliderFree((tt_slider_t *) elementp);
+        turtle_tools_slider_free((turtle_tools_slider_t *) elementp);
     break;
     case TT_ELEMENT_TEXTBOX:
-        tt_textboxFree((tt_textbox_t *) elementp);
+        turtle_tools_textbox_free((turtle_tools_textbox_t *) elementp);
     break;
     case TT_ELEMENT_DROPDOWN:
-        tt_dropdownFree((tt_dropdown_t *) elementp);
+        turtle_tools_dropdown_free((turtle_tools_dropdown_t *) elementp);
     break;
     case TT_ELEMENT_SCROLLBAR:
-        tt_scrollbarFree((tt_scrollbar_t *) elementp);
+        turtle_tools_scrollbar_free((turtle_tools_scrollbar_t *) elementp);
     break;
     case TT_ELEMENT_CONTEXT:
-        tt_contextFree((tt_context_t *) elementp);
+        turtle_tools_context_free((turtle_tools_context_t *) elementp);
     break;
     case TT_ELEMENT_VARIABLE_READER:
-    // case TT_ELEMENT_LIST_READER:
-        tt_readerFree((tt_reader_t *) elementp);
+    case TT_ELEMENT_LIST_READER:
+        turtle_tools_reader_free((turtle_tools_reader_t *) elementp);
     break;
     default:
         return -1;
@@ -28017,7 +27995,8 @@ void turtle_tools_hide_all_elements() {
 
 /* initialise UI elements */
 
-void turtleToolsInit() {
+/* this function is automatically called when creating any turtleTools elements, it is not required to be called by the user */
+void turtle_tools_init() {
     if (turtleToolsEnabled.turtleToolsEnabled == 0) {
         turtleToolsEnabled.turtleToolsEnabled = 1;
         turtleToolsGlobals.elementLogicType = TT_ELEMENT_NONE;
@@ -28028,12 +28007,12 @@ void turtleToolsInit() {
 }
 
 /* create a button */
-turtle_tools_button_t *tt_buttonInit(char *label, int8_t *variable, double x, double y, double size) {
+turtle_tools_button_t *turtle_tools_button_init(char *label, int8_t *variable, double x, double y, double size) {
     if (turtleToolsEnabled.buttonEnabled == 0) {
         turtleToolsEnabled.buttonEnabled = 1;
         turtleToolsElements.buttons = list_init();
     }
-    turtleToolsInit();
+    turtle_tools_init();
     turtle_tools_button_t *buttonp = calloc(1, sizeof(turtle_tools_button_t));
     buttonp -> element = TT_ELEMENT_BUTTON;
     buttonp -> priority = buttonp -> element;
@@ -28067,19 +28046,20 @@ turtle_tools_button_t *tt_buttonInit(char *label, int8_t *variable, double x, do
     return buttonp;
 }
 
-void tt_buttonFree(turtle_tools_button_t *buttonp) {
+/* delete a button */
+void turtle_tools_button_free(turtle_tools_button_t *buttonp) {
     list_remove(turtleToolsElements.all, (unitype) (uint64_t) buttonp, 'l');
     list_remove(turtleToolsElements.buttons, (unitype) (void *) buttonp, 'p');
 }
 
 /* create a switch */
-tt_switch_t *tt_switchInit(char *label, int8_t *variable, double x, double y, double size) {
+turtle_tools_switch_t *turtle_tools_switch_init(char *label, int8_t *variable, double x, double y, double size) {
     if (turtleToolsEnabled.switchEnabled == 0) {
         turtleToolsEnabled.switchEnabled = 1;
         turtleToolsElements.switches = list_init();
     }
-    turtleToolsInit();
-    tt_switch_t *switchp = calloc(1, sizeof(tt_switch_t));
+    turtle_tools_init();
+    turtle_tools_switch_t *switchp = calloc(1, sizeof(turtle_tools_switch_t));
     switchp -> element = TT_ELEMENT_SWITCH;
     switchp -> priority = switchp -> element;
     switchp -> enabled = TT_ELEMENT_ENABLED;
@@ -28114,19 +28094,20 @@ tt_switch_t *tt_switchInit(char *label, int8_t *variable, double x, double y, do
     return switchp;
 }
 
-void tt_switchFree(tt_switch_t *switchp) {
+/* delete a switch */
+void turtle_tools_switch_free(turtle_tools_switch_t *switchp) {
     list_remove(turtleToolsElements.all, (unitype) (uint64_t) switchp, 'l');
     list_remove(turtleToolsElements.switches, (unitype) (void *) switchp, 'p');
 }
 
-/* create a dial - make renderNumberFactor 0 to hide dial number */
-tt_dial_t *tt_dialInit(char *label, int32_t *variable, tt_dial_scale_t scale, double x, double y, double size, int32_t bottom, int32_t top, char *render, double renderMultiplier) {
+/* create a dial - make renderMultiplier 0 to hide dial number */
+turtle_tools_dial_t *turtle_tools_dial_init(char *label, int32_t *variable, turtle_tools_dial_scale_t scale, double x, double y, double size, int32_t bottom, int32_t top, char *render, double renderMultiplier) {
     if (turtleToolsEnabled.dialEnabled == 0) {
         turtleToolsEnabled.dialEnabled = 1;
         turtleToolsElements.dials = list_init();
     }
-    turtleToolsInit();
-    tt_dial_t *dialp = calloc(1, sizeof(tt_dial_t));
+    turtle_tools_init();
+    turtle_tools_dial_t *dialp = calloc(1, sizeof(turtle_tools_dial_t));
     dialp -> element = TT_ELEMENT_DIAL;
     dialp -> priority = dialp -> element;
     dialp -> enabled = TT_ELEMENT_ENABLED;
@@ -28190,19 +28171,20 @@ tt_dial_t *tt_dialInit(char *label, int32_t *variable, tt_dial_scale_t scale, do
     return dialp;
 }
 
-void tt_dialFree(tt_dial_t *dialp) {
+/* delete a dial */
+void turtle_tools_dial_free(turtle_tools_dial_t *dialp) {
     list_remove(turtleToolsElements.all, (unitype) (uint64_t) dialp, 'l');
     list_remove(turtleToolsElements.dials, (unitype) (void *) dialp, 'p');
 }
 
-/* create a slider - make renderNumberFactor 0 to hide slider number */
-tt_slider_t *tt_sliderInit(char *label, int32_t *variable, tt_slider_type_t type, tt_slider_align_t align, double x, double y, double size, double length, int32_t bottom, int32_t top, char *render, double renderMultiplier) {
+/* create a slider - make renderMultiplier 0 to hide slider number */
+turtle_tools_slider_t *turtle_tools_slider_init(char *label, int32_t *variable, turtle_tools_slider_type_t type, turtle_tools_slider_align_t align, double x, double y, double size, double length, int32_t bottom, int32_t top, char *render, double renderMultiplier) {
     if (turtleToolsEnabled.sliderEnabled == 0) {
         turtleToolsEnabled.sliderEnabled = 1;
         turtleToolsElements.sliders = list_init();
     }
-    turtleToolsInit();
-    tt_slider_t *sliderp = calloc(1, sizeof(tt_slider_t));
+    turtle_tools_init();
+    turtle_tools_slider_t *sliderp = calloc(1, sizeof(turtle_tools_slider_t));
     sliderp -> element = TT_ELEMENT_SLIDER;
     sliderp -> priority = sliderp -> element;
     sliderp -> enabled = TT_ELEMENT_ENABLED;
@@ -28270,21 +28252,22 @@ tt_slider_t *tt_sliderInit(char *label, int32_t *variable, tt_slider_type_t type
     return sliderp;
 }
 
-void tt_sliderFree(tt_slider_t *sliderp) {
+/* delete a slider */
+void turtle_tools_slider_free(turtle_tools_slider_t *sliderp) {
     list_remove(turtleToolsElements.all, (unitype) (uint64_t) sliderp, 'l');
     list_remove(turtleToolsElements.sliders, (unitype) (void *) sliderp, 'p');
 }
 
 /* create a textbox */
-tt_textbox_t *tt_textboxInit(char *label, char *variable, int32_t maxCharacters, double x, double y, double size, double length) {
+turtle_tools_textbox_t *turtle_tools_textbox_init(char *label, char *variable, int32_t maxCharacters, double x, double y, double size, double length) {
     if (turtleToolsEnabled.textboxEnabled == 0) {
-        turtle.unicodeCallback = tt_textboxUnicodeCallback;
-        turtle.keyCallback = tt_textboxKeyCallback;
+        turtle.unicodeCallback = turtle_tools_textbox_unicode_callback;
+        turtle.keyCallback = turtle_tools_textbox_key_callback;
         turtleToolsEnabled.textboxEnabled = 1;
         turtleToolsElements.textboxes = list_init();
     }
-    turtleToolsInit();
-    tt_textbox_t *textboxp = calloc(1, sizeof(tt_textbox_t));
+    turtle_tools_init();
+    turtle_tools_textbox_t *textboxp = calloc(1, sizeof(turtle_tools_textbox_t));
     textboxp -> element = TT_ELEMENT_TEXTBOX;
     textboxp -> priority = textboxp -> element;
     textboxp -> enabled = TT_ELEMENT_ENABLED;
@@ -28339,12 +28322,14 @@ tt_textbox_t *tt_textboxInit(char *label, char *variable, int32_t maxCharacters,
     return textboxp;
 }
 
-void tt_textboxFree(tt_textbox_t *textboxp) {
+/* delete textbox */
+void turtle_tools_textbox_free(turtle_tools_textbox_t *textboxp) {
     list_remove(turtleToolsElements.all, (unitype) (uint64_t) textboxp, 'l');
     list_remove(turtleToolsElements.textboxes, (unitype) (void *) textboxp, 'p');
 }
 
-void tt_dropdownCalculateMax(tt_dropdown_t *dropdownp) {
+/* this function must be run if the contents of the the dropdown is changed. It will automatically resize the dropdown container based on the length of the elements */
+void turtle_tools_dropdown_calculate_bounds(turtle_tools_dropdown_t *dropdownp) {
     dropdownp -> maxXfactor = 0;
     for (int32_t i = 0; i < dropdownp -> options -> length; i++) {
         double stringLength = turtle_text_get_string_length(dropdownp -> options -> data[i].s, dropdownp -> size - 1);
@@ -28354,14 +28339,14 @@ void tt_dropdownCalculateMax(tt_dropdown_t *dropdownp) {
     }
 }
 
-/* create a dropdown - use a list of strings for options */
-tt_dropdown_t *tt_dropdownInit(char *label, list_t *options, int32_t *variable, tt_dropdown_align_t align, double x, double y, double size) {
+/* create a dropdown - use a list of strings for options (options must have at least one string) */
+turtle_tools_dropdown_t *turtle_tools_dropdown_init(char *label, list_t *options, int32_t *variable, turtle_tools_dropdown_align_t align, double x, double y, double size) {
     if (turtleToolsEnabled.dropdownEnabled == 0) {
         turtleToolsEnabled.dropdownEnabled = 1;
         turtleToolsElements.dropdowns = list_init();
     }
-    turtleToolsInit();
-    tt_dropdown_t *dropdownp = calloc(1, sizeof(tt_dropdown_t));
+    turtle_tools_init();
+    turtle_tools_dropdown_t *dropdownp = calloc(1, sizeof(turtle_tools_dropdown_t));
     dropdownp -> element = TT_ELEMENT_DROPDOWN;
     dropdownp -> priority = dropdownp -> element;
     dropdownp -> enabled = TT_ELEMENT_ENABLED;
@@ -28396,26 +28381,27 @@ tt_dropdown_t *tt_dropdownInit(char *label, list_t *options, int32_t *variable, 
     dropdownp -> y = y;
     dropdownp -> size = size;
     dropdownp -> variable = variable;
-    tt_dropdownCalculateMax(dropdownp);
+    turtle_tools_dropdown_calculate_bounds(dropdownp);
     list_append(turtleToolsElements.dropdowns, (unitype) (void *) dropdownp, 'p');
     list_append(turtleToolsElements.all, (unitype) (void *) dropdownp, 'l');
     return dropdownp;
 }
 
-void tt_dropdownFree(tt_dropdown_t *dropdownp) {
+/* delete a dropdown */
+void turtle_tools_dropdown_free(turtle_tools_dropdown_t *dropdownp) {
     list_free(dropdownp -> options);
     list_remove(turtleToolsElements.all, (unitype) (uint64_t) dropdownp, 'l');
     list_remove(turtleToolsElements.dropdowns, (unitype) (void *) dropdownp, 'p');
 }
 
 /* create a scrollbar */
-tt_scrollbar_t *tt_scrollbarInit(double *variable, tt_scrollbar_type_t type, double x, double y, double size, double length, double barPercentage) {
+turtle_tools_scrollbar_t *turtle_tools_scrollbar_init(double *variable, turtle_tools_scrollbar_type_t type, double x, double y, double size, double length, double barPercentage) {
     if (turtleToolsEnabled.scrollbarEnabled == 0) {
         turtleToolsEnabled.scrollbarEnabled = 1;
         turtleToolsElements.scrollbars = list_init();
     }
-    turtleToolsInit();
-    tt_scrollbar_t *scrollbarp = calloc(1, sizeof(tt_scrollbar_t));
+    turtle_tools_init();
+    turtle_tools_scrollbar_t *scrollbarp = calloc(1, sizeof(turtle_tools_scrollbar_t));
     scrollbarp -> element = TT_ELEMENT_SCROLLBAR;
     scrollbarp -> priority = scrollbarp -> element;
     scrollbarp -> enabled = TT_ELEMENT_ENABLED;
@@ -28434,12 +28420,14 @@ tt_scrollbar_t *tt_scrollbarInit(double *variable, tt_scrollbar_type_t type, dou
     return scrollbarp;
 }
 
-void tt_scrollbarFree(tt_scrollbar_t *scrollbarp) {
+/* delete a scrollbar */
+void turtle_tools_scrollbar_free(turtle_tools_scrollbar_t *scrollbarp) {
     list_remove(turtleToolsElements.all, (unitype) (uint64_t) scrollbarp, 'l');
     list_remove(turtleToolsElements.scrollbars, (unitype) (void *) scrollbarp, 'p');
 }
 
-void tt_contextCalculateMax(tt_context_t *contextp) {
+/* this function must be run if the contents of the the context menu is changed. It will automatically resize the context container based on the lengths of the options */
+void turtle_tools_context_calculate_bounds(turtle_tools_context_t *contextp) {
     contextp -> maxXfactor = 0;
     for (int32_t i = 0; i < contextp -> options -> length; i++) {
         double stringLength = turtle_text_get_string_length(contextp -> options -> data[i].s, contextp -> size - 1);
@@ -28450,13 +28438,13 @@ void tt_contextCalculateMax(tt_context_t *contextp) {
 }
 
 /* create a context menu */
-tt_context_t *tt_contextInit(list_t *options, int32_t *variable, double x, double y, double size) {
+turtle_tools_context_t *turtle_tools_context_init(list_t *options, int32_t *variable, double x, double y, double size) {
     if (turtleToolsEnabled.contextEnabled == 0) {
         turtleToolsEnabled.contextEnabled = 1;
         turtleToolsElements.contexts = list_init();
     }
-    turtleToolsInit();
-    tt_context_t *contextp = calloc(1, sizeof(tt_context_t));
+    turtle_tools_init();
+    turtle_tools_context_t *contextp = calloc(1, sizeof(turtle_tools_context_t));
     contextp -> element = TT_ELEMENT_CONTEXT;
     contextp -> priority = contextp -> element;
     contextp -> enabled = TT_ELEMENT_ENABLED;
@@ -28473,7 +28461,7 @@ tt_context_t *tt_contextInit(list_t *options, int32_t *variable, double x, doubl
         *variable = -1;
     }
     contextp -> variable = variable;
-    tt_contextCalculateMax(contextp);
+    turtle_tools_context_calculate_bounds(contextp);
     contextp -> direction = TT_CONTEXT_DIRECTION_AUTO;
     contextp -> autoLowerBound = turtle.initbounds[1];
     contextp -> autoRightBound = turtle.initbounds[2];
@@ -28482,19 +28470,21 @@ tt_context_t *tt_contextInit(list_t *options, int32_t *variable, double x, doubl
     return contextp;
 }
 
-void tt_contextFree(tt_context_t *contextp) {
+/* delete a context menu */
+void turtle_tools_context_free(turtle_tools_context_t *contextp) {
     list_free(contextp -> options);
     list_remove(turtleToolsElements.all, (unitype) (uint64_t) contextp, 'l');
     list_remove(turtleToolsElements.contexts, (unitype) (void *) contextp, 'p');
 }
 
-tt_reader_t *tt_readerInit(char *label, unitype *variable, char type, double x, double y, double size) {
+/* create a reader */
+turtle_tools_reader_t *turtle_tools_reader_init(char *label, unitype *variable, char type, double x, double y, double size) {
     if (turtleToolsEnabled.readerEnabled == 0) {
         turtleToolsEnabled.readerEnabled = 1;
         turtleToolsElements.readers = list_init();
     }
-    turtleToolsInit();
-    tt_reader_t *readerp = calloc(1, sizeof(tt_reader_t));
+    turtle_tools_init();
+    turtle_tools_reader_t *readerp = calloc(1, sizeof(turtle_tools_reader_t));
     if (type == UNITYPE_LIST) {
         readerp -> element = TT_ELEMENT_LIST_READER;
     } else {
@@ -28533,7 +28523,7 @@ tt_reader_t *tt_readerInit(char *label, unitype *variable, char type, double x, 
         if (list -> length > 20) {
             percentage = 100.0 / ((list -> length - 20) / 10);
         }
-        readerp -> scrollbarp = tt_scrollbarInit(NULL, TT_SCROLLBAR_TYPE_VERTICAL, x + size * 5, y, size * 0.75, size * 10, percentage);
+        readerp -> scrollbarp = turtle_tools_scrollbar_init(NULL, TT_SCROLLBAR_TYPE_VERTICAL, x + size * 5, y, size * 0.75, size * 10, percentage);
         readerp -> scrollbarp -> ignored = TT_ELEMENT_IGNORED; // this scrollbar is updated with the list reader to ensure it appears on top of the reader
         readerp -> scrollbarp -> priority = TT_ELEMENT_LIST_READER;
     }
@@ -28542,7 +28532,8 @@ tt_reader_t *tt_readerInit(char *label, unitype *variable, char type, double x, 
     return readerp;
 }
 
-void tt_readerFree(tt_reader_t *readerp) {
+/* delete a reader */
+void turtle_tools_reader_free(turtle_tools_reader_t *readerp) {
     if (readerp -> element == TT_ELEMENT_VARIABLE_READER) {
         list_remove(turtleToolsElements.all, (unitype) (uint64_t) readerp, 'l');
         list_remove(turtleToolsElements.readers, (unitype) (void *) readerp, 'p');
@@ -28554,7 +28545,8 @@ void tt_readerFree(tt_reader_t *readerp) {
     }
 }
 
-void tt_buttonUpdate(turtle_tools_button_t *buttonp) {
+/* update a button */
+void turtle_tools_button_update(turtle_tools_button_t *buttonp) {
     if (buttonp -> variable != NULL) {
         buttonp -> value = *buttonp -> variable;
     }
@@ -28701,7 +28693,8 @@ void tt_buttonUpdate(turtle_tools_button_t *buttonp) {
     }
 }
 
-void tt_switchUpdate(tt_switch_t *switchp) {
+/* update a switch */
+void turtle_tools_switch_update(turtle_tools_switch_t *switchp) {
     if (switchp -> variable != NULL) {
         switchp -> value = *switchp -> variable;
     }
@@ -28935,8 +28928,8 @@ void tt_switchUpdate(tt_switch_t *switchp) {
     }
 }
 
-/* angle between two coordinates (in degrees) */
-double tt_angleBetween(double x1, double y1, double x2, double y2) {
+/* calculate the angle between two coordinates (in degrees) */
+double turtle_tools_angle_between(double x1, double y1, double x2, double y2) {
     double output;
     if (y2 == y1) {
         if (x2 >= x1) {
@@ -28955,7 +28948,8 @@ double tt_angleBetween(double x1, double y1, double x2, double y2) {
     return output;
 }
 
-void tt_dialUpdate(tt_dial_t *dialp) {
+/* update a dial */
+void turtle_tools_dial_update(turtle_tools_dial_t *dialp) {
     if (dialp -> variable != NULL) {
         dialp -> value = *dialp -> variable;
     }
@@ -29067,7 +29061,7 @@ void tt_dialUpdate(tt_dial_t *dialp) {
         }
     }
     if (dialp -> status == TT_STATUS_CLICK || dialp -> status == TT_STATUS_CLICK_FIRST_TICK) {
-        dialAngle = tt_angleBetween(turtleToolsGlobals.dialAnchorX, turtleToolsGlobals.dialAnchorY, turtle.mouseX, turtle.mouseY);
+        dialAngle = turtle_tools_angle_between(turtleToolsGlobals.dialAnchorX, turtleToolsGlobals.dialAnchorY, turtle.mouseX, turtle.mouseY);
         if (dialp -> style == TT_DIAL_STYLE_CLASSIC) {
             if (turtle.mouseY < turtleToolsGlobals.dialAnchorY) {
                 dialp -> mouseAnchor = turtle.mouseX - dialX;
@@ -29126,7 +29120,8 @@ void tt_dialUpdate(tt_dial_t *dialp) {
     }
 }
 
-void tt_sliderUpdate(tt_slider_t *sliderp) {
+/* update a slider */
+void turtle_tools_slider_update(turtle_tools_slider_t *sliderp) {
     if (sliderp -> variable != NULL) {
         sliderp -> value = *sliderp -> variable;
     }
@@ -29394,7 +29389,7 @@ void tt_sliderUpdate(tt_slider_t *sliderp) {
     }
 }
 
-void tt_textboxAddKey(tt_textbox_t *textboxp, int32_t key) {
+void turtle_tools_textbox_add_key(turtle_tools_textbox_t *textboxp, int32_t key) {
     /* https://stackoverflow.com/questions/42012563/convert-unicode-code-points-to-utf-8-and-utf-32 */
     uint32_t uKey = key;
     uint8_t buffer[5] = {0};
@@ -29451,17 +29446,17 @@ void tt_textboxAddKey(tt_textbox_t *textboxp, int32_t key) {
     }
 }
 
-void tt_textboxUnicodeCallback(uint32_t codepoint) {
+void turtle_tools_textbox_unicode_callback(uint32_t codepoint) {
     for (int32_t i = 0; i < turtleToolsElements.textboxes -> length; i++) {
-        tt_textbox_t *textboxp = (tt_textbox_t *) (turtleToolsElements.textboxes -> data[i].p);
+        turtle_tools_textbox_t *textboxp = (turtle_tools_textbox_t *) (turtleToolsElements.textboxes -> data[i].p);
         if (textboxp -> status == TT_STATUS_CLICK || textboxp -> status == TT_STATUS_OPEN || textboxp -> status == TT_STATUS_CLICK_FIRST_TICK || textboxp -> status == TT_STATUS_OPEN_FIRST_TICK) {
-            tt_textboxAddKey(textboxp, codepoint);
+            turtle_tools_textbox_add_key(textboxp, codepoint);
             break;
         }
     }
 }
 
-void tt_textboxHandleOtherKey(tt_textbox_t *textboxp, int32_t key) {
+void turtle_tools_textbox_handle_other_key(turtle_tools_textbox_t *textboxp, int32_t key) {
     int32_t len = strlen(textboxp -> text);
     if (key == GLFW_KEY_A && turtle_key_pressed(GLFW_KEY_LEFT_CONTROL)) {
         /* select all */
@@ -29587,22 +29582,22 @@ void tt_textboxHandleOtherKey(tt_textbox_t *textboxp, int32_t key) {
     }
 }
 
-void tt_textboxKeyCallback(int32_t key, int32_t scancode, int32_t action) {
+void turtle_tools_textbox_key_callback(int32_t key, int32_t scancode, int32_t action) {
     /* non-printable keys */
     if (action == GLFW_PRESS) {
         for (int32_t i = 0; i < turtleToolsElements.textboxes -> length; i++) {
-            tt_textbox_t *textboxp = (tt_textbox_t *) (turtleToolsElements.textboxes -> data[i].p);
+            turtle_tools_textbox_t *textboxp = (turtle_tools_textbox_t *) (turtleToolsElements.textboxes -> data[i].p);
             if (textboxp -> status == TT_STATUS_CLICK || textboxp -> status == TT_STATUS_OPEN || textboxp -> status == TT_STATUS_CLICK_FIRST_TICK || textboxp -> status == TT_STATUS_OPEN_FIRST_TICK) {
                 textboxp -> lastKey = key;
                 textboxp -> keyTimeout = textboxp -> initialKeyTimeout;
-                tt_textboxHandleOtherKey(textboxp, key);
+                turtle_tools_textbox_handle_other_key(textboxp, key);
                 break;
             }
         }
     }
 }
 
-int32_t tt_textboxCalculateMaximumCharacters(uint32_t *charlist, int32_t textLength, double size, double lengthPixels, int8_t sweepDirection, double *outputLength) {
+int32_t turtle_tools_textbox_calculate_maximum_characters(uint32_t *charlist, int32_t textLength, double size, double lengthPixels, int8_t sweepDirection, double *outputLength) {
     if (sweepDirection == -1) {
         /* sweep from the back to the front */
         size /= 175;
@@ -29669,14 +29664,14 @@ int32_t tt_textboxCalculateMaximumCharacters(uint32_t *charlist, int32_t textLen
     return 0;
 }
 
-int32_t tt_textboxCalculateIndexFromPosition(tt_textbox_t *textboxp, double position) {
+int32_t turtle_tools_textbox_calculate_index_from_position(turtle_tools_textbox_t *textboxp, double position) {
     uint32_t textConverted[strlen(textboxp -> text) + 1];
     uint32_t characterLength = turtle_text_convert_unicode(textboxp -> text + textboxp -> renderStartingIndex, textConverted);
     int32_t index;
     double startingPx = position - (textboxp -> x + textboxp -> renderPixelOffset + textboxp -> size / 10 + turtle_text_get_length(textConverted, 1, textboxp -> size - 1) / 2);
     if (startingPx > 0) {
         double dummy;
-        index = tt_textboxCalculateMaximumCharacters(textConverted, characterLength, textboxp -> size - 1, startingPx, -1, &dummy) + textboxp -> renderStartingIndex;
+        index = turtle_tools_textbox_calculate_maximum_characters(textConverted, characterLength, textboxp -> size - 1, startingPx, -1, &dummy) + textboxp -> renderStartingIndex;
     } else {
         index = textboxp -> renderStartingIndex;
     }
@@ -29689,7 +29684,8 @@ int32_t tt_textboxCalculateIndexFromPosition(tt_textbox_t *textboxp, double posi
     return index;
 }
 
-void tt_textboxUpdate(tt_textbox_t *textboxp) {
+/* update a textbox */
+void turtle_tools_textbox_update(turtle_tools_textbox_t *textboxp) {
     if (textboxp -> enabled == TT_ELEMENT_HIDE) {
         if (textboxp -> status != TT_STATUS_BLOCKED) {
             textboxp -> status = TT_STATUS_IDLE;
@@ -29705,7 +29701,7 @@ void tt_textboxUpdate(tt_textbox_t *textboxp) {
         if (turtle_key_pressed(textboxp -> lastKey)) {
             if (textboxp -> keyTimeout == 0) {
                 textboxp -> keyTimeout = textboxp -> heldKeyTimeout;
-                tt_textboxHandleOtherKey(textboxp, textboxp -> lastKey);
+                turtle_tools_textbox_handle_other_key(textboxp, textboxp -> lastKey);
             }
         } else {
             textboxp -> lastKey = 0;
@@ -29738,7 +29734,7 @@ void tt_textboxUpdate(tt_textbox_t *textboxp) {
                 uint32_t textConverted[strlen(textboxp -> text) + 1];
                 uint32_t characterLength = turtle_text_convert_unicode(textboxp -> text, textConverted);
                 double dummy;
-                textboxp -> renderNumCharacters = tt_textboxCalculateMaximumCharacters(textConverted, characterLength, textboxp -> size - 1, textboxp -> length - textboxp -> size * 1.2, -1, &dummy);
+                textboxp -> renderNumCharacters = turtle_tools_textbox_calculate_maximum_characters(textConverted, characterLength, textboxp -> size - 1, textboxp -> length - textboxp -> size * 1.2, -1, &dummy);
             }
         }
     } else if (textboxp -> status == TT_STATUS_CLICK || textboxp -> status == TT_STATUS_OPEN || textboxp -> status == TT_STATUS_CLICK_FIRST_TICK || textboxp -> status == TT_STATUS_OPEN_FIRST_TICK) {
@@ -29758,7 +29754,7 @@ void tt_textboxUpdate(tt_textbox_t *textboxp) {
                 uint32_t textConverted[strlen(textboxp -> text) + 1];
                 uint32_t characterLength = turtle_text_convert_unicode(textboxp -> text + textboxp -> editIndex, textConverted);
                 double dummy;
-                textboxp -> renderNumCharacters = tt_textboxCalculateMaximumCharacters(textConverted, characterLength, textboxp -> size - 1, textboxp -> length - textboxp -> size * 1.2, -1, &dummy);
+                textboxp -> renderNumCharacters = turtle_tools_textbox_calculate_maximum_characters(textConverted, characterLength, textboxp -> size - 1, textboxp -> length - textboxp -> size * 1.2, -1, &dummy);
             } else if (textboxp -> editIndex > textboxp -> renderStartingIndex + textboxp -> renderNumCharacters || (strlen(textboxp -> text) < textboxp -> renderStartingIndex + textboxp -> renderNumCharacters && strlen(textboxp -> text) == textboxp -> editIndex)) {
                 /* set editIndex at the right side of box */
                 char tempHold;
@@ -29767,7 +29763,7 @@ void tt_textboxUpdate(tt_textbox_t *textboxp) {
                 uint32_t textConverted[strlen(textboxp -> text) + 1];
                 uint32_t characterLength = turtle_text_convert_unicode(textboxp -> text, textConverted);
                 double textPixelLength;
-                textboxp -> renderStartingIndex = strlen(textboxp -> text) + tt_textboxCalculateMaximumCharacters(textConverted, characterLength, textboxp -> size - 1, textboxp -> length - textboxp -> size * 1.2, 1, &textPixelLength);
+                textboxp -> renderStartingIndex = strlen(textboxp -> text) + turtle_tools_textbox_calculate_maximum_characters(textConverted, characterLength, textboxp -> size - 1, textboxp -> length - textboxp -> size * 1.2, 1, &textPixelLength);
                 textboxp -> renderNumCharacters = strlen(textboxp -> text) - textboxp -> renderStartingIndex;
                 textboxp -> renderPixelOffset = textboxp -> length - textboxp -> size / 3 - textPixelLength;
                 textboxp -> text[textboxp -> editIndex] = tempHold;
@@ -29856,7 +29852,7 @@ void tt_textboxUpdate(tt_textbox_t *textboxp) {
         if (textboxp -> status == TT_STATUS_HOVER || (textboxp -> status == TT_STATUS_OPEN && textboxp -> mouseOver) || textboxp -> status == TT_STATUS_HOVER_FIRST_TICK || (textboxp -> status == TT_STATUS_OPEN_FIRST_TICK && textboxp -> mouseOver)) {
             /* first tick clicked */
             textboxp -> count = 1;
-            textboxp -> editIndex = tt_textboxCalculateIndexFromPosition(textboxp, turtle.mouseX);
+            textboxp -> editIndex = turtle_tools_textbox_calculate_index_from_position(textboxp, turtle.mouseX);
             textboxp -> editIndexLength = 0;
             int32_t index = list_find(turtleToolsElements.textboxes, (unitype) (void *) textboxp, 'p');
             if (index != -1 && index != turtleToolsElements.textboxes -> length - 1) {
@@ -29875,7 +29871,7 @@ void tt_textboxUpdate(tt_textbox_t *textboxp) {
             textboxp -> status = TT_STATUS_CLICK;
             textboxp -> moveToTop = 0;
             if (textboxp -> editingMode == 0) {
-                int32_t boundIndex = tt_textboxCalculateIndexFromPosition(textboxp, turtle.mouseX);
+                int32_t boundIndex = turtle_tools_textbox_calculate_index_from_position(textboxp, turtle.mouseX);
                 textboxp -> editIndexLength = boundIndex - textboxp -> editIndex;
                 if (textboxp -> editIndex + textboxp -> editIndexLength > textboxp -> renderStartingIndex + textboxp -> renderNumCharacters) {
                     textboxp -> editIndexLength = textboxp -> renderStartingIndex + textboxp -> renderNumCharacters - textboxp -> editIndex;
@@ -29932,7 +29928,8 @@ void tt_textboxUpdate(tt_textbox_t *textboxp) {
     }
 }
 
-void tt_dropdownUpdate(tt_dropdown_t *dropdownp) {
+/* update a dropdown */
+void turtle_tools_dropdown_update(turtle_tools_dropdown_t *dropdownp) {
     if (dropdownp -> variable != NULL) {
         dropdownp -> index = *dropdownp -> variable;
         dropdownp -> value = *dropdownp -> variable;
@@ -30193,12 +30190,11 @@ void tt_dropdownUpdate(tt_dropdown_t *dropdownp) {
     }
 }
 
-/*
+/* update a scrollbar
 scrollbar range of motion (coordinates):
 scrollbar.length * (1 - scrollbar.barPercentage / 100)
-tip: try to match the ratio of visible content to the scrollbar's barPercentage - if half of the content can be shown on one screen then make the barPercentage 50
-*/
-void tt_scrollbarUpdate(tt_scrollbar_t *scrollbarp) {
+tip: try to match the ratio of visible content to the scrollbar's barPercentage - if half of the content can be shown on one screen then make the barPercentage 50 */
+void turtle_tools_scrollbar_update(turtle_tools_scrollbar_t *scrollbarp) {
     if (scrollbarp -> variable != NULL) {
         scrollbarp -> value = *scrollbarp -> variable;
     }
@@ -30333,7 +30329,8 @@ void tt_scrollbarUpdate(tt_scrollbar_t *scrollbarp) {
     }
 }
 
-void tt_contextUpdate(tt_context_t *contextp) {
+/* update a context */
+void turtle_tools_context_update(turtle_tools_context_t *contextp) {
     if (contextp -> variable != NULL) {
         contextp -> index = *contextp -> variable;
         contextp -> value = *contextp -> variable;
@@ -30399,7 +30396,8 @@ void tt_contextUpdate(tt_context_t *contextp) {
 
 static char readerString[4096]; // global memory for efficiency
 
-void tt_readerUpdate(tt_reader_t *readerp) {
+/* update a reader */
+void turtle_tools_reader_update(turtle_tools_reader_t *readerp) {
     if (readerp -> element == TT_ELEMENT_LIST_READER) {
         /* render rectangle */
         double readerLeftX = readerp -> x;
@@ -30495,7 +30493,7 @@ void tt_readerUpdate(tt_reader_t *readerp) {
             readerp -> scrollbarp -> barPercentage = 100.0 / (log((list -> length - itemsInWindow) / 2.0 + 1) + 1);
             readerp -> scrollbarp -> length = readerp -> height - readerp -> size * 4.75;
             turtleToolsGlobals.elementLogicTemp++;
-            tt_scrollbarUpdate(readerp -> scrollbarp);
+            turtle_tools_scrollbar_update(readerp -> scrollbarp);
         } else {
             readerp -> scrollbarp -> value = 0;
         }
@@ -30696,12 +30694,14 @@ void tt_readerUpdate(tt_reader_t *readerp) {
     }
 }
 
-void turtleToolsUpdate() {
-    turtleToolsUpdateUI();
-    turtleToolsUpdateRibbonPopup();
+/* update all turtleTools */
+void turtle_tools_update() {
+    turtle_tools_update_ui();
+    turtle_tools_update_ribbon_popup();
 }
 
-void turtleToolsUpdateUI() {
+/* update all turtleTools except ribbon and popup */
+void turtle_tools_update_ui() {
     turtleToolsGlobals.elementLogicType = TT_ELEMENT_NONE;
     turtleToolsGlobals.elementLogicIndex = -1;
     turtleToolsGlobals.elementLogicTemp = -1;
@@ -30713,48 +30713,48 @@ void turtleToolsUpdateUI() {
             if (((turtle_tools_button_t *) (turtleToolsElements.buttons -> data[i].p)) -> ignored == TT_ELEMENT_IGNORED) {
                 continue;
             }
-            tt_buttonUpdate((turtle_tools_button_t *) (turtleToolsElements.buttons -> data[i].p));
+            turtle_tools_button_update((turtle_tools_button_t *) (turtleToolsElements.buttons -> data[i].p));
             turtleToolsGlobals.elementLogicTemp++;
         }
     }
     if (turtleToolsEnabled.switchEnabled) {
         turtleToolsGlobals.elementLogicTemp = 0;
         for (int32_t i = 0; i < turtleToolsElements.switches -> length; i++) {
-            if (((tt_switch_t *) (turtleToolsElements.switches -> data[i].p)) -> ignored == TT_ELEMENT_IGNORED) {
+            if (((turtle_tools_switch_t *) (turtleToolsElements.switches -> data[i].p)) -> ignored == TT_ELEMENT_IGNORED) {
                 continue;
             }
-            tt_switchUpdate((tt_switch_t *) (turtleToolsElements.switches -> data[i].p));
+            turtle_tools_switch_update((turtle_tools_switch_t *) (turtleToolsElements.switches -> data[i].p));
             turtleToolsGlobals.elementLogicTemp++;
         }
     }
     if (turtleToolsEnabled.dialEnabled) {
         turtleToolsGlobals.elementLogicTemp = 0;
         for (int32_t i = 0; i < turtleToolsElements.dials -> length; i++) {
-            if (((tt_dial_t *) (turtleToolsElements.dials -> data[i].p)) -> ignored == TT_ELEMENT_IGNORED) {
+            if (((turtle_tools_dial_t *) (turtleToolsElements.dials -> data[i].p)) -> ignored == TT_ELEMENT_IGNORED) {
                 continue;
             }
-            tt_dialUpdate((tt_dial_t *) (turtleToolsElements.dials -> data[i].p));
+            turtle_tools_dial_update((turtle_tools_dial_t *) (turtleToolsElements.dials -> data[i].p));
             turtleToolsGlobals.elementLogicTemp++;
         }
     }
     if (turtleToolsEnabled.sliderEnabled) {
         turtleToolsGlobals.elementLogicTemp = 0;
         for (int32_t i = 0; i < turtleToolsElements.sliders -> length; i++) {
-            if (((tt_slider_t *) (turtleToolsElements.sliders -> data[i].p)) -> ignored == TT_ELEMENT_IGNORED) {
+            if (((turtle_tools_slider_t *) (turtleToolsElements.sliders -> data[i].p)) -> ignored == TT_ELEMENT_IGNORED) {
                 continue;
             }
-            tt_sliderUpdate((tt_slider_t *) (turtleToolsElements.sliders -> data[i].p));
+            turtle_tools_slider_update((turtle_tools_slider_t *) (turtleToolsElements.sliders -> data[i].p));
             turtleToolsGlobals.elementLogicTemp++;
         }
     }
     if (turtleToolsEnabled.textboxEnabled) {
         turtleToolsGlobals.elementLogicTemp = 0;
         for (int32_t i = 0; i < turtleToolsElements.textboxes -> length; i++) {
-            if (((tt_textbox_t *) (turtleToolsElements.textboxes -> data[i].p)) -> ignored == TT_ELEMENT_IGNORED) {
+            if (((turtle_tools_textbox_t *) (turtleToolsElements.textboxes -> data[i].p)) -> ignored == TT_ELEMENT_IGNORED) {
                 continue;
             }
-            tt_textbox_t *textboxp = (tt_textbox_t *) (turtleToolsElements.textboxes -> data[i].p);
-            tt_textboxUpdate(textboxp);
+            turtle_tools_textbox_t *textboxp = (turtle_tools_textbox_t *) (turtleToolsElements.textboxes -> data[i].p);
+            turtle_tools_textbox_update(textboxp);
             if (textboxp -> moveToTop) {
                 i--;
             } else {
@@ -30765,11 +30765,11 @@ void turtleToolsUpdateUI() {
     if (turtleToolsEnabled.dropdownEnabled) {
         turtleToolsGlobals.elementLogicTemp = 0;
         for (int32_t i = 0; i < turtleToolsElements.dropdowns -> length; i++) {
-            if (((tt_dropdown_t *) (turtleToolsElements.dropdowns -> data[i].p)) -> ignored == TT_ELEMENT_IGNORED) {
+            if (((turtle_tools_dropdown_t *) (turtleToolsElements.dropdowns -> data[i].p)) -> ignored == TT_ELEMENT_IGNORED) {
                 continue;
             }
-            tt_dropdown_t *dropdownp = (tt_dropdown_t *) (turtleToolsElements.dropdowns -> data[i].p);
-            tt_dropdownUpdate(dropdownp);
+            turtle_tools_dropdown_t *dropdownp = (turtle_tools_dropdown_t *) (turtleToolsElements.dropdowns -> data[i].p);
+            turtle_tools_dropdown_update(dropdownp);
             if (dropdownp -> moveToTop) {
                 i--;
             } else {
@@ -30780,31 +30780,31 @@ void turtleToolsUpdateUI() {
     if (turtleToolsEnabled.scrollbarEnabled) {
         turtleToolsGlobals.elementLogicTemp = 0;
         for (int32_t i = 0; i < turtleToolsElements.scrollbars -> length; i++) {
-            if (((tt_scrollbar_t *) (turtleToolsElements.scrollbars -> data[i].p)) -> ignored == TT_ELEMENT_IGNORED) {
+            if (((turtle_tools_scrollbar_t *) (turtleToolsElements.scrollbars -> data[i].p)) -> ignored == TT_ELEMENT_IGNORED) {
                 continue;
             }
-            tt_scrollbarUpdate((tt_scrollbar_t *) (turtleToolsElements.scrollbars -> data[i].p));
+            turtle_tools_scrollbar_update((turtle_tools_scrollbar_t *) (turtleToolsElements.scrollbars -> data[i].p));
             turtleToolsGlobals.elementLogicTemp++;
         }
     }
     if (turtleToolsEnabled.contextEnabled) {
         turtleToolsGlobals.elementLogicTemp = 0;
         for (int32_t i = 0; i < turtleToolsElements.contexts -> length; i++) {
-            if (((tt_context_t *) (turtleToolsElements.contexts -> data[i].p)) -> ignored == TT_ELEMENT_IGNORED) {
+            if (((turtle_tools_context_t *) (turtleToolsElements.contexts -> data[i].p)) -> ignored == TT_ELEMENT_IGNORED) {
                 continue;
             }
-            tt_contextUpdate((tt_context_t *) (turtleToolsElements.contexts -> data[i].p));
+            turtle_tools_context_update((turtle_tools_context_t *) (turtleToolsElements.contexts -> data[i].p));
             turtleToolsGlobals.elementLogicTemp++;
         }
     }
     if (turtleToolsEnabled.readerEnabled) {
         turtleToolsGlobals.elementLogicTemp = 0;
         for (int32_t i = 0; i < turtleToolsElements.readers -> length; i++) {
-            if (((tt_reader_t *) (turtleToolsElements.readers -> data[i].p)) -> ignored == TT_ELEMENT_IGNORED) {
+            if (((turtle_tools_reader_t *) (turtleToolsElements.readers -> data[i].p)) -> ignored == TT_ELEMENT_IGNORED) {
                 continue;
             }
-            tt_reader_t *readerp = (tt_reader_t *) (turtleToolsElements.readers -> data[i].p);
-            tt_readerUpdate(readerp);
+            turtle_tools_reader_t *readerp = (turtle_tools_reader_t *) (turtleToolsElements.readers -> data[i].p);
+            turtle_tools_reader_update(readerp);
             if (readerp -> moveToTop) {
                 i--;
             } else {
@@ -30817,7 +30817,8 @@ void turtleToolsUpdateUI() {
     turtleToolsGlobals.elementLogicIndexOld = turtleToolsGlobals.elementLogicIndex;
 }
 
-void turtleToolsUpdateRibbonPopup() {
+/* update ribbon and popup */
+void turtle_tools_update_ribbon_popup() {
     uint16_t shapeSave = turtle.penshape;
     turtle_pen_shape(TURTLE_PEN_SHAPE_CIRCLE);
     if (turtleToolsEnabled.ribbonEnabled) {
