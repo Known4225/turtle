@@ -2,7 +2,7 @@
 #include "turtle.h"
 #include <time.h>
 
-void parseRibbonOutput() {
+void parse_ribbon_output() {
     if (turtleToolsRibbon.output[0] == 0) {
         return;
     }
@@ -78,7 +78,7 @@ void parseRibbonOutput() {
     }
 }
 
-void parsePopupOutput(GLFWwindow *window) {
+void parse_popup_output(GLFWwindow *window) {
     if (turtleToolsPopup.output[0] == 0) {
         return;
     }
@@ -454,8 +454,8 @@ int main(int argc, char *argv[]) {
         turtle_tools_update(); // update turtleTools
         turtle_tools_set_color(TT_COLOR_TEXT);
         turtle_text_write_stringf(-310, -170, 5, 0, "%.2lf, %.2lf", turtle.mouseX, turtle.mouseY);
-        parseRibbonOutput(); // user defined function to use ribbon
-        parsePopupOutput(window); // user defined function to use popup
+        parse_ribbon_output(); // user defined function to use ribbon
+        parse_popup_output(window); // user defined function to use popup
         turtle_update(); // update the screen
         end = clock();
         while ((double) (end - start) / CLOCKS_PER_SEC < (1.0 / tps)) {
