@@ -225,32 +225,32 @@ int main(int argc, char *argv[]) {
     for (int32_t i = 0; i < cameras -> length; i += 4) {
         list_append(imageDropdownOptions, cameras -> data[i], 's');
     }
-    tt_dropdown_t *imageDropdown = tt_dropdownInit("Source", imageDropdownOptions, NULL, TT_DROPDOWN_ALIGN_RIGHT, 700, 36, 8);
+    turtle_tools_dropdown_t *imageDropdown = turtle_tools_dropdown_init("Source", imageDropdownOptions, NULL, TT_DROPDOWN_ALIGN_RIGHT, 700, 36, 8);
     int32_t oldImageDropdown = imageDropdown -> value;
 
     int32_t sliderVar = 0, dialVar = 0;
-    turtle_tools_button_t *button = tt_buttonInit("Button", NULL, 150, 20, 10);
+    turtle_tools_button_t *button = turtle_tools_button_init("Button", NULL, 150, 20, 10);
     button -> shape = TT_BUTTON_SHAPE_ROUNDED_RECTANGLE;
-    tt_switchInit("Switch", NULL, 150, -20, 10);
-    tt_dialInit("Exp", &dialVar, TT_DIAL_SCALE_EXP, -150, 20, 10, 0, 1000, NULL, 1);
-    tt_dialInit("Linear", &dialVar, TT_DIAL_SCALE_LINEAR, -150, -20, 10, 0, 1000, NULL, 1);
-    tt_dialInit("Log", &dialVar, TT_DIAL_SCALE_LOG, -150, -60, 10, 0, 1000, NULL, 1);
-    tt_sliderInit("Slider", NULL, TT_SLIDER_TYPE_HORIZONTAL, TT_SLIDER_ALIGN_LEFT, -100, 35, 10, 50, 0, 255, NULL, 1);
-    tt_sliderInit("Slider", NULL, TT_SLIDER_TYPE_HORIZONTAL, TT_SLIDER_ALIGN_CENTER, 0, 35, 10, 50, 0, 255, NULL, 1);
-    tt_sliderInit("Slider", NULL, TT_SLIDER_TYPE_HORIZONTAL, TT_SLIDER_ALIGN_RIGHT, 100, 35, 10, 50, 0, 255, NULL, 1);
-    tt_sliderInit("Log", &sliderVar, TT_SLIDER_TYPE_VERTICAL, TT_SLIDER_ALIGN_LEFT, -100, -35, 10, 50, 0, 255, NULL, 1) -> scale = TT_SLIDER_SCALE_LOG;
-    tt_sliderInit("Linear", &sliderVar, TT_SLIDER_TYPE_VERTICAL, TT_SLIDER_ALIGN_CENTER, 0, -35, 10, 50, 0, 255, NULL, 1) -> scale = TT_SLIDER_SCALE_LINEAR;
-    tt_sliderInit("Exp", &sliderVar, TT_SLIDER_TYPE_VERTICAL, TT_SLIDER_ALIGN_RIGHT, 100, -35, 10, 50, 0, 255, NULL, 1) -> scale = TT_SLIDER_SCALE_EXP;
-    tt_scrollbar_t *scrollbarX = tt_scrollbarInit(NULL, TT_SCROLLBAR_TYPE_HORIZONTAL, 20, -170, 10, 550, 50);
-    tt_scrollbar_t *scrollbarY = tt_scrollbarInit(NULL, TT_SCROLLBAR_TYPE_VERTICAL, 310, 0, 10, 320, 33);
+    turtle_tools_switch_init("Switch", NULL, 150, -20, 10);
+    turtle_tools_dial_init("Exp", &dialVar, TT_DIAL_SCALE_EXP, -150, 20, 10, 0, 1000, NULL, 1);
+    turtle_tools_dial_init("Linear", &dialVar, TT_DIAL_SCALE_LINEAR, -150, -20, 10, 0, 1000, NULL, 1);
+    turtle_tools_dial_init("Log", &dialVar, TT_DIAL_SCALE_LOG, -150, -60, 10, 0, 1000, NULL, 1);
+    turtle_tools_slider_init("Slider", NULL, TT_SLIDER_TYPE_HORIZONTAL, TT_SLIDER_ALIGN_LEFT, -100, 35, 10, 50, 0, 255, NULL, 1);
+    turtle_tools_slider_init("Slider", NULL, TT_SLIDER_TYPE_HORIZONTAL, TT_SLIDER_ALIGN_CENTER, 0, 35, 10, 50, 0, 255, NULL, 1);
+    turtle_tools_slider_init("Slider", NULL, TT_SLIDER_TYPE_HORIZONTAL, TT_SLIDER_ALIGN_RIGHT, 100, 35, 10, 50, 0, 255, NULL, 1);
+    turtle_tools_slider_init("Log", &sliderVar, TT_SLIDER_TYPE_VERTICAL, TT_SLIDER_ALIGN_LEFT, -100, -35, 10, 50, 0, 255, NULL, 1) -> scale = TT_SLIDER_SCALE_LOG;
+    turtle_tools_slider_init("Linear", &sliderVar, TT_SLIDER_TYPE_VERTICAL, TT_SLIDER_ALIGN_CENTER, 0, -35, 10, 50, 0, 255, NULL, 1) -> scale = TT_SLIDER_SCALE_LINEAR;
+    turtle_tools_slider_init("Exp", &sliderVar, TT_SLIDER_TYPE_VERTICAL, TT_SLIDER_ALIGN_RIGHT, 100, -35, 10, 50, 0, 255, NULL, 1) -> scale = TT_SLIDER_SCALE_EXP;
+    turtle_tools_scrollbar_t *scrollbarX = turtle_tools_scrollbar_init(NULL, TT_SCROLLBAR_TYPE_HORIZONTAL, 20, -170, 10, 550, 50);
+    turtle_tools_scrollbar_t *scrollbarY = turtle_tools_scrollbar_init(NULL, TT_SCROLLBAR_TYPE_VERTICAL, 310, 0, 10, 320, 33);
     list_t *dropdownOptions = list_init();
     list_append(dropdownOptions, (unitype) "Indicator", 's');
     list_append(dropdownOptions, (unitype) "Register", 's');
     list_append(dropdownOptions, (unitype) "P15 Pin", 's');
     list_append(dropdownOptions, (unitype) "K50 Touch", 's');
-    tt_dropdownInit("Dropdown", dropdownOptions, NULL, TT_DROPDOWN_ALIGN_CENTER, 0, 70, 10);
-    tt_textbox_t *username = tt_textboxInit("Username", NULL, 128, -50, -110, 10, 100);
-    tt_textbox_t *password = tt_textboxInit("Password", NULL, 128, -50, -135, 10, 100);
+    turtle_tools_dropdown_init("Dropdown", dropdownOptions, NULL, TT_DROPDOWN_ALIGN_CENTER, 0, 70, 10);
+    turtle_tools_textbox_t *username = turtle_tools_textbox_init("Username", NULL, 128, -50, -110, 10, 100);
+    turtle_tools_textbox_t *password = turtle_tools_textbox_init("Password", NULL, 128, -50, -135, 10, 100);
     list_t *contextOptions = list_init();
     list_append(contextOptions, (unitype) "Button", 's');
     list_append(contextOptions, (unitype) "Switch", 's');
@@ -260,7 +260,7 @@ int main(int argc, char *argv[]) {
     list_append(contextOptions, (unitype) "Dropdown", 's');
     list_append(contextOptions, (unitype) "Scrollbar", 's');
     list_append(contextOptions, (unitype) "Context", 's');
-    tt_context_t *context = tt_contextInit(contextOptions, NULL, 0, 0, 10);
+    turtle_tools_context_t *context = turtle_tools_context_init(contextOptions, NULL, 0, 0, 10);
     context -> enabled = TT_ELEMENT_HIDE;
 
     int32_t x = 103, y = 95, z = 215;
@@ -271,38 +271,38 @@ int main(int argc, char *argv[]) {
     list_append(sources, (unitype) "SP928", 's');
     list_append(sources, (unitype) "SP1203", 's');
     list_append(sources, (unitype) "SP-1550M", 's');
-    tt_dialInit("Power", NULL, TT_DIAL_SCALE_LINEAR, -150, -210, 10, 0, 100, NULL, 1) -> style = TT_DIAL_STYLE_SPEEDOMETER;
-    tt_dialInit("Speed", NULL, TT_DIAL_SCALE_LINEAR, -100, -210, 10, 0, 1000, NULL, 1) -> style = TT_DIAL_STYLE_SPEEDOMETER;
-    tt_dialInit("Shutter", NULL, TT_DIAL_SCALE_EXP, -50, -210, 10, 0, 1000, NULL, 1) -> style = TT_DIAL_STYLE_SPEEDOMETER;
-    tt_dropdownInit("Source", sources, NULL, TT_DROPDOWN_ALIGN_LEFT, -10, -211.2, 10);
-    tt_slider_t *xSlider = tt_sliderInit("X", &x, TT_SLIDER_TYPE_HORIZONTAL, TT_SLIDER_ALIGN_CENTER, -100, -240, 10, 100, -300, 300, "%.1lfmm", 0.1);
-    tt_slider_t *ySlider = tt_sliderInit("Y", &y, TT_SLIDER_TYPE_HORIZONTAL, TT_SLIDER_ALIGN_CENTER, -100, -260, 10, 100, -300, 300, "%.1lfmm", 0.1);
-    tt_slider_t *zSlider = tt_sliderInit("Z", &z, TT_SLIDER_TYPE_HORIZONTAL, TT_SLIDER_ALIGN_CENTER, -100, -280, 10, 100, -300, 300, "%.1lfmm", 0.1);
+    turtle_tools_dial_init("Power", NULL, TT_DIAL_SCALE_LINEAR, -150, -210, 10, 0, 100, NULL, 1) -> style = TT_DIAL_STYLE_SPEEDOMETER;
+    turtle_tools_dial_init("Speed", NULL, TT_DIAL_SCALE_LINEAR, -100, -210, 10, 0, 1000, NULL, 1) -> style = TT_DIAL_STYLE_SPEEDOMETER;
+    turtle_tools_dial_init("Shutter", NULL, TT_DIAL_SCALE_EXP, -50, -210, 10, 0, 1000, NULL, 1) -> style = TT_DIAL_STYLE_SPEEDOMETER;
+    turtle_tools_dropdown_init("Source", sources, NULL, TT_DROPDOWN_ALIGN_LEFT, -10, -211.2, 10);
+    turtle_tools_slider_t *xSlider = turtle_tools_slider_init("X", &x, TT_SLIDER_TYPE_HORIZONTAL, TT_SLIDER_ALIGN_CENTER, -100, -240, 10, 100, -300, 300, "%.1lfmm", 0.1);
+    turtle_tools_slider_t *ySlider = turtle_tools_slider_init("Y", &y, TT_SLIDER_TYPE_HORIZONTAL, TT_SLIDER_ALIGN_CENTER, -100, -260, 10, 100, -300, 300, "%.1lfmm", 0.1);
+    turtle_tools_slider_t *zSlider = turtle_tools_slider_init("Z", &z, TT_SLIDER_TYPE_HORIZONTAL, TT_SLIDER_ALIGN_CENTER, -100, -280, 10, 100, -300, 300, "%.1lfmm", 0.1);
     xSlider -> style = TT_SLIDER_STYLE_SIDESWIPE;
     ySlider -> style = TT_SLIDER_STYLE_SIDESWIPE;
     zSlider -> style = TT_SLIDER_STYLE_SIDESWIPE;
-    tt_switchInit("", NULL, 3, -240, 10);
-    tt_switchInit("", NULL, 3, -260, 10);
-    tt_switchInit("", NULL, 3, -280, 10);
+    turtle_tools_switch_init("", NULL, 3, -240, 10);
+    turtle_tools_switch_init("", NULL, 3, -260, 10);
+    turtle_tools_switch_init("", NULL, 3, -280, 10);
 
-    tt_switch_t *sideswipe = tt_switchInit("Side Swipe", NULL, 305, 15, 10);
-    tt_switch_t *checkbox = tt_switchInit("Checkbox", NULL, 300, 0, 10);
-    tt_switch_t *xbox = tt_switchInit("Xbox", NULL, 300, -15, 10);
+    turtle_tools_switch_t *sideswipe = turtle_tools_switch_init("Side Swipe", NULL, 305, 15, 10);
+    turtle_tools_switch_t *checkbox = turtle_tools_switch_init("Checkbox", NULL, 300, 0, 10);
+    turtle_tools_switch_t *xbox = turtle_tools_switch_init("Xbox", NULL, 300, -15, 10);
     sideswipe -> style = TT_SWITCH_STYLE_SIDESWIPE;
     checkbox -> value = 1;
     checkbox -> style = TT_SWITCH_STYLE_CHECKBOX;
     xbox -> value = 1;
     xbox -> style = TT_SWITCH_STYLE_XBOX;
-    turtle_tools_button_t *textButton = tt_buttonInit("Text Button", NULL, 330, -30, 10);
-    turtle_tools_button_t *circleButton = tt_buttonInit("Circle Button", NULL, 338, -100, 10);
+    turtle_tools_button_t *textButton = turtle_tools_button_init("Text Button", NULL, 330, -30, 10);
+    turtle_tools_button_t *circleButton = turtle_tools_button_init("Circle Button", NULL, 338, -100, 10);
     textButton -> shape = TT_BUTTON_SHAPE_TEXT;
     circleButton -> shape = TT_BUTTON_SHAPE_CIRCLE;
 
     uint64_t tick = 0; // count number of ticks since application started
-    tt_readerInit("tick", (unitype *) &tick, 'l', -315, 155, 10);
-    tt_readerInit("elementLogicTypeOld", (unitype *) &turtleToolsGlobals.elementLogicTypeOld, 'i', -315, 135, 10);
-    tt_readerInit("elementLogicIndexOld", (unitype *) &turtleToolsGlobals.elementLogicIndexOld, 'i', -315, 115, 10);
-    tt_reader_t *listReader = tt_readerInit("Sources", (unitype *) &sources, 'r', -315, 95, 10);
+    turtle_tools_reader_init("tick", (unitype *) &tick, 'l', -315, 155, 10);
+    turtle_tools_reader_init("elementLogicTypeOld", (unitype *) &turtleToolsGlobals.elementLogicTypeOld, 'i', -315, 135, 10);
+    turtle_tools_reader_init("elementLogicIndexOld", (unitype *) &turtleToolsGlobals.elementLogicIndexOld, 'i', -315, 115, 10);
+    turtle_tools_reader_t *listReader = turtle_tools_reader_init("Sources", (unitype *) &sources, 'r', -315, 95, 10);
     listReader -> height = 175;
     listReader -> width = 100;
 
@@ -329,7 +329,7 @@ int main(int argc, char *argv[]) {
         /* update element positions (scrollbar) */
         for (int32_t i = 0; i < turtleToolsElements.all -> length; i++) {
             if (((turtle_tools_button_t *) turtleToolsElements.all -> data[i].p) -> element != TT_ELEMENT_SCROLLBAR && ((turtle_tools_button_t *) turtleToolsElements.all -> data[i].p) -> element != TT_ELEMENT_CONTEXT) {
-                if ((((turtle_tools_button_t *) turtleToolsElements.all -> data[i].p) -> element == TT_ELEMENT_VARIABLE_READER || ((turtle_tools_button_t *) turtleToolsElements.all -> data[i].p) -> element == TT_ELEMENT_LIST_READER) && (((tt_reader_t *) turtleToolsElements.all -> data[i].p) -> status == TT_STATUS_CLICK || ((tt_reader_t *) turtleToolsElements.all -> data[i].p) -> status == TT_STATUS_CLICK_FIRST_TICK)) {
+                if ((((turtle_tools_button_t *) turtleToolsElements.all -> data[i].p) -> element == TT_ELEMENT_VARIABLE_READER || ((turtle_tools_button_t *) turtleToolsElements.all -> data[i].p) -> element == TT_ELEMENT_LIST_READER) && (((turtle_tools_reader_t *) turtleToolsElements.all -> data[i].p) -> status == TT_STATUS_CLICK || ((turtle_tools_reader_t *) turtleToolsElements.all -> data[i].p) -> status == TT_STATUS_CLICK_FIRST_TICK)) {
                     xPositions -> data[i].d = ((turtle_tools_button_t *) turtleToolsElements.all -> data[i].p) -> x + scrollbarX -> value * 5;
                     yPositions -> data[i].d = ((turtle_tools_button_t *) turtleToolsElements.all -> data[i].p) -> y - scrollbarY -> value * 3.3;
                     continue;
@@ -451,7 +451,7 @@ int main(int argc, char *argv[]) {
         } else {
             keys[1] = 0;
         }
-        turtleToolsUpdate(); // update turtleTools
+        turtle_tools_update(); // update turtleTools
         turtle_tools_set_color(TT_COLOR_TEXT);
         turtle_text_write_stringf(-310, -170, 5, 0, "%.2lf, %.2lf", turtle.mouseX, turtle.mouseY);
         parseRibbonOutput(); // user defined function to use ribbon
