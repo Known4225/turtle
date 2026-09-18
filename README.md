@@ -35,19 +35,19 @@ list is an implementation of resizable lists, similar to the way lists in python
 
 ## Turtle
 
-turtle allows you to use openGL to draw on an application window like a canvas. Using `turtleGoto()`, `turtlePenDown()`, and `turtlePenUp()`, objects can be drawn on the screen. Turtle can also directly "blit" shapes to the screen using `turtleCircle()`, `turtleQuad()`, and `turtleTexture()`. Turtle also includes functionality to detect keyboard and mouse clicks, using the `turtleKeyPressed()` and `turtleMouseDown()` functions.
+turtle allows you to use openGL to draw on an application window like a canvas. Using `turtle_goto()`, `turtle_pen_down()`, and `turtle_pen_up()`, objects can be drawn on the screen. Turtle can also directly "blit" shapes to the screen using `turtle_circle()`, `turtle_quad()`, and `turtle_texture()`. Turtle also includes functionality to detect keyboard and mouse clicks, using the `turtle_key_pressed()` and `turtle_mouse_down()` functions.
 
-## TurtleText
+## Turtle Text
 
-turtleText extends the functionality of turtle to allow text to be drawn to the screen using the `turtleTextWriteString()` and `turtleTextWriteUnicode()` functions. A custom font file `roberto.tgl` is included with the project which supports the latin, greek, and cyrillic alphabets as well as a variety of common characters.
+turtleText extends the functionality of turtle to allow text to be drawn to the screen using the `turtle_text_write_string()` and `turtle_text_write_unicode()` functions. A custom font file `roberto.tgl` is included with the project which supports the latin, greek, and cyrillic alphabets as well as a variety of common characters.
 
-## TurtleTools
+## Turtle Tools
 
 turtleTools contains many different UI elements including buttons, switches, dials, sliders, texboxes, dropdowns, scrollbars, and context menus.
 
 ![turtleTools](images/turtleTools.png)
 
-## osTools
+## OS Tools
 
 osTools contains file dialog, clipboard, and other operating system integration tools. Additionally, support for serial ports, tcp/ip, and camera streaming is included for windows only.
 
