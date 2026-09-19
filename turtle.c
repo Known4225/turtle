@@ -103,7 +103,7 @@ int main(int argc, char *argv[]) {
     turtle_set_resize_mode(TURTLE_RESIZE_MODE_PAD); // change to TURTLE_RESIZE_MODE_STRETCH to have content stretch when resized
     turtle_init(window, -320, -180, 320, 180);
 
-    /* initialise osTools */
+    /* initialise os_tools */
     os_tools_init(argv[0], window); // must include argv[0] to get executableFilepath, must include GLFW window for copy paste and cursor functionality
     os_tools_file_dialog_add_global_extension("txt"); // add txt to extension restrictions
     os_tools_file_dialog_add_global_extension("csv"); // add csv to extension restrictions
@@ -114,7 +114,7 @@ int main(int argc, char *argv[]) {
     strcat(constructedFilepath, "config/roberto.tgl");
     turtle_text_init(constructedFilepath);
 
-    /* initialise turtleTools ribbon */
+    /* initialise turtle_tools ribbon */
     turtle_tools_set_theme(TT_THEME_DARK); // dark theme preset
     strcpy(constructedFilepath, osToolsFileDialog.executableFilepath);
     strcat(constructedFilepath, "config/ribbonConfig.txt");
@@ -126,7 +126,7 @@ int main(int argc, char *argv[]) {
     // list_append(ribbonConfig, (unitype) "View, Change Theme, GLFW", 's');
     // turtle_tools_ribbon_init_list(ribbonConfig);
 
-    /* initialise turtleTools popup */
+    /* initialise turtle_tools popup */
     strcpy(constructedFilepath, osToolsFileDialog.executableFilepath);
     strcat(constructedFilepath, "config/popupConfig.txt");
     turtle_tools_popup_init(constructedFilepath);

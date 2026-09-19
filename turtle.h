@@ -10491,6 +10491,9 @@ int random_int(int lowerBound, int upperBound);
 /* random double between lower and upper bound */
 double random_double(double lowerBound, double upperBound);
 
+/* check if two strings are equal */
+int8_t streq(const char *str1, const char *str2);
+
 /* insert a string to an index in to string */
 char *strins(char *dest, char *source, int32_t index);
 
@@ -27323,6 +27326,14 @@ double random_double(double lowerBound, double upperBound) { // random double be
     return (rand() * (upperBound - lowerBound) / RAND_MAX + lowerBound); // probably works idk
 }
 
+/* check if two strings are equal */
+int8_t streq(const char *str1, const char *str2) {
+    if (strcmp(str1, str2) == 0) {
+        return 1;
+    }
+    return 0;
+}
+
 /* insert a string to an index in to string */
 char *strins(char *dest, char *source, int32_t index) {
     int32_t lenDest = strlen(dest);
@@ -29414,7 +29425,7 @@ void turtle_tools_textbox_add_key(turtle_tools_textbox_t *textboxp, int32_t key)
     }
     if (textboxp -> blacklist != NULL) {
         for (int32_t i = 0; i < textboxp -> blacklist -> length; i++) {
-            if (strcmp((char *) buffer, textboxp -> blacklist -> data[i].s) == 0) {
+            if (streq((char *) buffer, textboxp -> blacklist -> data[i].s)) {
                 return;
             }
         }
@@ -29422,7 +29433,7 @@ void turtle_tools_textbox_add_key(turtle_tools_textbox_t *textboxp, int32_t key)
     if (textboxp -> whitelist != NULL) {
         int32_t onWhitelist = 0;
         for (int32_t i = 0; i < textboxp -> whitelist -> length; i++) {
-            if (strcmp((char *) buffer, textboxp -> whitelist -> data[i].s) == 0) {
+            if (streq((char *) buffer, textboxp -> whitelist -> data[i].s)) {
                 onWhitelist = 1;
                 break;
             }
@@ -31204,7 +31215,7 @@ list_t *os_tools_load_internal(char *filename, ost_csv_t rowOrColumn, char delim
             sscanf((char *) (mappedFile + leftIndex), "%d", (int *) &field);
         } else if (fieldType == OSTOOLS_CSV_FIELD_STRING) {
             field.s = malloc(rightIndex - leftIndex + 1);
-            sscanf((char *) (mappedFile + leftIndex), "%s", field.s);
+            strcpy(field.s, (char *) (mappedFile + leftIndex));
         }
         list_append(outputList -> data[outputList -> length - 1].r, field, listType);
     }
