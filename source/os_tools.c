@@ -369,7 +369,7 @@ list_t *os_tools_load_internal(char *filename, ost_csv_t rowOrColumn, char delim
             sscanf((char *) (mappedFile + leftIndex), "%d", (int *) &field);
         } else if (fieldType == OSTOOLS_CSV_FIELD_STRING) {
             field.s = malloc(rightIndex - leftIndex + 1);
-            sscanf((char *) (mappedFile + leftIndex), "%s", field.s);
+            strcpy(field.s, (char *) (mappedFile + leftIndex));
         }
         list_append(outputList -> data[outputList -> length - 1].r, field, listType);
     }

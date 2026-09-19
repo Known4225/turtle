@@ -19,6 +19,9 @@ int random_int(int lowerBound, int upperBound);
 /* random double between lower and upper bound */
 double random_double(double lowerBound, double upperBound);
 
+/* check if two strings are equal */
+int8_t streq(const char *str1, const char *str2);
+
 /* insert a string to an index in to string */
 char *strins(char *dest, char *source, int32_t index);
 
