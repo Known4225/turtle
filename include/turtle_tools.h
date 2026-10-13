@@ -419,6 +419,7 @@ typedef enum {
 typedef enum {
     TT_DIAL_STYLE_CLASSIC = 0,
     TT_DIAL_STYLE_SPEEDOMETER = 1,
+    TT_DIAL_STYLE_SPEEDOMETER_CENTER = 2,
 } turtle_tools_dial_style_t;
 
 /* dial */
