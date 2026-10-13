@@ -284,6 +284,9 @@ int main(int argc, char *argv[]) {
     turtle_tools_switch_init("", NULL, 3, -240, 10);
     turtle_tools_switch_init("", NULL, 3, -260, 10);
     turtle_tools_switch_init("", NULL, 3, -280, 10);
+    turtle_tools_dial_init("X", NULL, TT_DIAL_SCALE_LINEAR, -150, -310, 10, 0, 100, NULL, 1) -> style = TT_DIAL_STYLE_SPEEDOMETER_CENTER;
+    turtle_tools_dial_init("Y", NULL, TT_DIAL_SCALE_LINEAR, -100, -310, 10, 0, 100, NULL, 1) -> style = TT_DIAL_STYLE_SPEEDOMETER_CENTER;
+    turtle_tools_dial_init("Z", NULL, TT_DIAL_SCALE_LINEAR, -50, -310, 10, 0, 100, NULL, 1) -> style = TT_DIAL_STYLE_SPEEDOMETER_CENTER;
 
     turtle_tools_switch_t *sideswipe = turtle_tools_switch_init("Side Swipe", NULL, 305, 15, 10);
     turtle_tools_switch_t *checkbox = turtle_tools_switch_init("Checkbox", NULL, 300, 0, 10);

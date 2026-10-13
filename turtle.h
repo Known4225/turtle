@@ -10891,6 +10891,7 @@ typedef enum {
 typedef enum {
     TT_DIAL_STYLE_CLASSIC = 0,
     TT_DIAL_STYLE_SPEEDOMETER = 1,
+    TT_DIAL_STYLE_SPEEDOMETER_CENTER = 2,
 } turtle_tools_dial_style_t;
 
 /* dial */
@@ -28971,7 +28972,11 @@ void turtle_tools_dial_update(turtle_tools_dial_t *dialp) {
         return;
     }
     turtle_tools_set_color(dialp -> color[TT_COLOR_SLOT_DIAL_TEXT]);
-    turtle_text_write_unicode(dialp -> label, dialp -> x, dialp -> y + 1.9 * dialp -> size, dialp -> size - 1, 50);
+    if (dialp -> style == TT_DIAL_STYLE_SPEEDOMETER_CENTER) {
+        turtle_text_write_unicode(dialp -> label, dialp -> x, dialp -> y, dialp -> size / 2, 50);
+    } else {
+        turtle_text_write_unicode(dialp -> label, dialp -> x, dialp -> y + 1.9 * dialp -> size, dialp -> size - 1, 50);
+    }
     double dialX = dialp -> x;
     double dialY = dialp -> y;
     turtle_pen_size(dialp -> size / 10);
@@ -28988,7 +28993,7 @@ void turtle_tools_dial_update(turtle_tools_dial_t *dialp) {
             theta += M_PI * 2 / bezierPrezCurrent;
         }
         turtle_goto(dialX, dialY + circleSize);
-    } else if (dialp -> style == TT_DIAL_STYLE_SPEEDOMETER) {
+    } else if (dialp -> style == TT_DIAL_STYLE_SPEEDOMETER || dialp -> style == TT_DIAL_STYLE_SPEEDOMETER_CENTER) {
         double theta = -135 / 57.2958;
         turtle_goto(dialX + circleSize * sin(theta), dialY + circleSize * cos(theta));
         turtle_pen_down();
@@ -28999,9 +29004,6 @@ void turtle_tools_dial_update(turtle_tools_dial_t *dialp) {
         turtle_goto(dialX + circleSize * sin(theta), dialY + circleSize * cos(theta));
     }
     turtle_pen_up();
-    turtle_goto(dialX, dialY);
-    turtle_tools_set_color(dialp -> color[TT_COLOR_SLOT_DIAL]);
-    turtle_pen_down();
     double dialAngle = 0.0;
     if (dialp -> style == TT_DIAL_STYLE_CLASSIC) {
         if (dialp -> scale == TT_DIAL_SCALE_LOG) {
@@ -29011,7 +29013,7 @@ void turtle_tools_dial_update(turtle_tools_dial_t *dialp) {
         } else if (dialp -> scale == TT_DIAL_SCALE_EXP) {
             dialAngle = 360 * (log((((double) dialp -> value - dialp -> range[0]) / (dialp -> range[1] - dialp -> range[0])) * 360 + 1) / log(361));
         }
-    } else if (dialp -> style == TT_DIAL_STYLE_SPEEDOMETER) {
+    } else if (dialp -> style == TT_DIAL_STYLE_SPEEDOMETER || dialp -> style == TT_DIAL_STYLE_SPEEDOMETER_CENTER) {
         if (dialp -> scale == TT_DIAL_SCALE_LOG) {
             dialAngle = pow(271, ((double) dialp -> value - dialp -> range[0]) / (dialp -> range[1] - dialp -> range[0])) - 1 - 135;
         } else if (dialp -> scale == TT_DIAL_SCALE_LINEAR) {
@@ -29020,6 +29022,13 @@ void turtle_tools_dial_update(turtle_tools_dial_t *dialp) {
             dialAngle = 270 * (log((((double) dialp -> value - dialp -> range[0]) / (dialp -> range[1] - dialp -> range[0])) * 270 + 1) / log(271)) - 135;
         }
     }
+    if (dialp -> style == TT_DIAL_STYLE_SPEEDOMETER_CENTER) {
+        turtle_goto(dialX + sin(dialAngle / 57.2958) * dialp -> size * 0.75, dialY + cos(dialAngle / 57.2958) * dialp -> size * 0.75);
+    } else {
+        turtle_goto(dialX, dialY);
+    }
+    turtle_tools_set_color(dialp -> color[TT_COLOR_SLOT_DIAL]);
+    turtle_pen_down();
     turtle_goto(dialX + sin(dialAngle / 57.2958) * dialp -> size, dialY + cos(dialAngle / 57.2958) * dialp -> size);
     turtle_pen_up();
     /* mouse */
@@ -29090,7 +29099,7 @@ void turtle_tools_dial_update(turtle_tools_dial_t *dialp) {
             } else if (dialp -> scale == TT_DIAL_SCALE_EXP) {
                 dialp -> value = round(dialp -> range[0] + (dialp -> range[1] - dialp -> range[0]) * ((pow(361, dialAngle / 360) - 1) / 360));
             }
-        } else if (dialp -> style == TT_DIAL_STYLE_SPEEDOMETER) {
+        } else if (dialp -> style == TT_DIAL_STYLE_SPEEDOMETER || dialp -> style == TT_DIAL_STYLE_SPEEDOMETER_CENTER) {
             if (turtle.mouseY > turtleToolsGlobals.dialAnchorY) {
                 dialp -> mouseAnchor = turtle.mouseX - dialX;
             }
@@ -29122,7 +29131,7 @@ void turtle_tools_dial_update(turtle_tools_dial_t *dialp) {
         turtle_tools_set_color(dialp -> color[TT_COLOR_SLOT_DIAL_TEXT]);
         if (dialp -> style == TT_DIAL_STYLE_CLASSIC) {
             turtle_text_write_stringf(dialX + dialp -> size * 1.3, dialY, dialp -> size / 2, 0, dialp -> render, dialp -> value * dialp -> renderMultiplier);
-        } else if (dialp -> style == TT_DIAL_STYLE_SPEEDOMETER) {
+        } else if (dialp -> style == TT_DIAL_STYLE_SPEEDOMETER || dialp -> style == TT_DIAL_STYLE_SPEEDOMETER_CENTER) {
             turtle_text_write_stringf(dialX, dialY - dialp -> size * 1.2, dialp -> size / 2, 50, dialp -> render, dialp -> value * dialp -> renderMultiplier);
         }
     }
