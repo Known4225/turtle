@@ -34,9 +34,11 @@ The following build commands are available:
 
 # To Do
 - Turn glfw and glad libraries into source code
-- Double click and drag highlights words in normal textboxes
+- Double click and drag highlights words like in normal textboxes
 - In normal textboxes you can drag highlighted text out of the text box and into another textbox or program like a pseudo-copy-and-paste (but it doesn't actually use the clipboard)
 - Allow textbox selecting off the ends of the visible content
+- Davinci Resolve style textboxes with numerical values editible by dragging left and right
+- Make versions of the slider and dial that have integrated textboxes allowing users to set these elements to precise values
 - Handrolled linear resizing is not only at least 2x slower than stbir, it is also worse (box size is only what box takes up instead of larger)
 - Build some support for osTools on OS_BROWSER
 - Add some emojis to font
