@@ -835,8 +835,6 @@ void list_sort(list_t *list) {
             list_sort_polymorph(list, p);
         case UNITYPE_LIST:
             list_sort_polymorph(list, r);
-        default:
-        break;
     }
     /* hybrid type sort */
     /* create min heap */
@@ -1008,8 +1006,6 @@ void list_sort_stride(list_t *list, int32_t stride, int32_t offset) {
             list_sort_stride_polymorph(list, stride, offset, p);
         case UNITYPE_LIST:
             list_sort_stride_polymorph(list, stride, offset, r);
-        default:
-        break;
     }
     /* hybrid type stride sort */
     offset %= stride;
@@ -1190,8 +1186,6 @@ int32_t list_select(list_t *list, int32_t k) {
             list_select_polymorph(list, k, p);
         case UNITYPE_LIST:
             list_select_polymorph(list, k, r);
-        default:
-        break;
     }
     /* hybrid type select */
     /* quickselect */
