@@ -28973,7 +28973,7 @@ void turtle_tools_dial_update(turtle_tools_dial_t *dialp) {
     }
     turtle_tools_set_color(dialp -> color[TT_COLOR_SLOT_DIAL_TEXT]);
     if (dialp -> style == TT_DIAL_STYLE_SPEEDOMETER_CENTER) {
-        turtle_text_write_unicode(dialp -> label, dialp -> x, dialp -> y, dialp -> size / 2, 50);
+        turtle_text_write_unicode(dialp -> label, dialp -> x, dialp -> y, dialp -> size / 1.5, 50);
     } else {
         turtle_text_write_unicode(dialp -> label, dialp -> x, dialp -> y + 1.9 * dialp -> size, dialp -> size - 1, 50);
     }
@@ -30048,7 +30048,7 @@ void turtle_tools_dropdown_update(turtle_tools_dropdown_t *dropdownp) {
         }
         goto LABEL_DROPDOWN_END;
     }
-    if (turtleToolsRibbon.mainselect[2] != -1) {
+    if (turtleToolsRibbon.mainselect[2] != -1 && turtleToolsEnabled.ribbonEnabled == 1) {
         /* fixes to dropdown/ribbon interaction */
         goto LABEL_DROPDOWN_END;
     }
