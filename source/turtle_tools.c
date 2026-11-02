@@ -2768,7 +2768,7 @@ void turtle_tools_dropdown_update(turtle_tools_dropdown_t *dropdownp) {
         }
         goto LABEL_DROPDOWN_END;
     }
-    if (turtleToolsRibbon.mainselect[2] != -1) {
+    if (turtleToolsRibbon.mainselect[2] != -1 && turtleToolsEnabled.ribbonEnabled == 1) {
         /* fixes to dropdown/ribbon interaction */
         goto LABEL_DROPDOWN_END;
     }
