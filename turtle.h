@@ -27834,7 +27834,8 @@ int32_t turtle_tools_popup_init_internal(FILE *configFile, list_t *configList, i
     turtleToolsPopup.output[0] = 0;
     turtleToolsPopup.output[1] = -1;
     turtleToolsPopup.mouseDown = 0;
-    turtleToolsPopup.size = (turtle.initbounds[3] - turtle.initbounds[1]) / 72;
+    int32_t sizeDivider = 48;
+    turtleToolsPopup.size = (turtle.initbounds[3] - turtle.initbounds[1]) / sizeDivider;
     turtleToolsPopup.style = 0;
 
     char line[256] = {1, 0}; // maximum size of message or option
@@ -27869,7 +27870,7 @@ int32_t turtle_tools_popup_init_internal(FILE *configFile, list_t *configList, i
     }
     list_free(configList);
     double centerY = (turtle.initbounds[1] + turtle.initbounds[3]) / 2;
-    double height = (turtle.initbounds[3] - turtle.initbounds[1]) / 9;
+    double height = (turtle.initbounds[3] - turtle.initbounds[1]) / (sizeDivider / 8);
     double centerX = (turtle.initbounds[0] + turtle.initbounds[2]) / 2;
     double messageWidth = turtle_text_get_unicode_length(turtleToolsPopup.message, turtleToolsPopup.size) + defaultPadding;
     double width = messageWidth;
@@ -27886,6 +27887,7 @@ int32_t turtle_tools_popup_init_internal(FILE *configFile, list_t *configList, i
 /* render popup */
 void turtle_tools_popup_update() {
     if (turtle.close == 1) {
+        turtle_rectangle_color(-320, -180, 320, 180, 0, 0, 0, 120);
         turtleToolsGlobals.elementLogicType = TT_ELEMENT_POPUP;
         turtle_tools_set_color(turtleToolsPopup.color[TT_COLOR_SLOT_POPUP_BOX]);
         turtle_rectangle(turtleToolsPopup.minX, turtleToolsPopup.minY, turtleToolsPopup.maxX, turtleToolsPopup.maxY);
