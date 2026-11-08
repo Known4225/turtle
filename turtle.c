@@ -78,20 +78,6 @@ void parse_ribbon_output() {
     }
 }
 
-void parse_popup_output(GLFWwindow *window) {
-    if (turtleToolsPopup.output[0] == 0) {
-        return;
-    }
-    turtleToolsPopup.output[0] = 0; // untoggle
-    if (turtleToolsPopup.output[1] == 0) { // cancel
-        turtle.close = 0;
-        glfwSetWindowShouldClose(window, 0);
-    }
-    if (turtleToolsPopup.output[1] == 1) { // close
-        turtle.popupClose = 1;
-    }
-}
-
 int main(int argc, char *argv[]) {
     /* create window */
     GLFWwindow *window = turtle_create_window_icon(TURTLE_WINDOW_DEFAULT_WIDTH, TURTLE_WINDOW_DEFAULT_HEIGHT, "turtle demo", "images/thumbnail.png");
@@ -126,15 +112,6 @@ int main(int argc, char *argv[]) {
     // list_append(ribbonConfig, (unitype) "View, Change Theme, GLFW", 's');
     // turtle_tools_ribbon_init_list(ribbonConfig);
 
-    /* initialise turtle_tools popup */
-    strcpy(constructedFilepath, osToolsFileDialog.executableFilepath);
-    strcat(constructedFilepath, "config/popupConfig.txt");
-    turtle_tools_popup_init(constructedFilepath);
-    // list_t *popupConfig = list_init();
-    // list_append(popupConfig, (unitype) "Are you sure you want to close?", 's');
-    // list_append(popupConfig, (unitype) "Cancel", 's');
-    // list_append(popupConfig, (unitype) "Close", 's');
-    // turtle_tools_popup_init_list(popupConfig);
     strcpy(constructedFilepath, osToolsFileDialog.executableFilepath);
     strcat(constructedFilepath, "config/test.csv");
     list_t *rowLike = os_tools_load_csv_string(constructedFilepath, OSTOOLS_CSV_ROW);
@@ -228,6 +205,16 @@ int main(int argc, char *argv[]) {
     turtle_tools_dropdown_t *imageDropdown = turtle_tools_dropdown_init("Source", imageDropdownOptions, NULL, TT_DROPDOWN_ALIGN_RIGHT, 700, 36, 8);
     int32_t oldImageDropdown = imageDropdown -> value;
 
+    /* initialise popup */
+    list_t *popupMessage = list_init();
+    list_append(popupMessage, (unitype) "Are you sure you want to close?", 's');
+    list_t *popupOptions = list_init();
+    list_append(popupOptions, (unitype) "Cancel", 's');
+    list_append(popupOptions, (unitype) "Close", 's');
+    int8_t keepWindowAlive = 1; // this variable determines whether the window should close
+    turtle_tools_popup_t *closePopup = turtle_tools_popup_init(popupMessage, popupOptions, 0, 0, 10);
+    closePopup -> enabled = TT_ELEMENT_HIDE;
+    
     int32_t sliderVar = 0, dialVar = 0;
     turtle_tools_button_t *button = turtle_tools_button_init("Button", NULL, 150, 20, 10);
     button -> shape = TT_BUTTON_SHAPE_ROUNDED_RECTANGLE;
@@ -260,6 +247,8 @@ int main(int argc, char *argv[]) {
     list_append(contextOptions, (unitype) "Dropdown", 's');
     list_append(contextOptions, (unitype) "Scrollbar", 's');
     list_append(contextOptions, (unitype) "Context", 's');
+    list_append(contextOptions, (unitype) "Reader", 's');
+    list_append(contextOptions, (unitype) "Popup", 's');
     turtle_tools_context_t *context = turtle_tools_context_init(contextOptions, NULL, 0, 0, 10);
     context -> enabled = TT_ELEMENT_HIDE;
 
@@ -325,13 +314,13 @@ int main(int argc, char *argv[]) {
 
     // turtle_background_color(13, 17, 23);
 
-    while (turtle.popupClose == 0) {
+    while (keepWindowAlive) {
         start = clock();
         turtle_get_mouse_coordinates();
         turtle_clear();
         /* update element positions (scrollbar) */
         for (int32_t i = 0; i < turtleToolsElements.all -> length; i++) {
-            if (((turtle_tools_button_t *) turtleToolsElements.all -> data[i].p) -> element != TT_ELEMENT_SCROLLBAR && ((turtle_tools_button_t *) turtleToolsElements.all -> data[i].p) -> element != TT_ELEMENT_CONTEXT) {
+            if (((turtle_tools_button_t *) turtleToolsElements.all -> data[i].p) -> element != TT_ELEMENT_SCROLLBAR && ((turtle_tools_button_t *) turtleToolsElements.all -> data[i].p) -> element != TT_ELEMENT_CONTEXT && ((turtle_tools_button_t *) turtleToolsElements.all -> data[i].p) -> element != TT_ELEMENT_POPUP) {
                 if ((((turtle_tools_button_t *) turtleToolsElements.all -> data[i].p) -> element == TT_ELEMENT_VARIABLE_READER || ((turtle_tools_button_t *) turtleToolsElements.all -> data[i].p) -> element == TT_ELEMENT_LIST_READER) && (((turtle_tools_reader_t *) turtleToolsElements.all -> data[i].p) -> status == TT_STATUS_CLICK || ((turtle_tools_reader_t *) turtleToolsElements.all -> data[i].p) -> status == TT_STATUS_CLICK_FIRST_TICK)) {
                     xPositions -> data[i].d = ((turtle_tools_button_t *) turtleToolsElements.all -> data[i].p) -> x + scrollbarX -> value * 5;
                     yPositions -> data[i].d = ((turtle_tools_button_t *) turtleToolsElements.all -> data[i].p) -> y - scrollbarY -> value * 3.3;
@@ -458,7 +447,19 @@ int main(int argc, char *argv[]) {
         turtle_tools_set_color(TT_COLOR_TEXT);
         turtle_text_write_stringf(-310, -170, 5, 0, "%.2lf, %.2lf", turtle.mouseX, turtle.mouseY);
         parse_ribbon_output(); // user defined function to use ribbon
-        parse_popup_output(window); // user defined function to use popup
+        /* handle popup */
+        if (turtle.close == 0) {
+            closePopup -> enabled = TT_ELEMENT_HIDE;
+        } else {
+            closePopup -> enabled = TT_ELEMENT_ENABLED;
+            if (closePopup -> index == 0) { // Cancel
+                glfwSetWindowShouldClose(window, 0);
+                turtle.close = 0;
+            }
+            if (closePopup -> index == 1) { // Close
+                keepWindowAlive = 0;
+            }
+        }
         turtle_update(); // update the screen
         end = clock();
         while ((double) (end - start) / CLOCKS_PER_SEC < (1.0 / tps)) {
