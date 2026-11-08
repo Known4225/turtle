@@ -33,7 +33,6 @@ The following build commands are available:
 - `make runserver` - For testing the server build on browser
 
 # To Do
-- Completely redo the popup (need newline support on message, need to make it on-demand and not just a close out popup)
 - Add option to include textboxes with sliders and dials
 - Turn glfw and glad libraries into source code
 - Double click and drag highlights words like in normal textboxes

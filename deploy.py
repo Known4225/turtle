@@ -44,7 +44,6 @@ print("\
 shutil.copy("turtle.c", "../turtle-main/turtle.c")
 shutil.copy("turtle.h", "../turtle-main/turtle.h")
 shutil.copy("config/combine.c", "../turtle-main/config/combine.c")
-shutil.copy("config/popupConfig.txt", "../turtle-main/config/popupConfig.txt")
 shutil.copy("config/ribbonConfig.txt", "../turtle-main/config/ribbonConfig.txt")
 shutil.copy("config/roberto.tgl", "../turtle-main/config/roberto.tgl")
 shutil.copy("config/robertoMono.tgl", "../turtle-main/config/robertoMono.tgl")
