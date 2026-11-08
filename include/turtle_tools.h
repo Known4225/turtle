@@ -83,6 +83,7 @@ typedef struct {
     list_t *scrollbars;
     list_t *contexts;
     list_t *readers;
+    list_t *popups;
 } turtle_tools_elements_t;
 
 extern turtle_tools_elements_t turtleToolsElements;
@@ -94,6 +95,20 @@ typedef enum {
     TT_ELEMENT_HIDE = 2,
     TT_ELEMENT_DISABLED = 2,
 } turtle_tools_element_enabled_t;
+
+/* status of element */
+typedef enum {
+    TT_STATUS_IDLE = 0,                  // Not being interacted with
+    TT_STATUS_BLOCKED = 1,               // Blocked from interaction
+    TT_STATUS_HOVER_FIRST_TICK = 2,      // When mouse comes into contact with element this is the status of the element for one tick
+    TT_STATUS_HOVER = 3,                 // Subsequent ticks of an element that the mouse is touching
+    TT_STATUS_CLICK_FIRST_TICK = 4,      // When mouse clicks an element this is the status of the element for one tick
+    TT_STATUS_CLICK = 5,                 // Subsequent ticks of an element that has been clicked (until the mouse is released)
+    TT_STATUS_OPEN_FIRST_TICK = 6,       // On dropdowns, textboxes, and context menus they remain active even after mouse is released
+    TT_STATUS_OPEN = 7,                  // Used to indicate a context menu or dropdown is open, or a textbox is accepting text
+    TT_STATUS_OPEN_CLICK_FIRST_TICK = 8, // Used for dropdowns and context menus when an option is clicked (first tick)
+    TT_STATUS_OPEN_CLICK = 9,            // Used for dropdowns and context menus when an option is clicked
+} turtle_tools_status_t;
 
 /* if an element is ignored then it is not updated with turtleToolsUpdate() and must be updated separately */
 typedef enum {
@@ -148,6 +163,22 @@ typedef enum {
     TT_COLOR_DARK_GREY_ALTERNATE = 117,
     TT_COLOR_LIGHT_GREY = 120,
     TT_COLOR_LIGHT_GREY_ALTERNATE = 123,
+    TT_COLOR_CUSTOM_0 = 126,
+    TT_COLOR_CUSTOM_1 = 129,
+    TT_COLOR_CUSTOM_2 = 132,
+    TT_COLOR_CUSTOM_3 = 135,
+    TT_COLOR_CUSTOM_4 = 138,
+    TT_COLOR_CUSTOM_5 = 141,
+    TT_COLOR_CUSTOM_6 = 144,
+    TT_COLOR_CUSTOM_7 = 147,
+    TT_COLOR_CUSTOM_8 = 150,
+    TT_COLOR_CUSTOM_9 = 153,
+    TT_COLOR_CUSTOM_10 = 156,
+    TT_COLOR_CUSTOM_11 = 159,
+    TT_COLOR_CUSTOM_12 = 162,
+    TT_COLOR_CUSTOM_13 = 165,
+    TT_COLOR_CUSTOM_14 = 168,
+    TT_COLOR_CUSTOM_15 = 171,
 } turtle_tools_color_t;
 
 /* default colours (light theme) */
@@ -223,10 +254,11 @@ typedef enum {
     TT_COLOR_SLOT_RIBBON_HOVER = 3,
     TT_COLOR_SLOT_RIBBON_SELECT = 4,
     /* popup */
-    TT_COLOR_SLOT_POPUP_TEXT = 0,
-    TT_COLOR_SLOT_POPUP_BOX = 1,
-    TT_COLOR_SLOT_POPUP_BUTTON_SELECT = 2,
-    TT_COLOR_SLOT_POPUP_BUTTON = 3,
+    TT_COLOR_SLOT_POPUP_TEXT_MESSAGE = 0,
+    TT_COLOR_SLOT_POPUP_TEXT_BUTTON = 1,
+    TT_COLOR_SLOT_POPUP_BOX = 2,
+    TT_COLOR_SLOT_POPUP_BUTTON_SELECT = 3,
+    TT_COLOR_SLOT_POPUP_BUTTON = 4,
 } turtle_tools_color_slots_t;
 
 void turtle_tools_element_reset_color(void *elementp);
@@ -241,6 +273,7 @@ void turtle_tools_hide_all_elements();
 typedef struct {
     turtle_tools_element_names_t element;
     turtle_tools_element_names_t priority;
+    turtle_tools_status_t status;
     turtle_tools_element_enabled_t enabled;
     turtle_tools_element_ignored_t ignored;
     int32_t color[8];
@@ -269,52 +302,7 @@ int32_t turtle_tools_ribbon_init_internal(FILE *configFile, list_t *configList, 
 /* render ribbon */
 void turtle_tools_ribbon_update();
 
-/* popup */
-
-/* popup variables */
-typedef struct {
-    turtle_tools_element_names_t element;
-    turtle_tools_element_names_t priority;
-    turtle_tools_element_enabled_t enabled;
-    turtle_tools_element_ignored_t ignored;
-    int32_t color[8];
-    char *message; // message displayed on the popup
-    double minX; // left edge of box
-    double minY; // bottom of box
-    double maxX; // right edge of box
-    double maxY; // top of box
-    double size; // size of text
-    list_t *options; // list of popup box options
-    /*
-    style:
-    0 - default
-    1 to 50 - rounded rectangle (not implemented)
-    51 - triangle (wacky)
-    52 - gaussian integral
-    */
-    int8_t style;
-    int8_t output[2]; // [toggle, select]
-    int8_t mouseDown;
-} turtle_tools_popup_t;
-
-extern turtle_tools_popup_t turtleToolsPopup;
-
-/* initialise popup */
-int32_t turtle_tools_popup_init(char *filename);
-
-/* initialise popup with a list instead of a config file - this function frees the list so you don't have to */
-int32_t turtle_tools_popup_init_list(list_t *config);
-
-/* internal */
-int32_t turtle_tools_popup_init_internal(FILE *configFile, list_t *configList, int8_t fileExists);
-
-/* render popup */
-void turtle_tools_popup_update();
-
-/* free popup */
-void turtle_tools_popup_free();
-
-/* UI tools */
+/* UI elements */
 
 typedef struct {
     double dialAnchorX;
@@ -328,19 +316,6 @@ typedef struct {
 } turtle_tools_globals_t;
 
 extern turtle_tools_globals_t turtleToolsGlobals;
-
-typedef enum {
-    TT_STATUS_IDLE = 0,                  // Not being interacted with
-    TT_STATUS_BLOCKED = 1,               // Blocked from interaction
-    TT_STATUS_HOVER_FIRST_TICK = 2,      // When mouse comes into contact with element this is the status of the element for one tick
-    TT_STATUS_HOVER = 3,                 // Subsequent ticks of an element that the mouse is touching
-    TT_STATUS_CLICK_FIRST_TICK = 4,      // When mouse clicks an element this is the status of the element for one tick
-    TT_STATUS_CLICK = 5,                 // Subsequent ticks of an element that has been clicked (until the mouse is released)
-    TT_STATUS_OPEN_FIRST_TICK = 6,       // On dropdowns, textboxes, and context menus they remain active even after mouse is released
-    TT_STATUS_OPEN = 7,                  // Used to indicate a context menu or dropdown is open, or a textbox is accepting text
-    TT_STATUS_OPEN_CLICK_FIRST_TICK = 8, // Used for dropdowns and context menus when an option is clicked (first tick)
-    TT_STATUS_OPEN_CLICK = 9,            // Used for dropdowns and context menus when an option is clicked
-} turtle_tools_status_t;
 
 #define TT_LABEL_LENGTH_LIMIT 128
 
@@ -361,6 +336,7 @@ typedef enum {
 typedef struct {
     turtle_tools_element_names_t element;
     turtle_tools_element_names_t priority;
+    turtle_tools_status_t status;
     turtle_tools_element_enabled_t enabled;
     turtle_tools_element_ignored_t ignored;
     int32_t color[8];
@@ -369,7 +345,6 @@ typedef struct {
     double size;
     int8_t *variable; // bound variable (can be NULL)
     char label[TT_LABEL_LENGTH_LIMIT];
-    turtle_tools_status_t status;
     turtle_tools_button_shape_t shape;
     turtle_tools_button_align_t align;
     /* value */
@@ -395,6 +370,7 @@ typedef enum {
 typedef struct {
     turtle_tools_element_names_t element;
     turtle_tools_element_names_t priority;
+    turtle_tools_status_t status;
     turtle_tools_element_enabled_t enabled;
     turtle_tools_element_ignored_t ignored;
     int32_t color[8];
@@ -403,7 +379,6 @@ typedef struct {
     double size;
     int8_t *variable; // bound variable (can be NULL)
     char label[TT_LABEL_LENGTH_LIMIT];
-    turtle_tools_status_t status;
     turtle_tools_switch_style_t style;
     turtle_tools_switch_align_t align;
     /* value */
@@ -426,6 +401,7 @@ typedef enum {
 typedef struct {
     turtle_tools_element_names_t element;
     turtle_tools_element_names_t priority;
+    turtle_tools_status_t status;
     turtle_tools_element_enabled_t enabled;
     turtle_tools_element_ignored_t ignored;
     int32_t color[8];
@@ -434,7 +410,6 @@ typedef struct {
     double size;
     int32_t *variable; // bound variable (can be NULL)
     char label[TT_LABEL_LENGTH_LIMIT];
-    turtle_tools_status_t status;
     double mouseAnchor;
     turtle_tools_dial_scale_t scale;
     turtle_tools_dial_style_t style;
@@ -473,6 +448,7 @@ typedef enum {
 typedef struct {
     turtle_tools_element_names_t element;
     turtle_tools_element_names_t priority;
+    turtle_tools_status_t status;
     turtle_tools_element_enabled_t enabled;
     turtle_tools_element_ignored_t ignored;
     int32_t color[8];
@@ -481,7 +457,6 @@ typedef struct {
     double size;
     int32_t *variable; // bound variable (can be NULL)
     char label[TT_LABEL_LENGTH_LIMIT];
-    turtle_tools_status_t status;
     turtle_tools_slider_type_t type;
     turtle_tools_slider_align_t align;
     turtle_tools_slider_scale_t scale;
@@ -505,6 +480,7 @@ typedef enum {
 typedef struct {
     turtle_tools_element_names_t element;
     turtle_tools_element_names_t priority;
+    turtle_tools_status_t status;
     turtle_tools_element_enabled_t enabled;
     turtle_tools_element_ignored_t ignored;
     int32_t color[8];
@@ -512,7 +488,6 @@ typedef struct {
     double y;
     double size;
     char label[TT_LABEL_LENGTH_LIMIT];
-    turtle_tools_status_t status;
     int8_t mouseOver; // whether mouse is hovering over textbox
     int8_t moveToTop;
     int32_t count; // counts updates for line flashing animation
@@ -559,6 +534,7 @@ typedef enum {
 typedef struct {
     turtle_tools_element_names_t element;
     turtle_tools_element_names_t priority;
+    turtle_tools_status_t status;
     turtle_tools_element_enabled_t enabled;
     turtle_tools_element_ignored_t ignored;
     int32_t color[8];
@@ -568,7 +544,6 @@ typedef struct {
     int32_t *variable; // bound variable (can be NULL)
     char label[TT_LABEL_LENGTH_LIMIT];
     list_t *options;
-    turtle_tools_status_t status;
     turtle_tools_dropdown_align_t align;
     turtle_tools_dropdown_direction_t direction;
     int8_t moveToTop;
@@ -589,6 +564,7 @@ typedef enum {
 typedef struct {
     turtle_tools_element_names_t element;
     turtle_tools_element_names_t priority;
+    turtle_tools_status_t status;
     turtle_tools_element_enabled_t enabled;
     turtle_tools_element_ignored_t ignored;
     int32_t color[8];
@@ -596,7 +572,6 @@ typedef struct {
     double y;
     double size;
     double *variable; // bound variable (can be NULL)
-    turtle_tools_status_t status;
     turtle_tools_scrollbar_type_t type;
     double length;
     double barPercentage; // percentage of scrollbar occupied by bar
@@ -616,6 +591,7 @@ typedef enum {
 typedef struct {
     turtle_tools_element_names_t element;
     turtle_tools_element_names_t priority;
+    turtle_tools_status_t status;
     turtle_tools_element_enabled_t enabled;
     turtle_tools_element_ignored_t ignored;
     int32_t color[8];
@@ -624,7 +600,6 @@ typedef struct {
     double size;
     int32_t *variable; // bound variable (can be NULL)
     list_t *options;
-    turtle_tools_status_t status;
     turtle_tools_context_direction_t direction;
     double autoLowerBound;
     double autoRightBound;
@@ -638,6 +613,7 @@ typedef struct {
 typedef struct {
     turtle_tools_element_names_t element;
     turtle_tools_element_names_t priority;
+    turtle_tools_status_t status;
     turtle_tools_element_enabled_t enabled;
     turtle_tools_element_ignored_t ignored;
     int32_t color[8];
@@ -646,7 +622,6 @@ typedef struct {
     double size;
     unitype *variable;
     char label[TT_LABEL_LENGTH_LIMIT];
-    turtle_tools_status_t status;
     char type;
     double anchorX;
     double anchorY;
@@ -659,7 +634,23 @@ typedef struct {
     turtle_tools_scrollbar_t *scrollbarp; // only used for list readers
 } turtle_tools_reader_t;
 
-/* initialise UI elements */
+/* popup */
+typedef struct {
+    turtle_tools_element_names_t element;
+    turtle_tools_element_names_t priority;
+    turtle_tools_status_t status;
+    turtle_tools_element_enabled_t enabled;
+    turtle_tools_element_ignored_t ignored;
+    int32_t color[8];
+    double x;
+    double y;
+    double size;
+    list_t *message; // popup message (each element is a line)
+    list_t *options; // list of popup box options
+    /* value */
+    int32_t index; // index of selected option
+    int32_t value; // index of selected option (duplicate name - always equal to index)
+} turtle_tools_popup_t;
 
 /* this function is automatically called when creating any turtleTools elements, it is not required to be called by the user */
 void turtle_tools_init();
@@ -670,8 +661,14 @@ turtle_tools_button_t *turtle_tools_button_init(char *label, int8_t *variable, d
 /* delete a button */
 void turtle_tools_button_free(turtle_tools_button_t *buttonp);
 
+/* update a button */
+void turtle_tools_button_update(turtle_tools_button_t *buttonp);
+
 /* create a switch */
 turtle_tools_switch_t *turtle_tools_switch_init(char *label, int8_t *variable, double x, double y, double size);
+
+/* update a switch */
+void turtle_tools_switch_update(turtle_tools_switch_t *switchp);
 
 /* delete a switch */
 void turtle_tools_switch_free(turtle_tools_switch_t *switchp);
@@ -679,65 +676,26 @@ void turtle_tools_switch_free(turtle_tools_switch_t *switchp);
 /* create a dial - make renderMultiplier 0 to hide dial number */
 turtle_tools_dial_t *turtle_tools_dial_init(char *label, int32_t *variable, turtle_tools_dial_scale_t scale, double x, double y, double size, int32_t bottom, int32_t top, char *render, double renderMultiplier);
 
-/* delete a dial */
-void turtle_tools_dial_free(turtle_tools_dial_t *dialp);
-
-/* create a slider - make renderMultiplier 0 to hide slider number */
-turtle_tools_slider_t *turtle_tools_slider_init(char *label, int32_t *variable, turtle_tools_slider_type_t type, turtle_tools_slider_align_t align, double x, double y, double size, double length, int32_t bottom, int32_t top, char *render, double renderMultiplier);
-
-/* delete a slider */
-void turtle_tools_slider_free(turtle_tools_slider_t *sliderp);
-
-/* create a textbox */
-turtle_tools_textbox_t *turtle_tools_textbox_init(char *label, char *variable, int32_t maxCharacters, double x, double y, double size, double length);
-
-/* delete textbox */
-void turtle_tools_textbox_free(turtle_tools_textbox_t *textboxp);
-
-/* this function must be run if the contents of the the dropdown is changed. It will automatically resize the dropdown container based on the lengths of the options */
-void turtle_tools_dropdown_calculate_bounds(turtle_tools_dropdown_t *dropdownp);
-
-/* create a dropdown - use a list of strings for options (options must have at least one string) */
-turtle_tools_dropdown_t *turtle_tools_dropdown_init(char *label, list_t *options, int32_t *variable, turtle_tools_dropdown_align_t align, double x, double y, double size);
-
-/* delete a dropdown */
-void turtle_tools_dropdown_free(turtle_tools_dropdown_t *dropdownp);
-
-/* create a scrollbar */
-turtle_tools_scrollbar_t *turtle_tools_scrollbar_init(double *variable, turtle_tools_scrollbar_type_t type, double x, double y, double size, double length, double barPercentage);
-
-/* delete a scrollbar */
-void turtle_tools_scrollbar_free(turtle_tools_scrollbar_t *scrollbarp);
-
-/* this function must be run if the contents of the the context menu is changed. It will automatically resize the context container based on the lengths of the options */
-void turtle_tools_context_calculate_bounds(turtle_tools_context_t *contextp);
-
-/* create a context menu */
-turtle_tools_context_t *turtle_tools_context_init(list_t *options, int32_t *variable, double x, double y, double size);
-
-/* delete a context menu */
-void turtle_tools_context_free(turtle_tools_context_t *contextp);
-
-/* create a reader */
-turtle_tools_reader_t *turtle_tools_reader_init(char *label, unitype *variable, char type, double x, double y, double size);
-
-/* delete a reader */
-void turtle_tools_reader_free(turtle_tools_reader_t *readerp);
-
-/* update a button */
-void turtle_tools_button_update(turtle_tools_button_t *buttonp);
-
-/* update a switch */
-void turtle_tools_switch_update(turtle_tools_switch_t *switchp);
-
 /* calculate the angle between two coordinates (in degrees) */
 double turtle_tools_angle_between(double x1, double y1, double x2, double y2);
 
 /* update a dial */
 void turtle_tools_dial_update(turtle_tools_dial_t *dialp);
 
+/* delete a dial */
+void turtle_tools_dial_free(turtle_tools_dial_t *dialp);
+
+/* create a slider - make renderMultiplier 0 to hide slider number */
+turtle_tools_slider_t *turtle_tools_slider_init(char *label, int32_t *variable, turtle_tools_slider_type_t type, turtle_tools_slider_align_t align, double x, double y, double size, double length, int32_t bottom, int32_t top, char *render, double renderMultiplier);
+
 /* update a slider */
 void turtle_tools_slider_update(turtle_tools_slider_t *sliderp);
+
+/* delete a slider */
+void turtle_tools_slider_free(turtle_tools_slider_t *sliderp);
+
+/* create a textbox */
+turtle_tools_textbox_t *turtle_tools_textbox_init(char *label, char *variable, int32_t maxCharacters, double x, double y, double size, double length);
 
 /* internal textbox functions */
 void turtle_tools_textbox_add_key(turtle_tools_textbox_t *textboxp, int32_t key);
@@ -750,8 +708,23 @@ int32_t turtle_tools_textbox_calculate_index_from_position(turtle_tools_textbox_
 /* update a textbox */
 void turtle_tools_textbox_update(turtle_tools_textbox_t *textboxp);
 
+/* delete textbox */
+void turtle_tools_textbox_free(turtle_tools_textbox_t *textboxp);
+
+/* this function must be run if the contents of the the dropdown is changed. It will automatically resize the dropdown container based on the lengths of the options */
+void turtle_tools_dropdown_calculate_bounds(turtle_tools_dropdown_t *dropdownp);
+
+/* create a dropdown - use a list of strings for options (options must have at least one string) */
+turtle_tools_dropdown_t *turtle_tools_dropdown_init(char *label, list_t *options, int32_t *variable, turtle_tools_dropdown_align_t align, double x, double y, double size);
+
 /* update a dropdown */
 void turtle_tools_dropdown_update(turtle_tools_dropdown_t *dropdownp);
+
+/* delete a dropdown */
+void turtle_tools_dropdown_free(turtle_tools_dropdown_t *dropdownp);
+
+/* create a scrollbar */
+turtle_tools_scrollbar_t *turtle_tools_scrollbar_init(double *variable, turtle_tools_scrollbar_type_t type, double x, double y, double size, double length, double barPercentage);
 
 /* update a scrollbar
 scrollbar range of motion (coordinates):
@@ -759,19 +732,40 @@ scrollbar.length * (1 - scrollbar.barPercentage / 100)
 tip: try to match the ratio of visible content to the scrollbar's barPercentage - if half of the content can be shown on one screen then make the barPercentage 50 */
 void turtle_tools_scrollbar_update(turtle_tools_scrollbar_t *scrollbarp);
 
+/* delete a scrollbar */
+void turtle_tools_scrollbar_free(turtle_tools_scrollbar_t *scrollbarp);
+
+/* create a context menu */
+turtle_tools_context_t *turtle_tools_context_init(list_t *options, int32_t *variable, double x, double y, double size);
+
+/* this function must be run if the contents of the the context menu is changed. It will automatically resize the context container based on the lengths of the options */
+void turtle_tools_context_calculate_bounds(turtle_tools_context_t *contextp);
+
 /* update a context */
 void turtle_tools_context_update(turtle_tools_context_t *contextp);
+
+/* delete a context menu */
+void turtle_tools_context_free(turtle_tools_context_t *contextp);
+
+/* create a reader */
+turtle_tools_reader_t *turtle_tools_reader_init(char *label, unitype *variable, char type, double x, double y, double size);
 
 /* update a reader */
 void turtle_tools_reader_update(turtle_tools_reader_t *readerp);
 
+/* delete a reader */
+void turtle_tools_reader_free(turtle_tools_reader_t *readerp);
+
+/* create a popup */
+turtle_tools_popup_t *turtle_tools_popup_init(list_t *message, list_t *options, double x, double y, double size);
+
+/* update a popup */
+void turtle_tools_popup_update(turtle_tools_popup_t *popupp);
+
+/* delete a popup */
+void turtle_tools_popup_free(turtle_tools_popup_t *popupp);
+
 /* update all turtleTools */
 void turtle_tools_update();
-
-/* update all turtleTools except ribbon and popup */
-void turtle_tools_update_ui();
-
-/* update ribbon and popup */
-void turtle_tools_update_ribbon_popup();
 
 #endif /* TURTLETOOLS_H */

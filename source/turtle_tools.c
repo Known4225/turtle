@@ -29,11 +29,11 @@ using the tab key to select different elements? And allowing them to be changed 
 /* UI element colours (in order listed in turtle_tools_element_names_t) */
 int32_t turtleToolsColorDefault[] = {
     /*         none                           button                         switch                            dial                           slider                          textbox                        dropdown                         scrollbar                      context                       variable reader                   list reader                     ribbon                           popup               */
-    0,                              TT_COLOR_TEXT_ALTERNATE,        TT_COLOR_TEXT_BASE,             TT_COLOR_TEXT_BASE,             TT_COLOR_TEXT_BASE,             TT_COLOR_TEXT_ALTERNATE,        TT_COLOR_TEXT_BASE,             0,                              TT_COLOR_TEXT_ALTERNATE,        TT_COLOR_BLACK,                 TT_COLOR_BLACK,                 TT_COLOR_TEXT_ALTERNATE,        TT_COLOR_TEXT_ALTERNATE,        
-    0,                              TT_COLOR_COMPONENT,             TT_COLOR_TEXT_ALTERNATE,        TT_COLOR_TEXT_BASE,             TT_COLOR_COMPONENT_ALTERNATE,   TT_COLOR_COMPONENT_BASE,        TT_COLOR_TEXT_ALTERNATE,        TT_COLOR_COMPONENT_BASE,        TT_COLOR_COMPONENT_BASE,        TT_COLOR_WHITE,                 TT_COLOR_WHITE,                 TT_COLOR_COMPONENT_HIGHLIGHT,   TT_COLOR_COMPONENT_ALTERNATE,   
-    0,                              TT_COLOR_COMPONENT_HIGHLIGHT,   TT_COLOR_COMPONENT_BASE,        0,                              TT_COLOR_BACKGROUND_COMPLEMENT, TT_COLOR_TEXT_HIGHLIGHT,        TT_COLOR_COMPONENT_BASE,        TT_COLOR_COMPONENT_COMPLEMENT,  TT_COLOR_COMPONENT_HIGHLIGHT,   TT_COLOR_LIGHT_GREY,            TT_COLOR_LIGHT_GREY,            TT_COLOR_COMPONENT_HIGHLIGHT,   TT_COLOR_COMPONENT_HIGHLIGHT,   
-    0,                              TT_COLOR_TEXT_BASE,             TT_COLOR_COMPONENT_HIGHLIGHT,   0,                              0,                              TT_COLOR_TEXT_ALTERNATE,        TT_COLOR_COMPONENT_HIGHLIGHT,   TT_COLOR_BACKGROUND_ALTERNATE,  0,                              TT_COLOR_ORANGE,                TT_COLOR_RED_ALTERNATE,         TT_COLOR_COMPONENT,             TT_COLOR_COMPONENT,             
-    0,                              TT_COLOR_COMPONENT_COMPLEMENT,  TT_COLOR_BACKGROUND_ALTERNATE,  0,                              0,                              TT_COLOR_BLUE,                  TT_COLOR_COMPONENT_HIGHLIGHT,   TT_COLOR_BACKGROUND_HIGHLIGHT,  0,                              0,                              TT_COLOR_WHITE_ALTERNATE,       TT_COLOR_COMPONENT,             0,                              
+    0,                              TT_COLOR_TEXT_ALTERNATE,        TT_COLOR_TEXT_BASE,             TT_COLOR_TEXT_BASE,             TT_COLOR_TEXT_BASE,             TT_COLOR_TEXT_ALTERNATE,        TT_COLOR_TEXT_BASE,             0,                              TT_COLOR_TEXT_ALTERNATE,        TT_COLOR_BLACK,                 TT_COLOR_BLACK,                 TT_COLOR_TEXT_ALTERNATE,        TT_COLOR_TEXT,                  
+    0,                              TT_COLOR_COMPONENT,             TT_COLOR_TEXT_ALTERNATE,        TT_COLOR_TEXT_BASE,             TT_COLOR_COMPONENT_ALTERNATE,   TT_COLOR_COMPONENT_BASE,        TT_COLOR_TEXT_ALTERNATE,        TT_COLOR_COMPONENT_BASE,        TT_COLOR_COMPONENT_BASE,        TT_COLOR_WHITE,                 TT_COLOR_WHITE,                 TT_COLOR_COMPONENT_HIGHLIGHT,   TT_COLOR_TEXT_ALTERNATE,        
+    0,                              TT_COLOR_COMPONENT_HIGHLIGHT,   TT_COLOR_COMPONENT_BASE,        0,                              TT_COLOR_BACKGROUND_COMPLEMENT, TT_COLOR_TEXT_HIGHLIGHT,        TT_COLOR_COMPONENT_BASE,        TT_COLOR_COMPONENT_COMPLEMENT,  TT_COLOR_COMPONENT_HIGHLIGHT,   TT_COLOR_LIGHT_GREY,            TT_COLOR_LIGHT_GREY,            TT_COLOR_COMPONENT_HIGHLIGHT,   TT_COLOR_COMPONENT_ALTERNATE,   
+    0,                              TT_COLOR_TEXT_BASE,             TT_COLOR_COMPONENT_HIGHLIGHT,   0,                              0,                              TT_COLOR_TEXT_ALTERNATE,        TT_COLOR_COMPONENT_HIGHLIGHT,   TT_COLOR_BACKGROUND_ALTERNATE,  0,                              TT_COLOR_ORANGE,                TT_COLOR_RED_ALTERNATE,         TT_COLOR_COMPONENT,             TT_COLOR_COMPONENT_HIGHLIGHT,   
+    0,                              TT_COLOR_COMPONENT_COMPLEMENT,  TT_COLOR_BACKGROUND_ALTERNATE,  0,                              0,                              TT_COLOR_BLUE,                  TT_COLOR_COMPONENT_HIGHLIGHT,   TT_COLOR_BACKGROUND_HIGHLIGHT,  0,                              0,                              TT_COLOR_WHITE_ALTERNATE,       TT_COLOR_COMPONENT,             TT_COLOR_COMPONENT,             
     0,                              0,                              TT_COLOR_TERTIARY_BASE,         0,                              0,                              0,                              TT_COLOR_TEXT_ALTERNATE,        0,                              0,                              0,                              TT_COLOR_DARK_GREY_ALTERNATE,   0,                              0,                              
     0,                              0,                              0,                              0,                              0,                              0,                              0,                              0,                              0,                              0,                              TT_COLOR_DARK_GREY,             0,                              0,                              
     0,                              0,                              0,                              0,                              0,                              0,                              0,                              0,                              0,                              0,                              TT_COLOR_DARK_GREY,             0,                              0,                              
@@ -122,6 +122,22 @@ double turtleToolsThemeColors[] = {
     81.0, 81.0, 81.0,    // TT_COLOR_DARK_GREY_ALTERNATE (117)
     187.0, 187.0, 187.0, // TT_COLOR_LIGHT_GREY (120)
     199.0, 199.0, 199.0, // TT_COLOR_LIGHT_GREY_ALTERNATE (123)
+    0.0, 0.0, 0.0, // TT_COLOR_CUSTOM_0
+    0.0, 0.0, 0.0, // TT_COLOR_CUSTOM_1
+    0.0, 0.0, 0.0, // TT_COLOR_CUSTOM_2
+    0.0, 0.0, 0.0, // TT_COLOR_CUSTOM_3
+    0.0, 0.0, 0.0, // TT_COLOR_CUSTOM_4
+    0.0, 0.0, 0.0, // TT_COLOR_CUSTOM_5
+    0.0, 0.0, 0.0, // TT_COLOR_CUSTOM_6
+    0.0, 0.0, 0.0, // TT_COLOR_CUSTOM_7
+    0.0, 0.0, 0.0, // TT_COLOR_CUSTOM_8
+    0.0, 0.0, 0.0, // TT_COLOR_CUSTOM_9
+    0.0, 0.0, 0.0, // TT_COLOR_CUSTOM_10
+    0.0, 0.0, 0.0, // TT_COLOR_CUSTOM_11
+    0.0, 0.0, 0.0, // TT_COLOR_CUSTOM_12
+    0.0, 0.0, 0.0, // TT_COLOR_CUSTOM_13
+    0.0, 0.0, 0.0, // TT_COLOR_CUSTOM_14
+    0.0, 0.0, 0.0, // TT_COLOR_CUSTOM_15
 };
 
 void turtle_tools_set_color(turtle_tools_color_t color) {
@@ -513,163 +529,6 @@ void turtle_tools_ribbon_update() {
     }
 }
 
-/* popup */
-
-/* popup variables */
-
-turtle_tools_popup_t turtleToolsPopup;
-
-/* initialise popup */
-int32_t turtle_tools_popup_init(char *filename) {
-    /* read information from config file */
-    char fileExists = 1;
-    list_t *defaultPopupFile = list_init();
-    list_append(defaultPopupFile, (unitype) "Are you sure you want to close?", 's');
-    list_append(defaultPopupFile, (unitype) "Cancel", 's');
-    list_append(defaultPopupFile, (unitype) "Close", 's');
-    FILE *configFile = fopen(filename, "r");
-    if (configFile == NULL) {
-        printf("Error: file %s not found\n", filename);
-        fileExists = 0;
-    }
-    return turtle_tools_popup_init_internal(configFile, defaultPopupFile, fileExists);
-}
-
-/* initialise popup with a list instead of a config file */
-int32_t turtle_tools_popup_init_list(list_t *config) {
-    return turtle_tools_popup_init_internal(NULL, config, 0);
-}
-
-/* initialise popup */
-int32_t turtle_tools_popup_init_internal(FILE *configFile, list_t *configList, int8_t fileExists) {
-    turtleToolsEnabled.popupEnabled = 1;
-    if (turtleToolsEnabled.turtleToolsEnabled == 0) {
-        turtleToolsEnabled.turtleToolsEnabled = 1;
-        turtleToolsElements.all = list_init();
-    }
-    turtleToolsPopup.element = TT_ELEMENT_POPUP;
-    turtleToolsPopup.priority = turtleToolsPopup.element;
-    turtleToolsPopup.enabled = TT_ELEMENT_ENABLED;
-    turtle_tools_element_reset_color((void *) &turtleToolsPopup);
-    turtleToolsPopup.output[0] = 0;
-    turtleToolsPopup.output[1] = -1;
-    turtleToolsPopup.mouseDown = 0;
-    int32_t sizeDivider = 48;
-    turtleToolsPopup.size = (turtle.initbounds[3] - turtle.initbounds[1]) / sizeDivider;
-    turtleToolsPopup.style = 0;
-
-    char line[256] = {1, 0}; // maximum size of message or option
-    /* read popup message */
-    if (fileExists) {
-        if (fgets(line, 256, configFile) != NULL) {
-            if (line[strlen(line) - 1] == '\n') {
-                line[strlen(line) - 1] = '\0'; // cull newline
-            }
-            turtleToolsPopup.message = strdup(line);
-        }
-    } else {
-        turtleToolsPopup.message = strdup(configList -> data[0].s);
-    }
-    /* read popup options */
-    double defaultPadding = (turtle.initbounds[2] - turtle.initbounds[0]) / 50;
-    double buttonWidth = defaultPadding;
-    turtleToolsPopup.options = list_init();
-    while ((fileExists == 0 && turtleToolsPopup.options -> length < configList -> length - 1) || (fileExists == 1 && fgets(line, 256, configFile) != NULL)) {
-        if (fileExists == 1) {
-            if (line[strlen(line) - 1] == '\n') {
-                line[strlen(line) - 1] = '\0'; // cull newline
-            }
-            list_append(turtleToolsPopup.options, (unitype) strdup(line), 's');
-        } else {
-            list_append(turtleToolsPopup.options, configList -> data[turtleToolsPopup.options -> length + 1], 's');
-        }
-        buttonWidth += turtle_text_get_unicode_length(turtleToolsPopup.options -> data[turtleToolsPopup.options -> length - 1].s, turtleToolsPopup.size) + defaultPadding;
-    }
-    if (fileExists) {
-        fclose(configFile);
-    }
-    list_free(configList);
-    double centerY = (turtle.initbounds[1] + turtle.initbounds[3]) / 2;
-    double height = (turtle.initbounds[3] - turtle.initbounds[1]) / (sizeDivider / 8);
-    double centerX = (turtle.initbounds[0] + turtle.initbounds[2]) / 2;
-    double messageWidth = turtle_text_get_unicode_length(turtleToolsPopup.message, turtleToolsPopup.size) + defaultPadding;
-    double width = messageWidth;
-    if (messageWidth < buttonWidth) {
-        width = buttonWidth;
-    }
-    turtleToolsPopup.minX = centerX - width / 2;
-    turtleToolsPopup.minY = centerY - height / 2;
-    turtleToolsPopup.maxX = centerX + width / 2;
-    turtleToolsPopup.maxY = centerY + height / 2;
-    return 0;
-}
-
-/* render popup */
-void turtle_tools_popup_update() {
-    if (turtle.close == 1) {
-        turtle_rectangle_color(-320, -180, 320, 180, 0, 0, 0, 120);
-        turtleToolsGlobals.elementLogicType = TT_ELEMENT_POPUP;
-        turtle_tools_set_color(turtleToolsPopup.color[TT_COLOR_SLOT_POPUP_BOX]);
-        turtle_rectangle(turtleToolsPopup.minX, turtleToolsPopup.minY, turtleToolsPopup.maxX, turtleToolsPopup.maxY);
-        double textX = turtleToolsPopup.minX + (turtleToolsPopup.maxX - turtleToolsPopup.minX) / 2;
-        double textY = turtleToolsPopup.maxY - turtleToolsPopup.size * 2;
-        turtle_tools_set_color(turtleToolsPopup.color[TT_COLOR_SLOT_POPUP_TEXT]);
-        turtle_text_write_unicode(turtleToolsPopup.message, textX, textY, turtleToolsPopup.size, 50);
-        textY -= turtleToolsPopup.size * 4;
-        double fullLength = 0;
-        for (int32_t i = 0; i < turtleToolsPopup.options -> length; i++) {
-            fullLength += turtle_text_get_string_length(turtleToolsPopup.options -> data[i].s, turtleToolsPopup.size);
-        }
-        /* we have the length of the strings, now we pad with n + 1 padding regions */
-        double padding = (turtleToolsPopup.maxX - turtleToolsPopup.minX - fullLength) / (turtleToolsPopup.options -> length + 1);
-        textX = turtleToolsPopup.minX + padding;
-        char flagged = 0;
-        if (!turtle_mouse_down() && turtleToolsPopup.mouseDown == 1) {
-            flagged = 1; // flagged for mouse misbehaviour
-        }
-        for (int32_t i = 0; i < turtleToolsPopup.options -> length; i++) {
-            double strLen = turtle_text_get_string_length(turtleToolsPopup.options -> data[i].s, turtleToolsPopup.size);
-            if (turtle.mouseX > textX - turtleToolsPopup.size && turtle.mouseX < textX + strLen + turtleToolsPopup.size && turtle.mouseY > textY - turtleToolsPopup.size && turtle.mouseY < textY + turtleToolsPopup.size) {
-                turtle_tools_set_color(turtleToolsPopup.color[TT_COLOR_SLOT_POPUP_BUTTON_SELECT]);
-                turtle_rectangle(textX - turtleToolsPopup.size, textY - turtleToolsPopup.size, textX + turtleToolsPopup.size + strLen, textY + turtleToolsPopup.size);
-                if (turtle_mouse_down()) {
-                    if (turtleToolsPopup.mouseDown == 0) {
-                        turtleToolsPopup.mouseDown = 1;
-                        if (turtleToolsPopup.output[0] == 0) {
-                            turtleToolsPopup.output[1] = i;
-                        }
-                        // turtleToolsGlobals.elementLogicType = TT_ELEMENT_NONE;
-                    }
-                } else {
-                    if (turtleToolsPopup.mouseDown == 1) {
-                        turtleToolsPopup.mouseDown = 0;
-                        if (turtleToolsPopup.output[1] == i) {
-                            turtleToolsPopup.output[0] = 1;
-                        }
-                        // turtleToolsGlobals.elementLogicType = TT_ELEMENT_NONE;
-                    }
-                }
-            } else {
-                turtle_tools_set_color(turtleToolsPopup.color[TT_COLOR_SLOT_POPUP_BUTTON]);
-                turtle_rectangle(textX - turtleToolsPopup.size, textY - turtleToolsPopup.size, textX + turtleToolsPopup.size + strLen, textY + turtleToolsPopup.size);
-            }
-            turtle_tools_set_color(turtleToolsPopup.color[TT_COLOR_SLOT_POPUP_TEXT]);
-            turtle_text_write_unicode(turtleToolsPopup.options -> data[i].s, textX, textY, turtleToolsPopup.size, 0);
-            textX += strLen + padding;
-        }
-        if (!turtle_mouse_down() && turtleToolsPopup.mouseDown == 1 && flagged == 1) {
-            turtleToolsPopup.mouseDown = 0;
-            turtleToolsPopup.output[0] = 0;
-            turtleToolsPopup.output[1] = -1;
-            // turtleToolsGlobals.elementLogicType = TT_ELEMENT_NONE;
-        }
-    }
-}
-
-void turtle_tools_popup_free() {
-    free(turtleToolsPopup.message);
-}
-
 /* UI tools */
 
 turtle_tools_globals_t turtleToolsGlobals;
@@ -713,6 +572,9 @@ int32_t turtle_tools_element_free(void *elementp) {
     case TT_ELEMENT_VARIABLE_READER:
     case TT_ELEMENT_LIST_READER:
         turtle_tools_reader_free((turtle_tools_reader_t *) elementp);
+    break;
+    case TT_ELEMENT_POPUP:
+        turtle_tools_popup_free((turtle_tools_popup_t *) elementp);
     break;
     default:
         return -1;
@@ -1277,6 +1139,40 @@ void turtle_tools_reader_free(turtle_tools_reader_t *readerp) {
         list_remove(turtleToolsElements.all, (unitype) (uint64_t) readerp, 'l');
         list_remove(turtleToolsElements.readers, (unitype) (void *) readerp, 'p');
     }
+}
+
+/* create a popup */
+turtle_tools_popup_t *turtle_tools_popup_init(list_t *message, list_t *options, double x, double y, double size) {
+    if (turtleToolsEnabled.popupEnabled == 0) {
+        turtleToolsEnabled.popupEnabled = 1;
+        turtleToolsElements.popups = list_init();
+    }
+    turtle_tools_init();
+    turtle_tools_popup_t *popupp = calloc(1, sizeof(turtle_tools_popup_t));
+    popupp -> element = TT_ELEMENT_POPUP;
+    popupp -> priority = popupp -> element;
+    popupp -> enabled = TT_ELEMENT_ENABLED;
+    popupp -> ignored = TT_ELEMENT_NOT_IGNORED;
+    turtle_tools_element_reset_color(popupp);
+    popupp -> x = x;
+    popupp -> y = y;
+    popupp -> size = size;
+    popupp -> status = TT_STATUS_IDLE;
+    popupp -> message = message;
+    popupp -> options = options;
+    popupp -> index = -1;
+    popupp -> value = -1;
+    list_append(turtleToolsElements.popups, (unitype) (void *) popupp, 'p');
+    list_append(turtleToolsElements.all, (unitype) (void *) popupp, 'l');
+    return popupp;
+}
+
+/* delete a popup */
+void turtle_tools_popup_free(turtle_tools_popup_t *popupp) {
+    list_free(popupp -> message);
+    list_free(popupp -> options);
+    list_remove(turtleToolsElements.all, (unitype) (uint64_t) popupp, 'l');
+    list_remove(turtleToolsElements.popups, (unitype) (void *) popupp, 'p');
 }
 
 /* update a button */
@@ -3436,14 +3332,88 @@ void turtle_tools_reader_update(turtle_tools_reader_t *readerp) {
     }
 }
 
-/* update all turtleTools */
-void turtle_tools_update() {
-    turtle_tools_update_ui();
-    turtle_tools_update_ribbon_popup();
+/* render popup */
+void turtle_tools_popup_update(turtle_tools_popup_t *popupp) {
+    if (popupp -> enabled == TT_ELEMENT_HIDE) {
+        if (popupp -> status != TT_STATUS_BLOCKED) {
+            popupp -> status = TT_STATUS_IDLE;
+        }
+        popupp -> index = -1;
+        popupp -> value = -1;
+        return;
+    }
+    turtle_rectangle_color(-320, -180, 320, 180, 0, 0, 0, 120);
+    turtleToolsGlobals.elementLogicType = TT_ELEMENT_POPUP;
+    turtleToolsGlobals.elementLogicIndex = turtleToolsGlobals.elementLogicTemp;
+    /* render message */
+    double maxLength = 35;
+    int32_t popupTextLines = popupp -> message -> length;
+    for (int32_t i = 0; i < popupTextLines; i++) {
+        double length = turtle_text_get_unicode_length(popupp -> message -> data[i].s, popupp -> size);
+        if (length > maxLength) {
+            maxLength = length;
+        }
+    }
+    double leading = popupp -> size * 1.6;
+    double messageY = popupp -> y + (popupTextLines / 2.0) * leading;
+    turtle_tools_set_color(popupp -> color[TT_COLOR_SLOT_POPUP_BOX]);
+    turtle_rectangle(maxLength / -2 - popupp -> size / 2 + popupp -> x, messageY + popupp -> size, maxLength / 2 + popupp -> size / 2 + popupp -> x, popupp -> y - (popupTextLines / 2.0) * leading - popupp -> size);
+    turtle_tools_set_color(popupp -> color[TT_COLOR_SLOT_POPUP_TEXT_MESSAGE]);
+    for (int32_t i = 0; i < popupTextLines; i++) {
+        turtle_text_write_unicode(popupp -> message -> data[i].s, popupp -> x, messageY, popupp -> size, 50);
+        messageY -= leading;
+    }
+    maxLength += popupp -> size;
+    /* render buttons */
+    double buttonX = popupp -> x;
+    double buttonY = popupp -> y - popupp -> size * 2;
+    double fullLength = 0;
+    for (int32_t i = 0; i < popupp -> options -> length; i++) {
+        fullLength += turtle_text_get_string_length(popupp -> options -> data[i].s, popupp -> size);
+    }
+    /* we have the length of the strings, now we pad with n + 1 padding regions */
+    double padding = (maxLength - fullLength) / (popupp -> options -> length + 1);
+    buttonX = popupp -> x - maxLength / 2 + padding;
+    char flagged = 0;
+    if (!turtle_mouse_down() && popupp -> status == TT_STATUS_CLICK) {
+        flagged = 1; // flagged for mouse misbehaviour
+    }
+    for (int32_t i = 0; i < popupp -> options -> length; i++) {
+        double strLen = turtle_text_get_string_length(popupp -> options -> data[i].s, popupp -> size);
+        if (turtle.mouseX > buttonX - popupp -> size && turtle.mouseX < buttonX + strLen + popupp -> size && turtle.mouseY > buttonY - popupp -> size && turtle.mouseY < buttonY + popupp -> size) {
+            turtle_tools_set_color(popupp -> color[TT_COLOR_SLOT_POPUP_BUTTON_SELECT]);
+            turtle_rectangle(buttonX - popupp -> size, buttonY - popupp -> size, buttonX + popupp -> size + strLen, buttonY + popupp -> size);
+            if (turtle_mouse_down()) {
+                if (popupp -> status == TT_STATUS_IDLE) {
+                    popupp -> status = TT_STATUS_CLICK;
+                    // turtleToolsGlobals.elementLogicType = TT_ELEMENT_NONE;
+                }
+            } else {
+                if (popupp -> status == TT_STATUS_CLICK) {
+                    popupp -> status = TT_STATUS_IDLE;
+                    popupp -> index = i;
+                    popupp -> value = i;
+                    // turtleToolsGlobals.elementLogicType = TT_ELEMENT_NONE;
+                }
+            }
+        } else {
+            turtle_tools_set_color(popupp -> color[TT_COLOR_SLOT_POPUP_BUTTON]);
+            turtle_rectangle(buttonX - popupp -> size, buttonY - popupp -> size, buttonX + popupp -> size + strLen, buttonY + popupp -> size);
+        }
+        turtle_tools_set_color(popupp -> color[TT_COLOR_SLOT_POPUP_TEXT_BUTTON]);
+        turtle_text_write_unicode(popupp -> options -> data[i].s, buttonX, buttonY, popupp -> size, 0);
+        buttonX += strLen + padding;
+    }
+    if (!turtle_mouse_down() && popupp -> status == TT_STATUS_CLICK && flagged == 1) {
+        popupp -> status = TT_STATUS_IDLE;
+        popupp -> index = -1;
+        popupp -> value = -1;
+        // turtleToolsGlobals.elementLogicType = TT_ELEMENT_NONE;
+    }
 }
 
-/* update all turtleTools except ribbon and popup */
-void turtle_tools_update_ui() {
+/* update all turtleTools */
+void turtle_tools_update() {
     turtleToolsGlobals.elementLogicType = TT_ELEMENT_NONE;
     turtleToolsGlobals.elementLogicIndex = -1;
     turtleToolsGlobals.elementLogicTemp = -1;
@@ -3554,20 +3524,21 @@ void turtle_tools_update_ui() {
             }
         }
     }
-    turtle.penshape = shapeSave;
+    if (turtleToolsEnabled.popupEnabled) {
+        turtleToolsGlobals.elementLogicTemp = 0;
+        for (int32_t i = 0; i < turtleToolsElements.popups -> length; i++) {
+            if (((turtle_tools_popup_t *) (turtleToolsElements.popups -> data[i].p)) -> ignored == TT_ELEMENT_IGNORED) {
+                continue;
+            }
+            turtle_tools_popup_t *popupp = (turtle_tools_popup_t *) (turtleToolsElements.popups -> data[i].p);
+            turtle_tools_popup_update(popupp);
+        }
+    }
     turtleToolsGlobals.elementLogicTypeOld = turtleToolsGlobals.elementLogicType;
     turtleToolsGlobals.elementLogicIndexOld = turtleToolsGlobals.elementLogicIndex;
-}
-
-/* update ribbon and popup */
-void turtle_tools_update_ribbon_popup() {
-    uint16_t shapeSave = turtle.penshape;
     turtle_pen_shape(TURTLE_PEN_SHAPE_CIRCLE);
     if (turtleToolsEnabled.ribbonEnabled) {
         turtle_tools_ribbon_update();
-    }
-    if (turtleToolsEnabled.popupEnabled) {
-        turtle_tools_popup_update();
     }
     turtle.penshape = shapeSave;
     turtleToolsGlobals.elementLogicTypeOld = turtleToolsGlobals.elementLogicType;
