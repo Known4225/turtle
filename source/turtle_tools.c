@@ -3346,7 +3346,13 @@ void turtle_tools_popup_update(turtle_tools_popup_t *popupp) {
     turtleToolsGlobals.elementLogicType = TT_ELEMENT_POPUP;
     turtleToolsGlobals.elementLogicIndex = turtleToolsGlobals.elementLogicTemp;
     /* render message */
-    double maxLength = 35;
+    double maxLength = 0;
+    double fullLength = 0;
+    for (int32_t i = 0; i < popupp -> options -> length; i++) {
+        double buttonStringLength = turtle_text_get_string_length(popupp -> options -> data[i].s, popupp -> size);
+        fullLength += buttonStringLength;
+        maxLength += buttonStringLength + popupp -> size * 4;
+    }
     int32_t popupTextLines = popupp -> message -> length;
     for (int32_t i = 0; i < popupTextLines; i++) {
         double length = turtle_text_get_unicode_length(popupp -> message -> data[i].s, popupp -> size);
@@ -3355,9 +3361,9 @@ void turtle_tools_popup_update(turtle_tools_popup_t *popupp) {
         }
     }
     double leading = popupp -> size * 1.6;
-    double messageY = popupp -> y + (popupTextLines / 2.0) * leading;
+    double messageY = popupp -> y + ((popupTextLines - 1) / 2.0) * leading + popupp -> size * 1.5;
     turtle_tools_set_color(popupp -> color[TT_COLOR_SLOT_POPUP_BOX]);
-    turtle_rectangle(maxLength / -2 - popupp -> size / 2 + popupp -> x, messageY + popupp -> size, maxLength / 2 + popupp -> size / 2 + popupp -> x, popupp -> y - (popupTextLines / 2.0) * leading - popupp -> size);
+    turtle_rectangle(maxLength / -2 - popupp -> size / 2 + popupp -> x, messageY + popupp -> size, maxLength / 2 + popupp -> size / 2 + popupp -> x, messageY - leading * (popupTextLines - 1) - popupp -> size * 4);
     turtle_tools_set_color(popupp -> color[TT_COLOR_SLOT_POPUP_TEXT_MESSAGE]);
     for (int32_t i = 0; i < popupTextLines; i++) {
         turtle_text_write_unicode(popupp -> message -> data[i].s, popupp -> x, messageY, popupp -> size, 50);
@@ -3366,11 +3372,7 @@ void turtle_tools_popup_update(turtle_tools_popup_t *popupp) {
     maxLength += popupp -> size;
     /* render buttons */
     double buttonX = popupp -> x;
-    double buttonY = popupp -> y - popupp -> size * 2;
-    double fullLength = 0;
-    for (int32_t i = 0; i < popupp -> options -> length; i++) {
-        fullLength += turtle_text_get_string_length(popupp -> options -> data[i].s, popupp -> size);
-    }
+    double buttonY = messageY - popupp -> size;
     /* we have the length of the strings, now we pad with n + 1 padding regions */
     double padding = (maxLength - fullLength) / (popupp -> options -> length + 1);
     buttonX = popupp -> x - maxLength / 2 + padding;
