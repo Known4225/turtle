@@ -3351,7 +3351,7 @@ void turtle_tools_popup_update(turtle_tools_popup_t *popupp) {
     for (int32_t i = 0; i < popupp -> options -> length; i++) {
         double buttonStringLength = turtle_text_get_string_length(popupp -> options -> data[i].s, popupp -> size);
         fullLength += buttonStringLength;
-        maxLength += buttonStringLength + popupp -> size * 4;
+        maxLength += buttonStringLength + popupp -> size * 3;
     }
     int32_t popupTextLines = popupp -> message -> length;
     for (int32_t i = 0; i < popupTextLines; i++) {
@@ -3361,9 +3361,9 @@ void turtle_tools_popup_update(turtle_tools_popup_t *popupp) {
         }
     }
     double leading = popupp -> size * 1.6;
-    double messageY = popupp -> y + ((popupTextLines - 1) / 2.0) * leading + popupp -> size * 1.5;
+    double messageY = popupp -> y + ((popupTextLines - 1) / 2.0) * leading + popupp -> size * 2;
     turtle_tools_set_color(popupp -> color[TT_COLOR_SLOT_POPUP_BOX]);
-    turtle_rectangle(maxLength / -2 - popupp -> size / 2 + popupp -> x, messageY + popupp -> size, maxLength / 2 + popupp -> size / 2 + popupp -> x, messageY - leading * (popupTextLines - 1) - popupp -> size * 4);
+    turtle_rectangle(maxLength / -2 - popupp -> size / 2 + popupp -> x, messageY + popupp -> size, maxLength / 2 + popupp -> size / 2 + popupp -> x, messageY - leading * (popupTextLines - 1) - popupp -> size * 5);
     turtle_tools_set_color(popupp -> color[TT_COLOR_SLOT_POPUP_TEXT_MESSAGE]);
     for (int32_t i = 0; i < popupTextLines; i++) {
         turtle_text_write_unicode(popupp -> message -> data[i].s, popupp -> x, messageY, popupp -> size, 50);
@@ -3372,10 +3372,10 @@ void turtle_tools_popup_update(turtle_tools_popup_t *popupp) {
     maxLength += popupp -> size;
     /* render buttons */
     double buttonX = popupp -> x;
-    double buttonY = messageY - popupp -> size;
-    /* we have the length of the strings, now we pad with n + 1 padding regions */
-    double padding = (maxLength - fullLength) / (popupp -> options -> length + 1);
-    buttonX = popupp -> x - maxLength / 2 + padding;
+    double buttonY = messageY - popupp -> size * 2;
+    /* we have the length of the strings, now we pad with n padding regions (the ends are padding / 2) */
+    double padding = (maxLength - fullLength) / popupp -> options -> length;
+    buttonX = popupp -> x - maxLength / 2 + padding / 2;
     char flagged = 0;
     if (!turtle_mouse_down() && popupp -> status == TT_STATUS_CLICK) {
         flagged = 1; // flagged for mouse misbehaviour
