@@ -1510,9 +1510,20 @@ void turtle_tools_switch_update(turtle_tools_switch_t *switchp) {
             turtle_triangle(switchX - switchp -> size * 0.5, switchY - switchp -> size * 0.5, switchX + switchp -> size * 0.3, switchY, switchX - switchp -> size * 0.5, switchY + switchp -> size * 0.5);
         }
         switchClickLeft = switchX - switchp -> size * 0.6;
-        switchClickRight = switchX + switchp -> size * 0.6;
+        switchClickRight = switchX + switchp -> size * 0.6 + turtle_text_get_unicode_length(switchp -> label, switchp -> size - 1) + switchp -> size;
         switchClickDown = switchY - switchp -> size * 0.6;
         switchClickUp = switchY + switchp -> size * 0.6;
+        /* render text */
+        if (switchp -> status == TT_STATUS_IDLE || switchp -> status == TT_STATUS_BLOCKED) {
+            turtle_tools_set_color(switchp -> color[TT_COLOR_SLOT_SWITCH_TEXT]);
+        } else {
+            turtle_tools_set_color(switchp -> color[TT_COLOR_SLOT_SWITCH_TEXT_HOVER]);
+        }
+        if (switchp -> align == TT_SWITCH_ALIGN_RIGHT) {
+            turtle_text_write_unicode(switchp -> label, switchX + switchp -> size, switchY, switchp -> size - 1, 100);
+        } else {
+            turtle_text_write_unicode(switchp -> label, switchX + switchp -> size, switchY, switchp -> size - 1, 0);
+        }
     }
     /* mouse */
     if (switchp -> enabled != TT_ELEMENT_ENABLED || turtleToolsGlobals.elementLogicTypeOld > switchp -> priority || (turtleToolsGlobals.elementLogicTypeOld == switchp -> priority && turtleToolsGlobals.elementLogicIndexOld > turtleToolsGlobals.elementLogicTemp)) {
