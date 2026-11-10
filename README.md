@@ -33,20 +33,19 @@ The following build commands are available:
 - `make runserver` - For testing the server build on browser
 
 # To Do
-- Add option to include textboxes with sliders and dials
+- Audio support using OpenAL
 - Turn glfw and glad libraries into source code
 - Double click and drag highlights words like in normal textboxes
+- Fix Ctrl+A behaviour on textboxes that spill over the bounds
 - In normal textboxes you can drag highlighted text out of the text box and into another textbox or program like a pseudo-copy-and-paste (but it doesn't actually use the clipboard)
 - Allow textbox selecting off the ends of the visible content
 - Davinci Resolve style textboxes with numerical values editible by dragging left and right
-- Make versions of the slider and dial that have integrated textboxes allowing users to set these elements to precise values
 - Handrolled linear resizing is not only at least 2x slower than stbir, it is also worse (box size is only what box takes up instead of larger)
 - Build some support for osTools on OS_BROWSER
 - Add some emojis to font
 - Write tests
 - Fix flipped world coordinates
 - 3D support
-- Audio support (PortAudio?)
 - SVG support (NanoSVG?)
 - Update wiki/documentation
 - Linux COM support
