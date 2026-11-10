@@ -475,8 +475,8 @@ typedef struct {
     char render[32];
     double renderMultiplier;
     int32_t defaultValue;
-    int8_t textbox;
-    turtle_tools_textbox_t *textboxInternal;
+    int8_t textbox; // set this variable to integrate a textbox with the dial
+    turtle_tools_textbox_t *textboxInternal; // don't touch please
     /* value */
     int32_t value; // value of dial
 } turtle_tools_dial_t;
@@ -527,8 +527,8 @@ typedef struct {
     char render[32];
     double renderMultiplier;
     int32_t defaultValue;
-    int8_t textbox;
-    turtle_tools_textbox_t *textboxInternal;
+    int8_t textbox; // set this variable to integrate a textbox with the dial
+    turtle_tools_textbox_t *textboxInternal; // don't touch please
     /* value */
     int32_t value; // value of slider
 } turtle_tools_slider_t;

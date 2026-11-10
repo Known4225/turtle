@@ -260,7 +260,9 @@ int main(int argc, char *argv[]) {
     list_append(sources, (unitype) "SP928", 's');
     list_append(sources, (unitype) "SP1203", 's');
     list_append(sources, (unitype) "SP-1550M", 's');
-    turtle_tools_dial_init("Power", NULL, TT_DIAL_SCALE_LINEAR, -150, -210, 10, 0, 100, NULL, 1) -> style = TT_DIAL_STYLE_SPEEDOMETER;
+    turtle_tools_dial_t *power = turtle_tools_dial_init("Power", NULL, TT_DIAL_SCALE_LINEAR, -150, -210, 10, 0, 100, NULL, 1);
+    power -> style = TT_DIAL_STYLE_SPEEDOMETER;
+    power -> textbox = 1;
     turtle_tools_dial_init("Speed", NULL, TT_DIAL_SCALE_LINEAR, -100, -210, 10, 0, 1000, NULL, 1) -> style = TT_DIAL_STYLE_SPEEDOMETER;
     turtle_tools_dial_init("Shutter", NULL, TT_DIAL_SCALE_EXP, -50, -210, 10, 0, 1000, NULL, 1) -> style = TT_DIAL_STYLE_SPEEDOMETER;
     turtle_tools_dropdown_init("Source", sources, NULL, TT_DROPDOWN_ALIGN_LEFT, -10, -211.2, 10);
