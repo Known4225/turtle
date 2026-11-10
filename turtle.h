@@ -28890,6 +28890,7 @@ void turtle_tools_dial_update(turtle_tools_dial_t *dialp) {
         }
         return;
     }
+    /* handle integrated textbox */
     if (dialp -> textbox) {
         if (dialp -> textboxInternal == NULL) {
             if (dialp -> renderMultiplier != 0) {
@@ -28900,18 +28901,19 @@ void turtle_tools_dial_update(turtle_tools_dial_t *dialp) {
                 }
                 double textboxLength = maxCharacters * dialp -> size / 2;
                 dialp -> textboxInternal = turtle_tools_textbox_init("TEMP", NULL, maxCharacters, dialp -> x - textboxLength / 2, dialp -> y, dialp -> size / 2 + 1, textboxLength);
-                if (dialp -> style == TT_DIAL_STYLE_SPEEDOMETER || dialp -> style == TT_DIAL_STYLE_SPEEDOMETER_CENTER) {
-                    dialp -> textboxInternal -> align = TT_TEXTBOX_ALIGN_CENTER;
-                }
                 dialp -> textboxInternal -> style = TT_TEXTBOX_STYLE_TEXT_ONLY;
                 dialp -> textboxInternal -> color[TT_COLOR_SLOT_TEXTBOX_TEXT] = dialp -> color[TT_COLOR_SLOT_DIAL_TEXT];
+                goto LABEL_DIAL_UPDATE_TEXTBOX;
             }
         } else {
+            LABEL_DIAL_UPDATE_TEXTBOX:
             /* update textbox */
             if (dialp -> textboxInternal -> status <= TT_STATUS_HOVER) {
                 if (dialp -> textboxEditing) {
                     dialp -> textboxEditing = 0;
-                    sscanf(dialp -> textboxInternal -> text, "%d", &dialp -> value);
+                    double exactValue;
+                    sscanf(dialp -> textboxInternal -> text, "%lf", &exactValue);
+                    dialp -> value = (exactValue + dialp -> renderMultiplier / 2) / dialp -> renderMultiplier;
                     if (dialp -> value >= dialp -> range[1]) {
                         dialp -> value = dialp -> range[1];
                     }
@@ -28927,9 +28929,11 @@ void turtle_tools_dial_update(turtle_tools_dial_t *dialp) {
             double textboxLength = turtle_text_get_unicode_length(dialp -> textboxInternal -> text, dialp -> textboxInternal -> size) + dialp -> size;
             dialp -> textboxInternal -> length = textboxLength;
             if (dialp -> style == TT_DIAL_STYLE_SPEEDOMETER || dialp -> style == TT_DIAL_STYLE_SPEEDOMETER_CENTER) {
+                dialp -> textboxInternal -> align = TT_TEXTBOX_ALIGN_CENTER;
                 dialp -> textboxInternal -> x = dialp -> x - dialp -> textboxInternal -> length / 2 + dialp -> textboxInternal -> size / 8;
                 dialp -> textboxInternal -> y = dialp -> y - dialp -> size * 1.2;
             } else {
+                dialp -> textboxInternal -> align = TT_TEXTBOX_ALIGN_LEFT;
                 dialp -> textboxInternal -> x = dialp -> x + dialp -> size * 1.3 - dialp -> textboxInternal -> size / 3;
                 dialp -> textboxInternal -> y = dialp -> y;
             }
@@ -29125,7 +29129,7 @@ void turtle_tools_slider_update(turtle_tools_slider_t *sliderp) {
     double sliderYLeft = 0;
     double sliderXRight = 0;
     double sliderYRight = 0;
-    double sliderAlignFactor = 0;
+    int32_t sliderAlignFactor = 0;
     double sliderRotateFactor = 0;
     double sliderOffsetXFactor = 0;
     double sliderOffsetYFactor = 0;
@@ -29241,6 +29245,63 @@ void turtle_tools_slider_update(turtle_tools_slider_t *sliderp) {
                 sliderOffsetXFactor = sliderp -> size * 0.4;
                 sliderOffsetXFactorSmall = -sliderp -> size * 1;
             }
+        }
+    }
+    /* handle integrated textbox */
+    if (sliderp -> textbox) {
+        if (sliderp -> textboxInternal == NULL) {
+            if (sliderp -> renderMultiplier != 0) {
+                /* create textbox */
+                int32_t maxCharacters = 5;
+                if (strlen(sliderp -> render) > maxCharacters) {
+                    maxCharacters = strlen(sliderp -> render) + 10; // TODO - check bottom and top bounds of dial to ensure this is enough characters
+                }
+                double textboxLength = maxCharacters * sliderp -> size / 2;
+                sliderp -> textboxInternal = turtle_tools_textbox_init("TEMP", NULL, maxCharacters, sliderp -> x - textboxLength / 2, sliderp -> y, sliderp -> size / 2 + 1, textboxLength);
+                sliderp -> textboxInternal -> style = TT_TEXTBOX_STYLE_TEXT_ONLY;
+                sliderp -> textboxInternal -> color[TT_COLOR_SLOT_TEXTBOX_TEXT] = sliderp -> color[TT_COLOR_SLOT_DIAL_TEXT];
+                goto LABEL_SLIDER_UPDATE_TEXTBOX;
+            }
+        } else {
+            LABEL_SLIDER_UPDATE_TEXTBOX:
+            /* update textbox */
+            if (sliderp -> textboxInternal -> status <= TT_STATUS_HOVER) {
+                if (sliderp -> textboxEditing) {
+                    sliderp -> textboxEditing = 0;
+                    double exactValue;
+                    sscanf(sliderp -> textboxInternal -> text, "%lf", &exactValue);
+                    sliderp -> value = (exactValue + sliderp -> renderMultiplier / 2) / sliderp -> renderMultiplier;
+                    if (sliderp -> value >= sliderp -> range[1]) {
+                        sliderp -> value = sliderp -> range[1];
+                    }
+                    if (sliderp -> value <= sliderp -> range[0]) {
+                        sliderp -> value = sliderp -> range[0];
+                    }
+                } else {
+                    sprintf(sliderp -> textboxInternal -> text, sliderp -> render, sliderp -> value * sliderp -> renderMultiplier);
+                }
+            } else {
+                sliderp -> textboxEditing = 1;
+            }
+            double textboxLength = turtle_text_get_unicode_length(sliderp -> textboxInternal -> text, sliderp -> textboxInternal -> size) + sliderp -> size;
+            sliderp -> textboxInternal -> length = textboxLength;
+            sliderp -> textboxInternal -> x = sliderp -> x + sliderOffsetXFactorSmall;
+            sliderp -> textboxInternal -> y = sliderp -> y + sliderOffsetYFactorSmall;
+            if (sliderAlignFactor == 0) {
+                sliderp -> textboxInternal -> align = TT_TEXTBOX_ALIGN_LEFT;
+            } else if (sliderAlignFactor == 50) {
+                sliderp -> textboxInternal -> align = TT_TEXTBOX_ALIGN_CENTER;
+                sliderp -> textboxInternal -> x -= sliderp -> textboxInternal -> length / 2 + sliderp -> textboxInternal -> size / 8;
+            } else if (sliderAlignFactor == 100) {
+                sliderp -> textboxInternal -> align = TT_TEXTBOX_ALIGN_RIGHT;
+                sliderp -> textboxInternal -> x -= sliderp -> textboxInternal -> length - sliderp -> textboxInternal -> size / 3;
+            }
+        }
+    } else {
+        if (sliderp -> textboxInternal != NULL) {
+            /* delete textbox */
+            turtle_tools_textbox_free(sliderp -> textboxInternal);
+            sliderp -> textboxInternal = NULL;
         }
     }
     turtle_tools_set_color(sliderp -> color[TT_COLOR_SLOT_SLIDER_TEXT]);
@@ -29366,7 +29427,7 @@ void turtle_tools_slider_update(turtle_tools_slider_t *sliderp) {
         turtleToolsGlobals.elementLogicIndex = turtleToolsGlobals.elementLogicTemp;
     }
     LABEL_SLIDER_END:
-    if (sliderp -> renderMultiplier != 0) {
+    if (sliderp -> renderMultiplier != 0 && sliderp -> textboxInternal == NULL) {
         turtle_tools_set_color(sliderp -> color[TT_COLOR_SLOT_SLIDER_TEXT]);
         if (sliderRotateFactor != 0) {
             turtle_text_write_stringf_rotated(sliderp -> x + sliderOffsetXFactorSmall, sliderp -> y + sliderOffsetYFactorSmall, sliderp -> size / 2, sliderAlignFactor, sliderRotateFactor, sliderp -> render, sliderp -> value * sliderp -> renderMultiplier);
