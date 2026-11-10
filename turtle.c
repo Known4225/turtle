@@ -217,7 +217,7 @@ int main(int argc, char *argv[]) {
     
     int32_t sliderVar = 0, dialVar = 0;
     turtle_tools_button_t *button = turtle_tools_button_init("Button", NULL, 150, 20, 10);
-    button -> shape = TT_BUTTON_SHAPE_ROUNDED_RECTANGLE;
+    button -> style = TT_BUTTON_STYLE_ROUNDED_RECTANGLE;
     turtle_tools_switch_init("Switch", NULL, 150, -20, 10);
     turtle_tools_dial_init("Exp", &dialVar, TT_DIAL_SCALE_EXP, -150, 20, 10, 0, 1000, NULL, 1);
     turtle_tools_dial_init("Linear", &dialVar, TT_DIAL_SCALE_LINEAR, -150, -20, 10, 0, 1000, NULL, 1);
@@ -287,8 +287,8 @@ int main(int argc, char *argv[]) {
     xbox -> style = TT_SWITCH_STYLE_XBOX;
     turtle_tools_button_t *textButton = turtle_tools_button_init("Text Button", NULL, 330, -30, 10);
     turtle_tools_button_t *circleButton = turtle_tools_button_init("Circle Button", NULL, 338, -100, 10);
-    textButton -> shape = TT_BUTTON_SHAPE_TEXT;
-    circleButton -> shape = TT_BUTTON_SHAPE_CIRCLE;
+    textButton -> style = TT_BUTTON_STYLE_TEXT;
+    circleButton -> style = TT_BUTTON_STYLE_CIRCLE;
 
     uint64_t tick = 0; // count number of ticks since application started
     turtle_tools_reader_init("tick", (unitype *) &tick, 'l', -315, 155, 10);

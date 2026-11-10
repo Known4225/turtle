@@ -189,7 +189,7 @@ void turtle_pen_down();
 /* lift the pen */
 void turtle_pen_up();
 
-/* set the pen shape ("circle", "square", "triangle", "none", or "connected") */
+/* set the pen shape - use one of TURTLE_PEN_SHAPE_CIRCLE, TURTLE_PEN_SHAPE_TRIANGLE, TURTLE_PEN_SHAPE_NONE, TURTLE_PEN_SHAPE_CONNECTED, TURTLE_PEN_SHAPE_TEXT */
 void turtle_pen_shape(turtle_pen_shape_t shape);
 
 /* set the circle precision (default 9) */

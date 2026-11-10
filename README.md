@@ -45,7 +45,6 @@ The following build commands are available:
 - Add some emojis to font
 - Write tests
 - Fix flipped world coordinates
-- Text-only textbox
 - 3D support
 - Audio support (PortAudio?)
 - SVG support (NanoSVG?)

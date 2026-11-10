@@ -320,11 +320,13 @@ extern turtle_tools_globals_t turtleToolsGlobals;
 #define TT_LABEL_LENGTH_LIMIT 128
 
 typedef enum {
-    TT_BUTTON_SHAPE_RECTANGLE = 0,
-    TT_BUTTON_SHAPE_ROUNDED_RECTANGLE = 1,
-    TT_BUTTON_SHAPE_CIRCLE = 2,
-    TT_BUTTON_SHAPE_TEXT = 3,
-} turtle_tools_button_shape_t;
+    TT_BUTTON_STYLE_DEFAULT = 0,
+    TT_BUTTON_STYLE_CLASSIC = 0,
+    TT_BUTTON_STYLE_RECTANGLE = 0,
+    TT_BUTTON_STYLE_ROUNDED_RECTANGLE = 1,
+    TT_BUTTON_STYLE_CIRCLE = 2,
+    TT_BUTTON_STYLE_TEXT = 3,
+} turtle_tools_button_style_t;
 
 typedef enum {
     TT_BUTTON_ALIGN_LEFT = 0,
@@ -345,13 +347,14 @@ typedef struct {
     double size;
     int8_t *variable; // bound variable (can be NULL)
     char label[TT_LABEL_LENGTH_LIMIT];
-    turtle_tools_button_shape_t shape;
+    turtle_tools_button_style_t style;
     turtle_tools_button_align_t align;
     /* value */
     int8_t value; // 1 if button is being pressed, 0 otherwise
 } turtle_tools_button_t;
 
 typedef enum {
+    TT_SWITCH_STYLE_DEFAULT = 0,
     TT_SWITCH_STYLE_CLASSIC = 0,
     TT_SWITCH_STYLE_VERTICAL = 1,
     TT_SWITCH_STYLE_SIDESWIPE = 2,
@@ -386,12 +389,67 @@ typedef struct {
 } turtle_tools_switch_t;
 
 typedef enum {
+    TT_TEXTBOX_ALIGN_LEFT = 0,
+    TT_TEXTBOX_ALIGN_CENTER = 1,
+    TT_TEXTBOX_ALIGN_RIGHT = 2,
+} turtle_tools_textbox_align_t;
+
+typedef enum {
+    TT_TEXTBOX_STYLE_DEFAULT = 0,
+    TT_TEXTBOX_STYLE_CLASSIC = 0,
+    TT_TEXTBOX_STYLE_TEXT_ONLY = 1,
+} turtle_tools_textbox_style_t;
+
+/* textbox */
+typedef struct {
+    turtle_tools_element_names_t element;
+    turtle_tools_element_names_t priority;
+    turtle_tools_status_t status;
+    turtle_tools_element_enabled_t enabled;
+    turtle_tools_element_ignored_t ignored;
+    int32_t color[8];
+    double x;
+    double y;
+    double size;
+    char label[TT_LABEL_LENGTH_LIMIT];
+    int8_t mouseOver; // whether mouse is hovering over textbox
+    int8_t moveToTop;
+    int32_t count; // counts updates for line flashing animation
+    turtle_tools_textbox_align_t align;
+    turtle_tools_textbox_style_t style;
+    double length; // length of textbox in coordinates
+    int32_t maxCharacters; // maximum characters of textbox text
+    int32_t editIndex; // index of editing (index of text)
+    int32_t editIndexLength; // length of text editing for highlighted bits of text (can be negative)
+    int32_t lastKey; // keep track of last key pressed for spamming key behaviour
+    int32_t keyTimeout; // counts updates of key timeouts
+    int32_t initialKeyTimeout; // initial timeout in updates to determine when key switches to spamming
+    int32_t heldKeyTimeout; // timeout in updates of key held down spamming behaviour
+    int32_t linePeriod; // period in updates of flashing bar to indicate text is being updated (1 full cycle)
+    int32_t doubleClickEditIndex; // keep track of edit index when attempting double click (invalidate if second click has different edit index)
+    int16_t doubleClickCount; // counts updates for double click timer
+    int16_t doubleClickTimeout; // timeout in updates of how long between clicks for double click to register
+    int8_t editingMode; // mode 0 for editing characters, mode 1 for editing words, mode 2 for editing all
+    /* render variables */
+    double renderPixelOffset;
+    int32_t renderStartingIndex;
+    int32_t renderNumCharacters;
+    /* whitelist */
+    list_t *whitelist;
+    list_t *blacklist;
+    /* value */
+    char *text; // text of textbox
+    char *value; // text of textbox (duplicate name - always equal to text)
+} turtle_tools_textbox_t;
+
+typedef enum {
     TT_DIAL_SCALE_LINEAR = 0,
     TT_DIAL_SCALE_LOG = 1,
     TT_DIAL_SCALE_EXP = 2,
 } turtle_tools_dial_scale_t;
 
 typedef enum {
+    TT_DIAL_STYLE_DEFAULT = 0,
     TT_DIAL_STYLE_CLASSIC = 0,
     TT_DIAL_STYLE_SPEEDOMETER = 1,
     TT_DIAL_STYLE_SPEEDOMETER_CENTER = 2,
@@ -417,6 +475,8 @@ typedef struct {
     char render[32];
     double renderMultiplier;
     int32_t defaultValue;
+    int8_t textbox;
+    turtle_tools_textbox_t *textboxInternal;
     /* value */
     int32_t value; // value of dial
 } turtle_tools_dial_t;
@@ -439,6 +499,7 @@ typedef enum {
 } turtle_tools_slider_scale_t;
 
 typedef enum {
+    TT_SLIDER_STYLE_DEFAULT = 0,
     TT_SLIDER_STYLE_CLASSIC = 0,
     TT_SLIDER_STYLE_SIDESWIPE = 1,
     TT_SLIDER_STYLE_COMPACT = 2,
@@ -466,56 +527,11 @@ typedef struct {
     char render[32];
     double renderMultiplier;
     int32_t defaultValue;
+    int8_t textbox;
+    turtle_tools_textbox_t *textboxInternal;
     /* value */
     int32_t value; // value of slider
 } turtle_tools_slider_t;
-
-typedef enum {
-    TT_TEXTBOX_ALIGN_LEFT = 0,
-    TT_TEXTBOX_ALIGN_CENTER = 1,
-    TT_TEXTBOX_ALIGN_RIGHT = 2,
-} turtle_tools_textbox_align_t;
-
-/* textbox */
-typedef struct {
-    turtle_tools_element_names_t element;
-    turtle_tools_element_names_t priority;
-    turtle_tools_status_t status;
-    turtle_tools_element_enabled_t enabled;
-    turtle_tools_element_ignored_t ignored;
-    int32_t color[8];
-    double x;
-    double y;
-    double size;
-    char label[TT_LABEL_LENGTH_LIMIT];
-    int8_t mouseOver; // whether mouse is hovering over textbox
-    int8_t moveToTop;
-    int32_t count; // counts updates for line flashing animation
-    turtle_tools_textbox_align_t align;
-    double length; // length of textbox in coordinates
-    int32_t maxCharacters; // maximum characters of textbox text
-    int32_t editIndex; // index of editing (index of text)
-    int32_t editIndexLength; // length of text editing for highlighted bits of text (can be negative)
-    int32_t lastKey; // keep track of last key pressed for spamming key behaviour
-    int32_t keyTimeout; // counts updates of key timeouts
-    int32_t initialKeyTimeout; // initial timeout in updates to determine when key switches to spamming
-    int32_t heldKeyTimeout; // timeout in updates of key held down spamming behaviour
-    int32_t linePeriod; // period in updates of flashing bar to indicate text is being updated (1 full cycle)
-    int32_t doubleClickEditIndex; // keep track of edit index when attempting double click (invalidate if second click has different edit index)
-    int16_t doubleClickCount; // counts updates for double click timer
-    int16_t doubleClickTimeout; // timeout in updates of how long between clicks for double click to register
-    int8_t editingMode; // mode 0 for editing characters, mode 1 for editing words, mode 2 for editing all
-    /* render variables */
-    double renderPixelOffset;
-    int32_t renderStartingIndex;
-    int32_t renderNumCharacters;
-    /* whitelist */
-    list_t *whitelist;
-    list_t *blacklist;
-    /* value */
-    char *text; // text of textbox
-    char *value; // text of textbox (duplicate name - always equal to text)
-} turtle_tools_textbox_t;
 
 typedef enum {
     TT_DROPDOWN_ALIGN_LEFT = 0,
