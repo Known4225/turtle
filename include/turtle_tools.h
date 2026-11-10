@@ -665,6 +665,8 @@ typedef struct {
     double size;
     list_t *message; // popup message (each element is a line)
     list_t *options; // list of popup box options
+    int32_t hoverIndex; // index of hovered option
+    int32_t clickIndex; // index of clicked option
     /* value */
     int32_t index; // index of selected option
     int32_t value; // index of selected option (duplicate name - always equal to index)
