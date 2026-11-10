@@ -733,6 +733,7 @@ turtle_tools_dial_t *turtle_tools_dial_init(char *label, int32_t *variable, turt
         memcpy(dialp -> render, "%.0lf", strlen("%.0lf") + 1);
     } else {
         char renderEdited[sizeof(dialp -> render) * 5];
+        memset(renderEdited, 0, sizeof(renderEdited));
         int32_t initialLength = strlen(render);
         int32_t editedIndex = 0;
         for (int32_t i = 0; i < initialLength; i++) {
@@ -763,6 +764,7 @@ turtle_tools_dial_t *turtle_tools_dial_init(char *label, int32_t *variable, turt
     }
     dialp -> value = dialp -> defaultValue;
     dialp -> textbox = 0;
+    dialp -> textboxEditing = 0;
     dialp -> textboxInternal = NULL;
     list_append(turtleToolsElements.dials, (unitype) (void *) dialp, 'p');
     list_append(turtleToolsElements.all, (unitype) (void *) dialp, 'l');
@@ -816,6 +818,7 @@ turtle_tools_slider_t *turtle_tools_slider_init(char *label, int32_t *variable, 
         memcpy(sliderp -> render, "%.0lf", strlen("%.0lf") + 1);
     } else {
         char renderEdited[sizeof(sliderp -> render) * 5];
+        memset(renderEdited, 0, sizeof(renderEdited));
         int32_t initialLength = strlen(render);
         int32_t editedIndex = 0;
         for (int32_t i = 0; i < initialLength; i++) {
@@ -846,6 +849,7 @@ turtle_tools_slider_t *turtle_tools_slider_init(char *label, int32_t *variable, 
     }
     sliderp -> value = sliderp -> defaultValue;
     sliderp -> textbox = 0;
+    sliderp -> textboxEditing = 0;
     sliderp -> textboxInternal = NULL;
     list_append(turtleToolsElements.sliders, (unitype) (void *) sliderp, 'p');
     list_append(turtleToolsElements.all, (unitype) (void *) sliderp, 'l');
@@ -1596,20 +1600,53 @@ void turtle_tools_dial_update(turtle_tools_dial_t *dialp) {
     }
     if (dialp -> textbox) {
         if (dialp -> textboxInternal == NULL) {
-            /* create textbox */
-            dialp -> textboxInternal = turtle_tools_textbox_init("TEMP", NULL, 32, dialp -> x, dialp -> y, dialp -> size / 2 + 1, 50); // TODO - evaluate maxCharacters
-            dialp -> textboxInternal -> align = TT_TEXTBOX_ALIGN_CENTER;
-            dialp -> textboxInternal -> style = TT_TEXTBOX_STYLE_TEXT_ONLY;
-            dialp -> textboxInternal -> color[TT_COLOR_SLOT_TEXTBOX_TEXT] = dialp -> color[TT_COLOR_SLOT_DIAL_TEXT];
+            if (dialp -> renderMultiplier != 0) {
+                /* create textbox */
+                int32_t maxCharacters = 5;
+                if (strlen(dialp -> render) > maxCharacters) {
+                    maxCharacters = strlen(dialp -> render) + 10; // TODO - check bottom and top bounds of dial to ensure this is enough characters
+                }
+                double textboxLength = maxCharacters * dialp -> size / 2;
+                dialp -> textboxInternal = turtle_tools_textbox_init("TEMP", NULL, maxCharacters, dialp -> x - textboxLength / 2, dialp -> y, dialp -> size / 2 + 1, textboxLength);
+                if (dialp -> style == TT_DIAL_STYLE_SPEEDOMETER || dialp -> style == TT_DIAL_STYLE_SPEEDOMETER_CENTER) {
+                    dialp -> textboxInternal -> align = TT_TEXTBOX_ALIGN_CENTER;
+                }
+                dialp -> textboxInternal -> style = TT_TEXTBOX_STYLE_TEXT_ONLY;
+                dialp -> textboxInternal -> color[TT_COLOR_SLOT_TEXTBOX_TEXT] = dialp -> color[TT_COLOR_SLOT_DIAL_TEXT];
+            }
         } else {
             /* update textbox */
-            dialp -> textboxInternal -> x = dialp -> x;
-            dialp -> textboxInternal -> y = dialp -> y - dialp -> size * 1.2;
+            if (dialp -> textboxInternal -> status <= TT_STATUS_HOVER) {
+                if (dialp -> textboxEditing) {
+                    dialp -> textboxEditing = 0;
+                    sscanf(dialp -> textboxInternal -> text, "%d", &dialp -> value);
+                    if (dialp -> value >= dialp -> range[1]) {
+                        dialp -> value = dialp -> range[1];
+                    }
+                    if (dialp -> value <= dialp -> range[0]) {
+                        dialp -> value = dialp -> range[0];
+                    }
+                } else {
+                    sprintf(dialp -> textboxInternal -> text, dialp -> render, dialp -> value * dialp -> renderMultiplier);
+                }
+            } else {
+                dialp -> textboxEditing = 1;
+            }
+            double textboxLength = turtle_text_get_unicode_length(dialp -> textboxInternal -> text, dialp -> textboxInternal -> size) + dialp -> size;
+            dialp -> textboxInternal -> length = textboxLength;
+            if (dialp -> style == TT_DIAL_STYLE_SPEEDOMETER || dialp -> style == TT_DIAL_STYLE_SPEEDOMETER_CENTER) {
+                dialp -> textboxInternal -> x = dialp -> x - dialp -> textboxInternal -> length / 2 + dialp -> textboxInternal -> size / 8;
+                dialp -> textboxInternal -> y = dialp -> y - dialp -> size * 1.2;
+            } else {
+                dialp -> textboxInternal -> x = dialp -> x + dialp -> size * 1.3 - dialp -> textboxInternal -> size / 3;
+                dialp -> textboxInternal -> y = dialp -> y;
+            }
         }
     } else {
         if (dialp -> textboxInternal != NULL) {
             /* delete textbox */
             turtle_tools_textbox_free(dialp -> textboxInternal);
+            dialp -> textboxInternal = NULL;
         }
     }
     turtle_tools_set_color(dialp -> color[TT_COLOR_SLOT_DIAL_TEXT]);
@@ -1768,7 +1805,7 @@ void turtle_tools_dial_update(turtle_tools_dial_t *dialp) {
         turtleToolsGlobals.elementLogicIndex = turtleToolsGlobals.elementLogicTemp;
     }
     LABEL_DIAL_END:
-    if (dialp -> renderMultiplier != 0) {
+    if (dialp -> renderMultiplier != 0 && dialp -> textboxInternal == NULL) {
         turtle_tools_set_color(dialp -> color[TT_COLOR_SLOT_DIAL_TEXT]);
         if (dialp -> style == TT_DIAL_STYLE_CLASSIC) {
             turtle_text_write_stringf(dialX + dialp -> size * 1.3, dialY, dialp -> size / 2, 0, dialp -> render, dialp -> value * dialp -> renderMultiplier);
