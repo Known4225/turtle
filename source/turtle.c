@@ -257,7 +257,6 @@ void turtle_init(GLFWwindow *window, double leftX, double bottomY, double rightX
     glClearColor(1.0, 1.0, 1.0, 0.0); // white background by default
     turtle.window = window;
     turtle.close = 0;
-    turtle.popupClose = 0;
     turtle.keyPressed = list_init();
     turtle.lastscreenbounds[0] = 0;
     turtle.lastscreenbounds[1] = 0;
@@ -1673,9 +1672,6 @@ void turtle_update() {
     glfwPollEvents();
     if (glfwWindowShouldClose(turtle.window)) {
         turtle.close = 1;
-        if (turtle.popupClose) {
-            glfwTerminate();
-        }
     }
     #ifdef OS_BROWSER
     emscripten_sleep(0);

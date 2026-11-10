@@ -83,7 +83,6 @@ typedef struct {
     uint16_t penshape; // 0 for circle, 1 for square, 2 for triangle
     uint8_t pen; // pen status (1 for down, 0 for up)
     uint8_t close; // close changes to 1 when the user clicks the x on the window
-    uint8_t popupClose; // controls whether the window terminates on turtle.close
     uint8_t windowSpecial; // special features of window creation
     uint8_t forceUpdate; // toggle to skip check to see if screen has changed
     double circleprez; // how precise circles are (specifically, the number of sides of a circle with diameter e, default: 9)

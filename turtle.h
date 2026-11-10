@@ -10118,7 +10118,6 @@ typedef struct {
     uint16_t penshape; // 0 for circle, 1 for square, 2 for triangle
     uint8_t pen; // pen status (1 for down, 0 for up)
     uint8_t close; // close changes to 1 when the user clicks the x on the window
-    uint8_t popupClose; // controls whether the window terminates on turtle.close
     uint8_t windowSpecial; // special features of window creation
     uint8_t forceUpdate; // toggle to skip check to see if screen has changed
     double circleprez; // how precise circles are (specifically, the number of sides of a circle with diameter e, default: 9)
@@ -24691,7 +24690,6 @@ void turtle_init(GLFWwindow *window, double leftX, double bottomY, double rightX
     glClearColor(1.0, 1.0, 1.0, 0.0); // white background by default
     turtle.window = window;
     turtle.close = 0;
-    turtle.popupClose = 0;
     turtle.keyPressed = list_init();
     turtle.lastscreenbounds[0] = 0;
     turtle.lastscreenbounds[1] = 0;
@@ -26107,9 +26105,6 @@ void turtle_update() {
     glfwPollEvents();
     if (glfwWindowShouldClose(turtle.window)) {
         turtle.close = 1;
-        if (turtle.popupClose) {
-            glfwTerminate();
-        }
     }
     #ifdef OS_BROWSER
     emscripten_sleep(0);
