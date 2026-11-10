@@ -10224,7 +10224,7 @@ void turtle_pen_down();
 /* lift the pen */
 void turtle_pen_up();
 
-/* set the pen shape ("circle", "square", "triangle", "none", or "connected") */
+/* set the pen shape - use one of TURTLE_PEN_SHAPE_CIRCLE, TURTLE_PEN_SHAPE_TRIANGLE, TURTLE_PEN_SHAPE_NONE, TURTLE_PEN_SHAPE_CONNECTED, TURTLE_PEN_SHAPE_TEXT */
 void turtle_pen_shape(turtle_pen_shape_t shape);
 
 /* set the circle precision (default 9) */
@@ -10792,11 +10792,13 @@ extern turtle_tools_globals_t turtleToolsGlobals;
 #define TT_LABEL_LENGTH_LIMIT 128
 
 typedef enum {
-    TT_BUTTON_SHAPE_RECTANGLE = 0,
-    TT_BUTTON_SHAPE_ROUNDED_RECTANGLE = 1,
-    TT_BUTTON_SHAPE_CIRCLE = 2,
-    TT_BUTTON_SHAPE_TEXT = 3,
-} turtle_tools_button_shape_t;
+    TT_BUTTON_STYLE_DEFAULT = 0,
+    TT_BUTTON_STYLE_CLASSIC = 0,
+    TT_BUTTON_STYLE_RECTANGLE = 0,
+    TT_BUTTON_STYLE_ROUNDED_RECTANGLE = 1,
+    TT_BUTTON_STYLE_CIRCLE = 2,
+    TT_BUTTON_STYLE_TEXT = 3,
+} turtle_tools_button_style_t;
 
 typedef enum {
     TT_BUTTON_ALIGN_LEFT = 0,
@@ -10817,13 +10819,14 @@ typedef struct {
     double size;
     int8_t *variable; // bound variable (can be NULL)
     char label[TT_LABEL_LENGTH_LIMIT];
-    turtle_tools_button_shape_t shape;
+    turtle_tools_button_style_t style;
     turtle_tools_button_align_t align;
     /* value */
     int8_t value; // 1 if button is being pressed, 0 otherwise
 } turtle_tools_button_t;
 
 typedef enum {
+    TT_SWITCH_STYLE_DEFAULT = 0,
     TT_SWITCH_STYLE_CLASSIC = 0,
     TT_SWITCH_STYLE_VERTICAL = 1,
     TT_SWITCH_STYLE_SIDESWIPE = 2,
@@ -10858,12 +10861,67 @@ typedef struct {
 } turtle_tools_switch_t;
 
 typedef enum {
+    TT_TEXTBOX_ALIGN_LEFT = 0,
+    TT_TEXTBOX_ALIGN_CENTER = 1,
+    TT_TEXTBOX_ALIGN_RIGHT = 2,
+} turtle_tools_textbox_align_t;
+
+typedef enum {
+    TT_TEXTBOX_STYLE_DEFAULT = 0,
+    TT_TEXTBOX_STYLE_CLASSIC = 0,
+    TT_TEXTBOX_STYLE_TEXT_ONLY = 1,
+} turtle_tools_textbox_style_t;
+
+/* textbox */
+typedef struct {
+    turtle_tools_element_names_t element;
+    turtle_tools_element_names_t priority;
+    turtle_tools_status_t status;
+    turtle_tools_element_enabled_t enabled;
+    turtle_tools_element_ignored_t ignored;
+    int32_t color[8];
+    double x;
+    double y;
+    double size;
+    char label[TT_LABEL_LENGTH_LIMIT];
+    int8_t mouseOver; // whether mouse is hovering over textbox
+    int8_t moveToTop;
+    int32_t count; // counts updates for line flashing animation
+    turtle_tools_textbox_align_t align;
+    turtle_tools_textbox_style_t style;
+    double length; // length of textbox in coordinates
+    int32_t maxCharacters; // maximum characters of textbox text
+    int32_t editIndex; // index of editing (index of text)
+    int32_t editIndexLength; // length of text editing for highlighted bits of text (can be negative)
+    int32_t lastKey; // keep track of last key pressed for spamming key behaviour
+    int32_t keyTimeout; // counts updates of key timeouts
+    int32_t initialKeyTimeout; // initial timeout in updates to determine when key switches to spamming
+    int32_t heldKeyTimeout; // timeout in updates of key held down spamming behaviour
+    int32_t linePeriod; // period in updates of flashing bar to indicate text is being updated (1 full cycle)
+    int32_t doubleClickEditIndex; // keep track of edit index when attempting double click (invalidate if second click has different edit index)
+    int16_t doubleClickCount; // counts updates for double click timer
+    int16_t doubleClickTimeout; // timeout in updates of how long between clicks for double click to register
+    int8_t editingMode; // mode 0 for editing characters, mode 1 for editing words, mode 2 for editing all
+    /* render variables */
+    double renderPixelOffset;
+    int32_t renderStartingIndex;
+    int32_t renderNumCharacters;
+    /* whitelist */
+    list_t *whitelist;
+    list_t *blacklist;
+    /* value */
+    char *text; // text of textbox
+    char *value; // text of textbox (duplicate name - always equal to text)
+} turtle_tools_textbox_t;
+
+typedef enum {
     TT_DIAL_SCALE_LINEAR = 0,
     TT_DIAL_SCALE_LOG = 1,
     TT_DIAL_SCALE_EXP = 2,
 } turtle_tools_dial_scale_t;
 
 typedef enum {
+    TT_DIAL_STYLE_DEFAULT = 0,
     TT_DIAL_STYLE_CLASSIC = 0,
     TT_DIAL_STYLE_SPEEDOMETER = 1,
     TT_DIAL_STYLE_SPEEDOMETER_CENTER = 2,
@@ -10889,6 +10947,9 @@ typedef struct {
     char render[32];
     double renderMultiplier;
     int32_t defaultValue;
+    int8_t textbox; // set this variable to integrate a textbox with the dial
+    int8_t textboxEditing;
+    turtle_tools_textbox_t *textboxInternal; // don't touch please
     /* value */
     int32_t value; // value of dial
 } turtle_tools_dial_t;
@@ -10911,6 +10972,7 @@ typedef enum {
 } turtle_tools_slider_scale_t;
 
 typedef enum {
+    TT_SLIDER_STYLE_DEFAULT = 0,
     TT_SLIDER_STYLE_CLASSIC = 0,
     TT_SLIDER_STYLE_SIDESWIPE = 1,
     TT_SLIDER_STYLE_COMPACT = 2,
@@ -10938,56 +11000,12 @@ typedef struct {
     char render[32];
     double renderMultiplier;
     int32_t defaultValue;
+    int8_t textbox; // set this variable to integrate a textbox with the dial
+    int8_t textboxEditing;
+    turtle_tools_textbox_t *textboxInternal; // don't touch please
     /* value */
     int32_t value; // value of slider
 } turtle_tools_slider_t;
-
-typedef enum {
-    TT_TEXTBOX_ALIGN_LEFT = 0,
-    TT_TEXTBOX_ALIGN_CENTER = 1,
-    TT_TEXTBOX_ALIGN_RIGHT = 2,
-} turtle_tools_textbox_align_t;
-
-/* textbox */
-typedef struct {
-    turtle_tools_element_names_t element;
-    turtle_tools_element_names_t priority;
-    turtle_tools_status_t status;
-    turtle_tools_element_enabled_t enabled;
-    turtle_tools_element_ignored_t ignored;
-    int32_t color[8];
-    double x;
-    double y;
-    double size;
-    char label[TT_LABEL_LENGTH_LIMIT];
-    int8_t mouseOver; // whether mouse is hovering over textbox
-    int8_t moveToTop;
-    int32_t count; // counts updates for line flashing animation
-    turtle_tools_textbox_align_t align;
-    double length; // length of textbox in coordinates
-    int32_t maxCharacters; // maximum characters of textbox text
-    int32_t editIndex; // index of editing (index of text)
-    int32_t editIndexLength; // length of text editing for highlighted bits of text (can be negative)
-    int32_t lastKey; // keep track of last key pressed for spamming key behaviour
-    int32_t keyTimeout; // counts updates of key timeouts
-    int32_t initialKeyTimeout; // initial timeout in updates to determine when key switches to spamming
-    int32_t heldKeyTimeout; // timeout in updates of key held down spamming behaviour
-    int32_t linePeriod; // period in updates of flashing bar to indicate text is being updated (1 full cycle)
-    int32_t doubleClickEditIndex; // keep track of edit index when attempting double click (invalidate if second click has different edit index)
-    int16_t doubleClickCount; // counts updates for double click timer
-    int16_t doubleClickTimeout; // timeout in updates of how long between clicks for double click to register
-    int8_t editingMode; // mode 0 for editing characters, mode 1 for editing words, mode 2 for editing all
-    /* render variables */
-    double renderPixelOffset;
-    int32_t renderStartingIndex;
-    int32_t renderNumCharacters;
-    /* whitelist */
-    list_t *whitelist;
-    list_t *blacklist;
-    /* value */
-    char *text; // text of textbox
-    char *value; // text of textbox (duplicate name - always equal to text)
-} turtle_tools_textbox_t;
 
 typedef enum {
     TT_DROPDOWN_ALIGN_LEFT = 0,
@@ -27906,7 +27924,7 @@ turtle_tools_button_t *turtle_tools_button_init(char *label, int8_t *variable, d
     buttonp -> y = y;
     buttonp -> size = size;
     buttonp -> variable = variable;
-    buttonp -> shape = TT_BUTTON_SHAPE_RECTANGLE;
+    buttonp -> style = TT_BUTTON_STYLE_RECTANGLE;
     buttonp -> align = TT_BUTTON_ALIGN_CENTER;
     if (variable != NULL) {
         *variable = 0; // button starts unpressed
@@ -28007,11 +28025,12 @@ turtle_tools_dial_t *turtle_tools_dial_init(char *label, int32_t *variable, turt
         memcpy(dialp -> render, "%.0lf", strlen("%.0lf") + 1);
     } else {
         char renderEdited[sizeof(dialp -> render) * 5];
+        memset(renderEdited, 0, sizeof(renderEdited));
         int32_t initialLength = strlen(render);
         int32_t editedIndex = 0;
         for (int32_t i = 0; i < initialLength; i++) {
             if (i < initialLength - 1 && render[i] == '%' && (render[i + 1] == 'd' || render[i + 1] == 'i' || render[i + 1] == 'u' || render[i + 1] == 'h')) {
-                strcat(renderEdited, "%0.lf");
+                strcat(renderEdited, "%.0lf");
                 editedIndex = strlen(renderEdited);
                 i++;
             } else {
@@ -28036,6 +28055,9 @@ turtle_tools_dial_t *turtle_tools_dial_init(char *label, int32_t *variable, turt
         dialp -> defaultValue = *variable;
     }
     dialp -> value = dialp -> defaultValue;
+    dialp -> textbox = 0;
+    dialp -> textboxEditing = 0;
+    dialp -> textboxInternal = NULL;
     list_append(turtleToolsElements.dials, (unitype) (void *) dialp, 'p');
     list_append(turtleToolsElements.all, (unitype) (void *) dialp, 'l');
     return dialp;
@@ -28088,11 +28110,12 @@ turtle_tools_slider_t *turtle_tools_slider_init(char *label, int32_t *variable, 
         memcpy(sliderp -> render, "%.0lf", strlen("%.0lf") + 1);
     } else {
         char renderEdited[sizeof(sliderp -> render) * 5];
+        memset(renderEdited, 0, sizeof(renderEdited));
         int32_t initialLength = strlen(render);
         int32_t editedIndex = 0;
         for (int32_t i = 0; i < initialLength; i++) {
             if (i < initialLength - 1 && render[i] == '%' && (render[i + 1] == 'd' || render[i + 1] == 'i' || render[i + 1] == 'u' || render[i + 1] == 'h')) {
-                strcat(renderEdited, "%0.lf");
+                strcat(renderEdited, "%.0lf");
                 editedIndex = strlen(renderEdited);
                 i++;
             } else {
@@ -28117,6 +28140,9 @@ turtle_tools_slider_t *turtle_tools_slider_init(char *label, int32_t *variable, 
         sliderp -> defaultValue = *variable;
     }
     sliderp -> value = sliderp -> defaultValue;
+    sliderp -> textbox = 0;
+    sliderp -> textboxEditing = 0;
+    sliderp -> textboxInternal = NULL;
     list_append(turtleToolsElements.sliders, (unitype) (void *) sliderp, 'p');
     list_append(turtleToolsElements.all, (unitype) (void *) sliderp, 'l');
     return sliderp;
@@ -28160,6 +28186,7 @@ turtle_tools_textbox_t *turtle_tools_textbox_init(char *label, char *variable, i
     textboxp -> moveToTop = 0;
     textboxp -> count = 0;
     textboxp -> align = TT_TEXTBOX_ALIGN_LEFT;
+    textboxp -> style = TT_TEXTBOX_STYLE_CLASSIC;
     textboxp -> x = x;
     textboxp -> y = y;
     textboxp -> size = size;
@@ -28487,9 +28514,9 @@ void turtle_tools_button_update(turtle_tools_button_t *buttonp) {
         turtle_tools_set_color(buttonp -> color[TT_COLOR_SLOT_BUTTON]);
         break;
     }
-    if (buttonp -> shape == TT_BUTTON_SHAPE_RECTANGLE) {
+    if (buttonp -> style == TT_BUTTON_STYLE_RECTANGLE) {
         turtle_rectangle(buttonLeftX, buttonY - buttonHeight / 2, buttonRightX, buttonY + buttonHeight / 2);
-    } else if (buttonp -> shape == TT_BUTTON_SHAPE_ROUNDED_RECTANGLE) {
+    } else if (buttonp -> style == TT_BUTTON_STYLE_ROUNDED_RECTANGLE) {
         turtle_pen_size(buttonp -> size);
         turtle_goto(buttonLeftX + buttonp -> size / 2, buttonY - buttonHeight / 2 + buttonp -> size / 2);
         turtle_pen_down();
@@ -28499,14 +28526,14 @@ void turtle_tools_button_update(turtle_tools_button_t *buttonp) {
         turtle_goto(buttonLeftX + buttonp -> size / 2, buttonY - buttonHeight / 2 + buttonp -> size / 2);
         turtle_pen_up();
         turtle_rectangle(buttonLeftX + buttonp -> size / 2, buttonY - buttonHeight / 2 + buttonp -> size / 2, buttonRightX - buttonp -> size / 2, buttonY + buttonHeight / 2 - buttonp -> size / 2);
-    } else if (buttonp -> shape == TT_BUTTON_SHAPE_CIRCLE) {
+    } else if (buttonp -> style == TT_BUTTON_STYLE_CIRCLE) {
         turtle_goto((buttonLeftX + buttonRightX) / 2, buttonY);
         turtle_pen_size(buttonWidth);
         turtle_pen_down();
         turtle_pen_up();
     }
     turtle_tools_set_color(buttonp -> color[TT_COLOR_SLOT_BUTTON_TEXT]);
-    if (buttonp -> shape == TT_BUTTON_SHAPE_TEXT) {
+    if (buttonp -> style == TT_BUTTON_STYLE_TEXT) {
         switch (buttonp -> status) {
             case TT_STATUS_HOVER_FIRST_TICK:
             case TT_STATUS_HOVER:
@@ -28533,7 +28560,7 @@ void turtle_tools_button_update(turtle_tools_button_t *buttonp) {
     }
     LABEL_BUTTON_CHECK_HOVER:
     if (buttonp -> status != TT_STATUS_CLICK && buttonp -> status != TT_STATUS_BLOCKED && buttonp -> status != TT_STATUS_CLICK_FIRST_TICK) {
-        if (buttonp -> shape == TT_BUTTON_SHAPE_CIRCLE) {
+        if (buttonp -> style == TT_BUTTON_STYLE_CIRCLE) {
             /* circle hovering criteria */
             if ((turtle.mouseX - (buttonLeftX + buttonRightX) / 2) * (turtle.mouseX - (buttonLeftX + buttonRightX) / 2) + (turtle.mouseY - buttonY) * (turtle.mouseY - buttonY) < buttonWidth * buttonWidth / 4) {
                 if (buttonp -> status == TT_STATUS_HOVER || buttonp -> status == TT_STATUS_HOVER_FIRST_TICK) {
@@ -28863,6 +28890,61 @@ void turtle_tools_dial_update(turtle_tools_dial_t *dialp) {
         }
         return;
     }
+    /* handle integrated textbox */
+    if (dialp -> textbox) {
+        if (dialp -> textboxInternal == NULL) {
+            if (dialp -> renderMultiplier != 0) {
+                /* create textbox */
+                int32_t maxCharacters = 5;
+                if (strlen(dialp -> render) > maxCharacters) {
+                    maxCharacters = strlen(dialp -> render) + 10; // TODO - check bottom and top bounds of dial to ensure this is enough characters
+                }
+                double textboxLength = maxCharacters * dialp -> size / 2;
+                dialp -> textboxInternal = turtle_tools_textbox_init("TEMP", NULL, maxCharacters, dialp -> x - textboxLength / 2, dialp -> y, dialp -> size / 2 + 1, textboxLength);
+                dialp -> textboxInternal -> style = TT_TEXTBOX_STYLE_TEXT_ONLY;
+                dialp -> textboxInternal -> color[TT_COLOR_SLOT_TEXTBOX_TEXT] = dialp -> color[TT_COLOR_SLOT_DIAL_TEXT];
+                goto LABEL_DIAL_UPDATE_TEXTBOX;
+            }
+        } else {
+            LABEL_DIAL_UPDATE_TEXTBOX:
+            /* update textbox */
+            if (dialp -> textboxInternal -> status <= TT_STATUS_HOVER) {
+                if (dialp -> textboxEditing) {
+                    dialp -> textboxEditing = 0;
+                    double exactValue;
+                    sscanf(dialp -> textboxInternal -> text, "%lf", &exactValue);
+                    dialp -> value = (exactValue + dialp -> renderMultiplier / 2) / dialp -> renderMultiplier;
+                    if (dialp -> value >= dialp -> range[1]) {
+                        dialp -> value = dialp -> range[1];
+                    }
+                    if (dialp -> value <= dialp -> range[0]) {
+                        dialp -> value = dialp -> range[0];
+                    }
+                } else {
+                    sprintf(dialp -> textboxInternal -> text, dialp -> render, dialp -> value * dialp -> renderMultiplier);
+                }
+            } else {
+                dialp -> textboxEditing = 1;
+            }
+            double textboxLength = turtle_text_get_unicode_length(dialp -> textboxInternal -> text, dialp -> textboxInternal -> size) + dialp -> size;
+            dialp -> textboxInternal -> length = textboxLength;
+            if (dialp -> style == TT_DIAL_STYLE_SPEEDOMETER || dialp -> style == TT_DIAL_STYLE_SPEEDOMETER_CENTER) {
+                dialp -> textboxInternal -> align = TT_TEXTBOX_ALIGN_CENTER;
+                dialp -> textboxInternal -> x = dialp -> x - dialp -> textboxInternal -> length / 2 + dialp -> textboxInternal -> size / 8;
+                dialp -> textboxInternal -> y = dialp -> y - dialp -> size * 1.2;
+            } else {
+                dialp -> textboxInternal -> align = TT_TEXTBOX_ALIGN_LEFT;
+                dialp -> textboxInternal -> x = dialp -> x + dialp -> size * 1.3 - dialp -> textboxInternal -> size / 3;
+                dialp -> textboxInternal -> y = dialp -> y;
+            }
+        }
+    } else {
+        if (dialp -> textboxInternal != NULL) {
+            /* delete textbox */
+            turtle_tools_textbox_free(dialp -> textboxInternal);
+            dialp -> textboxInternal = NULL;
+        }
+    }
     turtle_tools_set_color(dialp -> color[TT_COLOR_SLOT_DIAL_TEXT]);
     if (dialp -> style == TT_DIAL_STYLE_SPEEDOMETER_CENTER) {
         turtle_text_write_unicode(dialp -> label, dialp -> x, dialp -> y, dialp -> size / 1.5, 50);
@@ -29019,7 +29101,7 @@ void turtle_tools_dial_update(turtle_tools_dial_t *dialp) {
         turtleToolsGlobals.elementLogicIndex = turtleToolsGlobals.elementLogicTemp;
     }
     LABEL_DIAL_END:
-    if (dialp -> renderMultiplier != 0) {
+    if (dialp -> renderMultiplier != 0 && dialp -> textboxInternal == NULL) {
         turtle_tools_set_color(dialp -> color[TT_COLOR_SLOT_DIAL_TEXT]);
         if (dialp -> style == TT_DIAL_STYLE_CLASSIC) {
             turtle_text_write_stringf(dialX + dialp -> size * 1.3, dialY, dialp -> size / 2, 0, dialp -> render, dialp -> value * dialp -> renderMultiplier);
@@ -29047,7 +29129,7 @@ void turtle_tools_slider_update(turtle_tools_slider_t *sliderp) {
     double sliderYLeft = 0;
     double sliderXRight = 0;
     double sliderYRight = 0;
-    double sliderAlignFactor = 0;
+    int32_t sliderAlignFactor = 0;
     double sliderRotateFactor = 0;
     double sliderOffsetXFactor = 0;
     double sliderOffsetYFactor = 0;
@@ -29177,6 +29259,64 @@ void turtle_tools_slider_update(turtle_tools_slider_t *sliderp) {
     if (sliderp -> style == TT_SLIDER_STYLE_COMPACT) {
         sliderRotateFactor = 0;
     }
+    /* handle integrated textbox */
+    if (sliderp -> textbox) {
+        if (sliderp -> textboxInternal == NULL) {
+            if (sliderp -> renderMultiplier != 0) {
+                /* create textbox */
+                int32_t maxCharacters = 5;
+                if (strlen(sliderp -> render) > maxCharacters) {
+                    maxCharacters = strlen(sliderp -> render) + 10; // TODO - check bottom and top bounds of dial to ensure this is enough characters
+                }
+                double textboxLength = maxCharacters * sliderp -> size / 2;
+                sliderp -> textboxInternal = turtle_tools_textbox_init("TEMP", NULL, maxCharacters, sliderp -> x - textboxLength / 2, sliderp -> y, sliderp -> size / 2 + 1, textboxLength);
+                sliderp -> textboxInternal -> style = TT_TEXTBOX_STYLE_TEXT_ONLY;
+                sliderp -> textboxInternal -> color[TT_COLOR_SLOT_TEXTBOX_TEXT] = sliderp -> color[TT_COLOR_SLOT_DIAL_TEXT];
+                goto LABEL_SLIDER_UPDATE_TEXTBOX;
+            }
+        } else {
+            LABEL_SLIDER_UPDATE_TEXTBOX:
+            /* update textbox */
+            if (sliderp -> textboxInternal -> status <= TT_STATUS_HOVER) {
+                if (sliderp -> textboxEditing) {
+                    sliderp -> textboxEditing = 0;
+                    double exactValue;
+                    sscanf(sliderp -> textboxInternal -> text, "%lf", &exactValue);
+                    sliderp -> value = (exactValue + sliderp -> renderMultiplier / 2) / sliderp -> renderMultiplier;
+                    if (sliderp -> value >= sliderp -> range[1]) {
+                        sliderp -> value = sliderp -> range[1];
+                    }
+                    if (sliderp -> value <= sliderp -> range[0]) {
+                        sliderp -> value = sliderp -> range[0];
+                    }
+                } else {
+                    sprintf(sliderp -> textboxInternal -> text, sliderp -> render, sliderp -> value * sliderp -> renderMultiplier);
+                }
+            } else {
+                sliderp -> textboxEditing = 1;
+            }
+            double textboxLength = turtle_text_get_unicode_length(sliderp -> textboxInternal -> text, sliderp -> textboxInternal -> size) + sliderp -> size;
+            sliderp -> textboxInternal -> length = textboxLength;
+            sliderp -> textboxInternal -> x = sliderp -> x + sliderOffsetXFactorSmall;
+            sliderp -> textboxInternal -> y = sliderp -> y + sliderOffsetYFactorSmall;
+            if (sliderAlignFactor == 0) {
+                sliderp -> textboxInternal -> align = TT_TEXTBOX_ALIGN_LEFT;
+                sliderp -> textboxInternal -> x -= sliderp -> textboxInternal -> size / 3;
+            } else if (sliderAlignFactor == 50) {
+                sliderp -> textboxInternal -> align = TT_TEXTBOX_ALIGN_CENTER;
+                sliderp -> textboxInternal -> x -= sliderp -> textboxInternal -> length / 2 - sliderp -> textboxInternal -> size / 8;
+            } else if (sliderAlignFactor == 100) {
+                sliderp -> textboxInternal -> align = TT_TEXTBOX_ALIGN_RIGHT;
+                sliderp -> textboxInternal -> x -= sliderp -> textboxInternal -> length - sliderp -> textboxInternal -> size / 1.5;
+            }
+        }
+    } else {
+        if (sliderp -> textboxInternal != NULL) {
+            /* delete textbox */
+            turtle_tools_textbox_free(sliderp -> textboxInternal);
+            sliderp -> textboxInternal = NULL;
+        }
+    }
     turtle_pen_size(sliderp -> size * 1.2);
     turtle_goto(sliderXLeft, sliderYLeft);
     turtle_tools_set_color(sliderp -> color[TT_COLOR_SLOT_SLIDER_BAR]);
@@ -29288,7 +29428,7 @@ void turtle_tools_slider_update(turtle_tools_slider_t *sliderp) {
         turtleToolsGlobals.elementLogicIndex = turtleToolsGlobals.elementLogicTemp;
     }
     LABEL_SLIDER_END:
-    if (sliderp -> renderMultiplier != 0) {
+    if (sliderp -> renderMultiplier != 0 && sliderp -> textboxInternal == NULL) {
         turtle_tools_set_color(sliderp -> color[TT_COLOR_SLOT_SLIDER_TEXT]);
         if (sliderRotateFactor != 0) {
             turtle_text_write_stringf_rotated(sliderp -> x + sliderOffsetXFactorSmall, sliderp -> y + sliderOffsetYFactorSmall, sliderp -> size / 2, sliderAlignFactor, sliderRotateFactor, sliderp -> render, sliderp -> value * sliderp -> renderMultiplier);
@@ -29626,16 +29766,31 @@ void turtle_tools_textbox_update(turtle_tools_textbox_t *textboxp) {
         }
     }
     turtle_tools_set_color(textboxp -> color[TT_COLOR_SLOT_TEXTBOX_BOX]);
-    turtle_rectangle(textboxp -> x, textboxp -> y - textboxp -> size, textboxp -> x + textboxp -> length, textboxp -> y + textboxp -> size);
+    if (textboxp -> style != TT_TEXTBOX_STYLE_TEXT_ONLY) {
+        turtle_rectangle(textboxp -> x, textboxp -> y - textboxp -> size, textboxp -> x + textboxp -> length, textboxp -> y + textboxp -> size);
+    }
+    double alignTextOffset = 0;
+    double alignPhantomText = 0;
+    int32_t alignStartingIndex = 0;
+    if (textboxp -> align == TT_TEXTBOX_ALIGN_CENTER) {
+        alignPhantomText = 50;
+        alignTextOffset = turtle_text_get_unicode_length(textboxp -> text + textboxp -> renderStartingIndex, textboxp -> size - 1) / -2 + textboxp -> length / 2 - textboxp -> size / 2;
+    } else if (textboxp -> align == TT_TEXTBOX_ALIGN_RIGHT) {
+        alignTextOffset = turtle_text_get_unicode_length(textboxp -> text + textboxp -> renderStartingIndex, textboxp -> size - 1) / -1 + textboxp -> length - textboxp -> size;
+        alignPhantomText = 100;
+    }
+    if (alignTextOffset < 0) {
+            alignTextOffset = 0;
+        }
     if (textboxp -> status == TT_STATUS_IDLE || textboxp -> status == TT_STATUS_BLOCKED || textboxp -> status == TT_STATUS_HOVER || textboxp -> status == TT_STATUS_HOVER_FIRST_TICK) {
         textboxp -> renderPixelOffset = textboxp -> size / 3;
-        textboxp -> renderStartingIndex = 0;
+        textboxp -> renderStartingIndex = alignStartingIndex;
         /* textbox idle */
         if (strlen(textboxp -> text) == 0) {
             /* render label */
             textboxp -> renderNumCharacters = 0;
             turtle_tools_set_color(textboxp -> color[TT_COLOR_SLOT_TEXTBOX_PHANTOM_TEXT]);
-            turtle_text_write_unicode(textboxp -> label, textboxp -> x + textboxp -> size / 2, textboxp -> y, textboxp -> size - 1, 0);
+            turtle_text_write_unicode(textboxp -> label, textboxp -> x + textboxp -> size / 2 + alignTextOffset, textboxp -> y, textboxp -> size - 1, alignPhantomText);
         } else {
             /* calculate rendered characters */
             double totalTextLength = turtle_text_get_unicode_length(textboxp -> text, textboxp -> size - 1);
@@ -29654,7 +29809,7 @@ void turtle_tools_textbox_update(turtle_tools_textbox_t *textboxp) {
         /* calculate rendered characters */
         double totalTextLength = turtle_text_get_unicode_length(textboxp -> text, textboxp -> size - 1);
         if (totalTextLength < textboxp -> length - textboxp -> size / 1.5) {
-            textboxp -> renderStartingIndex = 0;
+            textboxp -> renderStartingIndex = alignStartingIndex;
             textboxp -> renderPixelOffset = textboxp -> size / 3;
             textboxp -> renderNumCharacters = strlen(textboxp -> text);
         } else {
@@ -29705,17 +29860,20 @@ void turtle_tools_textbox_update(turtle_tools_textbox_t *textboxp) {
             textboxp -> text[textboxp -> editIndex + textboxp -> editIndexLength] = tempHold;
         }
         turtle_tools_set_color(textboxp -> color[TT_COLOR_SLOT_TEXTBOX_HIGHLIGHT]);
-        turtle_rectangle(textboxp -> x + textboxp -> renderPixelOffset + highlightLeft, textboxp -> y - textboxp -> size * 0.8, textboxp -> x + textboxp -> renderPixelOffset + highlightRight, textboxp -> y + textboxp -> size * 0.8);
+        // turtle_rectangle(textboxp -> x + textboxp -> renderPixelOffset + highlightLeft, textboxp -> y - textboxp -> size * 0.8, textboxp -> x + textboxp -> renderPixelOffset + highlightRight, textboxp -> y + textboxp -> size * 0.8);
+        turtle_rectangle(textboxp -> x + textboxp -> renderPixelOffset + highlightLeft + alignTextOffset, textboxp -> y - textboxp -> size * 0.8, textboxp -> x + textboxp -> renderPixelOffset + highlightRight + alignTextOffset, textboxp -> y + textboxp -> size * 0.8);
     }
     char tempHold;
     tempHold = textboxp -> text[textboxp -> renderStartingIndex + textboxp -> renderNumCharacters];
     textboxp -> text[textboxp -> renderStartingIndex + textboxp -> renderNumCharacters] = '\0';
     turtle_tools_set_color(textboxp -> color[TT_COLOR_SLOT_TEXTBOX_TEXT]);
-    turtle_text_write_unicode(textboxp -> text + textboxp -> renderStartingIndex, textboxp -> x + textboxp -> renderPixelOffset, textboxp -> y, textboxp -> size - 1, 0);
+    turtle_text_write_unicode(textboxp -> text + textboxp -> renderStartingIndex, textboxp -> x + textboxp -> renderPixelOffset + alignTextOffset, textboxp -> y, textboxp -> size - 1, 0);
     textboxp -> text[textboxp -> renderStartingIndex + textboxp -> renderNumCharacters] = tempHold;
-    turtle_tools_set_color(textboxp -> color[TT_COLOR_SLOT_TEXTBOX_BOX]);
-    turtle_rectangle(textboxp -> x, textboxp -> y - textboxp -> size, textboxp -> x + textboxp -> size / 4, textboxp -> y + textboxp -> size);
-    turtle_rectangle(textboxp -> x + textboxp -> length, textboxp -> y - textboxp -> size, textboxp -> x + textboxp -> length - textboxp -> size / 4, textboxp -> y + textboxp -> size);
+    if (textboxp -> style != TT_TEXTBOX_STYLE_TEXT_ONLY) {
+        turtle_tools_set_color(textboxp -> color[TT_COLOR_SLOT_TEXTBOX_BOX]);
+        turtle_rectangle(textboxp -> x, textboxp -> y - textboxp -> size, textboxp -> x + textboxp -> size / 4, textboxp -> y + textboxp -> size);
+        turtle_rectangle(textboxp -> x + textboxp -> length, textboxp -> y - textboxp -> size, textboxp -> x + textboxp -> length - textboxp -> size / 4, textboxp -> y + textboxp -> size);
+    }
     if ((textboxp -> status == TT_STATUS_CLICK || textboxp -> status == TT_STATUS_OPEN || textboxp -> status == TT_STATUS_CLICK_FIRST_TICK || textboxp -> status == TT_STATUS_OPEN_FIRST_TICK) && textboxp -> count <= textboxp -> linePeriod / 2 && textboxp -> editIndexLength == 0) {
         double textLength;
         if (textboxp -> editIndex + textboxp -> editIndexLength == textboxp -> renderStartingIndex) {
@@ -29727,7 +29885,7 @@ void turtle_tools_textbox_update(turtle_tools_textbox_t *textboxp) {
             textboxp -> text[textboxp -> editIndex] = tempHold;
         }
         turtle_tools_set_color(textboxp -> color[TT_COLOR_SLOT_TEXTBOX_LINE]);
-        turtle_rectangle(textboxp -> x + textboxp -> renderPixelOffset + textLength, textboxp -> y - textboxp -> size * 0.8, textboxp -> x + textboxp -> renderPixelOffset + textLength + textboxp -> size / 10, textboxp -> y + textboxp -> size * 0.8);
+        turtle_rectangle(textboxp -> x + textboxp -> renderPixelOffset + textLength + alignTextOffset, textboxp -> y - textboxp -> size * 0.8, textboxp -> x + textboxp -> renderPixelOffset + textLength + textboxp -> size / 10 + alignTextOffset, textboxp -> y + textboxp -> size * 0.8);
     }
     /* mouse */
     if (turtle.mouseX > textboxp -> x && turtle.mouseX < textboxp -> x + textboxp -> length && turtle.mouseY > textboxp -> y - textboxp -> size && turtle.mouseY < textboxp -> y + textboxp -> size) {
@@ -29764,7 +29922,7 @@ void turtle_tools_textbox_update(turtle_tools_textbox_t *textboxp) {
         if (textboxp -> status == TT_STATUS_HOVER || (textboxp -> status == TT_STATUS_OPEN && textboxp -> mouseOver) || textboxp -> status == TT_STATUS_HOVER_FIRST_TICK || (textboxp -> status == TT_STATUS_OPEN_FIRST_TICK && textboxp -> mouseOver)) {
             /* first tick clicked */
             textboxp -> count = 1;
-            textboxp -> editIndex = turtle_tools_textbox_calculate_index_from_position(textboxp, turtle.mouseX);
+            textboxp -> editIndex = turtle_tools_textbox_calculate_index_from_position(textboxp, turtle.mouseX - alignTextOffset);
             textboxp -> editIndexLength = 0;
             int32_t index = list_find(turtleToolsElements.textboxes, (unitype) (void *) textboxp, 'p');
             if (index != -1 && index != turtleToolsElements.textboxes -> length - 1) {
@@ -29783,7 +29941,7 @@ void turtle_tools_textbox_update(turtle_tools_textbox_t *textboxp) {
             textboxp -> status = TT_STATUS_CLICK;
             textboxp -> moveToTop = 0;
             if (textboxp -> editingMode == 0) {
-                int32_t boundIndex = turtle_tools_textbox_calculate_index_from_position(textboxp, turtle.mouseX);
+                int32_t boundIndex = turtle_tools_textbox_calculate_index_from_position(textboxp, turtle.mouseX - alignTextOffset);
                 textboxp -> editIndexLength = boundIndex - textboxp -> editIndex;
                 if (textboxp -> editIndex + textboxp -> editIndexLength > textboxp -> renderStartingIndex + textboxp -> renderNumCharacters) {
                     textboxp -> editIndexLength = textboxp -> renderStartingIndex + textboxp -> renderNumCharacters - textboxp -> editIndex;
@@ -30623,13 +30781,13 @@ void turtle_tools_popup_update(turtle_tools_popup_t *popupp) {
     double maxLength = 0;
     double fullLength = 0;
     for (int32_t i = 0; i < popupp -> options -> length; i++) {
-        double buttonStringLength = turtle_text_get_string_length(popupp -> options -> data[i].s, popupp -> size);
+        double buttonStringLength = turtle_text_get_unicode_length(popupp -> options -> data[i].s, popupp -> size - 1);
         fullLength += buttonStringLength;
         maxLength += buttonStringLength + popupp -> size * 3;
     }
     int32_t popupTextLines = popupp -> message -> length;
     for (int32_t i = 0; i < popupTextLines; i++) {
-        double length = turtle_text_get_unicode_length(popupp -> message -> data[i].s, popupp -> size);
+        double length = turtle_text_get_unicode_length(popupp -> message -> data[i].s, popupp -> size - 1);
         if (length > maxLength) {
             maxLength = length;
         }
@@ -30640,22 +30798,22 @@ void turtle_tools_popup_update(turtle_tools_popup_t *popupp) {
     turtle_rectangle(maxLength / -2 - popupp -> size / 2 + popupp -> x, messageY + popupp -> size, maxLength / 2 + popupp -> size / 2 + popupp -> x, messageY - leading * (popupTextLines - 1) - popupp -> size * 5);
     turtle_tools_set_color(popupp -> color[TT_COLOR_SLOT_POPUP_TEXT_MESSAGE]);
     for (int32_t i = 0; i < popupTextLines; i++) {
-        turtle_text_write_unicode(popupp -> message -> data[i].s, popupp -> x, messageY, popupp -> size, 50);
+        turtle_text_write_unicode(popupp -> message -> data[i].s, popupp -> x, messageY, popupp -> size - 1, 50);
         messageY -= leading;
     }
     maxLength += popupp -> size;
     /* render buttons */
     double buttonX = popupp -> x;
     double buttonY = messageY - popupp -> size * 2;
-    /* we have the length of the strings, now we pad with n padding regions (the ends are padding / 2) */
-    double padding = (maxLength - fullLength) / popupp -> options -> length;
-    buttonX = popupp -> x - maxLength / 2 + padding / 2;
+    /* we have the length of the strings, now we pad with n + 0.5 padding regions (the ends are padding / 1.5) */
+    double padding = (maxLength - fullLength) / (popupp -> options -> length + 0.33333333333);
+    buttonX = popupp -> x - maxLength / 2 + padding / 1.5;
     char flagged = 0;
     if (!turtle_mouse_down() && popupp -> status == TT_STATUS_CLICK) {
         flagged = 1; // flagged for mouse misbehaviour
     }
     for (int32_t i = 0; i < popupp -> options -> length; i++) {
-        double strLen = turtle_text_get_string_length(popupp -> options -> data[i].s, popupp -> size);
+        double strLen = turtle_text_get_unicode_length(popupp -> options -> data[i].s, popupp -> size - 1);
         if (turtle.mouseX > buttonX - popupp -> size && turtle.mouseX < buttonX + strLen + popupp -> size && turtle.mouseY > buttonY - popupp -> size && turtle.mouseY < buttonY + popupp -> size) {
             turtle_tools_set_color(popupp -> color[TT_COLOR_SLOT_POPUP_BUTTON_SELECT]);
             turtle_rectangle(buttonX - popupp -> size, buttonY - popupp -> size, buttonX + popupp -> size + strLen, buttonY + popupp -> size);
@@ -30677,7 +30835,7 @@ void turtle_tools_popup_update(turtle_tools_popup_t *popupp) {
             turtle_rectangle(buttonX - popupp -> size, buttonY - popupp -> size, buttonX + popupp -> size + strLen, buttonY + popupp -> size);
         }
         turtle_tools_set_color(popupp -> color[TT_COLOR_SLOT_POPUP_TEXT_BUTTON]);
-        turtle_text_write_unicode(popupp -> options -> data[i].s, buttonX, buttonY, popupp -> size, 0);
+        turtle_text_write_unicode(popupp -> options -> data[i].s, buttonX, buttonY, popupp -> size - 1, 0);
         buttonX += strLen + padding;
     }
     if (!turtle_mouse_down() && popupp -> status == TT_STATUS_CLICK && flagged == 1) {
