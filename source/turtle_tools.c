@@ -1955,6 +1955,18 @@ void turtle_tools_slider_update(turtle_tools_slider_t *sliderp) {
             }
         }
     }
+    turtle_tools_set_color(sliderp -> color[TT_COLOR_SLOT_SLIDER_TEXT]);
+    if (sliderRotateFactor != 0) {
+        turtle_text_write_unicode_rotated(sliderp -> label, sliderp -> x + sliderOffsetXFactor, sliderp -> y + sliderOffsetYFactor, sliderp -> size - 1, sliderAlignFactor, sliderRotateFactor);
+    } else {
+        turtle_text_write_unicode(sliderp -> label, sliderp -> x + sliderOffsetXFactor, sliderp -> y + sliderOffsetYFactor, sliderp -> size - 1, sliderAlignFactor);
+    }
+    if (sliderp -> style == TT_SLIDER_STYLE_SIDESWIPE) {
+        sliderAlignFactor = 100 - sliderAlignFactor;
+    }
+    if (sliderp -> style == TT_SLIDER_STYLE_COMPACT) {
+        sliderRotateFactor = 0;
+    }
     /* handle integrated textbox */
     if (sliderp -> textbox) {
         if (sliderp -> textboxInternal == NULL) {
@@ -1997,12 +2009,13 @@ void turtle_tools_slider_update(turtle_tools_slider_t *sliderp) {
             sliderp -> textboxInternal -> y = sliderp -> y + sliderOffsetYFactorSmall;
             if (sliderAlignFactor == 0) {
                 sliderp -> textboxInternal -> align = TT_TEXTBOX_ALIGN_LEFT;
+                sliderp -> textboxInternal -> x -= sliderp -> textboxInternal -> size / 3;
             } else if (sliderAlignFactor == 50) {
                 sliderp -> textboxInternal -> align = TT_TEXTBOX_ALIGN_CENTER;
-                sliderp -> textboxInternal -> x -= sliderp -> textboxInternal -> length / 2 + sliderp -> textboxInternal -> size / 8;
+                sliderp -> textboxInternal -> x -= sliderp -> textboxInternal -> length / 2 - sliderp -> textboxInternal -> size / 8;
             } else if (sliderAlignFactor == 100) {
                 sliderp -> textboxInternal -> align = TT_TEXTBOX_ALIGN_RIGHT;
-                sliderp -> textboxInternal -> x -= sliderp -> textboxInternal -> length - sliderp -> textboxInternal -> size / 3;
+                sliderp -> textboxInternal -> x -= sliderp -> textboxInternal -> length - sliderp -> textboxInternal -> size / 1.5;
             }
         }
     } else {
@@ -2011,18 +2024,6 @@ void turtle_tools_slider_update(turtle_tools_slider_t *sliderp) {
             turtle_tools_textbox_free(sliderp -> textboxInternal);
             sliderp -> textboxInternal = NULL;
         }
-    }
-    turtle_tools_set_color(sliderp -> color[TT_COLOR_SLOT_SLIDER_TEXT]);
-    if (sliderRotateFactor != 0) {
-        turtle_text_write_unicode_rotated(sliderp -> label, sliderp -> x + sliderOffsetXFactor, sliderp -> y + sliderOffsetYFactor, sliderp -> size - 1, sliderAlignFactor, sliderRotateFactor);
-    } else {
-        turtle_text_write_unicode(sliderp -> label, sliderp -> x + sliderOffsetXFactor, sliderp -> y + sliderOffsetYFactor, sliderp -> size - 1, sliderAlignFactor);
-    }
-    if (sliderp -> style == TT_SLIDER_STYLE_SIDESWIPE) {
-        sliderAlignFactor = 100 - sliderAlignFactor;
-    }
-    if (sliderp -> style == TT_SLIDER_STYLE_COMPACT) {
-        sliderRotateFactor = 0;
     }
     turtle_pen_size(sliderp -> size * 1.2);
     turtle_goto(sliderXLeft, sliderYLeft);
