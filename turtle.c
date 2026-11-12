@@ -285,6 +285,9 @@ int main(int argc, char *argv[]) {
     turtle_tools_slider_t *zSlider = turtle_tools_slider_init("Z", &z, TT_SLIDER_TYPE_HORIZONTAL, TT_SLIDER_ALIGN_CENTER, -100, -280, 10, 100, -300, 300, "%.1lfmm", 0.1);
     zSlider -> style = TT_SLIDER_STYLE_SIDESWIPE;
     zSlider -> textbox = 1;
+    turtle_tools_slider_t *tSlider = turtle_tools_slider_init("Time", NULL, TT_SLIDER_TYPE_VERTICAL, TT_SLIDER_ALIGN_CENTER, -190, -250, 10, 100, 0, 1000, "%.1lfs", 0.1);
+    tSlider -> style = TT_SLIDER_STYLE_COMPACT;
+    tSlider -> textbox = 1;
     turtle_tools_switch_init("", NULL, 3, -240, 10);
     turtle_tools_switch_init("", NULL, 3, -260, 10);
     turtle_tools_switch_init("", NULL, 3, -280, 10);
@@ -298,7 +301,7 @@ int main(int argc, char *argv[]) {
     zDial -> style = TT_DIAL_STYLE_SPEEDOMETER_CENTER;
     zDial -> textbox = 1;
 
-    turtle_tools_switch_t *sideswipe = turtle_tools_switch_init("Side Swipe", NULL, 305, 15, 10);
+    turtle_tools_switch_t *sideswipe = turtle_tools_switch_init("Side Swipe", NULL, 306.5, 15, 10);
     turtle_tools_switch_t *checkbox = turtle_tools_switch_init("Checkbox", NULL, 300, 0, 10);
     turtle_tools_switch_t *xbox = turtle_tools_switch_init("Xbox", NULL, 300, -15, 10);
     sideswipe -> style = TT_SWITCH_STYLE_SIDESWIPE;
@@ -307,6 +310,8 @@ int main(int argc, char *argv[]) {
     xbox -> value = 1;
     xbox -> style = TT_SWITCH_STYLE_XBOX;
     turtle_tools_button_t *textButton = turtle_tools_button_init("Text Button", NULL, 330, -30, 10);
+    turtle_tools_switch_t *triangle = turtle_tools_switch_init("Triangle", NULL, 300, -45, 10);
+    triangle -> style = TT_SWITCH_STYLE_TRIANGLE;
     turtle_tools_button_t *circleButton = turtle_tools_button_init("Circle Button", NULL, 338, -100, 10);
     textButton -> style = TT_BUTTON_STYLE_TEXT;
     circleButton -> style = TT_BUTTON_STYLE_CIRCLE;
