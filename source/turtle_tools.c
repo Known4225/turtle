@@ -1535,7 +1535,7 @@ void turtle_tools_switch_update(turtle_tools_switch_t *switchp) {
         if (switchp -> align == TT_SWITCH_ALIGN_RIGHT) {
             turtle_text_write_unicode(switchp -> label, switchX + switchp -> size * 0.5, switchY, switchp -> size - 1, 100);
         } else {
-            turtle_text_write_unicode(switchp -> label, switchX + switchp -> size * 0.5, switchY, switchp -> size - 1, 0);
+            turtle_text_write_unicode(switchp -> label, switchX + switchp -> size * 0.6, switchY, switchp -> size - 1, 0);
         }
     }
     /* mouse */
