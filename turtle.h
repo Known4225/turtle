@@ -10118,7 +10118,6 @@ typedef struct {
     uint16_t penshape; // 0 for circle, 1 for square, 2 for triangle
     uint8_t pen; // pen status (1 for down, 0 for up)
     uint8_t close; // close changes to 1 when the user clicks the x on the window
-    uint8_t popupClose; // controls whether the window terminates on turtle.close
     uint8_t windowSpecial; // special features of window creation
     uint8_t forceUpdate; // toggle to skip check to see if screen has changed
     double circleprez; // how precise circles are (specifically, the number of sides of a circle with diameter e, default: 9)
@@ -11137,6 +11136,8 @@ typedef struct {
     double size;
     list_t *message; // popup message (each element is a line)
     list_t *options; // list of popup box options
+    int32_t hoverIndex; // index of hovered option
+    int32_t clickIndex; // index of clicked option
     /* value */
     int32_t index; // index of selected option
     int32_t value; // index of selected option (duplicate name - always equal to index)
@@ -24691,7 +24692,6 @@ void turtle_init(GLFWwindow *window, double leftX, double bottomY, double rightX
     glClearColor(1.0, 1.0, 1.0, 0.0); // white background by default
     turtle.window = window;
     turtle.close = 0;
-    turtle.popupClose = 0;
     turtle.keyPressed = list_init();
     turtle.lastscreenbounds[0] = 0;
     turtle.lastscreenbounds[1] = 0;
@@ -26107,9 +26107,6 @@ void turtle_update() {
     glfwPollEvents();
     if (glfwWindowShouldClose(turtle.window)) {
         turtle.close = 1;
-        if (turtle.popupClose) {
-            glfwTerminate();
-        }
     }
     #ifdef OS_BROWSER
     emscripten_sleep(0);
@@ -28795,16 +28792,40 @@ void turtle_tools_switch_update(turtle_tools_switch_t *switchp) {
         turtle_text_write_unicode(switchp -> label, switchX + switchp -> size, switchY, switchp -> size - 1, 0);
     } else if (switchp -> style == TT_SWITCH_STYLE_TRIANGLE) {
         if (switchp -> value) {
-            turtle_tools_set_color(switchp -> color[TT_COLOR_SLOT_SWITCH_ON]);
-            turtle_triangle(switchX - switchp -> size * 0.5, switchY - switchp -> size * 0.5, switchX + switchp -> size * 0.5, switchY - switchp -> size * 0.5, switchX + switchp -> size * 0.5, switchY + switchp -> size * 0.5);
+            turtle_tools_set_color(switchp -> color[TT_COLOR_SLOT_CIRCLE_OFF]);
+            if (switchp -> align == TT_SWITCH_ALIGN_RIGHT) {
+                turtle_triangle(switchX + switchp -> size * 0.8, switchY - switchp -> size * 0.4, switchX + switchp -> size * 1.6, switchY - switchp -> size * 0.4, switchX + switchp -> size * 1.6, switchY + switchp -> size * 0.4);
+            } else {
+                turtle_triangle(switchX - switchp -> size * 0.6, switchY - switchp -> size * 0.4, switchX + switchp -> size * 0.2, switchY - switchp -> size * 0.4, switchX + switchp -> size * 0.2, switchY + switchp -> size * 0.4);
+            }
         } else {
             turtle_tools_set_color(switchp -> color[TT_COLOR_SLOT_SWITCH_OFF]);
-            turtle_triangle(switchX - switchp -> size * 0.5, switchY - switchp -> size * 0.5, switchX + switchp -> size * 0.3, switchY, switchX - switchp -> size * 0.5, switchY + switchp -> size * 0.5);
+            if (switchp -> align == TT_SWITCH_ALIGN_RIGHT) {
+                turtle_triangle(switchX + switchp -> size * 0.9, switchY - switchp -> size * 0.5, switchX + switchp -> size * 1.7, switchY, switchX + switchp -> size * 0.9, switchY + switchp -> size * 0.5);
+            } else {
+                turtle_triangle(switchX - switchp -> size * 0.5, switchY - switchp -> size * 0.5, switchX + switchp -> size * 0.3, switchY, switchX - switchp -> size * 0.5, switchY + switchp -> size * 0.5);
+            }
         }
-        switchClickLeft = switchX - switchp -> size * 0.6;
-        switchClickRight = switchX + switchp -> size * 0.6;
+        if (switchp -> align == TT_SWITCH_ALIGN_RIGHT) {
+            switchClickLeft = switchX - turtle_text_get_unicode_length(switchp -> label, switchp -> size - 1);
+            switchClickRight = switchX + switchp -> size * 1.8;
+        } else {
+            switchClickLeft = switchX - switchp -> size * 0.6;
+            switchClickRight = switchX + switchp -> size * 0.6 + turtle_text_get_unicode_length(switchp -> label, switchp -> size - 1) + switchp -> size;
+        }
         switchClickDown = switchY - switchp -> size * 0.6;
         switchClickUp = switchY + switchp -> size * 0.6;
+        /* render text */
+        if (switchp -> status == TT_STATUS_IDLE || switchp -> status == TT_STATUS_BLOCKED) {
+            turtle_tools_set_color(switchp -> color[TT_COLOR_SLOT_SWITCH_TEXT]);
+        } else {
+            turtle_tools_set_color(switchp -> color[TT_COLOR_SLOT_SWITCH_TEXT_HOVER]);
+        }
+        if (switchp -> align == TT_SWITCH_ALIGN_RIGHT) {
+            turtle_text_write_unicode(switchp -> label, switchX + switchp -> size * 0.5, switchY, switchp -> size - 1, 100);
+        } else {
+            turtle_text_write_unicode(switchp -> label, switchX + switchp -> size * 0.5, switchY, switchp -> size - 1, 0);
+        }
     }
     /* mouse */
     if (switchp -> enabled != TT_ELEMENT_ENABLED || turtleToolsGlobals.elementLogicTypeOld > switchp -> priority || (turtleToolsGlobals.elementLogicTypeOld == switchp -> priority && turtleToolsGlobals.elementLogicIndexOld > turtleToolsGlobals.elementLogicTemp)) {
@@ -30766,12 +30787,12 @@ void turtle_tools_reader_update(turtle_tools_reader_t *readerp) {
 
 /* render popup */
 void turtle_tools_popup_update(turtle_tools_popup_t *popupp) {
+    popupp -> index = -1;
+    popupp -> value = -1;
     if (popupp -> enabled == TT_ELEMENT_HIDE) {
         if (popupp -> status != TT_STATUS_BLOCKED) {
             popupp -> status = TT_STATUS_IDLE;
         }
-        popupp -> index = -1;
-        popupp -> value = -1;
         return;
     }
     turtle_rectangle_color(-320, -180, 320, 180, 0, 0, 0, 120);
@@ -30808,41 +30829,47 @@ void turtle_tools_popup_update(turtle_tools_popup_t *popupp) {
     /* we have the length of the strings, now we pad with n + 0.5 padding regions (the ends are padding / 1.5) */
     double padding = (maxLength - fullLength) / (popupp -> options -> length + 0.33333333333);
     buttonX = popupp -> x - maxLength / 2 + padding / 1.5;
-    char flagged = 0;
-    if (!turtle_mouse_down() && popupp -> status == TT_STATUS_CLICK) {
-        flagged = 1; // flagged for mouse misbehaviour
+    if (popupp -> status != TT_STATUS_BLOCKED && popupp -> status != TT_STATUS_CLICK) {
+        popupp -> status = TT_STATUS_IDLE;
     }
+    popupp -> hoverIndex = -1;
     for (int32_t i = 0; i < popupp -> options -> length; i++) {
         double strLen = turtle_text_get_unicode_length(popupp -> options -> data[i].s, popupp -> size - 1);
         if (turtle.mouseX > buttonX - popupp -> size && turtle.mouseX < buttonX + strLen + popupp -> size && turtle.mouseY > buttonY - popupp -> size && turtle.mouseY < buttonY + popupp -> size) {
-            turtle_tools_set_color(popupp -> color[TT_COLOR_SLOT_POPUP_BUTTON_SELECT]);
-            turtle_rectangle(buttonX - popupp -> size, buttonY - popupp -> size, buttonX + popupp -> size + strLen, buttonY + popupp -> size);
-            if (turtle_mouse_down()) {
-                if (popupp -> status == TT_STATUS_IDLE) {
-                    popupp -> status = TT_STATUS_CLICK;
-                    // turtleToolsGlobals.elementLogicType = TT_ELEMENT_NONE;
-                }
-            } else {
-                if (popupp -> status == TT_STATUS_CLICK) {
-                    popupp -> status = TT_STATUS_IDLE;
-                    popupp -> index = i;
-                    popupp -> value = i;
-                    // turtleToolsGlobals.elementLogicType = TT_ELEMENT_NONE;
-                }
+            popupp -> hoverIndex = i;
+            if (popupp -> status == TT_STATUS_IDLE || popupp -> status == TT_STATUS_HOVER) {
+                popupp -> status = TT_STATUS_HOVER;
             }
+        }
+        if ((popupp -> hoverIndex == i && popupp -> status == TT_STATUS_HOVER) || (popupp -> hoverIndex == i && popupp -> clickIndex == i && popupp -> status == TT_STATUS_CLICK)) {
+            turtle_tools_set_color(popupp -> color[TT_COLOR_SLOT_POPUP_BUTTON_SELECT]);
         } else {
             turtle_tools_set_color(popupp -> color[TT_COLOR_SLOT_POPUP_BUTTON]);
-            turtle_rectangle(buttonX - popupp -> size, buttonY - popupp -> size, buttonX + popupp -> size + strLen, buttonY + popupp -> size);
         }
+        turtle_rectangle(buttonX - popupp -> size, buttonY - popupp -> size, buttonX + popupp -> size + strLen, buttonY + popupp -> size);
         turtle_tools_set_color(popupp -> color[TT_COLOR_SLOT_POPUP_TEXT_BUTTON]);
         turtle_text_write_unicode(popupp -> options -> data[i].s, buttonX, buttonY, popupp -> size - 1, 0);
         buttonX += strLen + padding;
     }
-    if (!turtle_mouse_down() && popupp -> status == TT_STATUS_CLICK && flagged == 1) {
-        popupp -> status = TT_STATUS_IDLE;
-        popupp -> index = -1;
-        popupp -> value = -1;
-        // turtleToolsGlobals.elementLogicType = TT_ELEMENT_NONE;
+    if (turtle_mouse_down()) {
+        if (popupp -> status == TT_STATUS_HOVER) {
+            /* popup is clicked */
+            popupp -> status = TT_STATUS_CLICK;
+            popupp -> clickIndex = popupp -> hoverIndex;
+        } else if (popupp -> status == TT_STATUS_IDLE) {
+            /* popup is blocked from interaction until mouse is unclicked */
+            popupp -> status = TT_STATUS_BLOCKED;
+        }
+    } else {
+        if (popupp -> status == TT_STATUS_CLICK) {
+            if (popupp -> hoverIndex == popupp -> clickIndex) {
+                popupp -> index = popupp -> clickIndex;
+                popupp -> value = popupp -> clickIndex;
+            }
+            popupp -> status = TT_STATUS_IDLE;
+        } else if (popupp -> status == TT_STATUS_BLOCKED) {
+            popupp -> status = TT_STATUS_IDLE;
+        }
     }
 }
 
