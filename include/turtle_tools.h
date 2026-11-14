@@ -230,7 +230,7 @@ typedef enum {
 } turtle_tools_color_t;
 
 /* colours */
-extern double turtleToolsThemeColors[];
+extern uint8_t turtleToolsThemeColors[];
 void turtle_tools_set_color(turtle_tools_color_t color);
 void turtle_tools_set_theme(turtle_tools_theme_t theme);
 void turtle_tools_override_color(turtle_tools_color_t color, uint8_t r, uint8_t g, uint8_t b);
