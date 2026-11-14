@@ -181,12 +181,11 @@ typedef enum {
     TT_COLOR_CUSTOM_15 = 171,
 } turtle_tools_color_t;
 
-/* default colours (light theme) */
+/* colours */
 extern double turtleToolsThemeColors[];
-
 void turtle_tools_set_color(turtle_tools_color_t color);
-
 void turtle_tools_set_theme(turtle_tools_theme_t theme);
+void turtle_tools_override_color(turtle_tools_color_t color, uint8_t r, uint8_t g, uint8_t b);
 
 extern int32_t turtleToolsColorDefault[];
 

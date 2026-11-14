@@ -337,6 +337,12 @@ void turtle_tools_set_theme(turtle_tools_theme_t theme) {
     turtle_background_color(turtleToolsThemeColors[TT_COLOR_BACKGROUND], turtleToolsThemeColors[TT_COLOR_BACKGROUND + 1], turtleToolsThemeColors[TT_COLOR_BACKGROUND + 2]);
 }
 
+void turtle_tools_override_color(turtle_tools_color_t color, uint8_t r, uint8_t g, uint8_t b) {
+    turtleToolsThemeColors[color] = r;
+    turtleToolsThemeColors[color + 1] = g;
+    turtleToolsThemeColors[color + 2] = b;
+}
+
 /* ribbon */
 
 /* ribbon variables */

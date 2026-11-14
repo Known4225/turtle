@@ -40,6 +40,7 @@ The following build commands are available:
 - In normal textboxes you can drag highlighted text out of the text box and into another textbox or program like a pseudo-copy-and-paste (but it doesn't actually use the clipboard)
 - Allow textbox selecting off the ends of the visible content
 - Davinci Resolve style textboxes with numerical values editible by dragging left and right
+- Expand context to allow lists as well (for multi-tiered menus)
 - Handrolled linear resizing is not only at least 2x slower than stbir, it is also worse (box size is only what box takes up instead of larger)
 - Build some support for osTools on OS_BROWSER
 - Add some emojis to font

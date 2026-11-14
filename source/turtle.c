@@ -445,7 +445,7 @@ int8_t turtle_mouse_mid() {
 }
 
 /* puts the mouse coordinates in turtle.mouseX and turtle.mouseY */
-void turtle_get_mouse_coordinates() {
+void turtle_get_mouse_coordinates(double *mouseX, double *mouseY) {
     glfwGetCursorPos(turtle.window, &turtle.mouseAbsX, &turtle.mouseAbsY); // get mouse positions (absolute)
     if (turtle.resizeMode == TURTLE_RESIZE_MODE_STRETCH) {
         turtle.mouseX = (turtle.mouseAbsX - turtle.screenbounds[0] / 2) / turtle.screenbounds[0] * (turtle.initbounds[2] - turtle.initbounds[0]) + (turtle.bounds[0] + turtle.bounds[2]) / 2;
@@ -460,6 +460,12 @@ void turtle_get_mouse_coordinates() {
             turtle.mouseX = (turtle.mouseAbsX - turtle.screenbounds[0] / 2) / turtle.screenbounds[0] * (turtle.initbounds[2] - turtle.initbounds[0]) + (turtle.bounds[0] + turtle.bounds[2]) / 2;
             turtle.mouseY = ((turtle.mouseAbsY - turtle.screenbounds[1] / 2) / turtle.screenbounds[1] * (turtle.initbounds[1] - turtle.initbounds[3]) + (turtle.bounds[1] + turtle.bounds[3]) / 2) * originalAspect / currentAspect;
         }
+    }
+    if (mouseX != NULL) {
+        *mouseX = turtle.mouseX;
+    }
+    if (mouseY != NULL) {
+        *mouseY = turtle.mouseY;
     }
 }
 

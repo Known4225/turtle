@@ -165,7 +165,7 @@ int8_t turtle_mouse_mid();
 void turtle_init(GLFWwindow *window, double leftX, double bottomY, double rightX, double topY);
 
 /* puts the mouse coordinates in turtle.mouseX and turtle.mouseY */
-void turtle_get_mouse_coordinates();
+void turtle_get_mouse_coordinates(double *mouseX, double *mouseY);
 
 /* set the background color */
 void turtle_background_color(uint8_t r, uint8_t g, uint8_t b);

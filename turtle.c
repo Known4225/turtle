@@ -342,7 +342,7 @@ int main(int argc, char *argv[]) {
 
     while (keepWindowAlive) {
         start = clock();
-        turtle_get_mouse_coordinates();
+        turtle_get_mouse_coordinates(NULL, NULL);
         turtle_clear();
         /* update element positions (scrollbar) */
         for (int32_t i = 0; i < turtleToolsElements.all -> length; i++) {
