@@ -28881,7 +28881,11 @@ void turtle_tools_dial_update(turtle_tools_dial_t *dialp) {
                     dialp -> textboxEditing = 0;
                     double exactValue;
                     sscanf(dialp -> textboxInternal -> text, "%lf", &exactValue);
-                    dialp -> value = (exactValue + dialp -> renderMultiplier / 2) / dialp -> renderMultiplier;
+                    if (exactValue < 0) {
+                        dialp -> value = (exactValue - dialp -> renderMultiplier / 2) / dialp -> renderMultiplier;
+                    } else {
+                        dialp -> value = (exactValue + dialp -> renderMultiplier / 2) / dialp -> renderMultiplier;
+                    }
                     if (dialp -> value >= dialp -> range[1]) {
                         dialp -> value = dialp -> range[1];
                     }
@@ -28894,7 +28898,7 @@ void turtle_tools_dial_update(turtle_tools_dial_t *dialp) {
             } else {
                 dialp -> textboxEditing = 1;
             }
-            double textboxLength = turtle_text_get_unicode_length(dialp -> textboxInternal -> text, dialp -> textboxInternal -> size) + dialp -> size;
+            double textboxLength = turtle_text_get_unicode_length(dialp -> textboxInternal -> text, dialp -> textboxInternal -> size) + dialp -> size / 2;
             dialp -> textboxInternal -> length = textboxLength;
             if (dialp -> style == TT_DIAL_STYLE_SPEEDOMETER || dialp -> style == TT_DIAL_STYLE_SPEEDOMETER_CENTER) {
                 dialp -> textboxInternal -> align = TT_TEXTBOX_ALIGN_CENTER;
@@ -29234,7 +29238,7 @@ void turtle_tools_slider_update(turtle_tools_slider_t *sliderp) {
                 /* create textbox */
                 int32_t maxCharacters = 5;
                 if (strlen(sliderp -> render) > maxCharacters) {
-                    maxCharacters = strlen(sliderp -> render) + 10; // TODO - check bottom and top bounds of dial to ensure this is enough characters
+                    maxCharacters = strlen(sliderp -> render) + 10; // TODO - check bottom and top bounds of slider to ensure this is enough characters
                 }
                 double textboxLength = maxCharacters * sliderp -> size / 2;
                 sliderp -> textboxInternal = turtle_tools_textbox_init("TEMP", NULL, maxCharacters, sliderp -> x - textboxLength / 2, sliderp -> y, sliderp -> size / 2 + 1, textboxLength);
@@ -29250,7 +29254,11 @@ void turtle_tools_slider_update(turtle_tools_slider_t *sliderp) {
                     sliderp -> textboxEditing = 0;
                     double exactValue;
                     sscanf(sliderp -> textboxInternal -> text, "%lf", &exactValue);
-                    sliderp -> value = (exactValue + sliderp -> renderMultiplier / 2) / sliderp -> renderMultiplier;
+                    if (exactValue < 0) {
+                        sliderp -> value = (exactValue - sliderp -> renderMultiplier / 2) / sliderp -> renderMultiplier;
+                    } else {
+                        sliderp -> value = (exactValue + sliderp -> renderMultiplier / 2) / sliderp -> renderMultiplier;
+                    }
                     if (sliderp -> value >= sliderp -> range[1]) {
                         sliderp -> value = sliderp -> range[1];
                     }
@@ -29263,7 +29271,7 @@ void turtle_tools_slider_update(turtle_tools_slider_t *sliderp) {
             } else {
                 sliderp -> textboxEditing = 1;
             }
-            double textboxLength = turtle_text_get_unicode_length(sliderp -> textboxInternal -> text, sliderp -> textboxInternal -> size) + sliderp -> size;
+            double textboxLength = turtle_text_get_unicode_length(sliderp -> textboxInternal -> text, sliderp -> textboxInternal -> size) + sliderp -> size / 2;
             sliderp -> textboxInternal -> length = textboxLength;
             sliderp -> textboxInternal -> x = sliderp -> x + sliderOffsetXFactorSmall;
             sliderp -> textboxInternal -> y = sliderp -> y + sliderOffsetYFactorSmall;
