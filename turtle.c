@@ -59,16 +59,12 @@ void parse_ribbon_output() {
         if (turtleToolsRibbon.output[2] == 1) { // Change theme
             printf("Change theme\n");
             if (turtleToolsTheme == TT_THEME_DARK) {
-                turtle_background_color(36, 30, 32);
                 turtle_tools_set_theme(TT_THEME_COLT);
             } else if (turtleToolsTheme == TT_THEME_COLT) {
-                turtle_background_color(212, 201, 190);
                 turtle_tools_set_theme(TT_THEME_NAVY);
             } else if (turtleToolsTheme == TT_THEME_NAVY) {
-                turtle_background_color(255, 255, 255);
                 turtle_tools_set_theme(TT_THEME_LIGHT);
             } else if (turtleToolsTheme == TT_THEME_LIGHT) {
-                turtle_background_color(30, 30, 30);
                 turtle_tools_set_theme(TT_THEME_DARK);
             }
         }
