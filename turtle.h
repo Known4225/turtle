@@ -10650,6 +10650,54 @@ typedef enum {
     TT_COLOR_CUSTOM_13 = 165,
     TT_COLOR_CUSTOM_14 = 168,
     TT_COLOR_CUSTOM_15 = 171,
+    TT_COLOR_CUSTOM_16 = 174,
+    TT_COLOR_CUSTOM_17 = 177,
+    TT_COLOR_CUSTOM_18 = 180,
+    TT_COLOR_CUSTOM_19 = 183,
+    TT_COLOR_CUSTOM_20 = 186,
+    TT_COLOR_CUSTOM_21 = 189,
+    TT_COLOR_CUSTOM_22 = 192,
+    TT_COLOR_CUSTOM_23 = 195,
+    TT_COLOR_CUSTOM_24 = 198,
+    TT_COLOR_CUSTOM_25 = 201,
+    TT_COLOR_CUSTOM_26 = 204,
+    TT_COLOR_CUSTOM_27 = 207,
+    TT_COLOR_CUSTOM_28 = 210,
+    TT_COLOR_CUSTOM_29 = 213,
+    TT_COLOR_CUSTOM_30 = 216,
+    TT_COLOR_CUSTOM_31 = 219,
+    TT_COLOR_CUSTOM_32 = 222,
+    TT_COLOR_CUSTOM_33 = 225,
+    TT_COLOR_CUSTOM_34 = 228,
+    TT_COLOR_CUSTOM_35 = 231,
+    TT_COLOR_CUSTOM_36 = 234,
+    TT_COLOR_CUSTOM_37 = 237,
+    TT_COLOR_CUSTOM_38 = 240,
+    TT_COLOR_CUSTOM_39 = 243,
+    TT_COLOR_CUSTOM_40 = 246,
+    TT_COLOR_CUSTOM_41 = 249,
+    TT_COLOR_CUSTOM_42 = 252,
+    TT_COLOR_CUSTOM_43 = 255,
+    TT_COLOR_CUSTOM_44 = 258,
+    TT_COLOR_CUSTOM_45 = 261,
+    TT_COLOR_CUSTOM_46 = 264,
+    TT_COLOR_CUSTOM_47 = 267,
+    TT_COLOR_CUSTOM_48 = 270,
+    TT_COLOR_CUSTOM_49 = 273,
+    TT_COLOR_CUSTOM_50 = 276,
+    TT_COLOR_CUSTOM_51 = 279,
+    TT_COLOR_CUSTOM_52 = 282,
+    TT_COLOR_CUSTOM_53 = 285,
+    TT_COLOR_CUSTOM_54 = 288,
+    TT_COLOR_CUSTOM_55 = 291,
+    TT_COLOR_CUSTOM_56 = 294,
+    TT_COLOR_CUSTOM_57 = 297,
+    TT_COLOR_CUSTOM_58 = 300,
+    TT_COLOR_CUSTOM_59 = 303,
+    TT_COLOR_CUSTOM_60 = 306,
+    TT_COLOR_CUSTOM_61 = 309,
+    TT_COLOR_CUSTOM_62 = 312,
+    TT_COLOR_CUSTOM_63 = 315,
 } turtle_tools_color_t;
 
 /* colours */
@@ -27416,22 +27464,14 @@ double turtleToolsThemeColors[] = {
     81.0, 81.0, 81.0,    // TT_COLOR_DARK_GREY_ALTERNATE (117)
     187.0, 187.0, 187.0, // TT_COLOR_LIGHT_GREY (120)
     199.0, 199.0, 199.0, // TT_COLOR_LIGHT_GREY_ALTERNATE (123)
-    0.0, 0.0, 0.0, // TT_COLOR_CUSTOM_0
-    0.0, 0.0, 0.0, // TT_COLOR_CUSTOM_1
-    0.0, 0.0, 0.0, // TT_COLOR_CUSTOM_2
-    0.0, 0.0, 0.0, // TT_COLOR_CUSTOM_3
-    0.0, 0.0, 0.0, // TT_COLOR_CUSTOM_4
-    0.0, 0.0, 0.0, // TT_COLOR_CUSTOM_5
-    0.0, 0.0, 0.0, // TT_COLOR_CUSTOM_6
-    0.0, 0.0, 0.0, // TT_COLOR_CUSTOM_7
-    0.0, 0.0, 0.0, // TT_COLOR_CUSTOM_8
-    0.0, 0.0, 0.0, // TT_COLOR_CUSTOM_9
-    0.0, 0.0, 0.0, // TT_COLOR_CUSTOM_10
-    0.0, 0.0, 0.0, // TT_COLOR_CUSTOM_11
-    0.0, 0.0, 0.0, // TT_COLOR_CUSTOM_12
-    0.0, 0.0, 0.0, // TT_COLOR_CUSTOM_13
-    0.0, 0.0, 0.0, // TT_COLOR_CUSTOM_14
-    0.0, 0.0, 0.0, // TT_COLOR_CUSTOM_15
+    0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+    0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+    0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+    0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+    0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+    0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+    0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+    0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
 };
 
 void turtle_tools_set_color(turtle_tools_color_t color) {
