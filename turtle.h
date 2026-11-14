@@ -10200,7 +10200,7 @@ int8_t turtle_mouse_mid();
 void turtle_init(GLFWwindow *window, double leftX, double bottomY, double rightX, double topY);
 
 /* puts the mouse coordinates in turtle.mouseX and turtle.mouseY */
-void turtle_get_mouse_coordinates();
+void turtle_get_mouse_coordinates(double *mouseX, double *mouseY);
 
 /* set the background color */
 void turtle_background_color(uint8_t r, uint8_t g, uint8_t b);
@@ -10652,12 +10652,11 @@ typedef enum {
     TT_COLOR_CUSTOM_15 = 171,
 } turtle_tools_color_t;
 
-/* default colours (light theme) */
+/* colours */
 extern double turtleToolsThemeColors[];
-
 void turtle_tools_set_color(turtle_tools_color_t color);
-
 void turtle_tools_set_theme(turtle_tools_theme_t theme);
+void turtle_tools_override_color(turtle_tools_color_t color, uint8_t r, uint8_t g, uint8_t b);
 
 extern int32_t turtleToolsColorDefault[];
 
@@ -24880,7 +24879,7 @@ int8_t turtle_mouse_mid() {
 }
 
 /* puts the mouse coordinates in turtle.mouseX and turtle.mouseY */
-void turtle_get_mouse_coordinates() {
+void turtle_get_mouse_coordinates(double *mouseX, double *mouseY) {
     glfwGetCursorPos(turtle.window, &turtle.mouseAbsX, &turtle.mouseAbsY); // get mouse positions (absolute)
     if (turtle.resizeMode == TURTLE_RESIZE_MODE_STRETCH) {
         turtle.mouseX = (turtle.mouseAbsX - turtle.screenbounds[0] / 2) / turtle.screenbounds[0] * (turtle.initbounds[2] - turtle.initbounds[0]) + (turtle.bounds[0] + turtle.bounds[2]) / 2;
@@ -24895,6 +24894,12 @@ void turtle_get_mouse_coordinates() {
             turtle.mouseX = (turtle.mouseAbsX - turtle.screenbounds[0] / 2) / turtle.screenbounds[0] * (turtle.initbounds[2] - turtle.initbounds[0]) + (turtle.bounds[0] + turtle.bounds[2]) / 2;
             turtle.mouseY = ((turtle.mouseAbsY - turtle.screenbounds[1] / 2) / turtle.screenbounds[1] * (turtle.initbounds[1] - turtle.initbounds[3]) + (turtle.bounds[1] + turtle.bounds[3]) / 2) * originalAspect / currentAspect;
         }
+    }
+    if (mouseX != NULL) {
+        *mouseX = turtle.mouseX;
+    }
+    if (mouseY != NULL) {
+        *mouseY = turtle.mouseY;
     }
 }
 
@@ -27626,6 +27631,12 @@ void turtle_tools_set_theme(turtle_tools_theme_t theme) {
     turtle_background_color(turtleToolsThemeColors[TT_COLOR_BACKGROUND], turtleToolsThemeColors[TT_COLOR_BACKGROUND + 1], turtleToolsThemeColors[TT_COLOR_BACKGROUND + 2]);
 }
 
+void turtle_tools_override_color(turtle_tools_color_t color, uint8_t r, uint8_t g, uint8_t b) {
+    turtleToolsThemeColors[color] = r;
+    turtleToolsThemeColors[color + 1] = g;
+    turtleToolsThemeColors[color + 2] = b;
+}
+
 /* ribbon */
 
 /* ribbon variables */
@@ -28824,7 +28835,7 @@ void turtle_tools_switch_update(turtle_tools_switch_t *switchp) {
         if (switchp -> align == TT_SWITCH_ALIGN_RIGHT) {
             turtle_text_write_unicode(switchp -> label, switchX + switchp -> size * 0.5, switchY, switchp -> size - 1, 100);
         } else {
-            turtle_text_write_unicode(switchp -> label, switchX + switchp -> size * 0.5, switchY, switchp -> size - 1, 0);
+            turtle_text_write_unicode(switchp -> label, switchX + switchp -> size * 0.6, switchY, switchp -> size - 1, 0);
         }
     }
     /* mouse */
