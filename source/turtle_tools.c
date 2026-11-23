@@ -920,6 +920,11 @@ turtle_tools_scrollbar_t *turtle_tools_scrollbar_init(double *variable, turtle_t
     scrollbarp -> length = length;
     scrollbarp -> barPercentage = barPercentage;
     scrollbarp -> variable = variable;
+    if (variable == NULL) {
+        scrollbarp -> value = 0;
+    } else {
+        scrollbarp -> value = *variable;
+    }
     list_append(turtleToolsElements.scrollbars, (unitype) (void *) scrollbarp, 'p');
     list_append(turtleToolsElements.all, (unitype) (void *) scrollbarp, 'l');
     return scrollbarp;
