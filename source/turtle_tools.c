@@ -667,6 +667,9 @@ turtle_tools_dial_t *turtle_tools_dial_init(char *label, int32_t *variable, turt
 
 /* delete a dial */
 void turtle_tools_dial_free(turtle_tools_dial_t *dialp) {
+    if (dialp -> textboxInternal != NULL) {
+        turtle_tools_textbox_free(dialp -> textboxInternal);
+    }
     list_remove(turtleToolsElements.all, (unitype) (uint64_t) dialp, 'l');
     list_remove(turtleToolsElements.dials, (unitype) (void *) dialp, 'p');
 }
@@ -752,6 +755,9 @@ turtle_tools_slider_t *turtle_tools_slider_init(char *label, int32_t *variable, 
 
 /* delete a slider */
 void turtle_tools_slider_free(turtle_tools_slider_t *sliderp) {
+    if (sliderp -> textboxInternal != NULL) {
+        turtle_tools_textbox_free(sliderp -> textboxInternal);
+    }
     list_remove(turtleToolsElements.all, (unitype) (uint64_t) sliderp, 'l');
     list_remove(turtleToolsElements.sliders, (unitype) (void *) sliderp, 'p');
 }
