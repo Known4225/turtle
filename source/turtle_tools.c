@@ -1909,8 +1909,8 @@ void turtle_tools_slider_update(turtle_tools_slider_t *sliderp) {
                 if (strlen(sliderp -> render) > maxCharacters) {
                     maxCharacters = strlen(sliderp -> render) + 10; // TODO - check bottom and top bounds of slider to ensure this is enough characters
                 }
-                double textboxLength = maxCharacters * sliderp -> size / 2;
-                sliderp -> textboxInternal = turtle_tools_textbox_init("TEMP", NULL, maxCharacters, sliderp -> x - textboxLength / 2, sliderp -> y, sliderp -> size / 2 + 1, textboxLength);
+                double textboxLength = maxCharacters * (sliderp -> size / 2 + 1);
+                sliderp -> textboxInternal = turtle_tools_textbox_init("TEMP", NULL, maxCharacters, sliderp -> x - textboxLength / 2, sliderp -> y, sliderp -> size / 2 + 2, textboxLength);
                 sliderp -> textboxInternal -> style = TT_TEXTBOX_STYLE_TEXT_ONLY;
                 sliderp -> textboxInternal -> color[TT_COLOR_SLOT_TEXTBOX_TEXT] = sliderp -> color[TT_COLOR_SLOT_DIAL_TEXT];
                 goto LABEL_SLIDER_UPDATE_TEXTBOX;
@@ -1946,10 +1946,10 @@ void turtle_tools_slider_update(turtle_tools_slider_t *sliderp) {
             sliderp -> textboxInternal -> y = sliderp -> y + sliderOffsetYFactorSmall;
             if (sliderAlignFactor == 0) {
                 sliderp -> textboxInternal -> align = TT_TEXTBOX_ALIGN_LEFT;
-                sliderp -> textboxInternal -> x -= sliderp -> textboxInternal -> size / 3;
+                sliderp -> textboxInternal -> x -= sliderp -> textboxInternal -> size / 2;
             } else if (sliderAlignFactor == 50) {
                 sliderp -> textboxInternal -> align = TT_TEXTBOX_ALIGN_CENTER;
-                sliderp -> textboxInternal -> x -= sliderp -> textboxInternal -> length / 2 - sliderp -> textboxInternal -> size / 8;
+                sliderp -> textboxInternal -> x -= sliderp -> textboxInternal -> length / 2 - sliderp -> textboxInternal -> size / 16;
             } else if (sliderAlignFactor == 100) {
                 sliderp -> textboxInternal -> align = TT_TEXTBOX_ALIGN_RIGHT;
                 sliderp -> textboxInternal -> x -= sliderp -> textboxInternal -> length - sliderp -> textboxInternal -> size / 1.5;
@@ -2076,9 +2076,9 @@ void turtle_tools_slider_update(turtle_tools_slider_t *sliderp) {
     if (sliderp -> renderMultiplier != 0 && sliderp -> textboxInternal == NULL) {
         turtle_tools_set_color(sliderp -> color[TT_COLOR_SLOT_SLIDER_TEXT]);
         if (sliderRotateFactor != 0) {
-            turtle_text_write_stringf_rotated(sliderp -> x + sliderOffsetXFactorSmall, sliderp -> y + sliderOffsetYFactorSmall, sliderp -> size / 2, sliderAlignFactor, sliderRotateFactor, sliderp -> render, sliderp -> value * sliderp -> renderMultiplier);
+            turtle_text_write_stringf_rotated(sliderp -> x + sliderOffsetXFactorSmall, sliderp -> y + sliderOffsetYFactorSmall, sliderp -> size / 2 + 1, sliderAlignFactor, sliderRotateFactor, sliderp -> render, sliderp -> value * sliderp -> renderMultiplier);
         } else {
-            turtle_text_write_stringf(sliderp -> x + sliderOffsetXFactorSmall, sliderp -> y + sliderOffsetYFactorSmall, sliderp -> size / 2, sliderAlignFactor, sliderp -> render, sliderp -> value * sliderp -> renderMultiplier);
+            turtle_text_write_stringf(sliderp -> x + sliderOffsetXFactorSmall, sliderp -> y + sliderOffsetYFactorSmall, sliderp -> size / 2 + 1, sliderAlignFactor, sliderp -> render, sliderp -> value * sliderp -> renderMultiplier);
         }
     }
     if (sliderp -> variable != NULL) {
